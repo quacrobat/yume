@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>YUME</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.xtext.ui.shared.xtextBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>com.eclipsesource.jshint.ui.builder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>tern.eclipse.ide.core.ternBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.wst.jsdt.core.jsNature</nature>
+		<nature>org.nodeclipse.ui.NodeNature</nature>
+		<nature>org.eclipse.xtext.ui.shared.xtextNature</nature>
+		<nature>net.vtst.ow.eclipse.less.nature</nature>
+		<nature>tern.eclipse.ide.core.ternnature</nature>
+	</natures>
+	<filteredResources>
+		<filter>
+			<id>0</id>
+			<name>node_modules</name>
+			<type>30</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-*</arguments>
+			</matcher>
+		</filter>
+	</filteredResources>
+</projectDescription>

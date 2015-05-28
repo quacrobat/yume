@@ -1,0 +1,4 @@
+{
+	"Label.Color": "Farbe wechseln",
+	"InformationPanel.Text": "<h3>Action System</h3>In YUME gibt es zwei Möglichkeiten, um mit der Welt zu interagieren.<ul><li><strong>Interactive Objects</strong> (linke Box): Der Spieler kann per E-Taste sogenannte Actions auslösen, die mit interaktiven Objekten verknüpft sind. Die Action ist frei programmierbar, ebenso kann der Text des Labels frei definiert werden. Im Beispiel wird die Farbe der Box geändert.</li><li><strong>Action Trigger</strong> (rechter Kreis): Hierbei handelt es sich um eine einfachen (normalerweise unsichtbaren) Kreis, der beim Betreten durch den Spieler eine Action ausführt. Im Beispiel ändert sich ebenfalls die Farbe der Box.</li></ul>Actions können via Flag jederzeit als aktiv oder inaktiv konfiguriert werden. Im inaktiven Zustand ist das Ausführen des hinterlegten Skripts nicht möglich. Außerdem wird das Label eines interaktiven Objektes nicht angezeigt."
+}

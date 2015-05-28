@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  	<!-- Meta -->
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<meta name="author" content="Human Interactive">
+	<meta name="robots" content="noindex">
+	
+    <title><%= appInfos.name %> <%= appInfos.version %></title>
+    
+    <!-- Stylesheet -->
+    <link rel='stylesheet' href='/stylesheets/bundle.min.css' />
+    
+    <!-- JavaScript -->
+    <script type="text/javascript" src="javascript/bundle.js"></script>
+    
+    <script type="text/javascript">
+		var parameters = {};
+		parameters.mode = "<%= mode %>";
+		parameters.locale = "<%= locale %>";
+		parameters.name =  "<%= appInfos.name %>";
+		parameters.version = "<%= appInfos.version %>";
+		parameters.isMultiplayerActive = <%= isMultiplayerActive %>;
+		
+		sessionStorage.setItem("parameters", JSON.stringify(parameters));
+	</script>
+  </head>
+  <body>
+  <section id="ui-container">
+ 	
+  	<!-- Menu
+    ================================================== -->
+  	<section id="menu" >
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+					<header>
+						<img alt="<%= appInfos.name %>" src="assets/images/logo.png" width="250" height="77"></img>
+						<h2><%= __("Game.Menu.Headline") %></h2>
+						<p>
+							<%= __("Game.Menu.Description") %>
+						</p>
+					</header>	
+						
+					<div class="content">
+						<div>
+							<h2><%= __("Game.Menu.Controls") %></h2>
+							<ul>
+								<li>
+									<%= __("Game.Menu.Controls.Move") %>
+								</li>
+								<li>
+									<%= __("Game.Menu.Controls.Look") %>
+								</li>
+								<li>
+									<%= __("Game.Menu.Controls.Interact") %>
+								</li>
+								<li>
+									<%= __("Game.Menu.Controls.Read") %>
+								</li>
+								<li>
+									<%= __("Game.Menu.Controls.Menu") %>
+								</li>
+							</ul>
+						</div>
+					</div>
+					
+					<footer>
+						<a class="btn btn-primary btn-large"><%= __("Game.Menu.Play") %></a>
+						<div class="text" style="float: right"><%= __("Game.Menu.PointerLock") %></div>	
+						<div class="progress">
+						  <div class="progress-bar progress-bar-striped active" role="progressbar">
+						  </div>
+						</div>		
+					</footer>
+				</div>
+			</div>
+		</div>
+	</section>
+	
+	<!-- Loading-Screen
+    ================================================== -->
+	<section id="loading-screen">
+	    <div class="progress-container">
+	    	<div class="text"><%= __("Game.LoadingScreen.Continue") %></div>
+			<div class="progress">
+			  <div class="progress-bar progress-bar-striped active" role="progressbar">
+			  </div>
+			</div>
+		</div>
+	</section>
+	
+	<!-- Interaction-Label
+    ================================================== -->
+	<section id="interaction-label">
+		<div class="icon"></div>
+		<div class="label label-primary"></div>
+	</section>
+	
+	<!-- Text-Screen
+    ================================================== -->
+	<section id="text-screen">
+		<div class="text"></div>
+		<div class="controls"><%= __("Game.TextScreen.Continue") %></div>
+	</section>
+	
+	<!-- Modal-Dialog
+    ================================================== -->
+	<section class="md-modal" id="modal-dialog">
+		<div class="md-content">
+			<h2></h2>
+			<div>
+				<div class="md-text"></div>
+				<div class="btn-row">
+					<a class="btn btn-primary btn-large md-close"></a>
+				</div>		
+			</div>
+		</div>
+	</section>
+	<section class="md-overlay"></section>
+	
+	<!-- Chat
+    ================================================== -->
+	<section id="chat">
+		<input class="form-control" type="text" placeholder="<%= __("Game.Chat.Placeholder") %>">
+	</section>
+	<section id="messages">
+	</section>
+	
+	<!-- Information-Panel
+    ================================================== -->
+	<section id="information-panel">
+		<div class="text"></div>
+	</section>
+	
+	<% if(mode === 'development'){ %>
+	
+	<!-- Development Information
+    ================================================== -->
+	
+	<% } %>
+	
+  </section>
+  <section id="canvas-container">
+  </section>
+  </body>
+</html>

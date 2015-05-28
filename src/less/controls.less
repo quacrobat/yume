@@ -1,0 +1,205 @@
+@import "constants.less";
+@import "mixins.less";
+
+#interaction-label {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	.icon {
+		width: 10px;
+		height: 10px;
+		border-radius: 66px;
+		border: 2px double #ffffff;
+		opacity: 0.5;
+	}
+}
+
+#menu {
+	position: absolute;
+	z-index: 5;
+	width: 100%;
+	height: 100%;
+	color: @brand-font-color;
+	background-color: @brand-background;
+	.container{
+		header{
+			padding-top: 100px;
+			h2{
+				padding-top: 40px;
+			}
+		}
+		.content {
+			padding: 40px 0;
+			ul>li{
+				padding: 10px 0;
+				font-size: 15px;
+			}			
+		}
+		footer{
+			padding: 40px 0;
+			.text{
+				display: none;
+			}
+			.btn{
+				float: right;
+				.fadeIn(0.5s, 0.5s);
+			}
+			.progress{
+				.fadeOut();
+			}
+		}
+	}
+}
+
+#loading-screen{
+	position: absolute;
+	z-index: 4;
+	width: 100%;
+	height: 100%;
+	color: @brand-font-color;
+	background-color: @brand-background;
+	.fadeIn();
+	.progress-container{
+		display: flex;
+		align-items: center;
+ 		justify-content: center;
+ 		flex-direction: column;
+ 		height: 100%;
+ 		.progress{
+ 			width: 90%;
+ 			.fadeOut();
+ 		}
+ 		.text{
+ 			.fadeIn(0.5s, 0.5s);
+ 		}
+	}
+}
+
+#text-screen{
+	position: absolute;
+	bottom: 0px;
+	height: 0px;
+	width: 100%;
+	z-index: 1;
+	color: @brand-font-color;
+	background-color: @brand-background;
+	text-align: center;
+	visibility:hidden;
+	transition: height 0.5s ease-in-out, visibility 0.5s ease-in-out;
+	&.slideEffect{
+		height: 100px;
+		visibility: visible;
+	}
+	.text{
+		padding: 20px 100px;
+	}
+	.controls{
+		font-size:12px;
+		color: darken(@brand-font-color, 50%);
+	}
+}
+
+#modal-dialog{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 50%;
+	max-width: 630px;
+	min-width: 320px;
+	height: auto;
+	z-index: 3;
+	visibility: hidden;
+	backface-visibility: hidden;
+	transform: translateX(-50%) translateY(-50%);
+	&.md-show {
+		visibility: visible;
+		& ~ .md-overlay {
+			opacity: 1;
+			visibility: visible;
+		}
+		.md-content {
+			transform: scale(1);
+			opacity: 1;
+		}
+	}
+	.md-content{
+		color: @brand-font-color;
+		background-color: @brand-background;
+		position: relative;
+		border-radius: 3px;
+		margin: 0 auto;
+		transform: scale(0.7);
+		opacity: 0;
+		transition: all 0.3s;
+		h2{
+			margin: 0;
+			padding: 20px 0;
+			text-align: center;
+			opacity: 0.8;
+			background-color: lighten(@brand-background, 5);
+			border-radius: 3px 3px 0 0;
+		}
+		>div{
+			padding: 30px 40px 20px;
+		}
+		.btn-row{
+			margin: 20px 0;
+			text-align: center;
+		}
+	
+	}
+}
+
+.md-overlay{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	visibility: hidden;
+	top: 0;
+	left: 0;
+	z-index: 2;
+	opacity: 0;
+	background-color: fade(@brand-background, 70);
+	transition: all 0.3s;
+}
+
+#chat{
+	display: none;
+	position: absolute;
+	bottom: 25%;
+	left: 25%;
+	height: 40px;
+	width: 50%;
+	z-index: 1;
+}
+
+#messages{
+	display: none;
+	position: absolute;
+	bottom: 5%;
+	height: 200px;
+	width: 25%;
+	padding: 20px;
+	z-index: 1;
+	color: @brand-font-color;
+	background-color: fade(@brand-background, 80);
+	border-radius: 5px;
+	overflow: hidden;
+}
+
+#information-panel{
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: 1;
+	width: 25%;
+	.text{
+		padding: 20px;
+		background-color: fade(@brand-background, 80);
+		border-radius: 5px;
+		color: @brand-font-color;
+		&:empty{
+			display: none;
+		}
+	}
+}

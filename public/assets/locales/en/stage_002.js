@@ -1,0 +1,4 @@
+{
+	"Label.Action" : "No Action assigned",
+	"InformationPanel.Text": "<h3>Collision Detection</h3><p>YUME supports three types of 3D objects in the context of a simple but effective collision detection.<ul><li><strong>Plain Object</strong> (right box): A simple object without collision detection. Technically, it's a simple three.js mesh.</li><li><strong>Static Object</strong> (middle box): A static object is a three.js mesh and part of the collision detection. The player can't walk through a static object.</li><li><strong>Interactive Object</strong> (left box): An interactive object is also a three.js mesh and part of the collision detection. Moreover the user can interact with it (see label). In this example no action is assigned, so nothing happened when pressing 'E'.</li></ul>The collision detection is calculated via AABB(Axis-Aligned Bounding Boxes). The bounding volume of the player and of all interactive and static objects are AABBs.<p>"
+}

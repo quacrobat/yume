@@ -1,0 +1,52 @@
+{
+    "uvs": [[0.737148,0.420951,0.262852,0.420951,0.266474,0.422158,0.733526,0.422158,0.737148,0.579049,0.733526,0.577842,0.266474,0.577842,0.262852,0.579049,1,0,1,1,0,1,0,0]],
+    "vertices": [0.214285,-3.99373,-11.9812,0.214282,-3.99372,11.9812,-0.214285,-3.99372,11.9812,-0.214282,-3.99373,-11.9812,0.214285,3.99372,-11.9812,0.214282,3.99373,11.9812,-0.214285,3.99373,11.9812,-0.214282,3.99372,-11.9812],
+    "faces": [43,0,1,2,3,0,0,1,2,3,0,1,2,3,43,4,7,6,5,0,4,5,6,7,4,5,6,7,43,0,4,5,1,0,0,4,7,1,0,4,7,1,43,1,5,6,2,0,1,7,6,2,1,7,6,2,43,2,6,7,3,1,8,9,10,11,2,6,5,3,43,4,0,3,7,0,4,0,3,5,4,0,3,5],
+    "normals": [0.577349,-0.577349,-0.577319,0.577319,-0.577349,0.577349,-0.577349,-0.577319,0.577319,-0.577319,-0.577349,-0.577349,0.577349,0.577349,-0.577319,-0.577319,0.577349,-0.577349,-0.577349,0.577349,0.577319,0.577319,0.577319,0.577349],
+    "metadata": {
+        "generator": "io_three",
+        "normals": 8,
+        "materials": 2,
+        "version": 3,
+        "vertices": 8,
+        "faces": 6,
+        "type": "Geometry",
+        "uvs": 1
+    },
+    "name": "CubeGeometry",
+    "materials": [{
+        "DbgIndex": 0,
+        "DbgColor": 15658734,
+        "colorEmissive": [0,0,0],
+        "transparent": false,
+        "depthWrite": true,
+        "visible": true,
+        "shading": "basic",
+        "colorAmbient": [0.014444,0.0185,0.028426],
+        "blending": "NormalBlending",
+        "colorDiffuse": [0.014444,0.0185,0.028426],
+        "wireframe": false,
+        "DbgName": "Background",
+        "depthTest": true,
+        "opacity": 1
+    },{
+        "mapDiffuseRepeat": [1,1],
+        "DbgIndex": 1,
+        "DbgColor": 15597568,
+        "mapDiffuseWrap": ["RepeatWrapping","RepeatWrapping"],
+        "colorEmissive": [0,0,0],
+        "transparent": false,
+        "depthWrite": true,
+        "mapDiffuseAnisotropy": 1,
+        "visible": true,
+        "shading": "basic",
+        "colorAmbient": [0.8,0.8,0.8],
+        "blending": "NormalBlending",
+        "colorDiffuse": [0.8,0.8,0.8],
+        "mapDiffuse": "sign.jpg",
+        "wireframe": false,
+        "DbgName": "Text",
+        "depthTest": true,
+        "opacity": 1
+    }]
+}

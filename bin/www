@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+var debug = require("debug")("YUME");
+var app = require("../app");
+var MultiplayerServer = require("../src/javascript/backend/modules/MultiplayerServer");
+
+app.set("webport", process.env.YUME_WEBPORT || 3000); // web server port
+app.set("wssport", process.env.YUME_WSSPORT || 8000); // websocket server port
+app.set("multiplayer", process.env.YUME_MULTIPLAYER || false); // multiplayer flag
+
+var server = app.listen(app.get("webport"), function() {
+  debug("Web server listening on port " + server.address().port);
+});
+
+if(app.get("multiplayer") === "true"){
+	var multiplayerServer = new MultiplayerServer(app.get("wssport"), function(){
+		debug("Multiplayer server listening on port " + app.get("wssport"));
+	}).init();
+}
