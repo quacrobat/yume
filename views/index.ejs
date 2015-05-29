@@ -14,7 +14,11 @@
     <link rel='stylesheet' href='/stylesheets/bundle.min.css' />
     
     <!-- JavaScript -->
-    <script type="text/javascript" src="javascript/bundle.js"></script>
+    <% if(mode === 'development'){ %>
+    	<script type="text/javascript" src="javascript/bundle.js"></script>
+    <% }else{ %>
+    	<script type="text/javascript" src="javascript/bundle.min.js"></script>
+    <% } %>
     
     <script type="text/javascript">
 		var parameters = {};

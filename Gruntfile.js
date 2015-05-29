@@ -55,7 +55,11 @@ module.exports = function(grunt) {
 		
 		uglify : {
 			options : {
-				banner : '/* Version: <%= pkg.version %>, <%= grunt.template.today("dd-mm-yyyy") %> */\n'
+				banner : '/* Version: <%= pkg.version %>, <%= grunt.template.today("dd-mm-yyyy") %> */\n',
+				// The following identifiers must not changed, otherwise WebWorkers cause reference erros
+				mangle: {
+			        except: ['self', 'WebSocket']
+			      }
 			},
 			dist : {
 				files : {
