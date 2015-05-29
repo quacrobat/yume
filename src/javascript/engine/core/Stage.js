@@ -19,6 +19,7 @@ var audioManager = require("../audio/AudioManager");
 var animationManager = require("../etc/AnimationManager");
 var groupManager = require("../etc/GroupManager");
 var textManager = require("../etc/TextManager");
+var saveGameManager = require("../etc/SaveGameManager");
 var settingsManager = require("../etc/SettingsManager");
 var userInterfaceManager = require("../ui/UserInterfaceManager");
 var utils = require("../etc/Utils");
@@ -76,6 +77,12 @@ function Stage(){
 		},
 		groupManager: {
 			value: groupManager,
+			configurable: false,
+			enumerable: true,
+			writable: false
+		},
+		saveGameManager: {
+			value: saveGameManager,
 			configurable: false,
 			enumerable: true,
 			writable: false

@@ -38774,6 +38774,7 @@ var audioManager = require("../audio/AudioManager");
 var animationManager = require("../etc/AnimationManager");
 var groupManager = require("../etc/GroupManager");
 var textManager = require("../etc/TextManager");
+var saveGameManager = require("../etc/SaveGameManager");
 var settingsManager = require("../etc/SettingsManager");
 var userInterfaceManager = require("../ui/UserInterfaceManager");
 var utils = require("../etc/Utils");
@@ -38831,6 +38832,12 @@ function Stage(){
 		},
 		groupManager: {
 			value: groupManager,
+			configurable: false,
+			enumerable: true,
+			writable: false
+		},
+		saveGameManager: {
+			value: saveGameManager,
 			configurable: false,
 			enumerable: true,
 			writable: false
@@ -38955,7 +38962,7 @@ Stage.prototype._changeStage = function(stageId, isSaveGame){
 
 module.exports = Stage;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":7,"../audio/AudioManager":13,"../controls/FirstPersonControls":15,"../etc/AnimationManager":26,"../etc/GroupManager":28,"../etc/SettingsManager":35,"../etc/TextManager":36,"../etc/Utils":37,"../ui/UserInterfaceManager":54,"./Camera":17,"./Renderer":20,"./Scene":21,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
+},{"../action/ActionManager":7,"../audio/AudioManager":13,"../controls/FirstPersonControls":15,"../etc/AnimationManager":26,"../etc/GroupManager":28,"../etc/SaveGameManager":34,"../etc/SettingsManager":35,"../etc/TextManager":36,"../etc/Utils":37,"../ui/UserInterfaceManager":54,"./Camera":17,"./Renderer":20,"./Scene":21,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -41989,13 +41996,16 @@ Stage_007.prototype.setup = function(){
 		}).start();
 	});
 	
-	// add trigger for redirect
+	// add trigger for ending
 	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
+		
 		self.userInterfaceManager.showModalDialog({
 			headline: "Modal.Headline",
 			button: "Modal.Button",
 			content: "Modal.Content"
 		});
+		
+		self.saveGameManager.remove();
 	});
 	stageTrigger.position.set(0, 0, 75);
 	this.scene.add(stageTrigger);

@@ -1,6 +1,6 @@
 {
 	"Label.TextScreen": "Show TextScreen",
-	"Label.Modal": "Show Modaler Dialog",
+	"Label.Modal": "Show Modal Dialog",
 	"Name.Daniel": "Daniel",
 	"Name.Peter": "Peter",
 	"TextScreen.Part1": "Some text...",

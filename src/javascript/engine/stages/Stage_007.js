@@ -87,13 +87,16 @@ Stage_007.prototype.setup = function(){
 		}).start();
 	});
 	
-	// add trigger for redirect
+	// add trigger for ending
 	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
+		
 		self.userInterfaceManager.showModalDialog({
 			headline: "Modal.Headline",
 			button: "Modal.Button",
 			content: "Modal.Content"
 		});
+		
+		self.saveGameManager.remove();
 	});
 	stageTrigger.position.set(0, 0, 75);
 	this.scene.add(stageTrigger);
