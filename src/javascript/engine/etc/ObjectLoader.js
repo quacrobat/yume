@@ -68,10 +68,10 @@ ObjectLoader.prototype.load = function (url, onLoad) {
 					PubSub.publish("loading.complete.object", {url: url});
 
 				} else {
-					throw "ERROR: '" + url + "' seems to be unreachable or the file is empty.";
+					throw "ERROR: ObjectLoader: '" + url + "' seems to be unreachable or the file is empty.";
 				}
 			} else {
-				throw "ERROR: Could not load '" + url + "' (Status: " + xhr.status + ").";
+				throw "ERROR: ObjectLoader: Could not load '" + url + "' (Status: " + xhr.status + ").";
 			}
 		}
 	};

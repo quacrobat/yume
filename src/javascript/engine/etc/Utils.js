@@ -102,7 +102,7 @@ Utils.prototype.isMultiplayerActive = function(){
  */
 Utils.prototype.printWorldInformation = function() {
 
-	console.group("INFO: World Information, %s", new Date().toTimeString());
+	console.group("INFO: Utils: World Information, %s", new Date().toTimeString());
 
 		console.group("Memory");
 			console.log("%i Geometries", renderer.info.memory.geometries);
@@ -137,7 +137,7 @@ Utils.prototype.preloadImages = function(images, callback) {
 	};
 
 	var onError = function(e) {
-		throw "ERROR: Unable to preload image with URL: " + e.target.src;
+		throw "ERROR: Utils: Unable to preload image with URL: " + e.target.src;
 	};
 
 	for (var i = 0; i < images.length; i++) {

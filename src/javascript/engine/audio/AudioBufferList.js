@@ -96,7 +96,7 @@ AudioBufferList.prototype.loadBuffer = function(file, index){
 				// decode audio data
 				self.context.decodeAudioData( xhr.response, function(buffer) { 
 					if (!buffer) { 
-						throw "ERROR: Unable to decode audio file: " + url;  
+						throw "ERROR: AudioBufferList: Unable to decode audio file: " + url;  
 					} 
 					// add buffer to bufferlist
 					self.bufferList[index] = buffer;
@@ -111,11 +111,11 @@ AudioBufferList.prototype.loadBuffer = function(file, index){
 						self._onload(self.bufferList);
 					} 
 				}, function(){
-					throw "ERROR: Unable to decode audio file " + url;  
+					throw "ERROR: AudioBufferList: Unable to decode audio file " + url;  
 				}); 
 				
 			} else {
-				throw "ERROR: Could not load '" + url + "' (Status: " + xhr.status + ").";
+				throw "ERROR: AudioBufferList: Could not load '" + url + "' (Status: " + xhr.status + ").";
 			}
 		}
 	};

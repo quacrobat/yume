@@ -117,11 +117,11 @@ StageManager.prototype.load = function(stageId) {
 			break;
 			
 		default:
-			throw "ERROR: Invalid Stage-ID: " + stageId;
+			throw "ERROR: StageManager: Invalid Stage-ID: " + stageId;
 	}
 	
 	if(utils.isDevelopmentModeActive() === true){
-		console.log("INFO: Start loading scene with ID: %s", stageId);
+		console.log("INFO: StageManager: Start loading scene with ID: %s", stageId);
 	}
 	
 	this._stage.setup();
@@ -154,7 +154,7 @@ StageManager.prototype._onApplicationStart = function(message, data){
 			// load new stage
 			self.load(data.stageId);
 	}else{
-		throw "ERROR: Application start not possible. Missing message data.";
+		throw "ERROR: StageManager: Application start not possible. Missing message data.";
 	}
 };
 
@@ -188,7 +188,7 @@ StageManager.prototype._onStageChange = function(message, data){
 		});
 		
 	}else{
-		throw "ERROR: Stage change not possible. Missing message data.";
+		throw "ERROR: StageManager: Stage change not possible. Missing message data.";
 	}
 };
 
@@ -214,7 +214,7 @@ StageManager.prototype._onStageStart = function(message, data){
 StageManager.prototype._onLoadStart = function(message, data){
 	
 	if(utils.isDevelopmentModeActive() === true){
-		console.log("INFO: Start asset loading. Message: %s. URL: %s", message, data.url);
+		console.log("INFO: StageManager: Start asset loading. Message: %s. URL: %s", message, data.url);
 	}
 	
 	self._total++;
@@ -232,7 +232,7 @@ StageManager.prototype._onLoadComplete = function(message, data){
 	if(self._isStageChangeActive === true || self._isApplicationStartActive === true){
 		
 		if(utils.isDevelopmentModeActive() === true){
-			console.log("INFO: Asset loading complete. Message: %s. URL: %s", message, data.url);
+			console.log("INFO: StageManager: Asset loading complete. Message: %s. URL: %s", message, data.url);
 		}
 		self._loaded++;
 		
@@ -256,7 +256,7 @@ StageManager.prototype._onLoadComplete = function(message, data){
 			
 			// log event
 			if(utils.isDevelopmentModeActive() === true){
-				console.log("INFO: Scene completely loaded and ready.");
+				console.log("INFO: StageManager: Scene completely loaded and ready.");
 			}
 		}
 	}

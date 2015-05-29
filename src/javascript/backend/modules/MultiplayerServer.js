@@ -121,10 +121,10 @@ MultiplayerServer.prototype._onConnection = function(socket){
 		// clean session
 		self._clean(socket);
 		
-		debug("Client disconnected");
+		debug("INFO: MultiplayerServer: Client disconnected");
 	});
 	
-	debug("Client connected from IP:", socket.upgradeReq.connection.remoteAddress);
+	debug("INFO: MultiplayerServer: Client connected from IP:", socket.upgradeReq.connection.remoteAddress);
 };
 
 /**
@@ -161,7 +161,7 @@ MultiplayerServer.prototype._assignSession = (function(){
 					// assign session-id to socket
 					socket.userData.sessionId = id;
 					
-					debug("Client assigned to existing session with ID: %s", id);
+					debug("INFO: MultiplayerServer: Client assigned to existing session with ID: %s", id);
 					
 					return;
 				}
@@ -178,7 +178,7 @@ MultiplayerServer.prototype._assignSession = (function(){
 		// assign session-id to socket
 		socket.userData.sessionId = id;
 		
-		debug("Client assigned to new session with ID: %s", id);
+		debug("INFO: MultiplayerServer: Client assigned to new session with ID: %s", id);
 	};
 	
 }());
@@ -221,7 +221,7 @@ MultiplayerServer.prototype._clean = (function(){
 			
 			delete this._sessions[socket.userData.sessionId];
 			
-			debug("Socket removed and session deleted with ID: %s", socket.userData.sessionId);
+			debug("INFO: MultiplayerServer: Socket removed and session deleted with ID: %s", socket.userData.sessionId);
 			
 		// if the session has a length greater than one, other sockets are in the same session.
 		// The socket will just be removed from the session.
@@ -231,7 +231,7 @@ MultiplayerServer.prototype._clean = (function(){
 			
 		 	session.splice(index, 1);
 		 	
-		 	debug("Socket removed from session with ID: %s", socket.userData.sessionId);
+		 	debug("INFO: MultiplayerServer: Socket removed from session with ID: %s", socket.userData.sessionId);
 		 	
 		}else{
 			// This case must never happen! If so, throw runtime error.
@@ -268,7 +268,7 @@ MultiplayerServer.prototype._broadcast = (function(){
 			}
 		}
 		
-		debug("Session-ID: %s; Broadcast Message: %s", sender.userData.sessionId, message);
+		debug("INFO: MultiplayerServer: Session-ID: %s; Broadcast Message: %s", sender.userData.sessionId, message);
 	};
 	
 }());
@@ -306,7 +306,7 @@ MultiplayerServer.prototype._updateOnlineStatus = (function(){
 					message = JSON.stringify( new Message(Message.TYPES.STATUS, {clientId: session[index].userData.clientId, online: isOnline} ) );
 					sender.send(message);
 					
-					debug("Session-ID: %s; Client Message: %s", sender.userData.sessionId, message);
+					debug("INFO: MultiplayerServer: Session-ID: %s; Client Message: %s", sender.userData.sessionId, message);
 				}
 			}
 		}

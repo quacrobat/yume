@@ -90,7 +90,7 @@ GroupManager.prototype.get = function(id) {
 	}
 	
 	if(group === null){
-		throw "ERROR: Group with ID " + id + " not existing.";
+		throw "ERROR: GroupManager: Group with ID " + id + " not existing.";
 	}else{
 		return group;
 	}

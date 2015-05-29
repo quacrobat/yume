@@ -69,10 +69,10 @@ TextManager.prototype.load = function(stageId, callback){
 					}
 					
 				} else {
-					throw "ERROR: Unable to parse texts for stageId '" + stageId + "'. Textfile could be empty.";
+					throw "ERROR: TextManager: Unable to parse texts for stageId '" + stageId + "'. Textfile could be empty.";
 				}
 			} else {
-				throw "ERROR: Could not load '" + url + "' (Status: " + xhr.status + ").";
+				throw "ERROR: TextManager: Could not load '" + url + "' (Status: " + xhr.status + ").";
 			}
 		}
 	};

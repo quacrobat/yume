@@ -130,7 +130,7 @@ NetworkManager.prototype._onErrorThread = function(event){
 	
 	if(utils.isDevelopmentModeActive() === true){
 		
-		console.log("ERROR: Runtime-Error in thread \"NetworkManager\", line %s in %s: %s", event.lineno, event.filename, event.message);
+		console.log("ERROR: NetworkManager: Runtime-Error in thread \"NetworkManager\", line %s in %s: %s", event.lineno, event.filename, event.message);
 	}
 };
 
@@ -147,11 +147,11 @@ script = function(){
 		ws = new WebSocket("ws://" + location  + ":" + port);
 		
 		ws.onopen = function(event) {
-			self.postMessage({type: 4, content: {message: "INFO: Connected to multiplayer-server: " + location + " port: " + port}});
+			self.postMessage({type: 4, content: {message: "INFO: NetworkManager: Connected to multiplayer-server: " + location + " port: " + port}});
 		};
 		
 		ws.onclose = function(event) {
-			self.postMessage({type: 4, content: {message: "INFO: Disconnected from multiplayer-server: " + location + " port: " + port}});
+			self.postMessage({type: 4, content: {message: "INFO: NetworkManager: Disconnected from multiplayer-server: " + location + " port: " + port}});
 		};
 		
 		ws.onmessage = function(event) {
@@ -160,7 +160,7 @@ script = function(){
 		};
 		
 		ws.onerror = function(error) {
-			self.postMessage({type: 5, content: {message: "ERROR: WebSocket Error: " +  error}});
+			self.postMessage({type: 5, content: {message: "ERROR: NetworkManager: WebSocket Error: " +  error}});
 		};
 	}
 	
@@ -189,15 +189,15 @@ script = function(){
 						 
 				 	}else if(ws.readyState === WebSocket.CONNECTING){
 				 		
-				 		self.postMessage({type: 4, content: {message: "The connection to the server has not yet been established. Please try againg."}});
+				 		self.postMessage({type: 4, content: {message: "ERROR: NetworkManager: The connection to the server has not yet been established. Please try againg."}});
 				 		
 				 	}else if(ws.readyState === WebSocket.CLOSING && ws.readyState === WebSocket.CLOSED){
 				 		
-				 		self.postMessage({type: 4, content: {message: "Messaging not possible. The connection to the server has been closed or could not be opened."}});
+				 		self.postMessage({type: 4, content: {message: "ERROR: NetworkManager: Messaging not possible. The connection to the server has been closed or could not be opened."}});
 				 	}
 				 }else{
 					 
-					 self.postMessage({type: 4, content: {message: "Messaging not possible. No connection to server."}});
+					 self.postMessage({type: 4, content: {message: "ERROR: NetworkManager: Messaging not possible. No connection to server."}});
 				 }
 			 }
 		}

@@ -36265,7 +36265,7 @@ Action.prototype.run = function() {
 	if (typeof this._actionCallback === "function") {
 		this._actionCallback();
 	} else {
-		throw "ERROR: Assigned callback not of type 'function'.";
+		throw "ERROR: Action: Assigned callback not of type 'function'.";
 	}
 };
 
@@ -36788,7 +36788,7 @@ AudioBufferList.prototype.loadBuffer = function(file, index){
 				// decode audio data
 				self.context.decodeAudioData( xhr.response, function(buffer) { 
 					if (!buffer) { 
-						throw "ERROR: Unable to decode audio file: " + url;  
+						throw "ERROR: AudioBufferList: Unable to decode audio file: " + url;  
 					} 
 					// add buffer to bufferlist
 					self.bufferList[index] = buffer;
@@ -36803,11 +36803,11 @@ AudioBufferList.prototype.loadBuffer = function(file, index){
 						self._onload(self.bufferList);
 					} 
 				}, function(){
-					throw "ERROR: Unable to decode audio file " + url;  
+					throw "ERROR: AudioBufferList: Unable to decode audio file " + url;  
 				}); 
 				
 			} else {
-				throw "ERROR: Could not load '" + url + "' (Status: " + xhr.status + ").";
+				throw "ERROR: AudioBufferList: Could not load '" + url + "' (Status: " + xhr.status + ").";
 			}
 		}
 	};
@@ -36959,7 +36959,7 @@ function AudioManager() {
 		}
 	});
 	
-	// connect background-music to audio pipeline
+	// connect background music to audio pipeline
 	// BUGFIX: Firefox <=37 causes flickering with some music, so we don't do this step for it
 	if(utils.isFirefox() === false){
 		var source = this._listener.context.createMediaElementSource(this._backgroundMusic);
@@ -37040,14 +37040,14 @@ AudioManager.prototype.getDynamicAudio = function(id) {
 	}
 	
 	if(dynamicAudio === null){
-		throw "ERROR: Dynamic Audio with ID " + id + " not existing.";
+		throw "ERROR: AudioManager: Dynamic Audio with ID " + id + " not existing.";
 	}else{
 		return dynamicAudio;
 	}
 };
 
 /**
- * Sets the background-music.
+ * Sets the background music.
  * 
  * @param {string} file - The actual audio file. Only MP3s are valid.
  * @param {number} volume - The volume of the audio.
@@ -37073,38 +37073,54 @@ AudioManager.prototype.setBackgroundMusic = function(file, volume, isLoop, isMut
 	}else{
 		this._backgroundMusic.oncanplay = null;
 	}
+	
+	if(utils.isDevelopmentModeActive() === true){
+		console.log("INFO: AudioManager: Set new background music. URL: %s", this._backgroundMusic.src);
+	}
 };
 
 /**
- * Plays the background-music.
+ * Plays the background music.
  * 
  */
 AudioManager.prototype.playBackgroundMusic = function(isFadeIn, time) {
 		
 	this._backgroundMusic.play();
+	
+	if(utils.isDevelopmentModeActive() === true){
+		console.log("INFO: AudioManager: Start playing background music.");
+	}
 };
 
 /**
- * Pauses the background-music.
+ * Pauses the background music.
  * 
  */
 AudioManager.prototype.pauseBackgroundMusic = function(isFadeOut, time) {
 
 	this._backgroundMusic.pause();
+	
+	if(utils.isDevelopmentModeActive() === true){
+		console.log("INFO: AudioManager: Pause playing background music.");
+	}
 };
 
 /**
- * Stops the background-music.
+ * Stops the background music.
  */
 AudioManager.prototype.stopBackgroundMusic = function() {
 
-	this.pauseBackgroundMusic();
+	this._backgroundMusic.pause();
 	this._backgroundMusic.currentTime = 0.0;
+	
+	if(utils.isDevelopmentModeActive() === true){
+		console.log("INFO: AudioManager: Stop playing background music.");
+	}
 };
 
 
 /**
- * Is the background-music is played?
+ * Is the background music is played?
  * 
  * @returns {boolean}
  */
@@ -37114,7 +37130,7 @@ AudioManager.prototype.isBackgroundMusicPlayed = function() {
 };
 
 /**
- * Sets the muted property of the background-music.
+ * Sets the muted property of the background music.
  * 
  * @param {boolean} isMuted - The muted-flag to set.
  */
@@ -37124,7 +37140,7 @@ AudioManager.prototype.setBackgroundMusicMuted = function(isMuted) {
 };
 
 /**
- * Sets the loop property of the background-music.
+ * Sets the loop property of the background music.
  * 
  * @param {boolean} isLoop - The loop-flag to set.
  */
@@ -37134,7 +37150,7 @@ AudioManager.prototype.setBackgroundMusicLoop = function(isLoop) {
 };
 
 /**
- * Sets the volume property of the background-music.
+ * Sets the volume property of the background music.
  * 
  * @param {number} volume - The volume to set.
  */
@@ -37144,12 +37160,12 @@ AudioManager.prototype.setBackgroundMusicVolume = function(volume) {
 };
 
 /**
- * This method handles error-situations when playing the background-music.
+ * This method handles error-situations when playing the background music.
  * It triggers a custom event, which can processed of e.g. the UserInterfaceManager.
  */
 AudioManager.prototype.onErrorBackgroundMusic = function(){
 
-	console.error("ERROR: Media resource could not be processed.");
+	console.error("ERROR: AudioManager: Media resource could not be processed.");
 	PubSub.publish("audio.backgroundmusic.error", "Media resource could not be processed");
 };
 
@@ -37989,11 +38005,11 @@ FirstPersonControls.prototype._checkAndProcessTrigger = (function() {
 					intersects[0].object.action.run();
 					inRadius = true;
 					if(utils.isDevelopmentModeActive() === true){
-						console.log("INFO: Trigger released and action \"%s\" executed.", intersects[0].object.action.label);
+						console.log("INFO: FirstPersonControls: Trigger released and action \"%s\" executed.", intersects[0].object.action.label);
 					}
 				}				
 			}else{
-				throw "ERROR: No action defined for trigger object.";
+				throw "ERROR: FirstPersonControls: No action defined for trigger object.";
 			}
 		}else{
 			inRadius = false;
@@ -38184,7 +38200,7 @@ FirstPersonControls.prototype._onPointerlockchange = function() {
  * Any error situation should be marked with an exception.
  */
 FirstPersonControls.prototype._onPointerlockerror = function(event) {
-	throw "ERROR: Pointer Lock Error.";
+	throw "ERROR: FirstPersonControls: Pointer Lock Error.";
 };
 
 /**
@@ -38368,7 +38384,7 @@ Bootstrap.prototype._initEngine = function(){
 			multiplayerManager.init();
 		}
 	}else{
-		throw "ERROR: The browser does not support all required APIs. Missing APIs: " + environment.unsupportedAPIs;
+		throw "ERROR: Bootstrap: The browser does not support all required APIs. Missing APIs: " + environment.unsupportedAPIs;
 	}
 };
 
@@ -39082,11 +39098,11 @@ StageManager.prototype.load = function(stageId) {
 			break;
 			
 		default:
-			throw "ERROR: Invalid Stage-ID: " + stageId;
+			throw "ERROR: StageManager: Invalid Stage-ID: " + stageId;
 	}
 	
 	if(utils.isDevelopmentModeActive() === true){
-		console.log("INFO: Start loading scene with ID: %s", stageId);
+		console.log("INFO: StageManager: Start loading scene with ID: %s", stageId);
 	}
 	
 	this._stage.setup();
@@ -39119,7 +39135,7 @@ StageManager.prototype._onApplicationStart = function(message, data){
 			// load new stage
 			self.load(data.stageId);
 	}else{
-		throw "ERROR: Application start not possible. Missing message data.";
+		throw "ERROR: StageManager: Application start not possible. Missing message data.";
 	}
 };
 
@@ -39153,7 +39169,7 @@ StageManager.prototype._onStageChange = function(message, data){
 		});
 		
 	}else{
-		throw "ERROR: Stage change not possible. Missing message data.";
+		throw "ERROR: StageManager: Stage change not possible. Missing message data.";
 	}
 };
 
@@ -39179,7 +39195,7 @@ StageManager.prototype._onStageStart = function(message, data){
 StageManager.prototype._onLoadStart = function(message, data){
 	
 	if(utils.isDevelopmentModeActive() === true){
-		console.log("INFO: Start asset loading. Message: %s. URL: %s", message, data.url);
+		console.log("INFO: StageManager: Start asset loading. Message: %s. URL: %s", message, data.url);
 	}
 	
 	self._total++;
@@ -39197,7 +39213,7 @@ StageManager.prototype._onLoadComplete = function(message, data){
 	if(self._isStageChangeActive === true || self._isApplicationStartActive === true){
 		
 		if(utils.isDevelopmentModeActive() === true){
-			console.log("INFO: Asset loading complete. Message: %s. URL: %s", message, data.url);
+			console.log("INFO: StageManager: Asset loading complete. Message: %s. URL: %s", message, data.url);
 		}
 		self._loaded++;
 		
@@ -39221,7 +39237,7 @@ StageManager.prototype._onLoadComplete = function(message, data){
 			
 			// log event
 			if(utils.isDevelopmentModeActive() === true){
-				console.log("INFO: Scene completely loaded and ready.");
+				console.log("INFO: StageManager: Scene completely loaded and ready.");
 			}
 		}
 	}
@@ -39376,7 +39392,7 @@ ThreadManager.prototype.get = function(id) {
 	}
 	
 	if(thread === null){
-		throw "ERROR: Thread with ID " + id + " not existing.";
+		throw "ERROR: ThreadManager: Thread with ID " + id + " not existing.";
 	}else{
 		return thread;
 	}
@@ -39811,7 +39827,7 @@ GroupManager.prototype.get = function(id) {
 	}
 	
 	if(group === null){
-		throw "ERROR: Group with ID " + id + " not existing.";
+		throw "ERROR: GroupManager: Group with ID " + id + " not existing.";
 	}else{
 		return group;
 	}
@@ -39913,10 +39929,10 @@ JSONLoader.prototype.load = function(url, onLoad) {
 					PubSub.publish("loading.complete.object", {url: url});
 
 				} else {
-					throw "ERROR: '" + url + "' seems to be unreachable or the file is empty.";
+					throw "ERROR: JSONLoader: '" + url + "' seems to be unreachable or the file is empty.";
 				}
 			} else {
-				throw "ERROR: Could not load '" + url + "' (Status: " + xhr.status + ").";
+				throw "ERROR: JSONLoader: Could not load '" + url + "' (Status: " + xhr.status + ").";
 			}
 
 		}
@@ -40022,7 +40038,7 @@ MultiplayerManager.prototype._onStatus = function(message, data){
 		
 		// logging
 		if(utils.isDevelopmentModeActive() === true){		
-			console.log("INFO: Player with ID %i online.", data.clientId);
+			console.log("INFO: MultiplayerManager: Player with ID %i online.", data.clientId);
 		}
 	}
 	else
@@ -40035,7 +40051,7 @@ MultiplayerManager.prototype._onStatus = function(message, data){
 		
 		// logging
 		if(utils.isDevelopmentModeActive() === true){			
-			console.log("INFO: Player with ID %i offline.", data.clientId);
+			console.log("INFO: MultiplayerManager: Player with ID %i offline.", data.clientId);
 		}
 	}
 };
@@ -40088,7 +40104,7 @@ MultiplayerManager.prototype._getPlayer = function(id){
 	}
 	
 	if(player === null){
-		throw "ERROR: Player with ID " + id + " not existing.";
+		throw "ERROR: MultiplayerManager: Player with ID " + id + " not existing.";
 	}else{
 		return player;
 	}
@@ -40229,7 +40245,7 @@ NetworkManager.prototype._onErrorThread = function(event){
 	
 	if(utils.isDevelopmentModeActive() === true){
 		
-		console.log("ERROR: Runtime-Error in thread \"NetworkManager\", line %s in %s: %s", event.lineno, event.filename, event.message);
+		console.log("ERROR: NetworkManager: Runtime-Error in thread \"NetworkManager\", line %s in %s: %s", event.lineno, event.filename, event.message);
 	}
 };
 
@@ -40246,11 +40262,11 @@ script = function(){
 		ws = new WebSocket("ws://" + location  + ":" + port);
 		
 		ws.onopen = function(event) {
-			self.postMessage({type: 4, content: {message: "INFO: Connected to multiplayer-server: " + location + " port: " + port}});
+			self.postMessage({type: 4, content: {message: "INFO: NetworkManager: Connected to multiplayer-server: " + location + " port: " + port}});
 		};
 		
 		ws.onclose = function(event) {
-			self.postMessage({type: 4, content: {message: "INFO: Disconnected from multiplayer-server: " + location + " port: " + port}});
+			self.postMessage({type: 4, content: {message: "INFO: NetworkManager: Disconnected from multiplayer-server: " + location + " port: " + port}});
 		};
 		
 		ws.onmessage = function(event) {
@@ -40259,7 +40275,7 @@ script = function(){
 		};
 		
 		ws.onerror = function(error) {
-			self.postMessage({type: 5, content: {message: "ERROR: WebSocket Error: " +  error}});
+			self.postMessage({type: 5, content: {message: "ERROR: NetworkManager: WebSocket Error: " +  error}});
 		};
 	}
 	
@@ -40288,15 +40304,15 @@ script = function(){
 						 
 				 	}else if(ws.readyState === WebSocket.CONNECTING){
 				 		
-				 		self.postMessage({type: 4, content: {message: "The connection to the server has not yet been established. Please try againg."}});
+				 		self.postMessage({type: 4, content: {message: "ERROR: NetworkManager: The connection to the server has not yet been established. Please try againg."}});
 				 		
 				 	}else if(ws.readyState === WebSocket.CLOSING && ws.readyState === WebSocket.CLOSED){
 				 		
-				 		self.postMessage({type: 4, content: {message: "Messaging not possible. The connection to the server has been closed or could not be opened."}});
+				 		self.postMessage({type: 4, content: {message: "ERROR: NetworkManager: Messaging not possible. The connection to the server has been closed or could not be opened."}});
 				 	}
 				 }else{
 					 
-					 self.postMessage({type: 4, content: {message: "Messaging not possible. No connection to server."}});
+					 self.postMessage({type: 4, content: {message: "ERROR: NetworkManager: Messaging not possible. No connection to server."}});
 				 }
 			 }
 		}
@@ -40383,10 +40399,10 @@ ObjectLoader.prototype.load = function (url, onLoad) {
 					PubSub.publish("loading.complete.object", {url: url});
 
 				} else {
-					throw "ERROR: '" + url + "' seems to be unreachable or the file is empty.";
+					throw "ERROR: ObjectLoader: '" + url + "' seems to be unreachable or the file is empty.";
 				}
 			} else {
-				throw "ERROR: Could not load '" + url + "' (Status: " + xhr.status + ").";
+				throw "ERROR: ObjectLoader: Could not load '" + url + "' (Status: " + xhr.status + ").";
 			}
 		}
 	};
@@ -40787,10 +40803,10 @@ TextManager.prototype.load = function(stageId, callback){
 					}
 					
 				} else {
-					throw "ERROR: Unable to parse texts for stageId '" + stageId + "'. Textfile could be empty.";
+					throw "ERROR: TextManager: Unable to parse texts for stageId '" + stageId + "'. Textfile could be empty.";
 				}
 			} else {
-				throw "ERROR: Could not load '" + url + "' (Status: " + xhr.status + ").";
+				throw "ERROR: TextManager: Could not load '" + url + "' (Status: " + xhr.status + ").";
 			}
 		}
 	};
@@ -40976,7 +40992,7 @@ Utils.prototype.isMultiplayerActive = function(){
  */
 Utils.prototype.printWorldInformation = function() {
 
-	console.group("INFO: World Information, %s", new Date().toTimeString());
+	console.group("INFO: Utils: World Information, %s", new Date().toTimeString());
 
 		console.group("Memory");
 			console.log("%i Geometries", renderer.info.memory.geometries);
@@ -41011,7 +41027,7 @@ Utils.prototype.preloadImages = function(images, callback) {
 	};
 
 	var onError = function(e) {
-		throw "ERROR: Unable to preload image with URL: " + e.target.src;
+		throw "ERROR: Utils: Unable to preload image with URL: " + e.target.src;
 	};
 
 	for (var i = 0; i < images.length; i++) {

@@ -52,7 +52,7 @@ Action.prototype.run = function() {
 	if (typeof this._actionCallback === "function") {
 		this._actionCallback();
 	} else {
-		throw "ERROR: Assigned callback not of type 'function'.";
+		throw "ERROR: Action: Assigned callback not of type 'function'.";
 	}
 };
 

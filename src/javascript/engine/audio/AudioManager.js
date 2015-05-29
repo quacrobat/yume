@@ -42,7 +42,7 @@ function AudioManager() {
 		}
 	});
 	
-	// connect background-music to audio pipeline
+	// connect background music to audio pipeline
 	// BUGFIX: Firefox <=37 causes flickering with some music, so we don't do this step for it
 	if(utils.isFirefox() === false){
 		var source = this._listener.context.createMediaElementSource(this._backgroundMusic);
@@ -123,14 +123,14 @@ AudioManager.prototype.getDynamicAudio = function(id) {
 	}
 	
 	if(dynamicAudio === null){
-		throw "ERROR: Dynamic Audio with ID " + id + " not existing.";
+		throw "ERROR: AudioManager: Dynamic Audio with ID " + id + " not existing.";
 	}else{
 		return dynamicAudio;
 	}
 };
 
 /**
- * Sets the background-music.
+ * Sets the background music.
  * 
  * @param {string} file - The actual audio file. Only MP3s are valid.
  * @param {number} volume - The volume of the audio.
@@ -156,38 +156,54 @@ AudioManager.prototype.setBackgroundMusic = function(file, volume, isLoop, isMut
 	}else{
 		this._backgroundMusic.oncanplay = null;
 	}
+	
+	if(utils.isDevelopmentModeActive() === true){
+		console.log("INFO: AudioManager: Set new background music. URL: %s", this._backgroundMusic.src);
+	}
 };
 
 /**
- * Plays the background-music.
+ * Plays the background music.
  * 
  */
 AudioManager.prototype.playBackgroundMusic = function(isFadeIn, time) {
 		
 	this._backgroundMusic.play();
+	
+	if(utils.isDevelopmentModeActive() === true){
+		console.log("INFO: AudioManager: Start playing background music.");
+	}
 };
 
 /**
- * Pauses the background-music.
+ * Pauses the background music.
  * 
  */
 AudioManager.prototype.pauseBackgroundMusic = function(isFadeOut, time) {
 
 	this._backgroundMusic.pause();
+	
+	if(utils.isDevelopmentModeActive() === true){
+		console.log("INFO: AudioManager: Pause playing background music.");
+	}
 };
 
 /**
- * Stops the background-music.
+ * Stops the background music.
  */
 AudioManager.prototype.stopBackgroundMusic = function() {
 
-	this.pauseBackgroundMusic();
+	this._backgroundMusic.pause();
 	this._backgroundMusic.currentTime = 0.0;
+	
+	if(utils.isDevelopmentModeActive() === true){
+		console.log("INFO: AudioManager: Stop playing background music.");
+	}
 };
 
 
 /**
- * Is the background-music is played?
+ * Is the background music is played?
  * 
  * @returns {boolean}
  */
@@ -197,7 +213,7 @@ AudioManager.prototype.isBackgroundMusicPlayed = function() {
 };
 
 /**
- * Sets the muted property of the background-music.
+ * Sets the muted property of the background music.
  * 
  * @param {boolean} isMuted - The muted-flag to set.
  */
@@ -207,7 +223,7 @@ AudioManager.prototype.setBackgroundMusicMuted = function(isMuted) {
 };
 
 /**
- * Sets the loop property of the background-music.
+ * Sets the loop property of the background music.
  * 
  * @param {boolean} isLoop - The loop-flag to set.
  */
@@ -217,7 +233,7 @@ AudioManager.prototype.setBackgroundMusicLoop = function(isLoop) {
 };
 
 /**
- * Sets the volume property of the background-music.
+ * Sets the volume property of the background music.
  * 
  * @param {number} volume - The volume to set.
  */
@@ -227,12 +243,12 @@ AudioManager.prototype.setBackgroundMusicVolume = function(volume) {
 };
 
 /**
- * This method handles error-situations when playing the background-music.
+ * This method handles error-situations when playing the background music.
  * It triggers a custom event, which can processed of e.g. the UserInterfaceManager.
  */
 AudioManager.prototype.onErrorBackgroundMusic = function(){
 
-	console.error("ERROR: Media resource could not be processed.");
+	console.error("ERROR: AudioManager: Media resource could not be processed.");
 	PubSub.publish("audio.backgroundmusic.error", "Media resource could not be processed");
 };
 

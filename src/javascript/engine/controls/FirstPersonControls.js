@@ -601,11 +601,11 @@ FirstPersonControls.prototype._checkAndProcessTrigger = (function() {
 					intersects[0].object.action.run();
 					inRadius = true;
 					if(utils.isDevelopmentModeActive() === true){
-						console.log("INFO: Trigger released and action \"%s\" executed.", intersects[0].object.action.label);
+						console.log("INFO: FirstPersonControls: Trigger released and action \"%s\" executed.", intersects[0].object.action.label);
 					}
 				}				
 			}else{
-				throw "ERROR: No action defined for trigger object.";
+				throw "ERROR: FirstPersonControls: No action defined for trigger object.";
 			}
 		}else{
 			inRadius = false;
@@ -796,7 +796,7 @@ FirstPersonControls.prototype._onPointerlockchange = function() {
  * Any error situation should be marked with an exception.
  */
 FirstPersonControls.prototype._onPointerlockerror = function(event) {
-	throw "ERROR: Pointer Lock Error.";
+	throw "ERROR: FirstPersonControls: Pointer Lock Error.";
 };
 
 /**

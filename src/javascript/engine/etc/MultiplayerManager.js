@@ -86,7 +86,7 @@ MultiplayerManager.prototype._onStatus = function(message, data){
 		
 		// logging
 		if(utils.isDevelopmentModeActive() === true){		
-			console.log("INFO: Player with ID %i online.", data.clientId);
+			console.log("INFO: MultiplayerManager: Player with ID %i online.", data.clientId);
 		}
 	}
 	else
@@ -99,7 +99,7 @@ MultiplayerManager.prototype._onStatus = function(message, data){
 		
 		// logging
 		if(utils.isDevelopmentModeActive() === true){			
-			console.log("INFO: Player with ID %i offline.", data.clientId);
+			console.log("INFO: MultiplayerManager: Player with ID %i offline.", data.clientId);
 		}
 	}
 };
@@ -152,7 +152,7 @@ MultiplayerManager.prototype._getPlayer = function(id){
 	}
 	
 	if(player === null){
-		throw "ERROR: Player with ID " + id + " not existing.";
+		throw "ERROR: MultiplayerManager: Player with ID " + id + " not existing.";
 	}else{
 		return player;
 	}

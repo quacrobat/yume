@@ -64,7 +64,7 @@ ThreadManager.prototype.get = function(id) {
 	}
 	
 	if(thread === null){
-		throw "ERROR: Thread with ID " + id + " not existing.";
+		throw "ERROR: ThreadManager: Thread with ID " + id + " not existing.";
 	}else{
 		return thread;
 	}
