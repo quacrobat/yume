@@ -14,16 +14,16 @@ var routes = require("./routes/index");
 
 var app = express();
 
-// auth
-var basic = auth.basic({realm: 'Human Interactive Beta-Server Login'}, function(username, password, callback){
-	callback(username === "beta" && password === "2501");
+// prepare http basic auth
+var basic = auth.basic({realm: 'YUME'}, function(username, password, callback){
+	callback(username === "username" && password === "password");
 });
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-// authentication
+// authentication setup
 if(process.env.npm_package_config_auth === "true"){
 	app.use(auth.connect(basic));
 }

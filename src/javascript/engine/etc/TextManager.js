@@ -36,17 +36,24 @@ TextManager.prototype.load = function(stageId, callback){
 	
 	var self = this;
 	
+	// build url
 	var	url = utils.getCDNHost() + "assets/locales/" + utils.getLocale() + "/stage_" + stageId + ".js";
 	
+	// add nocache, if necessary
+	if(utils.isDevelopmentModeActive() === true){
+		url = url + "?" + new Date().getTime();
+	}
+	
+	// create XMLHttpRequest object
 	var xhr = new global.XMLHttpRequest();
 	
 	xhr.onreadystatechange = function() {
 
 		if (xhr.readyState === xhr.DONE) {
 
-			if (xhr.status === 200 || xhr.status === 0) {
+			if (xhr.status === 200) {
 
-				if (xhr.responseText) {
+				if (xhr.responseText !== "") {
 					
 					// assign texts
 					self._texts = JSON.parse(xhr.responseText);
@@ -65,11 +72,12 @@ TextManager.prototype.load = function(stageId, callback){
 					throw "ERROR: Unable to parse texts for stageId '" + stageId + "'. Textfile could be empty.";
 				}
 			} else {
-				throw "ERROR: Unable to load texts for stageId '" + stageId + "'.";
+				throw "ERROR: Could not load '" + url + "' (Status: " + xhr.status + ").";
 			}
 		}
 	};
 	
+	// start request
 	xhr.open('GET', url, true);
 	xhr.withCredentials = true;
 	xhr.send();

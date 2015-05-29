@@ -75,41 +75,56 @@ AudioBufferList.prototype.load = function(){
 AudioBufferList.prototype.loadBuffer = function(file, index){
 	
 	var self = this;
+	
+	// build url
 	var url = utils.getCDNHost() + "assets/audio/dynamic/" + file + ".mp3";
 	
-	var request = new global.XMLHttpRequest(); 
-	request.open("GET", url, true); 
-	request.responseType = "arraybuffer";  	  	
-	request.onload = function() { 
-		
-		// decode audio data
-		self.context.decodeAudioData( request.response, function(buffer) { 
-			if (!buffer) { 
-				throw "ERROR: Unable to decode audio-file: " + url;  
-			} 
-			// add buffer to bufferlist
-			self.bufferList[index] = buffer;
-			
-			// publish message to inform about status
-			PubSub.publish("loading.complete.audio", {url: url});
-			
-			// increase internal counter and compare to length of
-			// the audio list
-			if (++self._loadCount === self.audioList.length){
-				
-				self._onload(self.bufferList);
-			} 
-		}, function(){
-			throw "ERROR: Unable to decode audio-file " + url;  
-		}); 
-	};
+	// add nocache, if necessary
+	if(utils.isDevelopmentModeActive() === true){
+		url = url + "?" + new Date().getTime();
+	}
 	
-	request.onerror = function() { 
-		throw "ERROR: Unable to load audio-files.";  
+	// create XMLHttpRequest object
+	var xhr = new global.XMLHttpRequest(); 
+		
+	xhr.onreadystatechange = function() { 
+		
+		if (xhr.readyState === xhr.DONE) {
+			
+			if (xhr.status === 200) {
+				
+				// decode audio data
+				self.context.decodeAudioData( xhr.response, function(buffer) { 
+					if (!buffer) { 
+						throw "ERROR: Unable to decode audio file: " + url;  
+					} 
+					// add buffer to bufferlist
+					self.bufferList[index] = buffer;
+					
+					// publish message to inform about status
+					PubSub.publish("loading.complete.audio", {url: url});
+					
+					// increase internal counter and compare to length of
+					// the audio list
+					if (++self._loadCount === self.audioList.length){
+						
+						self._onload(self.bufferList);
+					} 
+				}, function(){
+					throw "ERROR: Unable to decode audio file " + url;  
+				}); 
+				
+			} else {
+				throw "ERROR: Could not load '" + url + "' (Status: " + xhr.status + ").";
+			}
+		}
 	};
 	
 	// send request
-	request.send();
+	xhr.open("GET", url, true);
+	xhr.responseType = "arraybuffer";
+	xhr.withCredentials = true;
+	xhr.send();
 	
 	// publish message to inform about status
 	PubSub.publish("loading.start.audio", {url: url});

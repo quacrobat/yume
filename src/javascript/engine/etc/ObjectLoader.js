@@ -16,11 +16,10 @@ var utils = require("./Utils");
  * @constructor
  * @augments THREE.ObjectLoader
  * 
- * @param {boolean} manager - The Loading Manager.
  */
-function ObjectLoader(manager) {
+function ObjectLoader() {
 
-	THREE.ObjectLoader.call(this, manager);
+	THREE.ObjectLoader.call(this);
 	
 	this.crossOrigin = "anonymous";
 }
@@ -33,31 +32,54 @@ ObjectLoader.prototype.constructor = ObjectLoader;
  * 
  * @param {string} url - The URL of the 3d object.
  * @param {function} onLoad - This callback function is executed, when the model is loaded and parsed.
- * @param {function} onProgress - This callback function is executed, when parts of the object are loaded.
- * @param {function} onError - This callback function is executed, when there is an error situation.
  */
-ObjectLoader.prototype.load = function (url, onLoad, onProgress, onError) {
+ObjectLoader.prototype.load = function (url, onLoad) {
 	
+	var self = this;
+	
+	// build url
 	url = utils.getCDNHost() + url;
-	this.texturePath = utils.getCDNHost() + this.texturePath;
 
-	if ( this.texturePath === "" ) {
+	// build texturePath
+	if(this.texturePath === "") {
 		this.texturePath = url.substring( 0, url.lastIndexOf( "/" ) + 1 );
 	}
+	
+	// add nocache, if necessary
+	if(utils.isDevelopmentModeActive() === true){
+		url = url + "?" + new Date().getTime();
+	}
 
-	var scope = this;
+	// create XMLHttpRequest object
+	var xhr = new global.XMLHttpRequest();
 
-	var loader = new THREE.XHRLoader(scope.manager);
-	loader.setCrossOrigin(this.crossOrigin);
-	loader.load(url, function (text) {
+	xhr.onreadystatechange = function() {
 
-		// parse result
-		scope.parse(JSON.parse(text), onLoad);
-		
-		// publish message
-		PubSub.publish("loading.complete.object", {url: url});
+		if (xhr.readyState === xhr.DONE) {
 
-	}, onProgress, onError);
+			if (xhr.status === 200) {
+
+				if (xhr.responseText) {
+
+					// parse result
+					self.parse(JSON.parse(xhr.responseText), onLoad);
+
+					// publish message
+					PubSub.publish("loading.complete.object", {url: url});
+
+				} else {
+					throw "ERROR: '" + url + "' seems to be unreachable or the file is empty.";
+				}
+			} else {
+				throw "ERROR: Could not load '" + url + "' (Status: " + xhr.status + ").";
+			}
+		}
+	};
+
+	// start request
+	xhr.open('GET', url, true);
+	xhr.withCredentials = true;
+	xhr.send();
 	
 	// publish message to inform about status
 	PubSub.publish("loading.start.object", {url: url});

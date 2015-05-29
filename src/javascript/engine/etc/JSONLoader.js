@@ -15,13 +15,13 @@ var utils = require("./Utils");
  * @constructor
  * @augments THREE.JSONLoader
  * 
- * @param {boolean} isShowStatus - Should the status of the loading progress should be visible?
  */
-function JSONLoader(isShowStatus) {
+function JSONLoader() {
 
-	THREE.JSONLoader.call(this, isShowStatus);
+	THREE.JSONLoader.call(this);
 	
 	this.crossOrigin = "anonymous";
+	this.texturePath = "";
 }
 
 JSONLoader.prototype = Object.create(THREE.JSONLoader.prototype);
@@ -30,79 +30,60 @@ JSONLoader.prototype.constructor = JSONLoader;
 /**
  * Loads a 3D object. Overwrites the standard method of three.js.
  * 
- * @param {JSONLoader} context - A reference to the current loader.
- * @param {string} url - The URL of the 3d object.
- * @param {function} callback - This callback function is executed, when the model is loaded and parsed.
- * @param {string} texturePath - If the corresponding textures are in a different directory, this parameter can used to set it.
- * @param {function} callbackProgress - This callback function is executed during the loading process.
+ * @param {string} url - The URL of the 3D object.
+ * @param {function} onLoad - This callback function is executed, when the model is loaded and parsed.
  */
-JSONLoader.prototype.loadAjaxJSON = function(context, url, callback, texturePath, callbackProgress) {
+JSONLoader.prototype.load = function(url, onLoad) {
 	
+	var self = this;
+	
+	// build url
 	url = utils.getCDNHost() + url;
-	texturePath = utils.getCDNHost() + texturePath;
+	
+	// build texturePath
+	if(this.texturePath === "") {
+		this.texturePath = url.substring( 0, url.lastIndexOf( "/" ) + 1 );
+	}
+	
+	// add nocache, if necessary
+	if(utils.isDevelopmentModeActive() === true){
+		url = url + "?" + new Date().getTime();
+	}
 
+	// create XMLHttpRequest object
 	var xhr = new global.XMLHttpRequest();
-	var length = 0;
 
 	xhr.onreadystatechange = function() {
 
 		if (xhr.readyState === xhr.DONE) {
 
-			if (xhr.status === 200 || xhr.status === 0) {
+			if (xhr.status === 200) {
 
 				if (xhr.responseText) {
-
-					var json = JSON.parse(xhr.responseText);
-
-					if (json.metadata !== undefined && json.metadata.type === 'scene') {
-
-						console.error('ERROR: JSONLoader: "' + url + '" seems to be a Scene. Use THREE.SceneLoader instead.');
-						return;
-					}
+					
 					// parse result
-					var result = context.parse(json, texturePath);
+					var result = self.parse(JSON.parse(xhr.responseText), self.texturePath);
+					
 					// execute callback
-					callback(result.geometry, result.materials);
+					onLoad(result.geometry, result.materials);
+					
 					// publish message
 					PubSub.publish("loading.complete.object", {url: url});
 
 				} else {
-					console.error('ERROR: JSONLoader: "' + url + '" seems to be unreachable or the file is empty.');
+					throw "ERROR: '" + url + "' seems to be unreachable or the file is empty.";
 				}
-
-				// in context of more complex asset initialization
-				// do not block on single failed file
-				// maybe should go even one more level up
-				context.onLoadComplete();
-
 			} else {
-				console.error('ERROR: JSONLoader: Couldn\'t load "' + url + '" (' + xhr.status + ')');
+				throw "ERROR: Could not load '" + url + "' (Status: " + xhr.status + ").";
 			}
 
-		} else if (xhr.readyState === xhr.LOADING) {
-
-			if (callbackProgress) {
-
-				if (length === 0) {
-					length = xhr.getResponseHeader('Content-Length');
-				}
-				callbackProgress({
-					total : length,
-					loaded : xhr.responseText.length
-				});
-			}
-		} else if (xhr.readyState === xhr.HEADERS_RECEIVED) {
-
-			if (callbackProgress !== undefined) {
-
-				length = xhr.getResponseHeader('Content-Length');
-			}
 		}
 	};
 
+	// start request
 	xhr.open('GET', url, true);
 	xhr.withCredentials = true;
-	xhr.send(null);
+	xhr.send();
 	
 	// publish message to inform about status
 	PubSub.publish("loading.start.object", {url: url});

@@ -36767,41 +36767,56 @@ AudioBufferList.prototype.load = function(){
 AudioBufferList.prototype.loadBuffer = function(file, index){
 	
 	var self = this;
+	
+	// build url
 	var url = utils.getCDNHost() + "assets/audio/dynamic/" + file + ".mp3";
 	
-	var request = new global.XMLHttpRequest(); 
-	request.open("GET", url, true); 
-	request.responseType = "arraybuffer";  	  	
-	request.onload = function() { 
-		
-		// decode audio data
-		self.context.decodeAudioData( request.response, function(buffer) { 
-			if (!buffer) { 
-				throw "ERROR: Unable to decode audio-file: " + url;  
-			} 
-			// add buffer to bufferlist
-			self.bufferList[index] = buffer;
-			
-			// publish message to inform about status
-			PubSub.publish("loading.complete.audio", {url: url});
-			
-			// increase internal counter and compare to length of
-			// the audio list
-			if (++self._loadCount === self.audioList.length){
-				
-				self._onload(self.bufferList);
-			} 
-		}, function(){
-			throw "ERROR: Unable to decode audio-file " + url;  
-		}); 
-	};
+	// add nocache, if necessary
+	if(utils.isDevelopmentModeActive() === true){
+		url = url + "?" + new Date().getTime();
+	}
 	
-	request.onerror = function() { 
-		throw "ERROR: Unable to load audio-files.";  
+	// create XMLHttpRequest object
+	var xhr = new global.XMLHttpRequest(); 
+		
+	xhr.onreadystatechange = function() { 
+		
+		if (xhr.readyState === xhr.DONE) {
+			
+			if (xhr.status === 200) {
+				
+				// decode audio data
+				self.context.decodeAudioData( xhr.response, function(buffer) { 
+					if (!buffer) { 
+						throw "ERROR: Unable to decode audio file: " + url;  
+					} 
+					// add buffer to bufferlist
+					self.bufferList[index] = buffer;
+					
+					// publish message to inform about status
+					PubSub.publish("loading.complete.audio", {url: url});
+					
+					// increase internal counter and compare to length of
+					// the audio list
+					if (++self._loadCount === self.audioList.length){
+						
+						self._onload(self.bufferList);
+					} 
+				}, function(){
+					throw "ERROR: Unable to decode audio file " + url;  
+				}); 
+				
+			} else {
+				throw "ERROR: Could not load '" + url + "' (Status: " + xhr.status + ").";
+			}
+		}
 	};
 	
 	// send request
-	request.send();
+	xhr.open("GET", url, true);
+	xhr.responseType = "arraybuffer";
+	xhr.withCredentials = true;
+	xhr.send();
 	
 	// publish message to inform about status
 	PubSub.publish("loading.start.audio", {url: url});
@@ -39835,13 +39850,13 @@ var utils = require("./Utils");
  * @constructor
  * @augments THREE.JSONLoader
  * 
- * @param {boolean} isShowStatus - Should the status of the loading progress should be visible?
  */
-function JSONLoader(isShowStatus) {
+function JSONLoader() {
 
-	THREE.JSONLoader.call(this, isShowStatus);
+	THREE.JSONLoader.call(this);
 	
 	this.crossOrigin = "anonymous";
+	this.texturePath = "";
 }
 
 JSONLoader.prototype = Object.create(THREE.JSONLoader.prototype);
@@ -39850,79 +39865,60 @@ JSONLoader.prototype.constructor = JSONLoader;
 /**
  * Loads a 3D object. Overwrites the standard method of three.js.
  * 
- * @param {JSONLoader} context - A reference to the current loader.
- * @param {string} url - The URL of the 3d object.
- * @param {function} callback - This callback function is executed, when the model is loaded and parsed.
- * @param {string} texturePath - If the corresponding textures are in a different directory, this parameter can used to set it.
- * @param {function} callbackProgress - This callback function is executed during the loading process.
+ * @param {string} url - The URL of the 3D object.
+ * @param {function} onLoad - This callback function is executed, when the model is loaded and parsed.
  */
-JSONLoader.prototype.loadAjaxJSON = function(context, url, callback, texturePath, callbackProgress) {
+JSONLoader.prototype.load = function(url, onLoad) {
 	
+	var self = this;
+	
+	// build url
 	url = utils.getCDNHost() + url;
-	texturePath = utils.getCDNHost() + texturePath;
+	
+	// build texturePath
+	if(this.texturePath === "") {
+		this.texturePath = url.substring( 0, url.lastIndexOf( "/" ) + 1 );
+	}
+	
+	// add nocache, if necessary
+	if(utils.isDevelopmentModeActive() === true){
+		url = url + "?" + new Date().getTime();
+	}
 
+	// create XMLHttpRequest object
 	var xhr = new global.XMLHttpRequest();
-	var length = 0;
 
 	xhr.onreadystatechange = function() {
 
 		if (xhr.readyState === xhr.DONE) {
 
-			if (xhr.status === 200 || xhr.status === 0) {
+			if (xhr.status === 200) {
 
 				if (xhr.responseText) {
-
-					var json = JSON.parse(xhr.responseText);
-
-					if (json.metadata !== undefined && json.metadata.type === 'scene') {
-
-						console.error('ERROR: JSONLoader: "' + url + '" seems to be a Scene. Use THREE.SceneLoader instead.');
-						return;
-					}
+					
 					// parse result
-					var result = context.parse(json, texturePath);
+					var result = self.parse(JSON.parse(xhr.responseText), self.texturePath);
+					
 					// execute callback
-					callback(result.geometry, result.materials);
+					onLoad(result.geometry, result.materials);
+					
 					// publish message
 					PubSub.publish("loading.complete.object", {url: url});
 
 				} else {
-					console.error('ERROR: JSONLoader: "' + url + '" seems to be unreachable or the file is empty.');
+					throw "ERROR: '" + url + "' seems to be unreachable or the file is empty.";
 				}
-
-				// in context of more complex asset initialization
-				// do not block on single failed file
-				// maybe should go even one more level up
-				context.onLoadComplete();
-
 			} else {
-				console.error('ERROR: JSONLoader: Couldn\'t load "' + url + '" (' + xhr.status + ')');
+				throw "ERROR: Could not load '" + url + "' (Status: " + xhr.status + ").";
 			}
 
-		} else if (xhr.readyState === xhr.LOADING) {
-
-			if (callbackProgress) {
-
-				if (length === 0) {
-					length = xhr.getResponseHeader('Content-Length');
-				}
-				callbackProgress({
-					total : length,
-					loaded : xhr.responseText.length
-				});
-			}
-		} else if (xhr.readyState === xhr.HEADERS_RECEIVED) {
-
-			if (callbackProgress !== undefined) {
-
-				length = xhr.getResponseHeader('Content-Length');
-			}
 		}
 	};
 
+	// start request
 	xhr.open('GET', url, true);
 	xhr.withCredentials = true;
-	xhr.send(null);
+	xhr.send();
 	
 	// publish message to inform about status
 	PubSub.publish("loading.start.object", {url: url});
@@ -40309,6 +40305,7 @@ NetworkManager.SERVER = {
 module.exports = new NetworkManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../core/Message":19,"../core/ThreadManager":25,"../etc/Utils":37,"pubsub-js":1,"ws":4}],32:[function(require,module,exports){
+(function (global){
 /**
  * @file Prototype for loading 3D objects in object-format 
  * from the server. The objects are provided with Blender.
@@ -40327,11 +40324,10 @@ var utils = require("./Utils");
  * @constructor
  * @augments THREE.ObjectLoader
  * 
- * @param {boolean} manager - The Loading Manager.
  */
-function ObjectLoader(manager) {
+function ObjectLoader() {
 
-	THREE.ObjectLoader.call(this, manager);
+	THREE.ObjectLoader.call(this);
 	
 	this.crossOrigin = "anonymous";
 }
@@ -40344,37 +40340,61 @@ ObjectLoader.prototype.constructor = ObjectLoader;
  * 
  * @param {string} url - The URL of the 3d object.
  * @param {function} onLoad - This callback function is executed, when the model is loaded and parsed.
- * @param {function} onProgress - This callback function is executed, when parts of the object are loaded.
- * @param {function} onError - This callback function is executed, when there is an error situation.
  */
-ObjectLoader.prototype.load = function (url, onLoad, onProgress, onError) {
+ObjectLoader.prototype.load = function (url, onLoad) {
 	
+	var self = this;
+	
+	// build url
 	url = utils.getCDNHost() + url;
-	this.texturePath = utils.getCDNHost() + this.texturePath;
 
-	if ( this.texturePath === "" ) {
+	// build texturePath
+	if(this.texturePath === "") {
 		this.texturePath = url.substring( 0, url.lastIndexOf( "/" ) + 1 );
 	}
+	
+	// add nocache, if necessary
+	if(utils.isDevelopmentModeActive() === true){
+		url = url + "?" + new Date().getTime();
+	}
 
-	var scope = this;
+	// create XMLHttpRequest object
+	var xhr = new global.XMLHttpRequest();
 
-	var loader = new THREE.XHRLoader(scope.manager);
-	loader.setCrossOrigin(this.crossOrigin);
-	loader.load(url, function (text) {
+	xhr.onreadystatechange = function() {
 
-		// parse result
-		scope.parse(JSON.parse(text), onLoad);
-		
-		// publish message
-		PubSub.publish("loading.complete.object", {url: url});
+		if (xhr.readyState === xhr.DONE) {
 
-	}, onProgress, onError);
+			if (xhr.status === 200) {
+
+				if (xhr.responseText) {
+
+					// parse result
+					self.parse(JSON.parse(xhr.responseText), onLoad);
+
+					// publish message
+					PubSub.publish("loading.complete.object", {url: url});
+
+				} else {
+					throw "ERROR: '" + url + "' seems to be unreachable or the file is empty.";
+				}
+			} else {
+				throw "ERROR: Could not load '" + url + "' (Status: " + xhr.status + ").";
+			}
+		}
+	};
+
+	// start request
+	xhr.open('GET', url, true);
+	xhr.withCredentials = true;
+	xhr.send();
 	
 	// publish message to inform about status
 	PubSub.publish("loading.start.object", {url: url});
 };
 
 module.exports = ObjectLoader;
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./Utils":37,"pubsub-js":1,"three":2}],33:[function(require,module,exports){
 /**
  * @file This prototype represents the character of
@@ -40727,17 +40747,24 @@ TextManager.prototype.load = function(stageId, callback){
 	
 	var self = this;
 	
+	// build url
 	var	url = utils.getCDNHost() + "assets/locales/" + utils.getLocale() + "/stage_" + stageId + ".js";
 	
+	// add nocache, if necessary
+	if(utils.isDevelopmentModeActive() === true){
+		url = url + "?" + new Date().getTime();
+	}
+	
+	// create XMLHttpRequest object
 	var xhr = new global.XMLHttpRequest();
 	
 	xhr.onreadystatechange = function() {
 
 		if (xhr.readyState === xhr.DONE) {
 
-			if (xhr.status === 200 || xhr.status === 0) {
+			if (xhr.status === 200) {
 
-				if (xhr.responseText) {
+				if (xhr.responseText !== "") {
 					
 					// assign texts
 					self._texts = JSON.parse(xhr.responseText);
@@ -40756,11 +40783,12 @@ TextManager.prototype.load = function(stageId, callback){
 					throw "ERROR: Unable to parse texts for stageId '" + stageId + "'. Textfile could be empty.";
 				}
 			} else {
-				throw "ERROR: Unable to load texts for stageId '" + stageId + "'.";
+				throw "ERROR: Could not load '" + url + "' (Status: " + xhr.status + ").";
 			}
 		}
 	};
 	
+	// start request
 	xhr.open('GET', url, true);
 	xhr.withCredentials = true;
 	xhr.send();
