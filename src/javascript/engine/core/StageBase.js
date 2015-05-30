@@ -30,9 +30,15 @@ var self;
  * 
  * @constructor
  */
-function Stage(){
+function StageBase(stageId){
 	
-	Object.defineProperties(this, {	
+	Object.defineProperties(this, {
+		stageId: {
+			value: stageId,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
 		scene: {
 			value: scene,
 			configurable: false,
@@ -132,7 +138,7 @@ function Stage(){
  * This method is called, when the all requirements are fulfilled 
  * to setup the stage. In dev-mode, additional helper objects are added.
  */
-Stage.prototype.setup = function(){
+StageBase.prototype.setup = function(){
 	
 	if(utils.isDevelopmentModeActive() === true){
 		this.scene.add(new THREE.AxisHelper(30));
@@ -141,18 +147,17 @@ Stage.prototype.setup = function(){
 };
 
 /**
- * This method is called, when the stages is ready and started by the player.
+ * This method is called, when the stage is ready and started by the player.
  */
-Stage.prototype.start = function(){
+StageBase.prototype.start = function(){
 	
-	this.controls.isActionInProgress = false;
 };
 
 /**
  * This method is called, when the stage is destroyed. 
  * It removes all scene-related data.
  */
-Stage.prototype.destroy = function(){
+StageBase.prototype.destroy = function(){
 	
 	// remove stage objects from all managers
 	this.actionManager.removeInteractiveObjects();
@@ -183,7 +188,7 @@ Stage.prototype.destroy = function(){
 /**
  * Renders the stage.
  */
-Stage.prototype._render = function(){
+StageBase.prototype._render = function(){
 	
 	this._delta = this.timeManager.getDelta();
 	this.animationManager.update();
@@ -199,10 +204,10 @@ Stage.prototype._render = function(){
  * @param {string} stageId - The new stageId
  * @param {boolean} isSaveGame -  Should the progress be saved?
  */
-Stage.prototype._changeStage = function(stageId, isSaveGame){
+StageBase.prototype._changeStage = function(stageId, isSaveGame){
 	
 	self.controls.isActionInProgress = true;
 	PubSub.publish("stage.change", {stageId: stageId, isSaveGame: isSaveGame});
 };
 
-module.exports = Stage;
+module.exports = StageBase;

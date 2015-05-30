@@ -38801,9 +38801,15 @@ var self;
  * 
  * @constructor
  */
-function Stage(){
+function StageBase(stageId){
 	
-	Object.defineProperties(this, {	
+	Object.defineProperties(this, {
+		stageId: {
+			value: stageId,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
 		scene: {
 			value: scene,
 			configurable: false,
@@ -38903,7 +38909,7 @@ function Stage(){
  * This method is called, when the all requirements are fulfilled 
  * to setup the stage. In dev-mode, additional helper objects are added.
  */
-Stage.prototype.setup = function(){
+StageBase.prototype.setup = function(){
 	
 	if(utils.isDevelopmentModeActive() === true){
 		this.scene.add(new THREE.AxisHelper(30));
@@ -38912,18 +38918,17 @@ Stage.prototype.setup = function(){
 };
 
 /**
- * This method is called, when the stages is ready and started by the player.
+ * This method is called, when the stage is ready and started by the player.
  */
-Stage.prototype.start = function(){
+StageBase.prototype.start = function(){
 	
-	this.controls.isActionInProgress = false;
 };
 
 /**
  * This method is called, when the stage is destroyed. 
  * It removes all scene-related data.
  */
-Stage.prototype.destroy = function(){
+StageBase.prototype.destroy = function(){
 	
 	// remove stage objects from all managers
 	this.actionManager.removeInteractiveObjects();
@@ -38954,7 +38959,7 @@ Stage.prototype.destroy = function(){
 /**
  * Renders the stage.
  */
-Stage.prototype._render = function(){
+StageBase.prototype._render = function(){
 	
 	this._delta = this.timeManager.getDelta();
 	this.animationManager.update();
@@ -38970,13 +38975,13 @@ Stage.prototype._render = function(){
  * @param {string} stageId - The new stageId
  * @param {boolean} isSaveGame -  Should the progress be saved?
  */
-Stage.prototype._changeStage = function(stageId, isSaveGame){
+StageBase.prototype._changeStage = function(stageId, isSaveGame){
 	
 	self.controls.isActionInProgress = true;
 	PubSub.publish("stage.change", {stageId: stageId, isSaveGame: isSaveGame});
 };
 
-module.exports = Stage;
+module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../action/ActionManager":7,"../audio/AudioManager":13,"../controls/FirstPersonControls":15,"../etc/AnimationManager":26,"../etc/GroupManager":28,"../etc/SaveGameManager":34,"../etc/SettingsManager":35,"../etc/TextManager":36,"../etc/Utils":37,"../ui/UserInterfaceManager":54,"./Camera":17,"./Renderer":20,"./Scene":21,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
 /**
@@ -41091,31 +41096,31 @@ a+"px",m=b,r=0);return b},update:function(){l=this.end()}}};"object"===typeof mo
 var THREE = require("three");
 var TWEEN = require("tween.js");
 
-var Stage = require("../core/Stage");
+var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
 
 var self;
 
-function Stage_001(){
+function Stage(){
 	
-	Stage.call(this);
-
+	StageBase.call(this, "001");
+	
 	self = this;
 }
 
-Stage_001.prototype = Object.create(Stage.prototype);
-Stage_001.prototype.constructor = Stage_001;
+Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype.constructor = Stage;
 
-Stage_001.prototype.setup = function(){
+Stage.prototype.setup = function(){
 	
-	Stage.prototype.setup.call(this);
+	StageBase.prototype.setup.call(this);
 	
 	// controls setup
 	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
 	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
 	
 	// load texts
-	this.textManager.load("001");
+	this.textManager.load(this.stageId);
 	
 	// add ground
 	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
@@ -41159,22 +41164,22 @@ Stage_001.prototype.setup = function(){
 	this._render();
 };
 
-Stage_001.prototype.start = function(){
+Stage.prototype.start = function(){
 	
-	Stage.prototype.start.call(this);
+	StageBase.prototype.start.call(this);
 	
 	// set information panel text
 	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
 };
 
-Stage_001.prototype.destroy = function(){
+Stage.prototype.destroy = function(){
 	
-	Stage.prototype.destroy.call(this);
+	StageBase.prototype.destroy.call(this);
 };
 
-Stage_001.prototype._render = function(){
+Stage.prototype._render = function(){
 	
-	Stage.prototype._render.call(self);
+	StageBase.prototype._render.call(self);
 };
 
 //custom functions
@@ -41191,38 +41196,38 @@ function colorFaces(geometry){
 	}
 }
 
-module.exports = Stage_001;
-},{"../core/Stage":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],40:[function(require,module,exports){
+module.exports = Stage;
+},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],40:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
 var TWEEN = require("tween.js");
 
-var Stage = require("../core/Stage");
+var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
 
 var self;
 
-function Stage_002(){
+function Stage(){
 	
-	Stage.call(this);
-
+	StageBase.call(this, "002");
+	
 	self = this;
 }
 
-Stage_002.prototype = Object.create(Stage.prototype);
-Stage_002.prototype.constructor = Stage_002;
+Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype.constructor = Stage;
 
-Stage_002.prototype.setup = function(){
+Stage.prototype.setup = function(){
 	
-	Stage.prototype.setup.call(this);
+	StageBase.prototype.setup.call(this);
 	
 	// setup controls
 	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
 	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
 	
 	// load texts
-	this.textManager.load("002");
+	this.textManager.load(this.stageId);
 	
 	// add ground
 	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
@@ -41308,22 +41313,22 @@ Stage_002.prototype.setup = function(){
 	
 };
 
-Stage_002.prototype.start = function(){
+Stage.prototype.start = function(){
 	
-	Stage.prototype.start.call(this);
+	StageBase.prototype.start.call(this);
 	
 	// set information panel text
 	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
 };
 
-Stage_002.prototype.destroy = function(){
+Stage.prototype.destroy = function(){
 	
-	Stage.prototype.destroy.call(this);
+	StageBase.prototype.destroy.call(this);
 };
 
-Stage_002.prototype._render = function(){
+Stage.prototype._render = function(){
 	
-	Stage.prototype._render.call(self);
+	StageBase.prototype._render.call(self);
 };
 
 //custom functions
@@ -41340,38 +41345,38 @@ function colorFaces(geometry){
 	}
 }
 
-module.exports = Stage_002;
-},{"../core/Stage":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],41:[function(require,module,exports){
+module.exports = Stage;
+},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],41:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
 var TWEEN = require("tween.js");
 
-var Stage = require("../core/Stage");
+var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
 
 var self, index = 0;
 
-function Stage_003(){
+function Stage(){
 	
-	Stage.call(this);
-
+	StageBase.call(this, "003");
+	
 	self = this;
 }
 
-Stage_003.prototype = Object.create(Stage.prototype);
-Stage_003.prototype.constructor = Stage_003;
+Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype.constructor = Stage;
 
-Stage_003.prototype.setup = function(){
+Stage.prototype.setup = function(){
 	
-	Stage.prototype.setup.call(this);
+	StageBase.prototype.setup.call(this);
 	
 	// setup controls
 	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
 	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
 	
 	// load texts
-	this.textManager.load("003");
+	this.textManager.load(this.stageId);
 	
 	// add ground
 	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
@@ -41449,22 +41454,22 @@ Stage_003.prototype.setup = function(){
 	
 };
 
-Stage_003.prototype.start = function(){
+Stage.prototype.start = function(){
 	
-	Stage.prototype.start.call(this);
+	StageBase.prototype.start.call(this);
 	
 	// set information panel text
 	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
 };
 
-Stage_003.prototype.destroy = function(){
+Stage.prototype.destroy = function(){
 	
-	Stage.prototype.destroy.call(this);
+	StageBase.prototype.destroy.call(this);
 };
 
-Stage_003.prototype._render = function(){
+Stage.prototype._render = function(){
 	
-	Stage.prototype._render.call(self);
+	StageBase.prototype._render.call(self);
 };
 
 // custom functions
@@ -41490,38 +41495,38 @@ function colorMesh(mesh){
 	}	
 }
 
-module.exports = Stage_003;
-},{"../core/Stage":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],42:[function(require,module,exports){
+module.exports = Stage;
+},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],42:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
 var TWEEN = require("tween.js");
 
-var Stage = require("../core/Stage");
+var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
 
 var self;
 
-function Stage_004(){
+function Stage(){
 	
-	Stage.call(this);
-
+	StageBase.call(this, "004");
+	
 	self = this;
 }
 
-Stage_004.prototype = Object.create(Stage.prototype);
-Stage_004.prototype.constructor = Stage_004;
+Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype.constructor = Stage;
 
-Stage_004.prototype.setup = function(){
+Stage.prototype.setup = function(){
 	
-	Stage.prototype.setup.call(this);
+	StageBase.prototype.setup.call(this);
 	
 	// setup controls
 	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
 	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
 	
 	// load texts
-	this.textManager.load("004");
+	this.textManager.load(this.stageId);
 	
 	// add ground
 	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
@@ -41612,22 +41617,22 @@ Stage_004.prototype.setup = function(){
 	
 };
 
-Stage_004.prototype.start = function(){
+Stage.prototype.start = function(){
 	
-	Stage.prototype.start.call(this);
+	StageBase.prototype.start.call(this);
 	
 	// set information panel text
 	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
 };
 
-Stage_004.prototype.destroy = function(){
+Stage.prototype.destroy = function(){
 	
-	Stage.prototype.destroy.call(this);
+	StageBase.prototype.destroy.call(this);
 };
 
-Stage_004.prototype._render = function(){
+Stage.prototype._render = function(){
 	
-	Stage.prototype._render.call(self);
+	StageBase.prototype._render.call(self);
 };
 
 // custom functions
@@ -41644,38 +41649,38 @@ function colorFaces(geometry){
 	}
 }
 
-module.exports = Stage_004;
-},{"../core/Stage":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],43:[function(require,module,exports){
+module.exports = Stage;
+},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],43:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
 var TWEEN = require("tween.js");
 
-var Stage = require("../core/Stage");
+var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
 
 var self;
 
-function Stage_005(){
+function Stage(){
 	
-	Stage.call(this);
-
+	StageBase.call(this, "005");
+	
 	self = this;
 }
 
-Stage_005.prototype = Object.create(Stage.prototype);
-Stage_005.prototype.constructor = Stage_005;
+Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype.constructor = Stage;
 
-Stage_005.prototype.setup = function(){
+Stage.prototype.setup = function(){
 	
-	Stage.prototype.setup.call(this);
+	StageBase.prototype.setup.call(this);
 	
 	// setup controls
 	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
 	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
 	
 	// load texts
-	this.textManager.load("005");
+	this.textManager.load(this.stageId);
 	
 	// add ground
 	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
@@ -41722,9 +41727,9 @@ Stage_005.prototype.setup = function(){
 	this._render();
 };
 
-Stage_005.prototype.start = function(){
+Stage.prototype.start = function(){
 	
-	Stage.prototype.start.call(this);
+	StageBase.prototype.start.call(this);
 	
 	// start playing
 	this.audioManager.playBackgroundMusic();
@@ -41733,17 +41738,17 @@ Stage_005.prototype.start = function(){
 	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
 };
 
-Stage_005.prototype.destroy = function(){
+Stage.prototype.destroy = function(){
 	
-	Stage.prototype.destroy.call(this);
+	StageBase.prototype.destroy.call(this);
 	
 	// stop playing
 	this.audioManager.stopBackgroundMusic();
 };
 
-Stage_005.prototype._render = function(){
+Stage.prototype._render = function(){
 	
-	Stage.prototype._render.call(self);
+	StageBase.prototype._render.call(self);
 };
 
 //custom functions
@@ -41760,40 +41765,40 @@ function colorFaces(geometry){
 	}
 }
 
-module.exports = Stage_005;
-},{"../core/Stage":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],44:[function(require,module,exports){
+module.exports = Stage;
+},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],44:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
 var TWEEN = require("tween.js");
 
-var Stage = require("../core/Stage");
+var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
 
 var self;
 
 var audioFire, audioClock;
 
-function Stage_006(){
+function Stage(){
 	
-	Stage.call(this);
+	StageBase.call(this, "006");
 
 	self = this;
 }
 
-Stage_006.prototype = Object.create(Stage.prototype);
-Stage_006.prototype.constructor = Stage_006;
+Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype.constructor = Stage;
 
-Stage_006.prototype.setup = function(){
+Stage.prototype.setup = function(){
 	
-	Stage.prototype.setup.call(this);
+	StageBase.prototype.setup.call(this);
 	
 	// setup controls
 	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
 	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
 	
 	// load texts
-	this.textManager.load("006");
+	this.textManager.load(this.stageId);
 	
 	// add ground
 	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
@@ -41881,9 +41886,9 @@ Stage_006.prototype.setup = function(){
 	this._render();
 };
 
-Stage_006.prototype.start = function(){
+Stage.prototype.start = function(){
 	
-	Stage.prototype.start.call(this);
+	StageBase.prototype.start.call(this);
 	
 	// start playing
 	audioFire.play();
@@ -41893,18 +41898,18 @@ Stage_006.prototype.start = function(){
 	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
 };
 
-Stage_006.prototype.destroy = function(){
+Stage.prototype.destroy = function(){
 	
-	Stage.prototype.destroy.call(this);
+	StageBase.prototype.destroy.call(this);
 	
 	// stop playing
 	audioFire.stop();
 	audioClock.stop();
 };
 
-Stage_006.prototype._render = function(){
+Stage.prototype._render = function(){
 	
-	Stage.prototype._render.call(self);
+	StageBase.prototype._render.call(self);
 };
 
 //custom functions
@@ -41921,38 +41926,38 @@ function colorFaces(geometry){
 	}
 }
 
-module.exports = Stage_006;
-},{"../core/Stage":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],45:[function(require,module,exports){
+module.exports = Stage;
+},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],45:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
 var TWEEN = require("tween.js");
 
-var Stage = require("../core/Stage");
+var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
 
 var self;
 
-function Stage_007(){
+function Stage(){
 	
-	Stage.call(this);
+	StageBase.call(this, "007");
 
 	self = this;
 }
 
-Stage_007.prototype = Object.create(Stage.prototype);
-Stage_007.prototype.constructor = Stage_007;
+Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype.constructor = Stage;
 
-Stage_007.prototype.setup = function(){
+Stage.prototype.setup = function(){
 	
-	Stage.prototype.setup.call(this);
+	StageBase.prototype.setup.call(this);
 	
 	// setup controls
 	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
 	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
 	
 	// load texts
-	this.textManager.load("007");
+	this.textManager.load(this.stageId);
 	
 	// add ground
 	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
@@ -42040,22 +42045,22 @@ Stage_007.prototype.setup = function(){
 	this._render();
 };
 
-Stage_007.prototype.start = function(){
+Stage.prototype.start = function(){
 	
-	Stage.prototype.start.call(this);
+	StageBase.prototype.start.call(this);
 	
 	// set information panel text
 	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
 };
 
-Stage_007.prototype.destroy = function(){
+Stage.prototype.destroy = function(){
 	
-	Stage.prototype.destroy.call(this);
+	StageBase.prototype.destroy.call(this);
 };
 
-Stage_007.prototype._render = function(){
+Stage.prototype._render = function(){
 	
-	Stage.prototype._render.call(self);
+	StageBase.prototype._render.call(self);
 };
 
 //custom functions
@@ -42072,8 +42077,8 @@ function colorFaces(geometry){
 	}
 }
 
-module.exports = Stage_007;
-},{"../core/Stage":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],46:[function(require,module,exports){
+module.exports = Stage;
+},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],46:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.

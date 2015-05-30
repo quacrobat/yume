@@ -3,31 +3,31 @@
 var THREE = require("three");
 var TWEEN = require("tween.js");
 
-var Stage = require("../core/Stage");
+var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
 
 var self;
 
-function Stage_007(){
+function Stage(){
 	
-	Stage.call(this);
+	StageBase.call(this, "007");
 
 	self = this;
 }
 
-Stage_007.prototype = Object.create(Stage.prototype);
-Stage_007.prototype.constructor = Stage_007;
+Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype.constructor = Stage;
 
-Stage_007.prototype.setup = function(){
+Stage.prototype.setup = function(){
 	
-	Stage.prototype.setup.call(this);
+	StageBase.prototype.setup.call(this);
 	
 	// setup controls
 	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
 	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
 	
 	// load texts
-	this.textManager.load("007");
+	this.textManager.load(this.stageId);
 	
 	// add ground
 	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
@@ -115,22 +115,22 @@ Stage_007.prototype.setup = function(){
 	this._render();
 };
 
-Stage_007.prototype.start = function(){
+Stage.prototype.start = function(){
 	
-	Stage.prototype.start.call(this);
+	StageBase.prototype.start.call(this);
 	
 	// set information panel text
 	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
 };
 
-Stage_007.prototype.destroy = function(){
+Stage.prototype.destroy = function(){
 	
-	Stage.prototype.destroy.call(this);
+	StageBase.prototype.destroy.call(this);
 };
 
-Stage_007.prototype._render = function(){
+Stage.prototype._render = function(){
 	
-	Stage.prototype._render.call(self);
+	StageBase.prototype._render.call(self);
 };
 
 //custom functions
@@ -147,4 +147,4 @@ function colorFaces(geometry){
 	}
 }
 
-module.exports = Stage_007;
+module.exports = Stage;

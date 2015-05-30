@@ -3,33 +3,33 @@
 var THREE = require("three");
 var TWEEN = require("tween.js");
 
-var Stage = require("../core/Stage");
+var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
 
 var self;
 
 var audioFire, audioClock;
 
-function Stage_006(){
+function Stage(){
 	
-	Stage.call(this);
+	StageBase.call(this, "006");
 
 	self = this;
 }
 
-Stage_006.prototype = Object.create(Stage.prototype);
-Stage_006.prototype.constructor = Stage_006;
+Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype.constructor = Stage;
 
-Stage_006.prototype.setup = function(){
+Stage.prototype.setup = function(){
 	
-	Stage.prototype.setup.call(this);
+	StageBase.prototype.setup.call(this);
 	
 	// setup controls
 	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
 	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
 	
 	// load texts
-	this.textManager.load("006");
+	this.textManager.load(this.stageId);
 	
 	// add ground
 	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
@@ -117,9 +117,9 @@ Stage_006.prototype.setup = function(){
 	this._render();
 };
 
-Stage_006.prototype.start = function(){
+Stage.prototype.start = function(){
 	
-	Stage.prototype.start.call(this);
+	StageBase.prototype.start.call(this);
 	
 	// start playing
 	audioFire.play();
@@ -129,18 +129,18 @@ Stage_006.prototype.start = function(){
 	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
 };
 
-Stage_006.prototype.destroy = function(){
+Stage.prototype.destroy = function(){
 	
-	Stage.prototype.destroy.call(this);
+	StageBase.prototype.destroy.call(this);
 	
 	// stop playing
 	audioFire.stop();
 	audioClock.stop();
 };
 
-Stage_006.prototype._render = function(){
+Stage.prototype._render = function(){
 	
-	Stage.prototype._render.call(self);
+	StageBase.prototype._render.call(self);
 };
 
 //custom functions
@@ -157,4 +157,4 @@ function colorFaces(geometry){
 	}
 }
 
-module.exports = Stage_006;
+module.exports = Stage;

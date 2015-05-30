@@ -36,5 +36,14 @@
     "grunt-contrib-less": "^1.0.1",
     "grunt-contrib-uglify": "^0.9.1",
     "grunt-contrib-watch": "^0.6.1"
+  },
+  "repository": {
+	  "type": "git",
+	  "url": "https://github.com/Mugen87/yume.git"
+  },
+  "author": "Mugen87",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Mugen87/yume/issues"
   }
 }
