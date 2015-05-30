@@ -45,7 +45,7 @@ Stage.prototype.setup = function(){
 	colorFaces(groundGeometry);
 	
 	// add background music
-	this.audioManager.setBackgroundMusic("music");
+	this.audioManager.setBackgroundMusic("music", 0.5);
 	
 	// add sign
 	var signLoader = new JSONLoader();

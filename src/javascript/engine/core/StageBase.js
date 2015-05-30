@@ -151,6 +151,7 @@ StageBase.prototype.setup = function(){
  */
 StageBase.prototype.start = function(){
 	
+	this.controls.isActionInProgress = false;
 };
 
 /**

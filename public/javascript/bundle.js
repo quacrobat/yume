@@ -36959,13 +36959,10 @@ function AudioManager() {
 		}
 	});
 	
-	// connect background music to audio pipeline
-	// BUGFIX: Firefox <=37 causes flickering with some music, so we don't do this step for it
-	if(utils.isFirefox() === false){
-		var source = this._listener.context.createMediaElementSource(this._backgroundMusic);
-		source.connect(this._listener.gain);
-	}
-
+	// connect background-music to web audio pipeline
+	var source = this._listener.context.createMediaElementSource(this._backgroundMusic);
+	source.connect(this._listener.gain);
+	
 	// add listener to camera
 	camera.add(this._listener);
 }
@@ -37056,27 +37053,35 @@ AudioManager.prototype.getDynamicAudio = function(id) {
  * @param {function} canPlayCallback - This function is executed, when the browser can start playing the audio (when it has buffered enough to begin).
  */
 AudioManager.prototype.setBackgroundMusic = function(file, volume, isLoop, isMuted, canPlayCallback) {
+	
+	var url = "assets/audio/static/" + file + ".mp3";
 
-	this._backgroundMusic.src = "assets/audio/static/" + file + ".mp3";
+	this._backgroundMusic.src = url;
 	this._backgroundMusic.volume = volume || 1;
 	this._backgroundMusic.loop = isLoop || true;
 	this._backgroundMusic.muted = isMuted || false;
 	this._backgroundMusic.onerror = this.onErrorBackgroundMusic;
 	
-	if(typeof canPlayCallback === "function"){
-		this._backgroundMusic.oncanplay = function(event){
-			// execute callback...
+	this._backgroundMusic.oncanplay = function(event){
+		
+		if(typeof canPlayCallback === "function"){
+			// execute callback
 			canPlayCallback();
-			// ...but just one time
-			event.target.oncanplay = null;
-		};
-	}else{
-		this._backgroundMusic.oncanplay = null;
-	}
+		}
+		
+		// publish message to inform about status
+		PubSub.publish("loading.complete.music", {url: url});
+		
+		// execute this handler just one time
+		event.target.oncanplay = null;
+	};
 	
 	if(utils.isDevelopmentModeActive() === true){
-		console.log("INFO: AudioManager: Set new background music. URL: %s", this._backgroundMusic.src);
+		console.log("INFO: AudioManager: Set new background music. URL: %s", url);
 	}
+	
+	// publish message to inform about status
+	PubSub.publish("loading.start.music", {url: url});
 };
 
 /**
@@ -38922,6 +38927,7 @@ StageBase.prototype.setup = function(){
  */
 StageBase.prototype.start = function(){
 	
+	this.controls.isActionInProgress = false;
 };
 
 /**
@@ -41698,7 +41704,7 @@ Stage.prototype.setup = function(){
 	colorFaces(groundGeometry);
 	
 	// add background music
-	this.audioManager.setBackgroundMusic("music");
+	this.audioManager.setBackgroundMusic("music", 0.5);
 	
 	// add sign
 	var signLoader = new JSONLoader();
