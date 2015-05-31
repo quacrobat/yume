@@ -34,12 +34,12 @@ When you want to work with YUME, please ensure that you have a basic understandi
 
 - install node.js and npm
 - download the repository
-- go to the root directory of yume and execute "npm install" in a console to install all dependencies
+- go to the root directory of YUME and execute "npm install" in a console to install all dependencies
 - execute "npm start" to start the application
 
 ## Developing with YUME
 
-YUME uses Browserify to manage its dependencies. So you just develop a node.js application and generate a bundle-file for the browser with your entire code. Type the following command to auto-generate the bundle, when editing the source-files in the src-directory.
+YUME uses Browserify to manage its dependencies. So you just develop a node.js application and generate a bundle-file for the browser with your entire code. Open a console, go to the root directory of YUME and type the following command to auto generate the bundle when editing source-files in the src-directory.
 
 	grunt watch
 

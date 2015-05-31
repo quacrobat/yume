@@ -36916,8 +36916,8 @@ module.exports = AudioListener;
 },{"three":2}],13:[function(require,module,exports){
 (function (global){
 /**
- * @file Interface for entire audio-handling. This prototype is used in scenes
- * to access audio-based logic and to create audio-entities.
+ * @file Interface for entire audio handling. This prototype is used in scenes
+ * to access audio-based logic and to create audio entities.
  * 
  * @author Human Interactive
  */
@@ -36963,6 +36963,9 @@ function AudioManager() {
 	var source = this._listener.context.createMediaElementSource(this._backgroundMusic);
 	source.connect(this._listener.gain);
 	
+	// set error handling for background music
+	this._backgroundMusic.onerror = this._onErrorBackgroundMusic;
+	
 	// add listener to camera
 	camera.add(this._listener);
 }
@@ -37003,7 +37006,7 @@ AudioManager.prototype.createAudioBufferList = function(audioList, callback) {
 /**
  * Removes dynamic audio objects from the internal array.
  * 
- * @param {boolean} isClear - Should all dynamic audios deleted or only stage-dependent?
+ * @param {boolean} isClear - Should all dynamic audios deleted or only stage dependent audios?
  */
 AudioManager.prototype.removeDynamicAudios = function(isClear){
 	
@@ -37050,9 +37053,8 @@ AudioManager.prototype.getDynamicAudio = function(id) {
  * @param {number} volume - The volume of the audio.
  * @param {boolean} isLoop - Should the audio played in a loop?
  * @param {boolean} isMuted - Should the audio muted?
- * @param {function} canPlayCallback - This function is executed, when the browser can start playing the audio (when it has buffered enough to begin).
  */
-AudioManager.prototype.setBackgroundMusic = function(file, volume, isLoop, isMuted, canPlayCallback) {
+AudioManager.prototype.setBackgroundMusic = function(file, volume, isLoop, isMuted) {
 	
 	var url = "assets/audio/static/" + file + ".mp3";
 
@@ -37060,15 +37062,9 @@ AudioManager.prototype.setBackgroundMusic = function(file, volume, isLoop, isMut
 	this._backgroundMusic.volume = volume || 1;
 	this._backgroundMusic.loop = isLoop || true;
 	this._backgroundMusic.muted = isMuted || false;
-	this._backgroundMusic.onerror = this.onErrorBackgroundMusic;
 	
 	this._backgroundMusic.oncanplay = function(event){
-		
-		if(typeof canPlayCallback === "function"){
-			// execute callback
-			canPlayCallback();
-		}
-		
+
 		// publish message to inform about status
 		PubSub.publish("loading.complete.music", {url: url});
 		
@@ -37168,7 +37164,7 @@ AudioManager.prototype.setBackgroundMusicVolume = function(volume) {
  * This method handles error-situations when playing the background music.
  * It triggers a custom event, which can processed of e.g. the UserInterfaceManager.
  */
-AudioManager.prototype.onErrorBackgroundMusic = function(){
+AudioManager.prototype._onErrorBackgroundMusic = function(){
 
 	console.error("ERROR: AudioManager: Media resource could not be processed.");
 	PubSub.publish("audio.backgroundmusic.error", "Media resource could not be processed");
