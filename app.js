@@ -11,6 +11,7 @@ var i18n = require("i18n-2");
 var compress = require("compression");
 
 var routes = require("./routes/index");
+var metadata = require("./package.json");
 
 var app = express();
 
@@ -24,7 +25,7 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
 // authentication setup
-if(process.env.npm_package_config_auth === "true"){
+if(metadata.config.auth === true){
 	app.use(auth.connect(basic));
 }
 
@@ -35,7 +36,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public"), {
-	maxAge: "1d",
+	maxAge: metadata.config.cache.duration,
 	setHeaders: function (res, path) {
 		  res.setHeader("Access-Control-Allow-Origin", "*");
 	}

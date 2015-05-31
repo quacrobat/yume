@@ -8,7 +8,7 @@
 	<meta name="author" content="Human Interactive">
 	<meta name="robots" content="noindex">
 	
-    <title><%= appInfos.name %> <%= appInfos.version %></title>
+    <title><%= metadata.name %> <%= metadata.version %></title>
     
     <!-- Stylesheet -->
     <link rel='stylesheet' href='/stylesheets/bundle.min.css' />
@@ -24,9 +24,9 @@
 		var parameters = {};
 		parameters.mode = "<%= mode %>";
 		parameters.locale = "<%= locale %>";
-		parameters.name =  "<%= appInfos.name %>";
-		parameters.version = "<%= appInfos.version %>";
-		parameters.isMultiplayerActive = <%= isMultiplayerActive %>;
+		parameters.name =  "<%= metadata.name %>";
+		parameters.version = "<%= metadata.version %>";
+		parameters.isMultiplayerActive = <%= metadata.config.multiplayer.active %>;
 		
 		sessionStorage.setItem("parameters", JSON.stringify(parameters));
 	</script>
@@ -41,7 +41,7 @@
 			<div class="row">
 				<div class="col-md-12">
 					<header>
-						<img alt="<%= appInfos.name %>" src="assets/images/logo.png" width="250" height="77"></img>
+						<img alt="<%= metadata.name %>" src="assets/images/logo.png" width="250" height="77"></img>
 						<h2><%= __("Game.Menu.Headline") %></h2>
 						<p>
 							<%= __("Game.Menu.Description") %>

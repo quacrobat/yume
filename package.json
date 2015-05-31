@@ -6,7 +6,14 @@
     "start": "node ./bin/www"
   },
   "config": {
-    "auth": false
+    "auth": false,
+    "cache": {
+    	"duration": "1d"
+    },
+    "multiplayer":{
+    	"active": true,
+    	"clients_per_session": 4
+    }
   },
   "dependencies": {
     "body-parser": "~1.8.1",

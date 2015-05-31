@@ -10,6 +10,7 @@
 var debug = require("debug")("YUME");
 var ws = require("ws");
 
+var metadata = require("../../../../package.json")
 var Message = require("../../engine/core/Message");
 
 var self;
@@ -50,7 +51,7 @@ function MultiplayerServer(port, callback){
 			writable: false
 		},
 		_CLIENTS_PER_SESSION: {
-			value: 4,
+			value: metadata.config.multiplayer.clients_per_session,
 			configurable: false,
 			enumerable: false,
 			writable: false
