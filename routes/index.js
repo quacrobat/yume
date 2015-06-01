@@ -1,14 +1,10 @@
 var express = require("express");
 var router = express.Router();
-var setLocale = require("../src/javascript/backend/modules/I18N");
 
 var metadata = require("./../package.json");
 
 router.get("/", function(req, res) {
-	
-	// set localization
-	setLocale(req);
-	
+
 	// set no-cache for dynamic content
 	res.set("Cache-Control", "no-cache");
 	

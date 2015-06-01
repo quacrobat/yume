@@ -11,5 +11,6 @@
 	"Game.TextScreen.Continue": "Weiter mit Leertaste",
 	"Game.LoadingScreen.Continue": "Weiter mit Leertaste",
 	"Game.Chat.Placeholder": "Deine Chatnachricht...",
-	"Game.Menu.Description": "Die folgenden Demo-Stages bieten einen schnellen Einblick in einige Grundfunktionen von YUME. Der Source-Code und weiterführende Dokumentation ist bei github verfügbar."
+	"Game.Menu.Description": "Die folgenden Demo-Stages bieten einen schnellen Einblick in einige Grundfunktionen von YUME. Der Source-Code und weiterführende Dokumentation ist bei github verfügbar.",
+	"Error.PageNotFound": "Die gewünschte Seite wurde nicht gefunden!"
 }

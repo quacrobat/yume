@@ -230,7 +230,7 @@ UserInterfaceManager.prototype._setupDevelopmentInformation = function(){
 	domElement.style.left = "0px";
 	domElement.style.bottom = "0px";
 	domElement.style.color = "#ffffff";
-	domElement.style.backgroundColor = "#000000";
+	domElement.style.backgroundColor = "#20252f";
 	domElement.style.padding = "5px";
 	
 	domElement.innerHTML = "Development Mode: " + utils.getAppInformation();

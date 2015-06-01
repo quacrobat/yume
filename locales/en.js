@@ -11,5 +11,6 @@
 	"Game.TextScreen.Continue": "Press spacebar to continue",
 	"Game.LoadingScreen.Continue": "Press spacebar to continue",
 	"Game.Chat.Placeholder": "Your chat message...",
-	"Game.Menu.Description": "The following demo stages show you some basic functionality of YUME. The source code and additional documentation is available at github."
+	"Game.Menu.Description": "The following demo stages show you some basic functionality of YUME. The source code and additional documentation is available at github.",
+	"Error.PageNotFound": "The page you requested was not found!"
 }

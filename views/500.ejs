@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  	<!-- Meta -->
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<meta name="author" content="Human Interactive">
+	
+    <title>Internal server error</title>
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="/stylesheets/bundle.min.css" />
+   
+  </head>
+  <body>
+  
+	<h1><%= error.message %></h1>
+	<% if (settings["verbose errors"]) { %>
+	<pre><%= error.stack %></pre>
+	<% } %>
+	
+  </body>
+</html>
