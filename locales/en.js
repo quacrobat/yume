@@ -12,5 +12,8 @@
 	"Game.LoadingScreen.Continue": "Press spacebar to continue",
 	"Game.Chat.Placeholder": "Your chat message...",
 	"Game.Menu.Description": "The following demo stages show you some basic functionality of YUME. The source code and additional documentation is available at github.",
-	"Error.PageNotFound": "The page you requested was not found!"
+	"Error.404.Title": "Page not found",
+	"Error.404.Text": "The page you requested was not found!",
+	"Error.404.Button": "Go Back to Game",
+	"Error.500.Title": "Internal server error"
 }
