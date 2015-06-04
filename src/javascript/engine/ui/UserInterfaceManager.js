@@ -212,9 +212,6 @@ UserInterfaceManager.prototype.tooglePerformanceMonitor = function(){
 UserInterfaceManager.prototype._setupPerformanceMonitor = function(){
 	
 	this._stats.setMode(0); // 0: fps, 1: ms
-	this._stats.domElement.style.position = "absolute";
-	this._stats.domElement.style.left = "0px";
-	this._stats.domElement.style.top = "0px";
 	
 	this._$uiContainer.appendChild(this._stats.domElement);
 };
@@ -232,6 +229,7 @@ UserInterfaceManager.prototype._setupDevelopmentInformation = function(){
 	domElement.style.color = "#ffffff";
 	domElement.style.backgroundColor = "#20252f";
 	domElement.style.padding = "5px";
+	domElement.style.borderRadius = "5px";
 	
 	domElement.innerHTML = "Development Mode: " + utils.getAppInformation();
 	this._$uiContainer.appendChild(domElement);
