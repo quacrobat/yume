@@ -3,6 +3,7 @@
 	"Game.Menu.Controls": "How to play",
 	"Game.Menu.Controls.Move": "W-A-S-D = Move",
 	"Game.Menu.Controls.Look": "Mouse = Look Around",
+	"Game.Menu.Controls.Crouch": "C = Crouch",
 	"Game.Menu.Controls.Interact": "E = Interact",
 	"Game.Menu.Controls.Read": "Space Bar = Read",
 	"Game.Menu.Controls.Menu": "Esc = Menu",

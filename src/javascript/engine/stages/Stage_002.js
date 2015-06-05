@@ -47,7 +47,7 @@ Stage.prototype.setup = function(){
 	// create interactive box
 	var interactiveBox = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0x455066}));
 	interactiveBox.matrixAutoUpdate = false;
-	interactiveBox.position.set(40, 5, 0);
+	interactiveBox.position.set(50, 5, 0);
 	interactiveBox.castShadow = true;
 	interactiveBox.updateMatrix();
 	this.scene.add(interactiveBox);
@@ -57,20 +57,30 @@ Stage.prototype.setup = function(){
 		// nothing happens here...
 	});
 	
-	// create static box
+	// create first static box
 	var staticBox = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0x6083c2}));
 	staticBox.matrixAutoUpdate = false;
-	staticBox.position.set(0, 5, 0);
+	staticBox.position.set(17, 15, 0);
 	staticBox.castShadow = true;
 	staticBox.updateMatrix();
 	this.scene.add(staticBox);
 	
 	this.actionManager.createStatic(staticBox);
 	
+	// create second static box
+	var staticBoxHover = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0x6083c2}));
+	staticBoxHover.matrixAutoUpdate = false;
+	staticBoxHover.position.set(-17, 5, 0);
+	staticBoxHover.castShadow = true;
+	staticBoxHover.updateMatrix();
+	this.scene.add(staticBoxHover);
+	
+	this.actionManager.createStatic(staticBoxHover);
+	
 	// create plain object
 	var plainBox = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0xf3f4f6}));
 	plainBox.matrixAutoUpdate = false;
-	plainBox.position.set(-40, 5, 0);
+	plainBox.position.set(-50, 5, 0);
 	plainBox.castShadow = true;
 	plainBox.updateMatrix();
 	this.scene.add(plainBox);

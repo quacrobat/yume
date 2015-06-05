@@ -8,55 +8,56 @@ function Stats() {
 	var ms = 0, msMin = Infinity, msMax = 0;
 	var fps = 0, fpsMin = Infinity, fpsMax = 0;
 	var frames = 0, mode = 0;
+	var bar = null;
 
-	var container = document.createElement( 'section' );
+	var container = global.document.createElement( 'section' );
 	container.id = 'stats';
-	container.addEventListener( 'mousedown', function ( event ) { event.preventDefault(); setMode( ++ mode % 2 ) }, false );
+	container.addEventListener( 'mousedown', function ( event ) { event.preventDefault(); setMode( ++ mode % 2 ); }, false );
 	container.style.cssText = 'width:80px;cursor:pointer;position:absolute;top:0px;left:0px;';
 
-	var fpsDiv = document.createElement( 'div' );
+	var fpsDiv = global.document.createElement( 'div' );
 	fpsDiv.id = 'fps';
 	fpsDiv.style.cssText = 'padding:0 0 3px 3px;text-align:left;background-color:#20252f;border-radius: 5px;';
 	container.appendChild( fpsDiv );
 
-	var fpsText = document.createElement( 'div' );
+	var fpsText = global.document.createElement( 'div' );
 	fpsText.id = 'fpsText';
 	fpsText.style.cssText = 'color:#ffffff;font-size:10px;';
 	fpsText.innerHTML = 'FPS';
 	fpsDiv.appendChild( fpsText );
 
-	var fpsGraph = document.createElement( 'div' );
+	var fpsGraph = global.document.createElement( 'div' );
 	fpsGraph.id = 'fpsGraph';
 	fpsGraph.style.cssText = 'position:relative;width:74px;height:30px;background-color:#6083c2';
 	fpsDiv.appendChild( fpsGraph );
 
 	while ( fpsGraph.children.length < 74 ) {
 
-		var bar = document.createElement( 'span' );
+		bar = global.document.createElement( 'span' );
 		bar.style.cssText = 'width:1px;height:30px;float:left;background-color:#20252f';
 		fpsGraph.appendChild( bar );
 
 	}
 
-	var msDiv = document.createElement( 'div' );
+	var msDiv = global.document.createElement( 'div' );
 	msDiv.id = 'ms';
 	msDiv.style.cssText = 'padding:0 0 3px 3px;text-align:left;background-color:#20252f;display:none;border-radius: 5px;';
 	container.appendChild( msDiv );
 
-	var msText = document.createElement( 'div' );
+	var msText = global.document.createElement( 'div' );
 	msText.id = 'msText';
 	msText.style.cssText = 'color:#ffffff;font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:bold;line-height:15px';
 	msText.innerHTML = 'MS';
 	msDiv.appendChild( msText );
 
-	var msGraph = document.createElement( 'div' );
+	var msGraph = global.document.createElement( 'div' );
 	msGraph.id = 'msGraph';
 	msGraph.style.cssText = 'position:relative;width:74px;height:30px;background-color:#f3f4f6';
 	msDiv.appendChild( msGraph );
 
 	while ( msGraph.children.length < 74 ) {
 
-		var bar = document.createElement( 'span' );
+		bar = global.document.createElement( 'span' );
 		bar.style.cssText = 'width:1px;height:30px;float:left;background-color:#20252f';
 		msGraph.appendChild( bar );
 
@@ -138,7 +139,7 @@ function Stats() {
 
 		}
 
-	}
-};
+	};
+}
 
 module.exports = Stats;

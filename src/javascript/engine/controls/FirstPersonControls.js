@@ -55,7 +55,7 @@ function FirstPersonControls(){
 		}
 	});
 	
-	// direction properties
+	// movement properties
 	Object.defineProperties(this, {
 		_moveForward: {
 			value: false,
@@ -92,6 +92,36 @@ function FirstPersonControls(){
 			configurable: false,
 			enumerable: false,
 			writable: true
+		},
+		_moveSpeed: {
+			value: FirstPersonControls.DEFAULT.SPEED.MOVE,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_strafeSpeed: {
+			value: FirstPersonControls.DEFAULT.SPEED.STRAFE,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_height: {
+			value: FirstPersonControls.DEFAULT.HEIGHT,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_animationStartTime: {
+			value: 0,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_animationStartHeight: {
+			value: 0,
+			configurable: false,
+			enumerable: false,
+			writable: true
 		}
 	});
 	
@@ -119,6 +149,12 @@ function FirstPersonControls(){
 	
 	// flags
 	Object.defineProperties(this, {
+		_isCrouch: {
+			value: false,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
 		_isControlsActive: {
 			value: false,
 			configurable: false,
@@ -171,7 +207,7 @@ function FirstPersonControls(){
 FirstPersonControls.prototype.setPosition = function(position) {
 	
 	this._yawObject.position.x = position.x;
-	this._yawObject.position.y = position.y + FirstPersonControls.CAMERA.HEIGHT;
+	this._yawObject.position.y = position.y + this._height;
 	this._yawObject.position.z = position.z;
 };
 
@@ -251,7 +287,7 @@ FirstPersonControls.prototype.getDirection = (function() {
  */
 FirstPersonControls.prototype.getGroundHeight = function() {
 	
-	return this._yawObject.position.y - FirstPersonControls.CAMERA.HEIGHT;
+	return this._yawObject.position.y - this._height;
 };
 
 /**
@@ -311,6 +347,8 @@ FirstPersonControls.prototype.update = function(delta){
 		this._checkInteractiveObjects();
 		
 		this._checkAndProcessTrigger();
+		
+		this._animateCrouch(delta);
 		
 		this._publishPlayerStatus();
 	}else{
@@ -392,7 +430,7 @@ FirstPersonControls.prototype._calculateCameraMotion = (function() {
 		if(this._move !== 0 || this._strafe !== 0){
 			
 			// motion calculation
-			this._motionFactor += delta * (Math.min(Math.abs(normalizedMovement.z) + Math.abs(normalizedMovement.x), FirstPersonControls.MOVE.SPEED));
+			this._motionFactor += delta * (Math.min(Math.abs(normalizedMovement.z) + Math.abs(normalizedMovement.x), this._moveSpeed));
 			
 			motion = Math.sin(this._motionFactor * FirstPersonControls.CAMERA.SHAKEFREQUENCY) * FirstPersonControls.CAMERA.DEFLECTION;
 
@@ -466,7 +504,7 @@ FirstPersonControls.prototype._calculateMoveVelocity = (function() {
 		}else{
 			acceleration = 0;
 		}
-		return Math.abs( Math.tan(acceleration) * FirstPersonControls.MOVE.SPEED);
+		return Math.abs( Math.tan(acceleration) * this._moveSpeed);
 	};
 }());
 
@@ -490,9 +528,9 @@ FirstPersonControls.prototype._calculateStrafeVelocity = (function() {
 				acceleration = FirstPersonControls.STRAFE.MAXACC * this._strafe;
 			}
 		}else{
-			acceleration = 0;	
+			acceleration = 0;
 		}
-		return Math.abs( Math.tan(acceleration) * FirstPersonControls.STRAFE.SPEED);
+		return Math.abs( Math.tan(acceleration) * this._strafeSpeed);
 	};
 }());
 
@@ -503,7 +541,7 @@ FirstPersonControls.prototype._calculateStrafeVelocity = (function() {
  */
 FirstPersonControls.prototype._calculateHeight = function(distance) {
 	
-	this._yawObject.position.y += ( FirstPersonControls.CAMERA.HEIGHT - distance );
+	this._yawObject.position.y += ( this._height - distance );
 };
 
 /**
@@ -591,7 +629,7 @@ FirstPersonControls.prototype._checkAndProcessTrigger = (function() {
 	return function(){
 		
 		this._rayCaster.set(this._yawObject.position, direction);
-		this._rayCaster.far = FirstPersonControls.CAMERA.HEIGHT + 1;
+		this._rayCaster.far = this._height + 1;
 		
 		intersects = this._rayCaster.intersectObjects(actionManager.triggers);
 
@@ -636,7 +674,7 @@ FirstPersonControls.prototype._isCollisionHandlingRequired = (function() {
 		if(this._grounds.length !== 0){
 						
 			this._rayCaster.set(this._yawObject.position, direction);
-			this._rayCaster.far = FirstPersonControls.CAMERA.HEIGHT + 1;
+			this._rayCaster.far = FirstPersonControls.DEFAULT.HEIGHT + 1;
 			
 			// first, check grounds
 			intersects = this._rayCaster.intersectObjects(this._grounds);
@@ -654,10 +692,10 @@ FirstPersonControls.prototype._isCollisionHandlingRequired = (function() {
 				
 				// compute center of player
 				center.copy(this._yawObject.position);
-				center.y -= (FirstPersonControls.CAMERA.HEIGHT / 2);
+				center.y -= (this._height / 2);
 				
 				// set size of BB
-				size.set(4, FirstPersonControls.CAMERA.HEIGHT, 4);
+				size.set(4, this._height, 4);
 				
 				// compute BB, which represents the body of the player
 				boundingBox.setFromCenterAndSize(center, size);
@@ -685,6 +723,73 @@ FirstPersonControls.prototype._isCollisionHandlingRequired = (function() {
 		}
 	};
 }());
+
+/**
+ * Handles the "crouch" command. Causes implicitly an animation,
+ * which changes the height of the player.
+ */
+FirstPersonControls.prototype._toogleCrouch = function(){
+	
+	if(this._isCrouch === true){
+		// set "default mode", increase movement speed
+		this._moveSpeed = FirstPersonControls.DEFAULT.SPEED.MOVE;
+		this._strafeSpeed = FirstPersonControls.DEFAULT.SPEED.STRAFE;
+		this._isCrouch = false;
+		
+	}else{
+		// set "crouch mode", decrease movement speed
+		this._moveSpeed = FirstPersonControls.CROUCH.SPEED.MOVE;
+		this._strafeSpeed = FirstPersonControls.CROUCH.SPEED.STRAFE;
+		this._isCrouch = true;
+		
+	}
+
+	// save current timestamp and height for animation
+	this._animationStartTime  = global.window.performance.now();
+	this._animationStartHeight = this._height;
+};
+
+/**
+ * Animates the change from default to crouch, or crouch to default position.
+ */
+FirstPersonControls.prototype._animateCrouch = (function(){
+	
+	var elapsed, factor, value = 0;
+	
+	return function(){
+		
+		// animate only, if necessary
+		if(this._isCrouch === true  && this._height !== FirstPersonControls.CROUCH.HEIGHT ||
+		   this._isCrouch === false && this._height !== FirstPersonControls.DEFAULT.HEIGHT){
+		
+			// calculate elapsed time
+			elapsed = (global.window.performance.now() - this._animationStartTime) / FirstPersonControls.ANIMATION.CROUCH.DURATION;
+			
+			// calculate factor for easing formula
+			factor = elapsed > 1 ? 1 : elapsed;
+			
+			// calculate easing value
+			value = 1 - ( --factor * factor * factor * factor); // Easing QuarticOut
+			
+			if(this._isCrouch === true){
+				
+				if(this._height > FirstPersonControls.CROUCH.HEIGHT){
+					
+					this._height = this._animationStartHeight + ( FirstPersonControls.CROUCH.HEIGHT - this._animationStartHeight ) * value;
+					
+				}
+				
+			}else{
+				
+				if(this._height < FirstPersonControls.DEFAULT.HEIGHT){
+					
+					this._height = this._animationStartHeight + ( FirstPersonControls.DEFAULT.HEIGHT - this._animationStartHeight ) * value;
+				}
+			}
+		}
+	};
+	
+})();
 
 /**
  * Publish the world information of the player for multiplayer.
@@ -852,20 +957,29 @@ FirstPersonControls.prototype._onKeyDown = function(event) {
 				// d
 				self._moveRight = true;
 				break;
+				
+			case 67:
+				// c
+				self._toogleCrouch();
+				break;
+				
 			case 69:
 				// e
 				self._interact();
 				break;
+				
 			case 70:
 				// f 
 				userInterfaceManager.tooglePerformanceMonitor();
 				break;
+				
 			case 80:
 				// p
 				if(utils.isDevelopmentModeActive() === true){
 					utils.printWorldInformation();
 				}
 				break;
+				
 			case 32:
 				// space
 				userInterfaceManager.handleUiInteraction(event);		
@@ -908,20 +1022,39 @@ FirstPersonControls.prototype._onKeyUp = function(event) {
 };
 
 FirstPersonControls.CAMERA = {
-	HEIGHT: 13,
 	DEFLECTION: 0.2,
 	SHAKEFREQUENCY: 15,
 	RESETFACTOR: 2		
 };
 
+FirstPersonControls.DEFAULT = {
+	HEIGHT: 13,
+	SPEED: {
+		MOVE: 0.4,
+		STRAFE: 0.3
+	}
+};
+
+FirstPersonControls.CROUCH = {
+	HEIGHT: 6,
+	SPEED: {
+		MOVE: 0.2,
+		STRAFE: 0.15
+	}
+};
+
+FirstPersonControls.ANIMATION = {
+		CROUCH: {
+			DURATION: 1000
+		}
+};
+
 FirstPersonControls.MOVE = {
-	SPEED: 0.4,
 	ACCFACTOR: 1,
 	MAXACC: Math.PI/4
 };
 
 FirstPersonControls.STRAFE = {
-	SPEED: 0.3,
 	ACCFACTOR: 1,
 	MAXACC: Math.PI/4
 };
