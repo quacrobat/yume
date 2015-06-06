@@ -745,7 +745,7 @@ FirstPersonControls.prototype._toogleCrouch = function(){
 	}
 
 	// save current timestamp and height for animation
-	this._animationStartTime  = global.window.performance.now();
+	this._animationStartTime  = global.performance.now();
 	this._animationStartHeight = this._height;
 };
 
@@ -763,7 +763,7 @@ FirstPersonControls.prototype._animateCrouch = (function(){
 		   this._isCrouch === false && this._height !== FirstPersonControls.DEFAULT.HEIGHT){
 		
 			// calculate elapsed time
-			elapsed = (global.window.performance.now() - this._animationStartTime) / FirstPersonControls.ANIMATION.CROUCH.DURATION;
+			elapsed = (global.performance.now() - this._animationStartTime) / FirstPersonControls.ANIMATION.CROUCH.DURATION;
 			
 			// calculate factor for easing formula
 			factor = elapsed > 1 ? 1 : elapsed;

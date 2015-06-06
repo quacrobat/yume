@@ -38150,7 +38150,7 @@ FirstPersonControls.prototype._toogleCrouch = function(){
 	}
 
 	// save current timestamp and height for animation
-	this._animationStartTime  = global.window.performance.now();
+	this._animationStartTime  = global.performance.now();
 	this._animationStartHeight = this._height;
 };
 
@@ -38168,7 +38168,7 @@ FirstPersonControls.prototype._animateCrouch = (function(){
 		   this._isCrouch === false && this._height !== FirstPersonControls.DEFAULT.HEIGHT){
 		
 			// calculate elapsed time
-			elapsed = (global.window.performance.now() - this._animationStartTime) / FirstPersonControls.ANIMATION.CROUCH.DURATION;
+			elapsed = (global.performance.now() - this._animationStartTime) / FirstPersonControls.ANIMATION.CROUCH.DURATION;
 			
 			// calculate factor for easing formula
 			factor = elapsed > 1 ? 1 : elapsed;
@@ -41225,62 +41225,54 @@ module.exports = new Utils();
  * see https://github.com/mrdoob/stats.js
  */
 function Stats() {
+	
+	var now = ( global.performance && global.performance.now ) ? global.performance.now.bind( global.performance ) : Date.now;
 
-	var startTime = Date.now(), prevTime = startTime;
+	var startTime = now(), prevTime = startTime;
 	var ms = 0, msMin = Infinity, msMax = 0;
 	var fps = 0, fpsMin = Infinity, fpsMax = 0;
 	var frames = 0, mode = 0;
 	var bar = null;
+	
+	function createElement( tag, id, css ) {
+		var element = global.document.createElement( tag );
+		element.id = id;
+		element.style.cssText = css;
+		return element;
+	}
 
-	var container = global.document.createElement( 'section' );
-	container.id = 'stats';
+	var container = createElement( 'section', 'stats', 'width:80px;cursor:pointer;position:absolute;top:0px;left:0px;' );
 	container.addEventListener( 'mousedown', function ( event ) { event.preventDefault(); setMode( ++ mode % 2 ); }, false );
-	container.style.cssText = 'width:80px;cursor:pointer;position:absolute;top:0px;left:0px;';
 
-	var fpsDiv = global.document.createElement( 'div' );
-	fpsDiv.id = 'fps';
-	fpsDiv.style.cssText = 'padding:0 0 3px 3px;text-align:left;background-color:#20252f;border-radius: 5px;';
+	var fpsDiv = createElement( 'div', 'fps', 'padding:0 0 3px 3px;text-align:left;background-color:#20252f;border-radius: 5px;' );
 	container.appendChild( fpsDiv );
 
-	var fpsText = global.document.createElement( 'div' );
-	fpsText.id = 'fpsText';
-	fpsText.style.cssText = 'color:#ffffff;font-size:10px;';
+	var fpsText = createElement( 'div', 'fpsText', 'color:#ffffff;font-size:10px;' );
 	fpsText.innerHTML = 'FPS';
 	fpsDiv.appendChild( fpsText );
 
-	var fpsGraph = global.document.createElement( 'div' );
-	fpsGraph.id = 'fpsGraph';
-	fpsGraph.style.cssText = 'position:relative;width:74px;height:30px;background-color:#6083c2';
+	var fpsGraph = createElement( 'div', 'fpsGraph', 'position:relative;width:74px;height:30px;background-color:#6083c2' );
 	fpsDiv.appendChild( fpsGraph );
 
 	while ( fpsGraph.children.length < 74 ) {
 
-		bar = global.document.createElement( 'span' );
-		bar.style.cssText = 'width:1px;height:30px;float:left;background-color:#20252f';
+		bar = createElement( 'span', '', 'width:1px;height:30px;float:left;background-color:#20252f' );
 		fpsGraph.appendChild( bar );
-
 	}
 
-	var msDiv = global.document.createElement( 'div' );
-	msDiv.id = 'ms';
-	msDiv.style.cssText = 'padding:0 0 3px 3px;text-align:left;background-color:#20252f;display:none;border-radius: 5px;';
+	var msDiv = createElement( 'div', 'ms', 'padding:0 0 3px 3px;text-align:left;background-color:#20252f;display:none;border-radius: 5px;' );
 	container.appendChild( msDiv );
-
-	var msText = global.document.createElement( 'div' );
-	msText.id = 'msText';
-	msText.style.cssText = 'color:#ffffff;font-family:Helvetica,Arial,sans-serif;font-size:9px;font-weight:bold;line-height:15px';
+	
+	var msText = createElement( 'div', 'msText', 'color:#ffffff;font-size:10px;' );
 	msText.innerHTML = 'MS';
 	msDiv.appendChild( msText );
 
-	var msGraph = global.document.createElement( 'div' );
-	msGraph.id = 'msGraph';
-	msGraph.style.cssText = 'position:relative;width:74px;height:30px;background-color:#f3f4f6';
+	var msGraph = createElement( 'div', 'msGraph', 'position:relative;width:74px;height:30px;background-color:#f3f4f6' );
 	msDiv.appendChild( msGraph );
 
 	while ( msGraph.children.length < 74 ) {
 
-		bar = global.document.createElement( 'span' );
-		bar.style.cssText = 'width:1px;height:30px;float:left;background-color:#20252f';
+		bar = createElement( 'span', '', 'width:1px;height:30px;float:left;background-color:#20252f' );
 		msGraph.appendChild( bar );
 
 	}
@@ -41312,7 +41304,7 @@ function Stats() {
 
 	return {
 
-		REVISION: 12,
+		REVISION: 13,
 
 		domElement: container,
 
@@ -41320,19 +41312,19 @@ function Stats() {
 
 		begin: function () {
 
-			startTime = Date.now();
+			startTime = now();
 
 		},
 
 		end: function () {
 
-			var time = Date.now();
+			var time = now();
 
 			ms = time - startTime;
 			msMin = Math.min( msMin, ms );
 			msMax = Math.max( msMax, ms );
 
-			msText.textContent = ms + ' MS (' + msMin + '-' + msMax + ')';
+			/*jslint bitwise: true */msText.textContent = ( ms | 0 ) + ' MS (' + ( msMin | 0 ) + '-' + ( msMax | 0 ) + ')';
 			updateGraph( msGraph, Math.min( 30, 30 - ( ms / 200 ) * 30 ) );
 
 			frames ++;
@@ -42464,7 +42456,7 @@ Stage.prototype.setup = function(){
 	
 	// add invisible ramp
 	var rampGeometry = new THREE.PlaneBufferGeometry(200, 25, 1, 1);
-	var rampMaterial = new THREE.MeshBasicMaterial({});
+	var rampMaterial = new THREE.MeshBasicMaterial();
 	
 	var ramp = new THREE.Mesh(rampGeometry, rampMaterial);
 	ramp.matrixAutoUpdate = false;
