@@ -95,15 +95,10 @@ SettingsManager.prototype.remove = function(){
  * 
  * @param {object} materials - An arrays of THREE.Material objects.
  * @param {THREE.WebGLRenderer} renderer - The renderer of the application.
- * @param {number} side - The side option of materials.
  */
-SettingsManager.prototype.adjustMaterials = function(materials, renderer, side){
+SettingsManager.prototype.adjustMaterials = function(materials, renderer){
 	
 	for( var i = 0; i < materials.length; i++){
-		
-		if(side !== undefined){
-			materials[i].side = side;
-		}
 		
 		if(this._settings.graphicSettings === SettingsManager.GRAPHICS.HIGH){
 			// anisotropy filter on high-settings

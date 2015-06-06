@@ -1,0 +1,48 @@
+{
+    "normals": [0,0.707083,-0.707083,0,1,0,0,0,-1],
+    "materials": [{
+        "DbgName": "Stairs_1",
+        "blending": "NormalBlending",
+        "wireframe": false,
+        "depthTest": true,
+        "opacity": 1,
+        "shading": "basic",
+        "DbgColor": 15658734,
+        "colorEmissive": [0,0,0],
+        "DbgIndex": 0,
+        "colorDiffuse": [0.059511,0.08022,0.132868],
+        "transparent": false,
+        "colorAmbient": [0.059511,0.08022,0.132868],
+        "visible": true,
+        "depthWrite": true
+    },{
+        "DbgName": "Stairs_2",
+        "blending": "NormalBlending",
+        "wireframe": false,
+        "depthTest": true,
+        "opacity": 1,
+        "shading": "basic",
+        "DbgColor": 15597568,
+        "colorEmissive": [0,0,0],
+        "DbgIndex": 1,
+        "colorDiffuse": [0.119538,0.226966,0.545725],
+        "transparent": false,
+        "colorAmbient": [0.119538,0.226966,0.545725],
+        "visible": true,
+        "depthWrite": true
+    }],
+    "vertices": [100,0,6,100,0,1e-06,-100,0,6,-100,-0,-1e-06,100,2.5,6,-100,2.5,6,100,2.5,12,100,2.5,6,-100,2.5,12,-100,2.5,6,100,5,12,-100,5,12,100,5,18,100,5,12,-100,5,18,-100,5,12,100,7.5,18,-100,7.5,18],
+    "name": "StairsGeometry",
+    "faces": [43,0,1,3,2,0,0,0,0,0,0,1,1,0,43,0,2,5,4,1,0,0,0,0,0,0,2,2,43,6,7,9,8,0,0,0,0,0,0,1,1,0,43,6,8,11,10,1,0,0,0,0,0,0,2,2,43,12,13,15,14,0,0,0,0,0,0,1,1,0,43,12,14,17,16,1,0,0,0,0,0,0,2,2],
+    "uvs": [[0,0]],
+    "metadata": {
+        "generator": "io_three",
+        "faces": 6,
+        "normals": 3,
+        "version": 3,
+        "materials": 2,
+        "vertices": 18,
+        "type": "Geometry",
+        "uvs": 1
+    }
+}

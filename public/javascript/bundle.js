@@ -38466,7 +38466,7 @@ FirstPersonControls.STRAFE = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":7,"../audio/AudioManager":13,"../core/Camera":17,"../core/Scene":21,"../etc/SettingsManager":35,"../etc/Utils":37,"../ui/UserInterfaceManager":54,"pubsub-js":1,"three":2}],16:[function(require,module,exports){
+},{"../action/ActionManager":7,"../audio/AudioManager":13,"../core/Camera":17,"../core/Scene":21,"../etc/SettingsManager":35,"../etc/Utils":37,"../ui/UserInterfaceManager":55,"pubsub-js":1,"three":2}],16:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic for starting
  * the application.
@@ -38542,7 +38542,7 @@ Bootstrap.prototype._loadStage = function(){
 };
 
 module.exports = Bootstrap;
-},{"../controls/FirstPersonControls":15,"../etc/MultiplayerManager":30,"../etc/NetworkManager":31,"../etc/SaveGameManager":34,"../etc/Utils":37,"../ui/UserInterfaceManager":54,"./Environment":18,"./Renderer":20,"pubsub-js":1}],17:[function(require,module,exports){
+},{"../controls/FirstPersonControls":15,"../etc/MultiplayerManager":30,"../etc/NetworkManager":31,"../etc/SaveGameManager":34,"../etc/Utils":37,"../ui/UserInterfaceManager":55,"./Environment":18,"./Renderer":20,"pubsub-js":1}],17:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -39118,7 +39118,7 @@ StageBase.prototype._changeStage = function(stageId, isSaveGame){
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":7,"../audio/AudioManager":13,"../controls/FirstPersonControls":15,"../etc/AnimationManager":26,"../etc/GroupManager":28,"../etc/SaveGameManager":34,"../etc/SettingsManager":35,"../etc/TextManager":36,"../etc/Utils":37,"../ui/UserInterfaceManager":54,"./Camera":17,"./Renderer":20,"./Scene":21,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
+},{"../action/ActionManager":7,"../audio/AudioManager":13,"../controls/FirstPersonControls":15,"../etc/AnimationManager":26,"../etc/GroupManager":28,"../etc/SaveGameManager":34,"../etc/SettingsManager":35,"../etc/TextManager":36,"../etc/Utils":37,"../ui/UserInterfaceManager":55,"./Camera":17,"./Renderer":20,"./Scene":21,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -39142,6 +39142,7 @@ var Stage_004 = require("../stages/Stage_004");
 var Stage_005 = require("../stages/Stage_005");
 var Stage_006 = require("../stages/Stage_006");
 var Stage_007 = require("../stages/Stage_007");
+var Stage_008 = require("../stages/Stage_008");
 
 /**
  * Creates the stage manager.
@@ -39235,6 +39236,11 @@ StageManager.prototype.load = function(stageId) {
 		case "007":
 			
 			this._stage = new Stage_007();
+			break;
+			
+		case "008":
+			
+			this._stage = new Stage_008();
 			break;
 			
 		default:
@@ -39384,7 +39390,7 @@ StageManager.prototype._onLoadComplete = function(message, data){
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":34,"../etc/Utils":37,"../stages/Stage_001":39,"../stages/Stage_002":40,"../stages/Stage_003":41,"../stages/Stage_004":42,"../stages/Stage_005":43,"../stages/Stage_006":44,"../stages/Stage_007":45,"../ui/UserInterfaceManager":54,"pubsub-js":1}],24:[function(require,module,exports){
+},{"../etc/SaveGameManager":34,"../etc/Utils":37,"../stages/Stage_001":39,"../stages/Stage_002":40,"../stages/Stage_003":41,"../stages/Stage_004":42,"../stages/Stage_005":43,"../stages/Stage_006":44,"../stages/Stage_007":45,"../stages/Stage_008":46,"../ui/UserInterfaceManager":55,"pubsub-js":1}],24:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It 
@@ -40788,15 +40794,10 @@ SettingsManager.prototype.remove = function(){
  * 
  * @param {object} materials - An arrays of THREE.Material objects.
  * @param {THREE.WebGLRenderer} renderer - The renderer of the application.
- * @param {number} side - The side option of materials.
  */
-SettingsManager.prototype.adjustMaterials = function(materials, renderer, side){
+SettingsManager.prototype.adjustMaterials = function(materials, renderer){
 	
 	for( var i = 0; i < materials.length; i++){
-		
-		if(side !== undefined){
-			materials[i].side = side;
-		}
 		
 		if(this._settings.graphicSettings === SettingsManager.GRAPHICS.HIGH){
 			// anisotropy filter on high-settings
@@ -41418,7 +41419,7 @@ Stage.prototype.setup = function(){
 		
 		self.settingsManager.adjustMaterials(materials, self.renderer);
 		
-		var sign = new THREE.Mesh(geometry,  new THREE.MeshFaceMaterial(materials));
+		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
 		sign.position.set(0, 20, 75);
 		sign.rotation.set(0, Math.PI * -0.5, 0);
 		self.scene.add(sign);
@@ -41566,7 +41567,7 @@ Stage.prototype.setup = function(){
 		
 		self.settingsManager.adjustMaterials(materials, self.renderer);
 		
-		var sign = new THREE.Mesh(geometry,  new THREE.MeshFaceMaterial(materials));
+		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
 		sign.position.set(0, 20, 75);
 		sign.rotation.set(0, Math.PI * -0.5, 0);
 		self.scene.add(sign);
@@ -41584,14 +41585,17 @@ Stage.prototype.setup = function(){
 	this.scene.add(stageTrigger);
 	
 	// light
-	var light = new THREE.DirectionalLight(0xffffff);
-	light.position.set(-100, 50, -100);
-	light.shadowCameraLeft = -40;
-	light.shadowCameraRight = 40;
-	light.shadowCameraTop = 40;
-	light.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight(light);
-	this.scene.add(light);
+	var ambientLight = new THREE.AmbientLight(0x111111);
+	this.scene.add(ambientLight);
+	
+	var directionalLight = new THREE.DirectionalLight(0xffffff);
+	directionalLight.position.set(-100, 50, -100);
+	directionalLight.shadowCameraLeft = -40;
+	directionalLight.shadowCameraRight = 40;
+	directionalLight.shadowCameraTop = 40;
+	directionalLight.shadowCameraBottom = -40;
+	this.settingsManager.adjustLight(directionalLight);
+	this.scene.add(directionalLight);
 
 	// start rendering
 	this._render();
@@ -41707,7 +41711,7 @@ Stage.prototype.setup = function(){
 		
 		self.settingsManager.adjustMaterials(materials, self.renderer);
 		
-		var sign = new THREE.Mesh(geometry,  new THREE.MeshFaceMaterial(materials));
+		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
 		sign.position.set(0, 20, 75);
 		sign.rotation.set(0, Math.PI * -0.5, 0);
 		self.scene.add(sign);
@@ -41725,15 +41729,18 @@ Stage.prototype.setup = function(){
 	this.scene.add(stageTrigger);
 	
 	// light
-	var light = new THREE.DirectionalLight(0xffffff);
-	light.position.set(-100, 50, -100);
-	light.shadowCameraLeft = -40;
-	light.shadowCameraRight = 40;
-	light.shadowCameraTop = 40;
-	light.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight(light);
-	this.scene.add(light);
-
+	var ambientLight = new THREE.AmbientLight(0x111111);
+	this.scene.add(ambientLight);
+	
+	var directionalLight = new THREE.DirectionalLight(0xffffff);
+	directionalLight.position.set(-100, 50, -100);
+	directionalLight.shadowCameraLeft = -40;
+	directionalLight.shadowCameraRight = 40;
+	directionalLight.shadowCameraTop = 40;
+	directionalLight.shadowCameraBottom = -40;
+	this.settingsManager.adjustLight(directionalLight);
+	this.scene.add(directionalLight);
+	
 	// start rendering
 	this._render();
 	
@@ -41870,7 +41877,7 @@ Stage.prototype.setup = function(){
 		
 		self.settingsManager.adjustMaterials(materials, self.renderer);
 		
-		var sign = new THREE.Mesh(geometry,  new THREE.MeshFaceMaterial(materials));
+		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
 		sign.position.set(0, 20, 75);
 		sign.rotation.set(0, Math.PI * -0.5, 0);
 		self.scene.add(sign);
@@ -41888,14 +41895,17 @@ Stage.prototype.setup = function(){
 	this.scene.add(stageTrigger);
 	
 	// light
-	var light = new THREE.DirectionalLight(0xffffff);
-	light.position.set(-100, 50, -100);
-	light.shadowCameraLeft = -40;
-	light.shadowCameraRight = 40;
-	light.shadowCameraTop = 40;
-	light.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight(light);
-	this.scene.add(light);
+	var ambientLight = new THREE.AmbientLight(0x111111);
+	this.scene.add(ambientLight);
+	
+	var directionalLight = new THREE.DirectionalLight(0xffffff);
+	directionalLight.position.set(-100, 50, -100);
+	directionalLight.shadowCameraLeft = -40;
+	directionalLight.shadowCameraRight = 40;
+	directionalLight.shadowCameraTop = 40;
+	directionalLight.shadowCameraBottom = -40;
+	this.settingsManager.adjustLight(directionalLight);
+	this.scene.add(directionalLight);
 
 	// start rendering
 	this._render();
@@ -41991,7 +42001,7 @@ Stage.prototype.setup = function(){
 		
 		self.settingsManager.adjustMaterials(materials, self.renderer);
 		
-		var sign = new THREE.Mesh(geometry,  new THREE.MeshFaceMaterial(materials));
+		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
 		sign.position.set(0, 20, 75);
 		sign.rotation.set(0, Math.PI * -0.5, 0);
 		self.scene.add(sign);
@@ -42101,7 +42111,7 @@ Stage.prototype.setup = function(){
 	colorFaces(groundGeometry);
 	
 	// add boxes
-	var staticBoxFire = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0x6083c2}));
+	var staticBoxFire = new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0x6083c2}));
 	staticBoxFire.matrixAutoUpdate = false;
 	staticBoxFire.position.set(40, 5, 0);
 	staticBoxFire.castShadow = true;
@@ -42109,7 +42119,7 @@ Stage.prototype.setup = function(){
 	this.scene.add(staticBoxFire);
 	this.actionManager.createStatic(staticBoxFire);
 	
-	var staticBoxClock = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0xf3f4f6}));
+	var staticBoxClock = new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0xf3f4f6}));
 	staticBoxClock.matrixAutoUpdate = false;
 	staticBoxClock.position.set(-40, 5, 0);
 	staticBoxClock.castShadow = true;
@@ -42117,7 +42127,7 @@ Stage.prototype.setup = function(){
 	this.scene.add(staticBoxClock);
 	this.actionManager.createStatic(staticBoxClock);
 	
-	var staticBoxWall = new THREE.Mesh( new THREE.BoxGeometry(1, 20, 40) , new THREE.MeshBasicMaterial({wireframe: true}));
+	var staticBoxWall = new THREE.Mesh(new THREE.BoxGeometry(1, 20, 40) , new THREE.MeshBasicMaterial({wireframe: true}));
 	staticBoxWall.matrixAutoUpdate = false;
 	staticBoxWall.position.set(-5.5, 5, 0);
 	staticBoxWall.updateMatrix();
@@ -42136,11 +42146,11 @@ Stage.prototype.setup = function(){
 	
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load("assets/models/sign.json",  function(geometry, materials) {
+	signLoader.load("assets/models/sign.json", function(geometry, materials) {
 		
 		self.settingsManager.adjustMaterials(materials, self.renderer);
 		
-		var sign = new THREE.Mesh(geometry,  new THREE.MeshFaceMaterial(materials));
+		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
 		sign.position.set(0, 20, 75);
 		sign.rotation.set(0, Math.PI * -0.5, 0);
 		self.scene.add(sign);
@@ -42158,14 +42168,17 @@ Stage.prototype.setup = function(){
 	this.scene.add(stageTrigger);
 	
 	// light
-	var light = new THREE.DirectionalLight(0xffffff);
-	light.position.set(-100, 50, -100);
-	light.shadowCameraLeft = -40;
-	light.shadowCameraRight = 40;
-	light.shadowCameraTop = 40;
-	light.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight(light);
-	this.scene.add(light);
+	var ambientLight = new THREE.AmbientLight(0x111111);
+	this.scene.add(ambientLight);
+	
+	var directionalLight = new THREE.DirectionalLight(0xffffff);
+	directionalLight.position.set(-100, 50, -100);
+	directionalLight.shadowCameraLeft = -40;
+	directionalLight.shadowCameraRight = 40;
+	directionalLight.shadowCameraTop = 40;
+	directionalLight.shadowCameraBottom = -40;
+	this.settingsManager.adjustLight(directionalLight);
+	this.scene.add(directionalLight);
 
 	// start rendering
 	this._render();
@@ -42288,11 +42301,11 @@ Stage.prototype.setup = function(){
 
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load("assets/models/sign.json",  function(geometry, materials) {
+	signLoader.load("assets/models/sign.json", function(geometry, materials) {
 		
 		self.settingsManager.adjustMaterials(materials, self.renderer);
 		
-		var sign = new THREE.Mesh(geometry,  new THREE.MeshFaceMaterial(materials));
+		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
 		sign.position.set(0, 20, 75);
 		sign.rotation.set(0, Math.PI * -0.5, 0);
 		self.scene.add(sign);
@@ -42302,29 +42315,26 @@ Stage.prototype.setup = function(){
 		}).start();
 	});
 	
-	// add trigger for ending
+	// add trigger for scene change
 	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
 		
-		self.userInterfaceManager.showModalDialog({
-			headline: "Modal.Headline",
-			button: "Modal.Button",
-			content: "Modal.Content"
-		});
-		
-		self.saveGameManager.remove();
+		self._changeStage("008", true);
 	});
 	stageTrigger.position.set(0, 0, 75);
 	this.scene.add(stageTrigger);
 	
 	// light
-	var light = new THREE.DirectionalLight(0xffffff);
-	light.position.set(-100, 50, -100);
-	light.shadowCameraLeft = -40;
-	light.shadowCameraRight = 40;
-	light.shadowCameraTop = 40;
-	light.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight(light);
-	this.scene.add(light);
+	var ambientLight = new THREE.AmbientLight(0x111111);
+	this.scene.add(ambientLight);
+	
+	var directionalLight = new THREE.DirectionalLight(0xffffff);
+	directionalLight.position.set(-100, 50, -100);
+	directionalLight.shadowCameraLeft = -40;
+	directionalLight.shadowCameraRight = 40;
+	directionalLight.shadowCameraTop = 40;
+	directionalLight.shadowCameraBottom = -40;
+	this.settingsManager.adjustLight(directionalLight);
+	this.scene.add(directionalLight);
 
 	// start rendering
 	this._render();
@@ -42364,6 +42374,159 @@ function colorFaces(geometry){
 
 module.exports = Stage;
 },{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],46:[function(require,module,exports){
+"use strict";
+
+var THREE = require("three");
+var TWEEN = require("tween.js");
+
+var StageBase = require("../core/StageBase");
+var JSONLoader = require("../etc/JSONLoader");
+
+var self;
+
+function Stage(){
+	
+	StageBase.call(this, "008");
+	
+	self = this;
+}
+
+Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype.constructor = Stage;
+
+Stage.prototype.setup = function(){
+	
+	StageBase.prototype.setup.call(this);
+	
+	// controls setup
+	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
+	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
+	
+	// load texts
+	this.textManager.load(this.stageId);
+	
+	// add materials and geometry
+	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 100, 20, 10));
+	var groundMaterial = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
+	
+	// add ground down
+	var groundDown = new THREE.Mesh(groundGeometry, groundMaterial);
+	groundDown.matrixAutoUpdate = false;
+	groundDown.position.set(0, 0, -50);
+	groundDown.rotation.x = -0.5 * Math.PI;
+	groundDown.updateMatrix();
+	groundDown.receiveShadow = true;
+	this.controls.addGround(groundDown);
+	this.scene.add(groundDown);
+	
+	// add ground up	
+	var groundUp = new THREE.Mesh(groundGeometry, groundMaterial);
+	groundUp.matrixAutoUpdate = false;
+	groundUp.position.set(0, 7.5, 68);
+	groundUp.rotation.x = -0.5 * Math.PI;
+	groundUp.updateMatrix();
+	groundUp.receiveShadow = true;
+	this.controls.addGround(groundUp);
+	this.scene.add(groundUp);
+	
+	// color faces
+	colorFaces(groundGeometry);
+	
+	// add sign
+	var signLoader = new JSONLoader();
+	signLoader.load("assets/models/sign.json", function(geometry, materials) {
+		
+		self.settingsManager.adjustMaterials(materials, self.renderer);
+		
+		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
+		sign.position.set(0, 27.5, 75);
+		sign.rotation.set(0, Math.PI * -0.5, 0);
+		self.scene.add(sign);
+		
+		self.animationManager.createHoverAnimation(sign.position.y, 25.5, 30.5, 5000, TWEEN.Easing.Sinusoidal.InOut, function(){
+			sign.position.y = this.x;
+		}).start();
+	});
+	
+	// add stairs
+	var stairsLoader = new JSONLoader();
+	stairsLoader.load("assets/models/stairs.json",  function(geometry, materials) {
+		
+		self.settingsManager.adjustMaterials(materials, self.renderer);
+		
+		materials[0].color = new THREE.Color(0x6083c2).convertGammaToLinear();
+		materials[1].color = new THREE.Color(0x455066).convertGammaToLinear();
+			
+		var stairs = new THREE.Mesh(geometry,  new THREE.MeshFaceMaterial(materials));
+		stairs.receiveShadow = true;
+		self.scene.add(stairs);
+	});
+	
+	// add invisible ramp
+	var rampGeometry = new THREE.PlaneBufferGeometry(200, 25, 1, 1);
+	var rampMaterial = new THREE.MeshBasicMaterial({});
+	
+	var ramp = new THREE.Mesh(rampGeometry, rampMaterial);
+	ramp.matrixAutoUpdate = false;
+	ramp.position.set(0, 2.8, 6.4);
+	ramp.rotation.x = 1.378 * Math.PI;
+	ramp.updateMatrix();
+	ramp.visible = false;
+	this.controls.addGround(ramp);
+	this.scene.add(ramp);
+	
+	// add trigger for ending
+	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
+
+ 		self.userInterfaceManager.showModalDialog({
+			headline: "Modal.Headline",
+			button: "Modal.Button",
+			content: "Modal.Content"
+		});
+		
+		self.saveGameManager.remove();
+	});
+	stageTrigger.position.set(0, 7.5, 75);
+	this.scene.add(stageTrigger);
+	
+	// start rendering
+	this._render();
+};
+
+Stage.prototype.start = function(){
+	
+	StageBase.prototype.start.call(this);
+	
+	// set information panel text
+	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
+};
+
+Stage.prototype.destroy = function(){
+	
+	StageBase.prototype.destroy.call(this);
+};
+
+Stage.prototype._render = function(){
+	
+	StageBase.prototype._render.call(self);
+};
+
+//custom functions
+
+function colorFaces(geometry){
+	
+	for (var i = 0; i < geometry.faces.length; i ++){
+		
+		if(i % 2 === 0){
+			geometry.faces[i].color = new THREE.Color(0x6083c2);
+		}else{
+			geometry.faces[i].color = new THREE.Color(0x455066);
+		}
+	}
+}
+
+module.exports = Stage;
+},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],47:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -42537,7 +42700,7 @@ Chat.prototype._onMessage = function(message, data){
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":53,"pubsub-js":1}],47:[function(require,module,exports){
+},{"./UiElement":54,"pubsub-js":1}],48:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -42598,7 +42761,7 @@ InformationPanel.prototype.setText = function(textKey){
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":53}],48:[function(require,module,exports){
+},{"./UiElement":54}],49:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -42673,7 +42836,7 @@ InteractionLabel.prototype.hide = function(){
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":53}],49:[function(require,module,exports){
+},{"./UiElement":54}],50:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -42858,7 +43021,7 @@ LoadingScreen.prototype._onReady = function(message, data){
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":53,"pubsub-js":1}],50:[function(require,module,exports){
+},{"./UiElement":54,"pubsub-js":1}],51:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -43011,7 +43174,7 @@ Menu.prototype._publishFinishEvent = function(message, data){
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"./UiElement":53,"pubsub-js":1}],51:[function(require,module,exports){
+},{"../etc/Utils":37,"./UiElement":54,"pubsub-js":1}],52:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -43147,7 +43310,7 @@ ModalDialog.prototype._onClose = function(event){
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"./UiElement":53,"pubsub-js":1}],52:[function(require,module,exports){
+},{"../etc/Utils":37,"./UiElement":54,"pubsub-js":1}],53:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -43347,7 +43510,7 @@ TextScreen.prototype._printName = function(){
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":53}],53:[function(require,module,exports){
+},{"./UiElement":54}],54:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -43395,7 +43558,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":36}],54:[function(require,module,exports){
+},{"../etc/TextManager":36}],55:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in scenes
@@ -43682,4 +43845,4 @@ UserInterfaceManager.prototype._onKeyDown = function(event){
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"../lib/stats":38,"./Chat":46,"./InformationPanel":47,"./InteractionLabel":48,"./LoadingScreen":49,"./Menu":50,"./ModalDialog":51,"./TextScreen":52,"pubsub-js":1}]},{},[5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54]);
+},{"../etc/Utils":37,"../lib/stats":38,"./Chat":47,"./InformationPanel":48,"./InteractionLabel":49,"./LoadingScreen":50,"./Menu":51,"./ModalDialog":52,"./TextScreen":53,"pubsub-js":1}]},{},[5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55]);

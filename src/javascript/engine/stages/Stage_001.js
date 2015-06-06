@@ -50,7 +50,7 @@ Stage.prototype.setup = function(){
 		
 		self.settingsManager.adjustMaterials(materials, self.renderer);
 		
-		var sign = new THREE.Mesh(geometry,  new THREE.MeshFaceMaterial(materials));
+		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
 		sign.position.set(0, 20, 75);
 		sign.rotation.set(0, Math.PI * -0.5, 0);
 		self.scene.add(sign);

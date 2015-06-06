@@ -91,7 +91,7 @@ Stage.prototype.setup = function(){
 		
 		self.settingsManager.adjustMaterials(materials, self.renderer);
 		
-		var sign = new THREE.Mesh(geometry,  new THREE.MeshFaceMaterial(materials));
+		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
 		sign.position.set(0, 20, 75);
 		sign.rotation.set(0, Math.PI * -0.5, 0);
 		self.scene.add(sign);
@@ -109,14 +109,17 @@ Stage.prototype.setup = function(){
 	this.scene.add(stageTrigger);
 	
 	// light
-	var light = new THREE.DirectionalLight(0xffffff);
-	light.position.set(-100, 50, -100);
-	light.shadowCameraLeft = -40;
-	light.shadowCameraRight = 40;
-	light.shadowCameraTop = 40;
-	light.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight(light);
-	this.scene.add(light);
+	var ambientLight = new THREE.AmbientLight(0x111111);
+	this.scene.add(ambientLight);
+	
+	var directionalLight = new THREE.DirectionalLight(0xffffff);
+	directionalLight.position.set(-100, 50, -100);
+	directionalLight.shadowCameraLeft = -40;
+	directionalLight.shadowCameraRight = 40;
+	directionalLight.shadowCameraTop = 40;
+	directionalLight.shadowCameraBottom = -40;
+	this.settingsManager.adjustLight(directionalLight);
+	this.scene.add(directionalLight);
 
 	// start rendering
 	this._render();
