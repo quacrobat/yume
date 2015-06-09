@@ -10,6 +10,8 @@ var THREE = require("three");
 /**
  * Creates a dynamic audio object.
  * 
+ * node sequence: source -> panner -> gain
+ * 
  * @constructor
  * @augments THREE.Object3D
  * 
@@ -21,6 +23,7 @@ var THREE = require("three");
  * @param {number} rolloffFactor - How quickly the volume is reduced as the source moves away from the listener.
  * @param {number} maxDistance - Maximum distance between the audio source and the listener, after which the volume is not reduced any further.
  * @param {boolean} isStageIndependent - Should the audio independent of the stage?
+ * 
  */
 function DynamicAudio(id, listener, buffer, isLoop, refDistance, rolloffFactor, maxDistance, isStageIndependent) {
 	

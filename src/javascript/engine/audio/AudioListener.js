@@ -11,7 +11,9 @@ var THREE = require("three");
 
 /**
  * Creates an audioListener. The constructor creates the central WebAudio context
- * of the application and a gain-node for adjusting the master volume.
+ * of the application, a compressor and a gain-node for adjusting the master volume.
+ * 
+ * node sequence: master gain -> compressor -> destination
  * 
  * @constructor
  * @augments THREE.Object3D
@@ -37,6 +39,12 @@ function AudioListener() {
 			enumerable: true,
 			writable: false
 		},
+		compressor: {
+			value: {},
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
 		gain: {
 			value: {},
 			configurable: false,
@@ -44,9 +52,14 @@ function AudioListener() {
 			writable: true
 		}
 	});
+	
+	// dynamics compression
+	this.compressor = this.context.createDynamicsCompressor();
+	this.compressor.connect(this.context.destination);
 
+	// master gain
 	this.gain = this.context.createGain();
-	this.gain.connect(this.context.destination);
+	this.gain.connect(this.compressor);
 }
 
 AudioListener.prototype = Object.create(THREE.Object3D.prototype);
