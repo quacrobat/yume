@@ -36972,7 +36972,7 @@ function AudioManager() {
 		}
 	});
 	
-	// connect background-music to web audio pipeline
+	// connect background music to web audio pipeline
 	var source = this._listener.context.createMediaElementSource(this._backgroundMusic);
 	source.connect(this._listener.gain);
 	
@@ -36989,16 +36989,13 @@ function AudioManager() {
  * @param {string} id - The ID of the dynamic audio.
  * @param {object} buffer - The buffered audio file.
  * @param {boolean} isLoop - Should the audio played in a loop?
- * @param {number} refDistance - Reference distance for reducing volume as the audio source moves further from the listener.
- * @param {number} rolloffFactor - How quickly the volume is reduced as the source moves away from the listener.
- * @param {number} maxDistance - Maximum distance between the audio source and the listener, after which the volume is not reduced any further.
  * @param {boolean} isStageIndependent - Should the audio independent of the stage?
  * 
  * @returns {DynamicAudio} The new dynamic audio.
  */
-AudioManager.prototype.createDynamicSound = function(id, buffer, isLoop, refDistance, rolloffFactor, maxDistance, isStageIndependent) {
+AudioManager.prototype.createDynamicSound = function(id, buffer, isLoop, isStageIndependent) {
 
-	var audio = new DynamicAudio(id, this._listener, buffer, isLoop, refDistance, rolloffFactor, maxDistance, isStageIndependent);
+	var audio = new DynamicAudio(id, this._listener, buffer, isLoop, isStageIndependent);
 	this._dynamicAudios.push(audio);
 	return audio;
 };
@@ -37207,13 +37204,10 @@ var THREE = require("three");
  * @param {AudioListener} listener - The listener object.
  * @param {object} buffer - The buffered audio file.
  * @param {boolean} isLoop - Should the audio played in a loop?
- * @param {number} refDistance - Reference distance for reducing volume as the audio source moves further from the listener.
- * @param {number} rolloffFactor - How quickly the volume is reduced as the source moves away from the listener.
- * @param {number} maxDistance - Maximum distance between the audio source and the listener, after which the volume is not reduced any further.
  * @param {boolean} isStageIndependent - Should the audio independent of the stage?
  * 
  */
-function DynamicAudio(id, listener, buffer, isLoop, refDistance, rolloffFactor, maxDistance, isStageIndependent) {
+function DynamicAudio(id, listener, buffer, isLoop, isStageIndependent) {
 	
 	THREE.Object3D.call( this );
 	
@@ -37230,26 +37224,14 @@ function DynamicAudio(id, listener, buffer, isLoop, refDistance, rolloffFactor, 
 			enumerable: true,
 			writable: false
 		},
-		context: {
-			value: listener.context,
+		buffer:{
+			value: buffer,
 			configurable: false,
 			enumerable: true,
-			writable: false
+			writable: true
 		},
-		gain: {
-			value: listener.context.createGain(),
-			configurable: false,
-			enumerable: true,
-			writable: false
-		},
-		panner: {
-			value: listener.context.createPanner(),
-			configurable: false,
-			enumerable: true,
-			writable: false
-		},
-		source: {
-			value:listener.context.createBufferSource(),
+		isLoop: {
+			value: isLoop || false,
 			configurable: false,
 			enumerable: true,
 			writable: true
@@ -37260,8 +37242,32 @@ function DynamicAudio(id, listener, buffer, isLoop, refDistance, rolloffFactor, 
 			enumerable: true,
 			writable: true
 		},
-		_needsRebuild: {
-			value: false,
+		_context: {
+			value: listener.context,
+			configurable: false,
+			enumerable: true,
+			writable: false
+		},
+		_gain: {
+			value: listener.context.createGain(),
+			configurable: false,
+			enumerable: true,
+			writable: false
+		},
+		_panner: {
+			value: listener.context.createPanner(),
+			configurable: false,
+			enumerable: true,
+			writable: false
+		},
+		_source: {
+			value: null,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		_pitchVariation:  {
+			value: undefined,
 			configurable: false,
 			enumerable: false,
 			writable: true
@@ -37269,22 +37275,12 @@ function DynamicAudio(id, listener, buffer, isLoop, refDistance, rolloffFactor, 
 	});
 	
 	// audio-node for volume
-	this.gain.connect(listener.gain);
+	this._gain.connect(listener.gain);
 	
-	// audio-node for spatial sound effects
-	this.panner.refDistance 	= refDistance || 1;
-	this.panner.rolloffFactor	= rolloffFactor  || 1;
-	this.panner.maxDistance		= maxDistance || 10000;
-	this.panner.distanceModel 	= "linear";
-	this.panner.panningModel	= "HRTF";
-	this.panner.connect(this.gain);
-	
-	// audio-node for buffer source
-	this.source.loop = isLoop || false;
-	this.source.connect( this.panner );
-	if(buffer !== undefined){
-		this.source.buffer = buffer;
-	}
+	// audio-node for spatial effects
+	this._panner.distanceModel = "linear";
+	this._panner.panningModel  = "HRTF";
+	this._panner.connect(this._gain);
 }
 
 DynamicAudio.prototype = Object.create(THREE.Audio.prototype);
@@ -37298,18 +37294,24 @@ DynamicAudio.prototype.constructor = DynamicAudio;
  */
 DynamicAudio.prototype.play = function(time){
 	
-	if(this._needsRebuild === true){
-		this.source.disconnect();
-		var source = this.context.createBufferSource(); // sources can just played once, see https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode
-		source.buffer = this.source.buffer;
-		source.loop = this.source.loop;
-		source.connect(this.panner);		
-		this.source = source;
-		this.source.start(time || 0);
-	}else{
-		this.source.start(time || 0);
-		this._needsRebuild = true;
+	// disconnect source node, if necessary
+	if(this._source !== null){
+		this._source.disconnect();
 	}
+
+	// build new source node
+	this._source = this._context.createBufferSource(); // sources can just played once, see https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode
+	this._source.buffer = this.buffer;
+	this._source.loop = this.isLoop;
+	this._source.connect(this._panner);	
+	
+	// regard pitch variation
+	if(typeof this._pitchVariation === "function"){
+		this._source.playbackRate.value = this._pitchVariation();
+	}
+	
+	// play sound
+	this._source.start(time || 0);
 };
 
 /**
@@ -37319,7 +37321,17 @@ DynamicAudio.prototype.play = function(time){
  */
 DynamicAudio.prototype.stop = function(time){
 	
-	this.source.stop(time || 0);
+	this._source.stop(time || 0);
+};
+
+/**
+ * Gets the volume of the audio file.
+ * 
+ * @return {number} The volume.
+ */
+DynamicAudio.prototype.getVolume = function(){
+	
+	return this._gain.gain.value;
 };
 
 /**
@@ -37329,57 +37341,67 @@ DynamicAudio.prototype.stop = function(time){
  */
 DynamicAudio.prototype.setVolume = function(volume){
 	
-	this.gain.gain.value = volume;
+	this._gain.gain.value = volume;
 };
 
 /**
- * Sets the loop property of an AudioBufferSource.
+ * Gets the refDistance.
  * 
- * @param {boolean} isLoop - The loop-flag to set.
+ * @return {number} Reference distance for reducing volume as the audio source moves further from the listener.
  */
-DynamicAudio.prototype.setLoop = function(isLoop){
+DynamicAudio.prototype.getRefDistance = function(){
 	
-	this.source.loop = isLoop;
+	return this._panner.refDistance;
 };
 
 /**
- * Sets the refDistance property of the PannerNode.
+ * Sets the refDistance.
  * 
- * @param {number} refDistance - The refDistance to set.
+ * @param {number} refDistance - Reference distance for reducing volume as the audio source moves further from the listener.
  */
 DynamicAudio.prototype.setRefDistance = function(refDistance){
 	
-	this.panner.refDistance = refDistance;
+	this._panner.refDistance = refDistance;
 };
 
 /**
- * Sets the rolloffFactor property of the PannerNode.
+ * Gets the rolloffFactor.
  * 
- * @param {number} rolloffFactor - The rolloffFactor to set.
+ * @return {number} How quickly the volume is reduced as the source moves away from the listener.
+ */
+DynamicAudio.prototype.getRolloffFactor = function(){
+	
+	return this._panner.rolloffFactor;
+};
+
+/**
+ * Sets the rolloffFactor.
+ * 
+ * @param {number} rolloffFactor - How quickly the volume is reduced as the source moves away from the listener.
  */
 DynamicAudio.prototype.setRolloffFactor = function(rolloffFactor){
 	
-	this.panner.rolloffFactor = rolloffFactor;
+	this._panner.rolloffFactor = rolloffFactor;
 };
 
 /**
- * Sets the maxDistance property of the PannerNode.
+ * Gets the maxDistance.
  * 
- * @param {number} maxDistance - The maxDistance to set.
+ * @return {number} Maximum distance between the audio source and the listener, after which the volume is not reduced any further.
+ */
+DynamicAudio.prototype.getMaxDistance = function(){
+	
+	return this._panner.maxDistance;
+};
+
+/**
+ * Sets the maxDistance.
+ * 
+ * @param {number} maxDistance - Maximum distance between the audio source and the listener, after which the volume is not reduced any further.
  */
 DynamicAudio.prototype.setMaxDistance = function(maxDistance){
 	
-	this.panner.maxDistance = maxDistance;
-};
-
-/**
- * Sets the stageIndependent property of the dynamic audio .
- * 
- * @param {boolean} isStageIndependent - The stageIndependent-flag to set.
- */
-DynamicAudio.prototype.setSceneIndependent = function(isStageIndependent){
-	
-	this.isStageIndependent = isStageIndependent;
+	this._panner.maxDistance = maxDistance;
 };
 
 /**
@@ -37391,9 +37413,19 @@ DynamicAudio.prototype.setSceneIndependent = function(isStageIndependent){
  */
 DynamicAudio.prototype.addDirection = function(coneInnerAngle, coneOuterAngle, coneOuterGain){
 	
-	this.panner.coneInnerAngle = coneInnerAngle;
-	this.panner.coneOuterAngle = coneOuterAngle;
-	this.panner.coneOuterGain  = coneOuterGain;
+	this._panner.coneInnerAngle = coneInnerAngle;
+	this._panner.coneOuterAngle = coneOuterAngle;
+	this._panner.coneOuterGain  = coneOuterGain;
+};
+
+/**
+ * Adds a custom function, that calculates pitch variations.
+ * 
+ * @param {function} pitchVariation - Function for calculation pitch variations.
+ */
+DynamicAudio.prototype.addPitchVariation = function(pitchVariation){
+	
+	this._pitchVariation = pitchVariation;
 };
 
 /**
@@ -37402,17 +37434,17 @@ DynamicAudio.prototype.addDirection = function(coneInnerAngle, coneOuterAngle, c
  * 
  * @param {boolean} force - Flag for calculation the world matrix.
  */
-DynamicAudio.prototype.updateMatrixWorld = ( function () {
+DynamicAudio.prototype.updateMatrixWorld = (function() {
 
 	var position = new THREE.Vector3();
 
-	return function ( force ) {
+	return function (force) {
 
-		THREE.Object3D.prototype.updateMatrixWorld.call( this, force );
+		THREE.Object3D.prototype.updateMatrixWorld.call(this, force);
 
-		position.setFromMatrixPosition( this.matrixWorld );
+		position.setFromMatrixPosition(this.matrixWorld);
 
-		this.panner.setPosition( position.x, position.y, position.z );
+		this._panner.setPosition(position.x, position.y, position.z);
 	};
 })();
 
@@ -37739,18 +37771,25 @@ FirstPersonControls.prototype.init = function() {
 	global.document.addEventListener("mozpointerlockerror", this._onPointerlockerror);
 	global.document.addEventListener("webkitpointerlockerror", this._onPointerlockerror);
 	
-	// audios for steps
-	var audioStep1 = audioManager.createDynamicSound("controls.step1", undefined, false, 1, 1, 10000, true);
-	var audioStep2 = audioManager.createDynamicSound("controls.step2",undefined, false, 1, 1, 10000, true);
-	
-	// assign audios to camera
-	camera.add(audioStep1);
-	camera.add(audioStep2);
-	
-	// load and assign buffers
+	// load and assign audio buffers for steps
 	audioManager.createAudioBufferList(["step1", "step2"], function(bufferList){
-		audioStep1.source.buffer = bufferList[0];
-		audioStep2.source.buffer = bufferList[1];
+		
+		// create new audios
+		var audioStep1 = audioManager.createDynamicSound("controls.step1", bufferList[0], false, true);
+		var audioStep2 = audioManager.createDynamicSound("controls.step2", bufferList[1], false, 1, true);
+		
+		// add variations
+		audioStep1.addPitchVariation(function(){
+			return 0.9 + Math.random() * 0.4;
+		});
+		audioStep2.addPitchVariation(function(){
+			return 0.9 + Math.random() * 0.4;
+		});
+		
+		// assign audios to camera
+		camera.add(audioStep1);
+		camera.add(audioStep2);
+
 	}).load();
 };
 
@@ -38915,7 +38954,7 @@ Scene.prototype.constructor = Scene;
  */
 Scene.prototype.clear = function(){
 	for (var i = this.children.length - 1; i >= 0; i--) {
-		if(this.children[i].type !== "Controls" && this.children[i].type !== "Mate"){
+		if(this.children[i].type !== "Controls" && this.children[i].type !== "Player"){
 			this.remove(this.children[i]);
 		}
 	}
@@ -42149,10 +42188,19 @@ Stage.prototype.setup = function(){
 	
 	// add dynamic sounds
 	this.audioManager.createAudioBufferList(["fire", "clock"], function(bufferList){
-		audioFire = self.audioManager.createDynamicSound("ambient.fire", bufferList[0], true, 20, 1, 50);
-		audioClock = self.audioManager.createDynamicSound("ambient.clock", bufferList[1], true, 20, 1, 50);
+		
+		audioFire = self.audioManager.createDynamicSound("ambient.fire", bufferList[0], true);
+		audioFire.setRefDistance(20);
+		audioFire.setRolloffFactor(1);
+		audioFire.setMaxDistance(50);
+		
+		audioClock = self.audioManager.createDynamicSound("ambient.clock", bufferList[1], true);
+		audioClock.setRefDistance(20);
+		audioClock.setRolloffFactor(1);
+		audioClock.setMaxDistance(50);
 		audioClock.addDirection(180, 0, 0);
 		audioClock.position.set(-5, 0, 0);
+		
 		staticBoxFire.add(audioFire);
 		staticBoxClock.add(audioClock);
 	}).load();

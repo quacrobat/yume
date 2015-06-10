@@ -318,18 +318,25 @@ FirstPersonControls.prototype.init = function() {
 	global.document.addEventListener("mozpointerlockerror", this._onPointerlockerror);
 	global.document.addEventListener("webkitpointerlockerror", this._onPointerlockerror);
 	
-	// audios for steps
-	var audioStep1 = audioManager.createDynamicSound("controls.step1", undefined, false, 1, 1, 10000, true);
-	var audioStep2 = audioManager.createDynamicSound("controls.step2",undefined, false, 1, 1, 10000, true);
-	
-	// assign audios to camera
-	camera.add(audioStep1);
-	camera.add(audioStep2);
-	
-	// load and assign buffers
+	// load and assign audio buffers for steps
 	audioManager.createAudioBufferList(["step1", "step2"], function(bufferList){
-		audioStep1.source.buffer = bufferList[0];
-		audioStep2.source.buffer = bufferList[1];
+		
+		// create new audios
+		var audioStep1 = audioManager.createDynamicSound("controls.step1", bufferList[0], false, true);
+		var audioStep2 = audioManager.createDynamicSound("controls.step2", bufferList[1], false, 1, true);
+		
+		// add variations
+		audioStep1.addPitchVariation(function(){
+			return 0.9 + Math.random() * 0.4;
+		});
+		audioStep2.addPitchVariation(function(){
+			return 0.9 + Math.random() * 0.4;
+		});
+		
+		// assign audios to camera
+		camera.add(audioStep1);
+		camera.add(audioStep2);
+
 	}).load();
 };
 

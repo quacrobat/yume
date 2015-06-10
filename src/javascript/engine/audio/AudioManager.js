@@ -42,7 +42,7 @@ function AudioManager() {
 		}
 	});
 	
-	// connect background-music to web audio pipeline
+	// connect background music to web audio pipeline
 	var source = this._listener.context.createMediaElementSource(this._backgroundMusic);
 	source.connect(this._listener.gain);
 	
@@ -59,16 +59,13 @@ function AudioManager() {
  * @param {string} id - The ID of the dynamic audio.
  * @param {object} buffer - The buffered audio file.
  * @param {boolean} isLoop - Should the audio played in a loop?
- * @param {number} refDistance - Reference distance for reducing volume as the audio source moves further from the listener.
- * @param {number} rolloffFactor - How quickly the volume is reduced as the source moves away from the listener.
- * @param {number} maxDistance - Maximum distance between the audio source and the listener, after which the volume is not reduced any further.
  * @param {boolean} isStageIndependent - Should the audio independent of the stage?
  * 
  * @returns {DynamicAudio} The new dynamic audio.
  */
-AudioManager.prototype.createDynamicSound = function(id, buffer, isLoop, refDistance, rolloffFactor, maxDistance, isStageIndependent) {
+AudioManager.prototype.createDynamicSound = function(id, buffer, isLoop, isStageIndependent) {
 
-	var audio = new DynamicAudio(id, this._listener, buffer, isLoop, refDistance, rolloffFactor, maxDistance, isStageIndependent);
+	var audio = new DynamicAudio(id, this._listener, buffer, isLoop, isStageIndependent);
 	this._dynamicAudios.push(audio);
 	return audio;
 };
