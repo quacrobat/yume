@@ -36841,7 +36841,7 @@ var THREE = require("three");
  * Creates an audioListener. The constructor creates the central WebAudio context
  * of the application, a compressor and a gain-node for adjusting the master volume.
  * 
- * sequence: master gain -> compressor -> destination
+ * node sequence: master gain -> compressor -> destination
  * 
  * @constructor
  * @augments THREE.Object3D
@@ -38483,6 +38483,7 @@ FirstPersonControls.STRAFE = {
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../action/ActionManager":7,"../audio/AudioManager":13,"../core/Camera":17,"../core/Scene":21,"../etc/SettingsManager":35,"../etc/Utils":37,"../ui/UserInterfaceManager":55,"pubsub-js":1,"three":2}],16:[function(require,module,exports){
+(function (global){
 /**
  * @file This prototype contains the entire logic for starting
  * the application.
@@ -38534,7 +38535,10 @@ Bootstrap.prototype._initEngine = function(){
 			multiplayerManager.init();
 		}
 	}else{
-		throw "ERROR: Bootstrap: The browser does not support all required APIs. Missing APIs: " + environment.unsupportedAPIs;
+		
+		var message = "ERROR: Bootstrap: The browser does not support all required APIs. Missing APIs: " + environment.unsupportedAPIs;
+		global.alert(message);
+		throw message;
 	}
 };
 
@@ -38558,6 +38562,7 @@ Bootstrap.prototype._loadStage = function(){
 };
 
 module.exports = Bootstrap;
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../controls/FirstPersonControls":15,"../etc/MultiplayerManager":30,"../etc/NetworkManager":31,"../etc/SaveGameManager":34,"../etc/Utils":37,"../ui/UserInterfaceManager":55,"./Environment":18,"./Renderer":20,"pubsub-js":1}],17:[function(require,module,exports){
 (function (global){
 /**

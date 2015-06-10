@@ -49,7 +49,10 @@ Bootstrap.prototype._initEngine = function(){
 			multiplayerManager.init();
 		}
 	}else{
-		throw "ERROR: Bootstrap: The browser does not support all required APIs. Missing APIs: " + environment.unsupportedAPIs;
+		
+		var message = "ERROR: Bootstrap: The browser does not support all required APIs. Missing APIs: " + environment.unsupportedAPIs;
+		global.alert(message);
+		throw message;
 	}
 };
 
