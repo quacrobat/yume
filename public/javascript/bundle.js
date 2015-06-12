@@ -36911,15 +36911,13 @@ AudioListener.prototype.updateMatrixWorld = (function() {
 
 		THREE.Object3D.prototype.updateMatrixWorld.call(this, force);
 
-		var listener = this.context.listener;
-		var up = this.up;
-
 		this.matrixWorld.decompose(position, quaternion, scale);
 
-		orientation.set(0, 0, -1).applyQuaternion(quaternion );
+		orientation.set(0, 0, -1).applyQuaternion(quaternion);
 
-		listener.setPosition(position.x, position.y, position.z);
-		listener.setOrientation( orientation.x, orientation.y, orientation.z, up.x, up.y, up.z);
+		// set position and orientation of the audio listener
+		this.context.listener.setPosition(position.x, position.y, position.z);
+		this.context.listener.setOrientation(orientation.x, orientation.y, orientation.z, this.up.x, this.up.y, this.up.z);
 	};
 
 })();
@@ -36958,6 +36956,12 @@ function AudioManager() {
 			enumerable: false,
 			writable : false
 		},
+		_backgroundMusicGain: {
+			value: null,
+			configurable: false,
+			enumerable: false,
+			writable : true
+		},
 		_backgroundMusic: {
 			value: new global.Audio(),
 			configurable: false,
@@ -36972,9 +36976,13 @@ function AudioManager() {
 		}
 	});
 	
+	// gain node for background music, used for fadeIn/ fadeOut
+	this._backgroundMusicGain = this._listener.context.createGain();
+	this._backgroundMusicGain.connect(this._listener.gain);
+	
 	// connect background music to web audio pipeline
 	var source = this._listener.context.createMediaElementSource(this._backgroundMusic);
-	source.connect(this._listener.gain);
+	source.connect(this._backgroundMusicGain);
 	
 	// set error handling for background music
 	this._backgroundMusic.onerror = this._onErrorBackgroundMusic;
@@ -37062,16 +37070,14 @@ AudioManager.prototype.getDynamicAudio = function(id) {
  * @param {string} file - The actual audio file. Only MP3s are valid.
  * @param {number} volume - The volume of the audio.
  * @param {boolean} isLoop - Should the audio played in a loop?
- * @param {boolean} isMuted - Should the audio muted?
  */
-AudioManager.prototype.setBackgroundMusic = function(file, volume, isLoop, isMuted) {
+AudioManager.prototype.setBackgroundMusic = function(file, volume, isLoop) {
 	
 	var url = "assets/audio/static/" + file + ".mp3";
 
 	this._backgroundMusic.src = url;
 	this._backgroundMusic.volume = volume || 1;
 	this._backgroundMusic.loop = isLoop || true;
-	this._backgroundMusic.muted = isMuted || false;
 	
 	this._backgroundMusic.oncanplay = function(event){
 
@@ -37093,11 +37099,27 @@ AudioManager.prototype.setBackgroundMusic = function(file, volume, isLoop, isMut
 /**
  * Plays the background music.
  * 
+ * @param {boolean} isFadeIn - Should the audio fade in?
+ * @param {number} duration - The duration of the fade in.
  */
-AudioManager.prototype.playBackgroundMusic = function(isFadeIn, time) {
-		
+AudioManager.prototype.playBackgroundMusic = function(isFadeIn, duration) {
+	
+	// start playing
 	this._backgroundMusic.play();
 	
+	// adjust gain node of background music
+	if(isFadeIn === true){
+		
+		// fade in
+		this._backgroundMusicGain.gain.linearRampToValueAtTime(0, this._backgroundMusic.currentTime);
+		this._backgroundMusicGain.gain.linearRampToValueAtTime(1, this._backgroundMusic.currentTime + duration || 2);
+	
+	}else{
+		
+		this._backgroundMusicGain.gain.value = 1;
+	}
+	
+	// logging
 	if(utils.isDevelopmentModeActive() === true){
 		console.log("INFO: AudioManager: Start playing background music.");
 	}
@@ -37106,11 +37128,46 @@ AudioManager.prototype.playBackgroundMusic = function(isFadeIn, time) {
 /**
  * Pauses the background music.
  * 
+ * @param {boolean} isFadeOut - Should the audio fade out?
+ * @param {number} duration - The duration of the fade out.
+ * @param {function} onPausedCallback - Executed, when the audio is paused.
  */
-AudioManager.prototype.pauseBackgroundMusic = function(isFadeOut, time) {
-
-	this._backgroundMusic.pause();
+AudioManager.prototype.pauseBackgroundMusic = function(isFadeOut, duration, onPausedCallback) {
 	
+	// save context
+	var self = this;
+
+	if(isFadeOut === true){
+		
+		// fade out
+		this._backgroundMusicGain.gain.linearRampToValueAtTime(1, this._backgroundMusic.currentTime);
+		this._backgroundMusicGain.gain.linearRampToValueAtTime(0, this._backgroundMusic.currentTime + duration || 2);
+		
+		// pause music with delay, at the end of the animation
+		setTimeout(function(){
+			
+			self._backgroundMusic.pause();
+			
+			// execute callback
+			if(typeof onPausedCallback === "function"){
+				onPausedCallback.call(self);
+			}
+			
+		}, (duration || 2) * 1000);
+		
+	}else{
+		
+		// immediately pause music 
+		this._backgroundMusic.pause();
+		this._backgroundMusicGain.gain.value = 0;
+		
+		// execute callback
+		if(typeof onPausedCallback === "function"){
+			onPausedCallback.call(this);
+		}
+	}
+	
+	// logging
 	if(utils.isDevelopmentModeActive() === true){
 		console.log("INFO: AudioManager: Pause playing background music.");
 	}
@@ -37118,36 +37175,48 @@ AudioManager.prototype.pauseBackgroundMusic = function(isFadeOut, time) {
 
 /**
  * Stops the background music.
+ * 
+ * @param {boolean} isFadeOut - Should the audio fade out?
+ * @param {number} duration - The duration of the fade out.
+ * @param {function} onStoppedCallback - Executed, when the audio is stopped.
  */
-AudioManager.prototype.stopBackgroundMusic = function() {
+AudioManager.prototype.stopBackgroundMusic = function(isFadeOut, duration, onStoppedCallback) {
 
-	this._backgroundMusic.pause();
-	this._backgroundMusic.currentTime = 0.0;
+	this.pauseBackgroundMusic(true, duration, function(){
+		
+		// reset currentTime
+		this._backgroundMusic.currentTime = 0.0;
+		
+		// execute callback
+		if(typeof onStoppedCallback === "function"){
+			onStoppedCallback.call(this);
+		}
+	});
 	
+	// logging
 	if(utils.isDevelopmentModeActive() === true){
 		console.log("INFO: AudioManager: Stop playing background music.");
 	}
 };
 
-
 /**
- * Is the background music is played?
+ * Is the background music played?
  * 
  * @returns {boolean}
  */
 AudioManager.prototype.isBackgroundMusicPlayed = function() {
 
-	return this._backgroundMusic.paused !== true;
+	return this._backgroundMusic.paused;
 };
 
 /**
- * Sets the muted property of the background music.
+ * Is the background music played in a loop?
  * 
- * @param {boolean} isMuted - The muted-flag to set.
+ * @return {boolean} - The loop-flag.
  */
-AudioManager.prototype.setBackgroundMusicMuted = function(isMuted) {
+AudioManager.prototype.isBackgroundMusicLoop = function() {
 
-	this._backgroundMusic.muted = isMuted;
+	return this._backgroundMusic.loop;
 };
 
 /**
@@ -37158,6 +37227,16 @@ AudioManager.prototype.setBackgroundMusicMuted = function(isMuted) {
 AudioManager.prototype.setBackgroundMusicLoop = function(isLoop) {
 
 	this._backgroundMusic.loop = isLoop;
+};
+
+/**
+ * Gets the volume property of the background music.
+ * 
+ * @return {number} volume - The volume.
+ */
+AudioManager.prototype.getBackgroundMusicVolume = function() {
+
+	return this._backgroundMusic.volume;
 };
 
 /**

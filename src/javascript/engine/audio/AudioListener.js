@@ -83,15 +83,13 @@ AudioListener.prototype.updateMatrixWorld = (function() {
 
 		THREE.Object3D.prototype.updateMatrixWorld.call(this, force);
 
-		var listener = this.context.listener;
-		var up = this.up;
-
 		this.matrixWorld.decompose(position, quaternion, scale);
 
-		orientation.set(0, 0, -1).applyQuaternion(quaternion );
+		orientation.set(0, 0, -1).applyQuaternion(quaternion);
 
-		listener.setPosition(position.x, position.y, position.z);
-		listener.setOrientation( orientation.x, orientation.y, orientation.z, up.x, up.y, up.z);
+		// set position and orientation of the audio listener
+		this.context.listener.setPosition(position.x, position.y, position.z);
+		this.context.listener.setOrientation(orientation.x, orientation.y, orientation.z, this.up.x, this.up.y, this.up.z);
 	};
 
 })();
