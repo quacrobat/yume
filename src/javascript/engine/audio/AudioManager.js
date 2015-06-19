@@ -254,7 +254,7 @@ AudioManager.prototype.pauseBackgroundMusic = function(isFadeOut, duration, onPa
  */
 AudioManager.prototype.stopBackgroundMusic = function(isFadeOut, duration, onStoppedCallback) {
 
-	this.pauseBackgroundMusic(true, duration, function(){
+	this.pauseBackgroundMusic(isFadeOut, duration, function(){
 		
 		// reset currentTime
 		this._backgroundMusic.currentTime = 0.0;

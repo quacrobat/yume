@@ -23,6 +23,13 @@ function ThreadManager(){
 			writable: false
 		}
 	});
+	
+	var self = this;
+	
+	// terminate all threads when refreshing/ leaving the application
+	global.window.addEventListener("beforeunload", function(){
+		self.terminateAllThreads();
+	});
 }
 
 /**
@@ -86,7 +93,7 @@ ThreadManager.prototype.terminateThread = function(thread){
 	global.URL.revokeObjectURL(thread.scriptURL);
 	
 	// terminate thread
-	thread.thread.terminate();
+	thread.terminate();
 };
 
 /**
@@ -94,7 +101,7 @@ ThreadManager.prototype.terminateThread = function(thread){
  */
 ThreadManager.prototype.terminateAllThreads = function(){
 	
-	for(var index; index < this._threads.length; index++){
+	for(var index = 0; index < this._threads.length; index++){
 		
 		// release object URL
 		global.URL.revokeObjectURL(this._threads[index].scriptURL);
