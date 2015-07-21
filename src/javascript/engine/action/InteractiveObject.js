@@ -54,7 +54,7 @@ function InteractiveObject(object, action) {
 }
 
 /**
- * This method is detects an intersection between the raycaster and the 
+ * This method detects an intersection between the raycaster and the 
  * relevant object. The actual raycast-method of THREE.Mesh, which calculates
  * intersections via the faces of an object, is not used in this application.
  * Because of a better performance, this method uses only bounding boxes.
@@ -94,7 +94,7 @@ InteractiveObject.prototype.raycast = function(raycaster, intersects){
 
 /**
  * This method is detects an intersection between the bounding box
- * of the controls and the AABB of the static object.
+ * of the controls and the AABB of the interactive object.
  * 
  * @param {THREE.Box3} boundingBox - The boundingBox of the controls.
  */

@@ -467,25 +467,24 @@ FirstPersonControls.prototype._calculateCameraMotion = (function() {
  */
 FirstPersonControls.prototype._translateCameraToOrigin = function(){
 	
-	if(camera.position.y < 0){
-		camera.position.y += FirstPersonControls.CAMERA.RESETFACTOR / 100;
-		camera.position.y = Math.min(camera.position.y, 0);
-	}else if(camera.position.y > 0){
-		camera.position.y -= FirstPersonControls.CAMERA.RESETFACTOR/ 100;
+	// only translate if necessary
+	if(camera.position.x !== 0 || camera.position.y !== 0){
+		
+		camera.position.y -= FirstPersonControls.CAMERA.RESETFACTOR * 0.01;
 		camera.position.y = Math.max(camera.position.y, 0);
+		
+		if(camera.position.x < 0){
+			camera.position.x += FirstPersonControls.CAMERA.RESETFACTOR * 0.01;
+			camera.position.x = Math.min(camera.position.x, 0);
+		}else if(camera.position.x > 0){
+			camera.position.x -= FirstPersonControls.CAMERA.RESETFACTOR * 0.01;
+			camera.position.x = Math.max(camera.position.x, 0);
+		}
+
+		this._motionFactor = 0;
+		this._motionCurveUp = true;
+		this._motionLastValue = 0;
 	}
-	
-	if(camera.position.x < 0){
-		camera.position.x += FirstPersonControls.CAMERA.RESETFACTOR / 100;
-		camera.position.x = Math.min(camera.position.x, 0);
-	}else if(camera.position.x > 0){
-		camera.position.x -= FirstPersonControls.CAMERA.RESETFACTOR / 100;
-		camera.position.x = Math.max(camera.position.x, 0);
-	}
-	
-	this._motionFactor = 0;
-	this._motionCurveUp = true;
-	this._motionLastValue = 0;
 };
 
 /**
@@ -554,7 +553,7 @@ FirstPersonControls.prototype._calculateHeight = function(distance) {
 /**
  * Gets the first intersection of the controls with an interactive object.
  * 
- * @returns {InteractiveObject|undefined} The interactive object, if there is an intersection.
+ * @returns {InteractiveObject|undefined} The interactive object if there is an intersection.
  */
 FirstPersonControls.prototype._getFirstInteractiveIntersection = (function() {
 	
@@ -699,7 +698,7 @@ FirstPersonControls.prototype._isCollisionHandlingRequired = (function() {
 				
 				// compute center of player
 				center.copy(this._yawObject.position);
-				center.y -= (this._height / 2);
+				center.y -= (this._height * 0.5);
 				
 				// set size of BB
 				size.set(4, this._height, 4);
@@ -765,12 +764,12 @@ FirstPersonControls.prototype._animateCrouch = (function(){
 	
 	return function(){
 		
-		// animate only, if necessary
+		// animate only if necessary
 		if(this._isCrouch === true  && this._height !== FirstPersonControls.CROUCH.HEIGHT ||
 		   this._isCrouch === false && this._height !== FirstPersonControls.DEFAULT.HEIGHT){
 		
 			// calculate elapsed time
-			elapsed = (global.performance.now() - this._animationStartTime) / FirstPersonControls.ANIMATION.CROUCH.DURATION;
+			elapsed = (global.performance.now() - this._animationStartTime) * FirstPersonControls.ANIMATION.CROUCH.DURATION;
 			
 			// calculate factor for easing formula
 			factor = elapsed > 1 ? 1 : elapsed;
@@ -1052,7 +1051,7 @@ FirstPersonControls.CROUCH = {
 
 FirstPersonControls.ANIMATION = {
 		CROUCH: {
-			DURATION: 1000
+			DURATION: 0.001
 		}
 };
 
