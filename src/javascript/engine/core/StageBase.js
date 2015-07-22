@@ -17,7 +17,6 @@ var controls = require("../controls/FirstPersonControls");
 var actionManager = require("../action/ActionManager");
 var audioManager = require("../audio/AudioManager");
 var animationManager = require("../etc/AnimationManager");
-var groupManager = require("../etc/GroupManager");
 var performanceManager = require("../etc/PerformanceManager");
 var textManager = require("../etc/TextManager");
 var saveGameManager = require("../etc/SaveGameManager");
@@ -78,12 +77,6 @@ function StageBase(stageId){
 		},
 		audioManager: {
 			value: audioManager,
-			configurable: false,
-			enumerable: true,
-			writable: false
-		},
-		groupManager: {
-			value: groupManager,
 			configurable: false,
 			enumerable: true,
 			writable: false
@@ -181,8 +174,6 @@ StageBase.prototype.destroy = function(){
 	this.controls.removeGrounds();
 	
 	this.performanceManager.removeLODs();
-	
-	this.groupManager.removeGroups();
 	
 	this.textManager.removeTexts();
 	
