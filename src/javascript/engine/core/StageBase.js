@@ -18,6 +18,7 @@ var actionManager = require("../action/ActionManager");
 var audioManager = require("../audio/AudioManager");
 var animationManager = require("../etc/AnimationManager");
 var groupManager = require("../etc/GroupManager");
+var performanceManager = require("../etc/PerformanceManager");
 var textManager = require("../etc/TextManager");
 var saveGameManager = require("../etc/SaveGameManager");
 var settingsManager = require("../etc/SettingsManager");
@@ -83,6 +84,12 @@ function StageBase(stageId){
 		},
 		groupManager: {
 			value: groupManager,
+			configurable: false,
+			enumerable: true,
+			writable: false
+		},
+		performanceManager: {
+			value: performanceManager,
 			configurable: false,
 			enumerable: true,
 			writable: false
@@ -173,13 +180,16 @@ StageBase.prototype.destroy = function(){
 	
 	this.controls.removeGrounds();
 	
+	this.performanceManager.removeLODs();
+	
 	this.groupManager.removeGroups();
 	
 	this.textManager.removeTexts();
 	
-	// clear scene and renderer
+	// clear scene
 	this.scene.clear();
 	
+	// clear renderer
 	this.renderer.clear();
 	
 	// stop render loop
@@ -191,11 +201,21 @@ StageBase.prototype.destroy = function(){
  */
 StageBase.prototype._render = function(){
 	
+	// get delta time value
 	this._delta = this.timeManager.getDelta();
-	this.animationManager.update();
+	
+	// update controls
 	this.controls.update(this._delta);
+	
+	// update managers
+	this.animationManager.update();
+	this.performanceManager.update();
 	this.userInterfaceManager.update();
+	
+	// render frame
 	this.renderer.render(this.scene, this.camera);
+	
+	// save render ID
 	this._renderId = global.requestAnimationFrame(this._render);
 };
 

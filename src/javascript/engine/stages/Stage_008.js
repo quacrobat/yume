@@ -99,16 +99,10 @@ Stage.prototype.setup = function(){
 	this.controls.addGround(ramp);
 	this.scene.add(ramp);
 	
-	// add trigger for ending
+	// add trigger for scene change
 	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
-
- 		self.userInterfaceManager.showModalDialog({
-			headline: "Modal.Headline",
-			button: "Modal.Button",
-			content: "Modal.Content"
-		});
 		
-		self.saveGameManager.remove();
+		self._changeStage("009", true);
 	});
 	stageTrigger.position.set(0, 7.5, 75);
 	this.scene.add(stageTrigger);

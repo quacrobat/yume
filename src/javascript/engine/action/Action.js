@@ -10,7 +10,7 @@
  * Creates an action.
  * 
  * @constructor
- * @param {string} type - The type of the action.
+ * @param {number} type - The type of the action.
  * @param {function} actionCallback - The action callback.
  * @param {string} label - The label of the action.
  */

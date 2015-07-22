@@ -36210,7 +36210,7 @@ global.window.onload = function(){
 	var bootstrap = new Bootstrap();
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./core/Bootstrap":16,"./etc/Utils":37}],6:[function(require,module,exports){
+},{"./core/Bootstrap":16,"./etc/Utils":39}],6:[function(require,module,exports){
 /**
  * @file Prototype for defining script-based actions.
  * 
@@ -36223,7 +36223,7 @@ global.window.onload = function(){
  * Creates an action.
  * 
  * @constructor
- * @param {string} type - The type of the action.
+ * @param {number} type - The type of the action.
  * @param {function} actionCallback - The action callback.
  * @param {string} label - The label of the action.
  */
@@ -36518,7 +36518,7 @@ ActionTrigger.prototype.constructor = ActionTrigger;
 
 
 module.exports = ActionTrigger;
-},{"../etc/Utils":37,"three":2}],9:[function(require,module,exports){
+},{"../etc/Utils":39,"three":2}],9:[function(require,module,exports){
 /**
  * @file The prototype InteractiveObject enables ordinary 3D-Objects to be interactive. 
  * Any interactive object is part of the collision-detection logic and ready for interacting with the player.
@@ -36824,7 +36824,7 @@ AudioBufferList.prototype.loadBuffer = function(file, index){
 
 module.exports = AudioBufferList;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"pubsub-js":1}],12:[function(require,module,exports){
+},{"../etc/Utils":39,"pubsub-js":1}],12:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype holds the central Web Audio context and
@@ -37261,7 +37261,7 @@ AudioManager.prototype._onErrorBackgroundMusic = function(){
 
 module.exports = new AudioManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Camera":17,"../etc/Utils":37,"./AudioBufferList":11,"./AudioListener":12,"./DynamicAudio":14,"pubsub-js":1}],14:[function(require,module,exports){
+},{"../core/Camera":17,"../etc/Utils":39,"./AudioBufferList":11,"./AudioListener":12,"./DynamicAudio":14,"pubsub-js":1}],14:[function(require,module,exports){
 /**
  * @file Prototype for creating dynamic, full-buffered audio objects.
  * 
@@ -38599,7 +38599,7 @@ FirstPersonControls.STRAFE = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":7,"../audio/AudioManager":13,"../core/Camera":17,"../core/Scene":21,"../etc/SettingsManager":35,"../etc/Utils":37,"../ui/UserInterfaceManager":55,"pubsub-js":1,"three":2}],16:[function(require,module,exports){
+},{"../action/ActionManager":7,"../audio/AudioManager":13,"../core/Camera":17,"../core/Scene":21,"../etc/SettingsManager":37,"../etc/Utils":39,"../ui/UserInterfaceManager":58,"pubsub-js":1,"three":2}],16:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting
@@ -38680,7 +38680,7 @@ Bootstrap.prototype._loadStage = function(){
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":15,"../etc/MultiplayerManager":30,"../etc/NetworkManager":31,"../etc/SaveGameManager":34,"../etc/Utils":37,"../ui/UserInterfaceManager":55,"./Environment":18,"./Renderer":20,"pubsub-js":1}],17:[function(require,module,exports){
+},{"../controls/FirstPersonControls":15,"../etc/MultiplayerManager":31,"../etc/NetworkManager":32,"../etc/SaveGameManager":36,"../etc/Utils":39,"../ui/UserInterfaceManager":58,"./Environment":18,"./Renderer":20,"pubsub-js":1}],17:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -39061,6 +39061,7 @@ var actionManager = require("../action/ActionManager");
 var audioManager = require("../audio/AudioManager");
 var animationManager = require("../etc/AnimationManager");
 var groupManager = require("../etc/GroupManager");
+var performanceManager = require("../etc/PerformanceManager");
 var textManager = require("../etc/TextManager");
 var saveGameManager = require("../etc/SaveGameManager");
 var settingsManager = require("../etc/SettingsManager");
@@ -39126,6 +39127,12 @@ function StageBase(stageId){
 		},
 		groupManager: {
 			value: groupManager,
+			configurable: false,
+			enumerable: true,
+			writable: false
+		},
+		performanceManager: {
+			value: performanceManager,
 			configurable: false,
 			enumerable: true,
 			writable: false
@@ -39216,13 +39223,16 @@ StageBase.prototype.destroy = function(){
 	
 	this.controls.removeGrounds();
 	
+	this.performanceManager.removeLODs();
+	
 	this.groupManager.removeGroups();
 	
 	this.textManager.removeTexts();
 	
-	// clear scene and renderer
+	// clear scene
 	this.scene.clear();
 	
+	// clear renderer
 	this.renderer.clear();
 	
 	// stop render loop
@@ -39234,11 +39244,21 @@ StageBase.prototype.destroy = function(){
  */
 StageBase.prototype._render = function(){
 	
+	// get delta time value
 	this._delta = this.timeManager.getDelta();
-	this.animationManager.update();
+	
+	// update controls
 	this.controls.update(this._delta);
+	
+	// update managers
+	this.animationManager.update();
+	this.performanceManager.update();
 	this.userInterfaceManager.update();
+	
+	// render frame
 	this.renderer.render(this.scene, this.camera);
+	
+	// save render ID
 	this._renderId = global.requestAnimationFrame(this._render);
 };
 
@@ -39256,7 +39276,7 @@ StageBase.prototype._changeStage = function(stageId, isSaveGame){
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":7,"../audio/AudioManager":13,"../controls/FirstPersonControls":15,"../etc/AnimationManager":26,"../etc/GroupManager":28,"../etc/SaveGameManager":34,"../etc/SettingsManager":35,"../etc/TextManager":36,"../etc/Utils":37,"../ui/UserInterfaceManager":55,"./Camera":17,"./Renderer":20,"./Scene":21,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
+},{"../action/ActionManager":7,"../audio/AudioManager":13,"../controls/FirstPersonControls":15,"../etc/AnimationManager":26,"../etc/GroupManager":28,"../etc/PerformanceManager":34,"../etc/SaveGameManager":36,"../etc/SettingsManager":37,"../etc/TextManager":38,"../etc/Utils":39,"../ui/UserInterfaceManager":58,"./Camera":17,"./Renderer":20,"./Scene":21,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -39281,6 +39301,7 @@ var Stage_005 = require("../stages/Stage_005");
 var Stage_006 = require("../stages/Stage_006");
 var Stage_007 = require("../stages/Stage_007");
 var Stage_008 = require("../stages/Stage_008");
+var Stage_009 = require("../stages/Stage_009");
 
 /**
  * Creates the stage manager.
@@ -39379,6 +39400,11 @@ StageManager.prototype.load = function(stageId) {
 		case "008":
 			
 			this._stage = new Stage_008();
+			break;
+			
+		case "009":
+			
+			this._stage = new Stage_009();
 			break;
 			
 		default:
@@ -39528,7 +39554,7 @@ StageManager.prototype._onLoadComplete = function(message, data){
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":34,"../etc/Utils":37,"../stages/Stage_001":39,"../stages/Stage_002":40,"../stages/Stage_003":41,"../stages/Stage_004":42,"../stages/Stage_005":43,"../stages/Stage_006":44,"../stages/Stage_007":45,"../stages/Stage_008":46,"../ui/UserInterfaceManager":55,"pubsub-js":1}],24:[function(require,module,exports){
+},{"../etc/SaveGameManager":36,"../etc/Utils":39,"../stages/Stage_001":41,"../stages/Stage_002":42,"../stages/Stage_003":43,"../stages/Stage_004":44,"../stages/Stage_005":45,"../stages/Stage_006":46,"../stages/Stage_007":47,"../stages/Stage_008":48,"../stages/Stage_009":49,"../ui/UserInterfaceManager":58,"pubsub-js":1}],24:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It 
@@ -40240,7 +40266,181 @@ JSONLoader.prototype.load = function(url, onLoad) {
 
 module.exports = JSONLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":37,"pubsub-js":1,"three":2}],30:[function(require,module,exports){
+},{"./Utils":39,"pubsub-js":1,"three":2}],30:[function(require,module,exports){
+/**
+ * @file This prototype is used for LOD handling. It is an 
+ * enhancement of the LOD functionality of three.js. Instead of
+ * switching directly between LOD objects, this prototype uses
+ * a linear blend over a short period of time. This approach 
+ * provides a smoother switch and so avoids popping.
+ * 
+ * see: Real-Time Rendering, Third Edition, Akenine-Möller/Haines/Hoffman
+ * Chapter 14.7.1, LOD Switching, Blend LODs
+ * 
+ * @author Human Interactive
+ */
+"use strict";
+
+var THREE = require("three");
+/**
+ * Creates a LOD instance.
+ * 
+ * @constructor 
+ * @augments THREE.LOD
+ * 
+ * @param {string} id - The id of the LOD instance.
+ * @param {number} mode - The transition mode.
+ * @param {Camera} camera - The camera object.
+ * @param {number} threshold - The threshold where the blending is done.
+ */
+function LOD(id, mode, camera, threshold) {
+	
+	THREE.LOD.call(this);
+
+	Object.defineProperties(this, {
+		idLOD: {
+			value: id,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		mode:{
+			value: mode || LOD.MODE.DIRECT,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		camera: {
+			value: camera,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		threshold: {
+			value: threshold || 0,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		}
+	});
+}
+
+LOD.prototype = Object.create(THREE.LOD.prototype);
+LOD.prototype.constructor = LOD;
+
+/**
+ * Updates the LOD instance. Overwrites the standard method of three.js.
+ * 
+ * @param {Camera} camera - The camera object.
+ */
+LOD.prototype.update = (function(){
+	
+	var positionCamera = new THREE.Vector3();
+	var positionObject = new THREE.Vector3();
+	
+	var distance = 0; 			// calculated distance
+	var edge = 0; 				// this distance marks the begin/end of the transition
+	var opacity = 0; 			// opacity value for blending
+	var index = 0; 				// index for loops
+	var currentObject = null;	// current object of the loop
+	var previousObject = null;	// previous object of the loop
+
+	return function () {
+		
+		if(this.mode === LOD.MODE.DIRECT){
+			
+			// process code of parent prototype
+			THREE.LOD.prototype.update.call(this, this.camera);	
+			
+		}else if(this.mode === LOD.MODE.SMOOTH){
+		
+			// process LOD selection only if there are at least two objects
+			if(this.objects.length > 1){
+					
+				// get position of the camera and the LOD instance
+				positionCamera.setFromMatrixPosition(this.camera.matrixWorld);
+				positionObject.setFromMatrixPosition(this.matrixWorld);
+	
+				// calculate distance between camera and LOD instance
+				distance = positionCamera.distanceTo(positionObject);
+	
+				// set first LOD object always visible and opaque
+				this.objects[0].object.visible = true;
+				this.objects[0].object.material.transparent = false;
+				this.objects[0].object.material.opacity = 1;
+	
+				// start the iteration with the second object in the array
+				for(index = 1; index < this.objects.length; index ++){
+					
+					// save current object
+					currentObject  = this.objects[index];
+					previousObject = this.objects[index - 1];
+					 
+					// if the calculated distance is smaller than the LOD-distance but greater than the threshold, 
+					// show the new object smoothly
+					if (distance < currentObject.distance && distance >= (currentObject.distance - this.threshold)){
+	
+						edge = currentObject.distance - this.threshold;
+						opacity = Math.min(( distance - edge ) / this.threshold, 1);
+	
+						currentObject.object.visible = true;
+						currentObject.object.material.transparent = true;	
+						currentObject.object.material.opacity = opacity;
+						
+						previousObject.object.material.transparent = false;
+						previousObject.object.material.opacity = 1;	
+	
+					// if the calculated distance is greater than the LOD-distance but smaller than the threshold, 
+					// hide the old object smoothly
+					}else if(distance >= currentObject.distance && distance < (currentObject.distance + this.threshold)) {
+						
+						edge = currentObject.distance + this.threshold;
+						opacity = Math.max((edge - distance) / this.threshold, 0);
+						
+						currentObject.object.material.opacity = 1;
+						currentObject.object.material.transparent = false;
+						
+						previousObject.object.material.transparent = true;
+						previousObject.object.material.opacity = opacity;	
+					}
+					
+					// if the calculated distance is greater than the LOD-distance plus the threshold, show/ hide fully the objects
+					else if(distance >= currentObject.distance + this.threshold){
+							
+						currentObject.object.visible = true;
+						previousObject.object.visible = false;
+					}
+					
+					// if no condition is true, exit the loop
+					// this happens when the camera is very close to the LOD instance so the object with the highest details is chosen
+					else {
+	
+						break;
+	
+					}
+	
+				}
+	
+				// hide all subsequent objects and reset values
+				// we use the index of the previous loop
+				for ( ; index < this.objects.length; index ++ ) {
+	
+					this.objects[ index ].object.visible = false;
+					this.objects[ index ].object.material.transparent = false;
+					this.objects[ index ].object.material.opacity = 1;
+				}
+			}
+		}
+	};
+}());
+
+LOD.MODE = {
+	DIRECT : 0,
+	SMOOTH : 1
+};
+
+module.exports = LOD;
+},{"three":2}],31:[function(require,module,exports){
 /**
  * @file This prototype manages the characters of
  * the other players.
@@ -40402,7 +40602,7 @@ MultiplayerManager.prototype._getPlayer = function(id){
 };
 
 module.exports = new MultiplayerManager();
-},{"../core/Scene":21,"../etc/Utils":37,"./Player":33,"pubsub-js":1,"three":2}],31:[function(require,module,exports){
+},{"../core/Scene":21,"../etc/Utils":39,"./Player":35,"pubsub-js":1,"three":2}],32:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -40618,7 +40818,7 @@ NetworkManager.SERVER = {
 
 module.exports = new NetworkManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Message":19,"../core/ThreadManager":25,"../etc/Utils":37,"pubsub-js":1,"ws":4}],32:[function(require,module,exports){
+},{"../core/Message":19,"../core/ThreadManager":25,"../etc/Utils":39,"pubsub-js":1,"ws":4}],33:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading 3D objects in object-format 
@@ -40709,7 +40909,148 @@ ObjectLoader.prototype.load = function (url, onLoad) {
 
 module.exports = ObjectLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":37,"pubsub-js":1,"three":2}],33:[function(require,module,exports){
+},{"./Utils":39,"pubsub-js":1,"three":2}],34:[function(require,module,exports){
+/**
+ * @file Interface for performance handling. This prototype is used in scenes
+ * to create e.g. LOD instances.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var LOD = require("./LOD");
+
+/**
+ * Creates the performance manager.
+ * 
+ * @constructor
+ */
+function PerformanceManager() {
+
+	Object.defineProperties(this, {
+		_lods : {
+			value : [],
+			configurable: false,
+			enumerable: false,
+			writable: false
+		}
+	});
+}
+
+/**
+ * Creates a LOD instance with direct transitions and stores it to the internal array.
+ * 
+ * @param {string} id - The id of the LOD instance.
+ * @param {Camera} camera - The camera object.
+ * 
+ * @returns {LOD} The new LOD instance.
+ */
+PerformanceManager.prototype.createDirectLOD = function(id, camera) {
+	
+	var lod = new LOD(id, LOD.MODE.DIRECT, camera);
+	this.addLOD(lod);
+	return lod;
+};
+
+/**
+ * Creates a LOD instance with smooth transitions and stores it to the internal array.
+ * 
+ * @param {string} id - The id of the LOD instance.
+ * @param {Camera} camera - The camera object.
+ * @param {number} threshold - The threshold where the blending is done.
+ * 
+ * @returns {LOD} The new LOD instance.
+ */
+PerformanceManager.prototype.createSmoothLOD = function(id, camera, threshold) {
+	
+	var lod = new LOD(id, LOD.MODE.SMOOTH, camera, threshold);
+	this.addLOD(lod);
+	return lod;
+};
+
+/**
+ * Adds a single LOD instance to the internal array.
+ * 
+ * @param {LOD} lod - The LOD instance to be added.
+ */
+PerformanceManager.prototype.addLOD = function(lod){
+	
+	this._lods.push(lod);
+};
+
+/**
+ * Removes a LOD instance from the internal array.
+ * 
+ * @param {LOD} lod - The LOD instance to be removed.
+ */
+PerformanceManager.prototype.removeLOD = function(lod) {
+
+	var index = this._lods.indexOf(lod);
+	this._lods.splice(index, 1);
+};
+
+/**
+ * Removes all LOD instances from the internal array.
+ */
+PerformanceManager.prototype.removeLODs = function() {
+
+	this._lods.length = 0;
+};
+
+/**
+ * Gets a LOD instance of the internal array.
+ * 
+ * @param {string} id - The id of the LOD instance.
+ * 
+ * @returns {LOD} The LOD instance.
+ */
+PerformanceManager.prototype.getLOD = function(id) {
+
+	var lod = null;
+	
+	for( var index = 0; index < this._lods.length; index++){
+		if(this._lods[index].idLOD === id){
+			lod =  this._lods[index];
+			break;
+		}
+	}
+	
+	if(lod === null){
+		throw "ERROR: PerformanceManager: LOD instance with ID " + id + " not existing.";
+	}else{
+		return lod;
+	}
+};
+
+/**
+ * Updates the performance manager.
+ */
+PerformanceManager.prototype.update = function(){
+	
+	this._updateLODs();
+	
+};
+
+/**
+ * Updates all LOD instances.
+ */
+PerformanceManager.prototype._updateLODs = (function(){
+	
+	var index = 0;
+	
+	return function(){
+		
+		for(index = 0; index < this._lods.length; index++){
+			
+			this._lods[index].update();
+		}
+	};
+	
+}());
+
+module.exports = new PerformanceManager();
+},{"./LOD":30}],35:[function(require,module,exports){
 /**
  * @file This prototype represents the character of
  * an other player.
@@ -40763,7 +41104,7 @@ Player.prototype = Object.create(THREE.Mesh.prototype);
 Player.prototype.constructor = Player;
 
 module.exports = Player;
-},{"three":2}],34:[function(require,module,exports){
+},{"three":2}],36:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire savegame-handling. This prototype is using
@@ -40840,7 +41181,7 @@ SaveGameManager.prototype.remove = function(){
 
 module.exports = new SaveGameManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],35:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire settings-handling. This prototype is used
@@ -41016,7 +41357,7 @@ SettingsManager.MOUSE = {
 
 module.exports = new SettingsManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":37,"three":2}],36:[function(require,module,exports){
+},{"./Utils":39,"three":2}],38:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire text-handling. This prototype is used in scenes
@@ -41172,7 +41513,7 @@ TextManager.prototype._searchAndRepalce = function(){
 
 module.exports = new TextManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":37,"pubsub-js":1}],37:[function(require,module,exports){
+},{"./Utils":39,"pubsub-js":1}],39:[function(require,module,exports){
 (function (global){
 /**
  * @file All helper and util functions are
@@ -41363,7 +41704,7 @@ Utils.CDN = {
 
 module.exports = new Utils();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Renderer":20}],38:[function(require,module,exports){
+},{"../core/Renderer":20}],40:[function(require,module,exports){
 (function (global){
 "use strict";
 /**
@@ -41503,7 +41844,7 @@ function Stats() {
 
 module.exports = Stats;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],39:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -41610,7 +41951,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],40:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],42:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -41772,7 +42113,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],41:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],43:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -41925,7 +42266,7 @@ function colorMesh(mesh){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],42:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],44:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42082,7 +42423,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],43:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],45:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42198,7 +42539,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],44:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],46:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42371,7 +42712,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],45:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],47:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42519,7 +42860,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],46:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],48:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42621,16 +42962,10 @@ Stage.prototype.setup = function(){
 	this.controls.addGround(ramp);
 	this.scene.add(ramp);
 	
-	// add trigger for ending
+	// add trigger for scene change
 	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
-
- 		self.userInterfaceManager.showModalDialog({
-			headline: "Modal.Headline",
-			button: "Modal.Button",
-			content: "Modal.Content"
-		});
 		
-		self.saveGameManager.remove();
+		self._changeStage("009", true);
 	});
 	stageTrigger.position.set(0, 7.5, 75);
 	this.scene.add(stageTrigger);
@@ -42672,7 +43007,175 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],47:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],49:[function(require,module,exports){
+"use strict";
+
+var THREE = require("three");
+var TWEEN = require("tween.js");
+
+var StageBase = require("../core/StageBase");
+var JSONLoader = require("../etc/JSONLoader");
+
+var self;
+
+function Stage(){
+	
+	StageBase.call(this, "009");
+	
+	self = this;
+}
+
+Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype.constructor = Stage;
+
+Stage.prototype.setup = function(){
+	
+	StageBase.prototype.setup.call(this);
+	
+	// controls setup
+	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
+	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
+	
+	// load texts
+	this.textManager.load(this.stageId);
+	
+	// add ground
+	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
+	var groundMaterial = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
+	
+	var ground = new THREE.Mesh(groundGeometry, groundMaterial);
+	ground.matrixAutoUpdate = false;
+	ground.rotation.x = -0.5 * Math.PI;
+	ground.updateMatrix();
+	ground.receiveShadow = true;
+	this.controls.addGround(ground);
+	this.scene.add(ground);
+	
+	// color faces
+	colorFaces(groundGeometry);
+	
+	// add sign
+	var signLoader = new JSONLoader();
+	signLoader.load("assets/models/sign.json",  function(geometry, materials) {
+		
+		self.settingsManager.adjustMaterials(materials, self.renderer);
+		
+		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
+		sign.position.set(0, 20, 75);
+		sign.rotation.set(0, Math.PI * -0.5, 0);
+		self.scene.add(sign);
+		
+		self.animationManager.createHoverAnimation(sign.position.y, 18, 23, 5000, TWEEN.Easing.Sinusoidal.InOut, function(){
+			sign.position.y = this.x;
+		}).start();
+	});
+	
+	// create spheres for LOD switching
+	var sphereOne = new THREE.Mesh(new THREE.SphereGeometry(10, 25, 25), new THREE.MeshLambertMaterial( { color: 0x6083c2} )); 
+	var sphereTwo = new THREE.Mesh(new THREE.SphereGeometry(10, 10, 10), new THREE.MeshLambertMaterial( { color: 0x6083c2} ));
+	var sphereThree = new THREE.Mesh(new THREE.SphereGeometry(10, 6, 6), new THREE.MeshLambertMaterial( { color: 0x6083c2} ));
+	
+	sphereOne.matrixAutoUpdate = false;
+	sphereTwo.matrixAutoUpdate = false;
+	sphereThree.matrixAutoUpdate = false;
+	
+	sphereOne.castShadow = true;
+	sphereTwo.castShadow = true;
+	sphereThree.castShadow = true;
+	
+	// create LOD instance
+	var lod = this.performanceManager.createSmoothLOD("sphere", this.camera, 10);
+	lod.matrixAutoUpdate = false;
+	lod.position.set(0,10,0);
+	lod.updateMatrix();
+	
+	// add objects and distances
+	lod.addLevel(sphereOne, 0);
+	lod.addLevel(sphereTwo, 60);
+	lod.addLevel(sphereThree, 100);
+	
+	this.scene.add(lod);
+	
+	// create circles to visualize the LOD distances
+	showLODCircles(this.scene);
+	
+	// light
+	var ambientLight = new THREE.AmbientLight(0x111111);
+	this.scene.add(ambientLight);
+	
+	var directionalLight = new THREE.DirectionalLight(0xffffff);
+	directionalLight.position.set(-100, 50, -100);
+	directionalLight.shadowCameraLeft = -40;
+	directionalLight.shadowCameraRight = 40;
+	directionalLight.shadowCameraTop = 40;
+	directionalLight.shadowCameraBottom = -40;
+	this.settingsManager.adjustLight(directionalLight);
+	this.scene.add(directionalLight);
+	
+	// add trigger for ending
+	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
+
+ 		self.userInterfaceManager.showModalDialog({
+			headline: "Modal.Headline",
+			button: "Modal.Button",
+			content: "Modal.Content"
+		});
+		
+		self.saveGameManager.remove();
+	});
+	stageTrigger.position.set(0, 0, 75);
+	this.scene.add(stageTrigger);
+	
+	// start rendering
+	this._render();
+};
+
+Stage.prototype.start = function(){
+	
+	StageBase.prototype.start.call(this);
+	
+	// set information panel text
+	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
+};
+
+Stage.prototype.destroy = function(){
+	
+	StageBase.prototype.destroy.call(this);
+};
+
+Stage.prototype._render = function(){
+	
+	StageBase.prototype._render.call(self);
+};
+
+//custom functions
+
+function colorFaces(geometry){
+	
+	for (var i = 0; i < geometry.faces.length; i ++){
+		
+		if(i % 2 === 0){
+			geometry.faces[i].color = new THREE.Color(0x6083c2);
+		}else{
+			geometry.faces[i].color = new THREE.Color(0x455066);
+		}
+	}
+}
+
+function showLODCircles(scene){
+	
+	var circleOne =  new THREE.Mesh(new THREE.CircleGeometry(60, 25), new THREE.MeshBasicMaterial( { wireframe: true} ));
+	var circleTwo =  new THREE.Mesh(new THREE.CircleGeometry(100, 25), new THREE.MeshBasicMaterial( { wireframe: true} ));
+	
+	circleOne.rotation.set(Math.PI * 0.5, 0, 0);
+	circleTwo.rotation.set(Math.PI * 0.5, 0, 0);
+	
+	scene.add(circleOne);
+	scene.add(circleTwo);
+}
+
+module.exports = Stage;
+},{"../core/StageBase":22,"../etc/JSONLoader":29,"three":2,"tween.js":3}],50:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -42846,7 +43349,7 @@ Chat.prototype._onMessage = function(message, data){
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":54,"pubsub-js":1}],48:[function(require,module,exports){
+},{"./UiElement":57,"pubsub-js":1}],51:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -42907,7 +43410,7 @@ InformationPanel.prototype.setText = function(textKey){
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":54}],49:[function(require,module,exports){
+},{"./UiElement":57}],52:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -42982,7 +43485,7 @@ InteractionLabel.prototype.hide = function(){
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":54}],50:[function(require,module,exports){
+},{"./UiElement":57}],53:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -43167,7 +43670,7 @@ LoadingScreen.prototype._onReady = function(message, data){
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":54,"pubsub-js":1}],51:[function(require,module,exports){
+},{"./UiElement":57,"pubsub-js":1}],54:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -43320,7 +43823,7 @@ Menu.prototype._publishFinishEvent = function(message, data){
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"./UiElement":54,"pubsub-js":1}],52:[function(require,module,exports){
+},{"../etc/Utils":39,"./UiElement":57,"pubsub-js":1}],55:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -43456,7 +43959,7 @@ ModalDialog.prototype._onClose = function(event){
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"./UiElement":54,"pubsub-js":1}],53:[function(require,module,exports){
+},{"../etc/Utils":39,"./UiElement":57,"pubsub-js":1}],56:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -43656,7 +44159,7 @@ TextScreen.prototype._printName = function(){
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":54}],54:[function(require,module,exports){
+},{"./UiElement":57}],57:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -43704,7 +44207,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":36}],55:[function(require,module,exports){
+},{"../etc/TextManager":38}],58:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in scenes
@@ -43991,4 +44494,4 @@ UserInterfaceManager.prototype._onKeyDown = function(event){
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"../lib/stats":38,"./Chat":47,"./InformationPanel":48,"./InteractionLabel":49,"./LoadingScreen":50,"./Menu":51,"./ModalDialog":52,"./TextScreen":53,"pubsub-js":1}]},{},[5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55]);
+},{"../etc/Utils":39,"../lib/stats":40,"./Chat":50,"./InformationPanel":51,"./InteractionLabel":52,"./LoadingScreen":53,"./Menu":54,"./ModalDialog":55,"./TextScreen":56,"pubsub-js":1}]},{},[5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58]);
