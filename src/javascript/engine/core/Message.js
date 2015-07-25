@@ -9,6 +9,9 @@
  * Creates a network message.
  * 
  * @constructor
+ * 
+ * @param {number} type - The type of the message.
+ * @param {string} content - The content of the message.
  */
 function Message(type, content){
 

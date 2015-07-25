@@ -30,9 +30,9 @@ Scene.prototype.constructor = Scene;
  * 
  */
 Scene.prototype.clear = function(){
-	for (var i = this.children.length - 1; i >= 0; i--) {
-		if(this.children[i].type !== "Controls" && this.children[i].type !== "Player"){
-			this.remove(this.children[i]);
+	for(var index = this.children.length - 1; index >= 0; index--){
+		if(this.children[index].type !== "Controls" && this.children[index].type !== "Player"){
+			this.remove(this.children[index]);
 		}
 	}
 };

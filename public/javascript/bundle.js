@@ -38599,7 +38599,7 @@ FirstPersonControls.STRAFE = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":7,"../audio/AudioManager":13,"../core/Camera":17,"../core/Scene":21,"../etc/SettingsManager":35,"../etc/Utils":37,"../ui/UserInterfaceManager":56,"pubsub-js":1,"three":2}],16:[function(require,module,exports){
+},{"../action/ActionManager":7,"../audio/AudioManager":13,"../core/Camera":17,"../core/Scene":21,"../etc/SettingsManager":35,"../etc/Utils":37,"../ui/UserInterfaceManager":60,"pubsub-js":1,"three":2}],16:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting
@@ -38680,7 +38680,7 @@ Bootstrap.prototype._loadStage = function(){
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":15,"../etc/MultiplayerManager":29,"../etc/NetworkManager":30,"../etc/SaveGameManager":34,"../etc/Utils":37,"../ui/UserInterfaceManager":56,"./Environment":18,"./Renderer":20,"pubsub-js":1}],17:[function(require,module,exports){
+},{"../controls/FirstPersonControls":15,"../etc/MultiplayerManager":29,"../etc/NetworkManager":30,"../etc/SaveGameManager":34,"../etc/Utils":37,"../ui/UserInterfaceManager":60,"./Environment":18,"./Renderer":20,"pubsub-js":1}],17:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -38890,6 +38890,9 @@ module.exports = new Environment();
  * Creates a network message.
  * 
  * @constructor
+ * 
+ * @param {number} type - The type of the message.
+ * @param {string} content - The content of the message.
  */
 function Message(type, content){
 
@@ -38929,7 +38932,8 @@ module.exports = Message;
 (function (global){
 /**
  * @file This prototype contains the entire logic 
- * for rendering-based functionality.
+ * for rendering-based functionality. The renderer can
+ * add and remove post-processing effects at any time.
  * 
  * @author Human Interactive
  */
@@ -38940,11 +38944,15 @@ var THREE = require("three");
 var PubSub = require("pubsub-js");
 
 var camera = require("./Camera");
+var scene = require("./Scene");
 
-var options = {
-	antialias : true,
-	alpha : true
-};
+var EffectComposer = require("../postprocessing/EffectComposer");
+var RenderPass = require("../postprocessing/RenderPass");
+var ShaderPass = require("../postprocessing/ShaderPass");
+
+var GrayscaleShader = require("../shader/GrayscaleShader");
+
+var utils = require("../etc/Utils");
 
 var self;
 
@@ -38952,36 +38960,145 @@ var self;
  * Creates a renderer.
  * 
  * @constructor
- * @augments THREE.WebGLRenderer
  * 
  */
-function Renderer(options){
-
-	THREE.WebGLRenderer.call(this, options);
+function Renderer(){
+	
+	Object.defineProperties(this, {
+		_renderer: {
+			value: null,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_composer: {
+			value: null,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_effectCount: {
+			value: 0,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		enablePostProcessing: {
+			value: true,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		}
+	});
 	
 	self = this;
 }
 
-Renderer.prototype = Object.create(THREE.WebGLRenderer.prototype);
-Renderer.prototype.constructor = Renderer;
-
 /**
- * Inits the renderer
+ * Inits the renderer.
  */
 Renderer.prototype.init = function(){
+	
+	// create WebGL renderer
+	this._renderer = new THREE.WebGLRenderer({antialias : true, alpha : true});
 
 	// this.setPixelRatio(window.devicePixelRatio);
-	this.setSize(global.window.innerWidth, global.window.innerHeight);
-	this.setClearColor(0x000000);
-	this.gammaInput = true;
-	this.gammaOutput = true;
-	this.shadowMapEnabled = true;
+	this._renderer.setSize(global.window.innerWidth, global.window.innerHeight);
+	this._renderer.setClearColor(0x000000);
+	this._renderer.gammaInput = true;
+	this._renderer.gammaOutput = true;
+	this._renderer.shadowMapEnabled = true;
 	
 	// append renderer to DOM
-	global.document.querySelector("#canvas-container").appendChild(this.domElement);
+	global.document.querySelector("#canvas-container").appendChild(this._renderer.domElement);
+	
+	// create effect composer for post-processing
+	this._composer = new EffectComposer(this._renderer);
 	
 	// set subscriptions
 	PubSub.subscribe("ui.event.resize", this._onResize);
+};
+
+/**
+ * Renders the frame.
+ * 
+ * @param {Scene} scene - The scene object.
+ * @param {Camera} camera - The camera object.
+ */
+Renderer.prototype.render = function(scene, camera){
+	
+	if(this._effectCount > 0 && this.enablePostProcessing === true){
+		this._composer.render();
+	}else{
+		this._renderer.render(scene, camera);
+	}
+};
+
+/**
+ * Prepares the renderer for post-processing. This method
+ * creates internally a custom framebuffer (render target).
+ */
+Renderer.prototype.preparePostProcessing = function(){
+	
+	this._composer.addPass(new RenderPass(scene, camera));
+	
+	if(utils.isDevelopmentModeActive() === true){
+		console.log("INFO: Renderer: Init post-processing for stage.");
+	}
+};
+
+/**
+ * Adds a grayscale effect via post-processing.
+ * 
+ * @param {boolean} renderToScreen - Determines screen or off-screen rendering.
+ * 
+ * @returns {ShaderPass} The new effect.
+ */
+Renderer.prototype.addGrayscaleEffect = function(renderToScreen){
+	
+	var effect = new ShaderPass(GrayscaleShader);
+	effect.renderToScreen = renderToScreen;
+	this._composer.addPass(effect);
+	this._effectCount++;
+	
+	if(utils.isDevelopmentModeActive() === true){
+		console.log("INFO: Renderer: Added grayscale effect.");
+	}
+	
+	return effect;
+};
+
+/**
+ * Removes a post-processing effect from the renderer.
+ *
+ * @param {ShaderPass} effect - The effect to remove.
+ */
+Renderer.prototype.removeEffect = function(effect){
+	
+	this._composer.removePass(effect);
+	this._effectCount--;
+};
+
+/**
+ * Clears the renderer.
+ */
+Renderer.prototype.clear = function(){
+	
+	// stop post-processing
+	this._composer.removePasses();
+	this._effectCount = 0;
+	
+	// clear the internal renderer
+	this._renderer.clear();
+};
+
+/**
+ * Returns the maximum anisotropic filter value.
+ * 
+ * @returns {number} The maximum anisotropic filter value.
+ */
+Renderer.prototype.getMaxAnisotropy = function(){
+	return this._renderer.getMaxAnisotropy();
 };
 
 /**
@@ -38991,14 +39108,19 @@ Renderer.prototype.init = function(){
  * @param {string} data - The data of the topic message.
  */
 Renderer.prototype._onResize = function(message, data){
-	self.setSize(global.window.innerWidth, global.window.innerHeight);
+	
+	// resize renderer and effect composer
+	self._renderer.setSize(global.window.innerWidth, global.window.innerHeight);
+	self._composer.setSize(global.window.innerWidth, global.window.innerHeight);
+	
+	// update camera dimensions
 	camera.aspect = global.window.innerWidth / global.window.innerHeight;
 	camera.updateProjectionMatrix();
 };
 
-module.exports = new Renderer(options);
+module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Camera":17,"pubsub-js":1,"three":2}],21:[function(require,module,exports){
+},{"../etc/Utils":37,"../postprocessing/EffectComposer":39,"../postprocessing/RenderPass":40,"../postprocessing/ShaderPass":41,"../shader/GrayscaleShader":42,"./Camera":17,"./Scene":21,"pubsub-js":1,"three":2}],21:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic 
  * for scene-based functionality.
@@ -39031,9 +39153,9 @@ Scene.prototype.constructor = Scene;
  * 
  */
 Scene.prototype.clear = function(){
-	for (var i = this.children.length - 1; i >= 0; i--) {
-		if(this.children[i].type !== "Controls" && this.children[i].type !== "Player"){
-			this.remove(this.children[i]);
+	for(var index = this.children.length - 1; index >= 0; index--){
+		if(this.children[index].type !== "Controls" && this.children[index].type !== "Player"){
+			this.remove(this.children[index]);
 		}
 	}
 };
@@ -39072,6 +39194,8 @@ var self;
  * Creates a stage.
  * 
  * @constructor
+ * 
+ * @param {string} stageId - The ID of the stage.
  */
 function StageBase(stageId){
 	
@@ -39217,7 +39341,7 @@ StageBase.prototype.destroy = function(){
 	this.controls.removeGrounds();
 	
 	this.performanceManager.removeLODs();
-	
+		
 	this.textManager.removeTexts();
 	
 	// clear scene
@@ -39267,7 +39391,7 @@ StageBase.prototype._changeStage = function(stageId, isSaveGame){
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":7,"../audio/AudioManager":13,"../controls/FirstPersonControls":15,"../etc/AnimationManager":26,"../etc/PerformanceManager":32,"../etc/SaveGameManager":34,"../etc/SettingsManager":35,"../etc/TextManager":36,"../etc/Utils":37,"../ui/UserInterfaceManager":56,"./Camera":17,"./Renderer":20,"./Scene":21,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
+},{"../action/ActionManager":7,"../audio/AudioManager":13,"../controls/FirstPersonControls":15,"../etc/AnimationManager":26,"../etc/PerformanceManager":32,"../etc/SaveGameManager":34,"../etc/SettingsManager":35,"../etc/TextManager":36,"../etc/Utils":37,"../ui/UserInterfaceManager":60,"./Camera":17,"./Renderer":20,"./Scene":21,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -39545,7 +39669,7 @@ StageManager.prototype._onLoadComplete = function(message, data){
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":34,"../etc/Utils":37,"../stages/Stage_001":39,"../stages/Stage_002":40,"../stages/Stage_003":41,"../stages/Stage_004":42,"../stages/Stage_005":43,"../stages/Stage_006":44,"../stages/Stage_007":45,"../stages/Stage_008":46,"../stages/Stage_009":47,"../ui/UserInterfaceManager":56,"pubsub-js":1}],24:[function(require,module,exports){
+},{"../etc/SaveGameManager":34,"../etc/Utils":37,"../stages/Stage_001":43,"../stages/Stage_002":44,"../stages/Stage_003":45,"../stages/Stage_004":46,"../stages/Stage_005":47,"../stages/Stage_006":48,"../stages/Stage_007":49,"../stages/Stage_008":50,"../stages/Stage_009":51,"../ui/UserInterfaceManager":60,"pubsub-js":1}],24:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It 
@@ -41587,6 +41711,398 @@ function Stats() {
 module.exports = Stats;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],39:[function(require,module,exports){
+/**
+ * @file This prototype manages effects for post-processing.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require("three");
+
+/**
+ * Creates the effect composer.
+ * 
+ * @constructor
+ * 
+ * @param {THREE.WebGLRenderer} renderer - The WebGL renderer.
+ * @param {THREE.WebGLRenderTarget} renderTarget - The render target.
+ */
+function EffectComposer(renderer, renderTarget){
+	
+	// if no render target is assigned, let's create a new one
+	if (renderTarget === undefined) {
+	
+		var width  = Math.floor(renderer.context.canvas.width  / renderer.getPixelRatio()) || 1;
+		var height = Math.floor(renderer.context.canvas.height / renderer.getPixelRatio()) || 1;
+		var parameters = {minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, stencilBuffer: false};
+	
+		renderTarget = new THREE.WebGLRenderTarget(width, height, parameters);
+	
+	}
+	
+	Object.defineProperties(this, {
+		_passes: {
+			value: [],
+			configurable: false,
+			enumerable: false,
+			writable: false
+		},
+		_renderer: {
+			value: renderer,
+			configurable: false,
+			enumerable: false,
+			writable: false
+		},
+		_renderTarget: {
+			value: renderTarget,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_writeBuffer: {
+			value: null,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_readBuffer: {
+			value: null,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		}
+	});
+	
+	this._writeBuffer = this._renderTarget;
+	this._readBuffer = this._renderTarget.clone();
+}
+
+/**
+ * Adds a pass to the internal array.
+ * 
+ * @param {object} pass - Render or shader pass.
+ */
+EffectComposer.prototype.addPass = function(pass){
+	
+	this._passes.push(pass);
+};
+
+/**
+ * Removes a pass from the internal array.
+ * 
+ * @param {object} pass - Render or shader pass.
+ */
+EffectComposer.prototype.removePass = function(pass){
+	
+	var index = this._passes.indexOf(pass);
+	this._passes.splice(index, 1);
+};
+
+/**
+ * Removes all Shader Passes from the internal array.
+ */
+EffectComposer.prototype.removePasses = function(){
+	
+	this._passes.length = 0;
+};
+
+/**
+ * Renders the scene with all effects.
+ */
+EffectComposer.prototype.render = (function(){
+	
+	var pass, index;
+	
+	return function(){
+		
+		// process all assigned passes and call their render method
+		for (index = 0; index < this._passes.length; index++) {
+
+			pass = this._passes[index];
+
+			if (pass.enabled === true){	
+
+				pass.render(this._renderer, this._writeBuffer, this._readBuffer);
+		
+				if (pass.needsSwap === true) {
+					
+					this._swapBuffers();
+				}
+			}
+		}
+	};
+
+}());
+
+/**
+ * Sets the size of the render target.
+ * 
+ * @param {number} width - The width of render target.
+ * @param {number} height - The height of render target.
+ */
+EffectComposer.prototype.setSize = function(width, height){
+	
+	var renderTarget = this._renderTarget.clone();
+
+	renderTarget.width = width;
+	renderTarget.height = height;
+
+	this._reset(renderTarget);
+};
+
+/**
+ * Swaps the internal framebuffers.
+ */
+EffectComposer.prototype._swapBuffers = (function(){
+	
+	var temp = null;
+	
+	return function(){
+		temp = this._readBuffer;
+		this._readBuffer = this._writeBuffer;
+		this._writeBuffer = temp;
+	};
+}());
+
+/**
+ * Resets the internal render targets/framebuffers.
+ * 
+ * @param {THREE.WebGLRenderTarget} renderTarget - The render target.
+ */
+EffectComposer.prototype._reset = function(renderTarget){
+	
+	if (renderTarget === undefined) {
+
+		renderTarget = this._renderTarget.clone();
+
+		renderTarget.width  = Math.floor(this._renderer.context.canvas.width  / this._renderer.getPixelRatio());
+		renderTarget.height = Math.floor(this._renderer.context.canvas.height / this._renderer.getPixelRatio());
+
+	}
+
+	this._renderTarget = renderTarget;
+
+	this._writeBuffer = this._renderTarget;
+	this._readBuffer = this._renderTarget.clone();
+};
+
+module.exports = EffectComposer;
+},{"three":2}],40:[function(require,module,exports){
+/**
+ * @file This prototype provides a render pass for post-processing.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require("three");
+
+/**
+ * Creates a render pass.
+ * 
+ * @constructor
+ * 
+ * @param {Scene} scene - The scene object.
+ * @param {Camera} camera - The camera object.
+ */
+function RenderPass(scene, camera){
+	
+	Object.defineProperties(this, {
+		_scene: {
+			value: scene,
+			configurable: false,
+			enumerable: false,
+			writable: false
+		},
+		_camera: {
+			value: camera,
+			configurable: false,
+			enumerable: false,
+			writable: false
+		},
+		enabled: {
+			value: true,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		needsSwap: {
+			value:  false,
+			configurable: false,
+			enumerable: true,
+			writable: false
+		}
+	});
+}
+
+/**
+ * Renders the scene to a custom framebuffer for further processing.
+ * 
+ * @param {THREE.WebGLRenderer} renderer - The WebGL renderer.
+ * @param {THREE.WebGLRenderTarget} writeBuffer - The target framebuffer.
+ * @param {THREE.WebGLRenderTarget} readBuffer - The source framebuffer.
+ */
+RenderPass.prototype.render = function(renderer, writeBuffer, readBuffer){
+
+	renderer.render(this._scene, this._camera, readBuffer, true);
+};
+
+module.exports = RenderPass;
+},{"three":2}],41:[function(require,module,exports){
+/**
+ * @file This prototype provides a shader pass for post-processing.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require("three");
+
+/**
+ * Creates a shader pass.
+ * 
+ * @constructor
+ * 
+ * @param {object} shader - The shader source code.
+ * @param {string} textureID - The name of the texture, which represents the readBuffer.
+ */
+function ShaderPass(shader, textureID){
+	
+	Object.defineProperties(this, {
+		_textureID: {
+			value: (textureID !== undefined) ? textureID : "tDiffuse",
+			configurable: false,
+			enumerable: false,
+			writable: false
+		},
+		_scene: {
+			value:  new THREE.Scene(),
+			configurable: false,
+			enumerable: false,
+			writable: false
+		},
+		_camera: {
+			value:  new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1),
+			configurable: false,
+			enumerable: false,
+			writable: false
+		},
+		uniforms: {
+			value:  THREE.UniformsUtils.clone(shader.uniforms),
+			configurable: false,
+			enumerable: true,
+			writable: false
+		},
+		enabled: {
+			value: true,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		needsSwap: {
+			value:  true,
+			configurable: false,
+			enumerable: true,
+			writable: false
+		},
+		renderToScreen: {
+			value:  false,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		}
+	});
+
+	var quad = new THREE.Mesh(new THREE.PlaneBufferGeometry(2, 2), null);
+	quad.material = new THREE.ShaderMaterial({
+
+        defines: shader.defines || {},
+		uniforms: this.uniforms,
+		vertexShader: shader.vertexShader,
+		fragmentShader: shader.fragmentShader
+
+	});
+	
+	this._scene.add(quad);
+}
+
+/**
+ * Renders a post processing effect.
+ * 
+ * @param {THREE.WebGLRenderer} renderer - The WebGL renderer.
+ * @param {THREE.WebGLRenderTarget} writeBuffer - The target framebuffer.
+ * @param {THREE.WebGLRenderTarget} readBuffer - The source framebuffer.
+ */
+ShaderPass.prototype.render = function(renderer, writeBuffer, readBuffer){
+	
+	if (this.uniforms[this._textureID] !== undefined) {
+
+		this.uniforms[this._textureID].value = readBuffer;
+	}
+	
+	// determine screen/ off-screen rendering
+	if (this.renderToScreen === true) {
+
+		renderer.render(this._scene, this._camera);
+		
+	} else {
+		
+		renderer.render(this._scene, this._camera, writeBuffer, false);
+	}
+};
+
+module.exports = ShaderPass;
+},{"three":2}],42:[function(require,module,exports){
+/**
+ * @file This shader transforms all colors to grayscale.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+module.exports  = {
+
+	uniforms: {
+
+		"tDiffuse": {type: "t", value: null}
+
+	},
+
+	vertexShader: [
+
+		"varying vec2 vUv;",
+
+		"void main(){",
+
+			"vUv = uv;",
+			"gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);",
+
+		"}"
+
+	].join("\n"),
+
+	fragmentShader: [
+
+		"uniform sampler2D tDiffuse;",
+
+		"varying vec2 vUv;",
+
+		"void main() {",
+		
+			"vec4 texel = texture2D(tDiffuse, vUv);",
+		    "float grayScale = dot(texel.xyz, vec3(0.299, 0.587, 0.114));",
+	        "gl_FragColor = vec4(grayScale, grayScale, grayScale, 1.0);",
+
+		"}"
+
+	].join("\n")
+};
+},{}],43:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -41693,7 +42209,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],40:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],44:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -41855,7 +42371,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],41:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],45:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42008,7 +42524,7 @@ function colorMesh(mesh){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],42:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],46:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42165,7 +42681,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],43:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],47:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42281,7 +42797,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],44:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],48:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42454,7 +42970,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],45:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],49:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42602,7 +43118,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],46:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],50:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42749,7 +43265,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],47:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],51:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42917,7 +43433,7 @@ function showLODCircles(scene){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],48:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],52:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -43091,7 +43607,7 @@ Chat.prototype._onMessage = function(message, data){
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":55,"pubsub-js":1}],49:[function(require,module,exports){
+},{"./UiElement":59,"pubsub-js":1}],53:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -43152,7 +43668,7 @@ InformationPanel.prototype.setText = function(textKey){
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":55}],50:[function(require,module,exports){
+},{"./UiElement":59}],54:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -43227,7 +43743,7 @@ InteractionLabel.prototype.hide = function(){
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":55}],51:[function(require,module,exports){
+},{"./UiElement":59}],55:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -43412,7 +43928,7 @@ LoadingScreen.prototype._onReady = function(message, data){
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":55,"pubsub-js":1}],52:[function(require,module,exports){
+},{"./UiElement":59,"pubsub-js":1}],56:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -43565,7 +44081,7 @@ Menu.prototype._publishFinishEvent = function(message, data){
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"./UiElement":55,"pubsub-js":1}],53:[function(require,module,exports){
+},{"../etc/Utils":37,"./UiElement":59,"pubsub-js":1}],57:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -43701,7 +44217,7 @@ ModalDialog.prototype._onClose = function(event){
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"./UiElement":55,"pubsub-js":1}],54:[function(require,module,exports){
+},{"../etc/Utils":37,"./UiElement":59,"pubsub-js":1}],58:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -43901,7 +44417,7 @@ TextScreen.prototype._printName = function(){
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":55}],55:[function(require,module,exports){
+},{"./UiElement":59}],59:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -43949,7 +44465,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":36}],56:[function(require,module,exports){
+},{"../etc/TextManager":36}],60:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in scenes
@@ -44236,4 +44752,4 @@ UserInterfaceManager.prototype._onKeyDown = function(event){
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"../lib/stats":38,"./Chat":48,"./InformationPanel":49,"./InteractionLabel":50,"./LoadingScreen":51,"./Menu":52,"./ModalDialog":53,"./TextScreen":54,"pubsub-js":1}]},{},[5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56]);
+},{"../etc/Utils":37,"../lib/stats":38,"./Chat":52,"./InformationPanel":53,"./InteractionLabel":54,"./LoadingScreen":55,"./Menu":56,"./ModalDialog":57,"./TextScreen":58,"pubsub-js":1}]},{},[5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60]);

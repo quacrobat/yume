@@ -29,6 +29,8 @@ var self;
  * Creates a stage.
  * 
  * @constructor
+ * 
+ * @param {string} stageId - The ID of the stage.
  */
 function StageBase(stageId){
 	
@@ -174,7 +176,7 @@ StageBase.prototype.destroy = function(){
 	this.controls.removeGrounds();
 	
 	this.performanceManager.removeLODs();
-	
+		
 	this.textManager.removeTexts();
 	
 	// clear scene
