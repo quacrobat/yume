@@ -36198,19 +36198,14 @@ if (WebSocket) ws.prototype = WebSocket.prototype;
 "use strict";
 
 var Bootstrap = require("./core/Bootstrap");
-var Utils = require("./etc/Utils");
 
 global.window.onload = function(){
-	
-	// get startup parameter
-	var parameters = JSON.parse(global.sessionStorage.getItem("parameters"));
-	Utils.setRuntimeInformation(parameters);
 	
 	// run engine
 	var bootstrap = new Bootstrap();
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./core/Bootstrap":16,"./etc/Utils":37}],6:[function(require,module,exports){
+},{"./core/Bootstrap":16}],6:[function(require,module,exports){
 /**
  * @file Prototype for defining script-based actions.
  * 
@@ -38599,7 +38594,7 @@ FirstPersonControls.STRAFE = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":7,"../audio/AudioManager":13,"../core/Camera":17,"../core/Scene":21,"../etc/SettingsManager":35,"../etc/Utils":37,"../ui/UserInterfaceManager":60,"pubsub-js":1,"three":2}],16:[function(require,module,exports){
+},{"../action/ActionManager":7,"../audio/AudioManager":13,"../core/Camera":17,"../core/Scene":21,"../etc/SettingsManager":35,"../etc/Utils":37,"../ui/UserInterfaceManager":62,"pubsub-js":1,"three":2}],16:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting
@@ -38622,11 +38617,13 @@ var multiplayerManager = require("../etc/MultiplayerManager");
 var utils = require("../etc/Utils");
 
 /**
- * Creates a Bootstrap instance, which inits the entire engine.
+ * Creates a Bootstrap instance, which initializes the entire application.
  * 
  * @constructor
  */
 function Bootstrap(){
+	
+	this._getStartupParameter();
 	
 	this._initEngine();
 	
@@ -38634,8 +38631,17 @@ function Bootstrap(){
 }
 
 /**
- * Inits the entire engine logic.
- * 
+ * Gets startup parameter from session context. The data were stored in the
+ * session context by the index.html.
+ */
+Bootstrap.prototype._getStartupParameter = function(){
+	
+	var parameters = JSON.parse(global.sessionStorage.getItem("parameters"));
+	utils.setRuntimeInformation(parameters);
+};
+
+/**
+ * Initializes the core engine logic.
  */
 Bootstrap.prototype._initEngine = function(){
 	
@@ -38660,8 +38666,9 @@ Bootstrap.prototype._initEngine = function(){
 };
 
 /**
- * Loads the stage.
- * 
+ * Loads the stage. The respective stage is determined by the
+ * save game data. If no save game is available, the engine uses
+ * the first stage.
  */
 Bootstrap.prototype._loadStage = function(){
 	
@@ -38680,7 +38687,7 @@ Bootstrap.prototype._loadStage = function(){
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":15,"../etc/MultiplayerManager":29,"../etc/NetworkManager":30,"../etc/SaveGameManager":34,"../etc/Utils":37,"../ui/UserInterfaceManager":60,"./Environment":18,"./Renderer":20,"pubsub-js":1}],17:[function(require,module,exports){
+},{"../controls/FirstPersonControls":15,"../etc/MultiplayerManager":29,"../etc/NetworkManager":30,"../etc/SaveGameManager":34,"../etc/Utils":37,"../ui/UserInterfaceManager":62,"./Environment":18,"./Renderer":20,"pubsub-js":1}],17:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -38951,6 +38958,8 @@ var RenderPass = require("../postprocessing/RenderPass");
 var ShaderPass = require("../postprocessing/ShaderPass");
 
 var GrayscaleShader = require("../shader/GrayscaleShader");
+var VignetteShader = require("../shader/VignetteShader");
+var GaussianBlurShader = require("../shader/GaussianBlurShader");
 
 var utils = require("../etc/Utils");
 
@@ -39002,7 +39011,7 @@ Renderer.prototype.init = function(){
 	// create WebGL renderer
 	this._renderer = new THREE.WebGLRenderer({antialias : true, alpha : true});
 
-	// this.setPixelRatio(window.devicePixelRatio);
+//	this._renderer.setPixelRatio(global.window.devicePixelRatio);
 	this._renderer.setSize(global.window.innerWidth, global.window.innerHeight);
 	this._renderer.setClearColor(0x000000);
 	this._renderer.gammaInput = true;
@@ -39069,6 +39078,80 @@ Renderer.prototype.addGrayscaleEffect = function(renderToScreen){
 };
 
 /**
+ * Adds a vignette effect via post-processing.
+ * 
+ * @param {boolean} renderToScreen - Determines screen or off-screen rendering.
+ * 
+ * @returns {ShaderPass} The new effect.
+ */
+Renderer.prototype.addVignetteEffect = function(renderToScreen){
+	
+	var effect = new ShaderPass(VignetteShader);
+	effect.renderToScreen = renderToScreen;
+	this._composer.addPass(effect);
+	this._effectCount++;
+	
+	if(utils.isDevelopmentModeActive() === true){
+		console.log("INFO: Renderer: Added vignette effect.");
+	}
+	
+	return effect;
+};
+
+/**
+ * Adds a horizontal gaussian blur effect via post-processing.
+ * 
+ * @param {boolean} renderToScreen - Determines screen or off-screen rendering.
+ * 
+ * @returns {ShaderPass} The new effect.
+ */
+Renderer.prototype.addHBlurEffect = function(renderToScreen){
+	
+	var effect = new ShaderPass(GaussianBlurShader);
+	effect.renderToScreen = renderToScreen;
+	
+	// set uniforms
+	effect.uniforms.direction.value = new THREE.Vector2(1.0, 0.0); // x-axis
+	effect.uniforms.blur.value = 1.0 / global.window.innerWidth;
+	
+	this._composer.addPass(effect);
+	this._effectCount++;
+	
+	if(utils.isDevelopmentModeActive() === true){
+		console.log("INFO: Renderer: Added horizonzal blur effect.");
+	}
+	
+	return effect;
+};
+
+/**
+ * Adds a vertical gaussian blur effect via post-processing.
+ * 
+ * @param {boolean} renderToScreen - Determines screen or off-screen rendering.
+ * 
+ * @returns {ShaderPass} The new effect.
+ */
+Renderer.prototype.addVBlurEffect = function(renderToScreen){
+	
+	var effect = new ShaderPass(GaussianBlurShader);
+	effect.renderToScreen = renderToScreen;
+	
+	// set uniforms
+	effect.uniforms.direction.value = new THREE.Vector2(0.0, 1.0); // y-axis
+	effect.uniforms.blur.value = 1.0 / global.window.innerHeight;
+	
+	this._composer.addPass(effect);
+	this._effectCount++;
+	
+	if(utils.isDevelopmentModeActive() === true){
+		console.log("INFO: Renderer: Added vertical blur effect.");
+	}
+	
+	return effect;
+};
+
+
+/**
  * Removes a post-processing effect from the renderer.
  *
  * @param {ShaderPass} effect - The effect to remove.
@@ -39120,7 +39203,7 @@ Renderer.prototype._onResize = function(message, data){
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"../postprocessing/EffectComposer":39,"../postprocessing/RenderPass":40,"../postprocessing/ShaderPass":41,"../shader/GrayscaleShader":42,"./Camera":17,"./Scene":21,"pubsub-js":1,"three":2}],21:[function(require,module,exports){
+},{"../etc/Utils":37,"../postprocessing/EffectComposer":39,"../postprocessing/RenderPass":40,"../postprocessing/ShaderPass":41,"../shader/GaussianBlurShader":42,"../shader/GrayscaleShader":43,"../shader/VignetteShader":44,"./Camera":17,"./Scene":21,"pubsub-js":1,"three":2}],21:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic 
  * for scene-based functionality.
@@ -39391,7 +39474,7 @@ StageBase.prototype._changeStage = function(stageId, isSaveGame){
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":7,"../audio/AudioManager":13,"../controls/FirstPersonControls":15,"../etc/AnimationManager":26,"../etc/PerformanceManager":32,"../etc/SaveGameManager":34,"../etc/SettingsManager":35,"../etc/TextManager":36,"../etc/Utils":37,"../ui/UserInterfaceManager":60,"./Camera":17,"./Renderer":20,"./Scene":21,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
+},{"../action/ActionManager":7,"../audio/AudioManager":13,"../controls/FirstPersonControls":15,"../etc/AnimationManager":26,"../etc/PerformanceManager":32,"../etc/SaveGameManager":34,"../etc/SettingsManager":35,"../etc/TextManager":36,"../etc/Utils":37,"../ui/UserInterfaceManager":62,"./Camera":17,"./Renderer":20,"./Scene":21,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -39669,7 +39752,7 @@ StageManager.prototype._onLoadComplete = function(message, data){
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":34,"../etc/Utils":37,"../stages/Stage_001":43,"../stages/Stage_002":44,"../stages/Stage_003":45,"../stages/Stage_004":46,"../stages/Stage_005":47,"../stages/Stage_006":48,"../stages/Stage_007":49,"../stages/Stage_008":50,"../stages/Stage_009":51,"../ui/UserInterfaceManager":60,"pubsub-js":1}],24:[function(require,module,exports){
+},{"../etc/SaveGameManager":34,"../etc/Utils":37,"../stages/Stage_001":45,"../stages/Stage_002":46,"../stages/Stage_003":47,"../stages/Stage_004":48,"../stages/Stage_005":49,"../stages/Stage_006":50,"../stages/Stage_007":51,"../stages/Stage_008":52,"../stages/Stage_009":53,"../ui/UserInterfaceManager":62,"pubsub-js":1}],24:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It 
@@ -41731,17 +41814,6 @@ var THREE = require("three");
  */
 function EffectComposer(renderer, renderTarget){
 	
-	// if no render target is assigned, let's create a new one
-	if (renderTarget === undefined) {
-	
-		var width  = Math.floor(renderer.context.canvas.width  / renderer.getPixelRatio()) || 1;
-		var height = Math.floor(renderer.context.canvas.height / renderer.getPixelRatio()) || 1;
-		var parameters = {minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, stencilBuffer: false};
-	
-		renderTarget = new THREE.WebGLRenderTarget(width, height, parameters);
-	
-	}
-	
 	Object.defineProperties(this, {
 		_passes: {
 			value: [],
@@ -41761,13 +41833,13 @@ function EffectComposer(renderer, renderTarget){
 			enumerable: false,
 			writable: true
 		},
-		_writeBuffer: {
+		_readBuffer: {
 			value: null,
 			configurable: false,
 			enumerable: false,
 			writable: true
 		},
-		_readBuffer: {
+		_writeBuffer: {
 			value: null,
 			configurable: false,
 			enumerable: false,
@@ -41775,8 +41847,19 @@ function EffectComposer(renderer, renderTarget){
 		}
 	});
 	
-	this._writeBuffer = this._renderTarget;
-	this._readBuffer = this._renderTarget.clone();
+	// if no render target is assigned, let's create a new one
+	if (this._renderTarget === undefined) {
+	
+		var width  = this._renderer.context.drawingBufferWidth;
+		var height = this._renderer.context.drawingBufferHeight;
+		var parameters = {minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, stencilBuffer: false};
+	
+		this._renderTarget = new THREE.WebGLRenderTarget(width, height, parameters);
+	}
+	
+	// create read/write buffers based the render target
+	this._readBuffer = this._renderTarget;
+	this._writeBuffer = this._renderTarget.clone();
 }
 
 /**
@@ -41846,8 +41929,8 @@ EffectComposer.prototype.setSize = function(width, height){
 	
 	var renderTarget = this._renderTarget.clone();
 
-	renderTarget.width = width;
-	renderTarget.height = height;
+	renderTarget.width = width  * this._renderer.getPixelRatio();
+	renderTarget.height = height * this._renderer.getPixelRatio();
 
 	this._reset(renderTarget);
 };
@@ -41877,15 +41960,16 @@ EffectComposer.prototype._reset = function(renderTarget){
 
 		renderTarget = this._renderTarget.clone();
 
-		renderTarget.width  = Math.floor(this._renderer.context.canvas.width  / this._renderer.getPixelRatio());
-		renderTarget.height = Math.floor(this._renderer.context.canvas.height / this._renderer.getPixelRatio());
+		renderTarget.width  = this._renderer.context.drawingBufferWidth;
+		renderTarget.height = this._renderer.context.drawingBufferHeight;
 
 	}
 
 	this._renderTarget = renderTarget;
 
-	this._writeBuffer = this._renderTarget;
-	this._readBuffer = this._renderTarget.clone();
+	this._readBuffer = this._renderTarget;
+	this._writeBuffer = this._renderTarget.clone();
+	
 };
 
 module.exports = EffectComposer;
@@ -42065,6 +42149,71 @@ module.exports = ShaderPass;
 
 "use strict";
 
+var THREE = require("three");
+
+module.exports  = {
+
+	uniforms: {
+
+		"tDiffuse": {type: "t", value: null},
+		"direction": {type: "v2", value: new THREE.Vector2()},  // the direction of the blur: (1.0, 0.0) -> x-axis blur, (0.0, 1.0) -> y-axis blur
+		"blur": {type: "f", value: 0.0},  // the amount to blur
+
+	},
+
+	vertexShader: [
+
+		"varying vec2 vUv;",
+
+		"void main(){",
+
+			"vUv = uv;",
+			
+			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+
+		"}"
+
+	].join("\n"),
+
+	fragmentShader: [
+
+		"uniform sampler2D tDiffuse;",
+		"uniform vec2 direction;",
+		"uniform float blur;",
+
+		"varying vec2 vUv;",
+
+		"void main() {",
+		
+			"vec4 result = vec4(0.0);",  // the result color
+				
+		    "result += texture2D(tDiffuse, vec2(vUv.x - 4.0 * blur * direction.x, vUv.y - 4.0 * blur * direction.y)) * 0.0162162162;",
+		    "result += texture2D(tDiffuse, vec2(vUv.x - 3.0 * blur * direction.x, vUv.y - 3.0 * blur * direction.y)) * 0.0540540541;",
+		    "result += texture2D(tDiffuse, vec2(vUv.x - 2.0 * blur * direction.x, vUv.y - 2.0 * blur * direction.y)) * 0.1216216216;",
+		    "result += texture2D(tDiffuse, vec2(vUv.x - 1.0 * blur * direction.x, vUv.y - 1.0 * blur * direction.y)) * 0.1945945946;",
+		    
+		    "result += texture2D(tDiffuse, vec2(vUv.x, vUv.y)) * 0.2270270270;",
+		    
+		    "result += texture2D(tDiffuse, vec2(vUv.x + 1.0 * blur * direction.x, vUv.y + 1.0 * blur * direction.y)) * 0.1945945946;",
+		    "result += texture2D(tDiffuse, vec2(vUv.x + 2.0 * blur * direction.x, vUv.y + 2.0 * blur * direction.y)) * 0.1216216216;",
+		    "result += texture2D(tDiffuse, vec2(vUv.x + 3.0 * blur * direction.x, vUv.y + 3.0 * blur * direction.y)) * 0.0540540541;",
+		    "result += texture2D(tDiffuse, vec2(vUv.x + 4.0 * blur * direction.x, vUv.y + 4.0 * blur * direction.y)) * 0.0162162162;",
+		    
+		    "gl_FragColor = result;",
+		   	    
+		"}"
+
+	].join("\n")
+};
+},{"three":2}],43:[function(require,module,exports){
+/**
+ * @file This shader transforms all colors to grayscale.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
 module.exports  = {
 
 	uniforms: {
@@ -42080,7 +42229,8 @@ module.exports  = {
 		"void main(){",
 
 			"vUv = uv;",
-			"gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);",
+			
+			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 
 		"}"
 
@@ -42094,15 +42244,78 @@ module.exports  = {
 
 		"void main() {",
 		
-			"vec4 texel = texture2D(tDiffuse, vUv);",
-		    "float grayScale = dot(texel.xyz, vec3(0.299, 0.587, 0.114));",
-	        "gl_FragColor = vec4(grayScale, grayScale, grayScale, 1.0);",
+			"vec4 texelColor = texture2D( tDiffuse, vUv );",  // sample the texture
+			
+		    "float grayscale = dot( texelColor.rgb, vec3( 0.299, 0.587, 0.114 ) );", // NTSC conversion weights
+		    
+	        "gl_FragColor = vec4( vec3( grayscale ), texelColor.a );", // apply grayscale to the respective rgb channels
 
 		"}"
 
 	].join("\n")
 };
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
+/**
+ * @file This shader creates a vignette effect.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+module.exports  = {
+
+	uniforms: {
+
+		"tDiffuse": {type: "t", value: null},   
+		"radius":   {type: "f", value: 0.75},	// radius of the vignette, where 0.5 results in a circle fitting the screen, between 0.0 and 1.0
+		"strength": {type: "f", value: 0.8},  	// strength of the vignette, between 0.0 and 1.0
+		"softness": {type: "f", value: 0.45}   	// softness of the vignette, between 0.0 and 1.0
+		
+	},
+
+	vertexShader: [
+
+		"varying vec2 vUv;",
+
+		"void main(){",
+
+			"vUv = uv;",
+			
+			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+
+		"}"
+
+	].join("\n"),
+
+	fragmentShader: [
+
+		"uniform sampler2D tDiffuse;",
+		"uniform float radius;",
+		"uniform float strength;",
+		"uniform float softness;",
+
+		"varying vec2 vUv;", 
+
+		"void main() {",
+		
+			"vec4 texelColor = texture2D (tDiffuse, vUv );",  // sample the texture
+			
+		    "vec2 position = vUv - vec2(0.5);", // determine the position from center, rather than lower-left (the origin).
+		    
+		    "float length = length(position);",  // determine the vector length of the center position
+		    
+		    "float vignette = 1.0 - smoothstep( radius - softness, radius, length);",    // the vignette effect, using smoothstep
+		    
+	        "texelColor.rgb = mix( texelColor.rgb, texelColor.rgb * vignette, strength );",
+	        
+	        "gl_FragColor = texelColor;",
+
+		"}"
+
+	].join("\n")
+};
+},{}],45:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42209,7 +42422,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],44:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],46:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42371,7 +42584,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],45:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],47:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42524,7 +42737,7 @@ function colorMesh(mesh){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],46:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],48:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42681,7 +42894,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],47:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],49:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42797,7 +43010,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],48:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],50:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42970,7 +43183,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],49:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],51:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43118,7 +43331,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],50:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],52:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43265,7 +43478,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],51:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],53:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43275,6 +43488,7 @@ var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
 
 var self;
+var plane;
 
 function Stage(){
 	
@@ -43384,6 +43598,14 @@ Stage.prototype.setup = function(){
 	stageTrigger.position.set(0, 0, 75);
 	this.scene.add(stageTrigger);
 	
+	// post processing
+	
+//	this.renderer.preparePostProcessing();
+//	this.renderer.addGrayscaleEffect();
+//	this.renderer.addHBlurEffect();
+//	this.renderer.addVBlurEffect();
+//	this.renderer.addVignetteEffect(true);
+	
 	// start rendering
 	this._render();
 };
@@ -43433,7 +43655,7 @@ function showLODCircles(scene){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],52:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],54:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -43607,7 +43829,7 @@ Chat.prototype._onMessage = function(message, data){
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":59,"pubsub-js":1}],53:[function(require,module,exports){
+},{"./UiElement":61,"pubsub-js":1}],55:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -43668,7 +43890,7 @@ InformationPanel.prototype.setText = function(textKey){
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":59}],54:[function(require,module,exports){
+},{"./UiElement":61}],56:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -43743,7 +43965,7 @@ InteractionLabel.prototype.hide = function(){
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":59}],55:[function(require,module,exports){
+},{"./UiElement":61}],57:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -43928,7 +44150,7 @@ LoadingScreen.prototype._onReady = function(message, data){
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":59,"pubsub-js":1}],56:[function(require,module,exports){
+},{"./UiElement":61,"pubsub-js":1}],58:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -44081,7 +44303,7 @@ Menu.prototype._publishFinishEvent = function(message, data){
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"./UiElement":59,"pubsub-js":1}],57:[function(require,module,exports){
+},{"../etc/Utils":37,"./UiElement":61,"pubsub-js":1}],59:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -44217,7 +44439,7 @@ ModalDialog.prototype._onClose = function(event){
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"./UiElement":59,"pubsub-js":1}],58:[function(require,module,exports){
+},{"../etc/Utils":37,"./UiElement":61,"pubsub-js":1}],60:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -44417,7 +44639,7 @@ TextScreen.prototype._printName = function(){
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":59}],59:[function(require,module,exports){
+},{"./UiElement":61}],61:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -44465,7 +44687,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":36}],60:[function(require,module,exports){
+},{"../etc/TextManager":36}],62:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in scenes
@@ -44752,4 +44974,4 @@ UserInterfaceManager.prototype._onKeyDown = function(event){
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"../lib/stats":38,"./Chat":52,"./InformationPanel":53,"./InteractionLabel":54,"./LoadingScreen":55,"./Menu":56,"./ModalDialog":57,"./TextScreen":58,"pubsub-js":1}]},{},[5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60]);
+},{"../etc/Utils":37,"../lib/stats":38,"./Chat":54,"./InformationPanel":55,"./InteractionLabel":56,"./LoadingScreen":57,"./Menu":58,"./ModalDialog":59,"./TextScreen":60,"pubsub-js":1}]},{},[5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62]);

@@ -19,11 +19,13 @@ var multiplayerManager = require("../etc/MultiplayerManager");
 var utils = require("../etc/Utils");
 
 /**
- * Creates a Bootstrap instance, which inits the entire engine.
+ * Creates a Bootstrap instance, which initializes the entire application.
  * 
  * @constructor
  */
 function Bootstrap(){
+	
+	this._getStartupParameter();
 	
 	this._initEngine();
 	
@@ -31,8 +33,17 @@ function Bootstrap(){
 }
 
 /**
- * Inits the entire engine logic.
- * 
+ * Gets startup parameter from session context. The data were stored in the
+ * session context by the index.html.
+ */
+Bootstrap.prototype._getStartupParameter = function(){
+	
+	var parameters = JSON.parse(global.sessionStorage.getItem("parameters"));
+	utils.setRuntimeInformation(parameters);
+};
+
+/**
+ * Initializes the core engine logic.
  */
 Bootstrap.prototype._initEngine = function(){
 	
@@ -57,8 +68,9 @@ Bootstrap.prototype._initEngine = function(){
 };
 
 /**
- * Loads the stage.
- * 
+ * Loads the stage. The respective stage is determined by the
+ * save game data. If no save game is available, the engine uses
+ * the first stage.
  */
 Bootstrap.prototype._loadStage = function(){
 	

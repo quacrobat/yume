@@ -7,6 +7,7 @@ var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
 
 var self;
+var plane;
 
 function Stage(){
 	
@@ -115,6 +116,14 @@ Stage.prototype.setup = function(){
 	});
 	stageTrigger.position.set(0, 0, 75);
 	this.scene.add(stageTrigger);
+	
+	// post processing
+	
+//	this.renderer.preparePostProcessing();
+//	this.renderer.addGrayscaleEffect();
+//	this.renderer.addHBlurEffect();
+//	this.renderer.addVBlurEffect();
+//	this.renderer.addVignetteEffect(true);
 	
 	// start rendering
 	this._render();

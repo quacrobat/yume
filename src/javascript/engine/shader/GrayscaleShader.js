@@ -21,7 +21,8 @@ module.exports  = {
 		"void main(){",
 
 			"vUv = uv;",
-			"gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);",
+			
+			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 
 		"}"
 
@@ -35,9 +36,11 @@ module.exports  = {
 
 		"void main() {",
 		
-			"vec4 texel = texture2D(tDiffuse, vUv);",
-		    "float grayScale = dot(texel.xyz, vec3(0.299, 0.587, 0.114));",
-	        "gl_FragColor = vec4(grayScale, grayScale, grayScale, 1.0);",
+			"vec4 texelColor = texture2D( tDiffuse, vUv );",  // sample the texture
+			
+		    "float grayscale = dot( texelColor.rgb, vec3( 0.299, 0.587, 0.114 ) );", // NTSC conversion weights
+		    
+	        "gl_FragColor = vec4( vec3( grayscale ), texelColor.a );", // apply grayscale to the respective rgb channels
 
 		"}"
 

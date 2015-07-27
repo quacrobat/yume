@@ -18,17 +18,6 @@ var THREE = require("three");
  */
 function EffectComposer(renderer, renderTarget){
 	
-	// if no render target is assigned, let's create a new one
-	if (renderTarget === undefined) {
-	
-		var width  = Math.floor(renderer.context.canvas.width  / renderer.getPixelRatio()) || 1;
-		var height = Math.floor(renderer.context.canvas.height / renderer.getPixelRatio()) || 1;
-		var parameters = {minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, stencilBuffer: false};
-	
-		renderTarget = new THREE.WebGLRenderTarget(width, height, parameters);
-	
-	}
-	
 	Object.defineProperties(this, {
 		_passes: {
 			value: [],
@@ -48,13 +37,13 @@ function EffectComposer(renderer, renderTarget){
 			enumerable: false,
 			writable: true
 		},
-		_writeBuffer: {
+		_readBuffer: {
 			value: null,
 			configurable: false,
 			enumerable: false,
 			writable: true
 		},
-		_readBuffer: {
+		_writeBuffer: {
 			value: null,
 			configurable: false,
 			enumerable: false,
@@ -62,8 +51,19 @@ function EffectComposer(renderer, renderTarget){
 		}
 	});
 	
-	this._writeBuffer = this._renderTarget;
-	this._readBuffer = this._renderTarget.clone();
+	// if no render target is assigned, let's create a new one
+	if (this._renderTarget === undefined) {
+	
+		var width  = this._renderer.context.drawingBufferWidth;
+		var height = this._renderer.context.drawingBufferHeight;
+		var parameters = {minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, stencilBuffer: false};
+	
+		this._renderTarget = new THREE.WebGLRenderTarget(width, height, parameters);
+	}
+	
+	// create read/write buffers based the render target
+	this._readBuffer = this._renderTarget;
+	this._writeBuffer = this._renderTarget.clone();
 }
 
 /**
@@ -133,8 +133,8 @@ EffectComposer.prototype.setSize = function(width, height){
 	
 	var renderTarget = this._renderTarget.clone();
 
-	renderTarget.width = width;
-	renderTarget.height = height;
+	renderTarget.width = width  * this._renderer.getPixelRatio();
+	renderTarget.height = height * this._renderer.getPixelRatio();
 
 	this._reset(renderTarget);
 };
@@ -164,15 +164,16 @@ EffectComposer.prototype._reset = function(renderTarget){
 
 		renderTarget = this._renderTarget.clone();
 
-		renderTarget.width  = Math.floor(this._renderer.context.canvas.width  / this._renderer.getPixelRatio());
-		renderTarget.height = Math.floor(this._renderer.context.canvas.height / this._renderer.getPixelRatio());
+		renderTarget.width  = this._renderer.context.drawingBufferWidth;
+		renderTarget.height = this._renderer.context.drawingBufferHeight;
 
 	}
 
 	this._renderTarget = renderTarget;
 
-	this._writeBuffer = this._renderTarget;
-	this._readBuffer = this._renderTarget.clone();
+	this._readBuffer = this._renderTarget;
+	this._writeBuffer = this._renderTarget.clone();
+	
 };
 
 module.exports = EffectComposer;
