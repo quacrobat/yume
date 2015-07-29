@@ -38594,7 +38594,7 @@ FirstPersonControls.STRAFE = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":7,"../audio/AudioManager":13,"../core/Camera":17,"../core/Scene":21,"../etc/SettingsManager":35,"../etc/Utils":37,"../ui/UserInterfaceManager":62,"pubsub-js":1,"three":2}],16:[function(require,module,exports){
+},{"../action/ActionManager":7,"../audio/AudioManager":13,"../core/Camera":17,"../core/Scene":21,"../etc/SettingsManager":35,"../etc/Utils":37,"../ui/UserInterfaceManager":63,"pubsub-js":1,"three":2}],16:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting
@@ -38687,7 +38687,7 @@ Bootstrap.prototype._loadStage = function(){
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":15,"../etc/MultiplayerManager":29,"../etc/NetworkManager":30,"../etc/SaveGameManager":34,"../etc/Utils":37,"../ui/UserInterfaceManager":62,"./Environment":18,"./Renderer":20,"pubsub-js":1}],17:[function(require,module,exports){
+},{"../controls/FirstPersonControls":15,"../etc/MultiplayerManager":29,"../etc/NetworkManager":30,"../etc/SaveGameManager":34,"../etc/Utils":37,"../ui/UserInterfaceManager":63,"./Environment":18,"./Renderer":20,"pubsub-js":1}],17:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -39474,7 +39474,7 @@ StageBase.prototype._changeStage = function(stageId, isSaveGame){
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":7,"../audio/AudioManager":13,"../controls/FirstPersonControls":15,"../etc/AnimationManager":26,"../etc/PerformanceManager":32,"../etc/SaveGameManager":34,"../etc/SettingsManager":35,"../etc/TextManager":36,"../etc/Utils":37,"../ui/UserInterfaceManager":62,"./Camera":17,"./Renderer":20,"./Scene":21,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
+},{"../action/ActionManager":7,"../audio/AudioManager":13,"../controls/FirstPersonControls":15,"../etc/AnimationManager":26,"../etc/PerformanceManager":32,"../etc/SaveGameManager":34,"../etc/SettingsManager":35,"../etc/TextManager":36,"../etc/Utils":37,"../ui/UserInterfaceManager":63,"./Camera":17,"./Renderer":20,"./Scene":21,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -39500,6 +39500,7 @@ var Stage_006 = require("../stages/Stage_006");
 var Stage_007 = require("../stages/Stage_007");
 var Stage_008 = require("../stages/Stage_008");
 var Stage_009 = require("../stages/Stage_009");
+var Stage_010 = require("../stages/Stage_010");
 
 /**
  * Creates the stage manager.
@@ -39603,6 +39604,11 @@ StageManager.prototype.load = function(stageId) {
 		case "009":
 			
 			this._stage = new Stage_009();
+			break;
+			
+		case "010":
+			
+			this._stage = new Stage_010();
 			break;
 			
 		default:
@@ -39752,7 +39758,7 @@ StageManager.prototype._onLoadComplete = function(message, data){
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":34,"../etc/Utils":37,"../stages/Stage_001":45,"../stages/Stage_002":46,"../stages/Stage_003":47,"../stages/Stage_004":48,"../stages/Stage_005":49,"../stages/Stage_006":50,"../stages/Stage_007":51,"../stages/Stage_008":52,"../stages/Stage_009":53,"../ui/UserInterfaceManager":62,"pubsub-js":1}],24:[function(require,module,exports){
+},{"../etc/SaveGameManager":34,"../etc/Utils":37,"../stages/Stage_001":45,"../stages/Stage_002":46,"../stages/Stage_003":47,"../stages/Stage_004":48,"../stages/Stage_005":49,"../stages/Stage_006":50,"../stages/Stage_007":51,"../stages/Stage_008":52,"../stages/Stage_009":53,"../stages/Stage_010":54,"../ui/UserInterfaceManager":63,"pubsub-js":1}],24:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It 
@@ -43488,7 +43494,6 @@ var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
 
 var self;
-var plane;
 
 function Stage(){
 	
@@ -43587,24 +43592,10 @@ Stage.prototype.setup = function(){
 	// add trigger for ending
 	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
 
- 		self.userInterfaceManager.showModalDialog({
-			headline: "Modal.Headline",
-			button: "Modal.Button",
-			content: "Modal.Content"
-		});
-		
-		self.saveGameManager.remove();
+		self._changeStage("010", true);
 	});
 	stageTrigger.position.set(0, 0, 75);
 	this.scene.add(stageTrigger);
-	
-	// post processing
-	
-//	this.renderer.preparePostProcessing();
-//	this.renderer.addGrayscaleEffect();
-//	this.renderer.addHBlurEffect();
-//	this.renderer.addVBlurEffect();
-//	this.renderer.addVignetteEffect(true);
 	
 	// start rendering
 	this._render();
@@ -43656,6 +43647,140 @@ function showLODCircles(scene){
 
 module.exports = Stage;
 },{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],54:[function(require,module,exports){
+"use strict";
+
+var THREE = require("three");
+var TWEEN = require("tween.js");
+
+var StageBase = require("../core/StageBase");
+var JSONLoader = require("../etc/JSONLoader");
+
+var self;
+
+function Stage(){
+	
+	StageBase.call(this, "010");
+	
+	self = this;
+}
+
+Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype.constructor = Stage;
+
+Stage.prototype.setup = function(){
+	
+	StageBase.prototype.setup.call(this);
+	
+	// controls setup
+	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
+	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
+	
+	// load texts
+	this.textManager.load(this.stageId);
+	
+	// add ground
+	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
+	var groundMaterial = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
+	
+	var ground = new THREE.Mesh(groundGeometry, groundMaterial);
+	ground.matrixAutoUpdate = false;
+	ground.rotation.x = -0.5 * Math.PI;
+	ground.updateMatrix();
+	ground.receiveShadow = true;
+	this.controls.addGround(ground);
+	this.scene.add(ground);
+	
+	// color faces
+	colorFaces(groundGeometry);
+	
+	// add sign
+	var signLoader = new JSONLoader();
+	signLoader.load("assets/models/sign.json",  function(geometry, materials) {
+		
+		self.settingsManager.adjustMaterials(materials, self.renderer);
+		
+		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
+		sign.position.set(0, 20, 75);
+		sign.rotation.set(0, Math.PI * -0.5, 0);
+		self.scene.add(sign);
+		
+		self.animationManager.createHoverAnimation(sign.position.y, 18, 23, 5000, TWEEN.Easing.Sinusoidal.InOut, function(){
+			sign.position.y = this.x;
+		}).start();
+	});
+	
+	// light
+	var ambientLight = new THREE.AmbientLight(0x111111);
+	this.scene.add(ambientLight);
+	
+	var directionalLight = new THREE.DirectionalLight(0xffffff);
+	directionalLight.position.set(-100, 50, -100);
+	directionalLight.shadowCameraLeft = -40;
+	directionalLight.shadowCameraRight = 40;
+	directionalLight.shadowCameraTop = 40;
+	directionalLight.shadowCameraBottom = -40;
+	this.settingsManager.adjustLight(directionalLight);
+	this.scene.add(directionalLight);
+	
+	// add trigger for ending
+	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
+
+ 		self.userInterfaceManager.showModalDialog({
+			headline: "Modal.Headline",
+			button: "Modal.Button",
+			content: "Modal.Content"
+		});
+		
+		self.saveGameManager.remove();
+	});
+	stageTrigger.position.set(0, 0, 75);
+	this.scene.add(stageTrigger);
+	
+	// post processing
+	this.renderer.preparePostProcessing();
+	this.renderer.addGrayscaleEffect();
+	this.renderer.addHBlurEffect();
+	this.renderer.addVBlurEffect();
+	this.renderer.addVignetteEffect(true);
+	
+	// start rendering
+	this._render();
+};
+
+Stage.prototype.start = function(){
+	
+	StageBase.prototype.start.call(this);
+	
+	// set information panel text
+	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
+};
+
+Stage.prototype.destroy = function(){
+	
+	StageBase.prototype.destroy.call(this);
+};
+
+Stage.prototype._render = function(){
+	
+	StageBase.prototype._render.call(self);
+};
+
+//custom functions
+
+function colorFaces(geometry){
+	
+	for (var i = 0; i < geometry.faces.length; i ++){
+		
+		if(i % 2 === 0){
+			geometry.faces[i].color = new THREE.Color(0x6083c2);
+		}else{
+			geometry.faces[i].color = new THREE.Color(0x455066);
+		}
+	}
+}
+
+module.exports = Stage;
+},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],55:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -43829,7 +43954,7 @@ Chat.prototype._onMessage = function(message, data){
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":61,"pubsub-js":1}],55:[function(require,module,exports){
+},{"./UiElement":62,"pubsub-js":1}],56:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -43890,7 +44015,7 @@ InformationPanel.prototype.setText = function(textKey){
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":61}],56:[function(require,module,exports){
+},{"./UiElement":62}],57:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -43965,7 +44090,7 @@ InteractionLabel.prototype.hide = function(){
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":61}],57:[function(require,module,exports){
+},{"./UiElement":62}],58:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -44150,7 +44275,7 @@ LoadingScreen.prototype._onReady = function(message, data){
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":61,"pubsub-js":1}],58:[function(require,module,exports){
+},{"./UiElement":62,"pubsub-js":1}],59:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -44303,7 +44428,7 @@ Menu.prototype._publishFinishEvent = function(message, data){
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"./UiElement":61,"pubsub-js":1}],59:[function(require,module,exports){
+},{"../etc/Utils":37,"./UiElement":62,"pubsub-js":1}],60:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -44439,7 +44564,7 @@ ModalDialog.prototype._onClose = function(event){
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"./UiElement":61,"pubsub-js":1}],60:[function(require,module,exports){
+},{"../etc/Utils":37,"./UiElement":62,"pubsub-js":1}],61:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -44639,7 +44764,7 @@ TextScreen.prototype._printName = function(){
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":61}],61:[function(require,module,exports){
+},{"./UiElement":62}],62:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -44687,7 +44812,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":36}],62:[function(require,module,exports){
+},{"../etc/TextManager":36}],63:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in scenes
@@ -44974,4 +45099,4 @@ UserInterfaceManager.prototype._onKeyDown = function(event){
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"../lib/stats":38,"./Chat":54,"./InformationPanel":55,"./InteractionLabel":56,"./LoadingScreen":57,"./Menu":58,"./ModalDialog":59,"./TextScreen":60,"pubsub-js":1}]},{},[5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62]);
+},{"../etc/Utils":37,"../lib/stats":38,"./Chat":55,"./InformationPanel":56,"./InteractionLabel":57,"./LoadingScreen":58,"./Menu":59,"./ModalDialog":60,"./TextScreen":61,"pubsub-js":1}]},{},[5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63]);

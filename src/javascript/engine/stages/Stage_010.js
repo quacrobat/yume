@@ -10,7 +10,7 @@ var self;
 
 function Stage(){
 	
-	StageBase.call(this, "009");
+	StageBase.call(this, "010");
 	
 	self = this;
 }
@@ -60,35 +60,6 @@ Stage.prototype.setup = function(){
 		}).start();
 	});
 	
-	// create spheres for LOD switching
-	var sphereOne = new THREE.Mesh(new THREE.SphereGeometry(10, 25, 25), new THREE.MeshLambertMaterial( { color: 0x6083c2} )); 
-	var sphereTwo = new THREE.Mesh(new THREE.SphereGeometry(10, 10, 10), new THREE.MeshLambertMaterial( { color: 0x6083c2} ));
-	var sphereThree = new THREE.Mesh(new THREE.SphereGeometry(10, 6, 6), new THREE.MeshLambertMaterial( { color: 0x6083c2} ));
-	
-	sphereOne.matrixAutoUpdate = false;
-	sphereTwo.matrixAutoUpdate = false;
-	sphereThree.matrixAutoUpdate = false;
-	
-	sphereOne.castShadow = true;
-	sphereTwo.castShadow = true;
-	sphereThree.castShadow = true;
-	
-	// create LOD instance
-	var lod = this.performanceManager.createSmoothLOD("sphere", this.camera, 10);
-	lod.matrixAutoUpdate = false;
-	lod.position.set(0,10,0);
-	lod.updateMatrix();
-	
-	// add objects and distances
-	lod.addLevel(sphereOne, 0);
-	lod.addLevel(sphereTwo, 60);
-	lod.addLevel(sphereThree, 100);
-	
-	this.scene.add(lod);
-	
-	// create circles to visualize the LOD distances
-	showLODCircles(this.scene);
-	
 	// light
 	var ambientLight = new THREE.AmbientLight(0x111111);
 	this.scene.add(ambientLight);
@@ -105,10 +76,23 @@ Stage.prototype.setup = function(){
 	// add trigger for ending
 	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
 
-		self._changeStage("010", true);
+ 		self.userInterfaceManager.showModalDialog({
+			headline: "Modal.Headline",
+			button: "Modal.Button",
+			content: "Modal.Content"
+		});
+		
+		self.saveGameManager.remove();
 	});
 	stageTrigger.position.set(0, 0, 75);
 	this.scene.add(stageTrigger);
+	
+	// post processing
+	this.renderer.preparePostProcessing();
+	this.renderer.addGrayscaleEffect();
+	this.renderer.addHBlurEffect();
+	this.renderer.addVBlurEffect();
+	this.renderer.addVignetteEffect(true);
 	
 	// start rendering
 	this._render();
@@ -144,18 +128,6 @@ function colorFaces(geometry){
 			geometry.faces[i].color = new THREE.Color(0x455066);
 		}
 	}
-}
-
-function showLODCircles(scene){
-	
-	var circleOne =  new THREE.Mesh(new THREE.CircleGeometry(60, 25), new THREE.MeshBasicMaterial( { wireframe: true} ));
-	var circleTwo =  new THREE.Mesh(new THREE.CircleGeometry(100, 25), new THREE.MeshBasicMaterial( { wireframe: true} ));
-	
-	circleOne.rotation.set(Math.PI * 0.5, 0, 0);
-	circleTwo.rotation.set(Math.PI * 0.5, 0, 0);
-	
-	scene.add(circleOne);
-	scene.add(circleTwo);
 }
 
 module.exports = Stage;
