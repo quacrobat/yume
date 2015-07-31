@@ -209,6 +209,8 @@ FirstPersonControls.prototype.setPosition = function(position) {
 	this._yawObject.position.x = position.x;
 	this._yawObject.position.y = position.y + this._height;
 	this._yawObject.position.z = position.z;
+	
+	this._yawObject.updateMatrixWorld();
 };
 
 /**
@@ -230,6 +232,8 @@ FirstPersonControls.prototype.setRotation = function(rotation) {
 	
 	this._pitchObject.rotation.x = rotation.x;
 	this._yawObject.rotation.y = rotation.y;
+	
+	this._yawObject.updateMatrixWorld();
 };
 
 /**

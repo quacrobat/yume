@@ -36513,7 +36513,7 @@ ActionTrigger.prototype.constructor = ActionTrigger;
 
 
 module.exports = ActionTrigger;
-},{"../etc/Utils":37,"three":2}],9:[function(require,module,exports){
+},{"../etc/Utils":38,"three":2}],9:[function(require,module,exports){
 /**
  * @file The prototype InteractiveObject enables ordinary 3D-Objects to be interactive. 
  * Any interactive object is part of the collision-detection logic and ready for interacting with the player.
@@ -36819,7 +36819,7 @@ AudioBufferList.prototype.loadBuffer = function(file, index){
 
 module.exports = AudioBufferList;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"pubsub-js":1}],12:[function(require,module,exports){
+},{"../etc/Utils":38,"pubsub-js":1}],12:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype holds the central Web Audio context and
@@ -37256,7 +37256,7 @@ AudioManager.prototype._onErrorBackgroundMusic = function(){
 
 module.exports = new AudioManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Camera":17,"../etc/Utils":37,"./AudioBufferList":11,"./AudioListener":12,"./DynamicAudio":14,"pubsub-js":1}],14:[function(require,module,exports){
+},{"../core/Camera":17,"../etc/Utils":38,"./AudioBufferList":11,"./AudioListener":12,"./DynamicAudio":14,"pubsub-js":1}],14:[function(require,module,exports){
 /**
  * @file Prototype for creating dynamic, full-buffered audio objects.
  * 
@@ -37736,6 +37736,8 @@ FirstPersonControls.prototype.setPosition = function(position) {
 	this._yawObject.position.x = position.x;
 	this._yawObject.position.y = position.y + this._height;
 	this._yawObject.position.z = position.z;
+	
+	this._yawObject.updateMatrixWorld();
 };
 
 /**
@@ -37757,6 +37759,8 @@ FirstPersonControls.prototype.setRotation = function(rotation) {
 	
 	this._pitchObject.rotation.x = rotation.x;
 	this._yawObject.rotation.y = rotation.y;
+	
+	this._yawObject.updateMatrixWorld();
 };
 
 /**
@@ -38594,7 +38598,7 @@ FirstPersonControls.STRAFE = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":7,"../audio/AudioManager":13,"../core/Camera":17,"../core/Scene":21,"../etc/SettingsManager":35,"../etc/Utils":37,"../ui/UserInterfaceManager":63,"pubsub-js":1,"three":2}],16:[function(require,module,exports){
+},{"../action/ActionManager":7,"../audio/AudioManager":13,"../core/Camera":17,"../core/Scene":21,"../etc/SettingsManager":36,"../etc/Utils":38,"../ui/UserInterfaceManager":64,"pubsub-js":1,"three":2}],16:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting
@@ -38609,6 +38613,7 @@ var PubSub = require("pubsub-js");
 
 var environment = require("./Environment");
 var renderer = require("./Renderer");
+var camera = require("./Camera");
 var controls = require("../controls/FirstPersonControls");
 var userInterfaceManager = require("../ui/UserInterfaceManager");
 var saveGameManager = require("../etc/SaveGameManager");
@@ -38649,6 +38654,7 @@ Bootstrap.prototype._initEngine = function(){
 	if(environment.check() === true){
 		
 		renderer.init();
+		camera.init();
 		controls.init();
 		userInterfaceManager.init();
 		
@@ -38687,7 +38693,7 @@ Bootstrap.prototype._loadStage = function(){
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":15,"../etc/MultiplayerManager":29,"../etc/NetworkManager":30,"../etc/SaveGameManager":34,"../etc/Utils":37,"../ui/UserInterfaceManager":63,"./Environment":18,"./Renderer":20,"pubsub-js":1}],17:[function(require,module,exports){
+},{"../controls/FirstPersonControls":15,"../etc/MultiplayerManager":30,"../etc/NetworkManager":31,"../etc/SaveGameManager":35,"../etc/Utils":38,"../ui/UserInterfaceManager":64,"./Camera":17,"./Environment":18,"./Renderer":20,"pubsub-js":1}],17:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -38698,6 +38704,9 @@ module.exports = Bootstrap;
 "use strict";
 
 var THREE = require("three");
+var PubSub = require("pubsub-js");
+
+var self;
 
 /**
  * Creates a perspective camera.
@@ -38708,15 +38717,52 @@ var THREE = require("three");
  */
 function Camera(){
 
-	 THREE.PerspectiveCamera.call(this, 45, global.window.innerWidth / global.window.innerHeight, 0.1, 1000);
+	 THREE.PerspectiveCamera.call(this);
+	 
+	 self = this;
 }
 
 Camera.prototype = Object.create(THREE.PerspectiveCamera.prototype);
 Camera.prototype.constructor = Camera;
 
+/**
+ * Inits the camera.
+ * 
+ * @param {number} fov - The field of view.
+ * @param {number} aspect - The aspect ratio.
+ * @param {number} near - The near distance.
+ * @param {number} far - The far distance.
+ */
+Camera.prototype.init = function(fov, aspect, near, far){
+	
+	this.fov = fov || 45;
+	this.aspect = aspect || global.window.innerWidth / global.window.innerHeight;
+	this.near = near || 0.1;
+	this.far = far || 1000;
+	
+	this.updateProjectionMatrix();
+	
+	// set subscriptions
+	PubSub.subscribe("ui.event.resize", this._onResize);
+};
+
+
+/**
+ * Resizes the camera.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {string} data - The data of the topic message.
+ */
+Camera.prototype._onResize = function(message, data){
+		
+	// update camera dimensions
+	self.aspect = global.window.innerWidth / global.window.innerHeight;
+	self.updateProjectionMatrix();
+};
+
 module.exports = new Camera();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"three":2}],18:[function(require,module,exports){
+},{"pubsub-js":1,"three":2}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype is used to detect all
@@ -38950,9 +38996,6 @@ module.exports = Message;
 var THREE = require("three");
 var PubSub = require("pubsub-js");
 
-var camera = require("./Camera");
-var scene = require("./Scene");
-
 var EffectComposer = require("../postprocessing/EffectComposer");
 var RenderPass = require("../postprocessing/RenderPass");
 var ShaderPass = require("../postprocessing/ShaderPass");
@@ -39033,21 +39076,26 @@ Renderer.prototype.init = function(){
  * 
  * @param {Scene} scene - The scene object.
  * @param {Camera} camera - The camera object.
+ * @param {THREE.WebGLRenderTarget} renderTarget - An optional render target.
+ * @param {boolean} forceClear - Should the renderer clear the scene before rendering?
  */
-Renderer.prototype.render = function(scene, camera){
+Renderer.prototype.render = function(scene, camera, renderTarget, forceClear){
 	
 	if(this._effectCount > 0 && this.enablePostProcessing === true){
 		this._composer.render();
 	}else{
-		this._renderer.render(scene, camera);
+		this._renderer.render(scene, camera, renderTarget, forceClear);
 	}
 };
 
 /**
  * Prepares the renderer for post-processing. This method
  * creates internally a custom framebuffer (render target).
+ * 
+ * @param {Scene} scene - The scene object.
+ * @param {Camera} camera - The camera object.
  */
-Renderer.prototype.preparePostProcessing = function(){
+Renderer.prototype.preparePostProcessing = function(scene, camera){
 	
 	this._composer.addPass(new RenderPass(scene, camera));
 	
@@ -39059,14 +39107,16 @@ Renderer.prototype.preparePostProcessing = function(){
 /**
  * Adds a grayscale effect via post-processing.
  * 
- * @param {boolean} renderToScreen - Determines screen or off-screen rendering.
+ * @param {object} options - The options for the effect.
  * 
  * @returns {ShaderPass} The new effect.
  */
-Renderer.prototype.addGrayscaleEffect = function(renderToScreen){
+Renderer.prototype.addGrayscaleEffect = function(options){
+	
+	options = options || {};
 	
 	var effect = new ShaderPass(GrayscaleShader);
-	effect.renderToScreen = renderToScreen;
+	effect.renderToScreen = options.renderToScreen;
 	this._composer.addPass(effect);
 	this._effectCount++;
 	
@@ -39080,14 +39130,22 @@ Renderer.prototype.addGrayscaleEffect = function(renderToScreen){
 /**
  * Adds a vignette effect via post-processing.
  * 
- * @param {boolean} renderToScreen - Determines screen or off-screen rendering.
+ * @param {object} options - The options for the effect.
  * 
  * @returns {ShaderPass} The new effect.
  */
-Renderer.prototype.addVignetteEffect = function(renderToScreen){
+Renderer.prototype.addVignetteEffect = function(options){
+	
+	options = options || {};
 	
 	var effect = new ShaderPass(VignetteShader);
-	effect.renderToScreen = renderToScreen;
+	effect.renderToScreen = options.renderToScreen;
+	
+	// set uniforms
+	effect.uniforms.radius.value   = options.radius   || effect.uniforms.radius.value;
+	effect.uniforms.strength.value = options.strength || effect.uniforms.strength.value;
+	effect.uniforms.softness.value = options.softness || effect.uniforms.softness.value;
+	
 	this._composer.addPass(effect);
 	this._effectCount++;
 	
@@ -39101,18 +39159,20 @@ Renderer.prototype.addVignetteEffect = function(renderToScreen){
 /**
  * Adds a horizontal gaussian blur effect via post-processing.
  * 
- * @param {boolean} renderToScreen - Determines screen or off-screen rendering.
+ * @param {object} options - The options for the effect.
  * 
  * @returns {ShaderPass} The new effect.
  */
-Renderer.prototype.addHBlurEffect = function(renderToScreen){
+Renderer.prototype.addHBlurEffect = function(options){
+	
+	options = options || {};
 	
 	var effect = new ShaderPass(GaussianBlurShader);
-	effect.renderToScreen = renderToScreen;
+	effect.renderToScreen = options.renderToScreen;
 	
 	// set uniforms
-	effect.uniforms.direction.value = new THREE.Vector2(1.0, 0.0); // x-axis
-	effect.uniforms.blur.value = 1.0 / global.window.innerWidth;
+	effect.uniforms.direction.value = new THREE.Vector2(1, 0); // x-axis
+	effect.uniforms.blur.value = (options.blur || 1) / global.window.innerWidth;
 	
 	this._composer.addPass(effect);
 	this._effectCount++;
@@ -39127,18 +39187,20 @@ Renderer.prototype.addHBlurEffect = function(renderToScreen){
 /**
  * Adds a vertical gaussian blur effect via post-processing.
  * 
- * @param {boolean} renderToScreen - Determines screen or off-screen rendering.
+ * @param {object} options - The options for the effect.
  * 
  * @returns {ShaderPass} The new effect.
  */
-Renderer.prototype.addVBlurEffect = function(renderToScreen){
+Renderer.prototype.addVBlurEffect = function(options){
+	
+	options = options || {};
 	
 	var effect = new ShaderPass(GaussianBlurShader);
-	effect.renderToScreen = renderToScreen;
+	effect.renderToScreen = options.renderToScreen;
 	
 	// set uniforms
-	effect.uniforms.direction.value = new THREE.Vector2(0.0, 1.0); // y-axis
-	effect.uniforms.blur.value = 1.0 / global.window.innerHeight;
+	effect.uniforms.direction.value = new THREE.Vector2(0, 1); // y-axis
+	effect.uniforms.blur.value = (options.blur || 1) / global.window.innerHeight;
 	
 	this._composer.addPass(effect);
 	this._effectCount++;
@@ -39185,7 +39247,36 @@ Renderer.prototype.getMaxAnisotropy = function(){
 };
 
 /**
- * Resizes the camera and render-dimensions.
+ * Returns the clear color of the renderer.
+ * 
+ * @returns {THREE.Color} The clear color.
+ */
+Renderer.prototype.getClearColor = function(){
+	return this._renderer.getClearColor();
+};
+
+/**
+ * Sets the clear color and alpha of the renderer.
+ *
+ * @param {THREE.Color} color - The clear color.
+ * @param {number} alpha - The clear alpha.
+ */
+Renderer.prototype.setClearColor = function(color, alpha){
+	
+	this._renderer.setClearColor(color, alpha);
+};
+
+/**
+ * Returns the clear alpha value of the renderer.
+ * 
+ * @returns {number} The clear alpha.
+ */
+Renderer.prototype.getClearAlpha = function(){
+	return this._renderer.getClearAlpha();
+};
+
+/**
+ * Resizes the render-dimensions.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {string} data - The data of the topic message.
@@ -39195,15 +39286,11 @@ Renderer.prototype._onResize = function(message, data){
 	// resize renderer and effect composer
 	self._renderer.setSize(global.window.innerWidth, global.window.innerHeight);
 	self._composer.setSize(global.window.innerWidth, global.window.innerHeight);
-	
-	// update camera dimensions
-	camera.aspect = global.window.innerWidth / global.window.innerHeight;
-	camera.updateProjectionMatrix();
 };
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"../postprocessing/EffectComposer":39,"../postprocessing/RenderPass":40,"../postprocessing/ShaderPass":41,"../shader/GaussianBlurShader":42,"../shader/GrayscaleShader":43,"../shader/VignetteShader":44,"./Camera":17,"./Scene":21,"pubsub-js":1,"three":2}],21:[function(require,module,exports){
+},{"../etc/Utils":38,"../postprocessing/EffectComposer":40,"../postprocessing/RenderPass":41,"../postprocessing/ShaderPass":42,"../shader/GaussianBlurShader":43,"../shader/GrayscaleShader":44,"../shader/VignetteShader":45,"pubsub-js":1,"three":2}],21:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic 
  * for scene-based functionality.
@@ -39424,6 +39511,8 @@ StageBase.prototype.destroy = function(){
 	this.controls.removeGrounds();
 	
 	this.performanceManager.removeLODs();
+	
+	this.performanceManager.removeImpostors();
 		
 	this.textManager.removeTexts();
 	
@@ -39474,7 +39563,7 @@ StageBase.prototype._changeStage = function(stageId, isSaveGame){
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":7,"../audio/AudioManager":13,"../controls/FirstPersonControls":15,"../etc/AnimationManager":26,"../etc/PerformanceManager":32,"../etc/SaveGameManager":34,"../etc/SettingsManager":35,"../etc/TextManager":36,"../etc/Utils":37,"../ui/UserInterfaceManager":63,"./Camera":17,"./Renderer":20,"./Scene":21,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
+},{"../action/ActionManager":7,"../audio/AudioManager":13,"../controls/FirstPersonControls":15,"../etc/AnimationManager":26,"../etc/PerformanceManager":33,"../etc/SaveGameManager":35,"../etc/SettingsManager":36,"../etc/TextManager":37,"../etc/Utils":38,"../ui/UserInterfaceManager":64,"./Camera":17,"./Renderer":20,"./Scene":21,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -39758,7 +39847,7 @@ StageManager.prototype._onLoadComplete = function(message, data){
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":34,"../etc/Utils":37,"../stages/Stage_001":45,"../stages/Stage_002":46,"../stages/Stage_003":47,"../stages/Stage_004":48,"../stages/Stage_005":49,"../stages/Stage_006":50,"../stages/Stage_007":51,"../stages/Stage_008":52,"../stages/Stage_009":53,"../stages/Stage_010":54,"../ui/UserInterfaceManager":63,"pubsub-js":1}],24:[function(require,module,exports){
+},{"../etc/SaveGameManager":35,"../etc/Utils":38,"../stages/Stage_001":46,"../stages/Stage_002":47,"../stages/Stage_003":48,"../stages/Stage_004":49,"../stages/Stage_005":50,"../stages/Stage_006":51,"../stages/Stage_007":52,"../stages/Stage_008":53,"../stages/Stage_009":54,"../stages/Stage_010":55,"../ui/UserInterfaceManager":64,"pubsub-js":1}],24:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It 
@@ -40129,6 +40218,306 @@ module.exports = new AnimationManager();
 },{"tween.js":3}],27:[function(require,module,exports){
 (function (global){
 /**
+ * @file This prototype handles all stuff for impostors. An impostor
+ * is a billboard that is created on the fly by rendering a complex
+ * object from the current viewpoint into an image texture, which is mapped
+ * on the billboard.
+ * 
+ * see: Real-Time Rendering, Third Edition, Akenine-Möller/Haines/Hoffman
+ * Chapter 10.7.1, Impostors
+ * 
+ * @author Human Interactive
+ */
+"use strict";
+
+var THREE = require("three");
+/**
+ * Creates a an impostor.
+ * 
+ * @constructor 
+ * @augments THREE.Mesh
+ * 
+ * @param {THREE.Object3D} object - The source 3D object of the impostor.
+ * @param {number} resolution - The resolution of the rendered texture.
+ */
+function Impostor(id, object, resolution) {
+	
+	THREE.Mesh.call(this);
+
+	Object.defineProperties(this, {
+		idImpostor: {
+			value: id,
+			configurable: false,
+			enumerable: true,
+			writable: false
+		},
+		object: {
+			value: object,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		resolution: {
+			value: resolution || 128,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		_renderTarget: {
+			value: null,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		_boundingBox: {
+			value: new THREE.Box3(),
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_scene: {
+			value: new THREE.Scene(),
+			configurable: false,
+			enumerable: false,
+			writable: true
+		}
+	});
+	
+	// create render target
+	this._renderTarget = new THREE.WebGLRenderTarget( this.resolution, this.resolution, {format: THREE.RGBAFormat});
+	
+	// prevent automatic update of model matrix
+	this.matrixAutoUpdate = false;
+}
+
+Impostor.prototype = Object.create(THREE.Mesh.prototype);
+Impostor.prototype.constructor = Impostor;
+
+/**
+ * Generates the Impostor.
+ * 
+ * @param {Renderer} renderer - The renderer object.
+ * @param {Camera} camera - The camera object.
+ * @param {object} lights - An array with all lights of the current stage.
+ */
+Impostor.prototype.generate = function(renderer, camera, lights){
+
+	this._computeBoundingBox(camera);
+	
+	this._prepareCamera(camera);
+	
+	this._prepareProjectionMatrix(camera);
+	
+	this._prepareScene(lights);
+	
+	this._render(renderer, camera);
+	
+	this._createImpostor();
+	
+	this._clear();
+};
+
+/**
+ * Computes the axis-aligned bounding box of the object.
+ */
+Impostor.prototype._computeBoundingBox = function(camera){
+
+	this._boundingBox.setFromObject(this.object);
+};
+
+/**
+ * Prepares the camera for rendering.
+ * 
+ * @param {Camera} camera - The camera object.
+ */
+Impostor.prototype._prepareCamera = function(camera){
+
+	// the camera should look at the center of the AABB
+	camera.lookAt(this._boundingBox.center());
+	
+	// compute new matrices
+	camera.updateMatrix();
+	camera.updateMatrixWorld();
+	camera.matrixWorldInverse.getInverse(camera.matrixWorld);
+};
+
+/**
+ * Prepares the projection matrix. First, the bounding rectangle of the projected
+ * bounding box is calculated. This rectangle is used to create a new frustum, which encloses
+ * the the bounding box as much as possible.
+ * 
+ * @param {Camera} camera - The camera object.
+ */
+Impostor.prototype._prepareProjectionMatrix = function(camera){
+
+	var points = [
+	              new THREE.Vector3(),
+	              new THREE.Vector3(),
+	              new THREE.Vector3(),
+	              new THREE.Vector3(),
+	              new THREE.Vector3(),
+	              new THREE.Vector3(),
+	              new THREE.Vector3(),
+	              new THREE.Vector3()
+	              ];
+	
+	var minX = 0, minY = 0, maxX = 0, maxY = 0;
+	
+	// calculate each point of the bounding box
+	points[0].set( this._boundingBox.min.x, this._boundingBox.min.y, this._boundingBox.min.z );
+	points[1].set( this._boundingBox.min.x, this._boundingBox.min.y, this._boundingBox.max.z );
+	points[2].set( this._boundingBox.min.x, this._boundingBox.max.y, this._boundingBox.min.z );
+	points[3].set( this._boundingBox.min.x, this._boundingBox.max.y, this._boundingBox.max.z );
+	points[4].set( this._boundingBox.max.x, this._boundingBox.min.y, this._boundingBox.min.z );
+	points[5].set( this._boundingBox.max.x, this._boundingBox.min.y, this._boundingBox.max.z );
+	points[6].set( this._boundingBox.max.x, this._boundingBox.max.y, this._boundingBox.min.z );
+	points[7].set( this._boundingBox.max.x, this._boundingBox.max.y, this._boundingBox.max.z );
+	
+	// transform and project each point to get clip coordinates
+	points[0].applyMatrix4( camera.matrixWorldInverse ).applyProjection( camera.projectionMatrix );
+	points[1].applyMatrix4( camera.matrixWorldInverse ).applyProjection( camera.projectionMatrix );
+	points[2].applyMatrix4( camera.matrixWorldInverse ).applyProjection( camera.projectionMatrix );
+	points[3].applyMatrix4( camera.matrixWorldInverse ).applyProjection( camera.projectionMatrix );
+	points[4].applyMatrix4( camera.matrixWorldInverse ).applyProjection( camera.projectionMatrix );
+	points[5].applyMatrix4( camera.matrixWorldInverse ).applyProjection( camera.projectionMatrix );
+	points[6].applyMatrix4( camera.matrixWorldInverse ).applyProjection( camera.projectionMatrix );
+	points[7].applyMatrix4( camera.matrixWorldInverse ).applyProjection( camera.projectionMatrix );
+	
+	// determine min/max values of x and y coordinate
+	for(var index = 0; index < points.length; index++){
+		
+		minX = Math.min(minX, points[index].x);
+		minY = Math.min(minY, points[index].y);
+		
+		maxX = Math.max(maxX, points[index].x);
+		maxY = Math.max(maxY, points[index].y);
+	}
+	
+	// create new projection matrix
+	var projectionMatrix = new THREE.Matrix4();
+	
+	// calculate new frustum
+	var frustumHeight = camera.near * Math.tan( THREE.Math.degToRad( camera.fov * 0.5 ) );
+	var frustumWidth = frustumHeight * ( global.window.innerWidth / global.window.innerHeight );
+	
+	projectionMatrix.makeFrustum( frustumWidth * minX, 
+								  frustumWidth * maxX,  
+								  frustumHeight * minY, 
+								  frustumHeight * maxY, 
+								  camera.near, 
+								  camera.far );
+	
+	// assign new matrix
+	camera.projectionMatrix = projectionMatrix;
+};
+
+/**
+ * Prepares the scene for rendering. This method ensures, that the actual object and
+ * the entire lightning of the scene is part of the rendering.
+ *
+ * @param {object} lights - An array with all lights of the current scene.
+ */
+Impostor.prototype._prepareScene = function(lights){
+
+	// add object
+	this.object = this.object.clone();
+	
+	// ensure its visible
+	this.object.visible = true;
+
+	// add to scene
+	this._scene.add(this.object);
+	
+	// add all light source
+	Array.prototype.push.apply(this._scene.children, lights);
+};
+
+/**
+ * Renders the scene to a render target (texture).
+ *
+ * @param {Renderer} renderer - The renderer object.
+ * @param {Camera} camera - The camera object.
+ */
+Impostor.prototype._render = function(renderer, camera){
+	
+	// save existing clear color and alpha
+	var clearColor = renderer.getClearColor();
+	var clearAlpha = renderer.getClearAlpha();
+	
+	// clear renderer so the image will have transparency
+	renderer.setClearColor(0x000000, 0);
+	
+	// render to target
+	renderer.render(this._scene, camera, this._renderTarget, true);
+	
+	// restore clear values
+	renderer.setClearColor(clearColor, clearAlpha);
+};
+
+/**
+ * Updates an impostor. The impostor is handled like a viewpoint-oriented, axis-aligned billboard.
+ * 
+ * see: Real-Time Rendering, Third Edition, Akenine-Möller/Haines/Hoffman
+ * Chapter 10.6.2, World-Oriented Billboards
+ * 
+ * @param {THREE.Vector3} cameraWorldPosition - The world position of the camera.
+ */
+Impostor.prototype.update = (function(){
+	
+	var front = new THREE.Vector3();
+	var up = new THREE.Vector3(0, 1, 0);
+	var right = new THREE.Vector3();
+	
+	return function(cameraWorldPosition){
+		
+		// compute "front" or "look" vector
+		front.subVectors(cameraWorldPosition, this.getWorldPosition());
+		front.y = 0; // this will ensure, that the impostor rotates correctly around the axis
+		front.normalize();
+		
+		// compute vector "right" out of "up" and "front" vector
+		right.crossVectors(up, front);
+		
+		// create new coord-system
+		// this overrides other transformations like scaling
+		this.matrix.makeBasis(right, up, front);
+		
+		// set the position
+		this.matrix.setPosition(this.position);
+		
+		// force world matrix to update
+		this.matrixWorldNeedsUpdate = true;
+	};
+	
+}());
+
+/**
+ * Creates the impostor.
+ */
+Impostor.prototype._createImpostor = function(){
+	
+	// calculate the dimensions of the gemoetry
+	var width =  this._boundingBox.max.x - this._boundingBox.min.x;
+	var height = this._boundingBox.max.y - this._boundingBox.min.y;
+
+	// assign geometry and material
+	this.geometry = new THREE.PlaneBufferGeometry(width, height);
+	
+	// the alphaTest value avoids semi-transparent black borders
+	this.material = new THREE.MeshBasicMaterial({map: this._renderTarget, transparent: true, alphaTest: 0.9}); 
+};
+
+Impostor.prototype._clear = function(camera){
+
+	// reset scene
+	this._scene = new THREE.Scene();
+};
+
+module.exports = Impostor;
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"three":2}],28:[function(require,module,exports){
+(function (global){
+/**
  * @file Prototype for loading 3D objects in JSON-format 
  * from the server. The objects are provided with Blender.
  * 
@@ -40221,7 +40610,7 @@ JSONLoader.prototype.load = function(url, onLoad) {
 
 module.exports = JSONLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":37,"pubsub-js":1,"three":2}],28:[function(require,module,exports){
+},{"./Utils":38,"pubsub-js":1,"three":2}],29:[function(require,module,exports){
 /**
  * @file This prototype is used for LOD handling. It is an 
  * enhancement of the LOD functionality of three.js. Instead of
@@ -40257,7 +40646,7 @@ function LOD(id, mode, camera, threshold) {
 			value: id,
 			configurable: false,
 			enumerable: true,
-			writable: true
+			writable: false
 		},
 		mode:{
 			value: mode || LOD.MODE.DIRECT,
@@ -40395,7 +40784,7 @@ LOD.MODE = {
 };
 
 module.exports = LOD;
-},{"three":2}],29:[function(require,module,exports){
+},{"three":2}],30:[function(require,module,exports){
 /**
  * @file This prototype manages the characters of
  * the other players.
@@ -40557,7 +40946,7 @@ MultiplayerManager.prototype._getPlayer = function(id){
 };
 
 module.exports = new MultiplayerManager();
-},{"../core/Scene":21,"../etc/Utils":37,"./Player":33,"pubsub-js":1,"three":2}],30:[function(require,module,exports){
+},{"../core/Scene":21,"../etc/Utils":38,"./Player":34,"pubsub-js":1,"three":2}],31:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -40773,7 +41162,7 @@ NetworkManager.SERVER = {
 
 module.exports = new NetworkManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Message":19,"../core/ThreadManager":25,"../etc/Utils":37,"pubsub-js":1,"ws":4}],31:[function(require,module,exports){
+},{"../core/Message":19,"../core/ThreadManager":25,"../etc/Utils":38,"pubsub-js":1,"ws":4}],32:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading 3D objects in object-format 
@@ -40864,7 +41253,7 @@ ObjectLoader.prototype.load = function (url, onLoad) {
 
 module.exports = ObjectLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":37,"pubsub-js":1,"three":2}],32:[function(require,module,exports){
+},{"./Utils":38,"pubsub-js":1,"three":2}],33:[function(require,module,exports){
 /**
  * @file Interface for performance handling. This prototype is used in scenes
  * to create e.g. LOD instances.
@@ -40874,7 +41263,14 @@ module.exports = ObjectLoader;
 
 "use strict";
 
+var THREE = require("three");
+
 var LOD = require("./LOD");
+var Impostor = require("./Impostor");
+
+var camera = require("../core/Camera");
+var scene = require("../core/Scene");
+var renderer = require("../core/Renderer");
 
 /**
  * Creates the performance manager.
@@ -40884,7 +41280,13 @@ var LOD = require("./LOD");
 function PerformanceManager() {
 
 	Object.defineProperties(this, {
-		_lods : {
+		_lods: {
+			value : [],
+			configurable: false,
+			enumerable: false,
+			writable: false
+		},
+		_impostors: {
 			value : [],
 			configurable: false,
 			enumerable: false,
@@ -40897,11 +41299,10 @@ function PerformanceManager() {
  * Creates a LOD instance with direct transitions and stores it to the internal array.
  * 
  * @param {string} id - The id of the LOD instance.
- * @param {Camera} camera - The camera object.
  * 
  * @returns {LOD} The new LOD instance.
  */
-PerformanceManager.prototype.createDirectLOD = function(id, camera) {
+PerformanceManager.prototype.createDirectLOD = function(id) {
 	
 	var lod = new LOD(id, LOD.MODE.DIRECT, camera);
 	this.addLOD(lod);
@@ -40912,16 +41313,31 @@ PerformanceManager.prototype.createDirectLOD = function(id, camera) {
  * Creates a LOD instance with smooth transitions and stores it to the internal array.
  * 
  * @param {string} id - The id of the LOD instance.
- * @param {Camera} camera - The camera object.
  * @param {number} threshold - The threshold where the blending is done.
  * 
  * @returns {LOD} The new LOD instance.
  */
-PerformanceManager.prototype.createSmoothLOD = function(id, camera, threshold) {
+PerformanceManager.prototype.createSmoothLOD = function(id, threshold) {
 	
 	var lod = new LOD(id, LOD.MODE.SMOOTH, camera, threshold);
 	this.addLOD(lod);
 	return lod;
+};
+
+/**
+ * Creates an impostor instance and stores it to the internal array.
+ * 
+ * @param {string} id - The id of the impostor instance.
+ * @param {THREE.Mesh} object - The source 3D object of the impostor.
+ * @param {number} resolution - The resolution of the rendered texture.
+ * 
+ * @returns {Impostor} The new impostor instance.
+ */
+PerformanceManager.prototype.createImpostor = function(id, object, resolution) {
+	
+	var impostor = new Impostor(id, object, resolution);
+	this.addImpostor(impostor);
+	return impostor;
 };
 
 /**
@@ -40932,6 +41348,16 @@ PerformanceManager.prototype.createSmoothLOD = function(id, camera, threshold) {
 PerformanceManager.prototype.addLOD = function(lod){
 	
 	this._lods.push(lod);
+};
+
+/**
+ * Adds a single impostor instance to the internal array.
+ * 
+ * @param {Impostor} impostor - The impostor instance to be added.
+ */
+PerformanceManager.prototype.addImpostor = function(impostor){
+	
+	this._impostors.push(impostor);
 };
 
 /**
@@ -40946,11 +41372,30 @@ PerformanceManager.prototype.removeLOD = function(lod) {
 };
 
 /**
+ * Removes an impostor instance from the internal array.
+ * 
+ * @param {Impostor} impostor - The impostor instance to be removed.
+ */
+PerformanceManager.prototype.removeImpostor = function(impostor) {
+
+	var index = this._impostors.indexOf(impostor);
+	this._impostors.splice(index, 1);
+};
+
+/**
  * Removes all LOD instances from the internal array.
  */
 PerformanceManager.prototype.removeLODs = function() {
 
 	this._lods.length = 0;
+};
+
+/**
+ * Removes all impostor instances from the internal array.
+ */
+PerformanceManager.prototype.removeImpostors = function() {
+
+	this._impostors.length = 0;
 };
 
 /**
@@ -40979,12 +41424,65 @@ PerformanceManager.prototype.getLOD = function(id) {
 };
 
 /**
+ * Gets an impostor instance of the internal array.
+ * 
+ * @param {string} id - The id of the impostor instance.
+ * 
+ * @returns {Impostor} The impostor instance.
+ */
+PerformanceManager.prototype.getImpostor = function(id) {
+
+	var impostor = null;
+	
+	for( var index = 0; index < this._impostors.length; index++){
+		if(this._impostors[index].idImpostor === id){
+			impostor =  this._impostors[index];
+			break;
+		}
+	}
+	
+	if(impostor === null){
+		throw "ERROR: PerformanceManager: Impostor instance with ID " + id + " not existing.";
+	}else{
+		return impostor;
+	}
+};
+
+/**
  * Updates the performance manager.
  */
 PerformanceManager.prototype.update = function(){
 	
 	this._updateLODs();
 	
+	this._updateImpostors();
+};
+
+/**
+ * Generates all impostors.
+ */
+PerformanceManager.prototype.generateImpostors = function(){
+	
+	// clone camera object
+	var impostorCamera = camera.clone();
+	
+	// set world position of the impostor camera
+	var cameraWorldPosition = camera.getWorldPosition();
+	impostorCamera.position.set(cameraWorldPosition.x, cameraWorldPosition.y, cameraWorldPosition.z);
+	
+	// create an array with the entire lighting of the actual scene
+	var impostorLights = [];
+	
+	for(var index = 0; index < scene.children.length; index++){
+		if(scene.children[index] instanceof THREE.Light){
+			impostorLights.push(scene.children[index].clone());
+		}
+	}
+	
+	// generate each impostor
+	for(index = 0; index < this._impostors.length; index++){
+		this._impostors[index].generate(renderer, impostorCamera, impostorLights);
+	}
 };
 
 /**
@@ -41004,8 +41502,29 @@ PerformanceManager.prototype._updateLODs = (function(){
 	
 }());
 
+/**
+ * Updates all LOD instances.
+ */
+PerformanceManager.prototype._updateImpostors = (function(){
+	
+	var index = 0;
+	var cameraWorldPosition = new THREE.Vector3();
+	
+	return function(){
+		
+		// the camera world position is equal for each impostor
+		cameraWorldPosition = camera.getWorldPosition();
+		
+		for(index = 0; index < this._impostors.length; index++){
+			
+			this._impostors[index].update(cameraWorldPosition);
+		}
+	};
+	
+}());
+
 module.exports = new PerformanceManager();
-},{"./LOD":28}],33:[function(require,module,exports){
+},{"../core/Camera":17,"../core/Renderer":20,"../core/Scene":21,"./Impostor":27,"./LOD":29,"three":2}],34:[function(require,module,exports){
 /**
  * @file This prototype represents the character of
  * an other player.
@@ -41059,7 +41578,7 @@ Player.prototype = Object.create(THREE.Mesh.prototype);
 Player.prototype.constructor = Player;
 
 module.exports = Player;
-},{"three":2}],34:[function(require,module,exports){
+},{"three":2}],35:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire savegame-handling. This prototype is using
@@ -41136,7 +41655,7 @@ SaveGameManager.prototype.remove = function(){
 
 module.exports = new SaveGameManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire settings-handling. This prototype is used
@@ -41312,7 +41831,7 @@ SettingsManager.MOUSE = {
 
 module.exports = new SettingsManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":37,"three":2}],36:[function(require,module,exports){
+},{"./Utils":38,"three":2}],37:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire text-handling. This prototype is used in scenes
@@ -41468,7 +41987,7 @@ TextManager.prototype._searchAndRepalce = function(){
 
 module.exports = new TextManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":37,"pubsub-js":1}],37:[function(require,module,exports){
+},{"./Utils":38,"pubsub-js":1}],38:[function(require,module,exports){
 (function (global){
 /**
  * @file All helper and util functions are
@@ -41659,7 +42178,7 @@ Utils.CDN = {
 
 module.exports = new Utils();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Renderer":20}],38:[function(require,module,exports){
+},{"../core/Renderer":20}],39:[function(require,module,exports){
 (function (global){
 "use strict";
 /**
@@ -41799,7 +42318,7 @@ function Stats() {
 
 module.exports = Stats;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 /**
  * @file This prototype manages effects for post-processing.
  * 
@@ -41979,7 +42498,7 @@ EffectComposer.prototype._reset = function(renderTarget){
 };
 
 module.exports = EffectComposer;
-},{"three":2}],40:[function(require,module,exports){
+},{"three":2}],41:[function(require,module,exports){
 /**
  * @file This prototype provides a render pass for post-processing.
  * 
@@ -42041,7 +42560,7 @@ RenderPass.prototype.render = function(renderer, writeBuffer, readBuffer){
 };
 
 module.exports = RenderPass;
-},{"three":2}],41:[function(require,module,exports){
+},{"three":2}],42:[function(require,module,exports){
 /**
  * @file This prototype provides a shader pass for post-processing.
  * 
@@ -42146,9 +42665,10 @@ ShaderPass.prototype.render = function(renderer, writeBuffer, readBuffer){
 };
 
 module.exports = ShaderPass;
-},{"three":2}],42:[function(require,module,exports){
+},{"three":2}],43:[function(require,module,exports){
 /**
- * @file This shader transforms all colors to grayscale.
+ * @file This shader applies a gaussian blur effect.
+ * It can be used for both x and y direction.
  * 
  * @author Human Interactive
  */
@@ -42163,7 +42683,7 @@ module.exports  = {
 
 		"tDiffuse": {type: "t", value: null},
 		"direction": {type: "v2", value: new THREE.Vector2()},  // the direction of the blur: (1.0, 0.0) -> x-axis blur, (0.0, 1.0) -> y-axis blur
-		"blur": {type: "f", value: 0.0},  // the amount to blur
+		"blur": {type: "f", value: 0.0},  // the amount of blur
 
 	},
 
@@ -42192,7 +42712,8 @@ module.exports  = {
 		"void main() {",
 		
 			"vec4 result = vec4(0.0);",  // the result color
-				
+			
+			// sample the texture 9 times for every fragment (9-tap filter)
 		    "result += texture2D(tDiffuse, vec2(vUv.x - 4.0 * blur * direction.x, vUv.y - 4.0 * blur * direction.y)) * 0.0162162162;",
 		    "result += texture2D(tDiffuse, vec2(vUv.x - 3.0 * blur * direction.x, vUv.y - 3.0 * blur * direction.y)) * 0.0540540541;",
 		    "result += texture2D(tDiffuse, vec2(vUv.x - 2.0 * blur * direction.x, vUv.y - 2.0 * blur * direction.y)) * 0.1216216216;",
@@ -42211,7 +42732,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":2}],43:[function(require,module,exports){
+},{"three":2}],44:[function(require,module,exports){
 /**
  * @file This shader transforms all colors to grayscale.
  * 
@@ -42260,7 +42781,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 /**
  * @file This shader creates a vignette effect.
  * 
@@ -42321,7 +42842,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42428,7 +42949,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],46:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],47:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42590,7 +43111,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],47:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],48:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42743,7 +43264,7 @@ function colorMesh(mesh){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],48:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],49:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42900,7 +43421,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],49:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],50:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43016,7 +43537,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],50:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],51:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43189,7 +43710,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],51:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],52:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43337,7 +43858,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],52:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],53:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43484,7 +44005,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],53:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],54:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43561,7 +44082,7 @@ Stage.prototype.setup = function(){
 	sphereThree.castShadow = true;
 	
 	// create LOD instance
-	var lod = this.performanceManager.createSmoothLOD("sphere", this.camera, 10);
+	var lod = this.performanceManager.createSmoothLOD("sphere", 10);
 	lod.matrixAutoUpdate = false;
 	lod.position.set(0,10,0);
 	lod.updateMatrix();
@@ -43646,7 +44167,7 @@ function showLODCircles(scene){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],54:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],55:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43737,12 +44258,12 @@ Stage.prototype.setup = function(){
 	this.scene.add(stageTrigger);
 	
 	// post processing
-	this.renderer.preparePostProcessing();
+	this.renderer.preparePostProcessing( this.scene, this.camera );
 	this.renderer.addGrayscaleEffect();
 	this.renderer.addHBlurEffect();
 	this.renderer.addVBlurEffect();
-	this.renderer.addVignetteEffect(true);
-	
+	this.renderer.addVignetteEffect( { renderToScreen: true } );
+
 	// start rendering
 	this._render();
 };
@@ -43780,7 +44301,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":27,"three":2,"tween.js":3}],55:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],56:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -43954,7 +44475,7 @@ Chat.prototype._onMessage = function(message, data){
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":62,"pubsub-js":1}],56:[function(require,module,exports){
+},{"./UiElement":63,"pubsub-js":1}],57:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -44015,7 +44536,7 @@ InformationPanel.prototype.setText = function(textKey){
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":62}],57:[function(require,module,exports){
+},{"./UiElement":63}],58:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -44090,7 +44611,7 @@ InteractionLabel.prototype.hide = function(){
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":62}],58:[function(require,module,exports){
+},{"./UiElement":63}],59:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -44275,7 +44796,7 @@ LoadingScreen.prototype._onReady = function(message, data){
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":62,"pubsub-js":1}],59:[function(require,module,exports){
+},{"./UiElement":63,"pubsub-js":1}],60:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -44428,7 +44949,7 @@ Menu.prototype._publishFinishEvent = function(message, data){
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"./UiElement":62,"pubsub-js":1}],60:[function(require,module,exports){
+},{"../etc/Utils":38,"./UiElement":63,"pubsub-js":1}],61:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -44564,7 +45085,7 @@ ModalDialog.prototype._onClose = function(event){
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"./UiElement":62,"pubsub-js":1}],61:[function(require,module,exports){
+},{"../etc/Utils":38,"./UiElement":63,"pubsub-js":1}],62:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -44764,7 +45285,7 @@ TextScreen.prototype._printName = function(){
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":62}],62:[function(require,module,exports){
+},{"./UiElement":63}],63:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -44812,7 +45333,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":36}],63:[function(require,module,exports){
+},{"../etc/TextManager":37}],64:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in scenes
@@ -45099,4 +45620,4 @@ UserInterfaceManager.prototype._onKeyDown = function(event){
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":37,"../lib/stats":38,"./Chat":55,"./InformationPanel":56,"./InteractionLabel":57,"./LoadingScreen":58,"./Menu":59,"./ModalDialog":60,"./TextScreen":61,"pubsub-js":1}]},{},[5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63]);
+},{"../etc/Utils":38,"../lib/stats":39,"./Chat":56,"./InformationPanel":57,"./InteractionLabel":58,"./LoadingScreen":59,"./Menu":60,"./ModalDialog":61,"./TextScreen":62,"pubsub-js":1}]},{},[5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64]);

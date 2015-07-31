@@ -176,6 +176,8 @@ StageBase.prototype.destroy = function(){
 	this.controls.removeGrounds();
 	
 	this.performanceManager.removeLODs();
+	
+	this.performanceManager.removeImpostors();
 		
 	this.textManager.removeTexts();
 	

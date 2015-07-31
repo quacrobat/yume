@@ -88,12 +88,12 @@ Stage.prototype.setup = function(){
 	this.scene.add(stageTrigger);
 	
 	// post processing
-	this.renderer.preparePostProcessing();
+	this.renderer.preparePostProcessing( this.scene, this.camera );
 	this.renderer.addGrayscaleEffect();
 	this.renderer.addHBlurEffect();
 	this.renderer.addVBlurEffect();
-	this.renderer.addVignetteEffect(true);
-	
+	this.renderer.addVignetteEffect( { renderToScreen: true } );
+
 	// start rendering
 	this._render();
 };

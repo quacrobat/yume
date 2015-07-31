@@ -11,9 +11,6 @@
 var THREE = require("three");
 var PubSub = require("pubsub-js");
 
-var camera = require("./Camera");
-var scene = require("./Scene");
-
 var EffectComposer = require("../postprocessing/EffectComposer");
 var RenderPass = require("../postprocessing/RenderPass");
 var ShaderPass = require("../postprocessing/ShaderPass");
@@ -94,21 +91,26 @@ Renderer.prototype.init = function(){
  * 
  * @param {Scene} scene - The scene object.
  * @param {Camera} camera - The camera object.
+ * @param {THREE.WebGLRenderTarget} renderTarget - An optional render target.
+ * @param {boolean} forceClear - Should the renderer clear the scene before rendering?
  */
-Renderer.prototype.render = function(scene, camera){
+Renderer.prototype.render = function(scene, camera, renderTarget, forceClear){
 	
 	if(this._effectCount > 0 && this.enablePostProcessing === true){
 		this._composer.render();
 	}else{
-		this._renderer.render(scene, camera);
+		this._renderer.render(scene, camera, renderTarget, forceClear);
 	}
 };
 
 /**
  * Prepares the renderer for post-processing. This method
  * creates internally a custom framebuffer (render target).
+ * 
+ * @param {Scene} scene - The scene object.
+ * @param {Camera} camera - The camera object.
  */
-Renderer.prototype.preparePostProcessing = function(){
+Renderer.prototype.preparePostProcessing = function(scene, camera){
 	
 	this._composer.addPass(new RenderPass(scene, camera));
 	
@@ -120,14 +122,16 @@ Renderer.prototype.preparePostProcessing = function(){
 /**
  * Adds a grayscale effect via post-processing.
  * 
- * @param {boolean} renderToScreen - Determines screen or off-screen rendering.
+ * @param {object} options - The options for the effect.
  * 
  * @returns {ShaderPass} The new effect.
  */
-Renderer.prototype.addGrayscaleEffect = function(renderToScreen){
+Renderer.prototype.addGrayscaleEffect = function(options){
+	
+	options = options || {};
 	
 	var effect = new ShaderPass(GrayscaleShader);
-	effect.renderToScreen = renderToScreen;
+	effect.renderToScreen = options.renderToScreen;
 	this._composer.addPass(effect);
 	this._effectCount++;
 	
@@ -141,14 +145,22 @@ Renderer.prototype.addGrayscaleEffect = function(renderToScreen){
 /**
  * Adds a vignette effect via post-processing.
  * 
- * @param {boolean} renderToScreen - Determines screen or off-screen rendering.
+ * @param {object} options - The options for the effect.
  * 
  * @returns {ShaderPass} The new effect.
  */
-Renderer.prototype.addVignetteEffect = function(renderToScreen){
+Renderer.prototype.addVignetteEffect = function(options){
+	
+	options = options || {};
 	
 	var effect = new ShaderPass(VignetteShader);
-	effect.renderToScreen = renderToScreen;
+	effect.renderToScreen = options.renderToScreen;
+	
+	// set uniforms
+	effect.uniforms.radius.value   = options.radius   || effect.uniforms.radius.value;
+	effect.uniforms.strength.value = options.strength || effect.uniforms.strength.value;
+	effect.uniforms.softness.value = options.softness || effect.uniforms.softness.value;
+	
 	this._composer.addPass(effect);
 	this._effectCount++;
 	
@@ -162,18 +174,20 @@ Renderer.prototype.addVignetteEffect = function(renderToScreen){
 /**
  * Adds a horizontal gaussian blur effect via post-processing.
  * 
- * @param {boolean} renderToScreen - Determines screen or off-screen rendering.
+ * @param {object} options - The options for the effect.
  * 
  * @returns {ShaderPass} The new effect.
  */
-Renderer.prototype.addHBlurEffect = function(renderToScreen){
+Renderer.prototype.addHBlurEffect = function(options){
+	
+	options = options || {};
 	
 	var effect = new ShaderPass(GaussianBlurShader);
-	effect.renderToScreen = renderToScreen;
+	effect.renderToScreen = options.renderToScreen;
 	
 	// set uniforms
-	effect.uniforms.direction.value = new THREE.Vector2(1.0, 0.0); // x-axis
-	effect.uniforms.blur.value = 1.0 / global.window.innerWidth;
+	effect.uniforms.direction.value = new THREE.Vector2(1, 0); // x-axis
+	effect.uniforms.blur.value = (options.blur || 1) / global.window.innerWidth;
 	
 	this._composer.addPass(effect);
 	this._effectCount++;
@@ -188,18 +202,20 @@ Renderer.prototype.addHBlurEffect = function(renderToScreen){
 /**
  * Adds a vertical gaussian blur effect via post-processing.
  * 
- * @param {boolean} renderToScreen - Determines screen or off-screen rendering.
+ * @param {object} options - The options for the effect.
  * 
  * @returns {ShaderPass} The new effect.
  */
-Renderer.prototype.addVBlurEffect = function(renderToScreen){
+Renderer.prototype.addVBlurEffect = function(options){
+	
+	options = options || {};
 	
 	var effect = new ShaderPass(GaussianBlurShader);
-	effect.renderToScreen = renderToScreen;
+	effect.renderToScreen = options.renderToScreen;
 	
 	// set uniforms
-	effect.uniforms.direction.value = new THREE.Vector2(0.0, 1.0); // y-axis
-	effect.uniforms.blur.value = 1.0 / global.window.innerHeight;
+	effect.uniforms.direction.value = new THREE.Vector2(0, 1); // y-axis
+	effect.uniforms.blur.value = (options.blur || 1) / global.window.innerHeight;
 	
 	this._composer.addPass(effect);
 	this._effectCount++;
@@ -246,7 +262,36 @@ Renderer.prototype.getMaxAnisotropy = function(){
 };
 
 /**
- * Resizes the camera and render-dimensions.
+ * Returns the clear color of the renderer.
+ * 
+ * @returns {THREE.Color} The clear color.
+ */
+Renderer.prototype.getClearColor = function(){
+	return this._renderer.getClearColor();
+};
+
+/**
+ * Sets the clear color and alpha of the renderer.
+ *
+ * @param {THREE.Color} color - The clear color.
+ * @param {number} alpha - The clear alpha.
+ */
+Renderer.prototype.setClearColor = function(color, alpha){
+	
+	this._renderer.setClearColor(color, alpha);
+};
+
+/**
+ * Returns the clear alpha value of the renderer.
+ * 
+ * @returns {number} The clear alpha.
+ */
+Renderer.prototype.getClearAlpha = function(){
+	return this._renderer.getClearAlpha();
+};
+
+/**
+ * Resizes the render-dimensions.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {string} data - The data of the topic message.
@@ -256,10 +301,6 @@ Renderer.prototype._onResize = function(message, data){
 	// resize renderer and effect composer
 	self._renderer.setSize(global.window.innerWidth, global.window.innerHeight);
 	self._composer.setSize(global.window.innerWidth, global.window.innerHeight);
-	
-	// update camera dimensions
-	camera.aspect = global.window.innerWidth / global.window.innerHeight;
-	camera.updateProjectionMatrix();
 };
 
 module.exports = new Renderer();

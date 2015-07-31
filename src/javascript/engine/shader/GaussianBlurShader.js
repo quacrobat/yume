@@ -1,5 +1,6 @@
 /**
- * @file This shader transforms all colors to grayscale.
+ * @file This shader applies a gaussian blur effect.
+ * It can be used for both x and y direction.
  * 
  * @author Human Interactive
  */
@@ -14,7 +15,7 @@ module.exports  = {
 
 		"tDiffuse": {type: "t", value: null},
 		"direction": {type: "v2", value: new THREE.Vector2()},  // the direction of the blur: (1.0, 0.0) -> x-axis blur, (0.0, 1.0) -> y-axis blur
-		"blur": {type: "f", value: 0.0},  // the amount to blur
+		"blur": {type: "f", value: 0.0},  // the amount of blur
 
 	},
 
@@ -43,7 +44,8 @@ module.exports  = {
 		"void main() {",
 		
 			"vec4 result = vec4(0.0);",  // the result color
-				
+			
+			// sample the texture 9 times for every fragment (9-tap filter)
 		    "result += texture2D(tDiffuse, vec2(vUv.x - 4.0 * blur * direction.x, vUv.y - 4.0 * blur * direction.y)) * 0.0162162162;",
 		    "result += texture2D(tDiffuse, vec2(vUv.x - 3.0 * blur * direction.x, vUv.y - 3.0 * blur * direction.y)) * 0.0540540541;",
 		    "result += texture2D(tDiffuse, vec2(vUv.x - 2.0 * blur * direction.x, vUv.y - 2.0 * blur * direction.y)) * 0.1216216216;",

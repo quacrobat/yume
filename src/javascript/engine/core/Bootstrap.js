@@ -11,6 +11,7 @@ var PubSub = require("pubsub-js");
 
 var environment = require("./Environment");
 var renderer = require("./Renderer");
+var camera = require("./Camera");
 var controls = require("../controls/FirstPersonControls");
 var userInterfaceManager = require("../ui/UserInterfaceManager");
 var saveGameManager = require("../etc/SaveGameManager");
@@ -51,6 +52,7 @@ Bootstrap.prototype._initEngine = function(){
 	if(environment.check() === true){
 		
 		renderer.init();
+		camera.init();
 		controls.init();
 		userInterfaceManager.init();
 		

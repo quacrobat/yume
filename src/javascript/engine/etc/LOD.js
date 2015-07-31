@@ -33,7 +33,7 @@ function LOD(id, mode, camera, threshold) {
 			value: id,
 			configurable: false,
 			enumerable: true,
-			writable: true
+			writable: false
 		},
 		mode:{
 			value: mode || LOD.MODE.DIRECT,

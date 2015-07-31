@@ -74,7 +74,7 @@ Stage.prototype.setup = function(){
 	sphereThree.castShadow = true;
 	
 	// create LOD instance
-	var lod = this.performanceManager.createSmoothLOD("sphere", this.camera, 10);
+	var lod = this.performanceManager.createSmoothLOD("sphere", 10);
 	lod.matrixAutoUpdate = false;
 	lod.position.set(0,10,0);
 	lod.updateMatrix();
