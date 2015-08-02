@@ -58,24 +58,24 @@ Stage.prototype.setup = function(){
 	});
 	
 	// create first static box
-	var staticBox = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0x6083c2}));
-	staticBox.matrixAutoUpdate = false;
-	staticBox.position.set(17, 15, 0);
-	staticBox.castShadow = true;
-	staticBox.updateMatrix();
-	this.scene.add(staticBox);
-	
-	this.actionManager.createStatic(staticBox);
-	
-	// create second static box
 	var staticBoxHover = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0x6083c2}));
 	staticBoxHover.matrixAutoUpdate = false;
-	staticBoxHover.position.set(-17, 5, 0);
+	staticBoxHover.position.set(17, 15, 0);
 	staticBoxHover.castShadow = true;
 	staticBoxHover.updateMatrix();
 	this.scene.add(staticBoxHover);
 	
 	this.actionManager.createStatic(staticBoxHover);
+	
+	// create second static box
+	var staticBox = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0x6083c2}));
+	staticBox.matrixAutoUpdate = false;
+	staticBox.position.set(-17, 5, 0);
+	staticBox.castShadow = true;
+	staticBox.updateMatrix();
+	this.scene.add(staticBox);
+	
+	this.actionManager.createStatic(staticBox);
 	
 	// create plain object
 	var plainBox = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0xf3f4f6}));

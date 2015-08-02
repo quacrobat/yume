@@ -40280,6 +40280,24 @@ function Impostor(id, object, resolution) {
 			configurable: false,
 			enumerable: false,
 			writable: true
+		},
+		_camera:  {
+			value: null,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_lights:  {
+			value: null,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_renderer: {
+			value: null,
+			configurable: false,
+			enumerable: false,
+			writable: true
 		}
 	});
 	
@@ -40294,164 +40312,37 @@ Impostor.prototype = Object.create(THREE.Mesh.prototype);
 Impostor.prototype.constructor = Impostor;
 
 /**
- * Generates the Impostor.
+ * Prepares the generation of the impostor.
  * 
  * @param {Renderer} renderer - The renderer object.
  * @param {Camera} camera - The camera object.
- * @param {object} lights - An array with all lights of the current stage.
+ * @param {object} lights - The lights of the stage.
  */
-Impostor.prototype.generate = function(renderer, camera, lights){
+Impostor.prototype.prepareGeneration = function(renderer, camera, lights){
 
-	this._computeBoundingBox(camera);
+	this._renderer = renderer;
+	this._camera = camera;
+	this._lights = lights;
+};
+
+/**
+ * Generates the Impostor.
+ */
+Impostor.prototype.generate = function(){
+
+	this._computeBoundingBox();
 	
-	this._prepareCamera(camera);
+	this._prepareCamera();
 	
-	this._prepareProjectionMatrix(camera);
+	this._prepareProjectionMatrix();
 	
-	this._prepareScene(lights);
+	this._prepareScene();
 	
-	this._render(renderer, camera);
+	this._render();
 	
 	this._createImpostor();
 	
 	this._clear();
-};
-
-/**
- * Computes the axis-aligned bounding box of the object.
- */
-Impostor.prototype._computeBoundingBox = function(camera){
-
-	this._boundingBox.setFromObject(this.object);
-};
-
-/**
- * Prepares the camera for rendering.
- * 
- * @param {Camera} camera - The camera object.
- */
-Impostor.prototype._prepareCamera = function(camera){
-
-	// the camera should look at the center of the AABB
-	camera.lookAt(this._boundingBox.center());
-	
-	// compute new matrices
-	camera.updateMatrix();
-	camera.updateMatrixWorld();
-	camera.matrixWorldInverse.getInverse(camera.matrixWorld);
-};
-
-/**
- * Prepares the projection matrix. First, the bounding rectangle of the projected
- * bounding box is calculated. This rectangle is used to create a new frustum, which encloses
- * the the bounding box as much as possible.
- * 
- * @param {Camera} camera - The camera object.
- */
-Impostor.prototype._prepareProjectionMatrix = function(camera){
-
-	var points = [
-	              new THREE.Vector3(),
-	              new THREE.Vector3(),
-	              new THREE.Vector3(),
-	              new THREE.Vector3(),
-	              new THREE.Vector3(),
-	              new THREE.Vector3(),
-	              new THREE.Vector3(),
-	              new THREE.Vector3()
-	              ];
-	
-	var minX = 0, minY = 0, maxX = 0, maxY = 0;
-	
-	// calculate each point of the bounding box
-	points[0].set( this._boundingBox.min.x, this._boundingBox.min.y, this._boundingBox.min.z );
-	points[1].set( this._boundingBox.min.x, this._boundingBox.min.y, this._boundingBox.max.z );
-	points[2].set( this._boundingBox.min.x, this._boundingBox.max.y, this._boundingBox.min.z );
-	points[3].set( this._boundingBox.min.x, this._boundingBox.max.y, this._boundingBox.max.z );
-	points[4].set( this._boundingBox.max.x, this._boundingBox.min.y, this._boundingBox.min.z );
-	points[5].set( this._boundingBox.max.x, this._boundingBox.min.y, this._boundingBox.max.z );
-	points[6].set( this._boundingBox.max.x, this._boundingBox.max.y, this._boundingBox.min.z );
-	points[7].set( this._boundingBox.max.x, this._boundingBox.max.y, this._boundingBox.max.z );
-	
-	// transform and project each point to get clip coordinates
-	points[0].applyMatrix4( camera.matrixWorldInverse ).applyProjection( camera.projectionMatrix );
-	points[1].applyMatrix4( camera.matrixWorldInverse ).applyProjection( camera.projectionMatrix );
-	points[2].applyMatrix4( camera.matrixWorldInverse ).applyProjection( camera.projectionMatrix );
-	points[3].applyMatrix4( camera.matrixWorldInverse ).applyProjection( camera.projectionMatrix );
-	points[4].applyMatrix4( camera.matrixWorldInverse ).applyProjection( camera.projectionMatrix );
-	points[5].applyMatrix4( camera.matrixWorldInverse ).applyProjection( camera.projectionMatrix );
-	points[6].applyMatrix4( camera.matrixWorldInverse ).applyProjection( camera.projectionMatrix );
-	points[7].applyMatrix4( camera.matrixWorldInverse ).applyProjection( camera.projectionMatrix );
-	
-	// determine min/max values of x and y coordinate
-	for(var index = 0; index < points.length; index++){
-		
-		minX = Math.min(minX, points[index].x);
-		minY = Math.min(minY, points[index].y);
-		
-		maxX = Math.max(maxX, points[index].x);
-		maxY = Math.max(maxY, points[index].y);
-	}
-	
-	// create new projection matrix
-	var projectionMatrix = new THREE.Matrix4();
-	
-	// calculate new frustum
-	var frustumHeight = camera.near * Math.tan( THREE.Math.degToRad( camera.fov * 0.5 ) );
-	var frustumWidth = frustumHeight * ( global.window.innerWidth / global.window.innerHeight );
-	
-	projectionMatrix.makeFrustum( frustumWidth * minX, 
-								  frustumWidth * maxX,  
-								  frustumHeight * minY, 
-								  frustumHeight * maxY, 
-								  camera.near, 
-								  camera.far );
-	
-	// assign new matrix
-	camera.projectionMatrix = projectionMatrix;
-};
-
-/**
- * Prepares the scene for rendering. This method ensures, that the actual object and
- * the entire lightning of the scene is part of the rendering.
- *
- * @param {object} lights - An array with all lights of the current scene.
- */
-Impostor.prototype._prepareScene = function(lights){
-
-	// add object
-	this.object = this.object.clone();
-	
-	// ensure its visible
-	this.object.visible = true;
-
-	// add to scene
-	this._scene.add(this.object);
-	
-	// add all light source
-	Array.prototype.push.apply(this._scene.children, lights);
-};
-
-/**
- * Renders the scene to a render target (texture).
- *
- * @param {Renderer} renderer - The renderer object.
- * @param {Camera} camera - The camera object.
- */
-Impostor.prototype._render = function(renderer, camera){
-	
-	// save existing clear color and alpha
-	var clearColor = renderer.getClearColor();
-	var clearAlpha = renderer.getClearAlpha();
-	
-	// clear renderer so the image will have transparency
-	renderer.setClearColor(0x000000, 0);
-	
-	// render to target
-	renderer.render(this._scene, camera, this._renderTarget, true);
-	
-	// restore clear values
-	renderer.setClearColor(clearColor, clearAlpha);
 };
 
 /**
@@ -40492,6 +40383,134 @@ Impostor.prototype.update = (function(){
 }());
 
 /**
+ * Computes the axis-aligned bounding box of the object.
+ */
+Impostor.prototype._computeBoundingBox = function(){
+
+	this._boundingBox.setFromObject(this.object);
+};
+
+/**
+ * Prepares the camera for rendering.
+ */
+Impostor.prototype._prepareCamera = function(){
+
+	// the camera should look at the center of the AABB
+	this._camera.lookAt(this._boundingBox.center());
+	
+	// compute new matrices
+	this._camera.updateMatrix();
+	this._camera.updateMatrixWorld();
+	this._camera.matrixWorldInverse.getInverse(this._camera.matrixWorld);
+};
+
+/**
+ * Prepares the projection matrix. First, the bounding rectangle of the projected
+ * bounding box is calculated. This rectangle is used to create a new frustum, which encloses
+ * the the bounding box as much as possible.
+ */
+Impostor.prototype._prepareProjectionMatrix = function(){
+
+	var points = [
+	              new THREE.Vector3(),
+	              new THREE.Vector3(),
+	              new THREE.Vector3(),
+	              new THREE.Vector3(),
+	              new THREE.Vector3(),
+	              new THREE.Vector3(),
+	              new THREE.Vector3(),
+	              new THREE.Vector3()
+	              ];
+	
+	var minX = 0, minY = 0, maxX = 0, maxY = 0;
+	
+	// calculate each point of the bounding box
+	points[0].set( this._boundingBox.min.x, this._boundingBox.min.y, this._boundingBox.min.z );
+	points[1].set( this._boundingBox.min.x, this._boundingBox.min.y, this._boundingBox.max.z );
+	points[2].set( this._boundingBox.min.x, this._boundingBox.max.y, this._boundingBox.min.z );
+	points[3].set( this._boundingBox.min.x, this._boundingBox.max.y, this._boundingBox.max.z );
+	points[4].set( this._boundingBox.max.x, this._boundingBox.min.y, this._boundingBox.min.z );
+	points[5].set( this._boundingBox.max.x, this._boundingBox.min.y, this._boundingBox.max.z );
+	points[6].set( this._boundingBox.max.x, this._boundingBox.max.y, this._boundingBox.min.z );
+	points[7].set( this._boundingBox.max.x, this._boundingBox.max.y, this._boundingBox.max.z );
+	
+	// transform and project each point to get clip coordinates
+	points[0].applyMatrix4( this._camera.matrixWorldInverse ).applyProjection( this._camera.projectionMatrix );
+	points[1].applyMatrix4( this._camera.matrixWorldInverse ).applyProjection( this._camera.projectionMatrix );
+	points[2].applyMatrix4( this._camera.matrixWorldInverse ).applyProjection( this._camera.projectionMatrix );
+	points[3].applyMatrix4( this._camera.matrixWorldInverse ).applyProjection( this._camera.projectionMatrix );
+	points[4].applyMatrix4( this._camera.matrixWorldInverse ).applyProjection( this._camera.projectionMatrix );
+	points[5].applyMatrix4( this._camera.matrixWorldInverse ).applyProjection( this._camera.projectionMatrix );
+	points[6].applyMatrix4( this._camera.matrixWorldInverse ).applyProjection( this._camera.projectionMatrix );
+	points[7].applyMatrix4( this._camera.matrixWorldInverse ).applyProjection( this._camera.projectionMatrix );
+	
+	// determine min/max values of x and y coordinate
+	for(var index = 0; index < points.length; index++){
+		
+		minX = Math.min(minX, points[index].x);
+		minY = Math.min(minY, points[index].y);
+		
+		maxX = Math.max(maxX, points[index].x);
+		maxY = Math.max(maxY, points[index].y);
+	}
+	
+	// create new projection matrix
+	var projectionMatrix = new THREE.Matrix4();
+	
+	// calculate new frustum
+	var frustumHeight = this._camera.near * Math.tan( THREE.Math.degToRad( this._camera.fov * 0.5 ) );
+	var frustumWidth = frustumHeight * ( global.window.innerWidth / global.window.innerHeight );
+	
+	projectionMatrix.makeFrustum( frustumWidth * minX, 
+								  frustumWidth * maxX,  
+								  frustumHeight * minY, 
+								  frustumHeight * maxY, 
+								  this._camera.near, 
+								  this._camera.far );
+	
+	// assign new matrix
+	this._camera.projectionMatrix = projectionMatrix;
+};
+
+/**
+ * Prepares the scene for rendering. This method ensures, that the actual object and
+ * the entire lightning of the scene is part of the rendering.
+ */
+Impostor.prototype._prepareScene = function(){
+
+	// add object
+	this.object = this.object.clone();
+	
+	// ensure its visible
+	this.object.visible = true;
+
+	// add to scene
+	this._scene.add(this.object);
+	
+	// add all light source
+	Array.prototype.push.apply(this._scene.children, this._lights);
+};
+
+/**
+ * Renders the scene to a render target (texture).
+ */
+Impostor.prototype._render = function(){
+	
+	// save existing clear color and alpha
+	var clearColor = this._renderer.getClearColor();
+	var clearAlpha = this._renderer.getClearAlpha();
+	
+	// clear renderer so the image will have transparency
+	this._renderer.setClearColor(0x000000, 0);
+	
+	// render to target
+	this._renderer.render(this._scene, this._camera, this._renderTarget, true);
+	
+	// restore clear values
+	this._renderer.setClearColor(clearColor, clearAlpha);
+};
+
+/**
  * Creates the impostor.
  */
 Impostor.prototype._createImpostor = function(){
@@ -40507,7 +40526,10 @@ Impostor.prototype._createImpostor = function(){
 	this.material = new THREE.MeshBasicMaterial({map: this._renderTarget, transparent: true, alphaTest: 0.9}); 
 };
 
-Impostor.prototype._clear = function(camera){
+/**
+ * Clears objects for impostor generating.
+ */
+Impostor.prototype._clear = function(){
 
 	// reset scene
 	this._scene = new THREE.Scene();
@@ -41467,21 +41489,27 @@ PerformanceManager.prototype.generateImpostors = function(){
 	var impostorCamera = camera.clone();
 	
 	// set world position of the impostor camera
+	// that's necessary because the clone does not regard parent objects
 	var cameraWorldPosition = camera.getWorldPosition();
 	impostorCamera.position.set(cameraWorldPosition.x, cameraWorldPosition.y, cameraWorldPosition.z);
 	
 	// create an array with the entire lighting of the actual scene
-	var impostorLights = [];
+	var lights = [];
 	
 	for(var index = 0; index < scene.children.length; index++){
 		if(scene.children[index] instanceof THREE.Light){
-			impostorLights.push(scene.children[index].clone());
+			lights.push(scene.children[index].clone());
 		}
 	}
 	
 	// generate each impostor
 	for(index = 0; index < this._impostors.length; index++){
-		this._impostors[index].generate(renderer, impostorCamera, impostorLights);
+		
+		// prepare the generation...
+		this._impostors[index].prepareGeneration(renderer, impostorCamera, lights);
+		
+		// ...and run it
+		this._impostors[index].generate();
 	}
 };
 
@@ -43010,24 +43038,24 @@ Stage.prototype.setup = function(){
 	});
 	
 	// create first static box
-	var staticBox = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0x6083c2}));
-	staticBox.matrixAutoUpdate = false;
-	staticBox.position.set(17, 15, 0);
-	staticBox.castShadow = true;
-	staticBox.updateMatrix();
-	this.scene.add(staticBox);
-	
-	this.actionManager.createStatic(staticBox);
-	
-	// create second static box
 	var staticBoxHover = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0x6083c2}));
 	staticBoxHover.matrixAutoUpdate = false;
-	staticBoxHover.position.set(-17, 5, 0);
+	staticBoxHover.position.set(17, 15, 0);
 	staticBoxHover.castShadow = true;
 	staticBoxHover.updateMatrix();
 	this.scene.add(staticBoxHover);
 	
 	this.actionManager.createStatic(staticBoxHover);
+	
+	// create second static box
+	var staticBox = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0x6083c2}));
+	staticBox.matrixAutoUpdate = false;
+	staticBox.position.set(-17, 5, 0);
+	staticBox.castShadow = true;
+	staticBox.updateMatrix();
+	this.scene.add(staticBox);
+	
+	this.actionManager.createStatic(staticBox);
 	
 	// create plain object
 	var plainBox = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0xf3f4f6}));

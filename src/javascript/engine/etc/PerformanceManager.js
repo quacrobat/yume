@@ -211,21 +211,27 @@ PerformanceManager.prototype.generateImpostors = function(){
 	var impostorCamera = camera.clone();
 	
 	// set world position of the impostor camera
+	// that's necessary because the clone does not regard parent objects
 	var cameraWorldPosition = camera.getWorldPosition();
 	impostorCamera.position.set(cameraWorldPosition.x, cameraWorldPosition.y, cameraWorldPosition.z);
 	
 	// create an array with the entire lighting of the actual scene
-	var impostorLights = [];
+	var lights = [];
 	
 	for(var index = 0; index < scene.children.length; index++){
 		if(scene.children[index] instanceof THREE.Light){
-			impostorLights.push(scene.children[index].clone());
+			lights.push(scene.children[index].clone());
 		}
 	}
 	
 	// generate each impostor
 	for(index = 0; index < this._impostors.length; index++){
-		this._impostors[index].generate(renderer, impostorCamera, impostorLights);
+		
+		// prepare the generation...
+		this._impostors[index].prepareGeneration(renderer, impostorCamera, lights);
+		
+		// ...and run it
+		this._impostors[index].generate();
 	}
 };
 
