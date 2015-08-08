@@ -359,7 +359,7 @@ FirstPersonControls.prototype.update = function(delta){
 		
 		this._checkAndProcessTrigger();
 		
-		this._animateCrouch(delta);
+		this._animateCrouch();
 		
 		this._publishPlayerStatus();
 	}else{
@@ -474,14 +474,14 @@ FirstPersonControls.prototype._translateCameraToOrigin = function(){
 	// only translate if necessary
 	if(camera.position.x !== 0 || camera.position.y !== 0){
 		
-		camera.position.y -= FirstPersonControls.CAMERA.RESETFACTOR * 0.01;
+		camera.position.y -= FirstPersonControls.CAMERA.RESETFACTOR;
 		camera.position.y = Math.max(camera.position.y, 0);
 		
 		if(camera.position.x < 0){
-			camera.position.x += FirstPersonControls.CAMERA.RESETFACTOR * 0.01;
+			camera.position.x += FirstPersonControls.CAMERA.RESETFACTOR;
 			camera.position.x = Math.min(camera.position.x, 0);
 		}else if(camera.position.x > 0){
-			camera.position.x -= FirstPersonControls.CAMERA.RESETFACTOR * 0.01;
+			camera.position.x -= FirstPersonControls.CAMERA.RESETFACTOR;
 			camera.position.x = Math.max(camera.position.x, 0);
 		}
 
@@ -785,6 +785,7 @@ FirstPersonControls.prototype._animateCrouch = (function(){
 				
 				if(this._height > FirstPersonControls.CROUCH.HEIGHT){
 					
+					// transition from "default" to "crouch"
 					this._height = this._animationStartHeight + ( FirstPersonControls.CROUCH.HEIGHT - this._animationStartHeight ) * value;
 					
 				}
@@ -793,6 +794,7 @@ FirstPersonControls.prototype._animateCrouch = (function(){
 				
 				if(this._height < FirstPersonControls.DEFAULT.HEIGHT){
 					
+					// transition from "crouch" to "default"
 					this._height = this._animationStartHeight + ( FirstPersonControls.DEFAULT.HEIGHT - this._animationStartHeight ) * value;
 				}
 			}
@@ -1034,7 +1036,7 @@ FirstPersonControls.prototype._onKeyUp = function(event) {
 FirstPersonControls.CAMERA = {
 	DEFLECTION: 0.2,
 	SHAKEFREQUENCY: 15,
-	RESETFACTOR: 2		
+	RESETFACTOR: 0.02	
 };
 
 FirstPersonControls.DEFAULT = {

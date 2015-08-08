@@ -18,6 +18,7 @@ var THREE = require("three");
  * @constructor 
  * @augments THREE.Mesh
  * 
+ * @param {string} id - The id of the impostor.
  * @param {THREE.Object3D} object - The source 3D object of the impostor.
  * @param {number} resolution - The resolution of the rendered texture.
  */
@@ -150,7 +151,7 @@ Impostor.prototype.update = (function(){
 		// compute vector "right" out of "up" and "front" vector
 		right.crossVectors(up, front);
 		
-		// create new coord-system
+		// create new matrix from basis vectors
 		// this overrides other transformations like scaling
 		this.matrix.makeBasis(right, up, front);
 		
