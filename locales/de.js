@@ -4,6 +4,7 @@
 	"Game.Menu.Controls.Move": "W-A-S-D = Bewegen",
 	"Game.Menu.Controls.Look": "Maus = Umschauen",
 	"Game.Menu.Controls.Crouch": "C = Ducken",
+	"Game.Menu.Controls.Run": "Shift (gedrückt halten) = Rennen",
 	"Game.Menu.Controls.Interact": "E = Interagieren",
 	"Game.Menu.Controls.Read": "Leertaste = Lesen",
 	"Game.Menu.Controls.Menu": "Esc = Menü",

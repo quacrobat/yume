@@ -37637,14 +37637,48 @@ function FirstPersonControls(){
 			configurable: false,
 			enumerable: false,
 			writable: true
-		},
-		_animationStartTime: {
+		}
+	});
+	
+	// used for animations
+	Object.defineProperties(this, {
+		_animationCrouchTime: {
 			value: 0,
 			configurable: false,
 			enumerable: false,
 			writable: true
 		},
-		_animationStartHeight: {
+		_animationHeight: {
+			value: 0,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_animationRunTime: {
+			value: 0,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_animationMove: {
+			value: 0,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_animationStrafe: {
+			value: 0,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_animationDeflection: {
+			value: 0,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_animationFrequency: {
 			value: 0,
 			configurable: false,
 			enumerable: false,
@@ -37654,6 +37688,30 @@ function FirstPersonControls(){
 	
 	// used for head motion calculation
 	Object.defineProperties(this, {
+		_deflection: {
+			value: FirstPersonControls.DEFAULT.CAMERA.DEFLECTION,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_frequency: {
+			value: FirstPersonControls.DEFAULT.CAMERA.FREQUENCY,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_phase: {
+			value: 0,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_lastFrequency: {
+			value: FirstPersonControls.DEFAULT.CAMERA.FREQUENCY,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
 		_motionFactor: {
 			value: 0,
 			configurable: false,
@@ -37677,6 +37735,12 @@ function FirstPersonControls(){
 	// flags
 	Object.defineProperties(this, {
 		_isCrouch: {
+			value: false,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_isRun: {
 			value: false,
 			configurable: false,
 			enumerable: false,
@@ -37888,6 +37952,8 @@ FirstPersonControls.prototype.update = function(delta){
 		
 		this._animateCrouch();
 		
+		this._animateRun();
+		
 		this._publishPlayerStatus();
 	}else{
 		// reset camera position
@@ -37912,16 +37978,18 @@ FirstPersonControls.prototype._translate = (function() {
 		lastPosition.copy(this._yawObject.position);
 		
 		// convert booleans to one number per axis (1, 0, -1)
-		this._move = Number(this._moveBackward) - Number(this._moveForward);
+		this._move = Number(this._moveBackward) - Number(this._moveForward);	
 		this._strafe = Number(this._moveRight) - Number(this._moveLeft);
 		
+		// calculate velocity
 		velocity.z = this._calculateMoveVelocity(delta);
 		velocity.x = this._calculateStrafeVelocity(delta);
 		
+		// initialize movement vectors
 		normalizedMovement.z = this._move;
 		normalizedMovement.x = this._strafe;
 		
-		// this prevents, that the player moves to fast, when
+		// this prevents, that the player moves to fast when
 		// e.g. forward and right are pressed simultaneously
 		normalizedMovement.normalize().multiply(velocity);
 		
@@ -37967,22 +38035,29 @@ FirstPersonControls.prototype._calculateCameraMotion = (function() {
 		
 		if(this._move !== 0 || this._strafe !== 0){
 			
-			// motion calculation
-			this._motionFactor += delta * (Math.min(Math.abs(normalizedMovement.z) + Math.abs(normalizedMovement.x), this._moveSpeed));
+			// get motion factor from normalized movement
+			this._motionFactor += delta * normalizedMovement.length();
 			
-			motion = Math.sin(this._motionFactor * FirstPersonControls.CAMERA.SHAKEFREQUENCY) * FirstPersonControls.CAMERA.DEFLECTION;
-
-			camera.position.y = Math.abs(motion);
-			camera.position.x = motion;
+			// calculate frequency for sine curve 
+			this._calculateFrequency();
 			
-			// audio steps
+			// calculate actual motion
+			motion = Math.sin( this._motionFactor * this._frequency + this._phase);
+						
+			// play audio steps
 			if(motion < this._motionLastValue && this._motionCurveUp === true){			
 				this._motionCurveUp = false;
 				audioStep1.play();
 			}else if(motion > this._motionLastValue && this._motionCurveUp === false){		
 				this._motionCurveUp = true;
 				audioStep2.play();
-			}		
+			}
+			
+			// set values to camera
+			camera.position.y = Math.abs(motion) * this._deflection;
+			camera.position.x = motion * this._deflection;
+			
+			// store current motion for next calculation
 			this._motionLastValue = motion;
 			
 		}else{
@@ -37994,27 +38069,52 @@ FirstPersonControls.prototype._calculateCameraMotion = (function() {
 }());
 
 /**
- * This method resets the camera to its origin. The reset is done with a smooth and simple animation.
+ * Calculates a new sine frequency for camera motion. It ensures, that
+ * the new sine cuvre is in-sync to the old one.
+ */
+FirstPersonControls.prototype._calculateFrequency = (function(){
+	
+	var current, next = 0;
+	var TWO_PI = 2 * Math.PI;
+	
+	return function(){
+			
+		if(this._frequency !== this._lastFrequency){
+			current = ( this._motionFactor * this._lastFrequency + this._phase ) % TWO_PI;
+			next    = ( this._motionFactor * this._frequency)   % TWO_PI;
+	        this._phase = current - next;
+	        this._lastFrequency = this._frequency;
+		}	
+	};
+}());
+
+
+/**
+ * This method resets the camera to its origin. The reset is done with a simple linear transition.
  */
 FirstPersonControls.prototype._translateCameraToOrigin = function(){
 	
 	// only translate if necessary
 	if(camera.position.x !== 0 || camera.position.y !== 0){
 		
-		camera.position.y -= FirstPersonControls.CAMERA.RESETFACTOR;
+		// reset y value
+		camera.position.y -= FirstPersonControls.DEFAULT.CAMERA.RESETFACTOR;
 		camera.position.y = Math.max(camera.position.y, 0);
 		
+		// reset x value
 		if(camera.position.x < 0){
-			camera.position.x += FirstPersonControls.CAMERA.RESETFACTOR;
+			camera.position.x += FirstPersonControls.DEFAULT.CAMERA.RESETFACTOR;
 			camera.position.x = Math.min(camera.position.x, 0);
 		}else if(camera.position.x > 0){
-			camera.position.x -= FirstPersonControls.CAMERA.RESETFACTOR;
+			camera.position.x -= FirstPersonControls.DEFAULT.CAMERA.RESETFACTOR;
 			camera.position.x = Math.max(camera.position.x, 0);
 		}
 
+		// initialize motion values
 		this._motionFactor = 0;
 		this._motionCurveUp = true;
 		this._motionLastValue = 0;
+		this._phase = 0;
 	}
 };
 
@@ -38030,12 +38130,12 @@ FirstPersonControls.prototype._calculateMoveVelocity = (function() {
 	var acceleration = 0;
 	
 	return function (delta){
-							
+									
 		if(this._move !== 0){
-			acceleration += this._move * delta * FirstPersonControls.MOVE.ACCFACTOR;
+			acceleration += this._move * delta * FirstPersonControls.DEFAULT.SPEED.ACCELERATION.FACTOR;
 			
-			if(Math.abs(acceleration) > FirstPersonControls.MOVE.MAXACC){
-				acceleration = FirstPersonControls.MOVE.MAXACC * this._move;
+			if(Math.abs(acceleration) > FirstPersonControls.DEFAULT.SPEED.ACCELERATION.MAX){
+				acceleration = FirstPersonControls.DEFAULT.SPEED.ACCELERATION.MAX * this._move;
 			}
 			
 		}else{
@@ -38059,10 +38159,10 @@ FirstPersonControls.prototype._calculateStrafeVelocity = (function() {
 	return function (delta){
 		
 		if(this._strafe !== 0){
-			acceleration += this._strafe * delta * FirstPersonControls.STRAFE.ACCFACTOR;
+			acceleration += this._strafe * delta * FirstPersonControls.DEFAULT.SPEED.ACCELERATION.FACTOR;
 			
-			if(Math.abs(acceleration) > FirstPersonControls.STRAFE.MAXACC){
-				acceleration = FirstPersonControls.STRAFE.MAXACC * this._strafe;
+			if(Math.abs(acceleration) > FirstPersonControls.DEFAULT.SPEED.ACCELERATION.MAX){
+				acceleration = FirstPersonControls.DEFAULT.SPEED.ACCELERATION.MAX * this._strafe;
 			}
 		}else{
 			acceleration = 0;
@@ -38262,69 +38362,113 @@ FirstPersonControls.prototype._isCollisionHandlingRequired = (function() {
 }());
 
 /**
- * Handles the "crouch" command. Causes implicitly an animation,
- * which changes the height of the player.
+ * Handles the "crouch" command. Crouching decreases the
+ * height and movement speed of the player. These values
+ * are changed via animations.
  */
 FirstPersonControls.prototype._toogleCrouch = function(){
 	
-	if(this._isCrouch === true){
-		// set "default mode", increase movement speed
-		this._moveSpeed = FirstPersonControls.DEFAULT.SPEED.MOVE;
-		this._strafeSpeed = FirstPersonControls.DEFAULT.SPEED.STRAFE;
-		this._isCrouch = false;
-		
-	}else{
-		// set "crouch mode", decrease movement speed
-		this._moveSpeed = FirstPersonControls.CROUCH.SPEED.MOVE;
-		this._strafeSpeed = FirstPersonControls.CROUCH.SPEED.STRAFE;
-		this._isCrouch = true;
-		
-	}
-
-	// save current timestamp and height for animation
-	this._animationStartTime  = global.performance.now();
-	this._animationStartHeight = this._height;
+	// toogle boolean value
+	this._isCrouch = !this._isCrouch;
+	
+	// save current timestamp and values for animation
+	this._animationCrouchTime =  global.performance.now();
+	
+	this._animationHeight = this._height;
+	this._animationMove   = this._moveSpeed;
+	this._animationStrafe = this._strafeSpeed;
 };
 
 /**
- * Animates the change from default to crouch, or crouch to default position.
+ * Handles the "run" command. Running increases the
+ * movement speed and the camera shaking of the player. These values
+ * are changed via animations.
+ * 
+ * @param {boolean} isActive - Should the player run.
+ */
+FirstPersonControls.prototype._toogleRun = function(isRun){
+		
+	this._isRun = isRun;
+	
+	// save current timestamp and values for animation
+	this._animationRunTime =  global.performance.now();
+	
+	this._animationMove  	  = this._moveSpeed;
+	this._animationStrafe 	  = this._strafeSpeed;
+	this._animationDeflection = this._deflection;
+	this._animationFrequency  = this._frequency;
+};
+
+/**
+ * Animates the transition between crouch and default position.
  */
 FirstPersonControls.prototype._animateCrouch = (function(){
 	
-	var elapsed, factor, value = 0;
+	var elapsed, factor, targetHeight, targetMove, targetStrafe, valueHeight, valueSpeed = 0;
 	
 	return function(){
 		
 		// animate only if necessary
-		if(this._isCrouch === true  && this._height !== FirstPersonControls.CROUCH.HEIGHT ||
-		   this._isCrouch === false && this._height !== FirstPersonControls.DEFAULT.HEIGHT){
+		if( this._isCrouch === true  && this._height > FirstPersonControls.CROUCH.HEIGHT ||
+		    this._isCrouch === false && this._height < FirstPersonControls.DEFAULT.HEIGHT ){
 		
 			// calculate elapsed time
-			elapsed = (global.performance.now() - this._animationStartTime) * FirstPersonControls.ANIMATION.CROUCH.DURATION;
+			elapsed = ( global.performance.now() - this._animationCrouchTime ) * FirstPersonControls.CROUCH.ANIMATION.DURATION;
 			
 			// calculate factor for easing formula
 			factor = elapsed > 1 ? 1 : elapsed;
 			
 			// calculate easing value
-			value = 1 - ( --factor * factor * factor * factor); // Easing QuarticOut
+			valueSpeed  =         factor * factor * factor * factor;  // easing quartic in
+			valueHeight = 1 - ( --factor * factor * factor * factor ); // easing quartic out
+				
+			// determine target values
+			targetHeight = this._isCrouch === true ? FirstPersonControls.CROUCH.HEIGHT       : FirstPersonControls.DEFAULT.HEIGHT;
+			targetMove   = this._isCrouch === true ? FirstPersonControls.CROUCH.SPEED.MOVE   : FirstPersonControls.DEFAULT.SPEED.MOVE;
+			targetStrafe = this._isCrouch === true ? FirstPersonControls.CROUCH.SPEED.STRAFE : FirstPersonControls.DEFAULT.SPEED.STRAFE;
 			
-			if(this._isCrouch === true){
-				
-				if(this._height > FirstPersonControls.CROUCH.HEIGHT){
-					
-					// transition from "default" to "crouch"
-					this._height = this._animationStartHeight + ( FirstPersonControls.CROUCH.HEIGHT - this._animationStartHeight ) * value;
-					
-				}
-				
-			}else{
-				
-				if(this._height < FirstPersonControls.DEFAULT.HEIGHT){
-					
-					// transition from "crouch" to "default"
-					this._height = this._animationStartHeight + ( FirstPersonControls.DEFAULT.HEIGHT - this._animationStartHeight ) * value;
-				}
-			}
+			// do transition
+			this._height      = this._animationHeight + ( targetHeight - this._animationHeight ) * valueHeight;
+			this._moveSpeed   = this._animationMove   + ( targetMove   - this._animationMove   ) * valueSpeed;
+			this._strafeSpeed = this._animationStrafe + ( targetStrafe - this._animationStrafe ) * valueSpeed;
+		}
+	};
+	
+})();
+
+/**
+ * Animates the transition between run and default movement.
+ */
+FirstPersonControls.prototype._animateRun = (function(){
+	
+	var elapsed, factor, targetMove, targetStrafe, targetDeflection, targetFrequency, value = 0;
+	
+	return function(){
+		
+		// animate only if necessary
+		if( this._isRun === true   && this._moveSpeed < FirstPersonControls.RUN.SPEED.MOVE ||
+		    this._isRun === false  && this._moveSpeed > FirstPersonControls.DEFAULT.SPEED.MOVE ){
+		
+			// calculate elapsed time
+			elapsed = (global.performance.now() - this._animationRunTime) * FirstPersonControls.RUN.ANIMATION.DURATION;
+			
+			// calculate factor for easing formula
+			factor = elapsed > 1 ? 1 : elapsed;
+			
+			// calculate easing value
+			value = factor * factor * factor * factor; // easing quartic in
+			
+			// determine target values
+			targetMove   	 = this._isRun === true ? FirstPersonControls.RUN.SPEED.MOVE   		: FirstPersonControls.DEFAULT.SPEED.MOVE;
+			targetStrafe     = this._isRun === true ? FirstPersonControls.RUN.SPEED.STRAFE 		: FirstPersonControls.DEFAULT.SPEED.STRAFE;
+			targetDeflection = this._isRun === true ? FirstPersonControls.RUN.CAMERA.DEFLECTION : FirstPersonControls.DEFAULT.CAMERA.DEFLECTION;
+			targetFrequency  = this._isRun === true ? FirstPersonControls.RUN.CAMERA.FREQUENCY  : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY;
+
+			// do transition
+			this._moveSpeed   = this._animationMove       + ( targetMove   	   - this._animationMove   )     * value;
+			this._strafeSpeed = this._animationStrafe     + ( targetStrafe     - this._animationStrafe )     * value;
+			this._deflection  = this._animationDeflection + ( targetDeflection - this._animationDeflection ) * value;
+			this._frequency   = this._animationFrequency  + ( targetFrequency  - this._animationFrequency )  * value;
 		}
 	};
 	
@@ -38449,22 +38593,29 @@ FirstPersonControls.prototype._onPointerlockerror = function(event) {
  * 
  * @param {object} event - Default event object.
  */
-FirstPersonControls.prototype._onMouseMove = function(event) {
-
-	if (self._isControlsActive === true && self.isActionInProgress === false){
+FirstPersonControls.prototype._onMouseMove = (function() {
+	
+	var movementX, movementY = 0;
+	var HALF_PI = Math.PI * 0.5;
+	
+	return function( event ){
 		
-		// capture mouse movement
-		var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
-		var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+		if ( self._isControlsActive === true && self.isActionInProgress === false ){
+			
+			// capture mouse movement
+			movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+			movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
-		// manipulate rotation of yaw and pitch object
-		self._yawObject.rotation.y -= movementX * (settingsManager.getMouseSensitivity() / 10000);
-		self._pitchObject.rotation.x -= movementY * (settingsManager.getMouseSensitivity() / 10000);
+			// manipulate rotation of yaw and pitch object
+			self._yawObject.rotation.y -= movementX * ( settingsManager.getMouseSensitivity() * 0.0001 );
+			self._pitchObject.rotation.x -= movementY * ( settingsManager.getMouseSensitivity() * 0.0001 );
 
-		// prevent "loop" of x-axis
-		self._pitchObject.rotation.x = Math.max(-(Math.PI / 2), Math.min((Math.PI / 2), self._pitchObject.rotation.x));
-	}
-};
+			// prevent "loop" of x-axis
+			self._pitchObject.rotation.x = Math.max( - HALF_PI, Math.min( HALF_PI, self._pitchObject.rotation.x ) );
+		}
+	};
+	
+}());
 
 /**
  * Executes, when a key is pressed down.
@@ -38475,7 +38626,7 @@ FirstPersonControls.prototype._onKeyDown = function(event) {
 	
 	if(self._isControlsActive === true){
 
-		switch ( event.keyCode ) {
+		switch (event.keyCode) {
 	
 			case 87:
 				// w
@@ -38499,7 +38650,16 @@ FirstPersonControls.prototype._onKeyDown = function(event) {
 				
 			case 67:
 				// c
-				self._toogleCrouch();
+				if(self._isRun === false){
+					self._toogleCrouch();
+				}	
+				break;
+				
+			case 16:
+				// shift
+				if( self._isCrouch === false){
+					self._toogleRun(true);
+				}
 				break;
 				
 			case 69:
@@ -38535,7 +38695,7 @@ FirstPersonControls.prototype._onKeyDown = function(event) {
 FirstPersonControls.prototype._onKeyUp = function(event) {
 	
 	if(self._isControlsActive === true){
-		switch( event.keyCode ) {
+		switch(event.keyCode) {
 	
 			case 87:
 				// w
@@ -38556,21 +38716,30 @@ FirstPersonControls.prototype._onKeyUp = function(event) {
 				// d
 				self._moveRight = false;
 				break;
+				
+			case 16:
+				// shift
+				if( self._isCrouch === false){
+					self._toogleRun(false);
+				}
 		}
 	}
-};
-
-FirstPersonControls.CAMERA = {
-	DEFLECTION: 0.2,
-	SHAKEFREQUENCY: 15,
-	RESETFACTOR: 0.02	
 };
 
 FirstPersonControls.DEFAULT = {
 	HEIGHT: 13,
 	SPEED: {
 		MOVE: 0.4,
-		STRAFE: 0.3
+		STRAFE: 0.3,
+		ACCELERATION:{
+			FACTOR: 1,
+			MAX: Math.PI/4
+		}
+	},
+	CAMERA: {
+		DEFLECTION: 0.3,
+		FREQUENCY: 15,
+		RESETFACTOR: 0.02	
 	}
 };
 
@@ -38578,24 +38747,40 @@ FirstPersonControls.CROUCH = {
 	HEIGHT: 6,
 	SPEED: {
 		MOVE: 0.2,
-		STRAFE: 0.15
-	}
-};
-
-FirstPersonControls.ANIMATION = {
-		CROUCH: {
-			DURATION: 0.001
+		STRAFE: 0.15,
+		ACCELERATION:{
+			FACTOR: 1,
+			MAX: Math.PI/4
 		}
+	},
+	CAMERA: {
+		DEFLECTION: 0.3,
+		FREQUENCY: 15,
+		RESETFACTOR: 0.02	
+	},
+	ANIMATION: {
+		DURATION: 0.001
+	},
 };
 
-FirstPersonControls.MOVE = {
-	ACCFACTOR: 1,
-	MAXACC: Math.PI/4
-};
-
-FirstPersonControls.STRAFE = {
-	ACCFACTOR: 1,
-	MAXACC: Math.PI/4
+FirstPersonControls.RUN = {
+	HEIGHT: 13,
+	SPEED: {
+		MOVE: 0.9,
+		STRAFE: 0.6,
+		ACCELERATION:{
+			FACTOR: 1,
+			MAX: Math.PI/4
+		}
+	},
+	CAMERA: {
+		DEFLECTION: 0.7,
+		FREQUENCY: 8,
+		RESETFACTOR: 0.02	
+	},
+	ANIMATION: {
+		DURATION: 0.002
+	}
 };
 
 module.exports = new FirstPersonControls();
