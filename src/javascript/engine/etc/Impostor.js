@@ -13,7 +13,7 @@
 
 var THREE = require("three");
 /**
- * Creates a an impostor.
+ * Creates an impostor.
  * 
  * @constructor 
  * @augments THREE.Mesh
@@ -108,7 +108,7 @@ Impostor.prototype.prepareGeneration = function(renderer, camera, lights){
 };
 
 /**
- * Generates the Impostor.
+ * Generates the impostor.
  */
 Impostor.prototype.generate = function(){
 
@@ -152,10 +152,9 @@ Impostor.prototype.update = (function(){
 		right.crossVectors(up, front);
 		
 		// create new matrix from basis vectors
-		// this overrides other transformations like scaling
 		this.matrix.makeBasis(right, up, front);
 		
-		// set the position
+		// apply the position
 		this.matrix.setPosition(this.position);
 		
 		// force world matrix to update
@@ -260,7 +259,7 @@ Impostor.prototype._prepareProjectionMatrix = function(){
  */
 Impostor.prototype._prepareScene = function(){
 
-	// add object
+	// clone object
 	this.object = this.object.clone();
 	
 	// ensure its visible
@@ -274,7 +273,7 @@ Impostor.prototype._prepareScene = function(){
 };
 
 /**
- * Renders the scene to a render target (texture).
+ * Renders the scene to the render target.
  */
 Impostor.prototype._render = function(){
 	
@@ -297,7 +296,7 @@ Impostor.prototype._render = function(){
  */
 Impostor.prototype._createImpostor = function(){
 	
-	// calculate the dimensions of the gemoetry
+	// calculate the dimensions of the geometry
 	var width =  this._boundingBox.max.x - this._boundingBox.min.x;
 	var height = this._boundingBox.max.y - this._boundingBox.min.y;
 
