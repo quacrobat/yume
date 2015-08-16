@@ -197,3 +197,59 @@
 		}
 	}
 }
+
+#development-panel{
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	.text{
+		padding: 5px;
+		border-radius: 5px;
+		background-color: fade(@brand-background, 80);
+		&:empty{
+			display: none;
+		}
+	}
+}
+
+#performance-monitor{
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 80px;
+	cursor: pointer;
+	.mode{
+		padding: 0 0 3px 3px;
+		text-align: left;
+		background-color: @brand-background;
+		border-radius: 5px;
+		.graph{
+			position: relative;
+			width: 74px;
+			height: 30px;
+			
+		}
+		&.fps{
+			display: block;
+			.graph{
+				background-color: @brand-primary;
+			}
+		}
+		&.ms{
+			display: none;
+			.graph{
+				background-color: @brand-secondary;
+			}
+		}
+	}
+	.text{
+		color: @brand-font-color;
+		font-size: 10px;
+	}
+	.bar{
+		width: 1px;
+		height: 30px;
+		float: left;
+		background-color: @brand-background;
+	}
+}

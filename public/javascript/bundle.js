@@ -38795,7 +38795,7 @@ FirstPersonControls.RUN = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":7,"../audio/AudioManager":13,"../core/Camera":17,"../core/Scene":21,"../etc/SettingsManager":36,"../etc/Utils":38,"../ui/UserInterfaceManager":64,"pubsub-js":1,"three":2}],16:[function(require,module,exports){
+},{"../action/ActionManager":7,"../audio/AudioManager":13,"../core/Camera":17,"../core/Scene":21,"../etc/SettingsManager":36,"../etc/Utils":38,"../ui/UserInterfaceManager":65,"pubsub-js":1,"three":2}],16:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting
@@ -38890,7 +38890,7 @@ Bootstrap.prototype._loadStage = function(){
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":15,"../etc/MultiplayerManager":30,"../etc/NetworkManager":31,"../etc/SaveGameManager":35,"../etc/Utils":38,"../ui/UserInterfaceManager":64,"./Camera":17,"./Environment":18,"./Renderer":20,"pubsub-js":1}],17:[function(require,module,exports){
+},{"../controls/FirstPersonControls":15,"../etc/MultiplayerManager":30,"../etc/NetworkManager":31,"../etc/SaveGameManager":35,"../etc/Utils":38,"../ui/UserInterfaceManager":65,"./Camera":17,"./Environment":18,"./Renderer":20,"pubsub-js":1}],17:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -39487,7 +39487,7 @@ Renderer.prototype._onResize = function(message, data){
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":38,"../postprocessing/EffectComposer":40,"../postprocessing/RenderPass":41,"../postprocessing/ShaderPass":42,"../shader/GaussianBlurShader":43,"../shader/GrayscaleShader":44,"../shader/VignetteShader":45,"pubsub-js":1,"three":2}],21:[function(require,module,exports){
+},{"../etc/Utils":38,"../postprocessing/EffectComposer":39,"../postprocessing/RenderPass":40,"../postprocessing/ShaderPass":41,"../shader/GaussianBlurShader":42,"../shader/GrayscaleShader":43,"../shader/VignetteShader":44,"pubsub-js":1,"three":2}],21:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic 
  * for scene-based functionality.
@@ -39760,7 +39760,7 @@ StageBase.prototype._changeStage = function(stageId, isSaveGame){
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":7,"../audio/AudioManager":13,"../controls/FirstPersonControls":15,"../etc/AnimationManager":26,"../etc/PerformanceManager":33,"../etc/SaveGameManager":35,"../etc/SettingsManager":36,"../etc/TextManager":37,"../etc/Utils":38,"../ui/UserInterfaceManager":64,"./Camera":17,"./Renderer":20,"./Scene":21,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
+},{"../action/ActionManager":7,"../audio/AudioManager":13,"../controls/FirstPersonControls":15,"../etc/AnimationManager":26,"../etc/PerformanceManager":33,"../etc/SaveGameManager":35,"../etc/SettingsManager":36,"../etc/TextManager":37,"../etc/Utils":38,"../ui/UserInterfaceManager":65,"./Camera":17,"./Renderer":20,"./Scene":21,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -40044,7 +40044,7 @@ StageManager.prototype._onLoadComplete = function(message, data){
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":35,"../etc/Utils":38,"../stages/Stage_001":46,"../stages/Stage_002":47,"../stages/Stage_003":48,"../stages/Stage_004":49,"../stages/Stage_005":50,"../stages/Stage_006":51,"../stages/Stage_007":52,"../stages/Stage_008":53,"../stages/Stage_009":54,"../stages/Stage_010":55,"../ui/UserInterfaceManager":64,"pubsub-js":1}],24:[function(require,module,exports){
+},{"../etc/SaveGameManager":35,"../etc/Utils":38,"../stages/Stage_001":45,"../stages/Stage_002":46,"../stages/Stage_003":47,"../stages/Stage_004":48,"../stages/Stage_005":49,"../stages/Stage_006":50,"../stages/Stage_007":51,"../stages/Stage_008":52,"../stages/Stage_009":53,"../stages/Stage_010":54,"../ui/UserInterfaceManager":65,"pubsub-js":1}],24:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It 
@@ -42404,146 +42404,6 @@ Utils.CDN = {
 module.exports = new Utils();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../core/Renderer":20}],39:[function(require,module,exports){
-(function (global){
-"use strict";
-/**
- * see https://github.com/mrdoob/stats.js
- */
-function Stats() {
-	
-	var now = ( global.performance && global.performance.now ) ? global.performance.now.bind( global.performance ) : Date.now;
-
-	var startTime = now(), prevTime = startTime;
-	var ms = 0, msMin = Infinity, msMax = 0;
-	var fps = 0, fpsMin = Infinity, fpsMax = 0;
-	var frames = 0, mode = 0;
-	var bar = null;
-	
-	function createElement( tag, id, css ) {
-		var element = global.document.createElement( tag );
-		element.id = id;
-		element.style.cssText = css;
-		return element;
-	}
-
-	var container = createElement( 'section', 'stats', 'width:80px;cursor:pointer;position:absolute;top:0px;left:0px;' );
-	container.addEventListener( 'mousedown', function ( event ) { event.preventDefault(); setMode( ++ mode % 2 ); }, false );
-
-	var fpsDiv = createElement( 'div', 'fps', 'padding:0 0 3px 3px;text-align:left;background-color:#20252f;border-radius: 5px;' );
-	container.appendChild( fpsDiv );
-
-	var fpsText = createElement( 'div', 'fpsText', 'color:#ffffff;font-size:10px;' );
-	fpsText.innerHTML = 'FPS';
-	fpsDiv.appendChild( fpsText );
-
-	var fpsGraph = createElement( 'div', 'fpsGraph', 'position:relative;width:74px;height:30px;background-color:#6083c2' );
-	fpsDiv.appendChild( fpsGraph );
-
-	while ( fpsGraph.children.length < 74 ) {
-
-		bar = createElement( 'span', '', 'width:1px;height:30px;float:left;background-color:#20252f' );
-		fpsGraph.appendChild( bar );
-	}
-
-	var msDiv = createElement( 'div', 'ms', 'padding:0 0 3px 3px;text-align:left;background-color:#20252f;display:none;border-radius: 5px;' );
-	container.appendChild( msDiv );
-	
-	var msText = createElement( 'div', 'msText', 'color:#ffffff;font-size:10px;' );
-	msText.innerHTML = 'MS';
-	msDiv.appendChild( msText );
-
-	var msGraph = createElement( 'div', 'msGraph', 'position:relative;width:74px;height:30px;background-color:#f3f4f6' );
-	msDiv.appendChild( msGraph );
-
-	while ( msGraph.children.length < 74 ) {
-
-		bar = createElement( 'span', '', 'width:1px;height:30px;float:left;background-color:#20252f' );
-		msGraph.appendChild( bar );
-
-	}
-
-	var setMode = function ( value ) {
-
-		mode = value;
-
-		switch ( mode ) {
-
-			case 0:
-				fpsDiv.style.display = 'block';
-				msDiv.style.display = 'none';
-				break;
-			case 1:
-				fpsDiv.style.display = 'none';
-				msDiv.style.display = 'block';
-				break;
-		}
-
-	};
-
-	var updateGraph = function ( dom, value ) {
-
-		var child = dom.appendChild( dom.firstChild );
-		child.style.height = value + 'px';
-
-	};
-
-	return {
-
-		REVISION: 13,
-
-		domElement: container,
-
-		setMode: setMode,
-
-		begin: function () {
-
-			startTime = now();
-
-		},
-
-		end: function () {
-
-			var time = now();
-
-			ms = time - startTime;
-			msMin = Math.min( msMin, ms );
-			msMax = Math.max( msMax, ms );
-
-			/*jslint bitwise: true */msText.textContent = ( ms | 0 ) + ' MS (' + ( msMin | 0 ) + '-' + ( msMax | 0 ) + ')';
-			updateGraph( msGraph, Math.min( 30, 30 - ( ms / 200 ) * 30 ) );
-
-			frames ++;
-
-			if ( time > prevTime + 1000 ) {
-
-				fps = Math.round( ( frames * 1000 ) / ( time - prevTime ) );
-				fpsMin = Math.min( fpsMin, fps );
-				fpsMax = Math.max( fpsMax, fps );
-
-				fpsText.textContent = fps + ' FPS (' + fpsMin + '-' + fpsMax + ')';
-				updateGraph( fpsGraph, Math.min( 30, 30 - ( fps / 100 ) * 30 ) );
-
-				prevTime = time;
-				frames = 0;
-
-			}
-
-			return time;
-
-		},
-
-		update: function () {
-
-			startTime = this.end();
-
-		}
-
-	};
-}
-
-module.exports = Stats;
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],40:[function(require,module,exports){
 /**
  * @file This prototype manages effects for post-processing.
  * 
@@ -42723,7 +42583,7 @@ EffectComposer.prototype._reset = function(renderTarget){
 };
 
 module.exports = EffectComposer;
-},{"three":2}],41:[function(require,module,exports){
+},{"three":2}],40:[function(require,module,exports){
 /**
  * @file This prototype provides a render pass for post-processing.
  * 
@@ -42785,7 +42645,7 @@ RenderPass.prototype.render = function(renderer, writeBuffer, readBuffer){
 };
 
 module.exports = RenderPass;
-},{"three":2}],42:[function(require,module,exports){
+},{"three":2}],41:[function(require,module,exports){
 /**
  * @file This prototype provides a shader pass for post-processing.
  * 
@@ -42890,7 +42750,7 @@ ShaderPass.prototype.render = function(renderer, writeBuffer, readBuffer){
 };
 
 module.exports = ShaderPass;
-},{"three":2}],43:[function(require,module,exports){
+},{"three":2}],42:[function(require,module,exports){
 /**
  * @file This shader applies a gaussian blur effect.
  * It can be used for both x and y direction.
@@ -42957,7 +42817,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":2}],44:[function(require,module,exports){
+},{"three":2}],43:[function(require,module,exports){
 /**
  * @file This shader transforms all colors to grayscale.
  * 
@@ -43006,7 +42866,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],45:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 /**
  * @file This shader creates a vignette effect.
  * 
@@ -43067,7 +42927,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],46:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43174,7 +43034,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],47:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],46:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43336,7 +43196,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],48:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],47:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43489,7 +43349,7 @@ function colorMesh(mesh){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],49:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],48:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43646,7 +43506,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],50:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],49:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43762,7 +43622,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],51:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],50:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43935,7 +43795,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],52:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],51:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -44083,7 +43943,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],53:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],52:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -44230,7 +44090,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],54:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],53:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -44392,7 +44252,7 @@ function showLODCircles(scene){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],55:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],54:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -44526,7 +44386,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],56:[function(require,module,exports){
+},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],55:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -44700,7 +44560,71 @@ Chat.prototype._onMessage = function(message, data){
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":63,"pubsub-js":1}],57:[function(require,module,exports){
+},{"./UiElement":64,"pubsub-js":1}],56:[function(require,module,exports){
+(function (global){
+/**
+ * @file Prototype for ui-element development panel.
+ * Only if the development mode is active, this control
+ * is part of the UI.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var UiElement = require("./UiElement");
+
+/**
+ * Creates the development panel.
+ * 
+ * @constructor
+ */
+function DevelopmentPanel() {
+	
+	UiElement.call(this);
+	
+	Object.defineProperties(this, {	
+		_$developmentPanel: {
+			value: null,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_$developmentPanelContent: {
+			value: null,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		}
+	});
+}
+
+DevelopmentPanel.prototype = Object.create(UiElement.prototype);
+DevelopmentPanel.prototype.constructor = DevelopmentPanel;
+
+/**
+ * Initializes the control.
+ */
+DevelopmentPanel.prototype.init = function(){
+	
+	this._$developmentPanel = global.document.querySelector("#development-panel");
+	this._$developmentPanelContent = this._$developmentPanel.querySelector(".text");
+};
+
+
+/**
+ * Sets the text of the development panel.
+ * 
+ * @param {string} text - The text-content of the development panel.
+ */
+DevelopmentPanel.prototype.setText = function(text){
+	
+	this._$developmentPanelContent.innerHTML = text;
+};
+
+module.exports = new DevelopmentPanel();
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./UiElement":64}],57:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -44761,7 +44685,7 @@ InformationPanel.prototype.setText = function(textKey){
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":63}],58:[function(require,module,exports){
+},{"./UiElement":64}],58:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -44836,7 +44760,7 @@ InteractionLabel.prototype.hide = function(){
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":63}],59:[function(require,module,exports){
+},{"./UiElement":64}],59:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -45021,7 +44945,7 @@ LoadingScreen.prototype._onReady = function(message, data){
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":63,"pubsub-js":1}],60:[function(require,module,exports){
+},{"./UiElement":64,"pubsub-js":1}],60:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -45174,7 +45098,7 @@ Menu.prototype._publishFinishEvent = function(message, data){
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":38,"./UiElement":63,"pubsub-js":1}],61:[function(require,module,exports){
+},{"../etc/Utils":38,"./UiElement":64,"pubsub-js":1}],61:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -45310,7 +45234,227 @@ ModalDialog.prototype._onClose = function(event){
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":38,"./UiElement":63,"pubsub-js":1}],62:[function(require,module,exports){
+},{"../etc/Utils":38,"./UiElement":64,"pubsub-js":1}],62:[function(require,module,exports){
+(function (global){
+/**
+ * @file Prototype for ui-element performance monitor.
+ * Only if the development mode is active, this control
+ * is part of the UI.
+ * 
+ * see https://github.com/mrdoob/stats.js/
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var UiElement = require("./UiElement");
+
+var self;
+
+/**
+ * Creates the performance monitor.
+ * 
+ * @constructor
+ */
+function PerformanceMonitor() {
+	
+	UiElement.call(this);
+	
+	Object.defineProperties(this, {	
+		_$performanceMonitor: {
+			value: null,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_$fps: {
+			value: null,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_$fpsText: {
+			value: null,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_$fpsGraph: {
+			value: null,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_$ms: {
+			value: null,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_$msText: {
+			value: null,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_$msGraph: {
+			value: null,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_mode: {
+			value: 0,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		}
+	});
+	
+	self = this;
+}
+
+PerformanceMonitor.prototype = Object.create(UiElement.prototype);
+PerformanceMonitor.prototype.constructor = PerformanceMonitor;
+
+/**
+ * Initializes the control.
+ */
+PerformanceMonitor.prototype.init = function(){
+	
+	// root element
+	this._$performanceMonitor = global.document.querySelector("#performance-monitor");
+	
+	// frames per seconds
+	this._$fps = this._$performanceMonitor.querySelector(".fps");
+	this._$fpsText = this._$fps.querySelector(".text");
+	this._$fpsGraph = this._$fps.querySelector(".graph");
+	this._generateBarChart(this._$fpsGraph);
+	
+	// frametime
+	this._$ms = this._$performanceMonitor.querySelector(".ms");
+	this._$msText = this._$ms.querySelector(".text");
+	this._$msGraph = this._$ms.querySelector(".graph");
+	this._generateBarChart(this._$msGraph);
+	
+	// event handler
+	this._$performanceMonitor.addEventListener("click", this._onSwitchMode);
+};
+
+/**
+ * Updates the control.
+ */
+PerformanceMonitor.prototype.update = (function(){
+	
+	var startTime = global.performance.now(), currentTime = 0, previousTime = startTime;
+	var ms = 0, msMin = Infinity, msMax = 0;
+	var fps = 0, fpsMin = Infinity, fpsMax = 0;
+	var frames = 0;
+	
+	return function() {
+		
+		currentTime = global.performance.now();
+
+		ms = currentTime - startTime;
+		msMin = Math.min( msMin, ms );
+		msMax = Math.max( msMax, ms );
+
+		/*jslint bitwise: true */this._$msText.textContent = ( ms | 0 ) + " MS (" + ( msMin | 0 ) + "-" + ( msMax | 0 ) + ")";
+		this._updateChart( this._$msGraph, Math.min( 30, 30 - ( ms / 200 ) * 30 ) );
+
+		frames ++;
+
+		if ( currentTime > previousTime + 1000 ) {
+
+			fps = Math.round( ( frames * 1000 ) / ( currentTime - previousTime ) );
+			fpsMin = Math.min( fpsMin, fps );
+			fpsMax = Math.max( fpsMax, fps );
+
+			this._$fpsText.textContent = fps + " FPS (" + fpsMin + "-" + fpsMax + ")";
+			this._updateChart( this._$fpsGraph, Math.min( 30, 30 - ( fps / 100 ) * 30 ) );
+
+			previousTime = currentTime;
+			frames = 0;
+
+		}
+
+		startTime = currentTime;
+
+	};
+	
+}());
+
+/**
+ * Toggles the control.
+ */
+PerformanceMonitor.prototype.toggle = function(){
+	
+	if(this._$performanceMonitor.style.display === "none"){
+		this._$performanceMonitor.style.display = "block";
+	}else{
+		this._$performanceMonitor.style.display = "none";
+	}
+};
+
+/**
+ * Generates the bar charts.
+ * 
+ * @param {object} $graph - The target graph object.
+ */
+PerformanceMonitor.prototype._generateBarChart = function( $graph ) {
+	
+	var element = null;
+	
+	while( $graph.children.length < 74 ) {
+		
+		element = global.document.createElement( "span" );
+		element.className = "bar";
+		$graph.appendChild(element);
+	}
+};
+
+/**
+ * Updates a graph.
+ * 
+ * @param {object} $graph - The target graph object.
+ */
+PerformanceMonitor.prototype._updateChart = ( function() {
+	
+	var child = null;
+	
+	return function( $graph, value ) {
+		
+		child = $graph.appendChild( $graph.firstChild );
+		child.style.height = value + "px";
+	};
+	
+}());
+
+/**
+ * Switches the mode of the performance monitor.
+ */
+PerformanceMonitor.prototype._onSwitchMode = function() {
+	
+	self._mode = ++ self._mode % 2;
+	
+	switch ( self._mode ) {
+
+		case 0:
+			self._$fps.style.display = "block";
+			self._$ms.style.display = "none";
+			break;
+			
+		case 1:
+			self._$fps.style.display = "none";
+			self._$ms.style.display = "block";
+			break;
+	}
+};
+
+module.exports = new PerformanceMonitor();
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./UiElement":64}],63:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -45510,7 +45654,7 @@ TextScreen.prototype._printName = function(){
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":63}],63:[function(require,module,exports){
+},{"./UiElement":64}],64:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -45558,7 +45702,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":37}],64:[function(require,module,exports){
+},{"../etc/TextManager":37}],65:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in scenes
@@ -45571,6 +45715,8 @@ module.exports = UiElement;
 
 var PubSub = require("pubsub-js");
 
+var developmentPanel = require("./DevelopmentPanel");
+var performanceMonitor = require("./PerformanceMonitor");
 var informationPanel = require("./InformationPanel");
 var interactionLabel = require("./InteractionLabel");
 var loadingScreen = require("./LoadingScreen");
@@ -45578,7 +45724,7 @@ var menu = require("./Menu");
 var textScreen = require("./TextScreen");
 var modalDialog = require("./ModalDialog");
 var chat = require("./Chat");
-var Stats = require("../lib/stats");
+
 var utils = require("../etc/Utils");
 
 /**
@@ -45594,31 +45740,17 @@ function UserInterfaceManager(){
 			configurable: false,
 			enumerable: false,
 			writable: true
-		},
-		_stats: {
-			value: new Stats(),
-			configurable: false,
-			enumerable: false,
-			writable: false
 		}
 	});
-
 }
 
 /**
- * Inits the UserInterface-Manager
+ * Initializes the user interface manager.
  */
 UserInterfaceManager.prototype.init = function(){
 	
 	// get reference to central ui-container
 	this._$uiContainer = global.document.querySelector("#ui-container");
-	
-	// create development information
-	if(utils.isDevelopmentModeActive() === true){
-		this._setupPerformanceMonitor();
-		
-		this._setupDevelopmentInformation();
-	}
 	
 	// init controls
 	informationPanel.init();
@@ -45628,6 +45760,15 @@ UserInterfaceManager.prototype.init = function(){
 	textScreen.init();
 	modalDialog.init();
 	chat.init();
+	
+	// add development information
+	if(utils.isDevelopmentModeActive() === true){
+		
+		performanceMonitor.init();
+		
+		developmentPanel.init();
+		developmentPanel.setText( "Development Mode Active: " + utils.getAppInformation() );
+	}
 	
 	// eventing
 	this._mapGlobalEventsToTopics();
@@ -45640,7 +45781,7 @@ UserInterfaceManager.prototype.init = function(){
 UserInterfaceManager.prototype.update = function(){
 	
 	if(utils.isDevelopmentModeActive() === true){
-		this._stats.update();
+		performanceMonitor.update();
 	}
 };
 
@@ -45761,41 +45902,9 @@ UserInterfaceManager.prototype.handleUiInteraction = function(event){
  */
 UserInterfaceManager.prototype.tooglePerformanceMonitor = function(){
 	
-	if(this._stats.domElement.style.display === "none"){
-		this._stats.domElement.style.display = "block";
-	}else{
-		this._stats.domElement.style.display = "none";
-	}
+	performanceMonitor.toggle();
 };
 
-/**
- * Shows a little performance-monitor in the higher left screen.
- */
-UserInterfaceManager.prototype._setupPerformanceMonitor = function(){
-	
-	this._stats.setMode(0); // 0: fps, 1: ms
-	
-	this._$uiContainer.appendChild(this._stats.domElement);
-};
-
-/**
- * Shows development information in the lower left corner of the screen.
- */
-UserInterfaceManager.prototype._setupDevelopmentInformation = function(){
-	
-	var domElement = global.document.createElement("section");
-	
-	domElement.style.position = "absolute";
-	domElement.style.left = "0px";
-	domElement.style.bottom = "0px";
-	domElement.style.color = "#ffffff";
-	domElement.style.backgroundColor = "#20252f";
-	domElement.style.padding = "5px";
-	domElement.style.borderRadius = "5px";
-	
-	domElement.innerHTML = "Development Mode: " + utils.getAppInformation();
-	this._$uiContainer.appendChild(domElement);
-};
 
 /**
  * Maps global events to topics
@@ -45845,4 +45954,4 @@ UserInterfaceManager.prototype._onKeyDown = function(event){
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":38,"../lib/stats":39,"./Chat":56,"./InformationPanel":57,"./InteractionLabel":58,"./LoadingScreen":59,"./Menu":60,"./ModalDialog":61,"./TextScreen":62,"pubsub-js":1}]},{},[5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64]);
+},{"../etc/Utils":38,"./Chat":55,"./DevelopmentPanel":56,"./InformationPanel":57,"./InteractionLabel":58,"./LoadingScreen":59,"./Menu":60,"./ModalDialog":61,"./PerformanceMonitor":62,"./TextScreen":63,"pubsub-js":1}]},{},[5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65]);

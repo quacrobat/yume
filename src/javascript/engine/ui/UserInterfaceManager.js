@@ -9,6 +9,8 @@
 
 var PubSub = require("pubsub-js");
 
+var developmentPanel = require("./DevelopmentPanel");
+var performanceMonitor = require("./PerformanceMonitor");
 var informationPanel = require("./InformationPanel");
 var interactionLabel = require("./InteractionLabel");
 var loadingScreen = require("./LoadingScreen");
@@ -16,7 +18,7 @@ var menu = require("./Menu");
 var textScreen = require("./TextScreen");
 var modalDialog = require("./ModalDialog");
 var chat = require("./Chat");
-var Stats = require("../lib/stats");
+
 var utils = require("../etc/Utils");
 
 /**
@@ -32,31 +34,17 @@ function UserInterfaceManager(){
 			configurable: false,
 			enumerable: false,
 			writable: true
-		},
-		_stats: {
-			value: new Stats(),
-			configurable: false,
-			enumerable: false,
-			writable: false
 		}
 	});
-
 }
 
 /**
- * Inits the UserInterface-Manager
+ * Initializes the user interface manager.
  */
 UserInterfaceManager.prototype.init = function(){
 	
 	// get reference to central ui-container
 	this._$uiContainer = global.document.querySelector("#ui-container");
-	
-	// create development information
-	if(utils.isDevelopmentModeActive() === true){
-		this._setupPerformanceMonitor();
-		
-		this._setupDevelopmentInformation();
-	}
 	
 	// init controls
 	informationPanel.init();
@@ -66,6 +54,15 @@ UserInterfaceManager.prototype.init = function(){
 	textScreen.init();
 	modalDialog.init();
 	chat.init();
+	
+	// add development information
+	if(utils.isDevelopmentModeActive() === true){
+		
+		performanceMonitor.init();
+		
+		developmentPanel.init();
+		developmentPanel.setText( "Development Mode Active: " + utils.getAppInformation() );
+	}
 	
 	// eventing
 	this._mapGlobalEventsToTopics();
@@ -78,7 +75,7 @@ UserInterfaceManager.prototype.init = function(){
 UserInterfaceManager.prototype.update = function(){
 	
 	if(utils.isDevelopmentModeActive() === true){
-		this._stats.update();
+		performanceMonitor.update();
 	}
 };
 
@@ -199,41 +196,9 @@ UserInterfaceManager.prototype.handleUiInteraction = function(event){
  */
 UserInterfaceManager.prototype.tooglePerformanceMonitor = function(){
 	
-	if(this._stats.domElement.style.display === "none"){
-		this._stats.domElement.style.display = "block";
-	}else{
-		this._stats.domElement.style.display = "none";
-	}
+	performanceMonitor.toggle();
 };
 
-/**
- * Shows a little performance-monitor in the higher left screen.
- */
-UserInterfaceManager.prototype._setupPerformanceMonitor = function(){
-	
-	this._stats.setMode(0); // 0: fps, 1: ms
-	
-	this._$uiContainer.appendChild(this._stats.domElement);
-};
-
-/**
- * Shows development information in the lower left corner of the screen.
- */
-UserInterfaceManager.prototype._setupDevelopmentInformation = function(){
-	
-	var domElement = global.document.createElement("section");
-	
-	domElement.style.position = "absolute";
-	domElement.style.left = "0px";
-	domElement.style.bottom = "0px";
-	domElement.style.color = "#ffffff";
-	domElement.style.backgroundColor = "#20252f";
-	domElement.style.padding = "5px";
-	domElement.style.borderRadius = "5px";
-	
-	domElement.innerHTML = "Development Mode: " + utils.getAppInformation();
-	this._$uiContainer.appendChild(domElement);
-};
 
 /**
  * Maps global events to topics
