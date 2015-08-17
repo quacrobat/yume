@@ -35391,764 +35391,6 @@ if (typeof exports !== 'undefined') {
 }
 
 },{}],3:[function(require,module,exports){
-/**
- * Tween.js - Licensed under the MIT license
- * https://github.com/sole/tween.js
- * ----------------------------------------------
- *
- * See https://github.com/sole/tween.js/graphs/contributors for the full list of contributors.
- * Thank you all, you're awesome!
- */
-
-// Date.now shim for (ahem) Internet Explo(d|r)er
-if ( Date.now === undefined ) {
-
-	Date.now = function () {
-
-		return new Date().valueOf();
-
-	};
-
-}
-
-var TWEEN = TWEEN || ( function () {
-
-	var _tweens = [];
-
-	return {
-
-		REVISION: '14',
-
-		getAll: function () {
-
-			return _tweens;
-
-		},
-
-		removeAll: function () {
-
-			_tweens = [];
-
-		},
-
-		add: function ( tween ) {
-
-			_tweens.push( tween );
-
-		},
-
-		remove: function ( tween ) {
-
-			var i = _tweens.indexOf( tween );
-
-			if ( i !== -1 ) {
-
-				_tweens.splice( i, 1 );
-
-			}
-
-		},
-
-		update: function ( time ) {
-
-			if ( _tweens.length === 0 ) return false;
-
-			var i = 0;
-
-			time = time !== undefined ? time : ( typeof window !== 'undefined' && window.performance !== undefined && window.performance.now !== undefined ? window.performance.now() : Date.now() );
-
-			while ( i < _tweens.length ) {
-
-				if ( _tweens[ i ].update( time ) ) {
-
-					i++;
-
-				} else {
-
-					_tweens.splice( i, 1 );
-
-				}
-
-			}
-
-			return true;
-
-		}
-	};
-
-} )();
-
-TWEEN.Tween = function ( object ) {
-
-	var _object = object;
-	var _valuesStart = {};
-	var _valuesEnd = {};
-	var _valuesStartRepeat = {};
-	var _duration = 1000;
-	var _repeat = 0;
-	var _yoyo = false;
-	var _isPlaying = false;
-	var _reversed = false;
-	var _delayTime = 0;
-	var _startTime = null;
-	var _easingFunction = TWEEN.Easing.Linear.None;
-	var _interpolationFunction = TWEEN.Interpolation.Linear;
-	var _chainedTweens = [];
-	var _onStartCallback = null;
-	var _onStartCallbackFired = false;
-	var _onUpdateCallback = null;
-	var _onCompleteCallback = null;
-	var _onStopCallback = null;
-
-	// Set all starting values present on the target object
-	for ( var field in object ) {
-
-		_valuesStart[ field ] = parseFloat(object[field], 10);
-
-	}
-
-	this.to = function ( properties, duration ) {
-
-		if ( duration !== undefined ) {
-
-			_duration = duration;
-
-		}
-
-		_valuesEnd = properties;
-
-		return this;
-
-	};
-
-	this.start = function ( time ) {
-
-		TWEEN.add( this );
-
-		_isPlaying = true;
-
-		_onStartCallbackFired = false;
-
-		_startTime = time !== undefined ? time : ( typeof window !== 'undefined' && window.performance !== undefined && window.performance.now !== undefined ? window.performance.now() : Date.now() );
-		_startTime += _delayTime;
-
-		for ( var property in _valuesEnd ) {
-
-			// check if an Array was provided as property value
-			if ( _valuesEnd[ property ] instanceof Array ) {
-
-				if ( _valuesEnd[ property ].length === 0 ) {
-
-					continue;
-
-				}
-
-				// create a local copy of the Array with the start value at the front
-				_valuesEnd[ property ] = [ _object[ property ] ].concat( _valuesEnd[ property ] );
-
-			}
-
-			_valuesStart[ property ] = _object[ property ];
-
-			if( ( _valuesStart[ property ] instanceof Array ) === false ) {
-				_valuesStart[ property ] *= 1.0; // Ensures we're using numbers, not strings
-			}
-
-			_valuesStartRepeat[ property ] = _valuesStart[ property ] || 0;
-
-		}
-
-		return this;
-
-	};
-
-	this.stop = function () {
-
-		if ( !_isPlaying ) {
-			return this;
-		}
-
-		TWEEN.remove( this );
-		_isPlaying = false;
-
-		if ( _onStopCallback !== null ) {
-
-			_onStopCallback.call( _object );
-
-		}
-
-		this.stopChainedTweens();
-		return this;
-
-	};
-
-	this.stopChainedTweens = function () {
-
-		for ( var i = 0, numChainedTweens = _chainedTweens.length; i < numChainedTweens; i++ ) {
-
-			_chainedTweens[ i ].stop();
-
-		}
-
-	};
-
-	this.delay = function ( amount ) {
-
-		_delayTime = amount;
-		return this;
-
-	};
-
-	this.repeat = function ( times ) {
-
-		_repeat = times;
-		return this;
-
-	};
-
-	this.yoyo = function( yoyo ) {
-
-		_yoyo = yoyo;
-		return this;
-
-	};
-
-
-	this.easing = function ( easing ) {
-
-		_easingFunction = easing;
-		return this;
-
-	};
-
-	this.interpolation = function ( interpolation ) {
-
-		_interpolationFunction = interpolation;
-		return this;
-
-	};
-
-	this.chain = function () {
-
-		_chainedTweens = arguments;
-		return this;
-
-	};
-
-	this.onStart = function ( callback ) {
-
-		_onStartCallback = callback;
-		return this;
-
-	};
-
-	this.onUpdate = function ( callback ) {
-
-		_onUpdateCallback = callback;
-		return this;
-
-	};
-
-	this.onComplete = function ( callback ) {
-
-		_onCompleteCallback = callback;
-		return this;
-
-	};
-
-	this.onStop = function ( callback ) {
-
-		_onStopCallback = callback;
-		return this;
-
-	};
-
-	this.update = function ( time ) {
-
-		var property;
-
-		if ( time < _startTime ) {
-
-			return true;
-
-		}
-
-		if ( _onStartCallbackFired === false ) {
-
-			if ( _onStartCallback !== null ) {
-
-				_onStartCallback.call( _object );
-
-			}
-
-			_onStartCallbackFired = true;
-
-		}
-
-		var elapsed = ( time - _startTime ) / _duration;
-		elapsed = elapsed > 1 ? 1 : elapsed;
-
-		var value = _easingFunction( elapsed );
-
-		for ( property in _valuesEnd ) {
-
-			var start = _valuesStart[ property ] || 0;
-			var end = _valuesEnd[ property ];
-
-			if ( end instanceof Array ) {
-
-				_object[ property ] = _interpolationFunction( end, value );
-
-			} else {
-
-				// Parses relative end values with start as base (e.g.: +10, -3)
-				if ( typeof(end) === "string" ) {
-					end = start + parseFloat(end, 10);
-				}
-
-				// protect against non numeric properties.
-				if ( typeof(end) === "number" ) {
-					_object[ property ] = start + ( end - start ) * value;
-				}
-
-			}
-
-		}
-
-		if ( _onUpdateCallback !== null ) {
-
-			_onUpdateCallback.call( _object, value );
-
-		}
-
-		if ( elapsed == 1 ) {
-
-			if ( _repeat > 0 ) {
-
-				if( isFinite( _repeat ) ) {
-					_repeat--;
-				}
-
-				// reassign starting values, restart by making startTime = now
-				for( property in _valuesStartRepeat ) {
-
-					if ( typeof( _valuesEnd[ property ] ) === "string" ) {
-						_valuesStartRepeat[ property ] = _valuesStartRepeat[ property ] + parseFloat(_valuesEnd[ property ], 10);
-					}
-
-					if (_yoyo) {
-						var tmp = _valuesStartRepeat[ property ];
-						_valuesStartRepeat[ property ] = _valuesEnd[ property ];
-						_valuesEnd[ property ] = tmp;
-					}
-
-					_valuesStart[ property ] = _valuesStartRepeat[ property ];
-
-				}
-
-				if (_yoyo) {
-					_reversed = !_reversed;
-				}
-
-				_startTime = time + _delayTime;
-
-				return true;
-
-			} else {
-
-				if ( _onCompleteCallback !== null ) {
-
-					_onCompleteCallback.call( _object );
-
-				}
-
-				for ( var i = 0, numChainedTweens = _chainedTweens.length; i < numChainedTweens; i++ ) {
-
-					_chainedTweens[ i ].start( time );
-
-				}
-
-				return false;
-
-			}
-
-		}
-
-		return true;
-
-	};
-
-};
-
-
-TWEEN.Easing = {
-
-	Linear: {
-
-		None: function ( k ) {
-
-			return k;
-
-		}
-
-	},
-
-	Quadratic: {
-
-		In: function ( k ) {
-
-			return k * k;
-
-		},
-
-		Out: function ( k ) {
-
-			return k * ( 2 - k );
-
-		},
-
-		InOut: function ( k ) {
-
-			if ( ( k *= 2 ) < 1 ) return 0.5 * k * k;
-			return - 0.5 * ( --k * ( k - 2 ) - 1 );
-
-		}
-
-	},
-
-	Cubic: {
-
-		In: function ( k ) {
-
-			return k * k * k;
-
-		},
-
-		Out: function ( k ) {
-
-			return --k * k * k + 1;
-
-		},
-
-		InOut: function ( k ) {
-
-			if ( ( k *= 2 ) < 1 ) return 0.5 * k * k * k;
-			return 0.5 * ( ( k -= 2 ) * k * k + 2 );
-
-		}
-
-	},
-
-	Quartic: {
-
-		In: function ( k ) {
-
-			return k * k * k * k;
-
-		},
-
-		Out: function ( k ) {
-
-			return 1 - ( --k * k * k * k );
-
-		},
-
-		InOut: function ( k ) {
-
-			if ( ( k *= 2 ) < 1) return 0.5 * k * k * k * k;
-			return - 0.5 * ( ( k -= 2 ) * k * k * k - 2 );
-
-		}
-
-	},
-
-	Quintic: {
-
-		In: function ( k ) {
-
-			return k * k * k * k * k;
-
-		},
-
-		Out: function ( k ) {
-
-			return --k * k * k * k * k + 1;
-
-		},
-
-		InOut: function ( k ) {
-
-			if ( ( k *= 2 ) < 1 ) return 0.5 * k * k * k * k * k;
-			return 0.5 * ( ( k -= 2 ) * k * k * k * k + 2 );
-
-		}
-
-	},
-
-	Sinusoidal: {
-
-		In: function ( k ) {
-
-			return 1 - Math.cos( k * Math.PI / 2 );
-
-		},
-
-		Out: function ( k ) {
-
-			return Math.sin( k * Math.PI / 2 );
-
-		},
-
-		InOut: function ( k ) {
-
-			return 0.5 * ( 1 - Math.cos( Math.PI * k ) );
-
-		}
-
-	},
-
-	Exponential: {
-
-		In: function ( k ) {
-
-			return k === 0 ? 0 : Math.pow( 1024, k - 1 );
-
-		},
-
-		Out: function ( k ) {
-
-			return k === 1 ? 1 : 1 - Math.pow( 2, - 10 * k );
-
-		},
-
-		InOut: function ( k ) {
-
-			if ( k === 0 ) return 0;
-			if ( k === 1 ) return 1;
-			if ( ( k *= 2 ) < 1 ) return 0.5 * Math.pow( 1024, k - 1 );
-			return 0.5 * ( - Math.pow( 2, - 10 * ( k - 1 ) ) + 2 );
-
-		}
-
-	},
-
-	Circular: {
-
-		In: function ( k ) {
-
-			return 1 - Math.sqrt( 1 - k * k );
-
-		},
-
-		Out: function ( k ) {
-
-			return Math.sqrt( 1 - ( --k * k ) );
-
-		},
-
-		InOut: function ( k ) {
-
-			if ( ( k *= 2 ) < 1) return - 0.5 * ( Math.sqrt( 1 - k * k) - 1);
-			return 0.5 * ( Math.sqrt( 1 - ( k -= 2) * k) + 1);
-
-		}
-
-	},
-
-	Elastic: {
-
-		In: function ( k ) {
-
-			var s, a = 0.1, p = 0.4;
-			if ( k === 0 ) return 0;
-			if ( k === 1 ) return 1;
-			if ( !a || a < 1 ) { a = 1; s = p / 4; }
-			else s = p * Math.asin( 1 / a ) / ( 2 * Math.PI );
-			return - ( a * Math.pow( 2, 10 * ( k -= 1 ) ) * Math.sin( ( k - s ) * ( 2 * Math.PI ) / p ) );
-
-		},
-
-		Out: function ( k ) {
-
-			var s, a = 0.1, p = 0.4;
-			if ( k === 0 ) return 0;
-			if ( k === 1 ) return 1;
-			if ( !a || a < 1 ) { a = 1; s = p / 4; }
-			else s = p * Math.asin( 1 / a ) / ( 2 * Math.PI );
-			return ( a * Math.pow( 2, - 10 * k) * Math.sin( ( k - s ) * ( 2 * Math.PI ) / p ) + 1 );
-
-		},
-
-		InOut: function ( k ) {
-
-			var s, a = 0.1, p = 0.4;
-			if ( k === 0 ) return 0;
-			if ( k === 1 ) return 1;
-			if ( !a || a < 1 ) { a = 1; s = p / 4; }
-			else s = p * Math.asin( 1 / a ) / ( 2 * Math.PI );
-			if ( ( k *= 2 ) < 1 ) return - 0.5 * ( a * Math.pow( 2, 10 * ( k -= 1 ) ) * Math.sin( ( k - s ) * ( 2 * Math.PI ) / p ) );
-			return a * Math.pow( 2, -10 * ( k -= 1 ) ) * Math.sin( ( k - s ) * ( 2 * Math.PI ) / p ) * 0.5 + 1;
-
-		}
-
-	},
-
-	Back: {
-
-		In: function ( k ) {
-
-			var s = 1.70158;
-			return k * k * ( ( s + 1 ) * k - s );
-
-		},
-
-		Out: function ( k ) {
-
-			var s = 1.70158;
-			return --k * k * ( ( s + 1 ) * k + s ) + 1;
-
-		},
-
-		InOut: function ( k ) {
-
-			var s = 1.70158 * 1.525;
-			if ( ( k *= 2 ) < 1 ) return 0.5 * ( k * k * ( ( s + 1 ) * k - s ) );
-			return 0.5 * ( ( k -= 2 ) * k * ( ( s + 1 ) * k + s ) + 2 );
-
-		}
-
-	},
-
-	Bounce: {
-
-		In: function ( k ) {
-
-			return 1 - TWEEN.Easing.Bounce.Out( 1 - k );
-
-		},
-
-		Out: function ( k ) {
-
-			if ( k < ( 1 / 2.75 ) ) {
-
-				return 7.5625 * k * k;
-
-			} else if ( k < ( 2 / 2.75 ) ) {
-
-				return 7.5625 * ( k -= ( 1.5 / 2.75 ) ) * k + 0.75;
-
-			} else if ( k < ( 2.5 / 2.75 ) ) {
-
-				return 7.5625 * ( k -= ( 2.25 / 2.75 ) ) * k + 0.9375;
-
-			} else {
-
-				return 7.5625 * ( k -= ( 2.625 / 2.75 ) ) * k + 0.984375;
-
-			}
-
-		},
-
-		InOut: function ( k ) {
-
-			if ( k < 0.5 ) return TWEEN.Easing.Bounce.In( k * 2 ) * 0.5;
-			return TWEEN.Easing.Bounce.Out( k * 2 - 1 ) * 0.5 + 0.5;
-
-		}
-
-	}
-
-};
-
-TWEEN.Interpolation = {
-
-	Linear: function ( v, k ) {
-
-		var m = v.length - 1, f = m * k, i = Math.floor( f ), fn = TWEEN.Interpolation.Utils.Linear;
-
-		if ( k < 0 ) return fn( v[ 0 ], v[ 1 ], f );
-		if ( k > 1 ) return fn( v[ m ], v[ m - 1 ], m - f );
-
-		return fn( v[ i ], v[ i + 1 > m ? m : i + 1 ], f - i );
-
-	},
-
-	Bezier: function ( v, k ) {
-
-		var b = 0, n = v.length - 1, pw = Math.pow, bn = TWEEN.Interpolation.Utils.Bernstein, i;
-
-		for ( i = 0; i <= n; i++ ) {
-			b += pw( 1 - k, n - i ) * pw( k, i ) * v[ i ] * bn( n, i );
-		}
-
-		return b;
-
-	},
-
-	CatmullRom: function ( v, k ) {
-
-		var m = v.length - 1, f = m * k, i = Math.floor( f ), fn = TWEEN.Interpolation.Utils.CatmullRom;
-
-		if ( v[ 0 ] === v[ m ] ) {
-
-			if ( k < 0 ) i = Math.floor( f = m * ( 1 + k ) );
-
-			return fn( v[ ( i - 1 + m ) % m ], v[ i ], v[ ( i + 1 ) % m ], v[ ( i + 2 ) % m ], f - i );
-
-		} else {
-
-			if ( k < 0 ) return v[ 0 ] - ( fn( v[ 0 ], v[ 0 ], v[ 1 ], v[ 1 ], -f ) - v[ 0 ] );
-			if ( k > 1 ) return v[ m ] - ( fn( v[ m ], v[ m ], v[ m - 1 ], v[ m - 1 ], f - m ) - v[ m ] );
-
-			return fn( v[ i ? i - 1 : 0 ], v[ i ], v[ m < i + 1 ? m : i + 1 ], v[ m < i + 2 ? m : i + 2 ], f - i );
-
-		}
-
-	},
-
-	Utils: {
-
-		Linear: function ( p0, p1, t ) {
-
-			return ( p1 - p0 ) * t + p0;
-
-		},
-
-		Bernstein: function ( n , i ) {
-
-			var fc = TWEEN.Interpolation.Utils.Factorial;
-			return fc( n ) / fc( i ) / fc( n - i );
-
-		},
-
-		Factorial: ( function () {
-
-			var a = [ 1 ];
-
-			return function ( n ) {
-
-				var s = 1, i;
-				if ( a[ n ] ) return a[ n ];
-				for ( i = n; i > 1; i-- ) s *= i;
-				return a[ n ] = s;
-
-			};
-
-		} )(),
-
-		CatmullRom: function ( p0, p1, p2, p3, t ) {
-
-			var v0 = ( p2 - p0 ) * 0.5, v1 = ( p3 - p1 ) * 0.5, t2 = t * t, t3 = t * t2;
-			return ( 2 * p1 - 2 * p2 + v0 + v1 ) * t3 + ( - 3 * p1 + 3 * p2 - 2 * v0 - v1 ) * t2 + v0 * t + p1;
-
-		}
-
-	}
-
-};
-
-module.exports=TWEEN;
-},{}],4:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -36193,7 +35435,7 @@ function ws(uri, protocols, opts) {
 
 if (WebSocket) ws.prototype = WebSocket.prototype;
 
-},{}],5:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -36205,7 +35447,7 @@ global.window.onload = function(){
 	var bootstrap = new Bootstrap();
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./core/Bootstrap":16}],6:[function(require,module,exports){
+},{"./core/Bootstrap":18}],5:[function(require,module,exports){
 /**
  * @file Prototype for defining script-based actions.
  * 
@@ -36270,7 +35512,7 @@ Action.TYPES = {
 };
 
 module.exports = Action;
-},{}],7:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 /**
  * @file Interface for entire action-handling. This prototype is used in scenes
  * to access action-based logic and to create action-entities.
@@ -36448,7 +35690,7 @@ ActionManager.prototype.removeStaticObjects = function(){
 };
 
 module.exports = new ActionManager();
-},{"./Action":6,"./ActionTrigger":8,"./InteractiveObject":9,"./StaticObject":10}],8:[function(require,module,exports){
+},{"./Action":5,"./ActionTrigger":7,"./InteractiveObject":8,"./StaticObject":9}],7:[function(require,module,exports){
 /**
  * @file The ActionTrigger is a static trigger for actions.
  * 
@@ -36513,7 +35755,7 @@ ActionTrigger.prototype.constructor = ActionTrigger;
 
 
 module.exports = ActionTrigger;
-},{"../etc/Utils":38,"three":2}],9:[function(require,module,exports){
+},{"../etc/Utils":39,"three":2}],8:[function(require,module,exports){
 /**
  * @file The prototype InteractiveObject enables ordinary 3D-Objects to be interactive. 
  * Any interactive object is part of the collision-detection logic and ready for interacting with the player.
@@ -36627,7 +35869,7 @@ InteractiveObject.prototype.isIntersectionBox = function(boundingBox){
 };	
 
 module.exports = InteractiveObject;
-},{"three":2}],10:[function(require,module,exports){
+},{"three":2}],9:[function(require,module,exports){
 /**
  * @file The prototype StaticObject enables ordinary 3D-Objects to be static. 
  * Any interactive object is part of the collision-detection logic.
@@ -36683,7 +35925,730 @@ StaticObject.prototype.isIntersectionBox = function(boundingBox){
 };	
 
 module.exports = StaticObject;
-},{"three":2}],11:[function(require,module,exports){
+},{"three":2}],10:[function(require,module,exports){
+(function (global){
+/**
+ * @file Prototype for defining an animation for
+ * a single property.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+/**
+ * Creates an animation.
+ * 
+ * @constructor
+ * 
+ * @param {object} options - The parameter for the animation.
+ */
+function Animation(options) {
+
+	Object.defineProperties(this, {
+		object: {
+			value: null,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		property: {
+			value: null,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		duration: {
+			value: 0,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		startValue: {
+			value: 0,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		endValue: {
+			value: 0,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		delayTime: {
+			value: 0,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		easingFunction: {
+			value: undefined,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		onStartCallback: {
+			value: undefined,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		onUpdateCallback: {
+			value: undefined,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		onCompleteCallback: {
+			value: undefined,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		onStopCallback: {
+			value: undefined,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		isPlaying: {
+			value: false,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_startTime: {
+			value: 0,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_isHover: {
+			value: false,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		}
+	});
+	
+	// set options
+	for(var property in options){
+		if( this.hasOwnProperty( property ) === true ){
+			this[ property ] = options[ property ];
+		}
+	}
+}
+
+/**
+ * Starts the animation.
+ * 
+ * @param {number} time - The update time.
+ * 
+ * @returns {boolean} Is the animation finished?
+ */
+Animation.prototype.update = (function(){
+	
+	var index, elapsed, value, temp = 0;
+	var isFinished = false;
+	
+	return function( time ){
+		
+		// set default value
+		isFinished = false;
+		
+		// if the startTime is greater than the current time,
+		// we will skip the update. this is important for delayed
+		// start time.
+		if ( time < this._startTime ) {
+
+			return isFinished;
+
+		}
+		
+		// calculate elapsed time. the final value of "elapsed"
+		// will always be inside the range of [0, 1].
+		elapsed = ( time - this._startTime ) / this.duration;
+		elapsed = elapsed > 1 ? 1 : elapsed;
+		
+		// execute easing function
+		if( typeof this.easingFunction === "function" ){
+			
+			value = this.easingFunction( elapsed );
+			
+		}else{
+			
+			throw "ERROR: Animation: No easing function assigned.";
+		}
+		
+		// check, if the object has the specified property
+		if( this.object.hasOwnProperty( this.property ) === true ){
+			
+			// calculate and assign new value
+			this.object[ this.property ] = this.startValue + ( this.endValue - this.startValue ) * value;
+		}
+		
+		// execute callback
+		if( typeof this.onUpdateCallback === "function" ){
+			
+			this.onUpdateCallback();
+		}
+		
+		// check finish
+		if( elapsed === 1 ){
+			
+			// when the hover flag is set, the animation
+			// will be played in an endless loop.
+			if( this._isHover === true ){
+				
+				// swtich start and end values
+				temp = this.startValue;
+				this.startValue = this.endValue;
+				this.endValue =  temp;
+				
+				// set new start time
+				this._startTime = time + this.delayTime;
+				
+			}else{
+				
+				// exectue callback
+				if ( typeof this.onCompleteCallback ===  "function" ) {
+
+					this.onCompleteCallback();
+
+				}
+				
+				isFinished = true;
+				
+			}
+		
+		}
+		
+		return isFinished;
+	};
+	
+}());
+
+/**
+ * Starts the animation.
+ * 
+ * @param {number} time - The starting time.
+ */
+Animation.prototype.start = function( time ){
+	
+	this.isPlaying = true;
+	
+	this._startTime = time !== undefined ? time : global.performance.now();
+	this._startTime += this.delayTime;
+	
+	// execute callback
+	if( typeof this.onStartCallback === "function" ){
+		
+		this.onStartCallback();
+	}
+};
+
+/**
+ * Stops the animation.
+ */
+Animation.prototype.stop = function(){
+	
+	if( this.isPlaying === true ){
+		
+		this.isPlaying = false;
+	}
+	
+	// execute callback
+	if( typeof this.onStopCallback === "function" ){
+		
+		this.onStopCallback();
+	}
+};
+
+/**
+ * Set the hover flag.
+ * 
+ * @param {boolean} hover - Should the animation has an endless hover effect?
+ */
+Animation.prototype.setHover = function( isHover ){
+	
+	this._isHover = isHover;
+};
+
+module.exports = Animation;
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],11:[function(require,module,exports){
+(function (global){
+/**
+ * @file Interface for entire animation-handling. This prototype is used in scenes
+ * to access animation-based logic and to create animation-entities. The prototype
+ * uses the framework TWEEN.js to create animations.
+ * 
+ * @author Human Interactive
+ */
+"use strict";
+
+var BasicAnimation = require("../animation/Animation");
+
+/**
+ * Creates the animation manager.
+ * 
+ * @constructor
+ */
+function AnimationManager() {
+	
+	Object.defineProperties(this, {	
+		_animations: {
+			value: [],
+			configurable: false,
+			enumerable: false,
+			writable: false
+		}
+	});
+}
+
+/**
+ * Creates an animation, which animates one property of an object.
+ * 
+ * @param {object} options - The options for the animation.
+ * 
+ * @returns {Animation} The new animation.
+ */
+AnimationManager.prototype.createBasicAnimation = function(options){
+	
+	var animation = new BasicAnimation(options);
+	this.addAnimation(animation);
+	return animation;
+};
+
+/**
+ * Creates an animation, which animates one property of an object in an endless loop.
+ * 
+ * @param {object} options - The options for the animation.
+ * 
+ * @returns {Animation} The new animation.
+ */
+AnimationManager.prototype.createHoverAnimation = function(options){
+	
+	var animation = new BasicAnimation(options);
+	animation.setHover(true);
+	this.addAnimation(animation);
+	
+	return animation;
+};
+
+/**
+ * Update method for animations. Called in render-loop.
+ */
+AnimationManager.prototype.update = (function(){
+	
+	var index, time = 0;
+	var isFinished = false;
+	var animation = null;
+	
+	return function() {
+		
+		// use the same time value for all animations
+		time = global.performance.now();
+		
+		// iterate over all animations
+		for( index = 0; index < this._animations.length; index++){
+			
+			// buffer current animation
+			animation = this._animations[index];
+			
+			// only update the animation if it actually runs
+			if( animation.isPlaying === true ){
+				
+				// update it and receive status
+				isFinished = animation.update( time );
+				
+				// check status
+				if( isFinished === true ){
+					
+					// remove automatically  the animation after ending
+					this.removeAnimation( animation );
+				}
+			}		
+		}
+	};
+	
+}());
+
+/**
+ * Adds a single animation object to the internal array.
+ * 
+ * @param {Animation} animation - The animation object to be added.
+ */
+AnimationManager.prototype.addAnimation = function( animation ){
+	
+	this._animations.push(animation);
+};
+
+/**
+ * Removes a single animation object from the internal array.
+ * 
+ * @param {Animation} animation - The animation object to be removed.
+ */
+AnimationManager.prototype.removeAnimation = function( animation ){
+	
+	var index = this._animations.indexOf(animation);
+	this._animations.splice(index, 1);
+};
+
+/**
+ * Removes all animations from the internal array.
+ */
+AnimationManager.prototype.removeAnimations = function(){
+	
+	// stop all animations
+	this._animations.length = 0;
+};
+
+module.exports = new AnimationManager();
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../animation/Animation":10}],12:[function(require,module,exports){
+/**
+ * @file This file contains easing functions for animations.
+ * 
+ * see https://github.com/tweenjs/tween.js/blob/master/src/Tween.js
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var Easing = {
+
+	Linear : {
+
+		None : function(k) {
+
+			return k;
+		
+		}
+	
+	},
+
+	Quadratic : {
+
+		In : function(k) {
+
+			return k * k;
+
+		},
+
+		Out : function(k) {
+
+			return k * (2 - k);
+
+		},
+
+		InOut : function(k) {
+
+			if ((k *= 2) < 1){
+				return 0.5 * k * k;
+			}	
+			return -0.5 * (--k * (k - 2) - 1);
+
+		}
+
+	},
+
+	Cubic : {
+
+		In : function(k) {
+
+			return k * k * k;
+
+		},
+
+		Out : function(k) {
+
+			return --k * k * k + 1;
+
+		},
+
+		InOut : function(k) {
+
+			if ((k *= 2) < 1){
+				return 0.5 * k * k * k;
+			}	
+			return 0.5 * ((k -= 2) * k * k + 2);
+
+		}
+
+	},
+
+	Quartic : {
+
+		In : function(k) {
+
+			return k * k * k * k;
+
+		},
+
+		Out : function(k) {
+
+			return 1 - (--k * k * k * k);
+
+		},
+
+		InOut : function(k) {
+
+			if ((k *= 2) < 1){
+				return 0.5 * k * k * k * k;
+			}
+			return -0.5 * ((k -= 2) * k * k * k - 2);
+
+		}
+
+	},
+
+	Quintic : {
+
+		In : function(k) {
+
+			return k * k * k * k * k;
+
+		},
+
+		Out : function(k) {
+
+			return --k * k * k * k * k + 1;
+
+		},
+
+		InOut : function(k) {
+
+			if ((k *= 2) < 1){
+				return 0.5 * k * k * k * k * k;
+			}	
+			return 0.5 * ((k -= 2) * k * k * k * k + 2);
+
+		}
+
+	},
+
+	Sinusoidal : {
+
+		In : function(k) {
+
+			return 1 - Math.cos(k * Math.PI / 2);
+
+		},
+
+		Out : function(k) {
+
+			return Math.sin(k * Math.PI / 2);
+
+		},
+
+		InOut : function(k) {
+
+			return 0.5 * (1 - Math.cos(Math.PI * k));
+
+		}
+
+	},
+
+	Exponential : {
+
+		In : function(k) {
+
+			return k === 0 ? 0 : Math.pow(1024, k - 1);
+
+		},
+
+		Out : function(k) {
+
+			return k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
+
+		},
+
+		InOut : function(k) {
+
+			if (k === 0){
+				return 0;
+			}	
+			if (k === 1){
+				return 1;
+			}			
+			if ((k *= 2) < 1){
+				return 0.5 * Math.pow(1024, k - 1);
+			}			
+			return 0.5 * (-Math.pow(2, -10 * (k - 1)) + 2);
+
+		}
+
+	},
+
+	Circular : {
+
+		In : function(k) {
+
+			return 1 - Math.sqrt(1 - k * k);
+
+		},
+
+		Out : function(k) {
+
+			return Math.sqrt(1 - (--k * k));
+
+		},
+
+		InOut : function(k) {
+
+			if ((k *= 2) < 1){
+				return -0.5 * (Math.sqrt(1 - k * k) - 1);
+			}		
+			return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
+
+		}
+
+	},
+
+	Elastic : {
+
+		In : function(k) {
+
+			var s, a = 0.1, p = 0.4;
+			
+			if (k === 0){
+				return 0;
+			}
+			if (k === 1){
+				return 1;
+			}	
+			if (!a || a < 1) {
+				a = 1;
+				s = p / 4;
+			} else {
+				s = p * Math.asin(1 / a) / (2 * Math.PI);
+			}
+			return -(a * Math.pow(2, 10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p));
+
+		},
+
+		Out : function(k) {
+
+			var s, a = 0.1, p = 0.4;
+			
+			if (k === 0){
+				return 0;
+			}
+			if (k === 1){
+				return 1;
+			}	
+			if (!a || a < 1) {
+				a = 1;
+				s = p / 4;
+			} else{
+				s = p * Math.asin(1 / a) / (2 * Math.PI);
+			}
+			return (a * Math.pow(2, -10 * k) * Math.sin((k - s) * (2 * Math.PI) / p) + 1);
+
+		},
+
+		InOut : function(k) {
+
+			var s, a = 0.1, p = 0.4;
+			
+			if (k === 0){
+				return 0;
+			}
+			if (k === 1){
+				return 1;
+			}		
+			if (!a || a < 1) {
+				a = 1;
+				s = p / 4;
+			} else{
+				s = p * Math.asin(1 / a) / (2 * Math.PI);
+			}
+				
+			if ((k *= 2) < 1){
+				return -0.5 * (a * Math.pow(2, 10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p));
+			}else{
+				return a * Math.pow(2, -10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p) * 0.5 + 1;
+			}
+
+		}
+
+	},
+
+	Back : {
+
+		In : function(k) {
+
+			var s = 1.70158;
+			return k * k * ((s + 1) * k - s);
+
+		},
+
+		Out : function(k) {
+
+			var s = 1.70158;
+			return --k * k * ((s + 1) * k + s) + 1;
+
+		},
+
+		InOut : function(k) {
+
+			var s = 1.70158 * 1.525;
+			if ((k *= 2) < 1){
+				return 0.5 * (k * k * ((s + 1) * k - s));
+			}	
+			return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
+
+		}
+
+	},
+
+	Bounce : {
+
+		In : function(k) {
+
+			return 1 - Easing.Bounce.Out(1 - k);
+
+		},
+
+		Out : function(k) {
+
+			if (k < (1 / 2.75)) {
+
+				return 7.5625 * k * k;
+
+			} else if (k < (2 / 2.75)) {
+
+				return 7.5625 * (k -= (1.5 / 2.75)) * k + 0.75;
+
+			} else if (k < (2.5 / 2.75)) {
+
+				return 7.5625 * (k -= (2.25 / 2.75)) * k + 0.9375;
+
+			} else {
+
+				return 7.5625 * (k -= (2.625 / 2.75)) * k + 0.984375;
+
+			}
+
+		},
+
+		InOut : function(k) {
+
+			if (k < 0.5){
+				return Easing.Bounce.In(k * 2) * 0.5;
+			}	
+			return Easing.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
+
+		}
+
+	}
+};
+
+module.exports = Easing;
+},{}],13:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading and decoding audio-files. The resulting buffers
@@ -36819,7 +36784,7 @@ AudioBufferList.prototype.loadBuffer = function(file, index){
 
 module.exports = AudioBufferList;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":38,"pubsub-js":1}],12:[function(require,module,exports){
+},{"../etc/Utils":39,"pubsub-js":1}],14:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype holds the central Web Audio context and
@@ -36919,7 +36884,7 @@ AudioListener.prototype.updateMatrixWorld = (function() {
 
 module.exports = AudioListener;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"three":2}],13:[function(require,module,exports){
+},{"three":2}],15:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire audio handling. This prototype is used in scenes
@@ -37256,7 +37221,7 @@ AudioManager.prototype._onErrorBackgroundMusic = function(){
 
 module.exports = new AudioManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Camera":17,"../etc/Utils":38,"./AudioBufferList":11,"./AudioListener":12,"./DynamicAudio":14,"pubsub-js":1}],14:[function(require,module,exports){
+},{"../core/Camera":19,"../etc/Utils":39,"./AudioBufferList":13,"./AudioListener":14,"./DynamicAudio":16,"pubsub-js":1}],16:[function(require,module,exports){
 /**
  * @file Prototype for creating dynamic, full-buffered audio objects.
  * 
@@ -37523,7 +37488,7 @@ DynamicAudio.prototype.updateMatrixWorld = (function() {
 })();
 
 module.exports = DynamicAudio;
-},{"three":2}],15:[function(require,module,exports){
+},{"three":2}],17:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for first person controls. The logic uses
@@ -37546,6 +37511,7 @@ var audioManager = require("../audio/AudioManager");
 var userInterfaceManager = require("../ui/UserInterfaceManager");
 var settingsManager = require("../etc/SettingsManager");
 var utils = require("../etc/Utils");
+var Easing = require("../animation/Easing");
 
 var self;
 
@@ -38426,9 +38392,9 @@ FirstPersonControls.prototype._animateCrouch = (function(){
 			factor = elapsed > 1 ? 1 : elapsed;
 			
 			// calculate easing value
-			valueSpeed  =         factor * factor * factor * factor;  // easing quartic in
-			valueHeight = 1 - ( --factor * factor * factor * factor ); // easing quartic out
-				
+			valueSpeed  = Easing.Quartic.In( factor );
+			valueHeight = Easing.Quartic.Out( factor );
+			
 			// determine target values
 			targetHeight     = this._isCrouch === true ? FirstPersonControls.CROUCH.HEIGHT            : FirstPersonControls.DEFAULT.HEIGHT;
 			targetMove       = this._isCrouch === true ? FirstPersonControls.CROUCH.SPEED.MOVE        : FirstPersonControls.DEFAULT.SPEED.MOVE;
@@ -38467,8 +38433,8 @@ FirstPersonControls.prototype._animateRun = (function(){
 			factor = elapsed > 1 ? 1 : elapsed;
 			
 			// calculate easing value
-			valueSpeed  =         factor * factor * factor * factor;  // easing quartic in
-			valueHeight = 1 - ( --factor * factor * factor * factor ); // easing quartic out
+			valueSpeed  = Easing.Quartic.In( factor );
+			valueHeight = Easing.Quartic.Out( factor );
 			
 			// determine target values
 			targetHeight     = this._isRun === true ? FirstPersonControls.RUN.HEIGHT            : FirstPersonControls.DEFAULT.HEIGHT;
@@ -38795,7 +38761,7 @@ FirstPersonControls.RUN = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":7,"../audio/AudioManager":13,"../core/Camera":17,"../core/Scene":21,"../etc/SettingsManager":36,"../etc/Utils":38,"../ui/UserInterfaceManager":65,"pubsub-js":1,"three":2}],16:[function(require,module,exports){
+},{"../action/ActionManager":6,"../animation/Easing":12,"../audio/AudioManager":15,"../core/Camera":19,"../core/Scene":23,"../etc/SettingsManager":37,"../etc/Utils":39,"../ui/UserInterfaceManager":66,"pubsub-js":1,"three":2}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting
@@ -38890,7 +38856,7 @@ Bootstrap.prototype._loadStage = function(){
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":15,"../etc/MultiplayerManager":30,"../etc/NetworkManager":31,"../etc/SaveGameManager":35,"../etc/Utils":38,"../ui/UserInterfaceManager":65,"./Camera":17,"./Environment":18,"./Renderer":20,"pubsub-js":1}],17:[function(require,module,exports){
+},{"../controls/FirstPersonControls":17,"../etc/MultiplayerManager":31,"../etc/NetworkManager":32,"../etc/SaveGameManager":36,"../etc/Utils":39,"../ui/UserInterfaceManager":66,"./Camera":19,"./Environment":20,"./Renderer":22,"pubsub-js":1}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -38959,7 +38925,7 @@ Camera.prototype._onResize = function(message, data){
 
 module.exports = new Camera();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"pubsub-js":1,"three":2}],18:[function(require,module,exports){
+},{"pubsub-js":1,"three":2}],20:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype is used to detect all
@@ -39128,7 +39094,7 @@ Environment.prototype._testWebAudio = function(){
 
 module.exports = new Environment();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],19:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 /**
  * @file Prototype for network-messages.
  * 
@@ -39178,7 +39144,7 @@ Message.TYPES = {
 };
 
 module.exports = Message;
-},{}],20:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -39487,7 +39453,7 @@ Renderer.prototype._onResize = function(message, data){
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":38,"../postprocessing/EffectComposer":39,"../postprocessing/RenderPass":40,"../postprocessing/ShaderPass":41,"../shader/GaussianBlurShader":42,"../shader/GrayscaleShader":43,"../shader/VignetteShader":44,"pubsub-js":1,"three":2}],21:[function(require,module,exports){
+},{"../etc/Utils":39,"../postprocessing/EffectComposer":40,"../postprocessing/RenderPass":41,"../postprocessing/ShaderPass":42,"../shader/GaussianBlurShader":43,"../shader/GrayscaleShader":44,"../shader/VignetteShader":45,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic 
  * for scene-based functionality.
@@ -39528,7 +39494,7 @@ Scene.prototype.clear = function(){
 };
 
 module.exports = new Scene();
-},{"three":2}],22:[function(require,module,exports){
+},{"three":2}],24:[function(require,module,exports){
 (function (global){
 /**
  * @file Basis prototype for all stages. It is used to provide
@@ -39548,7 +39514,7 @@ var camera = require("./Camera");
 var controls = require("../controls/FirstPersonControls");
 var actionManager = require("../action/ActionManager");
 var audioManager = require("../audio/AudioManager");
-var animationManager = require("../etc/AnimationManager");
+var animationManager = require("../animation/AnimationManager");
 var performanceManager = require("../etc/PerformanceManager");
 var textManager = require("../etc/TextManager");
 var saveGameManager = require("../etc/SaveGameManager");
@@ -39760,7 +39726,7 @@ StageBase.prototype._changeStage = function(stageId, isSaveGame){
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":7,"../audio/AudioManager":13,"../controls/FirstPersonControls":15,"../etc/AnimationManager":26,"../etc/PerformanceManager":33,"../etc/SaveGameManager":35,"../etc/SettingsManager":36,"../etc/TextManager":37,"../etc/Utils":38,"../ui/UserInterfaceManager":65,"./Camera":17,"./Renderer":20,"./Scene":21,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
+},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":15,"../controls/FirstPersonControls":17,"../etc/PerformanceManager":34,"../etc/SaveGameManager":36,"../etc/SettingsManager":37,"../etc/TextManager":38,"../etc/Utils":39,"../ui/UserInterfaceManager":66,"./Camera":19,"./Renderer":22,"./Scene":23,"pubsub-js":1,"three":2}],25:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -40044,7 +40010,7 @@ StageManager.prototype._onLoadComplete = function(message, data){
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":35,"../etc/Utils":38,"../stages/Stage_001":45,"../stages/Stage_002":46,"../stages/Stage_003":47,"../stages/Stage_004":48,"../stages/Stage_005":49,"../stages/Stage_006":50,"../stages/Stage_007":51,"../stages/Stage_008":52,"../stages/Stage_009":53,"../stages/Stage_010":54,"../ui/UserInterfaceManager":65,"pubsub-js":1}],24:[function(require,module,exports){
+},{"../etc/SaveGameManager":36,"../etc/Utils":39,"../stages/Stage_001":46,"../stages/Stage_002":47,"../stages/Stage_003":48,"../stages/Stage_004":49,"../stages/Stage_005":50,"../stages/Stage_006":51,"../stages/Stage_007":52,"../stages/Stage_008":53,"../stages/Stage_009":54,"../stages/Stage_010":55,"../ui/UserInterfaceManager":66,"pubsub-js":1}],26:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It 
@@ -40124,7 +40090,7 @@ Thread.prototype.onError = function(listener){
 
 module.exports = Thread;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],25:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -40260,159 +40226,7 @@ ThreadManager.prototype._getScriptURL = function(script){
 
 module.exports = new ThreadManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Thread":24}],26:[function(require,module,exports){
-/**
- * @file Interface for entire animation-handling. This prototype is used in scenes
- * to access animation-based logic and to create animation-entities. The prototype
- * uses the framework TWEEN.js to create animations.
- * 
- * @author Human Interactive
- */
-"use strict";
-
-var TWEEN = require('tween.js');
-
-/**
- * Creates the animation manager.
- * 
- * @constructor
- */
-function AnimationManager() {
-	
-	Object.defineProperties(this, {	
-		_animations: {
-			value: [],
-			configurable: false,
-			enumerable: false,
-			writable: false
-		}
-	});
-}
-
-/**
- * Creates a basic animation, which animates on property from a source to a target value.
- * 
- * @param {number} sourceValue - The source value of the animated property.
- * @param {number} targetValue - The target value of the animated property.
- * @param {number} duration - The duration of the animation.
- * @param {TWEEN.Easing} graph - The animation graph.
- * @param {function} update - The onUpdate callback function.
- * @param {function} complete - The onComplete callback function.
- * 
- * @returns {TWEEN.Tween} The new animation.
- */
-AnimationManager.prototype.createBasicAnimation = function(sourceValue, targetValue, duration, graph, update, complete){
-	
-	var animation = new TWEEN.Tween( { x: sourceValue } ).to( { x: targetValue }, duration ).easing( graph ).onUpdate(update);
-	
-	if(typeof complete === "function"){
-		animation.onComplete(complete);
-	}
-	
-	this.addAnimation(animation);
-	return animation;
-};
-
-/**
- * Creates a hover animation for a given property. This method is used by
- * so called "Memory" objects in the application. It consists of two single animations,
- * which are chained together.
- * 
- * @param {number} sourceValue - The source value of the animated property.
- * @param {number} targetStart - The target value of the animated property for the first animation.
- * @param {number} targetEnd - The target value of the animated property for the second animation.
- * @param {number} duration - The duration of the animation.
- * @param {TWEEN.Easing} graph - The animation graph.
- * @param {function} update - The onUpdate callback function.
- * 
- * @returns {TWEEN.Tween} The new animation.
- */
-AnimationManager.prototype.createHoverAnimation = function(sourceValue, targetStart, targetEnd, duration, graph, update){
-	
-	var source = {x: sourceValue};
-	
-	var animation 		= new TWEEN.Tween( source ).to( { x: targetStart }, duration ).easing( graph ).onUpdate(update);
-	var animationBack 	= new TWEEN.Tween( source ).to( { x: targetEnd }, duration ).easing( graph ).onUpdate(update);
-	
-	animation.chain(animationBack);
-	animationBack.chain(animation);
-	
-	this.addAnimation(animation);
-	return animation;
-};
-
-/**
- * Creates a simple tracking shot.
- * 
- * @param {THREE.Vector3} sourcePosition - The source position of the camera.
- * @param {THREE.Vector3} targetPosition - The target position of the camera.
- * @param {THREE.Euler} sourceRotation - The source rotation of the camera.
- * @param {THREE.Euler} targetRotation - The target rotation of the camera.
- * @param {number} duration - The duration of the animation.
- * @param {TWEEN.Easing} graph - The animation graph.
- * @param {function} update - The onUpdate callback function.
- * @param {function} complete - The onComplete callback function.
- * 
- * @returns {TWEEN.Tween} The new animation.
- */
-AnimationManager.prototype.createTrackingShot = function(sourcePosition, targetPosition, sourceRotation, targetRotation,  duration, graph, update, complete){
-	
-	var source = {positionX : sourcePosition.x, positionY : sourcePosition.y, positionZ : sourcePosition.z, rotationX : sourceRotation.x, rotationY : sourceRotation.y, rotationZ : sourceRotation.z};
-	var target = {positionX : targetPosition.x, positionY : targetPosition.y, positionZ : targetPosition.z, rotationX : targetRotation.x, rotationY : targetRotation.y, rotationZ : targetRotation.z};
-	
-	var animation = new TWEEN.Tween(source).to(target, duration ).easing( graph ).onUpdate(update);
-	
-	if(typeof complete === "function"){
-		animation.onComplete(complete);
-	}
-	
-	this.addAnimation(animation);
-	return animation;
-};
-
-/**
- * Update method for animations. Called in render-loop.
- */
-AnimationManager.prototype.update = function(){
-	
-	TWEEN.update();
-};
-
-/**
- * Adds a single animation object to the internal array.
- * 
- * @param {TWEEN.Tween} animation - The animation object to be added.
- */
-AnimationManager.prototype.addAnimation = function(animation){
-	
-	this._animations.push(animation);
-};
-
-/**
- * Removes a single animation object from the internal array.
- * 
- * @param {TWEEN.Tween} animation - The animation object to be removed.
- */
-AnimationManager.prototype.removeAnimation = function(animation){
-	
-	// make sure, that the animation is stopped
-	animation.stop();
-	var index = this._animations.indexOf(animation);
-	this._animations.splice(index, 1);
-};
-
-/**
- * Removes all animations from the internal array.
- */
-AnimationManager.prototype.removeAnimations = function(){
-	
-	// stop all animations
-	TWEEN.removeAll();
-	this._animations.length = 0;
-};
-
-module.exports = new AnimationManager();
-},{"tween.js":3}],27:[function(require,module,exports){
+},{"./Thread":26}],28:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype handles all stuff for impostors. An impostor
@@ -40734,7 +40548,7 @@ Impostor.prototype._clear = function(){
 
 module.exports = Impostor;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"three":2}],28:[function(require,module,exports){
+},{"three":2}],29:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading 3D objects in JSON-format 
@@ -40829,7 +40643,7 @@ JSONLoader.prototype.load = function(url, onLoad) {
 
 module.exports = JSONLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":38,"pubsub-js":1,"three":2}],29:[function(require,module,exports){
+},{"./Utils":39,"pubsub-js":1,"three":2}],30:[function(require,module,exports){
 /**
  * @file This prototype is used for LOD handling. It is an 
  * enhancement of the LOD functionality of three.js. Instead of
@@ -41003,7 +40817,7 @@ LOD.MODE = {
 };
 
 module.exports = LOD;
-},{"three":2}],30:[function(require,module,exports){
+},{"three":2}],31:[function(require,module,exports){
 /**
  * @file This prototype manages the characters of
  * the other players.
@@ -41165,7 +40979,7 @@ MultiplayerManager.prototype._getPlayer = function(id){
 };
 
 module.exports = new MultiplayerManager();
-},{"../core/Scene":21,"../etc/Utils":38,"./Player":34,"pubsub-js":1,"three":2}],31:[function(require,module,exports){
+},{"../core/Scene":23,"../etc/Utils":39,"./Player":35,"pubsub-js":1,"three":2}],32:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -41381,7 +41195,7 @@ NetworkManager.SERVER = {
 
 module.exports = new NetworkManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Message":19,"../core/ThreadManager":25,"../etc/Utils":38,"pubsub-js":1,"ws":4}],32:[function(require,module,exports){
+},{"../core/Message":21,"../core/ThreadManager":27,"../etc/Utils":39,"pubsub-js":1,"ws":3}],33:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading 3D objects in object-format 
@@ -41472,7 +41286,7 @@ ObjectLoader.prototype.load = function (url, onLoad) {
 
 module.exports = ObjectLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":38,"pubsub-js":1,"three":2}],33:[function(require,module,exports){
+},{"./Utils":39,"pubsub-js":1,"three":2}],34:[function(require,module,exports){
 /**
  * @file Interface for performance handling. This prototype is used in scenes
  * to create e.g. LOD instances.
@@ -41749,7 +41563,7 @@ PerformanceManager.prototype._updateImpostors = (function(){
 }());
 
 module.exports = new PerformanceManager();
-},{"../core/Camera":17,"../core/Renderer":20,"../core/Scene":21,"./Impostor":27,"./LOD":29,"three":2}],34:[function(require,module,exports){
+},{"../core/Camera":19,"../core/Renderer":22,"../core/Scene":23,"./Impostor":28,"./LOD":30,"three":2}],35:[function(require,module,exports){
 /**
  * @file This prototype represents the character of
  * an other player.
@@ -41803,7 +41617,7 @@ Player.prototype = Object.create(THREE.Mesh.prototype);
 Player.prototype.constructor = Player;
 
 module.exports = Player;
-},{"three":2}],35:[function(require,module,exports){
+},{"three":2}],36:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire savegame-handling. This prototype is using
@@ -41880,7 +41694,7 @@ SaveGameManager.prototype.remove = function(){
 
 module.exports = new SaveGameManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire settings-handling. This prototype is used
@@ -42056,7 +41870,7 @@ SettingsManager.MOUSE = {
 
 module.exports = new SettingsManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":38,"three":2}],37:[function(require,module,exports){
+},{"./Utils":39,"three":2}],38:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire text-handling. This prototype is used in scenes
@@ -42212,7 +42026,7 @@ TextManager.prototype._searchAndRepalce = function(){
 
 module.exports = new TextManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":38,"pubsub-js":1}],38:[function(require,module,exports){
+},{"./Utils":39,"pubsub-js":1}],39:[function(require,module,exports){
 (function (global){
 /**
  * @file All helper and util functions are
@@ -42403,7 +42217,7 @@ Utils.CDN = {
 
 module.exports = new Utils();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Renderer":20}],39:[function(require,module,exports){
+},{"../core/Renderer":22}],40:[function(require,module,exports){
 /**
  * @file This prototype manages effects for post-processing.
  * 
@@ -42583,7 +42397,7 @@ EffectComposer.prototype._reset = function(renderTarget){
 };
 
 module.exports = EffectComposer;
-},{"three":2}],40:[function(require,module,exports){
+},{"three":2}],41:[function(require,module,exports){
 /**
  * @file This prototype provides a render pass for post-processing.
  * 
@@ -42645,7 +42459,7 @@ RenderPass.prototype.render = function(renderer, writeBuffer, readBuffer){
 };
 
 module.exports = RenderPass;
-},{"three":2}],41:[function(require,module,exports){
+},{"three":2}],42:[function(require,module,exports){
 /**
  * @file This prototype provides a shader pass for post-processing.
  * 
@@ -42750,7 +42564,7 @@ ShaderPass.prototype.render = function(renderer, writeBuffer, readBuffer){
 };
 
 module.exports = ShaderPass;
-},{"three":2}],42:[function(require,module,exports){
+},{"three":2}],43:[function(require,module,exports){
 /**
  * @file This shader applies a gaussian blur effect.
  * It can be used for both x and y direction.
@@ -42817,7 +42631,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":2}],43:[function(require,module,exports){
+},{"three":2}],44:[function(require,module,exports){
 /**
  * @file This shader transforms all colors to grayscale.
  * 
@@ -42866,7 +42680,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 /**
  * @file This shader creates a vignette effect.
  * 
@@ -42927,14 +42741,14 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
-var TWEEN = require("tween.js");
 
 var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
+var Easing = require("../animation/Easing");
 
 var self;
 
@@ -42985,8 +42799,13 @@ Stage.prototype.setup = function(){
 		sign.rotation.set(0, Math.PI * -0.5, 0);
 		self.scene.add(sign);
 		
-		self.animationManager.createHoverAnimation(sign.position.y, 18, 23, 5000, TWEEN.Easing.Sinusoidal.InOut, function(){
-			sign.position.y = this.x;
+		self.animationManager.createHoverAnimation({
+			object: sign.position,
+			property: "y",
+			duration: 5000,
+			startValue: sign.position.y,
+			endValue: sign.position.y + 5,
+			easingFunction: Easing.Sinusoidal.InOut
 		}).start();
 	});
 	
@@ -43034,14 +42853,14 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],46:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],47:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
-var TWEEN = require("tween.js");
 
 var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
+var Easing = require("../animation/Easing");
 
 var self;
 
@@ -43133,8 +42952,13 @@ Stage.prototype.setup = function(){
 		sign.rotation.set(0, Math.PI * -0.5, 0);
 		self.scene.add(sign);
 		
-		self.animationManager.createHoverAnimation(sign.position.y, 18, 23, 5000, TWEEN.Easing.Sinusoidal.InOut, function(){
-			sign.position.y = this.x;
+		self.animationManager.createHoverAnimation({
+			object: sign.position,
+			property: "y",
+			duration: 5000,
+			startValue: sign.position.y,
+			endValue: sign.position.y + 5,
+			easingFunction: Easing.Sinusoidal.InOut
 		}).start();
 	});
 	
@@ -43196,14 +43020,14 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],47:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],48:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
-var TWEEN = require("tween.js");
 
 var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
+var Easing = require("../animation/Easing");
 
 var self, index = 0;
 
@@ -43277,8 +43101,13 @@ Stage.prototype.setup = function(){
 		sign.rotation.set(0, Math.PI * -0.5, 0);
 		self.scene.add(sign);
 		
-		self.animationManager.createHoverAnimation(sign.position.y, 18, 23, 5000, TWEEN.Easing.Sinusoidal.InOut, function(){
-			sign.position.y = this.x;
+		self.animationManager.createHoverAnimation({
+			object: sign.position,
+			property: "y",
+			duration: 5000,
+			startValue: sign.position.y,
+			endValue: sign.position.y + 5,
+			easingFunction: Easing.Sinusoidal.InOut
 		}).start();
 	});
 	
@@ -43349,14 +43178,14 @@ function colorMesh(mesh){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],48:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],49:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
-var TWEEN = require("tween.js");
 
 var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
+var Easing = require("../animation/Easing");
 
 var self;
 
@@ -43443,8 +43272,13 @@ Stage.prototype.setup = function(){
 		sign.rotation.set(0, Math.PI * -0.5, 0);
 		self.scene.add(sign);
 		
-		self.animationManager.createHoverAnimation(sign.position.y, 18, 23, 5000, TWEEN.Easing.Sinusoidal.InOut, function(){
-			sign.position.y = this.x;
+		self.animationManager.createHoverAnimation({
+			object: sign.position,
+			property: "y",
+			duration: 5000,
+			startValue: sign.position.y,
+			endValue: sign.position.y + 5,
+			easingFunction: Easing.Sinusoidal.InOut
 		}).start();
 	});
 	
@@ -43506,14 +43340,14 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],49:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],50:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
-var TWEEN = require("tween.js");
 
 var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
+var Easing = require("../animation/Easing");
 
 var self;
 
@@ -43567,8 +43401,13 @@ Stage.prototype.setup = function(){
 		sign.rotation.set(0, Math.PI * -0.5, 0);
 		self.scene.add(sign);
 		
-		self.animationManager.createHoverAnimation(sign.position.y, 18, 23, 5000, TWEEN.Easing.Sinusoidal.InOut, function(){
-			sign.position.y = this.x;
+		self.animationManager.createHoverAnimation({
+			object: sign.position,
+			property: "y",
+			duration: 5000,
+			startValue: sign.position.y,
+			endValue: sign.position.y + 5,
+			easingFunction: Easing.Sinusoidal.InOut
 		}).start();
 	});
 	
@@ -43622,14 +43461,14 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],50:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],51:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
-var TWEEN = require("tween.js");
 
 var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
+var Easing = require("../animation/Easing");
 
 var self;
 
@@ -43725,8 +43564,13 @@ Stage.prototype.setup = function(){
 		sign.rotation.set(0, Math.PI * -0.5, 0);
 		self.scene.add(sign);
 		
-		self.animationManager.createHoverAnimation(sign.position.y, 18, 23, 5000, TWEEN.Easing.Sinusoidal.InOut, function(){
-			sign.position.y = this.x;
+		self.animationManager.createHoverAnimation({
+			object: sign.position,
+			property: "y",
+			duration: 5000,
+			startValue: sign.position.y,
+			endValue: sign.position.y + 5,
+			easingFunction: Easing.Sinusoidal.InOut
 		}).start();
 	});
 	
@@ -43795,14 +43639,14 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],51:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],52:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
-var TWEEN = require("tween.js");
 
 var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
+var Easing = require("../animation/Easing");
 
 var self;
 
@@ -43852,9 +43696,14 @@ Stage.prototype.setup = function(){
 		
 		interactiveObject.action.isActive = false;
 		
-		// create a basic animation, which animates a single value one-time
-		self.animationManager.createBasicAnimation(interactiveBoxBasic.position.x, 50, 5000, TWEEN.Easing.Quartic.InOut, function(){
-			interactiveBoxBasic.position.x = this.x;
+		// create a basic animation, which animates a single value
+		self.animationManager.createBasicAnimation({
+			object: interactiveBoxBasic.position,
+			property: "x",
+			duration: 5000,
+			startValue:  interactiveBoxBasic.position.x,
+			endValue: interactiveBoxBasic.position.x + 30,
+			easingFunction: Easing.Quartic.InOut
 		}).start();
 	});
 	
@@ -43864,9 +43713,15 @@ Stage.prototype.setup = function(){
 	this.scene.add(staticBoxHover);
 	this.actionManager.createStatic(staticBoxHover);
 	
-	// create a hover animation, which animates a single value between a range
-	this.animationManager.createHoverAnimation(staticBoxHover.position.y, 6, 8, 4000, TWEEN.Easing.Sinusoidal.InOut, function(){
-		staticBoxHover.position.y = this.x;
+	// create a hover animation, which animates infinitely a property between start and endvalue
+	this.animationManager.createHoverAnimation({
+		object: staticBoxHover.position,
+		property: "y",
+		duration: 4000,
+		delayTime: 2000,
+		startValue: staticBoxHover.position.y,
+		endValue: staticBoxHover.position.y + 2,
+		easingFunction: Easing.Sinusoidal.InOut
 	}).start();
 
 	// add sign
@@ -43880,8 +43735,13 @@ Stage.prototype.setup = function(){
 		sign.rotation.set(0, Math.PI * -0.5, 0);
 		self.scene.add(sign);
 		
-		self.animationManager.createHoverAnimation(sign.position.y, 18, 23, 5000, TWEEN.Easing.Sinusoidal.InOut, function(){
-			sign.position.y = this.x;
+		self.animationManager.createHoverAnimation({
+			object: sign.position,
+			property: "y",
+			duration: 5000,
+			startValue: sign.position.y,
+			endValue: sign.position.y + 5,
+			easingFunction: Easing.Sinusoidal.InOut
 		}).start();
 	});
 	
@@ -43899,8 +43759,8 @@ Stage.prototype.setup = function(){
 	
 	var directionalLight = new THREE.DirectionalLight(0xffffff);
 	directionalLight.position.set(-100, 50, -100);
-	directionalLight.shadowCameraLeft = -40;
-	directionalLight.shadowCameraRight = 40;
+	directionalLight.shadowCameraLeft = -50;
+	directionalLight.shadowCameraRight = 50;
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
 	this.settingsManager.adjustLight(directionalLight);
@@ -43943,14 +43803,14 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],52:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],53:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
-var TWEEN = require("tween.js");
 
 var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
+var Easing = require("../animation/Easing");
 
 var self;
 
@@ -44013,8 +43873,13 @@ Stage.prototype.setup = function(){
 		sign.rotation.set(0, Math.PI * -0.5, 0);
 		self.scene.add(sign);
 		
-		self.animationManager.createHoverAnimation(sign.position.y, 25.5, 30.5, 5000, TWEEN.Easing.Sinusoidal.InOut, function(){
-			sign.position.y = this.x;
+		self.animationManager.createHoverAnimation({
+			object: sign.position,
+			property: "y",
+			duration: 5000,
+			startValue: sign.position.y,
+			endValue: sign.position.y + 5,
+			easingFunction: Easing.Sinusoidal.InOut
 		}).start();
 	});
 	
@@ -44090,14 +43955,14 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],53:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],54:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
-var TWEEN = require("tween.js");
 
 var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
+var Easing = require("../animation/Easing");
 
 var self;
 
@@ -44148,8 +44013,13 @@ Stage.prototype.setup = function(){
 		sign.rotation.set(0, Math.PI * -0.5, 0);
 		self.scene.add(sign);
 		
-		self.animationManager.createHoverAnimation(sign.position.y, 18, 23, 5000, TWEEN.Easing.Sinusoidal.InOut, function(){
-			sign.position.y = this.x;
+		self.animationManager.createHoverAnimation({
+			object: sign.position,
+			property: "y",
+			duration: 5000,
+			startValue: sign.position.y,
+			endValue: sign.position.y + 5,
+			easingFunction: Easing.Sinusoidal.InOut
 		}).start();
 	});
 	
@@ -44252,14 +44122,14 @@ function showLODCircles(scene){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],54:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],55:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
-var TWEEN = require("tween.js");
 
 var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
+var Easing = require("../animation/Easing");
 
 var self;
 
@@ -44310,8 +44180,13 @@ Stage.prototype.setup = function(){
 		sign.rotation.set(0, Math.PI * -0.5, 0);
 		self.scene.add(sign);
 		
-		self.animationManager.createHoverAnimation(sign.position.y, 18, 23, 5000, TWEEN.Easing.Sinusoidal.InOut, function(){
-			sign.position.y = this.x;
+		self.animationManager.createHoverAnimation({
+			object: sign.position,
+			property: "y",
+			duration: 5000,
+			startValue: sign.position.y,
+			endValue: sign.position.y + 5,
+			easingFunction: Easing.Sinusoidal.InOut
 		}).start();
 	});
 	
@@ -44386,7 +44261,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../core/StageBase":22,"../etc/JSONLoader":28,"three":2,"tween.js":3}],55:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],56:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -44560,7 +44435,7 @@ Chat.prototype._onMessage = function(message, data){
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":64,"pubsub-js":1}],56:[function(require,module,exports){
+},{"./UiElement":65,"pubsub-js":1}],57:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel.
@@ -44624,7 +44499,7 @@ DevelopmentPanel.prototype.setText = function(text){
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":64}],57:[function(require,module,exports){
+},{"./UiElement":65}],58:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -44685,7 +44560,7 @@ InformationPanel.prototype.setText = function(textKey){
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":64}],58:[function(require,module,exports){
+},{"./UiElement":65}],59:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -44760,7 +44635,7 @@ InteractionLabel.prototype.hide = function(){
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":64}],59:[function(require,module,exports){
+},{"./UiElement":65}],60:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -44945,7 +44820,7 @@ LoadingScreen.prototype._onReady = function(message, data){
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":64,"pubsub-js":1}],60:[function(require,module,exports){
+},{"./UiElement":65,"pubsub-js":1}],61:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -45098,7 +44973,7 @@ Menu.prototype._publishFinishEvent = function(message, data){
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":38,"./UiElement":64,"pubsub-js":1}],61:[function(require,module,exports){
+},{"../etc/Utils":39,"./UiElement":65,"pubsub-js":1}],62:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -45234,7 +45109,7 @@ ModalDialog.prototype._onClose = function(event){
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":38,"./UiElement":64,"pubsub-js":1}],62:[function(require,module,exports){
+},{"../etc/Utils":39,"./UiElement":65,"pubsub-js":1}],63:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor.
@@ -45454,7 +45329,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":64}],63:[function(require,module,exports){
+},{"./UiElement":65}],64:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -45654,7 +45529,7 @@ TextScreen.prototype._printName = function(){
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":64}],64:[function(require,module,exports){
+},{"./UiElement":65}],65:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -45702,7 +45577,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":37}],65:[function(require,module,exports){
+},{"../etc/TextManager":38}],66:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in scenes
@@ -45954,4 +45829,4 @@ UserInterfaceManager.prototype._onKeyDown = function(event){
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":38,"./Chat":55,"./DevelopmentPanel":56,"./InformationPanel":57,"./InteractionLabel":58,"./LoadingScreen":59,"./Menu":60,"./ModalDialog":61,"./PerformanceMonitor":62,"./TextScreen":63,"pubsub-js":1}]},{},[5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65]);
+},{"../etc/Utils":39,"./Chat":56,"./DevelopmentPanel":57,"./InformationPanel":58,"./InteractionLabel":59,"./LoadingScreen":60,"./Menu":61,"./ModalDialog":62,"./PerformanceMonitor":63,"./TextScreen":64,"pubsub-js":1}]},{},[4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66]);

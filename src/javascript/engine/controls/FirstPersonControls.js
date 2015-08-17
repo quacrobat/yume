@@ -19,6 +19,7 @@ var audioManager = require("../audio/AudioManager");
 var userInterfaceManager = require("../ui/UserInterfaceManager");
 var settingsManager = require("../etc/SettingsManager");
 var utils = require("../etc/Utils");
+var Easing = require("../animation/Easing");
 
 var self;
 
@@ -899,9 +900,9 @@ FirstPersonControls.prototype._animateCrouch = (function(){
 			factor = elapsed > 1 ? 1 : elapsed;
 			
 			// calculate easing value
-			valueSpeed  =         factor * factor * factor * factor;  // easing quartic in
-			valueHeight = 1 - ( --factor * factor * factor * factor ); // easing quartic out
-				
+			valueSpeed  = Easing.Quartic.In( factor );
+			valueHeight = Easing.Quartic.Out( factor );
+			
 			// determine target values
 			targetHeight     = this._isCrouch === true ? FirstPersonControls.CROUCH.HEIGHT            : FirstPersonControls.DEFAULT.HEIGHT;
 			targetMove       = this._isCrouch === true ? FirstPersonControls.CROUCH.SPEED.MOVE        : FirstPersonControls.DEFAULT.SPEED.MOVE;
@@ -940,8 +941,8 @@ FirstPersonControls.prototype._animateRun = (function(){
 			factor = elapsed > 1 ? 1 : elapsed;
 			
 			// calculate easing value
-			valueSpeed  =         factor * factor * factor * factor;  // easing quartic in
-			valueHeight = 1 - ( --factor * factor * factor * factor ); // easing quartic out
+			valueSpeed  = Easing.Quartic.In( factor );
+			valueHeight = Easing.Quartic.Out( factor );
 			
 			// determine target values
 			targetHeight     = this._isRun === true ? FirstPersonControls.RUN.HEIGHT            : FirstPersonControls.DEFAULT.HEIGHT;

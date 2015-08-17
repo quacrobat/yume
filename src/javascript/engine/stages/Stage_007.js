@@ -1,10 +1,10 @@
 "use strict";
 
 var THREE = require("three");
-var TWEEN = require("tween.js");
 
 var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
+var Easing = require("../animation/Easing");
 
 var self;
 
@@ -54,9 +54,14 @@ Stage.prototype.setup = function(){
 		
 		interactiveObject.action.isActive = false;
 		
-		// create a basic animation, which animates a single value one-time
-		self.animationManager.createBasicAnimation(interactiveBoxBasic.position.x, 50, 5000, TWEEN.Easing.Quartic.InOut, function(){
-			interactiveBoxBasic.position.x = this.x;
+		// create a basic animation, which animates a single value
+		self.animationManager.createBasicAnimation({
+			object: interactiveBoxBasic.position,
+			property: "x",
+			duration: 5000,
+			startValue:  interactiveBoxBasic.position.x,
+			endValue: interactiveBoxBasic.position.x + 30,
+			easingFunction: Easing.Quartic.InOut
 		}).start();
 	});
 	
@@ -66,9 +71,15 @@ Stage.prototype.setup = function(){
 	this.scene.add(staticBoxHover);
 	this.actionManager.createStatic(staticBoxHover);
 	
-	// create a hover animation, which animates a single value between a range
-	this.animationManager.createHoverAnimation(staticBoxHover.position.y, 6, 8, 4000, TWEEN.Easing.Sinusoidal.InOut, function(){
-		staticBoxHover.position.y = this.x;
+	// create a hover animation, which animates infinitely a property between start and endvalue
+	this.animationManager.createHoverAnimation({
+		object: staticBoxHover.position,
+		property: "y",
+		duration: 4000,
+		delayTime: 2000,
+		startValue: staticBoxHover.position.y,
+		endValue: staticBoxHover.position.y + 2,
+		easingFunction: Easing.Sinusoidal.InOut
 	}).start();
 
 	// add sign
@@ -82,8 +93,13 @@ Stage.prototype.setup = function(){
 		sign.rotation.set(0, Math.PI * -0.5, 0);
 		self.scene.add(sign);
 		
-		self.animationManager.createHoverAnimation(sign.position.y, 18, 23, 5000, TWEEN.Easing.Sinusoidal.InOut, function(){
-			sign.position.y = this.x;
+		self.animationManager.createHoverAnimation({
+			object: sign.position,
+			property: "y",
+			duration: 5000,
+			startValue: sign.position.y,
+			endValue: sign.position.y + 5,
+			easingFunction: Easing.Sinusoidal.InOut
 		}).start();
 	});
 	
@@ -101,8 +117,8 @@ Stage.prototype.setup = function(){
 	
 	var directionalLight = new THREE.DirectionalLight(0xffffff);
 	directionalLight.position.set(-100, 50, -100);
-	directionalLight.shadowCameraLeft = -40;
-	directionalLight.shadowCameraRight = 40;
+	directionalLight.shadowCameraLeft = -50;
+	directionalLight.shadowCameraRight = 50;
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
 	this.settingsManager.adjustLight(directionalLight);

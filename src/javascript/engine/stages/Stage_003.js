@@ -1,10 +1,10 @@
 "use strict";
 
 var THREE = require("three");
-var TWEEN = require("tween.js");
 
 var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
+var Easing = require("../animation/Easing");
 
 var self, index = 0;
 
@@ -78,8 +78,13 @@ Stage.prototype.setup = function(){
 		sign.rotation.set(0, Math.PI * -0.5, 0);
 		self.scene.add(sign);
 		
-		self.animationManager.createHoverAnimation(sign.position.y, 18, 23, 5000, TWEEN.Easing.Sinusoidal.InOut, function(){
-			sign.position.y = this.x;
+		self.animationManager.createHoverAnimation({
+			object: sign.position,
+			property: "y",
+			duration: 5000,
+			startValue: sign.position.y,
+			endValue: sign.position.y + 5,
+			easingFunction: Easing.Sinusoidal.InOut
 		}).start();
 	});
 	
