@@ -71,10 +71,10 @@ Stage.prototype.setup = function(){
 			object: sign.position,
 			property: "y",
 			duration: 5000,
-			startValue: sign.position.y,
-			endValue: sign.position.y + 5,
-			easingFunction: Easing.Sinusoidal.InOut
-		}).start();
+			start: sign.position.y,
+			end: sign.position.y + 5,
+			easing: Easing.Sinusoidal.InOut
+		}).play();
 	});
 	
 	// add stairs

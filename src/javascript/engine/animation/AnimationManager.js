@@ -7,6 +7,7 @@
 "use strict";
 
 var BasicAnimation = require("../animation/Animation");
+var SpriteAnimation = require("../animation/SpriteAnimation");
 
 /**
  * Creates the animation manager.
@@ -17,6 +18,12 @@ function AnimationManager() {
 	
 	Object.defineProperties(this, {	
 		_animations: {
+			value: [],
+			configurable: false,
+			enumerable: false,
+			writable: false
+		},
+		_sprites: {
 			value: [],
 			configurable: false,
 			enumerable: false,
@@ -56,9 +63,38 @@ AnimationManager.prototype.createHoverAnimation = function(options){
 };
 
 /**
+ * Creates a sprite animation.
+ * 
+ * @param {number} rows - Number of images in y-direction.
+ * @param {number} columns - Number of images in x-direction.
+ * @param {number} numberOfImages - Total number of images in the sprite.
+ * @param {THREE.Texture} texture - Contains the sprite image. The dimension of the texture should be a power of two, but it's not necessary.
+ * @param {number} imagesPerSecond - How many images should be displayed per second.
+ * 
+ * @returns {SpriteAnimation} The new sprite animation.
+ */
+AnimationManager.prototype.createSpriteAnimation = function( rows, columns, numberOfImages, texture, imagesPerSecond ){
+	
+	var sprite = new SpriteAnimation( rows, columns, numberOfImages, texture, imagesPerSecond );
+	this.addSpriteAnimation(sprite);
+	
+	return sprite;
+};
+
+/**
  * Update method for animations. Called in render-loop.
  */
-AnimationManager.prototype.update = (function(){
+AnimationManager.prototype.update = function( delta ){
+	
+	this._updateAnimations();
+	
+	this._updateSprites( delta );
+};
+
+/**
+ * Updates the standard animations.
+ */
+AnimationManager.prototype._updateAnimations = (function(){
 	
 	var index, time = 0;
 	var isFinished = false;
@@ -70,7 +106,7 @@ AnimationManager.prototype.update = (function(){
 		time = global.performance.now();
 		
 		// iterate over all animations
-		for( index = 0; index < this._animations.length; index++){
+		for( index = 0; index < this._animations.length; index++ ){
 			
 			// buffer current animation
 			animation = this._animations[index];
@@ -94,6 +130,23 @@ AnimationManager.prototype.update = (function(){
 }());
 
 /**
+ * Updates the sprites.
+ */
+AnimationManager.prototype._updateSprites = (function(){
+	
+	var index = 0;
+	
+	return function( delta ){
+		
+		for( index = 0; index < this._sprites.length; index++ ){
+			
+			this._sprites[index].update( delta );
+		}
+	};
+	
+}());
+
+/**
  * Adds a single animation object to the internal array.
  * 
  * @param {Animation} animation - The animation object to be added.
@@ -101,6 +154,16 @@ AnimationManager.prototype.update = (function(){
 AnimationManager.prototype.addAnimation = function( animation ){
 	
 	this._animations.push(animation);
+};
+
+/**
+ * Adds a single sprite object to the internal array.
+ * 
+ * @param {SpriteAnimation} sprite - The sprite object to be added.
+ */
+AnimationManager.prototype.addSpriteAnimation = function( sprite ){
+	
+	this._sprites.push(sprite);
 };
 
 /**
@@ -115,12 +178,30 @@ AnimationManager.prototype.removeAnimation = function( animation ){
 };
 
 /**
+ * Removes a single sprite object from the internal array.
+ * 
+ * @param {SpriteAnimation} sprite - The sprite object to be removed.
+ */
+AnimationManager.prototype.removeAnimation = function( sprite ){
+	
+	var index = this._sprites.indexOf(sprite);
+	this._sprites.splice(index, 1);
+};
+
+/**
  * Removes all animations from the internal array.
  */
 AnimationManager.prototype.removeAnimations = function(){
 	
-	// stop all animations
 	this._animations.length = 0;
+};
+
+/**
+ * Removes all sprites from the internal array.
+ */
+AnimationManager.prototype.removeSprites = function(){
+	
+	this._sprites.length = 0;
 };
 
 module.exports = new AnimationManager();

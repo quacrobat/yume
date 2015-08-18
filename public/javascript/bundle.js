@@ -35447,7 +35447,7 @@ global.window.onload = function(){
 	var bootstrap = new Bootstrap();
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./core/Bootstrap":18}],5:[function(require,module,exports){
+},{"./core/Bootstrap":19}],5:[function(require,module,exports){
 /**
  * @file Prototype for defining script-based actions.
  * 
@@ -35755,7 +35755,7 @@ ActionTrigger.prototype.constructor = ActionTrigger;
 
 
 module.exports = ActionTrigger;
-},{"../etc/Utils":39,"three":2}],8:[function(require,module,exports){
+},{"../etc/Utils":40,"three":2}],8:[function(require,module,exports){
 /**
  * @file The prototype InteractiveObject enables ordinary 3D-Objects to be interactive. 
  * Any interactive object is part of the collision-detection logic and ready for interacting with the player.
@@ -35936,6 +35936,7 @@ module.exports = StaticObject;
 
 "use strict";
 
+var utils = require("../etc/Utils");
 /**
  * Creates an animation.
  * 
@@ -35964,13 +35965,13 @@ function Animation(options) {
 			enumerable: true,
 			writable: true
 		},
-		startValue: {
+		start: {
 			value: 0,
 			configurable: false,
 			enumerable: true,
 			writable: true
 		},
-		endValue: {
+		end: {
 			value: 0,
 			configurable: false,
 			enumerable: true,
@@ -35982,7 +35983,7 @@ function Animation(options) {
 			enumerable: false,
 			writable: true
 		},
-		easingFunction: {
+		easing: {
 			value: undefined,
 			configurable: false,
 			enumerable: false,
@@ -36036,12 +36037,16 @@ function Animation(options) {
 	for(var property in options){
 		if( this.hasOwnProperty( property ) === true ){
 			this[ property ] = options[ property ];
+		}else{
+			if(utils.isDevelopmentModeActive() === true){
+				console.warn("WARN: Animation: Object created with faulty options. Property '%s' is no member of Animation.", property);
+			}
 		}
 	}
 }
 
 /**
- * Starts the animation.
+ * Updates the animation.
  * 
  * @param {number} time - The update time.
  * 
@@ -36072,9 +36077,9 @@ Animation.prototype.update = (function(){
 		elapsed = elapsed > 1 ? 1 : elapsed;
 		
 		// execute easing function
-		if( typeof this.easingFunction === "function" ){
+		if( typeof this.easing === "function" ){
 			
-			value = this.easingFunction( elapsed );
+			value = this.easing( elapsed );
 			
 		}else{
 			
@@ -36085,7 +36090,7 @@ Animation.prototype.update = (function(){
 		if( this.object.hasOwnProperty( this.property ) === true ){
 			
 			// calculate and assign new value
-			this.object[ this.property ] = this.startValue + ( this.endValue - this.startValue ) * value;
+			this.object[ this.property ] = this.start + ( this.end - this.start ) * value;
 		}
 		
 		// execute callback
@@ -36102,9 +36107,9 @@ Animation.prototype.update = (function(){
 			if( this._isHover === true ){
 				
 				// swtich start and end values
-				temp = this.startValue;
-				this.startValue = this.endValue;
-				this.endValue =  temp;
+				temp = this.start;
+				this.start = this.end;
+				this.end =  temp;
 				
 				// set new start time
 				this._startTime = time + this.delayTime;
@@ -36130,11 +36135,11 @@ Animation.prototype.update = (function(){
 }());
 
 /**
- * Starts the animation.
+ * Plays the animation.
  * 
  * @param {number} time - The starting time.
  */
-Animation.prototype.start = function( time ){
+Animation.prototype.play = function( time ){
 	
 	this.isPlaying = true;
 	
@@ -36166,7 +36171,7 @@ Animation.prototype.stop = function(){
 };
 
 /**
- * Set the hover flag.
+ * Sets the hover flag.
  * 
  * @param {boolean} hover - Should the animation has an endless hover effect?
  */
@@ -36177,18 +36182,18 @@ Animation.prototype.setHover = function( isHover ){
 
 module.exports = Animation;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],11:[function(require,module,exports){
+},{"../etc/Utils":40}],11:[function(require,module,exports){
 (function (global){
 /**
- * @file Interface for entire animation-handling. This prototype is used in scenes
- * to access animation-based logic and to create animation-entities. The prototype
- * uses the framework TWEEN.js to create animations.
+ * @file Interface for entire animation-handling. This prototype is used in stages
+ * to access animation-based logic and to create animation-entities.
  * 
  * @author Human Interactive
  */
 "use strict";
 
 var BasicAnimation = require("../animation/Animation");
+var SpriteAnimation = require("../animation/SpriteAnimation");
 
 /**
  * Creates the animation manager.
@@ -36199,6 +36204,12 @@ function AnimationManager() {
 	
 	Object.defineProperties(this, {	
 		_animations: {
+			value: [],
+			configurable: false,
+			enumerable: false,
+			writable: false
+		},
+		_sprites: {
 			value: [],
 			configurable: false,
 			enumerable: false,
@@ -36237,10 +36248,25 @@ AnimationManager.prototype.createHoverAnimation = function(options){
 	return animation;
 };
 
+AnimationManager.prototype.createSpriteAnimation = function( rows, columns, numberOfImages, texture, displayTime ){
+	
+	var sprite = new SpriteAnimation( rows, columns, numberOfImages, texture, displayTime );
+	this.addSpriteAnimation(sprite);
+	
+	return sprite;
+};
+
+AnimationManager.prototype.update = function( delta ){
+	
+	this._updateAnimations();
+	
+	this._updateSprites( delta );
+};
+
 /**
  * Update method for animations. Called in render-loop.
  */
-AnimationManager.prototype.update = (function(){
+AnimationManager.prototype._updateAnimations = (function(){
 	
 	var index, time = 0;
 	var isFinished = false;
@@ -36252,7 +36278,7 @@ AnimationManager.prototype.update = (function(){
 		time = global.performance.now();
 		
 		// iterate over all animations
-		for( index = 0; index < this._animations.length; index++){
+		for( index = 0; index < this._animations.length; index++ ){
 			
 			// buffer current animation
 			animation = this._animations[index];
@@ -36275,6 +36301,20 @@ AnimationManager.prototype.update = (function(){
 	
 }());
 
+AnimationManager.prototype._updateSprites = (function(){
+	
+	var index = 0;
+	
+	return function( delta ){
+		
+		for( index = 0; index < this._sprites.length; index++ ){
+			
+			this._sprites[index].update( delta );
+		}
+	};
+	
+}());
+
 /**
  * Adds a single animation object to the internal array.
  * 
@@ -36283,6 +36323,16 @@ AnimationManager.prototype.update = (function(){
 AnimationManager.prototype.addAnimation = function( animation ){
 	
 	this._animations.push(animation);
+};
+
+/**
+ * Adds a single sprite object to the internal array.
+ * 
+ * @param {SpriteAnimation} sprite - The sprite object to be added.
+ */
+AnimationManager.prototype.addSpriteAnimation = function( sprite ){
+	
+	this._sprites.push(sprite);
 };
 
 /**
@@ -36297,17 +36347,35 @@ AnimationManager.prototype.removeAnimation = function( animation ){
 };
 
 /**
+ * Removes a single sprite object from the internal array.
+ * 
+ * @param {SpriteAnimation} sprite - The sprite object to be removed.
+ */
+AnimationManager.prototype.removeAnimation = function( sprite ){
+	
+	var index = this._sprites.indexOf(sprite);
+	this._sprites.splice(index, 1);
+};
+
+/**
  * Removes all animations from the internal array.
  */
 AnimationManager.prototype.removeAnimations = function(){
 	
-	// stop all animations
 	this._animations.length = 0;
+};
+
+/**
+ * Removes all sprites from the internal array.
+ */
+AnimationManager.prototype.removeSprites = function(){
+	
+	this._sprites.length = 0;
 };
 
 module.exports = new AnimationManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Animation":10}],12:[function(require,module,exports){
+},{"../animation/Animation":10,"../animation/SpriteAnimation":13}],12:[function(require,module,exports){
 /**
  * @file This file contains easing functions for animations.
  * 
@@ -36649,6 +36717,126 @@ var Easing = {
 
 module.exports = Easing;
 },{}],13:[function(require,module,exports){
+/**
+ * @file Prototype for defining an animation based
+ * on sprites.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require("three");
+
+/**
+ * Creates a sprite animation.
+ * 
+ * @constructor
+ * 
+ */
+function SpriteAnimation( rows, columns, numberOfImages, texture, imagesPerSecond ) {
+
+	Object.defineProperties(this, {
+		// number of images in y-direction
+		rows: {
+			value: rows,
+			configurable: false,
+			enumerable: true,
+			writable: false
+		},
+		// number of images in x-direction
+		columns: {
+			value: columns,
+			configurable: false,
+			enumerable: true,
+			writable: false
+		},
+		// total number of images in the sprite
+		numberOfImages: {
+			value: numberOfImages,
+			configurable: false,
+			enumerable: true,
+			writable: false
+		},
+		// contains the sprite image. the dimension
+		// of the texture should be a power of two, but
+		// it's not necessary.
+		texture: {
+			value: texture,
+			configurable: false,
+			enumerable: true,
+			writable: false
+		},
+		// how many images should be displayed per second
+		imagesPerSecond: {
+			value: imagesPerSecond,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		// current displayed image
+		_currentImage: {
+			value: 0,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_elapsedTime:{
+			value: 0,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		}
+	});
+	
+	// this will zoom into the texture, so you see exactly on image of the sprite
+	this.texture.repeat.set( 1 / this.columns, 1 / this.rows );
+}
+
+/**
+ * Updates the sprite animation.
+ * 
+ * @param {number} delta - The update time.
+ */
+SpriteAnimation.prototype.update = (function(){
+	
+	var elapsedTime = 0;
+	var currentColumn, currentRow = 0;
+	
+	return function( delta ){
+		
+		// calculate the elapsed time
+		elapsedTime += delta * this.imagesPerSecond;
+	
+		// derive the index of the current image
+		this._currentImage = Math.floor( elapsedTime );
+		
+		// if the index is greater than the total number of images,
+		// reset the the counter to zero.
+		if( this._currentImage >= this.numberOfImages){
+			this._currentImage = 0;
+			elapsedTime = 0;
+		}
+		
+		// calculate the index of the current column
+		currentColumn = this._currentImage % this.columns;
+		
+		// calculate texture offset in x-direction
+		this.texture.offset.x = currentColumn / this.columns;
+		
+		// calculate the index of the current row
+		currentRow = Math.floor( this._currentImage / this.columns );
+		
+		// calculate texture offset in y-direction.
+		// because the first picture in sprites is usually in the upper left,
+		// you need to start from 1 instead from zero.
+		this.texture.offset.y = 1 - (currentRow / this.rows + 1 / this.rows);
+	};
+	
+}());
+
+module.exports = SpriteAnimation;
+},{"three":2}],14:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading and decoding audio-files. The resulting buffers
@@ -36784,7 +36972,7 @@ AudioBufferList.prototype.loadBuffer = function(file, index){
 
 module.exports = AudioBufferList;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":39,"pubsub-js":1}],14:[function(require,module,exports){
+},{"../etc/Utils":40,"pubsub-js":1}],15:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype holds the central Web Audio context and
@@ -36884,7 +37072,7 @@ AudioListener.prototype.updateMatrixWorld = (function() {
 
 module.exports = AudioListener;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"three":2}],15:[function(require,module,exports){
+},{"three":2}],16:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire audio handling. This prototype is used in scenes
@@ -37221,7 +37409,7 @@ AudioManager.prototype._onErrorBackgroundMusic = function(){
 
 module.exports = new AudioManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Camera":19,"../etc/Utils":39,"./AudioBufferList":13,"./AudioListener":14,"./DynamicAudio":16,"pubsub-js":1}],16:[function(require,module,exports){
+},{"../core/Camera":20,"../etc/Utils":40,"./AudioBufferList":14,"./AudioListener":15,"./DynamicAudio":17,"pubsub-js":1}],17:[function(require,module,exports){
 /**
  * @file Prototype for creating dynamic, full-buffered audio objects.
  * 
@@ -37488,7 +37676,7 @@ DynamicAudio.prototype.updateMatrixWorld = (function() {
 })();
 
 module.exports = DynamicAudio;
-},{"three":2}],17:[function(require,module,exports){
+},{"three":2}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for first person controls. The logic uses
@@ -38761,7 +38949,7 @@ FirstPersonControls.RUN = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":6,"../animation/Easing":12,"../audio/AudioManager":15,"../core/Camera":19,"../core/Scene":23,"../etc/SettingsManager":37,"../etc/Utils":39,"../ui/UserInterfaceManager":66,"pubsub-js":1,"three":2}],18:[function(require,module,exports){
+},{"../action/ActionManager":6,"../animation/Easing":12,"../audio/AudioManager":16,"../core/Camera":20,"../core/Scene":24,"../etc/SettingsManager":38,"../etc/Utils":40,"../ui/UserInterfaceManager":67,"pubsub-js":1,"three":2}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting
@@ -38856,7 +39044,7 @@ Bootstrap.prototype._loadStage = function(){
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":17,"../etc/MultiplayerManager":31,"../etc/NetworkManager":32,"../etc/SaveGameManager":36,"../etc/Utils":39,"../ui/UserInterfaceManager":66,"./Camera":19,"./Environment":20,"./Renderer":22,"pubsub-js":1}],19:[function(require,module,exports){
+},{"../controls/FirstPersonControls":18,"../etc/MultiplayerManager":32,"../etc/NetworkManager":33,"../etc/SaveGameManager":37,"../etc/Utils":40,"../ui/UserInterfaceManager":67,"./Camera":20,"./Environment":21,"./Renderer":23,"pubsub-js":1}],20:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -38925,7 +39113,7 @@ Camera.prototype._onResize = function(message, data){
 
 module.exports = new Camera();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"pubsub-js":1,"three":2}],20:[function(require,module,exports){
+},{"pubsub-js":1,"three":2}],21:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype is used to detect all
@@ -39094,7 +39282,7 @@ Environment.prototype._testWebAudio = function(){
 
 module.exports = new Environment();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 /**
  * @file Prototype for network-messages.
  * 
@@ -39144,7 +39332,7 @@ Message.TYPES = {
 };
 
 module.exports = Message;
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -39453,7 +39641,7 @@ Renderer.prototype._onResize = function(message, data){
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":39,"../postprocessing/EffectComposer":40,"../postprocessing/RenderPass":41,"../postprocessing/ShaderPass":42,"../shader/GaussianBlurShader":43,"../shader/GrayscaleShader":44,"../shader/VignetteShader":45,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
+},{"../etc/Utils":40,"../postprocessing/EffectComposer":41,"../postprocessing/RenderPass":42,"../postprocessing/ShaderPass":43,"../shader/GaussianBlurShader":44,"../shader/GrayscaleShader":45,"../shader/VignetteShader":46,"pubsub-js":1,"three":2}],24:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic 
  * for scene-based functionality.
@@ -39494,7 +39682,7 @@ Scene.prototype.clear = function(){
 };
 
 module.exports = new Scene();
-},{"three":2}],24:[function(require,module,exports){
+},{"three":2}],25:[function(require,module,exports){
 (function (global){
 /**
  * @file Basis prototype for all stages. It is used to provide
@@ -39698,18 +39886,18 @@ StageBase.prototype._render = function(){
 	this._delta = this.timeManager.getDelta();
 	
 	// update controls
-	this.controls.update(this._delta);
+	this.controls.update( this._delta );
 	
 	// update managers
-	this.animationManager.update();
+	this.animationManager.update( this._delta );
 	this.performanceManager.update();
 	this.userInterfaceManager.update();
 	
 	// render frame
-	this.renderer.render(this.scene, this.camera);
+	this.renderer.render( this.scene, this.camera );
 	
 	// save render ID
-	this._renderId = global.requestAnimationFrame(this._render);
+	this._renderId = global.requestAnimationFrame( this._render );
 };
 
 /**
@@ -39726,7 +39914,7 @@ StageBase.prototype._changeStage = function(stageId, isSaveGame){
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":15,"../controls/FirstPersonControls":17,"../etc/PerformanceManager":34,"../etc/SaveGameManager":36,"../etc/SettingsManager":37,"../etc/TextManager":38,"../etc/Utils":39,"../ui/UserInterfaceManager":66,"./Camera":19,"./Renderer":22,"./Scene":23,"pubsub-js":1,"three":2}],25:[function(require,module,exports){
+},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":16,"../controls/FirstPersonControls":18,"../etc/PerformanceManager":35,"../etc/SaveGameManager":37,"../etc/SettingsManager":38,"../etc/TextManager":39,"../etc/Utils":40,"../ui/UserInterfaceManager":67,"./Camera":20,"./Renderer":23,"./Scene":24,"pubsub-js":1,"three":2}],26:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -40010,7 +40198,7 @@ StageManager.prototype._onLoadComplete = function(message, data){
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":36,"../etc/Utils":39,"../stages/Stage_001":46,"../stages/Stage_002":47,"../stages/Stage_003":48,"../stages/Stage_004":49,"../stages/Stage_005":50,"../stages/Stage_006":51,"../stages/Stage_007":52,"../stages/Stage_008":53,"../stages/Stage_009":54,"../stages/Stage_010":55,"../ui/UserInterfaceManager":66,"pubsub-js":1}],26:[function(require,module,exports){
+},{"../etc/SaveGameManager":37,"../etc/Utils":40,"../stages/Stage_001":47,"../stages/Stage_002":48,"../stages/Stage_003":49,"../stages/Stage_004":50,"../stages/Stage_005":51,"../stages/Stage_006":52,"../stages/Stage_007":53,"../stages/Stage_008":54,"../stages/Stage_009":55,"../stages/Stage_010":56,"../ui/UserInterfaceManager":67,"pubsub-js":1}],27:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It 
@@ -40090,7 +40278,7 @@ Thread.prototype.onError = function(listener){
 
 module.exports = Thread;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -40226,7 +40414,7 @@ ThreadManager.prototype._getScriptURL = function(script){
 
 module.exports = new ThreadManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Thread":26}],28:[function(require,module,exports){
+},{"./Thread":27}],29:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype handles all stuff for impostors. An impostor
@@ -40548,7 +40736,7 @@ Impostor.prototype._clear = function(){
 
 module.exports = Impostor;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"three":2}],29:[function(require,module,exports){
+},{"three":2}],30:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading 3D objects in JSON-format 
@@ -40643,7 +40831,7 @@ JSONLoader.prototype.load = function(url, onLoad) {
 
 module.exports = JSONLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":39,"pubsub-js":1,"three":2}],30:[function(require,module,exports){
+},{"./Utils":40,"pubsub-js":1,"three":2}],31:[function(require,module,exports){
 /**
  * @file This prototype is used for LOD handling. It is an 
  * enhancement of the LOD functionality of three.js. Instead of
@@ -40817,7 +41005,7 @@ LOD.MODE = {
 };
 
 module.exports = LOD;
-},{"three":2}],31:[function(require,module,exports){
+},{"three":2}],32:[function(require,module,exports){
 /**
  * @file This prototype manages the characters of
  * the other players.
@@ -40979,7 +41167,7 @@ MultiplayerManager.prototype._getPlayer = function(id){
 };
 
 module.exports = new MultiplayerManager();
-},{"../core/Scene":23,"../etc/Utils":39,"./Player":35,"pubsub-js":1,"three":2}],32:[function(require,module,exports){
+},{"../core/Scene":24,"../etc/Utils":40,"./Player":36,"pubsub-js":1,"three":2}],33:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -41195,7 +41383,7 @@ NetworkManager.SERVER = {
 
 module.exports = new NetworkManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Message":21,"../core/ThreadManager":27,"../etc/Utils":39,"pubsub-js":1,"ws":3}],33:[function(require,module,exports){
+},{"../core/Message":22,"../core/ThreadManager":28,"../etc/Utils":40,"pubsub-js":1,"ws":3}],34:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading 3D objects in object-format 
@@ -41286,7 +41474,7 @@ ObjectLoader.prototype.load = function (url, onLoad) {
 
 module.exports = ObjectLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":39,"pubsub-js":1,"three":2}],34:[function(require,module,exports){
+},{"./Utils":40,"pubsub-js":1,"three":2}],35:[function(require,module,exports){
 /**
  * @file Interface for performance handling. This prototype is used in scenes
  * to create e.g. LOD instances.
@@ -41563,7 +41751,7 @@ PerformanceManager.prototype._updateImpostors = (function(){
 }());
 
 module.exports = new PerformanceManager();
-},{"../core/Camera":19,"../core/Renderer":22,"../core/Scene":23,"./Impostor":28,"./LOD":30,"three":2}],35:[function(require,module,exports){
+},{"../core/Camera":20,"../core/Renderer":23,"../core/Scene":24,"./Impostor":29,"./LOD":31,"three":2}],36:[function(require,module,exports){
 /**
  * @file This prototype represents the character of
  * an other player.
@@ -41617,7 +41805,7 @@ Player.prototype = Object.create(THREE.Mesh.prototype);
 Player.prototype.constructor = Player;
 
 module.exports = Player;
-},{"three":2}],36:[function(require,module,exports){
+},{"three":2}],37:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire savegame-handling. This prototype is using
@@ -41694,7 +41882,7 @@ SaveGameManager.prototype.remove = function(){
 
 module.exports = new SaveGameManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire settings-handling. This prototype is used
@@ -41870,7 +42058,7 @@ SettingsManager.MOUSE = {
 
 module.exports = new SettingsManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":39,"three":2}],38:[function(require,module,exports){
+},{"./Utils":40,"three":2}],39:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire text-handling. This prototype is used in scenes
@@ -42026,7 +42214,7 @@ TextManager.prototype._searchAndRepalce = function(){
 
 module.exports = new TextManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":39,"pubsub-js":1}],39:[function(require,module,exports){
+},{"./Utils":40,"pubsub-js":1}],40:[function(require,module,exports){
 (function (global){
 /**
  * @file All helper and util functions are
@@ -42217,7 +42405,7 @@ Utils.CDN = {
 
 module.exports = new Utils();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Renderer":22}],40:[function(require,module,exports){
+},{"../core/Renderer":23}],41:[function(require,module,exports){
 /**
  * @file This prototype manages effects for post-processing.
  * 
@@ -42397,7 +42585,7 @@ EffectComposer.prototype._reset = function(renderTarget){
 };
 
 module.exports = EffectComposer;
-},{"three":2}],41:[function(require,module,exports){
+},{"three":2}],42:[function(require,module,exports){
 /**
  * @file This prototype provides a render pass for post-processing.
  * 
@@ -42459,7 +42647,7 @@ RenderPass.prototype.render = function(renderer, writeBuffer, readBuffer){
 };
 
 module.exports = RenderPass;
-},{"three":2}],42:[function(require,module,exports){
+},{"three":2}],43:[function(require,module,exports){
 /**
  * @file This prototype provides a shader pass for post-processing.
  * 
@@ -42564,7 +42752,7 @@ ShaderPass.prototype.render = function(renderer, writeBuffer, readBuffer){
 };
 
 module.exports = ShaderPass;
-},{"three":2}],43:[function(require,module,exports){
+},{"three":2}],44:[function(require,module,exports){
 /**
  * @file This shader applies a gaussian blur effect.
  * It can be used for both x and y direction.
@@ -42631,7 +42819,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":2}],44:[function(require,module,exports){
+},{"three":2}],45:[function(require,module,exports){
 /**
  * @file This shader transforms all colors to grayscale.
  * 
@@ -42680,7 +42868,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 /**
  * @file This shader creates a vignette effect.
  * 
@@ -42741,7 +42929,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42803,10 +42991,10 @@ Stage.prototype.setup = function(){
 			object: sign.position,
 			property: "y",
 			duration: 5000,
-			startValue: sign.position.y,
-			endValue: sign.position.y + 5,
-			easingFunction: Easing.Sinusoidal.InOut
-		}).start();
+			start: sign.position.y,
+			end: sign.position.y + 5,
+			easing: Easing.Sinusoidal.InOut
+		}).play();
 	});
 	
 	// add trigger for stage change
@@ -42853,7 +43041,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],47:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],48:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -42956,10 +43144,10 @@ Stage.prototype.setup = function(){
 			object: sign.position,
 			property: "y",
 			duration: 5000,
-			startValue: sign.position.y,
-			endValue: sign.position.y + 5,
-			easingFunction: Easing.Sinusoidal.InOut
-		}).start();
+			start: sign.position.y,
+			end: sign.position.y + 5,
+			easing: Easing.Sinusoidal.InOut
+		}).play();
 	});
 	
 	// add trigger for stage change
@@ -43020,7 +43208,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],48:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],49:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43105,10 +43293,10 @@ Stage.prototype.setup = function(){
 			object: sign.position,
 			property: "y",
 			duration: 5000,
-			startValue: sign.position.y,
-			endValue: sign.position.y + 5,
-			easingFunction: Easing.Sinusoidal.InOut
-		}).start();
+			start: sign.position.y,
+			end: sign.position.y + 5,
+			easing: Easing.Sinusoidal.InOut
+		}).play();
 	});
 	
 	// add trigger for stage change
@@ -43178,7 +43366,7 @@ function colorMesh(mesh){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],49:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],50:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43276,10 +43464,10 @@ Stage.prototype.setup = function(){
 			object: sign.position,
 			property: "y",
 			duration: 5000,
-			startValue: sign.position.y,
-			endValue: sign.position.y + 5,
-			easingFunction: Easing.Sinusoidal.InOut
-		}).start();
+			start: sign.position.y,
+			end: sign.position.y + 5,
+			easing: Easing.Sinusoidal.InOut
+		}).play();
 	});
 	
 	// add trigger for stage change
@@ -43340,7 +43528,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],50:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],51:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43405,10 +43593,10 @@ Stage.prototype.setup = function(){
 			object: sign.position,
 			property: "y",
 			duration: 5000,
-			startValue: sign.position.y,
-			endValue: sign.position.y + 5,
-			easingFunction: Easing.Sinusoidal.InOut
-		}).start();
+			start: sign.position.y,
+			end: sign.position.y + 5,
+			easing: Easing.Sinusoidal.InOut
+		}).play();
 	});
 	
 	// add trigger for stage change
@@ -43461,7 +43649,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],51:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],52:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43568,10 +43756,10 @@ Stage.prototype.setup = function(){
 			object: sign.position,
 			property: "y",
 			duration: 5000,
-			startValue: sign.position.y,
-			endValue: sign.position.y + 5,
-			easingFunction: Easing.Sinusoidal.InOut
-		}).start();
+			start: sign.position.y,
+			end: sign.position.y + 5,
+			easing: Easing.Sinusoidal.InOut
+		}).play();
 	});
 	
 	// add trigger for stage change
@@ -43639,7 +43827,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],52:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],53:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43701,10 +43889,10 @@ Stage.prototype.setup = function(){
 			object: interactiveBoxBasic.position,
 			property: "x",
 			duration: 5000,
-			startValue:  interactiveBoxBasic.position.x,
-			endValue: interactiveBoxBasic.position.x + 30,
-			easingFunction: Easing.Quartic.InOut
-		}).start();
+			start:  interactiveBoxBasic.position.x,
+			end: interactiveBoxBasic.position.x + 30,
+			easing: Easing.Quartic.InOut
+		}).play();
 	});
 	
 	var staticBoxHover = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0xf3f4f6}));
@@ -43713,16 +43901,16 @@ Stage.prototype.setup = function(){
 	this.scene.add(staticBoxHover);
 	this.actionManager.createStatic(staticBoxHover);
 	
-	// create a hover animation, which animates infinitely a property between start and endvalue
+	// create a hover animation, which animates infinitely a property between start- and end-value
 	this.animationManager.createHoverAnimation({
 		object: staticBoxHover.position,
 		property: "y",
 		duration: 4000,
 		delayTime: 2000,
-		startValue: staticBoxHover.position.y,
-		endValue: staticBoxHover.position.y + 2,
-		easingFunction: Easing.Sinusoidal.InOut
-	}).start();
+		start: staticBoxHover.position.y,
+		end: staticBoxHover.position.y + 2,
+		easing: Easing.Sinusoidal.InOut
+	}).play();
 
 	// add sign
 	var signLoader = new JSONLoader();
@@ -43739,10 +43927,10 @@ Stage.prototype.setup = function(){
 			object: sign.position,
 			property: "y",
 			duration: 5000,
-			startValue: sign.position.y,
-			endValue: sign.position.y + 5,
-			easingFunction: Easing.Sinusoidal.InOut
-		}).start();
+			start: sign.position.y,
+			end: sign.position.y + 5,
+			easing: Easing.Sinusoidal.InOut
+		}).play();
 	});
 	
 	// add trigger for scene change
@@ -43803,7 +43991,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],53:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],54:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43877,10 +44065,10 @@ Stage.prototype.setup = function(){
 			object: sign.position,
 			property: "y",
 			duration: 5000,
-			startValue: sign.position.y,
-			endValue: sign.position.y + 5,
-			easingFunction: Easing.Sinusoidal.InOut
-		}).start();
+			start: sign.position.y,
+			end: sign.position.y + 5,
+			easing: Easing.Sinusoidal.InOut
+		}).play();
 	});
 	
 	// add stairs
@@ -43955,7 +44143,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],54:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],55:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -44017,10 +44205,10 @@ Stage.prototype.setup = function(){
 			object: sign.position,
 			property: "y",
 			duration: 5000,
-			startValue: sign.position.y,
-			endValue: sign.position.y + 5,
-			easingFunction: Easing.Sinusoidal.InOut
-		}).start();
+			start: sign.position.y,
+			end: sign.position.y + 5,
+			easing: Easing.Sinusoidal.InOut
+		}).play();
 	});
 	
 	// create spheres for LOD switching
@@ -44122,7 +44310,7 @@ function showLODCircles(scene){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],55:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],56:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -44184,10 +44372,10 @@ Stage.prototype.setup = function(){
 			object: sign.position,
 			property: "y",
 			duration: 5000,
-			startValue: sign.position.y,
-			endValue: sign.position.y + 5,
-			easingFunction: Easing.Sinusoidal.InOut
-		}).start();
+			start: sign.position.y,
+			end: sign.position.y + 5,
+			easing: Easing.Sinusoidal.InOut
+		}).play();
 	});
 	
 	// light
@@ -44261,7 +44449,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],56:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],57:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -44435,7 +44623,7 @@ Chat.prototype._onMessage = function(message, data){
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":65,"pubsub-js":1}],57:[function(require,module,exports){
+},{"./UiElement":66,"pubsub-js":1}],58:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel.
@@ -44499,7 +44687,7 @@ DevelopmentPanel.prototype.setText = function(text){
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":65}],58:[function(require,module,exports){
+},{"./UiElement":66}],59:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -44560,7 +44748,7 @@ InformationPanel.prototype.setText = function(textKey){
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":65}],59:[function(require,module,exports){
+},{"./UiElement":66}],60:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -44635,7 +44823,7 @@ InteractionLabel.prototype.hide = function(){
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":65}],60:[function(require,module,exports){
+},{"./UiElement":66}],61:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -44820,7 +45008,7 @@ LoadingScreen.prototype._onReady = function(message, data){
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":65,"pubsub-js":1}],61:[function(require,module,exports){
+},{"./UiElement":66,"pubsub-js":1}],62:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -44973,7 +45161,7 @@ Menu.prototype._publishFinishEvent = function(message, data){
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":39,"./UiElement":65,"pubsub-js":1}],62:[function(require,module,exports){
+},{"../etc/Utils":40,"./UiElement":66,"pubsub-js":1}],63:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -45109,7 +45297,7 @@ ModalDialog.prototype._onClose = function(event){
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":39,"./UiElement":65,"pubsub-js":1}],63:[function(require,module,exports){
+},{"../etc/Utils":40,"./UiElement":66,"pubsub-js":1}],64:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor.
@@ -45329,7 +45517,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":65}],64:[function(require,module,exports){
+},{"./UiElement":66}],65:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -45529,7 +45717,7 @@ TextScreen.prototype._printName = function(){
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":65}],65:[function(require,module,exports){
+},{"./UiElement":66}],66:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -45577,7 +45765,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":38}],66:[function(require,module,exports){
+},{"../etc/TextManager":39}],67:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in scenes
@@ -45829,4 +46017,4 @@ UserInterfaceManager.prototype._onKeyDown = function(event){
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":39,"./Chat":56,"./DevelopmentPanel":57,"./InformationPanel":58,"./InteractionLabel":59,"./LoadingScreen":60,"./Menu":61,"./ModalDialog":62,"./PerformanceMonitor":63,"./TextScreen":64,"pubsub-js":1}]},{},[4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66]);
+},{"../etc/Utils":40,"./Chat":57,"./DevelopmentPanel":58,"./InformationPanel":59,"./InteractionLabel":60,"./LoadingScreen":61,"./Menu":62,"./ModalDialog":63,"./PerformanceMonitor":64,"./TextScreen":65,"pubsub-js":1}]},{},[4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67]);

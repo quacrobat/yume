@@ -171,6 +171,8 @@ StageBase.prototype.destroy = function(){
 	
 	this.animationManager.removeAnimations();
 	
+	this.animationManager.removeSprites();
+	
 	this.audioManager.removeDynamicAudios();
 	
 	this.controls.removeGrounds();
@@ -200,18 +202,18 @@ StageBase.prototype._render = function(){
 	this._delta = this.timeManager.getDelta();
 	
 	// update controls
-	this.controls.update(this._delta);
+	this.controls.update( this._delta );
 	
 	// update managers
-	this.animationManager.update();
+	this.animationManager.update( this._delta );
 	this.performanceManager.update();
 	this.userInterfaceManager.update();
 	
 	// render frame
-	this.renderer.render(this.scene, this.camera);
+	this.renderer.render( this.scene, this.camera );
 	
 	// save render ID
-	this._renderId = global.requestAnimationFrame(this._render);
+	this._renderId = global.requestAnimationFrame( this._render );
 };
 
 /**

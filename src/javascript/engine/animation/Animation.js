@@ -7,6 +7,7 @@
 
 "use strict";
 
+var utils = require("../etc/Utils");
 /**
  * Creates an animation.
  * 
@@ -35,13 +36,13 @@ function Animation(options) {
 			enumerable: true,
 			writable: true
 		},
-		startValue: {
+		start: {
 			value: 0,
 			configurable: false,
 			enumerable: true,
 			writable: true
 		},
-		endValue: {
+		end: {
 			value: 0,
 			configurable: false,
 			enumerable: true,
@@ -53,7 +54,7 @@ function Animation(options) {
 			enumerable: false,
 			writable: true
 		},
-		easingFunction: {
+		easing: {
 			value: undefined,
 			configurable: false,
 			enumerable: false,
@@ -107,12 +108,16 @@ function Animation(options) {
 	for(var property in options){
 		if( this.hasOwnProperty( property ) === true ){
 			this[ property ] = options[ property ];
+		}else{
+			if(utils.isDevelopmentModeActive() === true){
+				console.warn("WARN: Animation: Object created with faulty options. Property '%s' is no member of Animation.", property);
+			}
 		}
 	}
 }
 
 /**
- * Starts the animation.
+ * Updates the animation.
  * 
  * @param {number} time - The update time.
  * 
@@ -143,9 +148,9 @@ Animation.prototype.update = (function(){
 		elapsed = elapsed > 1 ? 1 : elapsed;
 		
 		// execute easing function
-		if( typeof this.easingFunction === "function" ){
+		if( typeof this.easing === "function" ){
 			
-			value = this.easingFunction( elapsed );
+			value = this.easing( elapsed );
 			
 		}else{
 			
@@ -156,7 +161,7 @@ Animation.prototype.update = (function(){
 		if( this.object.hasOwnProperty( this.property ) === true ){
 			
 			// calculate and assign new value
-			this.object[ this.property ] = this.startValue + ( this.endValue - this.startValue ) * value;
+			this.object[ this.property ] = this.start + ( this.end - this.start ) * value;
 		}
 		
 		// execute callback
@@ -173,9 +178,9 @@ Animation.prototype.update = (function(){
 			if( this._isHover === true ){
 				
 				// swtich start and end values
-				temp = this.startValue;
-				this.startValue = this.endValue;
-				this.endValue =  temp;
+				temp = this.start;
+				this.start = this.end;
+				this.end =  temp;
 				
 				// set new start time
 				this._startTime = time + this.delayTime;
@@ -201,11 +206,11 @@ Animation.prototype.update = (function(){
 }());
 
 /**
- * Starts the animation.
+ * Plays the animation.
  * 
  * @param {number} time - The starting time.
  */
-Animation.prototype.start = function( time ){
+Animation.prototype.play = function( time ){
 	
 	this.isPlaying = true;
 	
@@ -237,7 +242,7 @@ Animation.prototype.stop = function(){
 };
 
 /**
- * Set the hover flag.
+ * Sets the hover flag.
  * 
  * @param {boolean} hover - Should the animation has an endless hover effect?
  */

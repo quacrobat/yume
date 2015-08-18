@@ -59,10 +59,10 @@ Stage.prototype.setup = function(){
 			object: interactiveBoxBasic.position,
 			property: "x",
 			duration: 5000,
-			startValue:  interactiveBoxBasic.position.x,
-			endValue: interactiveBoxBasic.position.x + 30,
-			easingFunction: Easing.Quartic.InOut
-		}).start();
+			start:  interactiveBoxBasic.position.x,
+			end: interactiveBoxBasic.position.x + 30,
+			easing: Easing.Quartic.InOut
+		}).play();
 	});
 	
 	var staticBoxHover = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0xf3f4f6}));
@@ -71,16 +71,16 @@ Stage.prototype.setup = function(){
 	this.scene.add(staticBoxHover);
 	this.actionManager.createStatic(staticBoxHover);
 	
-	// create a hover animation, which animates infinitely a property between start and endvalue
+	// create a hover animation, which animates infinitely a property between start- and end-value
 	this.animationManager.createHoverAnimation({
 		object: staticBoxHover.position,
 		property: "y",
 		duration: 4000,
 		delayTime: 2000,
-		startValue: staticBoxHover.position.y,
-		endValue: staticBoxHover.position.y + 2,
-		easingFunction: Easing.Sinusoidal.InOut
-	}).start();
+		start: staticBoxHover.position.y,
+		end: staticBoxHover.position.y + 2,
+		easing: Easing.Sinusoidal.InOut
+	}).play();
 
 	// add sign
 	var signLoader = new JSONLoader();
@@ -97,10 +97,10 @@ Stage.prototype.setup = function(){
 			object: sign.position,
 			property: "y",
 			duration: 5000,
-			startValue: sign.position.y,
-			endValue: sign.position.y + 5,
-			easingFunction: Easing.Sinusoidal.InOut
-		}).start();
+			start: sign.position.y,
+			end: sign.position.y + 5,
+			easing: Easing.Sinusoidal.InOut
+		}).play();
 	});
 	
 	// add trigger for scene change
