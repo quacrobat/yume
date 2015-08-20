@@ -36248,14 +36248,28 @@ AnimationManager.prototype.createHoverAnimation = function(options){
 	return animation;
 };
 
-AnimationManager.prototype.createSpriteAnimation = function( rows, columns, numberOfImages, texture, displayTime ){
+/**
+ * Creates a sprite animation.
+ * 
+ * @param {number} rows - Number of images in y-direction.
+ * @param {number} columns - Number of images in x-direction.
+ * @param {number} numberOfImages - Total number of images in the sprite.
+ * @param {THREE.Texture} texture - Contains the sprite image. The dimension of the texture should be a power of two, but it's not necessary.
+ * @param {number} imagesPerSecond - How many images should be displayed per second.
+ * 
+ * @returns {SpriteAnimation} The new sprite animation.
+ */
+AnimationManager.prototype.createSpriteAnimation = function( rows, columns, numberOfImages, texture, imagesPerSecond ){
 	
-	var sprite = new SpriteAnimation( rows, columns, numberOfImages, texture, displayTime );
+	var sprite = new SpriteAnimation( rows, columns, numberOfImages, texture, imagesPerSecond );
 	this.addSpriteAnimation(sprite);
 	
 	return sprite;
 };
 
+/**
+ * Update method for animations. Called in render-loop.
+ */
 AnimationManager.prototype.update = function( delta ){
 	
 	this._updateAnimations();
@@ -36264,7 +36278,7 @@ AnimationManager.prototype.update = function( delta ){
 };
 
 /**
- * Update method for animations. Called in render-loop.
+ * Updates the standard animations.
  */
 AnimationManager.prototype._updateAnimations = (function(){
 	
@@ -36301,6 +36315,9 @@ AnimationManager.prototype._updateAnimations = (function(){
 	
 }());
 
+/**
+ * Updates the sprites.
+ */
 AnimationManager.prototype._updateSprites = (function(){
 	
 	var index = 0;
@@ -36733,48 +36750,45 @@ var THREE = require("three");
  * 
  * @constructor
  * 
+ * @param {number} rows - Number of images in y-direction.
+ * @param {number} columns - Number of images in x-direction.
+ * @param {number} numberOfImages - Total number of images in the sprite.
+ * @param {THREE.Texture} texture - Contains the sprite image. The dimension of the texture should be a power of two, but it's not necessary.
+ * @param {number} imagesPerSecond - How many images should be displayed per second.
  */
 function SpriteAnimation( rows, columns, numberOfImages, texture, imagesPerSecond ) {
 
 	Object.defineProperties(this, {
-		// number of images in y-direction
 		rows: {
 			value: rows,
 			configurable: false,
 			enumerable: true,
 			writable: false
 		},
-		// number of images in x-direction
 		columns: {
 			value: columns,
 			configurable: false,
 			enumerable: true,
 			writable: false
 		},
-		// total number of images in the sprite
 		numberOfImages: {
 			value: numberOfImages,
 			configurable: false,
 			enumerable: true,
 			writable: false
 		},
-		// contains the sprite image. the dimension
-		// of the texture should be a power of two, but
-		// it's not necessary.
 		texture: {
 			value: texture,
 			configurable: false,
 			enumerable: true,
 			writable: false
 		},
-		// how many images should be displayed per second
 		imagesPerSecond: {
 			value: imagesPerSecond,
 			configurable: false,
 			enumerable: true,
 			writable: true
 		},
-		// current displayed image
 		_currentImage: {
 			value: 0,
 			configurable: false,
@@ -39857,6 +39871,8 @@ StageBase.prototype.destroy = function(){
 	
 	this.animationManager.removeAnimations();
 	
+	this.animationManager.removeSprites();
+	
 	this.audioManager.removeDynamicAudios();
 	
 	this.controls.removeGrounds();
@@ -40415,7 +40431,6 @@ ThreadManager.prototype._getScriptURL = function(script){
 module.exports = new ThreadManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./Thread":27}],29:[function(require,module,exports){
-(function (global){
 /**
  * @file This prototype handles all stuff for impostors. An impostor
  * is a billboard that is created on the fly by rendering a complex
@@ -40504,6 +40519,10 @@ function Impostor(id, object, resolution) {
 	// create render target
 	this._renderTarget = new THREE.WebGLRenderTarget( this.resolution, this.resolution, {format: THREE.RGBAFormat});
 	
+	// assign the render target to the material. 
+	// the alphaTest parameter avoids semi-transparent black borders of the billboard.
+	this.material = new THREE.MeshBasicMaterial({map: this._renderTarget, transparent: true, alphaTest: 0.9}); 
+	
 	// prevent automatic update of model matrix
 	this.matrixAutoUpdate = false;
 }
@@ -40532,6 +40551,8 @@ Impostor.prototype.generate = function(){
 
 	this._computeBoundingBox();
 	
+	this._setGeometry();
+	
 	this._prepareCamera();
 	
 	this._prepareProjectionMatrix();
@@ -40540,13 +40561,11 @@ Impostor.prototype.generate = function(){
 	
 	this._render();
 	
-	this._createImpostor();
-	
 	this._clear();
 };
 
 /**
- * Updates an impostor. The impostor is handled like a viewpoint-oriented, axis-aligned billboard.
+ * Updates the model matrix of an impostor. The impostor is handled like a viewpoint-oriented, axis-aligned billboard.
  * 
  * see: Real-Time Rendering, Third Edition, Akenine-Möller/Haines/Hoffman
  * Chapter 10.6.2, World-Oriented Billboards
@@ -40590,6 +40609,19 @@ Impostor.prototype._computeBoundingBox = function(){
 };
 
 /**
+ * Sets the geometry of impostor.
+ */
+Impostor.prototype._setGeometry = function(){
+	
+	// calculate the dimensions of the geometry
+	var width =  this._boundingBox.max.x - this._boundingBox.min.x;
+	var height = this._boundingBox.max.y - this._boundingBox.min.y;
+
+	// assign geometry and material
+	this.geometry = new THREE.PlaneBufferGeometry(width, height);
+};
+
+/**
  * Prepares the camera for rendering.
  */
 Impostor.prototype._prepareCamera = function(){
@@ -40606,7 +40638,7 @@ Impostor.prototype._prepareCamera = function(){
 /**
  * Prepares the projection matrix. First, the bounding rectangle of the projected
  * bounding box is calculated. This rectangle is used to create a new frustum, which encloses
- * the the bounding box as much as possible.
+ * the bounding box as much as possible.
  */
 Impostor.prototype._prepareProjectionMatrix = function(){
 
@@ -40644,6 +40676,7 @@ Impostor.prototype._prepareProjectionMatrix = function(){
 	points[7].applyMatrix4( this._camera.matrixWorldInverse ).applyProjection( this._camera.projectionMatrix );
 	
 	// determine min/max values of x and y coordinate
+	// these coordinates form the scissor rectangle of the object (in [-1,1] range)
 	for(var index = 0; index < points.length; index++){
 		
 		minX = Math.min(minX, points[index].x);
@@ -40658,8 +40691,11 @@ Impostor.prototype._prepareProjectionMatrix = function(){
 	
 	// calculate new frustum
 	var frustumHeight = this._camera.near * Math.tan( THREE.Math.degToRad( this._camera.fov * 0.5 ) );
-	var frustumWidth = frustumHeight * ( global.window.innerWidth / global.window.innerHeight );
-	
+	var frustumWidth = frustumHeight * this._camera.aspect;
+
+	// multiplying the parameter with the calculated min/max values 
+	// should set the frustum so that width and height are equal to
+	// the bounding rectangle of the 3D object.
 	projectionMatrix.makeFrustum( frustumWidth * minX, 
 								  frustumWidth * maxX,  
 								  frustumHeight * minY, 
@@ -40680,7 +40716,7 @@ Impostor.prototype._prepareScene = function(){
 	// clone object
 	this.object = this.object.clone();
 	
-	// ensure its visible
+	// ensure it's visible
 	this.object.visible = true;
 
 	// add to scene
@@ -40699,7 +40735,8 @@ Impostor.prototype._render = function(){
 	var clearColor = this._renderer.getClearColor();
 	var clearAlpha = this._renderer.getClearAlpha();
 	
-	// clear renderer so the image will have transparency
+	// the following clear color ensures
+	// that the rendered texture has transparency
 	this._renderer.setClearColor(0x000000, 0);
 	
 	// render to target
@@ -40707,22 +40744,6 @@ Impostor.prototype._render = function(){
 	
 	// restore clear values
 	this._renderer.setClearColor(clearColor, clearAlpha);
-};
-
-/**
- * Creates the impostor.
- */
-Impostor.prototype._createImpostor = function(){
-	
-	// calculate the dimensions of the geometry
-	var width =  this._boundingBox.max.x - this._boundingBox.min.x;
-	var height = this._boundingBox.max.y - this._boundingBox.min.y;
-
-	// assign geometry and material
-	this.geometry = new THREE.PlaneBufferGeometry(width, height);
-	
-	// the alphaTest value avoids semi-transparent black borders
-	this.material = new THREE.MeshBasicMaterial({map: this._renderTarget, transparent: true, alphaTest: 0.9}); 
 };
 
 /**
@@ -40735,7 +40756,6 @@ Impostor.prototype._clear = function(){
 };
 
 module.exports = Impostor;
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"three":2}],30:[function(require,module,exports){
 (function (global){
 /**

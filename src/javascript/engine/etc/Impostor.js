@@ -86,6 +86,10 @@ function Impostor(id, object, resolution) {
 	// create render target
 	this._renderTarget = new THREE.WebGLRenderTarget( this.resolution, this.resolution, {format: THREE.RGBAFormat});
 	
+	// assign the render target to the material. 
+	// the alphaTest parameter avoids semi-transparent black borders of the billboard.
+	this.material = new THREE.MeshBasicMaterial({map: this._renderTarget, transparent: true, alphaTest: 0.9}); 
+	
 	// prevent automatic update of model matrix
 	this.matrixAutoUpdate = false;
 }
@@ -114,6 +118,8 @@ Impostor.prototype.generate = function(){
 
 	this._computeBoundingBox();
 	
+	this._setGeometry();
+	
 	this._prepareCamera();
 	
 	this._prepareProjectionMatrix();
@@ -122,13 +128,11 @@ Impostor.prototype.generate = function(){
 	
 	this._render();
 	
-	this._createImpostor();
-	
 	this._clear();
 };
 
 /**
- * Updates an impostor. The impostor is handled like a viewpoint-oriented, axis-aligned billboard.
+ * Updates the model matrix of an impostor. The impostor is handled like a viewpoint-oriented, axis-aligned billboard.
  * 
  * see: Real-Time Rendering, Third Edition, Akenine-Möller/Haines/Hoffman
  * Chapter 10.6.2, World-Oriented Billboards
@@ -172,6 +176,19 @@ Impostor.prototype._computeBoundingBox = function(){
 };
 
 /**
+ * Sets the geometry of impostor.
+ */
+Impostor.prototype._setGeometry = function(){
+	
+	// calculate the dimensions of the geometry
+	var width =  this._boundingBox.max.x - this._boundingBox.min.x;
+	var height = this._boundingBox.max.y - this._boundingBox.min.y;
+
+	// assign geometry and material
+	this.geometry = new THREE.PlaneBufferGeometry(width, height);
+};
+
+/**
  * Prepares the camera for rendering.
  */
 Impostor.prototype._prepareCamera = function(){
@@ -188,7 +205,7 @@ Impostor.prototype._prepareCamera = function(){
 /**
  * Prepares the projection matrix. First, the bounding rectangle of the projected
  * bounding box is calculated. This rectangle is used to create a new frustum, which encloses
- * the the bounding box as much as possible.
+ * the bounding box as much as possible.
  */
 Impostor.prototype._prepareProjectionMatrix = function(){
 
@@ -226,6 +243,7 @@ Impostor.prototype._prepareProjectionMatrix = function(){
 	points[7].applyMatrix4( this._camera.matrixWorldInverse ).applyProjection( this._camera.projectionMatrix );
 	
 	// determine min/max values of x and y coordinate
+	// these coordinates form the scissor rectangle of the object (in [-1,1] range)
 	for(var index = 0; index < points.length; index++){
 		
 		minX = Math.min(minX, points[index].x);
@@ -240,8 +258,11 @@ Impostor.prototype._prepareProjectionMatrix = function(){
 	
 	// calculate new frustum
 	var frustumHeight = this._camera.near * Math.tan( THREE.Math.degToRad( this._camera.fov * 0.5 ) );
-	var frustumWidth = frustumHeight * ( global.window.innerWidth / global.window.innerHeight );
-	
+	var frustumWidth = frustumHeight * this._camera.aspect;
+
+	// multiplying the parameter with the calculated min/max values 
+	// should set the frustum so that width and height are equal to
+	// the bounding rectangle of the 3D object.
 	projectionMatrix.makeFrustum( frustumWidth * minX, 
 								  frustumWidth * maxX,  
 								  frustumHeight * minY, 
@@ -262,7 +283,7 @@ Impostor.prototype._prepareScene = function(){
 	// clone object
 	this.object = this.object.clone();
 	
-	// ensure its visible
+	// ensure it's visible
 	this.object.visible = true;
 
 	// add to scene
@@ -281,7 +302,8 @@ Impostor.prototype._render = function(){
 	var clearColor = this._renderer.getClearColor();
 	var clearAlpha = this._renderer.getClearAlpha();
 	
-	// clear renderer so the image will have transparency
+	// the following clear color ensures
+	// that the rendered texture has transparency
 	this._renderer.setClearColor(0x000000, 0);
 	
 	// render to target
@@ -289,22 +311,6 @@ Impostor.prototype._render = function(){
 	
 	// restore clear values
 	this._renderer.setClearColor(clearColor, clearAlpha);
-};
-
-/**
- * Creates the impostor.
- */
-Impostor.prototype._createImpostor = function(){
-	
-	// calculate the dimensions of the geometry
-	var width =  this._boundingBox.max.x - this._boundingBox.min.x;
-	var height = this._boundingBox.max.y - this._boundingBox.min.y;
-
-	// assign geometry and material
-	this.geometry = new THREE.PlaneBufferGeometry(width, height);
-	
-	// the alphaTest value avoids semi-transparent black borders
-	this.material = new THREE.MeshBasicMaterial({map: this._renderTarget, transparent: true, alphaTest: 0.9}); 
 };
 
 /**
