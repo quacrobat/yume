@@ -101,9 +101,11 @@ Menu.prototype.hide = function(){
 Menu.prototype._onClick = function(){
 	
 	global.document.dispatchEvent( new global.Event("lockPointer"));
-	self._$button.style.display = "none";
-	self._$text.style.display = "block";
-
+	
+	if(utils.isFirefox() === true){
+		self._$button.style.display = "none";
+		self._$text.style.display = "block";
+	}
 };
 
 /**
