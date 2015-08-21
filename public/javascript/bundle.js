@@ -38058,16 +38058,12 @@ FirstPersonControls.prototype.getGroundHeight = function() {
  */
 FirstPersonControls.prototype.init = function() {
 	
-	if(utils.isFirefox() === true){
-		// eventing
-		global.document.addEventListener("lockPointer", this._onLockPointer);
-		global.document.addEventListener("releasePointer", this._onReleasePointer);
-	}else{
-		// subscriptions
-		PubSub.subscribe("controls.pointer.lock", this._onLockPointer);
-		PubSub.subscribe("controls.pointer.release", this._onReleasePointer);
-	}
+	// subscriptions
 	PubSub.subscribe("controls.active", this._onActive);
+	
+	// events
+	global.document.addEventListener("lockPointer", this._onLockPointer);
+	global.document.addEventListener("releasePointer", this._onReleasePointer);
 	
 	global.document.addEventListener("mousemove", this._onMouseMove);
 	global.document.addEventListener("keydown", this._onKeyDown);
@@ -40709,7 +40705,7 @@ Impostor.prototype._prepareProjectionMatrix = function(){
 
 /**
  * Prepares the scene for rendering. This method ensures, that the actual object and
- * the entire lightning of the scene is part of the rendering.
+ * the entire lightning of the scene are part of the rendering.
  */
 Impostor.prototype._prepareScene = function(){
 
@@ -40747,7 +40743,7 @@ Impostor.prototype._render = function(){
 };
 
 /**
- * Clears objects for impostor generating.
+ * Clears objects after impostor generation.
  */
 Impostor.prototype._clear = function(){
 
@@ -45132,14 +45128,10 @@ Menu.prototype.hide = function(){
  */
 Menu.prototype._onClick = function(){
 	
-	if(utils.isFirefox() === true){
-		global.document.dispatchEvent( new global.Event("lockPointer"));
-		self._$button.style.display = "none";
-		self._$text.style.display = "block";
-		
-	}else{
-		PubSub.publish("controls.pointer.lock");
-	}
+	global.document.dispatchEvent( new global.Event("lockPointer"));
+	self._$button.style.display = "none";
+	self._$text.style.display = "block";
+
 };
 
 /**
@@ -45282,12 +45274,7 @@ ModalDialog.prototype.show = function(textKeys){
 	this._$modal.classList.add("md-show");
 	
 	// release pointer lock
-	if(utils.isFirefox() === true){
-		global.document.dispatchEvent(new global.Event("releasePointer"));
-	}else{
-		PubSub.publish("controls.pointer.release", {menu: false});
-	}
-	
+	global.document.dispatchEvent(new global.Event("releasePointer"));
 };
 
 /**
@@ -45299,11 +45286,7 @@ ModalDialog.prototype.hide = function(){
 	this._$modal.classList.remove("md-show");
 	
 	// lock pointer
-	if(utils.isFirefox() === true){
-		global.document.dispatchEvent( new global.Event("lockPointer"));
-	}else{
-		PubSub.publish("controls.pointer.lock");
-	}
+	global.document.dispatchEvent( new global.Event("lockPointer"));
 };
 
 /**

@@ -276,7 +276,7 @@ Impostor.prototype._prepareProjectionMatrix = function(){
 
 /**
  * Prepares the scene for rendering. This method ensures, that the actual object and
- * the entire lightning of the scene is part of the rendering.
+ * the entire lightning of the scene are part of the rendering.
  */
 Impostor.prototype._prepareScene = function(){
 
@@ -314,7 +314,7 @@ Impostor.prototype._render = function(){
 };
 
 /**
- * Clears objects for impostor generating.
+ * Clears objects after impostor generation.
  */
 Impostor.prototype._clear = function(){
 

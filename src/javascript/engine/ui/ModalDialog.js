@@ -97,12 +97,7 @@ ModalDialog.prototype.show = function(textKeys){
 	this._$modal.classList.add("md-show");
 	
 	// release pointer lock
-	if(utils.isFirefox() === true){
-		global.document.dispatchEvent(new global.Event("releasePointer"));
-	}else{
-		PubSub.publish("controls.pointer.release", {menu: false});
-	}
-	
+	global.document.dispatchEvent(new global.Event("releasePointer"));
 };
 
 /**
@@ -114,11 +109,7 @@ ModalDialog.prototype.hide = function(){
 	this._$modal.classList.remove("md-show");
 	
 	// lock pointer
-	if(utils.isFirefox() === true){
-		global.document.dispatchEvent( new global.Event("lockPointer"));
-	}else{
-		PubSub.publish("controls.pointer.lock");
-	}
+	global.document.dispatchEvent( new global.Event("lockPointer"));
 };
 
 /**

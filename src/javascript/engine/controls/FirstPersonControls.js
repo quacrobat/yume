@@ -364,16 +364,12 @@ FirstPersonControls.prototype.getGroundHeight = function() {
  */
 FirstPersonControls.prototype.init = function() {
 	
-	if(utils.isFirefox() === true){
-		// eventing
-		global.document.addEventListener("lockPointer", this._onLockPointer);
-		global.document.addEventListener("releasePointer", this._onReleasePointer);
-	}else{
-		// subscriptions
-		PubSub.subscribe("controls.pointer.lock", this._onLockPointer);
-		PubSub.subscribe("controls.pointer.release", this._onReleasePointer);
-	}
+	// subscriptions
 	PubSub.subscribe("controls.active", this._onActive);
+	
+	// events
+	global.document.addEventListener("lockPointer", this._onLockPointer);
+	global.document.addEventListener("releasePointer", this._onReleasePointer);
 	
 	global.document.addEventListener("mousemove", this._onMouseMove);
 	global.document.addEventListener("keydown", this._onKeyDown);

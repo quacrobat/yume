@@ -100,14 +100,10 @@ Menu.prototype.hide = function(){
  */
 Menu.prototype._onClick = function(){
 	
-	if(utils.isFirefox() === true){
-		global.document.dispatchEvent( new global.Event("lockPointer"));
-		self._$button.style.display = "none";
-		self._$text.style.display = "block";
-		
-	}else{
-		PubSub.publish("controls.pointer.lock");
-	}
+	global.document.dispatchEvent( new global.Event("lockPointer"));
+	self._$button.style.display = "none";
+	self._$text.style.display = "block";
+
 };
 
 /**
