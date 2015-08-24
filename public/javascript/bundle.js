@@ -38959,7 +38959,7 @@ FirstPersonControls.RUN = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":6,"../animation/Easing":12,"../audio/AudioManager":16,"../core/Camera":20,"../core/Scene":24,"../etc/SettingsManager":38,"../etc/Utils":40,"../ui/UserInterfaceManager":67,"pubsub-js":1,"three":2}],19:[function(require,module,exports){
+},{"../action/ActionManager":6,"../animation/Easing":12,"../audio/AudioManager":16,"../core/Camera":20,"../core/Scene":24,"../etc/SettingsManager":38,"../etc/Utils":40,"../ui/UserInterfaceManager":68,"pubsub-js":1,"three":2}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting
@@ -39054,7 +39054,7 @@ Bootstrap.prototype._loadStage = function(){
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":18,"../etc/MultiplayerManager":32,"../etc/NetworkManager":33,"../etc/SaveGameManager":37,"../etc/Utils":40,"../ui/UserInterfaceManager":67,"./Camera":20,"./Environment":21,"./Renderer":23,"pubsub-js":1}],20:[function(require,module,exports){
+},{"../controls/FirstPersonControls":18,"../etc/MultiplayerManager":32,"../etc/NetworkManager":33,"../etc/SaveGameManager":37,"../etc/Utils":40,"../ui/UserInterfaceManager":68,"./Camera":20,"./Environment":21,"./Renderer":23,"pubsub-js":1}],20:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -39651,7 +39651,7 @@ Renderer.prototype._onResize = function(message, data){
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"../postprocessing/EffectComposer":41,"../postprocessing/RenderPass":42,"../postprocessing/ShaderPass":43,"../shader/GaussianBlurShader":44,"../shader/GrayscaleShader":45,"../shader/VignetteShader":46,"pubsub-js":1,"three":2}],24:[function(require,module,exports){
+},{"../etc/Utils":40,"../postprocessing/EffectComposer":41,"../postprocessing/RenderPass":42,"../postprocessing/ShaderPass":43,"../shader/GaussianBlurShader":45,"../shader/GrayscaleShader":46,"../shader/VignetteShader":47,"pubsub-js":1,"three":2}],24:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic 
  * for scene-based functionality.
@@ -39926,7 +39926,7 @@ StageBase.prototype._changeStage = function(stageId, isSaveGame){
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":16,"../controls/FirstPersonControls":18,"../etc/PerformanceManager":35,"../etc/SaveGameManager":37,"../etc/SettingsManager":38,"../etc/TextManager":39,"../etc/Utils":40,"../ui/UserInterfaceManager":67,"./Camera":20,"./Renderer":23,"./Scene":24,"pubsub-js":1,"three":2}],26:[function(require,module,exports){
+},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":16,"../controls/FirstPersonControls":18,"../etc/PerformanceManager":35,"../etc/SaveGameManager":37,"../etc/SettingsManager":38,"../etc/TextManager":39,"../etc/Utils":40,"../ui/UserInterfaceManager":68,"./Camera":20,"./Renderer":23,"./Scene":24,"pubsub-js":1,"three":2}],26:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -40210,7 +40210,7 @@ StageManager.prototype._onLoadComplete = function(message, data){
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":37,"../etc/Utils":40,"../stages/Stage_001":47,"../stages/Stage_002":48,"../stages/Stage_003":49,"../stages/Stage_004":50,"../stages/Stage_005":51,"../stages/Stage_006":52,"../stages/Stage_007":53,"../stages/Stage_008":54,"../stages/Stage_009":55,"../stages/Stage_010":56,"../ui/UserInterfaceManager":67,"pubsub-js":1}],27:[function(require,module,exports){
+},{"../etc/SaveGameManager":37,"../etc/Utils":40,"../stages/Stage_001":48,"../stages/Stage_002":49,"../stages/Stage_003":50,"../stages/Stage_004":51,"../stages/Stage_005":52,"../stages/Stage_006":53,"../stages/Stage_007":54,"../stages/Stage_008":55,"../stages/Stage_009":56,"../stages/Stage_010":57,"../ui/UserInterfaceManager":68,"pubsub-js":1}],27:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It 
@@ -42770,6 +42770,108 @@ ShaderPass.prototype.render = function(renderer, writeBuffer, readBuffer){
 module.exports = ShaderPass;
 },{"three":2}],44:[function(require,module,exports){
 /**
+ * @file This shader can be used for vertex displacement to create
+ * water or fabric materials. It implements an exemplary diffuse lighting
+ * equation, which uses ambient and directional lights of the three.js scene. 
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require("three");
+
+module.exports  = {
+		
+	uniforms: THREE.UniformsUtils.merge([
+	                                     THREE.UniformsLib.lights,
+	                                     {"fTime": {type: "f", value: 0}}
+	                                     ]),
+	
+	lights: true, // use lights of scene in this shader
+
+	vertexShader: [
+	               
+	    "#define NUM_OCTAVES 5",
+	         
+	    "uniform float fTime;", 
+	    
+	    "varying vec3 vNormalWorld;",
+	    
+	    // 1D random function
+	    "float hash(float n) { return fract(sin(n) * 1e4); }", 
+	    
+	    // 3D noise function
+	    "float noise(vec3 x) {",
+	        "const vec3 step = vec3(110, 241, 171);",
+
+	        "vec3 i = floor(x);",
+	        "vec3 f = fract(x);",
+	     
+	        "float n = dot(i, step);",
+
+	        "vec3 u = f * f * (3.0 - 2.0 * f);",
+	        "return mix(mix(mix( hash(n + dot(step, vec3(0, 0, 0))), hash(n + dot(step, vec3(1, 0, 0))), u.x),",
+	                       "mix( hash(n + dot(step, vec3(0, 1, 0))), hash(n + dot(step, vec3(1, 1, 0))), u.x), u.y),",
+	                   "mix(mix( hash(n + dot(step, vec3(0, 0, 1))), hash(n + dot(step, vec3(1, 0, 1))), u.x),",
+	                       "mix( hash(n + dot(step, vec3(0, 1, 1))), hash(n + dot(step, vec3(1, 1, 1))), u.x), u.y), u.z);",
+	   "}",
+	   
+	    // 3D fbm-noise function
+	   "float fbm(vec3 x) {",
+			"float v = 0.0;",
+			"float a = 0.5;",
+			"vec3 shift = vec3(100);",
+			"for (int i = 0; i < NUM_OCTAVES; ++i) {",
+				"v += a * noise(x);",
+				"x = x * 2.0 + shift;",
+				"a *= 0.5;",
+			"}",
+			"return v;",
+		"}",
+
+		"void main(){",
+		  	
+			// calculate new vertex position (displacement)
+			"vec3 newPosition = position + 10.0 * normal * fbm(position * 0.05 + 0.05 * fTime);",
+			
+			// calculate normal in world space
+			"vNormalWorld = normalize( modelMatrix * vec4(normal, 0.0) ).xyz;",
+			
+			"gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );",
+
+		"}"
+
+	].join("\n"),
+
+	fragmentShader: [
+	                 
+	    "uniform vec3 ambientLightColor;",
+	    "uniform vec3 directionalLightDirection[MAX_DIR_LIGHTS];",
+	    "uniform vec3 directionalLightColor[MAX_DIR_LIGHTS];",
+	                 
+	    "varying vec3 vNormalWorld;",
+	                 
+		"void main() {",
+	       
+	    	"vec4 color = vec4( 0.0, 0.0, 1.0, 1.0 );",
+	    	"vec3 diffuseLightColor = vec3(0.0, 0.0, 0.0);",
+	    	
+	    	// calculate for each directional light the diffuse light color
+	    	"for(int l = 0; l < MAX_DIR_LIGHTS; l++) {",
+	    		"diffuseLightColor += max( dot ( vNormalWorld, directionalLightDirection[l]), 0.0) * directionalLightColor[l];",
+	    	"}",
+	                 
+	    	"vec3 lightWeighting = ambientLightColor + diffuseLightColor;",
+		    
+	        "gl_FragColor = vec4( color.rgb * lightWeighting, color.a );",
+
+		"}"
+
+	].join("\n")
+};
+},{"three":2}],45:[function(require,module,exports){
+/**
  * @file This shader applies a gaussian blur effect.
  * It can be used for both x and y direction.
  * 
@@ -42835,7 +42937,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":2}],45:[function(require,module,exports){
+},{"three":2}],46:[function(require,module,exports){
 /**
  * @file This shader transforms all colors to grayscale.
  * 
@@ -42884,7 +42986,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 /**
  * @file This shader creates a vignette effect.
  * 
@@ -42945,7 +43047,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43057,7 +43159,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],48:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],49:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43224,7 +43326,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],49:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],50:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43382,7 +43484,7 @@ function colorMesh(mesh){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],50:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],51:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43544,7 +43646,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],51:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],52:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43665,7 +43767,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],52:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],53:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43843,7 +43945,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],53:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],54:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -44007,7 +44109,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],54:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],55:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -44159,7 +44261,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],55:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],56:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -44326,7 +44428,7 @@ function showLODCircles(scene){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],56:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],57:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -44465,7 +44567,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],57:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],58:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -44639,7 +44741,7 @@ Chat.prototype._onMessage = function(message, data){
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":66,"pubsub-js":1}],58:[function(require,module,exports){
+},{"./UiElement":67,"pubsub-js":1}],59:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel.
@@ -44703,7 +44805,7 @@ DevelopmentPanel.prototype.setText = function(text){
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":66}],59:[function(require,module,exports){
+},{"./UiElement":67}],60:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -44764,7 +44866,7 @@ InformationPanel.prototype.setText = function(textKey){
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":66}],60:[function(require,module,exports){
+},{"./UiElement":67}],61:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -44839,7 +44941,7 @@ InteractionLabel.prototype.hide = function(){
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":66}],61:[function(require,module,exports){
+},{"./UiElement":67}],62:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -45024,7 +45126,7 @@ LoadingScreen.prototype._onReady = function(message, data){
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":66,"pubsub-js":1}],62:[function(require,module,exports){
+},{"./UiElement":67,"pubsub-js":1}],63:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -45175,7 +45277,7 @@ Menu.prototype._publishFinishEvent = function(message, data){
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"./UiElement":66,"pubsub-js":1}],63:[function(require,module,exports){
+},{"../etc/Utils":40,"./UiElement":67,"pubsub-js":1}],64:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -45302,7 +45404,7 @@ ModalDialog.prototype._onClose = function(event){
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"./UiElement":66,"pubsub-js":1}],64:[function(require,module,exports){
+},{"../etc/Utils":40,"./UiElement":67,"pubsub-js":1}],65:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor.
@@ -45522,7 +45624,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":66}],65:[function(require,module,exports){
+},{"./UiElement":67}],66:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -45722,7 +45824,7 @@ TextScreen.prototype._printName = function(){
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":66}],66:[function(require,module,exports){
+},{"./UiElement":67}],67:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -45770,7 +45872,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":39}],67:[function(require,module,exports){
+},{"../etc/TextManager":39}],68:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in scenes
@@ -46022,4 +46124,4 @@ UserInterfaceManager.prototype._onKeyDown = function(event){
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"./Chat":57,"./DevelopmentPanel":58,"./InformationPanel":59,"./InteractionLabel":60,"./LoadingScreen":61,"./Menu":62,"./ModalDialog":63,"./PerformanceMonitor":64,"./TextScreen":65,"pubsub-js":1}]},{},[4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67]);
+},{"../etc/Utils":40,"./Chat":58,"./DevelopmentPanel":59,"./InformationPanel":60,"./InteractionLabel":61,"./LoadingScreen":62,"./Menu":63,"./ModalDialog":64,"./PerformanceMonitor":65,"./TextScreen":66,"pubsub-js":1}]},{},[4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68]);
