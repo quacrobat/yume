@@ -30,35 +30,38 @@ function ActionTrigger(radius, action) {
 			enumerable: true,
 			writable: false
 		},
+		radius: {
+			value: radius,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
 		action: {
 			value: action,
 			configurable: false,
 			enumerable: true,
 			writable: true
-		},
-		geometry: {
-			value: new THREE.CircleGeometry(radius),
-			configurable: false,
-			enumerable: true,
-			writable: false
-		},
-		material: {
-			value: new THREE.MeshBasicMaterial({wireframe: true}),
-			configurable: false,
-			enumerable: true,
-			writable: false
 		}
 	});
 	
+	// by default, trigger is parallel to the floor
 	this.rotation.x = -0.5 * Math.PI;
 	
-	if(utils.isDevelopmentModeActive() === false){
-		this.material.visible = false;
+	// apply geometry
+	this.geometry = new THREE.CircleGeometry( this.radius );
+	
+	// hide default material
+	this.material.visible = false;
+	
+	// show wireframe only in dev mode
+	if(utils.isDevelopmentModeActive() === true){
+		this.material.visible = true;
+		this.material.wireframe = true;
+		this.material.color = new THREE.Color( 0xffffff );
 	}
 }
 
 ActionTrigger.prototype = Object.create(THREE.Mesh.prototype);
 ActionTrigger.prototype.constructor = ActionTrigger;
-
 
 module.exports = ActionTrigger;

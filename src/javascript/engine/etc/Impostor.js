@@ -27,6 +27,12 @@ function Impostor(id, object, resolution) {
 	THREE.Mesh.call(this);
 
 	Object.defineProperties(this, {
+		type: {
+			value: "Impostor",
+			configurable: false,
+			enumerable: true,
+			writable: false
+		},
 		idImpostor: {
 			value: id,
 			configurable: false,

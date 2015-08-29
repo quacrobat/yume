@@ -35723,36 +35723,39 @@ function ActionTrigger(radius, action) {
 			enumerable: true,
 			writable: false
 		},
+		radius: {
+			value: radius,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
 		action: {
 			value: action,
 			configurable: false,
 			enumerable: true,
 			writable: true
-		},
-		geometry: {
-			value: new THREE.CircleGeometry(radius),
-			configurable: false,
-			enumerable: true,
-			writable: false
-		},
-		material: {
-			value: new THREE.MeshBasicMaterial({wireframe: true}),
-			configurable: false,
-			enumerable: true,
-			writable: false
 		}
 	});
 	
+	// by default, trigger is parallel to the floor
 	this.rotation.x = -0.5 * Math.PI;
 	
-	if(utils.isDevelopmentModeActive() === false){
-		this.material.visible = false;
+	// apply geometry
+	this.geometry = new THREE.CircleGeometry( this.radius );
+	
+	// hide default material
+	this.material.visible = false;
+	
+	// show wireframe only in dev mode
+	if(utils.isDevelopmentModeActive() === true){
+		this.material.visible = true;
+		this.material.wireframe = true;
+		this.material.color = new THREE.Color( 0xffffff );
 	}
 }
 
 ActionTrigger.prototype = Object.create(THREE.Mesh.prototype);
 ActionTrigger.prototype.constructor = ActionTrigger;
-
 
 module.exports = ActionTrigger;
 },{"../etc/Utils":40,"three":2}],8:[function(require,module,exports){
@@ -40456,6 +40459,12 @@ function Impostor(id, object, resolution) {
 	THREE.Mesh.call(this);
 
 	Object.defineProperties(this, {
+		type: {
+			value: "Impostor",
+			configurable: false,
+			enumerable: true,
+			writable: false
+		},
 		idImpostor: {
 			value: id,
 			configurable: false,
@@ -41790,31 +41799,25 @@ function Player(id){
 	THREE.Mesh.call(this);
 
 	Object.defineProperties(this, {
-		playerId: {
-			value: id,
-			configurable: false,
-			enumerable: true,
-			writable: true
-		},
 		type: {
 			value: "Player",
 			configurable: false,
 			enumerable: true,
 			writable: false
 		},
-		geometry: {
-			value: new THREE.BoxGeometry(4, 4, 4),
+		playerId: {
+			value: id,
 			configurable: false,
 			enumerable: true,
-			writable: false
-		},
-		material: {
-			value: new THREE.MeshBasicMaterial({color: "#ff0000"}),
-			configurable: false,
-			enumerable: true,
-			writable: false
+			writable: true
 		}
 	});
+	
+	// apply exemplary geometry
+	this.geometry = new THREE.BoxGeometry(4, 4, 4);
+	
+	// apply exemplary material
+	this.material = new THREE.MeshBasicMaterial({color: "#ff0000"});
 }
 
 Player.prototype = Object.create(THREE.Mesh.prototype);

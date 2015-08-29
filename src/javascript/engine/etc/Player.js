@@ -20,31 +20,25 @@ function Player(id){
 	THREE.Mesh.call(this);
 
 	Object.defineProperties(this, {
-		playerId: {
-			value: id,
-			configurable: false,
-			enumerable: true,
-			writable: true
-		},
 		type: {
 			value: "Player",
 			configurable: false,
 			enumerable: true,
 			writable: false
 		},
-		geometry: {
-			value: new THREE.BoxGeometry(4, 4, 4),
+		playerId: {
+			value: id,
 			configurable: false,
 			enumerable: true,
-			writable: false
-		},
-		material: {
-			value: new THREE.MeshBasicMaterial({color: "#ff0000"}),
-			configurable: false,
-			enumerable: true,
-			writable: false
+			writable: true
 		}
 	});
+	
+	// apply exemplary geometry
+	this.geometry = new THREE.BoxGeometry(4, 4, 4);
+	
+	// apply exemplary material
+	this.material = new THREE.MeshBasicMaterial({color: "#ff0000"});
 }
 
 Player.prototype = Object.create(THREE.Mesh.prototype);
