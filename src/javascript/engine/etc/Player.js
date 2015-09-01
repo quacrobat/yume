@@ -12,6 +12,7 @@ var THREE = require("three");
  * Creates a player instance.
  * 
  * @constructor
+ * @augments THREE.Mesh
  * 
  * @param {number} id - The id of the player.
  */

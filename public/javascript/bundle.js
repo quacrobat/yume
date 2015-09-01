@@ -35502,7 +35502,7 @@ Action.prototype.run = function() {
 	if (typeof this._actionCallback === "function") {
 		this._actionCallback();
 	} else {
-		throw "ERROR: Action: Assigned callback not of type 'function'.";
+		throw "ERROR: Action: Assigned callback not type of 'function'.";
 	}
 };
 
@@ -35552,6 +35552,24 @@ function ActionManager() {
 			configurable: false,
 			enumerable: false,
 			writable: false
+		},
+		COLLISIONTYPES: {
+			value: {
+				AABB: 0,
+				OBB: 1
+			},
+			configurable: false,
+			enumerable: false,
+			writable: false
+		},
+		RAYCASTPRECISION: {
+			value: {
+				AABB: 0,
+				FACE: 1
+			},
+			configurable: false,
+			enumerable: false,
+			writable: false
 		}
 	});
 }
@@ -35559,15 +35577,17 @@ function ActionManager() {
 /**
  * Creates a new interactive object and stores it to the respective internal array.
  * 
+ * @param {THREE.Mesh} mesh - The mesh object.
+ * @param {number} collisionType - The type of collision detection.
+ * @param {number} raycastPrecision - The precision of the raycast operation.
  * @param {string} label - The label of the action.
- * @param {THREE.Object3D} object - The 3D object.
  * @param {function} actionCallback - The action callback.
  * 
  * @returns {InteractiveObject} The new interactive object.
  */
-ActionManager.prototype.createInteraction = function(label, object, actionCallback){
+ActionManager.prototype.createInteraction = function(mesh, collisionType, raycastPrecision, label, actionCallback){
 	
-	var interactiveObject = new InteractiveObject(object, new Action(Action.TYPES.INTERACTION, actionCallback, label));
+	var interactiveObject = new InteractiveObject(mesh, collisionType, raycastPrecision, new Action(Action.TYPES.INTERACTION, actionCallback, label));
 	this.addInteractiveObject(interactiveObject);
 	return interactiveObject;
 };
@@ -35575,13 +35595,14 @@ ActionManager.prototype.createInteraction = function(label, object, actionCallba
 /**
  * Creates a new static object and stores it to the respective internal array.
  * 
- * @param {THREE.Object3D} object - The 3D object.
+ * @param {THREE.Mesh} mesh - The mesh object.
+ * @param {number} collisionType - The type of collision detection.
  * 
  * @returns {StaticObject} The new static object.
  */
-ActionManager.prototype.createStatic = function(object){
+ActionManager.prototype.createStatic = function(mesh, collisionType){
 	
-	var staticObject = new StaticObject(object);
+	var staticObject = new StaticObject(mesh, collisionType);
 	this.addStaticObject(staticObject);
 	return staticObject;
 };
@@ -35758,7 +35779,7 @@ ActionTrigger.prototype = Object.create(THREE.Mesh.prototype);
 ActionTrigger.prototype.constructor = ActionTrigger;
 
 module.exports = ActionTrigger;
-},{"../etc/Utils":40,"three":2}],8:[function(require,module,exports){
+},{"../etc/Utils":41,"three":2}],8:[function(require,module,exports){
 /**
  * @file The prototype InteractiveObject enables ordinary 3D-Objects to be interactive. 
  * Any interactive object is part of the collision-detection logic and ready for interacting with the player.
@@ -35769,20 +35790,35 @@ module.exports = ActionTrigger;
 "use strict";
 
 var THREE = require("three");
+var OBB = require("../etc/OBB");
 
 /**
  * Creates an interactive object.
  * 
  * @constructor
  * 
- * @param {THREE.Object3D} object - An arbitrary 3D-Object.
+ * @param {THREE.Mesh} mesh - The mesh object.
+ * @param {number} collisionType - The type of collision detection.
+ * @param {number} raycastPrecision - The precision of the raycast operation.
  * @param {Action} action - The action, that should be executed.
  */
-function InteractiveObject(object, action) {
+function InteractiveObject(mesh, collisionType, raycastPrecision, action) {
 
 	Object.defineProperties(this, {
-		object: {
-			value: object,
+		mesh: {
+			value: mesh,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		collisionType: {
+			value: collisionType,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		raycastPrecision: {
+			value: raycastPrecision,
 			configurable: false,
 			enumerable: true,
 			writable: true
@@ -35791,12 +35827,6 @@ function InteractiveObject(object, action) {
 			value: action,
 			configurable: false,
 			enumerable: true,
-			writable: true
-		},
-		_boundingBox: {
-			value: new THREE.Box3(),
-			configurable: false,
-			enumerable: false,
 			writable: true
 		},
 		_distance: {
@@ -35810,69 +35840,129 @@ function InteractiveObject(object, action) {
 			configurable: false,
 			enumerable: false,
 			writable: true
-		}
+		},
+		// bounding volumes
+		_aabb: {
+			value: new THREE.Box3(),
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		_obb: {
+			value: new OBB(),
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
+		
 	});
 }
 
 /**
  * This method detects an intersection between the raycaster and the 
- * relevant object. The actual raycast-method of THREE.Mesh, which calculates
- * intersections via the faces of an object, is not used in this application.
- * Because of a better performance, this method uses only bounding boxes.
+ * relevant object. According to raycast precision, different algorithm
+ * are used to detect an intersection.
  * 
  * 
  * @param {THREE.Raycaster} raycaster - A raycaster instance.
  * @param {object} intersects - An array with intersection points.
  */
-InteractiveObject.prototype.raycast = function(raycaster, intersects){
+InteractiveObject.prototype.raycast = ( function(){
 	
-	if (this.object.geometry.boundingBox === null){
-		this.object.geometry.computeBoundingBox();
-	}
-
-	this._boundingBox.copy(this.object.geometry.boundingBox);
-	this._boundingBox.applyMatrix4(this.object.matrixWorld);
-
-	this._intersectionPoint = raycaster.ray.intersectBox(this._boundingBox);
-
-	if ( this._intersectionPoint !== null)  {
+	var index = 0;
+	var intersectsRay = [];
+	
+	return function(raycaster, intersects){
 		
-		this._distance = raycaster.ray.origin.distanceTo(this._intersectionPoint);
+		if( this.raycastPrecision === InteractiveObject.RAYCASTPRECISION.FACE ){
+			
+			// call default raycast method of the mesh object
+			this.mesh.raycast(raycaster, intersectsRay);
+			
+			for(index = 0; index < intersectsRay.length; index++){
+				
+				// set the interactive object as result object, not mesh
+				intersectsRay[index].object = this;
+				
+				// push to result array
+				intersects.push(intersectsRay[index]);
+			}
+			 // reset the array for next call
+			intersectsRay.length = 0;
+			
+		}else{
 		
-		if (this._distance >= raycaster.precision && this._distance >= raycaster.near && this._distance <= raycaster.far){
-		
-			intersects.push({
-				distance: this._distance,
-				point: this._intersectionPoint,
-				face: null,
-				faceIndex: null,
-				object: this
-			});
+			if (this.mesh.geometry.boundingBox === null){
+				this.mesh.geometry.computeBoundingBox();
+			}
+
+			this._aabb.copy(this.mesh.geometry.boundingBox);
+			this._aabb.applyMatrix4(this.mesh.matrixWorld);
+
+			// do intersection test
+			this._intersectionPoint = raycaster.ray.intersectBox(this._aabb);
+
+			if ( this._intersectionPoint !== null)  {
+				
+				// get the distance to the intersection point
+				this._distance = raycaster.ray.origin.distanceTo(this._intersectionPoint);
+				
+				if (this._distance >= raycaster.precision && this._distance >= raycaster.near && this._distance <= raycaster.far){
+				
+					// store the result in special data structure, see THREE.Mesh.raycast
+					intersects.push({
+						distance: this._distance,
+						point: this._intersectionPoint,
+						face: null,
+						faceIndex: null,
+						object: this
+					});
+				}
+			}
+			
 		}
-	}
+	};
 	
-};
-
+}());
+	
 /**
- * This method is detects an intersection between the bounding box
- * of the controls and the AABB of the interactive object.
+ * This method detects an intersection between the bounding box
+ * of the controls and the bounding volume of the interactive object.
  * 
  * @param {THREE.Box3} boundingBox - The boundingBox of the controls.
  */
-InteractiveObject.prototype.isIntersectionBox = function(boundingBox){
+InteractiveObject.prototype.isIntersection = function( boundingBox ){
 	
-	if (this.object.geometry.boundingBox === null){
-		this.object.geometry.computeBoundingBox();
+	if( this.collisionType === InteractiveObject.COLLISIONTYPES.OBB ){
+		
+		this._obb.setFromObject( this.mesh );
+		return this._obb.isIntersectionAABB( boundingBox );
+		
+	}else{
+		
+		if (this.mesh.geometry.boundingBox === null){
+			this.mesh.geometry.computeBoundingBox();
+		}
+	
+		this._aabb.copy(this.mesh.geometry.boundingBox);
+		this._aabb.applyMatrix4(this.mesh.matrixWorld);
+		
+		return this._aabb.isIntersectionBox(boundingBox);
 	}
+};
 
-	this._boundingBox.copy(this.object.geometry.boundingBox);
-	this._boundingBox.applyMatrix4(this.object.matrixWorld);
-	
-	return this._boundingBox.isIntersectionBox(boundingBox);
-};	
+InteractiveObject.COLLISIONTYPES = {
+	AABB: 0,
+	OBB: 1
+};
+
+InteractiveObject.RAYCASTPRECISION = {
+	AABB: 0,
+	FACE: 1
+};
 
 module.exports = InteractiveObject;
-},{"three":2}],9:[function(require,module,exports){
+},{"../etc/OBB":34,"three":2}],9:[function(require,module,exports){
 /**
  * @file The prototype StaticObject enables ordinary 3D-Objects to be static. 
  * Any interactive object is part of the collision-detection logic.
@@ -35883,52 +35973,82 @@ module.exports = InteractiveObject;
 "use strict";
 
 var THREE = require("three");
+var OBB = require("../etc/OBB");
 
 /**
  * Creates a static object.
  * 
  * @constructor
  * 
- * @param {THREE.Object3D} object - An arbitrary 3D-Object.
+ * @param {THREE.Mesh} mesh - The mesh object.
+ * @param {number} collisionType - The type of collision detection.
  */
-function StaticObject(object, action) {
+function StaticObject(object, collisionType) {
 
 	Object.defineProperties(this, {
-		object: {
+		mesh: {
 			value: object,
 			configurable: false,
 			enumerable: true,
 			writable: true
 		},
-		_boundingBox: {
+		collisionType: {
+			value: collisionType,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		// bounding volumes
+		_aabb: {
 			value: new THREE.Box3(),
 			configurable: false,
 			enumerable: false,
 			writable: true
-		}
+		},
+		_obb: {
+			value: new OBB(),
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
 	});
 }
 
 /**
- * This method is detects an intersection between the bounding box
- * of the controls and the AABB of the static object.
+ * This method detects an intersection between the bounding box
+ * of the controls and the bounding volume of the static object.
  * 
  * @param {THREE.Box3} boundingBox - The boundingBox of the controls.
  */
-StaticObject.prototype.isIntersectionBox = function(boundingBox){
+StaticObject.prototype.isIntersection = function(boundingBox){
 	
-	if (this.object.geometry.boundingBox === null){
-		this.object.geometry.computeBoundingBox();
-	}
+	if( this.collisionType === StaticObject.COLLISIONTYPES.OBB ){
+		
+		this._obb.setFromObject( this.mesh );
+		return this._obb.isIntersectionAABB( boundingBox );
+		
+	}else{
+		
+		if (this.mesh.geometry.boundingBox === null){
+			this.mesh.geometry.computeBoundingBox();
+		}
 
-	this._boundingBox.copy(this.object.geometry.boundingBox);
-	this._boundingBox.applyMatrix4(this.object.matrixWorld);
+		this._aabb.copy(this.mesh.geometry.boundingBox);
+		this._aabb.applyMatrix4(this.mesh.matrixWorld);
+		
+		return this._aabb.isIntersectionBox(boundingBox);
+		
+	}
 	
-	return this._boundingBox.isIntersectionBox(boundingBox);
-};	
+};
+
+StaticObject.COLLISIONTYPES = {
+	AABB : 0,
+	OBB : 1
+};
 
 module.exports = StaticObject;
-},{"three":2}],10:[function(require,module,exports){
+},{"../etc/OBB":34,"three":2}],10:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for defining an animation for
@@ -36185,7 +36305,7 @@ Animation.prototype.setHover = function( isHover ){
 
 module.exports = Animation;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40}],11:[function(require,module,exports){
+},{"../etc/Utils":41}],11:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire animation-handling. This prototype is used in stages
@@ -36989,7 +37109,7 @@ AudioBufferList.prototype.loadBuffer = function(file, index){
 
 module.exports = AudioBufferList;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"pubsub-js":1}],15:[function(require,module,exports){
+},{"../etc/Utils":41,"pubsub-js":1}],15:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype holds the central Web Audio context and
@@ -37426,7 +37546,7 @@ AudioManager.prototype._onErrorBackgroundMusic = function(){
 
 module.exports = new AudioManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Camera":20,"../etc/Utils":40,"./AudioBufferList":14,"./AudioListener":15,"./DynamicAudio":17,"pubsub-js":1}],17:[function(require,module,exports){
+},{"../core/Camera":20,"../etc/Utils":41,"./AudioBufferList":14,"./AudioListener":15,"./DynamicAudio":17,"pubsub-js":1}],17:[function(require,module,exports){
 /**
  * @file Prototype for creating dynamic, full-buffered audio objects.
  * 
@@ -38368,7 +38488,7 @@ FirstPersonControls.prototype._getFirstInteractiveIntersection = (function() {
 		if (intersects.length > 0) {
 			for(index = 0; index < intersects.length; index++){
 				// return only an object, which is visible and has an active action
-				if(intersects[index].object.object.visible === true && intersects[index].object.action.isActive === true){
+				if(intersects[index].object.mesh.visible === true && intersects[index].object.action.isActive === true){
 					return intersects[index].object;
 				}
 			}
@@ -38507,10 +38627,10 @@ FirstPersonControls.prototype._isCollisionHandlingRequired = (function() {
 				for(index = 0; index < objects.length; index++){
 					
 					// regard only visible objects
-					if(objects[index].object.visible === true){
+					if(objects[index].mesh.visible === true){
 						
-						// detect collision via bounding-box-intersection
-						if(objects[index].isIntersectionBox(boundingBox) === true){
+						// do collision detection
+						if(objects[index].isIntersection(boundingBox) === true){
 							// Yes, we are inside an visible object and inside our level
 							return true;
 						}
@@ -38962,7 +39082,7 @@ FirstPersonControls.RUN = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":6,"../animation/Easing":12,"../audio/AudioManager":16,"../core/Camera":20,"../core/Scene":24,"../etc/SettingsManager":38,"../etc/Utils":40,"../ui/UserInterfaceManager":68,"pubsub-js":1,"three":2}],19:[function(require,module,exports){
+},{"../action/ActionManager":6,"../animation/Easing":12,"../audio/AudioManager":16,"../core/Camera":20,"../core/Scene":24,"../etc/SettingsManager":39,"../etc/Utils":41,"../ui/UserInterfaceManager":69,"pubsub-js":1,"three":2}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting
@@ -39057,7 +39177,7 @@ Bootstrap.prototype._loadStage = function(){
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":18,"../etc/MultiplayerManager":32,"../etc/NetworkManager":33,"../etc/SaveGameManager":37,"../etc/Utils":40,"../ui/UserInterfaceManager":68,"./Camera":20,"./Environment":21,"./Renderer":23,"pubsub-js":1}],20:[function(require,module,exports){
+},{"../controls/FirstPersonControls":18,"../etc/MultiplayerManager":32,"../etc/NetworkManager":33,"../etc/SaveGameManager":38,"../etc/Utils":41,"../ui/UserInterfaceManager":69,"./Camera":20,"./Environment":21,"./Renderer":23,"pubsub-js":1}],20:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -39654,7 +39774,7 @@ Renderer.prototype._onResize = function(message, data){
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"../postprocessing/EffectComposer":41,"../postprocessing/RenderPass":42,"../postprocessing/ShaderPass":43,"../shader/GaussianBlurShader":45,"../shader/GrayscaleShader":46,"../shader/VignetteShader":47,"pubsub-js":1,"three":2}],24:[function(require,module,exports){
+},{"../etc/Utils":41,"../postprocessing/EffectComposer":42,"../postprocessing/RenderPass":43,"../postprocessing/ShaderPass":44,"../shader/GaussianBlurShader":46,"../shader/GrayscaleShader":47,"../shader/VignetteShader":48,"pubsub-js":1,"three":2}],24:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic 
  * for scene-based functionality.
@@ -39929,7 +40049,7 @@ StageBase.prototype._changeStage = function(stageId, isSaveGame){
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":16,"../controls/FirstPersonControls":18,"../etc/PerformanceManager":35,"../etc/SaveGameManager":37,"../etc/SettingsManager":38,"../etc/TextManager":39,"../etc/Utils":40,"../ui/UserInterfaceManager":68,"./Camera":20,"./Renderer":23,"./Scene":24,"pubsub-js":1,"three":2}],26:[function(require,module,exports){
+},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":16,"../controls/FirstPersonControls":18,"../etc/PerformanceManager":36,"../etc/SaveGameManager":38,"../etc/SettingsManager":39,"../etc/TextManager":40,"../etc/Utils":41,"../ui/UserInterfaceManager":69,"./Camera":20,"./Renderer":23,"./Scene":24,"pubsub-js":1,"three":2}],26:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -40213,7 +40333,7 @@ StageManager.prototype._onLoadComplete = function(message, data){
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":37,"../etc/Utils":40,"../stages/Stage_001":48,"../stages/Stage_002":49,"../stages/Stage_003":50,"../stages/Stage_004":51,"../stages/Stage_005":52,"../stages/Stage_006":53,"../stages/Stage_007":54,"../stages/Stage_008":55,"../stages/Stage_009":56,"../stages/Stage_010":57,"../ui/UserInterfaceManager":68,"pubsub-js":1}],27:[function(require,module,exports){
+},{"../etc/SaveGameManager":38,"../etc/Utils":41,"../stages/Stage_001":49,"../stages/Stage_002":50,"../stages/Stage_003":51,"../stages/Stage_004":52,"../stages/Stage_005":53,"../stages/Stage_006":54,"../stages/Stage_007":55,"../stages/Stage_008":56,"../stages/Stage_009":57,"../stages/Stage_010":58,"../ui/UserInterfaceManager":69,"pubsub-js":1}],27:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It 
@@ -40435,6 +40555,11 @@ module.exports = new ThreadManager();
  * is a billboard that is created on the fly by rendering a complex
  * object from the current viewpoint into an image texture, which is mapped
  * on the billboard.
+ * 
+ * Note: This prototype is not ready for production use. There are still
+ * some bugs when rendering the billboard texture.
+ * 
+ * see http://stackoverflow.com/questions/32135694/impostor-rendering-with-three-js
  * 
  * see: Real-Time Rendering, Third Edition, Akenine-Möller/Haines/Hoffman
  * Chapter 10.7.1, Impostors
@@ -40856,7 +40981,7 @@ JSONLoader.prototype.load = function(url, onLoad) {
 
 module.exports = JSONLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":40,"pubsub-js":1,"three":2}],31:[function(require,module,exports){
+},{"./Utils":41,"pubsub-js":1,"three":2}],31:[function(require,module,exports){
 /**
  * @file This prototype is used for LOD handling. It is an 
  * enhancement of the LOD functionality of three.js. Instead of
@@ -41192,7 +41317,7 @@ MultiplayerManager.prototype._getPlayer = function(id){
 };
 
 module.exports = new MultiplayerManager();
-},{"../core/Scene":24,"../etc/Utils":40,"./Player":36,"pubsub-js":1,"three":2}],33:[function(require,module,exports){
+},{"../core/Scene":24,"../etc/Utils":41,"./Player":37,"pubsub-js":1,"three":2}],33:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -41408,7 +41533,436 @@ NetworkManager.SERVER = {
 
 module.exports = new NetworkManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Message":22,"../core/ThreadManager":28,"../etc/Utils":40,"pubsub-js":1,"ws":3}],34:[function(require,module,exports){
+},{"../core/Message":22,"../core/ThreadManager":28,"../etc/Utils":41,"pubsub-js":1,"ws":3}],34:[function(require,module,exports){
+/**
+ * @file A 3D arbitrarily oriented bounding box.
+ * 
+ * This data structure represents a box in 3D space. The local axes of this box can be arbitrarily oriented/rotated
+ * with respect to the global world coordinate system. This allows OBBs to more tightly bound objects than AABBs do,
+ * which always align with the world space axes. This flexibility has the drawback that the geometry tests and operations
+ * involving OBBs are more costly, and representing an OBB in memory takes more space.
+ * 
+ * Reference: 
+ * 
+ * This file is a JavaScript/three.js implementation of the MathGeoLib by Jukka Jylänki. The prototype does not contain
+ * the entire logic of the original source.
+ * 
+ * https://github.com/juj/MathGeoLib/blob/master/src/Geometry/OBB.h
+ * https://github.com/juj/MathGeoLib/blob/master/src/Geometry/OBB.cpp
+ * 
+ * @author Human Interactive
+ */
+"use strict";
+
+var THREE = require("three");
+
+/**
+ * Creates the OBB.
+ * 
+ * @constructor
+ * 
+ * @param {THREE.Vector3} position - The center position of the OBB.
+ * @param {THREE.Vector3} halfSizes -  Stores half-sizes to x, y and z directions in the local space of the OBB.
+ * @param {THREE.Matrix4} basis - Specifies normalized direction vectors for the local axes.
+ */
+function OBB(position, halfSizes, basis) {	
+	
+	Object.defineProperties(this, {
+		position: {
+			value: position || new THREE.Vector3(),
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		halfSizes: {
+			value: halfSizes || new THREE.Vector3(),
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		basis: {
+			value: basis || new THREE.Matrix4(),
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		// The OBB-OBB test utilizes a SAT test to detect the intersection. A robust implementation requires
+		// an epsilon threshold to test that the used axes are not degenerate.
+		_epsilon: {
+			value: 1e-3,
+			configurable: false,
+			enumerable: false,
+			writable: false
+		}
+	});
+}
+
+/**
+ * Sets the OBB from a mesh. 
+ * 
+ * The basis of the objects world matrix is assumed to be orthogonal, which means no projection or shear is allowed. 
+ * Additionally, the matrix must contain only uniform scaling.
+ * 
+ * @param {THREE.Mesh} object - The mesh object to convert to an OBB.
+ * 
+ * @returns {OBB} The reference to the OBB.
+ */
+OBB.prototype.setFromObject = (function( ){
+	
+	var vector = new THREE.Vector3();
+	
+	var aabb = null;
+	var w = null;
+	
+	return function( object ){
+		
+		// calculate AABB, if necessary
+		if( object.geometry.boundingBox === null ){
+			object.geometry.computeBoundingBox();
+		}
+		
+		// ensure, world matrix of the object is up to date
+		object.updateMatrixWorld();
+		
+		// shortcuts
+		aabb = object.geometry.boundingBox;
+		w = object.matrixWorld.elements;
+		
+		// assign the transform center to the position member
+		this.position = aabb.center().applyMatrix4( object.matrixWorld );
+		
+		// extract the rotation and assign it to the basis of the OBB
+		// for numerical stability, you could orthonormalize the basis
+		this.basis.extractRotation( object.matrixWorld );
+		
+		// calculate half sizes for each axis
+		this.halfSizes = aabb.size().multiplyScalar( 0.5 );
+		
+		// extract the (uniform) scaling and apply it to the halfSizes
+		var scale = vector.set( w[ 0 ], w[ 1 ], w[ 2 ] ).length();
+		
+		// do the scale
+		this.halfSizes.multiplyScalar( scale );
+		
+		return this;
+	};
+	
+} ( ) );
+
+/**
+ * Sets the OBB from an AABB.
+ * 
+ * @param {THREE.Box3} aabb - The AABB to convert to an OBB.
+ * 
+ * @returns {OBB} The reference to the OBB.
+ */
+OBB.prototype.setFromAABB = function( aabb ){
+	
+	this.position = aabb.center();
+	
+	this.halfSizes = aabb.size().multiplyScalar( 0.5 );
+	
+	this.basis.identity();
+	
+	return this;
+};
+
+/**
+ * Sets the OBB from a Bounding Sphere.
+ * 
+ * @param {THREE.Sphere} sphere - The bounding sphere to convert to an OBB.
+ * 
+ * @returns {OBB} The reference to the OBB.
+ */
+OBB.prototype.setFromBS= function( sphere ){
+	
+	this.position = sphere.center;
+	
+	this.halfSizes.set( sphere.radius, sphere.radius, sphere.radius );
+	
+	this.basis.identity();
+	
+	return this;
+};
+
+/**
+ * Tests if the given point is fully contained inside the OBB.
+ *
+ * @param {THREE.Vector3} point - The point to test.
+ * 
+ * @returns {boolean} Is the point contained inside the OBB?
+ */
+OBB.prototype.isPointContained = ( function( ){
+	
+	var vector = new THREE.Vector3();
+	
+	var xAxis = new THREE.Vector3();
+	var yAxis = new THREE.Vector3();
+	var zAxis = new THREE.Vector3();
+	
+	return function( point ){
+		
+		// calculate vector between point and center
+		vector.subVectors( point, this.position );
+		
+		// extract each axis
+		this.basis.extractBasis( xAxis, yAxis, zAxis );
+		
+		// project the calculated vector to each axis and 
+		// compare the result with the respective half size.
+		return Math.abs( vector.dot( xAxis ) ) <= this.halfSizes.x &&
+			   Math.abs( vector.dot( yAxis ) ) <= this.halfSizes.y &&
+			   Math.abs( vector.dot( zAxis ) ) <= this.halfSizes.z;
+	};
+	
+} ( ) );
+
+/**
+ * Tests if the given AABB is fully contained inside the OBB.
+ *
+ * @param {THREE.Box3} aabb - The AABB to test.
+ * 
+ * @returns {boolean} Is the AABB fully contained inside the OBB?
+ */
+OBB.prototype.isAABBContained = ( function( ){
+	
+	var points = [
+	              new THREE.Vector3(),
+				  new THREE.Vector3(),
+				  new THREE.Vector3(),
+				  new THREE.Vector3(),
+				  new THREE.Vector3(),
+				  new THREE.Vector3(),
+				  new THREE.Vector3(),
+				  new THREE.Vector3()
+	];
+	
+	return function( aabb ){
+		
+		// determine all corner points
+		points[ 0 ].set( aabb.min.x, aabb.min.y, aabb.min.z );
+		points[ 1 ].set( aabb.min.x, aabb.min.y, aabb.max.z );
+		points[ 2 ].set( aabb.min.x, aabb.max.y, aabb.min.z );
+		points[ 3 ].set( aabb.min.x, aabb.max.y, aabb.max.z );
+		points[ 4 ].set( aabb.max.x, aabb.min.y, aabb.min.z );
+		points[ 5 ].set( aabb.max.x, aabb.min.y, aabb.max.z );
+		points[ 6 ].set( aabb.max.x, aabb.max.y, aabb.min.z );
+		points[ 7 ].set( aabb.max.x, aabb.max.y, aabb.max.z );
+		
+		for(var index = 0; index < 8; ++index){
+			
+			// check each point
+			if( this.isPointContained( points[ index ] ) === false){
+				// as soon as one point is outside the OBB, return false
+				return false;
+			}
+		}
+		
+		return true;
+	};
+	
+} ( ) );
+
+/**
+ * Tests whether this OBB and the given AABB intersect.
+ *
+ * @param {THREE.Box3} box - The AABB to test.
+ * 
+ * @returns {boolean} Is there an intersection between the given AABB and the OBB?
+ */
+OBB.prototype.isIntersectionAABB = function( box ){
+	
+	return this.isIntersectionOBB( new OBB().setFromAABB( box ) );
+};
+
+/**
+ * Tests whether this OBB and the given OBB intersect.
+ * 
+ * Reference: https://github.com/juj/MathGeoLib/blob/master/src/Geometry/OBB.cpp
+ *
+ * @param {OBB} box - The OBB to test.
+ * 
+ * @returns {boolean} Is there an intersection between the given OBB and the OBB?
+ */
+OBB.prototype.isIntersectionOBB = ( function(){
+		
+	var xAxisA = new THREE.Vector3();
+	var yAxisA = new THREE.Vector3();
+	var zAxisA = new THREE.Vector3();
+	
+	var xAxisB = new THREE.Vector3();
+	var yAxisB = new THREE.Vector3();
+	var zAxisB = new THREE.Vector3();
+	
+	var axisA = [];
+	var axisB = [];
+	var rotationMatrix = [[],[],[]];
+	var rotationMatrixAbs = [[],[],[]];
+	
+	var halfSizeA = 0;
+	var halfSizeB = 0;
+	
+	var translation = new THREE.Vector3();
+	
+	var vector = new THREE.Vector3();
+	var t = 0, i = 0;
+	
+	return function( obb ){
+		
+		// extract each axis
+		this.basis.extractBasis( xAxisA, yAxisA, zAxisA );
+		obb.basis.extractBasis( xAxisB, yAxisB, zAxisB );
+		
+		// push basis vectors into arrays, so you can access them via indices
+		axisA.push( xAxisA, yAxisA, zAxisA);
+		axisB.push( xAxisB, yAxisB, zAxisB);
+		
+		// get translation vector
+		vector.subVectors( obb.position , this.position );
+		
+		// express the translation vector in the coordinate frame of the current OBB (this)
+		for(i = 0; i < 3; i++){
+			translation.setComponent( i, vector.dot( axisA[i] ) );
+		}
+		
+		// generate a rotation matrix that transforms from world space to the OBB's coordinate space
+		for(i = 0; i < 3; i++){
+			for(var j = 0; j < 3; j++){
+				rotationMatrix[i][j] = axisA[i].dot( axisB[j] );
+				rotationMatrixAbs[i][j] = Math.abs( rotationMatrix[i][j] ) + this._epsilon;
+			}
+		}
+
+		// test the three major axes of this OBB
+		for(i = 0; i < 3; i++){
+			
+			vector.set( rotationMatrixAbs[i][0], rotationMatrixAbs[i][1], rotationMatrixAbs[i][2] );
+			
+			halfSizeA = this.halfSizes.getComponent( i );
+			halfSizeB = obb.halfSizes.dot( vector );
+			
+			if ( Math.abs( translation.getComponent( i ) ) > halfSizeA + halfSizeB ){
+				return false;
+			}
+		}
+		
+		
+		// test the three major axes of other OBB
+		for(i = 0; i < 3; i++){
+			
+			vector.set( rotationMatrixAbs[0][i], rotationMatrixAbs[1][i], rotationMatrixAbs[2][i] );
+			
+			halfSizeA = this.halfSizes.dot( vector );
+			halfSizeB = obb.halfSizes.getComponent( i );
+			
+			vector.set( rotationMatrix[0][i], rotationMatrix[1][i], rotationMatrix[2][i] );
+			t = translation.dot( vector );
+			
+			if ( Math.abs( t ) > halfSizeA + halfSizeB ){
+				return false;
+			}
+		}
+		
+		// test the 9 different cross-axes
+
+		// A.x <cross> B.x
+		halfSizeA = this.halfSizes.y * rotationMatrixAbs[2][0] + this.halfSizes.z * rotationMatrixAbs[1][0];
+		halfSizeB = obb.halfSizes.y  * rotationMatrixAbs[0][2] + obb.halfSizes.z  * rotationMatrixAbs[0][1];
+		
+		t = translation.z * rotationMatrix[1][0] - translation.y * rotationMatrix[2][0];
+		
+		if ( Math.abs( t ) > halfSizeA + halfSizeB ){
+			return false;
+		}
+		
+		// A.x < cross> B.y
+		halfSizeA = this.halfSizes.y * rotationMatrixAbs[2][1] + this.halfSizes.z * rotationMatrixAbs[1][1];
+		halfSizeB = obb.halfSizes.x  * rotationMatrixAbs[0][2] + obb.halfSizes.z  * rotationMatrixAbs[0][0];
+		
+		t = translation.z * rotationMatrix[1][1] - translation.y * rotationMatrix[2][1];
+
+		if ( Math.abs( t ) > halfSizeA + halfSizeB ){
+			return false;
+		}
+		
+		// A.x <cross> B.z
+		halfSizeA = this.halfSizes.y * rotationMatrixAbs[2][2] + this.halfSizes.z * rotationMatrixAbs[1][2];
+		halfSizeB = obb.halfSizes.x  * rotationMatrixAbs[0][1] + obb.halfSizes.y  * rotationMatrixAbs[0][0];
+		
+		t = translation.z * rotationMatrix[1][2] - translation.y * rotationMatrix[2][2];
+
+		if ( Math.abs( t ) > halfSizeA + halfSizeB ){
+			return false;
+		}
+		
+		// A.y <cross> B.x
+		halfSizeA = this.halfSizes.x * rotationMatrixAbs[2][0] + this.halfSizes.z * rotationMatrixAbs[0][0];
+		halfSizeB = obb.halfSizes.y  * rotationMatrixAbs[1][2] + obb.halfSizes.z  * rotationMatrixAbs[1][1];
+		
+		t = translation.x * rotationMatrix[2][0] - translation.z * rotationMatrix[0][0];
+
+		if ( Math.abs( t ) > halfSizeA + halfSizeB ){
+			return false;
+		}
+		
+		// A.y <cross> B.y
+		halfSizeA = this.halfSizes.x * rotationMatrixAbs[2][1] + this.halfSizes.z * rotationMatrixAbs[0][1];
+		halfSizeB = obb.halfSizes.x  * rotationMatrixAbs[1][2] + obb.halfSizes.z  * rotationMatrixAbs[1][0];
+		
+		t = translation.x * rotationMatrix[2][1] - translation.z * rotationMatrix[0][1];
+	
+		if ( Math.abs( t ) > halfSizeA + halfSizeB ){
+			return false;
+		}
+		
+		// A.y <cross> B.z
+		halfSizeA = this.halfSizes.x * rotationMatrixAbs[2][2] + this.halfSizes.z * rotationMatrixAbs[0][2];
+		halfSizeB = obb.halfSizes.x  * rotationMatrixAbs[1][1] + obb.halfSizes.y  * rotationMatrixAbs[1][0];
+		
+		t = translation.x * rotationMatrix[2][2] - translation.z * rotationMatrix[0][2];
+		
+		if ( Math.abs( t ) > halfSizeA + halfSizeB ){
+			return false;
+		}
+		
+		// A.z <cross> B.x
+		halfSizeA = this.halfSizes.x * rotationMatrixAbs[1][0] + this.halfSizes.y * rotationMatrixAbs[0][0];
+		halfSizeB = obb.halfSizes.y  * rotationMatrixAbs[2][2] + obb.halfSizes.z * rotationMatrixAbs[2][1];
+		
+		t = translation.y * rotationMatrix[0][0] - translation.x * rotationMatrix[1][0];
+		
+		if ( Math.abs( t ) > halfSizeA + halfSizeB ){
+			return false;
+		}
+		
+		// A.z <cross> B.y
+		halfSizeA = this.halfSizes.x * rotationMatrixAbs[1][1] + this.halfSizes.y * rotationMatrixAbs[0][1];
+		halfSizeB = obb.halfSizes.x  * rotationMatrixAbs[2][2] + obb.halfSizes.z * rotationMatrixAbs[2][0];
+		
+		t = translation.y * rotationMatrix[0][1] - translation.x * rotationMatrix[1][1];
+
+		if ( Math.abs( t ) > halfSizeA + halfSizeB ){
+			return false;
+		}
+		
+		// A.z <cross> B.z
+		halfSizeA = this.halfSizes.x * rotationMatrixAbs[1][2] + this.halfSizes.y * rotationMatrixAbs[0][2];
+		halfSizeB = obb.halfSizes.x  * rotationMatrixAbs[2][1] + obb.halfSizes.y * rotationMatrixAbs[2][0];
+
+		t = translation.y * rotationMatrix[0][2] - translation.x * rotationMatrix[1][2];
+		
+		if ( Math.abs( t ) > halfSizeA + halfSizeB ){
+			return false;
+		}
+		
+		// no separating axis exists, so the two OBB don't intersect
+		return true;
+	};
+	
+} ( ) );
+
+module.exports = OBB;
+},{"three":2}],35:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading 3D objects in object-format 
@@ -41499,7 +42053,7 @@ ObjectLoader.prototype.load = function (url, onLoad) {
 
 module.exports = ObjectLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":40,"pubsub-js":1,"three":2}],35:[function(require,module,exports){
+},{"./Utils":41,"pubsub-js":1,"three":2}],36:[function(require,module,exports){
 /**
  * @file Interface for performance handling. This prototype is used in scenes
  * to create e.g. LOD instances.
@@ -41776,7 +42330,7 @@ PerformanceManager.prototype._updateImpostors = (function(){
 }());
 
 module.exports = new PerformanceManager();
-},{"../core/Camera":20,"../core/Renderer":23,"../core/Scene":24,"./Impostor":29,"./LOD":31,"three":2}],36:[function(require,module,exports){
+},{"../core/Camera":20,"../core/Renderer":23,"../core/Scene":24,"./Impostor":29,"./LOD":31,"three":2}],37:[function(require,module,exports){
 /**
  * @file This prototype represents the character of
  * an other player.
@@ -41791,6 +42345,7 @@ var THREE = require("three");
  * Creates a player instance.
  * 
  * @constructor
+ * @augments THREE.Mesh
  * 
  * @param {number} id - The id of the player.
  */
@@ -41824,7 +42379,7 @@ Player.prototype = Object.create(THREE.Mesh.prototype);
 Player.prototype.constructor = Player;
 
 module.exports = Player;
-},{"three":2}],37:[function(require,module,exports){
+},{"three":2}],38:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire savegame-handling. This prototype is using
@@ -41901,7 +42456,7 @@ SaveGameManager.prototype.remove = function(){
 
 module.exports = new SaveGameManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire settings-handling. This prototype is used
@@ -42077,7 +42632,7 @@ SettingsManager.MOUSE = {
 
 module.exports = new SettingsManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":40,"three":2}],39:[function(require,module,exports){
+},{"./Utils":41,"three":2}],40:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire text-handling. This prototype is used in scenes
@@ -42233,7 +42788,7 @@ TextManager.prototype._searchAndRepalce = function(){
 
 module.exports = new TextManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":40,"pubsub-js":1}],40:[function(require,module,exports){
+},{"./Utils":41,"pubsub-js":1}],41:[function(require,module,exports){
 (function (global){
 /**
  * @file All helper and util functions are
@@ -42424,7 +42979,7 @@ Utils.CDN = {
 
 module.exports = new Utils();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Renderer":23}],41:[function(require,module,exports){
+},{"../core/Renderer":23}],42:[function(require,module,exports){
 /**
  * @file This prototype manages effects for post-processing.
  * 
@@ -42604,7 +43159,7 @@ EffectComposer.prototype._reset = function(renderTarget){
 };
 
 module.exports = EffectComposer;
-},{"three":2}],42:[function(require,module,exports){
+},{"three":2}],43:[function(require,module,exports){
 /**
  * @file This prototype provides a render pass for post-processing.
  * 
@@ -42666,7 +43221,7 @@ RenderPass.prototype.render = function(renderer, writeBuffer, readBuffer){
 };
 
 module.exports = RenderPass;
-},{"three":2}],43:[function(require,module,exports){
+},{"three":2}],44:[function(require,module,exports){
 /**
  * @file This prototype provides a shader pass for post-processing.
  * 
@@ -42771,7 +43326,7 @@ ShaderPass.prototype.render = function(renderer, writeBuffer, readBuffer){
 };
 
 module.exports = ShaderPass;
-},{"three":2}],44:[function(require,module,exports){
+},{"three":2}],45:[function(require,module,exports){
 /**
  * @file This shader can be used for vertex displacement to create
  * water or fabric materials. It implements an exemplary diffuse lighting
@@ -42873,7 +43428,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":2}],45:[function(require,module,exports){
+},{"three":2}],46:[function(require,module,exports){
 /**
  * @file This shader applies a gaussian blur effect.
  * It can be used for both x and y direction.
@@ -42940,7 +43495,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":2}],46:[function(require,module,exports){
+},{"three":2}],47:[function(require,module,exports){
 /**
  * @file This shader transforms all colors to grayscale.
  * 
@@ -42989,7 +43544,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 /**
  * @file This shader creates a vignette effect.
  * 
@@ -43050,7 +43605,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43162,7 +43717,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],49:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],50:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43217,12 +43772,17 @@ Stage.prototype.setup = function(){
 	interactiveBox.updateMatrix();
 	this.scene.add(interactiveBox);
 
-	this.actionManager.createInteraction("Label.Action", interactiveBox, function(){
-		
-		// nothing happens here...
-	});
+	this.actionManager.createInteraction(
+			interactiveBox, 
+			this.actionManager.COLLISIONTYPES.AABB, 
+			this.actionManager.RAYCASTPRECISION.FACE, 
+			"Label.Action", 
+			function(){
+				// nothing happens here...
+			}
+	);
 	
-	// create first static box
+	// create first static box with AABB collision detection
 	var staticBoxHover = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0x6083c2}));
 	staticBoxHover.matrixAutoUpdate = false;
 	staticBoxHover.position.set(17, 15, 0);
@@ -43230,17 +43790,18 @@ Stage.prototype.setup = function(){
 	staticBoxHover.updateMatrix();
 	this.scene.add(staticBoxHover);
 	
-	this.actionManager.createStatic(staticBoxHover);
+	this.actionManager.createStatic(staticBoxHover, this.actionManager.COLLISIONTYPES.AABB );
 	
-	// create second static box
-	var staticBox = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0x6083c2}));
+	// create second static box with OBB collision detection
+	var staticBox = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 20) , new THREE.MeshLambertMaterial({color: 0x6083c2}));
 	staticBox.matrixAutoUpdate = false;
 	staticBox.position.set(-17, 5, 0);
+	staticBox.rotation.set(0, Math.PI * 0.2, 0);
 	staticBox.castShadow = true;
 	staticBox.updateMatrix();
 	this.scene.add(staticBox);
 	
-	this.actionManager.createStatic(staticBox);
+	this.actionManager.createStatic(staticBox, this.actionManager.COLLISIONTYPES.OBB );
 	
 	// create plain object
 	var plainBox = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0xf3f4f6}));
@@ -43329,7 +43890,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],50:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],51:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43383,10 +43944,16 @@ Stage.prototype.setup = function(){
 	interactiveBox.castShadow = true;
 	interactiveBox.updateMatrix();
 	this.scene.add(interactiveBox);
-
-	this.actionManager.createInteraction("Label.Color", interactiveBox, function(){	
-		colorMesh(interactiveBox);
-	});	
+	
+	this.actionManager.createInteraction(
+			interactiveBox, 
+			this.actionManager.COLLISIONTYPES.AABB, 
+			this.actionManager.RAYCASTPRECISION.FACE, 
+			"Label.Color", 
+			function(){
+				colorMesh(interactiveBox);
+			}
+	);
 	
 	// add trigger for color change
 	var colorTrigger = this.actionManager.createTrigger("Color Change", 10, function(){
@@ -43487,7 +44054,7 @@ function colorMesh(mesh){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],51:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],52:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43541,17 +44108,22 @@ Stage.prototype.setup = function(){
 	interactiveBoxTextScreen.castShadow = true;
 	interactiveBoxTextScreen.updateMatrix();
 	this.scene.add(interactiveBoxTextScreen);
-
-	this.actionManager.createInteraction("Label.TextScreen", interactiveBoxTextScreen, function(){
-		
-		self.controls.isActionInProgress = true;
-		
-		self.userInterfaceManager.showTextScreen([{name: "Name.Daniel", text: "TextScreen.Part1"}, 
-                                                  {name: "Name.Peter", text: "TextScreen.Part2"}, 
-                                                  {name: undefined, text: "TextScreen.Part3"}], function(){
-			self.controls.isActionInProgress = false;
-		});
-	});
+	
+	this.actionManager.createInteraction(
+			interactiveBoxTextScreen, 
+			this.actionManager.COLLISIONTYPES.AABB, 
+			this.actionManager.RAYCASTPRECISION.FACE, 
+			"Label.TextScreen", 
+			function(){
+				
+				self.controls.isActionInProgress = true;
+				self.userInterfaceManager.showTextScreen([{name: "Name.Daniel", text: "TextScreen.Part1"}, 
+		                                                  {name: "Name.Peter", text: "TextScreen.Part2"}, 
+		                                                  {name: undefined, text: "TextScreen.Part3"}], function(){
+					self.controls.isActionInProgress = false;
+				});
+			}
+	);
 	
 	// create interactive box
 	var interactiveBoxModal = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0xf3f4f6}));
@@ -43560,15 +44132,20 @@ Stage.prototype.setup = function(){
 	interactiveBoxModal.castShadow = true;
 	interactiveBoxModal.updateMatrix();
 	this.scene.add(interactiveBoxModal);
-
-	this.actionManager.createInteraction("Label.Modal", interactiveBoxModal, function(){	
-		
-		self.userInterfaceManager.showModalDialog({
-			headline: "Modal.Headline",
-			button: "Modal.Button",
-			content: "Modal.Content"
-		});
-	});
+	
+	this.actionManager.createInteraction(
+			interactiveBoxModal, 
+			this.actionManager.COLLISIONTYPES.AABB, 
+			this.actionManager.RAYCASTPRECISION.FACE, 
+			"Label.Modal", 
+			function(){
+				self.userInterfaceManager.showModalDialog({
+					headline: "Modal.Headline",
+					button: "Modal.Button",
+					content: "Modal.Content"
+				});
+			}
+	);
 	
 	// add sign
 	var signLoader = new JSONLoader();
@@ -43649,7 +44226,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],52:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],53:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43770,7 +44347,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],53:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],54:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -43826,7 +44403,7 @@ Stage.prototype.setup = function(){
 	staticBoxFire.castShadow = true;
 	staticBoxFire.updateMatrix();
 	this.scene.add(staticBoxFire);
-	this.actionManager.createStatic(staticBoxFire);
+	this.actionManager.createStatic(staticBoxFire, this.actionManager.COLLISIONTYPES.AABB);
 	
 	var staticBoxClock = new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0xf3f4f6}));
 	staticBoxClock.matrixAutoUpdate = false;
@@ -43834,14 +44411,14 @@ Stage.prototype.setup = function(){
 	staticBoxClock.castShadow = true;
 	staticBoxClock.updateMatrix();
 	this.scene.add(staticBoxClock);
-	this.actionManager.createStatic(staticBoxClock);
+	this.actionManager.createStatic(staticBoxClock, this.actionManager.COLLISIONTYPES.AABB);
 	
 	var staticBoxWall = new THREE.Mesh(new THREE.BoxGeometry(1, 20, 40) , new THREE.MeshBasicMaterial({wireframe: true}));
 	staticBoxWall.matrixAutoUpdate = false;
 	staticBoxWall.position.set(-5.5, 5, 0);
 	staticBoxWall.updateMatrix();
 	staticBoxClock.add(staticBoxWall);
-	this.actionManager.createStatic(staticBoxWall);
+	this.actionManager.createStatic(staticBoxWall, this.actionManager.COLLISIONTYPES.AABB);
 	
 	// add dynamic sounds
 	this.audioManager.createAudioBufferList(["fire", "clock"], function(bufferList){
@@ -43948,7 +44525,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],54:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],55:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -44001,26 +44578,30 @@ Stage.prototype.setup = function(){
 	interactiveBoxBasic.castShadow = true;
 	this.scene.add(interactiveBoxBasic);
 	
-	var interactiveObject = this.actionManager.createInteraction("Label.BasicAnimation", interactiveBoxBasic, function(){
-		
-		interactiveObject.action.isActive = false;
-		
-		// create a basic animation, which animates a single value
-		self.animationManager.createBasicAnimation({
-			object: interactiveBoxBasic.position,
-			property: "x",
-			duration: 5000,
-			start:  interactiveBoxBasic.position.x,
-			end: interactiveBoxBasic.position.x + 30,
-			easing: Easing.Quartic.InOut
-		}).play();
-	});
+	var interactiveObject = this.actionManager.createInteraction(
+		     interactiveBoxBasic, 
+			 this.actionManager.COLLISIONTYPES.AABB, 
+			 this.actionManager.RAYCASTPRECISION.FACE, 
+			 "Label.BasicAnimation", 
+			 function(){
+				 interactiveObject.action.isActive = false;
+				
+				 // create a basic animation, which animates a single value
+				 self.animationManager.createBasicAnimation({
+					 object: interactiveBoxBasic.position,
+					 property: "x",
+					 duration: 5000,
+					 start:  interactiveBoxBasic.position.x,
+					 end: interactiveBoxBasic.position.x + 30,
+					 easing: Easing.Quartic.InOut
+				 }).play();
+			 });
 	
 	var staticBoxHover = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0xf3f4f6}));
 	staticBoxHover.position.set(-40, 8, 0);
 	staticBoxHover.castShadow = true;
 	this.scene.add(staticBoxHover);
-	this.actionManager.createStatic(staticBoxHover);
+	this.actionManager.createStatic(staticBoxHover, this.actionManager.COLLISIONTYPES.AABB);
 	
 	// create a hover animation, which animates infinitely a property between start- and end-value
 	this.animationManager.createHoverAnimation({
@@ -44112,7 +44693,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],55:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],56:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -44264,7 +44845,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],56:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],57:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -44431,7 +45012,7 @@ function showLODCircles(scene){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],57:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],58:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -44570,7 +45151,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],58:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],59:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -44744,7 +45325,7 @@ Chat.prototype._onMessage = function(message, data){
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":67,"pubsub-js":1}],59:[function(require,module,exports){
+},{"./UiElement":68,"pubsub-js":1}],60:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel.
@@ -44808,7 +45389,7 @@ DevelopmentPanel.prototype.setText = function(text){
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":67}],60:[function(require,module,exports){
+},{"./UiElement":68}],61:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -44869,7 +45450,7 @@ InformationPanel.prototype.setText = function(textKey){
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":67}],61:[function(require,module,exports){
+},{"./UiElement":68}],62:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -44944,7 +45525,7 @@ InteractionLabel.prototype.hide = function(){
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":67}],62:[function(require,module,exports){
+},{"./UiElement":68}],63:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -45129,7 +45710,7 @@ LoadingScreen.prototype._onReady = function(message, data){
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":67,"pubsub-js":1}],63:[function(require,module,exports){
+},{"./UiElement":68,"pubsub-js":1}],64:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -45280,7 +45861,7 @@ Menu.prototype._publishFinishEvent = function(message, data){
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"./UiElement":67,"pubsub-js":1}],64:[function(require,module,exports){
+},{"../etc/Utils":41,"./UiElement":68,"pubsub-js":1}],65:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -45407,7 +45988,7 @@ ModalDialog.prototype._onClose = function(event){
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"./UiElement":67,"pubsub-js":1}],65:[function(require,module,exports){
+},{"../etc/Utils":41,"./UiElement":68,"pubsub-js":1}],66:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor.
@@ -45627,7 +46208,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":67}],66:[function(require,module,exports){
+},{"./UiElement":68}],67:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -45827,7 +46408,7 @@ TextScreen.prototype._printName = function(){
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":67}],67:[function(require,module,exports){
+},{"./UiElement":68}],68:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -45875,7 +46456,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":39}],68:[function(require,module,exports){
+},{"../etc/TextManager":40}],69:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in scenes
@@ -46127,4 +46708,4 @@ UserInterfaceManager.prototype._onKeyDown = function(event){
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"./Chat":58,"./DevelopmentPanel":59,"./InformationPanel":60,"./InteractionLabel":61,"./LoadingScreen":62,"./Menu":63,"./ModalDialog":64,"./PerformanceMonitor":65,"./TextScreen":66,"pubsub-js":1}]},{},[4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68]);
+},{"../etc/Utils":41,"./Chat":59,"./DevelopmentPanel":60,"./InformationPanel":61,"./InteractionLabel":62,"./LoadingScreen":63,"./Menu":64,"./ModalDialog":65,"./PerformanceMonitor":66,"./TextScreen":67,"pubsub-js":1}]},{},[4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69]);

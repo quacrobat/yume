@@ -671,7 +671,7 @@ FirstPersonControls.prototype._getFirstInteractiveIntersection = (function() {
 		if (intersects.length > 0) {
 			for(index = 0; index < intersects.length; index++){
 				// return only an object, which is visible and has an active action
-				if(intersects[index].object.object.visible === true && intersects[index].object.action.isActive === true){
+				if(intersects[index].object.mesh.visible === true && intersects[index].object.action.isActive === true){
 					return intersects[index].object;
 				}
 			}
@@ -810,10 +810,10 @@ FirstPersonControls.prototype._isCollisionHandlingRequired = (function() {
 				for(index = 0; index < objects.length; index++){
 					
 					// regard only visible objects
-					if(objects[index].object.visible === true){
+					if(objects[index].mesh.visible === true){
 						
-						// detect collision via bounding-box-intersection
-						if(objects[index].isIntersectionBox(boundingBox) === true){
+						// do collision detection
+						if(objects[index].isIntersection(boundingBox) === true){
 							// Yes, we are inside an visible object and inside our level
 							return true;
 						}

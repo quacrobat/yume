@@ -8,48 +8,78 @@
 "use strict";
 
 var THREE = require("three");
+var OBB = require("../etc/OBB");
 
 /**
  * Creates a static object.
  * 
  * @constructor
  * 
- * @param {THREE.Object3D} object - An arbitrary 3D-Object.
+ * @param {THREE.Mesh} mesh - The mesh object.
+ * @param {number} collisionType - The type of collision detection.
  */
-function StaticObject(object, action) {
+function StaticObject(object, collisionType) {
 
 	Object.defineProperties(this, {
-		object: {
+		mesh: {
 			value: object,
 			configurable: false,
 			enumerable: true,
 			writable: true
 		},
-		_boundingBox: {
+		collisionType: {
+			value: collisionType,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		// bounding volumes
+		_aabb: {
 			value: new THREE.Box3(),
 			configurable: false,
 			enumerable: false,
 			writable: true
-		}
+		},
+		_obb: {
+			value: new OBB(),
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
 	});
 }
 
 /**
- * This method is detects an intersection between the bounding box
- * of the controls and the AABB of the static object.
+ * This method detects an intersection between the bounding box
+ * of the controls and the bounding volume of the static object.
  * 
  * @param {THREE.Box3} boundingBox - The boundingBox of the controls.
  */
-StaticObject.prototype.isIntersectionBox = function(boundingBox){
+StaticObject.prototype.isIntersection = function(boundingBox){
 	
-	if (this.object.geometry.boundingBox === null){
-		this.object.geometry.computeBoundingBox();
-	}
+	if( this.collisionType === StaticObject.COLLISIONTYPES.OBB ){
+		
+		this._obb.setFromObject( this.mesh );
+		return this._obb.isIntersectionAABB( boundingBox );
+		
+	}else{
+		
+		if (this.mesh.geometry.boundingBox === null){
+			this.mesh.geometry.computeBoundingBox();
+		}
 
-	this._boundingBox.copy(this.object.geometry.boundingBox);
-	this._boundingBox.applyMatrix4(this.object.matrixWorld);
+		this._aabb.copy(this.mesh.geometry.boundingBox);
+		this._aabb.applyMatrix4(this.mesh.matrixWorld);
+		
+		return this._aabb.isIntersectionBox(boundingBox);
+		
+	}
 	
-	return this._boundingBox.isIntersectionBox(boundingBox);
-};	
+};
+
+StaticObject.COLLISIONTYPES = {
+	AABB : 0,
+	OBB : 1
+};
 
 module.exports = StaticObject;

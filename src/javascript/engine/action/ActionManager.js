@@ -37,6 +37,24 @@ function ActionManager() {
 			configurable: false,
 			enumerable: false,
 			writable: false
+		},
+		COLLISIONTYPES: {
+			value: {
+				AABB: 0,
+				OBB: 1
+			},
+			configurable: false,
+			enumerable: false,
+			writable: false
+		},
+		RAYCASTPRECISION: {
+			value: {
+				AABB: 0,
+				FACE: 1
+			},
+			configurable: false,
+			enumerable: false,
+			writable: false
 		}
 	});
 }
@@ -44,15 +62,17 @@ function ActionManager() {
 /**
  * Creates a new interactive object and stores it to the respective internal array.
  * 
+ * @param {THREE.Mesh} mesh - The mesh object.
+ * @param {number} collisionType - The type of collision detection.
+ * @param {number} raycastPrecision - The precision of the raycast operation.
  * @param {string} label - The label of the action.
- * @param {THREE.Object3D} object - The 3D object.
  * @param {function} actionCallback - The action callback.
  * 
  * @returns {InteractiveObject} The new interactive object.
  */
-ActionManager.prototype.createInteraction = function(label, object, actionCallback){
+ActionManager.prototype.createInteraction = function(mesh, collisionType, raycastPrecision, label, actionCallback){
 	
-	var interactiveObject = new InteractiveObject(object, new Action(Action.TYPES.INTERACTION, actionCallback, label));
+	var interactiveObject = new InteractiveObject(mesh, collisionType, raycastPrecision, new Action(Action.TYPES.INTERACTION, actionCallback, label));
 	this.addInteractiveObject(interactiveObject);
 	return interactiveObject;
 };
@@ -60,13 +80,14 @@ ActionManager.prototype.createInteraction = function(label, object, actionCallba
 /**
  * Creates a new static object and stores it to the respective internal array.
  * 
- * @param {THREE.Object3D} object - The 3D object.
+ * @param {THREE.Mesh} mesh - The mesh object.
+ * @param {number} collisionType - The type of collision detection.
  * 
  * @returns {StaticObject} The new static object.
  */
-ActionManager.prototype.createStatic = function(object){
+ActionManager.prototype.createStatic = function(mesh, collisionType){
 	
-	var staticObject = new StaticObject(object);
+	var staticObject = new StaticObject(mesh, collisionType);
 	this.addStaticObject(staticObject);
 	return staticObject;
 };

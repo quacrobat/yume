@@ -50,26 +50,30 @@ Stage.prototype.setup = function(){
 	interactiveBoxBasic.castShadow = true;
 	this.scene.add(interactiveBoxBasic);
 	
-	var interactiveObject = this.actionManager.createInteraction("Label.BasicAnimation", interactiveBoxBasic, function(){
-		
-		interactiveObject.action.isActive = false;
-		
-		// create a basic animation, which animates a single value
-		self.animationManager.createBasicAnimation({
-			object: interactiveBoxBasic.position,
-			property: "x",
-			duration: 5000,
-			start:  interactiveBoxBasic.position.x,
-			end: interactiveBoxBasic.position.x + 30,
-			easing: Easing.Quartic.InOut
-		}).play();
-	});
+	var interactiveObject = this.actionManager.createInteraction(
+		     interactiveBoxBasic, 
+			 this.actionManager.COLLISIONTYPES.AABB, 
+			 this.actionManager.RAYCASTPRECISION.FACE, 
+			 "Label.BasicAnimation", 
+			 function(){
+				 interactiveObject.action.isActive = false;
+				
+				 // create a basic animation, which animates a single value
+				 self.animationManager.createBasicAnimation({
+					 object: interactiveBoxBasic.position,
+					 property: "x",
+					 duration: 5000,
+					 start:  interactiveBoxBasic.position.x,
+					 end: interactiveBoxBasic.position.x + 30,
+					 easing: Easing.Quartic.InOut
+				 }).play();
+			 });
 	
 	var staticBoxHover = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0xf3f4f6}));
 	staticBoxHover.position.set(-40, 8, 0);
 	staticBoxHover.castShadow = true;
 	this.scene.add(staticBoxHover);
-	this.actionManager.createStatic(staticBoxHover);
+	this.actionManager.createStatic(staticBoxHover, this.actionManager.COLLISIONTYPES.AABB);
 	
 	// create a hover animation, which animates infinitely a property between start- and end-value
 	this.animationManager.createHoverAnimation({

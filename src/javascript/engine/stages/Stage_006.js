@@ -53,7 +53,7 @@ Stage.prototype.setup = function(){
 	staticBoxFire.castShadow = true;
 	staticBoxFire.updateMatrix();
 	this.scene.add(staticBoxFire);
-	this.actionManager.createStatic(staticBoxFire);
+	this.actionManager.createStatic(staticBoxFire, this.actionManager.COLLISIONTYPES.AABB);
 	
 	var staticBoxClock = new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0xf3f4f6}));
 	staticBoxClock.matrixAutoUpdate = false;
@@ -61,14 +61,14 @@ Stage.prototype.setup = function(){
 	staticBoxClock.castShadow = true;
 	staticBoxClock.updateMatrix();
 	this.scene.add(staticBoxClock);
-	this.actionManager.createStatic(staticBoxClock);
+	this.actionManager.createStatic(staticBoxClock, this.actionManager.COLLISIONTYPES.AABB);
 	
 	var staticBoxWall = new THREE.Mesh(new THREE.BoxGeometry(1, 20, 40) , new THREE.MeshBasicMaterial({wireframe: true}));
 	staticBoxWall.matrixAutoUpdate = false;
 	staticBoxWall.position.set(-5.5, 5, 0);
 	staticBoxWall.updateMatrix();
 	staticBoxClock.add(staticBoxWall);
-	this.actionManager.createStatic(staticBoxWall);
+	this.actionManager.createStatic(staticBoxWall, this.actionManager.COLLISIONTYPES.AABB);
 	
 	// add dynamic sounds
 	this.audioManager.createAudioBufferList(["fire", "clock"], function(bufferList){

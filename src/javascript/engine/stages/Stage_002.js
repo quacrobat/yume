@@ -52,12 +52,17 @@ Stage.prototype.setup = function(){
 	interactiveBox.updateMatrix();
 	this.scene.add(interactiveBox);
 
-	this.actionManager.createInteraction("Label.Action", interactiveBox, function(){
-		
-		// nothing happens here...
-	});
+	this.actionManager.createInteraction(
+			interactiveBox, 
+			this.actionManager.COLLISIONTYPES.AABB, 
+			this.actionManager.RAYCASTPRECISION.FACE, 
+			"Label.Action", 
+			function(){
+				// nothing happens here...
+			}
+	);
 	
-	// create first static box
+	// create first static box with AABB collision detection
 	var staticBoxHover = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0x6083c2}));
 	staticBoxHover.matrixAutoUpdate = false;
 	staticBoxHover.position.set(17, 15, 0);
@@ -65,17 +70,18 @@ Stage.prototype.setup = function(){
 	staticBoxHover.updateMatrix();
 	this.scene.add(staticBoxHover);
 	
-	this.actionManager.createStatic(staticBoxHover);
+	this.actionManager.createStatic(staticBoxHover, this.actionManager.COLLISIONTYPES.AABB );
 	
-	// create second static box
-	var staticBox = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0x6083c2}));
+	// create second static box with OBB collision detection
+	var staticBox = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 20) , new THREE.MeshLambertMaterial({color: 0x6083c2}));
 	staticBox.matrixAutoUpdate = false;
 	staticBox.position.set(-17, 5, 0);
+	staticBox.rotation.set(0, Math.PI * 0.2, 0);
 	staticBox.castShadow = true;
 	staticBox.updateMatrix();
 	this.scene.add(staticBox);
 	
-	this.actionManager.createStatic(staticBox);
+	this.actionManager.createStatic(staticBox, this.actionManager.COLLISIONTYPES.OBB );
 	
 	// create plain object
 	var plainBox = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0xf3f4f6}));

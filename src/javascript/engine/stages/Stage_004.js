@@ -51,17 +51,22 @@ Stage.prototype.setup = function(){
 	interactiveBoxTextScreen.castShadow = true;
 	interactiveBoxTextScreen.updateMatrix();
 	this.scene.add(interactiveBoxTextScreen);
-
-	this.actionManager.createInteraction("Label.TextScreen", interactiveBoxTextScreen, function(){
-		
-		self.controls.isActionInProgress = true;
-		
-		self.userInterfaceManager.showTextScreen([{name: "Name.Daniel", text: "TextScreen.Part1"}, 
-                                                  {name: "Name.Peter", text: "TextScreen.Part2"}, 
-                                                  {name: undefined, text: "TextScreen.Part3"}], function(){
-			self.controls.isActionInProgress = false;
-		});
-	});
+	
+	this.actionManager.createInteraction(
+			interactiveBoxTextScreen, 
+			this.actionManager.COLLISIONTYPES.AABB, 
+			this.actionManager.RAYCASTPRECISION.FACE, 
+			"Label.TextScreen", 
+			function(){
+				
+				self.controls.isActionInProgress = true;
+				self.userInterfaceManager.showTextScreen([{name: "Name.Daniel", text: "TextScreen.Part1"}, 
+		                                                  {name: "Name.Peter", text: "TextScreen.Part2"}, 
+		                                                  {name: undefined, text: "TextScreen.Part3"}], function(){
+					self.controls.isActionInProgress = false;
+				});
+			}
+	);
 	
 	// create interactive box
 	var interactiveBoxModal = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0xf3f4f6}));
@@ -70,15 +75,20 @@ Stage.prototype.setup = function(){
 	interactiveBoxModal.castShadow = true;
 	interactiveBoxModal.updateMatrix();
 	this.scene.add(interactiveBoxModal);
-
-	this.actionManager.createInteraction("Label.Modal", interactiveBoxModal, function(){	
-		
-		self.userInterfaceManager.showModalDialog({
-			headline: "Modal.Headline",
-			button: "Modal.Button",
-			content: "Modal.Content"
-		});
-	});
+	
+	this.actionManager.createInteraction(
+			interactiveBoxModal, 
+			this.actionManager.COLLISIONTYPES.AABB, 
+			this.actionManager.RAYCASTPRECISION.FACE, 
+			"Label.Modal", 
+			function(){
+				self.userInterfaceManager.showModalDialog({
+					headline: "Modal.Headline",
+					button: "Modal.Button",
+					content: "Modal.Content"
+				});
+			}
+	);
 	
 	// add sign
 	var signLoader = new JSONLoader();

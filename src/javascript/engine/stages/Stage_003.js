@@ -51,10 +51,16 @@ Stage.prototype.setup = function(){
 	interactiveBox.castShadow = true;
 	interactiveBox.updateMatrix();
 	this.scene.add(interactiveBox);
-
-	this.actionManager.createInteraction("Label.Color", interactiveBox, function(){	
-		colorMesh(interactiveBox);
-	});	
+	
+	this.actionManager.createInteraction(
+			interactiveBox, 
+			this.actionManager.COLLISIONTYPES.AABB, 
+			this.actionManager.RAYCASTPRECISION.FACE, 
+			"Label.Color", 
+			function(){
+				colorMesh(interactiveBox);
+			}
+	);
 	
 	// add trigger for color change
 	var colorTrigger = this.actionManager.createTrigger("Color Change", 10, function(){
