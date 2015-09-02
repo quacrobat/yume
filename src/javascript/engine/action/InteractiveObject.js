@@ -47,18 +47,6 @@ function InteractiveObject(mesh, collisionType, raycastPrecision, action) {
 			enumerable: true,
 			writable: true
 		},
-		_distance: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
-		},
-		_intersectionPoint: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
-		},
 		// bounding volumes
 		_aabb: {
 			value: new THREE.Box3(),
@@ -89,6 +77,8 @@ InteractiveObject.prototype.raycast = ( function(){
 	
 	var index = 0;
 	var intersectsRay = [];
+	var intersectionPoint = null;
+	var distance = 0;
 	
 	return function(raycaster, intersects){
 		
@@ -109,35 +99,49 @@ InteractiveObject.prototype.raycast = ( function(){
 			intersectsRay.length = 0;
 			
 		}else{
-		
-			if (this.mesh.geometry.boundingBox === null){
-				this.mesh.geometry.computeBoundingBox();
+			
+			if( this.raycastPrecision === InteractiveObject.RAYCASTPRECISION.OBB ){
+				
+				// setup obb
+				this._obb.setFromObject( this.mesh );
+				
+				// do intersection test
+				intersectionPoint = this._obb.intersectRay( raycaster.ray );
+			
+			}else{
+				
+				// setup aabb
+				if (this.mesh.geometry.boundingBox === null){
+					this.mesh.geometry.computeBoundingBox();
+				}
+
+				this._aabb.copy(this.mesh.geometry.boundingBox);
+				this._aabb.applyMatrix4(this.mesh.matrixWorld);
+
+				// do intersection test
+				intersectionPoint = raycaster.ray.intersectBox(this._aabb);
 			}
-
-			this._aabb.copy(this.mesh.geometry.boundingBox);
-			this._aabb.applyMatrix4(this.mesh.matrixWorld);
-
-			// do intersection test
-			this._intersectionPoint = raycaster.ray.intersectBox(this._aabb);
-
-			if ( this._intersectionPoint !== null)  {
+				
+			if ( intersectionPoint !== null)  {
 				
 				// get the distance to the intersection point
-				this._distance = raycaster.ray.origin.distanceTo(this._intersectionPoint);
+				distance = raycaster.ray.origin.distanceTo(intersectionPoint);
 				
-				if (this._distance >= raycaster.precision && this._distance >= raycaster.near && this._distance <= raycaster.far){
+				if (distance >= raycaster.precision && distance >= raycaster.near && distance <= raycaster.far){
 				
 					// store the result in special data structure, see THREE.Mesh.raycast
 					intersects.push({
-						distance: this._distance,
-						point: this._intersectionPoint,
+						distance: distance,
+						point: intersectionPoint,
 						face: null,
 						faceIndex: null,
 						object: this
 					});
 				}
+				
+				// reset member
+				intersectionPoint = null;
 			}
-			
 		}
 	};
 	
@@ -176,7 +180,8 @@ InteractiveObject.COLLISIONTYPES = {
 
 InteractiveObject.RAYCASTPRECISION = {
 	AABB: 0,
-	FACE: 1
+	OBB: 1,
+	FACE: 2
 };
 
 module.exports = InteractiveObject;

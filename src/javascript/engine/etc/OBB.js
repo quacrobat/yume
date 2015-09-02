@@ -50,6 +50,12 @@ function OBB(position, halfSizes, basis) {
 			enumerable: true,
 			writable: true
 		},
+		_matrixWorld: {
+			value: new THREE.Matrix4(),
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
 		// The OBB-OBB test utilizes a SAT test to detect the intersection. A robust implementation requires
 		// an epsilon threshold to test that the used axes are not degenerate.
 		_epsilon: {
@@ -60,6 +66,11 @@ function OBB(position, halfSizes, basis) {
 		}
 	});
 }
+
+OBB.prototype.getSize = function(){
+	
+	return this.halfSizes.clone().multiplyScalar( 2 );
+};
 
 /**
  * Sets the OBB from a mesh. 
@@ -158,7 +169,7 @@ OBB.prototype.setFromBS= function( sphere ){
  */
 OBB.prototype.isPointContained = ( function( ){
 	
-	var vector = new THREE.Vector3();
+	var displacement = new THREE.Vector3();
 	
 	var xAxis = new THREE.Vector3();
 	var yAxis = new THREE.Vector3();
@@ -166,17 +177,17 @@ OBB.prototype.isPointContained = ( function( ){
 	
 	return function( point ){
 		
-		// calculate vector between point and center
-		vector.subVectors( point, this.position );
+		// calculate displacement vector of point and center
+		displacement.subVectors( point, this.position );
 		
 		// extract each axis
 		this.basis.extractBasis( xAxis, yAxis, zAxis );
 		
-		// project the calculated vector to each axis and 
+		// project the calculated displacement vector to each axis and 
 		// compare the result with the respective half size.
-		return Math.abs( vector.dot( xAxis ) ) <= this.halfSizes.x &&
-			   Math.abs( vector.dot( yAxis ) ) <= this.halfSizes.y &&
-			   Math.abs( vector.dot( zAxis ) ) <= this.halfSizes.z;
+		return Math.abs( displacement.dot( xAxis ) ) <= this.halfSizes.x &&
+			   Math.abs( displacement.dot( yAxis ) ) <= this.halfSizes.y &&
+			   Math.abs( displacement.dot( zAxis ) ) <= this.halfSizes.z;
 	};
 	
 } ( ) );
@@ -228,6 +239,33 @@ OBB.prototype.isAABBContained = ( function( ){
 } ( ) );
 
 /**
+ * Tests if the given line segment is fully contained inside the OBB.
+ *
+ * @param {THREE.Line3} line - The line segment to test.
+ * 
+ * @returns {boolean} Is the line segment contained inside the OBB?
+ */
+OBB.prototype.isLineContained = function( line ){
+	
+	return this.isPointContained( line.start ) && 
+		   this.isPointContained( line.end );
+};
+
+/**
+ * Tests if the given triangle is fully contained inside the OBB.
+ *
+ * @param {THREE.Triangle} triangle - The triangle to test.
+ * 
+ * @returns {boolean} Is the triangle contained inside the OBB?
+ */
+OBB.prototype.isTriangleContained = function( triangle ){
+	
+	return this.isPointContained( triangle.a ) && 
+		   this.isPointContained( triangle.b ) && 
+		   this.isPointContained( triangle.c );
+};
+
+/**
  * Tests whether this OBB and the given AABB intersect.
  *
  * @param {THREE.Box3} box - The AABB to test.
@@ -241,8 +279,6 @@ OBB.prototype.isIntersectionAABB = function( box ){
 
 /**
  * Tests whether this OBB and the given OBB intersect.
- * 
- * Reference: https://github.com/juj/MathGeoLib/blob/master/src/Geometry/OBB.cpp
  *
  * @param {OBB} box - The OBB to test.
  * 
@@ -281,7 +317,7 @@ OBB.prototype.isIntersectionOBB = ( function(){
 		axisA.push( xAxisA, yAxisA, zAxisA);
 		axisB.push( xAxisB, yAxisB, zAxisB);
 		
-		// get translation vector
+		// get displacement vector
 		vector.subVectors( obb.position , this.position );
 		
 		// express the translation vector in the coordinate frame of the current OBB (this)
@@ -424,5 +460,97 @@ OBB.prototype.isIntersectionOBB = ( function(){
 	};
 	
 } ( ) );
+
+
+/**
+ * Tests whether this OBB and the given plane intersect.
+ *
+ * @param {THREE.Plane} plane - The plane to test.
+ * 
+ * @returns {boolean} Is there an intersection between the given plane and the OBB?
+ */
+OBB.prototype.isIntersectionPlane = (function(){
+	
+	var t = 0, s = 0;
+	
+	var xAxis = new THREE.Vector3();
+	var yAxis = new THREE.Vector3();
+	var zAxis = new THREE.Vector3();
+	
+	return function( plane ){
+		
+		// extract each axis
+		this.basis.extractBasis( xAxis, yAxis, zAxis );
+		
+		// compute the projection interval radius of this OBB onto L(t) = this->pos + x * p.normal;
+		t = this.halfSizes.x * Math.abs( plane.normal.dot( xAxis ) ) +
+			this.halfSizes.y * Math.abs( plane.normal.dot( yAxis ) ) +
+			this.halfSizes.z * Math.abs( plane.normal.dot( zAxis ) );
+		
+		// compute the distance of this OBB center from the plane
+		s = plane.normal.dot( this.position ) - plane.constant;
+		
+		return Math.abs(s) <= t;
+	};
+	
+}());
+
+/**
+ * Tests whether this OBB and the given ray intersect.
+ *
+ * @param {THREE.Ray} ray - The ray to test.
+ * 
+ * @returns {boolean} Is there an intersection between the given ray and the OBB?
+ */
+OBB.prototype.isIntersectionRay = function( ray ){
+	
+	return this.intersectRay(ray) !== null;
+};
+
+/**
+ * Calculates intersection points between this OBB and the given ray.
+ *
+ * @param {THREE.Ray} ray - The ray to test.
+ * 
+ * @returns {THREE.Vector3} The intersection point.
+ */
+OBB.prototype.intersectRay = (function(){
+	
+	var aabb = new THREE.Box3();
+	var rayLocal = new THREE.Ray();
+	var intersection = null;
+	
+	return function( ray ){
+		
+		// set AABB to origin with the size of the OBB
+		aabb.setFromCenterAndSize( new THREE.Vector3(), this.getSize() );
+
+		// transform ray to the local space of the OBB
+		this._updateMatrixWorld();
+		rayLocal.copy( ray );
+		rayLocal.applyMatrix4( new THREE.Matrix4().getInverse( this._matrixWorld ) );
+		
+		// do ray <-> AABB intersection
+		intersection = rayLocal.intersectBox( aabb );
+		
+		if( intersection !== null){
+			// transform the intersection point back to world space
+			intersection.applyMatrix4( this._matrixWorld );
+		}
+		
+		return intersection;
+	};
+	
+}());
+
+/**
+ * Updates the world matrix of the OBB. This matrix contains only
+ * the rotation and translation part of the OBB, no scaling.
+ */
+OBB.prototype._updateMatrixWorld = function(){	
+	
+	this._matrixWorld.copy( this.basis );
+	this._matrixWorld.setPosition( this.position );
+};
 
 module.exports = OBB;

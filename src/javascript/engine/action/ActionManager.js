@@ -50,7 +50,8 @@ function ActionManager() {
 		RAYCASTPRECISION: {
 			value: {
 				AABB: 0,
-				FACE: 1
+				OBB: 1,
+				FACE: 2
 			},
 			configurable: false,
 			enumerable: false,
