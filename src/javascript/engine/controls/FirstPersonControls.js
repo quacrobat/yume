@@ -1087,8 +1087,8 @@ FirstPersonControls.prototype._onMouseMove = (function() {
 		if ( self._isControlsActive === true && self.isActionInProgress === false ){
 			
 			// capture mouse movement
-			movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
-			movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+			movementX = event.movementX || event.mozMovementX || 0;
+			movementY = event.movementY || event.mozMovementY || 0;
 
 			// manipulate rotation of yaw and pitch object
 			self._yawObject.rotation.y -= movementX * ( settingsManager.getMouseSensitivity() * 0.0001 );

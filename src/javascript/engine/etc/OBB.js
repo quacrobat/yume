@@ -50,15 +50,9 @@ function OBB(position, halfSizes, basis) {
 			enumerable: true,
 			writable: true
 		},
-		_matrixWorld: {
-			value: new THREE.Matrix4(),
-			configurable: false,
-			enumerable: false,
-			writable: true
-		},
 		// The OBB-OBB test utilizes a SAT test to detect the intersection. A robust implementation requires
 		// an epsilon threshold to test that the used axes are not degenerate.
-		_epsilon: {
+		_EPSILON: {
 			value: 1e-3,
 			configurable: false,
 			enumerable: false,
@@ -66,11 +60,6 @@ function OBB(position, halfSizes, basis) {
 		}
 	});
 }
-
-OBB.prototype.getSize = function(){
-	
-	return this.halfSizes.clone().multiplyScalar( 2 );
-};
 
 /**
  * Sets the OBB from a mesh. 
@@ -125,7 +114,7 @@ OBB.prototype.setFromObject = (function( ){
 } ( ) );
 
 /**
- * Sets the OBB from an AABB.
+ * Sets the OBB from an Axis-Aligned Bounding Box (AABB).
  * 
  * @param {THREE.Box3} aabb - The AABB to convert to an OBB.
  * 
@@ -149,7 +138,7 @@ OBB.prototype.setFromAABB = function( aabb ){
  * 
  * @returns {OBB} The reference to the OBB.
  */
-OBB.prototype.setFromBS= function( sphere ){
+OBB.prototype.setFromBS = function( sphere ){
 	
 	this.position = sphere.center;
 	
@@ -159,6 +148,53 @@ OBB.prototype.setFromBS= function( sphere ){
 	
 	return this;
 };
+
+/**
+ * Computes the closest point inside the OBB to the given point.
+ *
+ * @param {THREE.Vector3} point - The target point.
+ * 
+ * @returns {THREE.Vector3} The closest point inside the OBB.
+ */
+OBB.prototype.closestPoint = (function( ){
+	
+	var displacement = new THREE.Vector3();
+	var closesPoint = new THREE.Vector3();
+	
+	var xAxis = new THREE.Vector3();
+	var yAxis = new THREE.Vector3();
+	var zAxis = new THREE.Vector3();
+	
+	var axis = [];
+	
+	var index = 0, value = 0;
+	
+	return function( point ){
+		
+		// extract each axis
+		this.basis.extractBasis( xAxis, yAxis, zAxis );
+		
+		// push axis to array
+		axis.push( xAxis, yAxis, zAxis );
+				
+		// calculate displacement vector of targetPoint and center position
+		displacement.subVectors( point, this.position );
+		
+		// start at the center position of the OBB
+		closesPoint.copy( this.position );
+		
+		// project the target onto the OBB axes and walk towards that point
+		for(index = 0; index < 3; index++){
+			
+			value = THREE.Math.clamp( displacement.dot( axis[index] ), -this.halfSizes.getComponent(index), this.halfSizes.getComponent(index) );
+			
+			closesPoint.add( axis[index].multiplyScalar( value ) );
+		}
+		
+		return closesPoint;
+	};
+	
+}());
 
 /**
  * Tests if the given point is fully contained inside the OBB.
@@ -177,7 +213,7 @@ OBB.prototype.isPointContained = ( function( ){
 	
 	return function( point ){
 		
-		// calculate displacement vector of point and center
+		// calculate displacement vector of point and center position
 		displacement.subVectors( point, this.position );
 		
 		// extract each axis
@@ -329,7 +365,7 @@ OBB.prototype.isIntersectionOBB = ( function(){
 		for(i = 0; i < 3; i++){
 			for(var j = 0; j < 3; j++){
 				rotationMatrix[i][j] = axisA[i].dot( axisB[j] );
-				rotationMatrixAbs[i][j] = Math.abs( rotationMatrix[i][j] ) + this._epsilon;
+				rotationMatrixAbs[i][j] = Math.abs( rotationMatrix[i][j] ) + this._EPSILON;
 			}
 		}
 
@@ -461,7 +497,6 @@ OBB.prototype.isIntersectionOBB = ( function(){
 	
 } ( ) );
 
-
 /**
  * Tests whether this OBB and the given plane intersect.
  *
@@ -508,7 +543,7 @@ OBB.prototype.isIntersectionRay = function( ray ){
 };
 
 /**
- * Calculates intersection points between this OBB and the given ray.
+ * Calculates the intersection point between this OBB and the given ray.
  *
  * @param {THREE.Ray} ray - The ray to test.
  * 
@@ -520,22 +555,27 @@ OBB.prototype.intersectRay = (function(){
 	var rayLocal = new THREE.Ray();
 	var intersection = null;
 	
+	var transformationMatrix = new THREE.Matrix4();
+	var transformationMatrixInverse = new THREE.Matrix4();
+	
 	return function( ray ){
 		
 		// set AABB to origin with the size of the OBB
-		aabb.setFromCenterAndSize( new THREE.Vector3(), this.getSize() );
+		aabb.setFromCenterAndSize( new THREE.Vector3(), this.size() );
 
 		// transform ray to the local space of the OBB
-		this._updateMatrixWorld();
+		transformationMatrix.copy( this.basis );
+		transformationMatrix.setPosition( this.position );
+		
 		rayLocal.copy( ray );
-		rayLocal.applyMatrix4( new THREE.Matrix4().getInverse( this._matrixWorld ) );
+		rayLocal.applyMatrix4( transformationMatrixInverse.getInverse( transformationMatrix ) );
 		
 		// do ray <-> AABB intersection
 		intersection = rayLocal.intersectBox( aabb );
 		
 		if( intersection !== null){
 			// transform the intersection point back to world space
-			intersection.applyMatrix4( this._matrixWorld );
+			intersection.applyMatrix4( transformationMatrix );
 		}
 		
 		return intersection;
@@ -544,13 +584,55 @@ OBB.prototype.intersectRay = (function(){
 }());
 
 /**
- * Updates the world matrix of the OBB. This matrix contains only
- * the rotation and translation part of the OBB, no scaling.
+ * Gets the size of the OBB.
+ * 
+ * @returns {THREE.Vector3} The size of the OBB.
  */
-OBB.prototype._updateMatrixWorld = function(){	
+OBB.prototype.size = function(){
 	
-	this._matrixWorld.copy( this.basis );
-	this._matrixWorld.setPosition( this.position );
+	return this.halfSizes.clone().multiplyScalar( 2 );
+};
+
+/**
+ * Translates the OBB in world space.
+ * 
+ * @param {THREE.Vector3} offset - The amount of displacement to apply to this OBB, in world space coordinates.
+ * 
+ * @returns {OBB} The reference to the OBB.
+ */
+OBB.prototype.translate = function( offset ){
+	
+	this.position.add( offset );
+	
+	return this;
+};
+
+/**
+ * Copies the values of a given OBB to the current OBB.
+ * 
+ * @param {OBB} obb - The OBB to copy.
+ * 
+ * @returns {OBB} The reference to the OBB.
+ */
+OBB.prototype.copy = function( obb ){
+	
+	this.position.copy( obb.position );
+	this.halfSizes.copy( obb.halfSizes );
+	this.basis.copy( obb.basis );
+	
+	this._matrixWorld.copy( obb._matrixWorld );
+	
+	return this;
+};
+
+/**
+ * Creates a new instance from the current OBB.
+ * 
+ * @returns {OBB} The new OBB.
+ */
+OBB.prototype.clone = function(){
+	
+	return new OBB().copy( this );
 };
 
 module.exports = OBB;
