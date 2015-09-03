@@ -40687,13 +40687,13 @@ Impostor.prototype.generate = function(){
 
 	this._computeBoundingBox();
 	
-	this._setGeometry();
-	
 	this._prepareCamera();
 	
 	this._prepareProjectionMatrix();
 	
 	this._prepareScene();
+	
+	this._setGeometry();
 	
 	this._render();
 	
@@ -40710,25 +40710,25 @@ Impostor.prototype.generate = function(){
  */
 Impostor.prototype.update = (function(){
 	
-	var front = new THREE.Vector3();
-	var up = new THREE.Vector3(0, 1, 0);
-	var right = new THREE.Vector3();
+	var xAxis = new THREE.Vector3();		  // right
+	var yAxis = new THREE.Vector3( 0, 1, 0 ); // up
+	var zAxis = new THREE.Vector3();		  // front
 	
-	return function(cameraWorldPosition){
+	return function( cameraWorldPosition ){
 		
-		// compute "front" or "look" vector
-		front.subVectors(cameraWorldPosition, this.getWorldPosition());
-		front.y = 0; // this will ensure, that the impostor rotates correctly around the axis
-		front.normalize();
+		// first, compute zAxis 
+		zAxis.subVectors( cameraWorldPosition, this.getWorldPosition() );
+		zAxis.y = 0; // this will ensure, that the impostor rotates correctly around the axis
+		zAxis.normalize();
 		
-		// compute vector "right" out of "up" and "front" vector
-		right.crossVectors(up, front);
+		// compute the last axis with the cross product
+		xAxis.crossVectors( yAxis, zAxis );
 		
 		// create new matrix from basis vectors
-		this.matrix.makeBasis(right, up, front);
+		this.matrix.makeBasis( xAxis, yAxis, zAxis );
 		
 		// apply the position
-		this.matrix.setPosition(this.position);
+		this.matrix.setPosition( this.position );
 		
 		// force world matrix to update
 		this.matrixWorldNeedsUpdate = true;
@@ -40745,19 +40745,6 @@ Impostor.prototype._computeBoundingBox = function(){
 };
 
 /**
- * Sets the geometry of impostor.
- */
-Impostor.prototype._setGeometry = function(){
-	
-	// calculate the dimensions of the geometry
-	var width =  this._boundingBox.max.x - this._boundingBox.min.x;
-	var height = this._boundingBox.max.y - this._boundingBox.min.y;
-
-	// assign geometry and material
-	this.geometry = new THREE.PlaneBufferGeometry(width, height);
-};
-
-/**
  * Prepares the camera for rendering.
  */
 Impostor.prototype._prepareCamera = function(){
@@ -40769,6 +40756,11 @@ Impostor.prototype._prepareCamera = function(){
 	this._camera.updateMatrix();
 	this._camera.updateMatrixWorld();
 	this._camera.matrixWorldInverse.getInverse(this._camera.matrixWorld);
+	
+	// apply the inverse rotation of the camera the bounding box to avoid perspective problems
+	var rotation = new THREE.Matrix4();
+	this._camera.matrixWorldInverse.extractRotation( rotation );
+	this._boundingBox.applyMatrix4( rotation );
 };
 
 /**
@@ -40789,7 +40781,7 @@ Impostor.prototype._prepareProjectionMatrix = function(){
 	              new THREE.Vector3()
 	              ];
 	
-	var minX = 0, minY = 0, maxX = 0, maxY = 0;
+	var maxX = 0, maxY = 0;
 	
 	// calculate each point of the bounding box
 	points[0].set( this._boundingBox.min.x, this._boundingBox.min.y, this._boundingBox.min.z );
@@ -40811,36 +40803,27 @@ Impostor.prototype._prepareProjectionMatrix = function(){
 	points[6].applyMatrix4( this._camera.matrixWorldInverse ).applyProjection( this._camera.projectionMatrix );
 	points[7].applyMatrix4( this._camera.matrixWorldInverse ).applyProjection( this._camera.projectionMatrix );
 	
-	// determine min/max values of x and y coordinate
+	// determine max values of x and y coordinate
 	// these coordinates form the scissor rectangle of the object (in [-1,1] range)
 	for(var index = 0; index < points.length; index++){
-		
-		minX = Math.min(minX, points[index].x);
-		minY = Math.min(minY, points[index].y);
 		
 		maxX = Math.max(maxX, points[index].x);
 		maxY = Math.max(maxY, points[index].y);
 	}
-	
-	// create new projection matrix
-	var projectionMatrix = new THREE.Matrix4();
-	
+
 	// calculate new frustum
 	var frustumHeight = this._camera.near * Math.tan( THREE.Math.degToRad( this._camera.fov * 0.5 ) );
-	var frustumWidth = frustumHeight * this._camera.aspect;
+	var frustumWidth  = frustumHeight * this._camera.aspect;
 
-	// multiplying the parameter with the calculated min/max values 
-	// should set the frustum so that width and height are equal to
+	// multiplying the parameter with the calculated max values 
+	// should set the frustum, that width and height are equal to
 	// the bounding rectangle of the 3D object.
-	projectionMatrix.makeFrustum( frustumWidth * minX, 
-								  frustumWidth * maxX,  
-								  frustumHeight * minY, 
-								  frustumHeight * maxY, 
-								  this._camera.near, 
-								  this._camera.far );
-	
-	// assign new matrix
-	this._camera.projectionMatrix = projectionMatrix;
+	this._camera.projectionMatrix.makeFrustum( -frustumWidth  * maxX, 
+											    frustumWidth  * maxX,  
+											   -frustumHeight * maxY,
+											    frustumHeight * maxY, 
+											    this._camera.near, 
+											    this._camera.far);
 };
 
 /**
@@ -40860,6 +40843,19 @@ Impostor.prototype._prepareScene = function(){
 	
 	// add all light source
 	Array.prototype.push.apply(this._scene.children, this._lights);
+};
+
+/**
+ * Sets the geometry of impostor.
+ */
+Impostor.prototype._setGeometry = function(){
+	
+	// calculate the dimensions of the geometry
+	var width =  this._boundingBox.max.x - this._boundingBox.min.x;
+	var height = this._boundingBox.max.y - this._boundingBox.min.y;
+
+	// assign geometry and material
+	this.geometry = new THREE.PlaneBufferGeometry(width, height);
 };
 
 /**
