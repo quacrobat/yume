@@ -203,17 +203,18 @@ PerformanceManager.prototype.update = function(){
 };
 
 /**
- * Generates all impostors.
+ * Generates all impostors. Because the geometry of impostors changes over time,
+ * it's necessary to create new (impostor) meshes every time. These meshes are
+ * replaced with the old ones, via adding and removing to the scene object.
  */
 PerformanceManager.prototype.generateImpostors = function(){
 	
 	// clone camera object
 	var impostorCamera = camera.clone();
 	
-	// set world position of the impostor camera
-	// that's necessary because the clone does not regard parent objects
+	// ensure the position of the camera is in world coordinates
 	var cameraWorldPosition = camera.getWorldPosition();
-	impostorCamera.position.set(cameraWorldPosition.x, cameraWorldPosition.y, cameraWorldPosition.z);
+	impostorCamera.position.set( cameraWorldPosition.x, cameraWorldPosition.y, cameraWorldPosition.z );
 	
 	// create an array with the entire lighting of the actual scene
 	var lights = [];
@@ -227,11 +228,19 @@ PerformanceManager.prototype.generateImpostors = function(){
 	// generate each impostor
 	for(index = 0; index < this._impostors.length; index++){
 		
+		// remove old impostor
+		if( this._impostors[index].mesh !== null ){
+			scene.remove( this._impostors[index].mesh );
+		}
+		
 		// prepare the generation...
 		this._impostors[index].prepareGeneration(renderer, impostorCamera, lights);
 		
 		// ...and run it
 		this._impostors[index].generate();
+		
+		// add new mesh to scene
+		scene.add( this._impostors[index].mesh );
 	}
 };
 
