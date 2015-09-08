@@ -4,11 +4,6 @@
  * object from the current viewpoint into an image texture, which is mapped
  * on the billboard.
  * 
- * Note: This prototype is not ready for production use. There are still
- * some bugs when rendering the billboard texture.
- * 
- * see http://stackoverflow.com/questions/32135694/impostor-rendering-with-three-js
- * 
  * see: Real-Time Rendering, Third Edition, Akenine-Möller/Haines/Hoffman
  * Chapter 10.7.1, Impostors
  * 
