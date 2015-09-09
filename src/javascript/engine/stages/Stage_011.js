@@ -6,11 +6,11 @@ var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
 var Easing = require("../animation/Easing");
 
-var self, box, sphere;
+var self;
 
 function Stage(){
 	
-	StageBase.call(this, "010");
+	StageBase.call(this, "011");
 	
 	self = this;
 }
@@ -43,25 +43,6 @@ Stage.prototype.setup = function(){
 	
 	// color faces
 	colorFaces(groundGeometry);
-	
-	// create first mesh for impostor demo
-	sphere = new THREE.Mesh( new THREE.SphereGeometry(10, 25, 25), new THREE.MeshLambertMaterial( { color: 0x6083c2 } ));
-	sphere.matrixAutoUpdate = false;
-	sphere.position.set(-20, 10, 0);
-	sphere.updateMatrix();
-	sphere.visible = false;
-	this.scene.add( sphere );
-	
-	// create second mesh for impostor demo
-	box = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10), new THREE.MeshLambertMaterial( { color: 0x6083c2 } ));
-	box.matrixAutoUpdate = false;
-	box.position.set(20, 10, 0);
-	box.updateMatrix();
-	box.visible = false;
-	this.scene.add( box );
-	
-	this.performanceManager.createImpostor("sphere", sphere, 512);
-	this.performanceManager.createImpostor("box", box, 512);
 	
 	// add sign
 	var signLoader = new JSONLoader();
@@ -100,13 +81,23 @@ Stage.prototype.setup = function(){
 	// add trigger for ending
 	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
 
-		self._changeStage("011", true);
+ 		self.userInterfaceManager.showModalDialog({
+			headline: "Modal.Headline",
+			button: "Modal.Button",
+			content: "Modal.Content"
+		});
+		
+		self.saveGameManager.remove();
 	});
 	stageTrigger.position.set(0, 0, 75);
 	this.scene.add(stageTrigger);
 	
-	// generate impostors
-	this.performanceManager.generateImpostors();
+	// post processing
+	this.renderer.preparePostProcessing( this.scene, this.camera );
+	this.renderer.addGrayscaleEffect();
+	this.renderer.addHBlurEffect();
+	this.renderer.addVBlurEffect();
+	this.renderer.addVignetteEffect( { renderToScreen: true } );
 
 	// start rendering
 	this._render();
@@ -118,17 +109,11 @@ Stage.prototype.start = function(){
 	
 	// set information panel text
 	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
-	
-	// add special event handler for demo
-	global.document.addEventListener("keydown", onKeyDown);
 };
 
 Stage.prototype.destroy = function(){
 	
 	StageBase.prototype.destroy.call(this);
-	
-	// remove special event handler for demo
-	global.document.removeEventListener("keydown", onKeyDown);
 };
 
 Stage.prototype._render = function(){
@@ -147,22 +132,6 @@ function colorFaces(geometry){
 		}else{
 			geometry.faces[i].color = new THREE.Color(0x455066);
 		}
-	}
-}
-
-function onKeyDown(event){
-	
-	switch (event.keyCode) {
-		case 73:
-			// i
-			sphere.visible = !sphere.visible;
-			box.visible = !box.visible;
-			break;
-		case 71:
-			// g
-			self.performanceManager.generateImpostors();
-			console.log("generate impostor");
-			break;
 	}
 }
 

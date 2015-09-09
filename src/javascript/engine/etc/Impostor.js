@@ -107,10 +107,6 @@ function Impostor( id, sourceObject, resolution ) {
 	
 	// create render target
 	this._renderTarget = new THREE.WebGLRenderTarget( this.resolution, this.resolution, {format: THREE.RGBAFormat});
-	
-	// assign the render target to the material. 
-	// the alphaTest parameter avoids semi-transparent black borders of the billboard.
-	this.material = new THREE.MeshBasicMaterial({map: this._renderTarget, transparent: true, alphaTest: 0.9}); 
 }
 
 /**
@@ -120,18 +116,22 @@ function Impostor( id, sourceObject, resolution ) {
  * @param {Camera} camera - The camera object.
  * @param {object} lights - The lights of the stage.
  */
-Impostor.prototype.prepareGeneration = function(renderer, camera, lights){
+Impostor.prototype.prepareGeneration = function( renderer, camera, lights ){
 
+	// constant for all impostors
 	this._renderer = renderer;
-	this._camera = camera;
 	this._lights = lights;
+	
+	// the matrices of the camera get transformed, so it's necessary to clone it
+	this._camera = camera.clone(); 
 	
 	// create new mesh and apply impostor material
 	this.mesh = new THREE.Mesh();
-	this.mesh.material = this.material;
 	
-	// the model matrix is calculated by the impostor
-	// so disable the automatic update
+	// apply material. the alpha value avoids semi-transparent black borders at the billboard
+	this.mesh.material = new THREE.MeshBasicMaterial({map: this._renderTarget, transparent: true, alphaTest: 0.9});
+	
+	// the model matrix is calculated by the impostor so disable the automatic update
 	this.mesh.matrixAutoUpdate = false;
 };
 
@@ -216,20 +216,21 @@ Impostor.prototype._computeViewMatrix = function(){
 };
 
 /**
- * Computes the bounding rectangle of the impostor.
+ * Computes the bounding rectangle of the impostor. 
+ * This 2D bounding box is the impostor in screen-space.
  */
 Impostor.prototype._computeBoundingRectangle = function(){
 
 	var points = [
-		          new THREE.Vector3(),
-		          new THREE.Vector3(),
-		          new THREE.Vector3(),
-		          new THREE.Vector3(),
-		          new THREE.Vector3(),
-		          new THREE.Vector3(),
-		          new THREE.Vector3(),
-		          new THREE.Vector3()
-		          ];
+		  new THREE.Vector3(),
+		  new THREE.Vector3(),
+		  new THREE.Vector3(),
+		  new THREE.Vector3(),
+		  new THREE.Vector3(),
+		  new THREE.Vector3(),
+		  new THREE.Vector3(),
+		  new THREE.Vector3()
+	];
 	
 	// calculate each point of the bounding box
 	points[0].set( this._boundingBox.min.x, this._boundingBox.min.y, this._boundingBox.min.z );
@@ -261,7 +262,7 @@ Impostor.prototype._computeBoundingRectangle = function(){
 
 /**
  * Computes the position of the impostor. The center point of the bounding
- * rectangle will provide the exact value for this.
+ * rectangle in world space will provide the exact value.
  */
 Impostor.prototype._computePosition = function(){
 	
@@ -283,63 +284,68 @@ Impostor.prototype._computeGeometry = ( function(){
 	
 	var geometry, index;
 	
-	var transformationMatrix = new THREE.Matrix4();
+	var translationMatrix = new THREE.Matrix4();
+	var rotationMatrix = new THREE.Matrix4();
 	
+	// create point array
 	var points = [ 
-	               new THREE.Vector3(),
-		           new THREE.Vector3(),
-		           new THREE.Vector3(),
-		           new THREE.Vector3()
-	];
-	
-	// faces for the plane
-	var faces = [ new THREE.Face3( 0, 2, 1 ), new THREE.Face3( 2, 3, 1 ) ];
-	
-	// uvs for the plane
-	var faceVertexUvsOne = [ new THREE.Vector2(0,0), new THREE.Vector2(1,0), new THREE.Vector2(0,1) ];
-	var faceVertexUvsTwo = [ new THREE.Vector2(1,0), new THREE.Vector2(1,1), new THREE.Vector2(0,1) ];
+          new THREE.Vector3(),
+          new THREE.Vector3(),
+          new THREE.Vector3(),
+          new THREE.Vector3()
+   	];
+			
+	// create shared buffers for indices and uvs
+	var indices = new Uint16Array( [ 0, 2, 1, 2, 3, 1 ] ); // fix values
+	var uvs 	= new Float32Array( [ 0, 0, 0, 1, 1, 0, 1, 1 ] ); // fix values
 	
 	return function(){
 		
 		// create new geometry
-		geometry = new THREE.Geometry();
+		geometry = new THREE.BufferGeometry();
 		
-		// get the points of the bounding rectangle
+		// create vertex buffer, unique for each impostor
+		var vertices = new Float32Array( 12 );
+		
+		// get the points of the bounding rectangle	
 		points[0].set( this._boundingRectangle.min.x, this._boundingRectangle.min.y, this._depth );
 		points[1].set( this._boundingRectangle.min.x, this._boundingRectangle.max.y, this._depth );
 		points[2].set( this._boundingRectangle.max.x, this._boundingRectangle.min.y, this._depth );
 		points[3].set( this._boundingRectangle.max.x, this._boundingRectangle.max.y, this._depth );
-		
+
 		// set vertices
 		for( index = 0; index < points.length; index++ ){
 			
 			// transform point from screen space to world space
 			points[index].unproject( this._camera );
-			geometry.vertices.push( points[index]);
+			
+			// set the vertices of the bounding rectangle
+			vertices[ index * 3 + 0 ] = points[index].x;
+			vertices[ index * 3 + 1 ] = points[index].y;
+			vertices[ index * 3 + 2 ] = points[index].z;
 		}
 		
-		// set faces
-		geometry.faces = faces;
+		// add vertices, indices and uvs to geometry
+		geometry.addAttribute( "position", new THREE.BufferAttribute( vertices, 3 ) );
+		geometry.addAttribute( "index", new THREE.BufferAttribute( indices, 1 ) );
+		geometry.addAttribute( "uv", new THREE.BufferAttribute( uvs, 2 ) );
 		
-		// set uvs
-		geometry.faceVertexUvs[0].push( faceVertexUvsOne );
-		geometry.faceVertexUvs[0].push( faceVertexUvsTwo );
-		
-		// prepare transformation matrix
-		transformationMatrix.identity();
+		// prepare matrices
+		translationMatrix.identity();
+		rotationMatrix.identity();
 		
 		// reset the center of the geometry back to origin
-		transformationMatrix.makeTranslation( -this.mesh.position.x, -this.mesh.position.y, -this.mesh.position.z );
+		translationMatrix.makeTranslation( -this.mesh.position.x, -this.mesh.position.y, -this.mesh.position.z );
 		
 		// undo rotation of the view transform
-		transformationMatrix.extractRotation( this._camera.matrixWorldInverse );
+		rotationMatrix.extractRotation( this._camera.matrixWorldInverse );
 		
 		// reset geometry
-		geometry.applyMatrix( transformationMatrix );
+		geometry.applyMatrix( translationMatrix );
+		geometry.applyMatrix( rotationMatrix );
 		
-		// create geometry
+		// apply geometry
 		this.mesh.geometry = geometry;
-	
 	};
 	
 } () );
@@ -395,12 +401,11 @@ Impostor.prototype._render = function(){
 	var clearColor = this._renderer.getClearColor();
 	var clearAlpha = this._renderer.getClearAlpha();
 	
-	// the following clear color ensures
-	// that the rendered texture has transparency
-	this._renderer.setClearColor(0x000000, 0);
+	// the following clear ensures that the rendered texture has transparency
+	this._renderer.setClearColor( 0x000000, 0 );
 	
 	// render to target
-	this._renderer.render(this._scene, this._camera, this._renderTarget, true);
+	this._renderer.render( this._scene, this._camera, this._renderTarget, true );
 	
 	// restore clear values
 	this._renderer.setClearColor(clearColor, clearAlpha);

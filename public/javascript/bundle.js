@@ -39088,7 +39088,7 @@ FirstPersonControls.RUN = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":6,"../animation/Easing":12,"../audio/AudioManager":16,"../core/Camera":20,"../core/Scene":24,"../etc/SettingsManager":39,"../etc/Utils":41,"../ui/UserInterfaceManager":69,"pubsub-js":1,"three":2}],19:[function(require,module,exports){
+},{"../action/ActionManager":6,"../animation/Easing":12,"../audio/AudioManager":16,"../core/Camera":20,"../core/Scene":24,"../etc/SettingsManager":39,"../etc/Utils":41,"../ui/UserInterfaceManager":70,"pubsub-js":1,"three":2}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting
@@ -39183,7 +39183,7 @@ Bootstrap.prototype._loadStage = function(){
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":18,"../etc/MultiplayerManager":32,"../etc/NetworkManager":33,"../etc/SaveGameManager":38,"../etc/Utils":41,"../ui/UserInterfaceManager":69,"./Camera":20,"./Environment":21,"./Renderer":23,"pubsub-js":1}],20:[function(require,module,exports){
+},{"../controls/FirstPersonControls":18,"../etc/MultiplayerManager":32,"../etc/NetworkManager":33,"../etc/SaveGameManager":38,"../etc/Utils":41,"../ui/UserInterfaceManager":70,"./Camera":20,"./Environment":21,"./Renderer":23,"pubsub-js":1}],20:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -40055,7 +40055,7 @@ StageBase.prototype._changeStage = function(stageId, isSaveGame){
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":16,"../controls/FirstPersonControls":18,"../etc/PerformanceManager":36,"../etc/SaveGameManager":38,"../etc/SettingsManager":39,"../etc/TextManager":40,"../etc/Utils":41,"../ui/UserInterfaceManager":69,"./Camera":20,"./Renderer":23,"./Scene":24,"pubsub-js":1,"three":2}],26:[function(require,module,exports){
+},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":16,"../controls/FirstPersonControls":18,"../etc/PerformanceManager":36,"../etc/SaveGameManager":38,"../etc/SettingsManager":39,"../etc/TextManager":40,"../etc/Utils":41,"../ui/UserInterfaceManager":70,"./Camera":20,"./Renderer":23,"./Scene":24,"pubsub-js":1,"three":2}],26:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -40082,6 +40082,7 @@ var Stage_007 = require("../stages/Stage_007");
 var Stage_008 = require("../stages/Stage_008");
 var Stage_009 = require("../stages/Stage_009");
 var Stage_010 = require("../stages/Stage_010");
+var Stage_011 = require("../stages/Stage_011");
 
 /**
  * Creates the stage manager.
@@ -40190,6 +40191,11 @@ StageManager.prototype.load = function(stageId) {
 		case "010":
 			
 			this._stage = new Stage_010();
+			break;
+			
+		case "011":
+			
+			this._stage = new Stage_011();
 			break;
 			
 		default:
@@ -40339,7 +40345,7 @@ StageManager.prototype._onLoadComplete = function(message, data){
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":38,"../etc/Utils":41,"../stages/Stage_001":49,"../stages/Stage_002":50,"../stages/Stage_003":51,"../stages/Stage_004":52,"../stages/Stage_005":53,"../stages/Stage_006":54,"../stages/Stage_007":55,"../stages/Stage_008":56,"../stages/Stage_009":57,"../stages/Stage_010":58,"../ui/UserInterfaceManager":69,"pubsub-js":1}],27:[function(require,module,exports){
+},{"../etc/SaveGameManager":38,"../etc/Utils":41,"../stages/Stage_001":49,"../stages/Stage_002":50,"../stages/Stage_003":51,"../stages/Stage_004":52,"../stages/Stage_005":53,"../stages/Stage_006":54,"../stages/Stage_007":55,"../stages/Stage_008":56,"../stages/Stage_009":57,"../stages/Stage_010":58,"../stages/Stage_011":59,"../ui/UserInterfaceManager":70,"pubsub-js":1}],27:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It 
@@ -40665,10 +40671,6 @@ function Impostor( id, sourceObject, resolution ) {
 	
 	// create render target
 	this._renderTarget = new THREE.WebGLRenderTarget( this.resolution, this.resolution, {format: THREE.RGBAFormat});
-	
-	// assign the render target to the material. 
-	// the alphaTest parameter avoids semi-transparent black borders of the billboard.
-	this.material = new THREE.MeshBasicMaterial({map: this._renderTarget, transparent: true, alphaTest: 0.9}); 
 }
 
 /**
@@ -40678,18 +40680,22 @@ function Impostor( id, sourceObject, resolution ) {
  * @param {Camera} camera - The camera object.
  * @param {object} lights - The lights of the stage.
  */
-Impostor.prototype.prepareGeneration = function(renderer, camera, lights){
+Impostor.prototype.prepareGeneration = function( renderer, camera, lights ){
 
+	// constant for all impostors
 	this._renderer = renderer;
-	this._camera = camera;
 	this._lights = lights;
+	
+	// the matrices of the camera get transformed, so it's necessary to clone it
+	this._camera = camera.clone(); 
 	
 	// create new mesh and apply impostor material
 	this.mesh = new THREE.Mesh();
-	this.mesh.material = this.material;
 	
-	// the model matrix is calculated by the impostor
-	// so disable the automatic update
+	// apply material. the alpha value avoids semi-transparent black borders at the billboard
+	this.mesh.material = new THREE.MeshBasicMaterial({map: this._renderTarget, transparent: true, alphaTest: 0.9});
+	
+	// the model matrix is calculated by the impostor so disable the automatic update
 	this.mesh.matrixAutoUpdate = false;
 };
 
@@ -40774,20 +40780,21 @@ Impostor.prototype._computeViewMatrix = function(){
 };
 
 /**
- * Computes the bounding rectangle of the impostor.
+ * Computes the bounding rectangle of the impostor. 
+ * This 2D bounding box is the impostor in screen-space.
  */
 Impostor.prototype._computeBoundingRectangle = function(){
 
 	var points = [
-		          new THREE.Vector3(),
-		          new THREE.Vector3(),
-		          new THREE.Vector3(),
-		          new THREE.Vector3(),
-		          new THREE.Vector3(),
-		          new THREE.Vector3(),
-		          new THREE.Vector3(),
-		          new THREE.Vector3()
-		          ];
+		  new THREE.Vector3(),
+		  new THREE.Vector3(),
+		  new THREE.Vector3(),
+		  new THREE.Vector3(),
+		  new THREE.Vector3(),
+		  new THREE.Vector3(),
+		  new THREE.Vector3(),
+		  new THREE.Vector3()
+	];
 	
 	// calculate each point of the bounding box
 	points[0].set( this._boundingBox.min.x, this._boundingBox.min.y, this._boundingBox.min.z );
@@ -40819,7 +40826,7 @@ Impostor.prototype._computeBoundingRectangle = function(){
 
 /**
  * Computes the position of the impostor. The center point of the bounding
- * rectangle will provide the exact value for this.
+ * rectangle in world space will provide the exact value.
  */
 Impostor.prototype._computePosition = function(){
 	
@@ -40841,63 +40848,68 @@ Impostor.prototype._computeGeometry = ( function(){
 	
 	var geometry, index;
 	
-	var transformationMatrix = new THREE.Matrix4();
+	var translationMatrix = new THREE.Matrix4();
+	var rotationMatrix = new THREE.Matrix4();
 	
+	// create point array
 	var points = [ 
-	               new THREE.Vector3(),
-		           new THREE.Vector3(),
-		           new THREE.Vector3(),
-		           new THREE.Vector3()
-	];
-	
-	// faces for the plane
-	var faces = [ new THREE.Face3( 0, 2, 1 ), new THREE.Face3( 2, 3, 1 ) ];
-	
-	// uvs for the plane
-	var faceVertexUvsOne = [ new THREE.Vector2(0,0), new THREE.Vector2(1,0), new THREE.Vector2(0,1) ];
-	var faceVertexUvsTwo = [ new THREE.Vector2(1,0), new THREE.Vector2(1,1), new THREE.Vector2(0,1) ];
+          new THREE.Vector3(),
+          new THREE.Vector3(),
+          new THREE.Vector3(),
+          new THREE.Vector3()
+   	];
+			
+	// create shared buffers for indices and uvs
+	var indices = new Uint16Array( [ 0, 2, 1, 2, 3, 1 ] ); // fix values
+	var uvs 	= new Float32Array( [ 0, 0, 0, 1, 1, 0, 1, 1 ] ); // fix values
 	
 	return function(){
 		
 		// create new geometry
-		geometry = new THREE.Geometry();
+		geometry = new THREE.BufferGeometry();
 		
-		// get the points of the bounding rectangle
+		// create vertex buffer, unique for each impostor
+		var vertices = new Float32Array( 12 );
+		
+		// get the points of the bounding rectangle	
 		points[0].set( this._boundingRectangle.min.x, this._boundingRectangle.min.y, this._depth );
 		points[1].set( this._boundingRectangle.min.x, this._boundingRectangle.max.y, this._depth );
 		points[2].set( this._boundingRectangle.max.x, this._boundingRectangle.min.y, this._depth );
 		points[3].set( this._boundingRectangle.max.x, this._boundingRectangle.max.y, this._depth );
-		
+
 		// set vertices
 		for( index = 0; index < points.length; index++ ){
 			
 			// transform point from screen space to world space
 			points[index].unproject( this._camera );
-			geometry.vertices.push( points[index]);
+			
+			// set the vertices of the bounding rectangle
+			vertices[ index * 3 + 0 ] = points[index].x;
+			vertices[ index * 3 + 1 ] = points[index].y;
+			vertices[ index * 3 + 2 ] = points[index].z;
 		}
 		
-		// set faces
-		geometry.faces = faces;
+		// add vertices, indices and uvs to geometry
+		geometry.addAttribute( "position", new THREE.BufferAttribute( vertices, 3 ) );
+		geometry.addAttribute( "index", new THREE.BufferAttribute( indices, 1 ) );
+		geometry.addAttribute( "uv", new THREE.BufferAttribute( uvs, 2 ) );
 		
-		// set uvs
-		geometry.faceVertexUvs[0].push( faceVertexUvsOne );
-		geometry.faceVertexUvs[0].push( faceVertexUvsTwo );
-		
-		// prepare transformation matrix
-		transformationMatrix.identity();
+		// prepare matrices
+		translationMatrix.identity();
+		rotationMatrix.identity();
 		
 		// reset the center of the geometry back to origin
-		transformationMatrix.makeTranslation( -this.mesh.position.x, -this.mesh.position.y, -this.mesh.position.z );
+		translationMatrix.makeTranslation( -this.mesh.position.x, -this.mesh.position.y, -this.mesh.position.z );
 		
 		// undo rotation of the view transform
-		transformationMatrix.extractRotation( this._camera.matrixWorldInverse );
+		rotationMatrix.extractRotation( this._camera.matrixWorldInverse );
 		
 		// reset geometry
-		geometry.applyMatrix( transformationMatrix );
+		geometry.applyMatrix( translationMatrix );
+		geometry.applyMatrix( rotationMatrix );
 		
-		// create geometry
+		// apply geometry
 		this.mesh.geometry = geometry;
-	
 	};
 	
 } () );
@@ -40953,12 +40965,11 @@ Impostor.prototype._render = function(){
 	var clearColor = this._renderer.getClearColor();
 	var clearAlpha = this._renderer.getClearAlpha();
 	
-	// the following clear color ensures
-	// that the rendered texture has transparency
-	this._renderer.setClearColor(0x000000, 0);
+	// the following clear ensures that the rendered texture has transparency
+	this._renderer.setClearColor( 0x000000, 0 );
 	
 	// render to target
-	this._renderer.render(this._scene, this._camera, this._renderTarget, true);
+	this._renderer.render( this._scene, this._camera, this._renderTarget, true );
 	
 	// restore clear values
 	this._renderer.setClearColor(clearColor, clearAlpha);
@@ -42564,22 +42575,25 @@ PerformanceManager.prototype.generateImpostors = function(){
 	// create an array with the entire lighting of the actual scene
 	var lights = [];
 	
-	for(var index = 0; index < scene.children.length; index++){
-		if(scene.children[index] instanceof THREE.Light){
-			lights.push(scene.children[index].clone());
+	for( var index = 0; index < scene.children.length; index++ ){
+		
+		if( scene.children[index] instanceof THREE.Light ){
+			
+			lights.push( scene.children[index] );
 		}
 	}
 	
 	// generate each impostor
-	for(index = 0; index < this._impostors.length; index++){
+	for( index = 0; index < this._impostors.length; index++ ){
 		
 		// remove old impostor
 		if( this._impostors[index].mesh !== null ){
+			
 			scene.remove( this._impostors[index].mesh );
 		}
 		
 		// prepare the generation...
-		this._impostors[index].prepareGeneration(renderer, impostorCamera, lights);
+		this._impostors[index].prepareGeneration( renderer, impostorCamera, lights );
 		
 		// ...and run it
 		this._impostors[index].generate();
@@ -45311,6 +45325,178 @@ function showLODCircles(scene){
 
 module.exports = Stage;
 },{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],58:[function(require,module,exports){
+(function (global){
+"use strict";
+
+var THREE = require("three");
+
+var StageBase = require("../core/StageBase");
+var JSONLoader = require("../etc/JSONLoader");
+var Easing = require("../animation/Easing");
+
+var self, box, sphere;
+
+function Stage(){
+	
+	StageBase.call(this, "010");
+	
+	self = this;
+}
+
+Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype.constructor = Stage;
+
+Stage.prototype.setup = function(){
+	
+	StageBase.prototype.setup.call(this);
+	
+	// controls setup
+	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
+	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
+	
+	// load texts
+	this.textManager.load(this.stageId);
+	
+	// add ground
+	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
+	var groundMaterial = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
+	
+	var ground = new THREE.Mesh(groundGeometry, groundMaterial);
+	ground.matrixAutoUpdate = false;
+	ground.rotation.x = -0.5 * Math.PI;
+	ground.updateMatrix();
+	ground.receiveShadow = true;
+	this.controls.addGround(ground);
+	this.scene.add(ground);
+	
+	// color faces
+	colorFaces(groundGeometry);
+	
+	// create first mesh for impostor demo
+	sphere = new THREE.Mesh( new THREE.SphereGeometry(10, 25, 25), new THREE.MeshLambertMaterial( { color: 0x6083c2 } ));
+	sphere.matrixAutoUpdate = false;
+	sphere.position.set(-20, 10, 0);
+	sphere.updateMatrix();
+	sphere.visible = false;
+	this.scene.add( sphere );
+	
+	// create second mesh for impostor demo
+	box = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10), new THREE.MeshLambertMaterial( { color: 0x6083c2 } ));
+	box.matrixAutoUpdate = false;
+	box.position.set(20, 10, 0);
+	box.updateMatrix();
+	box.visible = false;
+	this.scene.add( box );
+	
+	this.performanceManager.createImpostor("sphere", sphere, 512);
+	this.performanceManager.createImpostor("box", box, 512);
+	
+	// add sign
+	var signLoader = new JSONLoader();
+	signLoader.load("assets/models/sign.json",  function(geometry, materials) {
+		
+		self.settingsManager.adjustMaterials(materials, self.renderer);
+		
+		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
+		sign.position.set(0, 20, 75);
+		sign.rotation.set(0, Math.PI * -0.5, 0);
+		self.scene.add(sign);
+		
+		self.animationManager.createHoverAnimation({
+			object: sign.position,
+			property: "y",
+			duration: 5000,
+			start: sign.position.y,
+			end: sign.position.y + 5,
+			easing: Easing.Sinusoidal.InOut
+		}).play();
+	});
+	
+	// light
+	var ambientLight = new THREE.AmbientLight(0x111111);
+	this.scene.add(ambientLight);
+	
+	var directionalLight = new THREE.DirectionalLight(0xffffff);
+	directionalLight.position.set(-100, 50, -100);
+	directionalLight.shadowCameraLeft = -40;
+	directionalLight.shadowCameraRight = 40;
+	directionalLight.shadowCameraTop = 40;
+	directionalLight.shadowCameraBottom = -40;
+	this.settingsManager.adjustLight(directionalLight);
+	this.scene.add(directionalLight);
+	
+	// add trigger for ending
+	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
+
+		self._changeStage("011", true);
+	});
+	stageTrigger.position.set(0, 0, 75);
+	this.scene.add(stageTrigger);
+	
+	// generate impostors
+	this.performanceManager.generateImpostors();
+
+	// start rendering
+	this._render();
+};
+
+Stage.prototype.start = function(){
+	
+	StageBase.prototype.start.call(this);
+	
+	// set information panel text
+	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
+	
+	// add special event handler for demo
+	global.document.addEventListener("keydown", onKeyDown);
+};
+
+Stage.prototype.destroy = function(){
+	
+	StageBase.prototype.destroy.call(this);
+	
+	// remove special event handler for demo
+	global.document.removeEventListener("keydown", onKeyDown);
+};
+
+Stage.prototype._render = function(){
+	
+	StageBase.prototype._render.call(self);
+};
+
+//custom functions
+
+function colorFaces(geometry){
+	
+	for (var i = 0; i < geometry.faces.length; i ++){
+		
+		if(i % 2 === 0){
+			geometry.faces[i].color = new THREE.Color(0x6083c2);
+		}else{
+			geometry.faces[i].color = new THREE.Color(0x455066);
+		}
+	}
+}
+
+function onKeyDown(event){
+	
+	switch (event.keyCode) {
+		case 73:
+			// i
+			sphere.visible = !sphere.visible;
+			box.visible = !box.visible;
+			break;
+		case 71:
+			// g
+			self.performanceManager.generateImpostors();
+			console.log("generate impostor");
+			break;
+	}
+}
+
+module.exports = Stage;
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],59:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -45323,7 +45509,7 @@ var self;
 
 function Stage(){
 	
-	StageBase.call(this, "010");
+	StageBase.call(this, "011");
 	
 	self = this;
 }
@@ -45449,7 +45635,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],59:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],60:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -45623,7 +45809,7 @@ Chat.prototype._onMessage = function(message, data){
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":68,"pubsub-js":1}],60:[function(require,module,exports){
+},{"./UiElement":69,"pubsub-js":1}],61:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel.
@@ -45687,7 +45873,7 @@ DevelopmentPanel.prototype.setText = function(text){
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":68}],61:[function(require,module,exports){
+},{"./UiElement":69}],62:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -45748,7 +45934,7 @@ InformationPanel.prototype.setText = function(textKey){
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":68}],62:[function(require,module,exports){
+},{"./UiElement":69}],63:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -45823,7 +46009,7 @@ InteractionLabel.prototype.hide = function(){
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":68}],63:[function(require,module,exports){
+},{"./UiElement":69}],64:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -46008,7 +46194,7 @@ LoadingScreen.prototype._onReady = function(message, data){
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":68,"pubsub-js":1}],64:[function(require,module,exports){
+},{"./UiElement":69,"pubsub-js":1}],65:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -46159,7 +46345,7 @@ Menu.prototype._publishFinishEvent = function(message, data){
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":41,"./UiElement":68,"pubsub-js":1}],65:[function(require,module,exports){
+},{"../etc/Utils":41,"./UiElement":69,"pubsub-js":1}],66:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -46286,7 +46472,7 @@ ModalDialog.prototype._onClose = function(event){
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":41,"./UiElement":68,"pubsub-js":1}],66:[function(require,module,exports){
+},{"../etc/Utils":41,"./UiElement":69,"pubsub-js":1}],67:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor.
@@ -46506,7 +46692,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":68}],67:[function(require,module,exports){
+},{"./UiElement":69}],68:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -46706,7 +46892,7 @@ TextScreen.prototype._printName = function(){
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":68}],68:[function(require,module,exports){
+},{"./UiElement":69}],69:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -46754,7 +46940,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":40}],69:[function(require,module,exports){
+},{"../etc/TextManager":40}],70:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in scenes
@@ -47006,4 +47192,4 @@ UserInterfaceManager.prototype._onKeyDown = function(event){
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":41,"./Chat":59,"./DevelopmentPanel":60,"./InformationPanel":61,"./InteractionLabel":62,"./LoadingScreen":63,"./Menu":64,"./ModalDialog":65,"./PerformanceMonitor":66,"./TextScreen":67,"pubsub-js":1}]},{},[4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69]);
+},{"../etc/Utils":41,"./Chat":60,"./DevelopmentPanel":61,"./InformationPanel":62,"./InteractionLabel":63,"./LoadingScreen":64,"./Menu":65,"./ModalDialog":66,"./PerformanceMonitor":67,"./TextScreen":68,"pubsub-js":1}]},{},[4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70]);

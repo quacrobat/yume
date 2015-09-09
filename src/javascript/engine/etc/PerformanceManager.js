@@ -219,22 +219,25 @@ PerformanceManager.prototype.generateImpostors = function(){
 	// create an array with the entire lighting of the actual scene
 	var lights = [];
 	
-	for(var index = 0; index < scene.children.length; index++){
-		if(scene.children[index] instanceof THREE.Light){
-			lights.push(scene.children[index].clone());
+	for( var index = 0; index < scene.children.length; index++ ){
+		
+		if( scene.children[index] instanceof THREE.Light ){
+			
+			lights.push( scene.children[index] );
 		}
 	}
 	
 	// generate each impostor
-	for(index = 0; index < this._impostors.length; index++){
+	for( index = 0; index < this._impostors.length; index++ ){
 		
 		// remove old impostor
 		if( this._impostors[index].mesh !== null ){
+			
 			scene.remove( this._impostors[index].mesh );
 		}
 		
 		// prepare the generation...
-		this._impostors[index].prepareGeneration(renderer, impostorCamera, lights);
+		this._impostors[index].prepareGeneration( renderer, impostorCamera, lights );
 		
 		// ...and run it
 		this._impostors[index].generate();
