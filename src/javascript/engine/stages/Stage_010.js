@@ -161,7 +161,6 @@ function onKeyDown(event){
 		case 71:
 			// g
 			self.performanceManager.generateImpostors();
-			console.log("generate impostor");
 			break;
 	}
 }
