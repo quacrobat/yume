@@ -204,7 +204,7 @@ PerformanceManager.prototype.update = function(){
 
 /**
  * Generates all impostors. Because the geometry of impostors changes over time,
- * it's necessary to create new (impostor) meshes every time. These meshes are
+ * it's necessary to create new (impostor) billboard. These billboard are
  * replaced with the old ones, via adding and removing to the scene object.
  */
 PerformanceManager.prototype.generateImpostors = function(){
@@ -231,9 +231,9 @@ PerformanceManager.prototype.generateImpostors = function(){
 	for( index = 0; index < this._impostors.length; index++ ){
 		
 		// remove old impostor
-		if( this._impostors[index].mesh !== null ){
+		if( this._impostors[index].billboard !== null ){
 			
-			scene.remove( this._impostors[index].mesh );
+			scene.remove( this._impostors[index].billboard );
 		}
 		
 		// prepare the generation...
@@ -243,7 +243,7 @@ PerformanceManager.prototype.generateImpostors = function(){
 		this._impostors[index].generate();
 		
 		// add new mesh to scene
-		scene.add( this._impostors[index].mesh );
+		scene.add( this._impostors[index].billboard );
 	}
 };
 

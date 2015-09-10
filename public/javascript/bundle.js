@@ -40579,29 +40579,22 @@ var THREE = require("three");
 /**
  * Creates an impostor.
  * 
- * @constructor 
- * @augments THREE.Mesh
+ * @constructor
  * 
  * @param {string} id - The id of the impostor.
  * @param {THREE.Object3D} sourceObject - The source 3D object of the impostor.
  * @param {number} resolution - The resolution of the rendered texture.
  */
-function Impostor( id, sourceObject, resolution ) {
+function Impostor( id, sourceObject, resolution, angle ) {
 	
 	Object.defineProperties(this, {
-		type: {
-			value: "Impostor",
-			configurable: false,
-			enumerable: true,
-			writable: false
-		},
 		idImpostor: {
 			value: id,
 			configurable: false,
 			enumerable: true,
 			writable: false
 		},
-		mesh: {
+		billboard: {
 			value: null,
 			configurable: false,
 			enumerable: true,
@@ -40615,6 +40608,12 @@ function Impostor( id, sourceObject, resolution ) {
 		},
 		resolution: {
 			value: resolution || 128,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		angle: {
+			value: angle || 30,
 			configurable: false,
 			enumerable: true,
 			writable: true
@@ -40666,6 +40665,12 @@ function Impostor( id, sourceObject, resolution ) {
 			configurable: false,
 			enumerable: false,
 			writable: true
+		},
+		_lastDirection: {
+			value: null,
+			configurable: false,
+			enumerable: false,
+			writable: true
 		}
 	});
 	
@@ -40689,14 +40694,14 @@ Impostor.prototype.prepareGeneration = function( renderer, camera, lights ){
 	// the matrices of the camera get transformed, so it's necessary to clone it
 	this._camera = camera.clone(); 
 	
-	// create new mesh and apply impostor material
-	this.mesh = new THREE.Mesh();
+	// create new billboard and apply impostor material
+	this.billboard = new THREE.Mesh();
 	
 	// apply material. the alpha value avoids semi-transparent black borders at the billboard
-	this.mesh.material = new THREE.MeshBasicMaterial({map: this._renderTarget, transparent: true, alphaTest: 0.9});
+	this.billboard.material = new THREE.MeshBasicMaterial( { map: this._renderTarget, transparent: true, alphaTest: 0.9 } );
 	
 	// the model matrix is calculated by the impostor so disable the automatic update
-	this.mesh.matrixAutoUpdate = false;
+	this.billboard.matrixAutoUpdate = false;
 };
 
 /**
@@ -40727,18 +40732,19 @@ Impostor.prototype.generate = function(){
  * see: Real-Time Rendering, Third Edition, Akenine-Möller/Haines/Hoffman
  * Chapter 10.6.2, World-Oriented Billboards
  * 
- * @param {THREE.Vector3} cameraWorldPosition - The world position of the camera.
+ * @param {THREE.Vector3} cameraPosition - The position of the camera.
+ * 
  */
 Impostor.prototype.update = (function(){
 	
 	var xAxis = new THREE.Vector3();		  // right
 	var yAxis = new THREE.Vector3( 0, 1, 0 ); // up
 	var zAxis = new THREE.Vector3();		  // front
-	
-	return function( cameraWorldPosition ){
+
+	return function( cameraPosition ){
 		
 		// first, compute zAxis 
-		zAxis.subVectors( cameraWorldPosition, this.mesh.getWorldPosition() );
+		zAxis.subVectors( cameraPosition, this.billboard.position );
 		zAxis.y = 0; // this will ensure, that the impostor rotates correctly around the axis
 		zAxis.normalize();
 		
@@ -40746,16 +40752,59 @@ Impostor.prototype.update = (function(){
 		xAxis.crossVectors( yAxis, zAxis );
 		
 		// create new model matrix from basis vectors
-		this.mesh.matrix.makeBasis( xAxis, yAxis, zAxis );
+		this.billboard.matrix.makeBasis( xAxis, yAxis, zAxis );
 		
 		// apply the position
-		this.mesh.matrix.setPosition( this.mesh.position );
+		this.billboard.matrix.setPosition( this.billboard.position );
 		
 		// force world matrix to update
-		this.mesh.matrixWorldNeedsUpdate = true;
+		this.billboard.matrixWorldNeedsUpdate = true;
 	};
 	
 }());
+
+/**
+ * Checks, if it's necessary to generate the impostor.
+ * 
+ * @param {THREE.Vector3} direction - The current direction from impostor to camera.
+ * 
+ * @returns {boolean} Is a generation necessary?
+ */
+Impostor.prototype.isGenerationNeeded = ( function(){
+
+	var angle = 0;
+	
+	return function( currentDirection ){
+		
+		if( this._lastDirection === null ){
+			
+			this._lastDirection = currentDirection.clone();
+			
+		}else{
+			
+			// compute the angle between current and last direction
+			angle = Math.acos( this._lastDirection.dot( currentDirection ) );
+			
+			// convert radians to degrees
+			angle *= ( 180 / Math.PI );
+			
+			// check against property
+			if( angle > this.angle * 0.5 ){
+				
+				// save the direction
+				this._lastDirection = currentDirection.clone();
+				
+				// return true to trigger a generation
+				return true;
+			}
+			
+			return false;
+		}
+		
+		return false;
+	};
+	
+} () );
 
 /**
  * Computes the axis-aligned bounding box of the object.
@@ -40837,7 +40886,7 @@ Impostor.prototype._computePosition = function(){
 	var positionWorldSpace = new THREE.Vector3( centerScreenSpace.x, centerScreenSpace.y, this._depth );
 	
 	// unproject the vector to get world position
-	this.mesh.position.copy( positionWorldSpace.unproject( this._camera ) );
+	this.billboard.position.copy( positionWorldSpace.unproject( this._camera ) );
 };
 
 /**
@@ -40899,7 +40948,7 @@ Impostor.prototype._computeGeometry = ( function(){
 		rotationMatrix.identity();
 		
 		// reset the center of the geometry back to origin
-		translationMatrix.makeTranslation( -this.mesh.position.x, -this.mesh.position.y, -this.mesh.position.z );
+		translationMatrix.makeTranslation( -this.billboard.position.x, -this.billboard.position.y, -this.billboard.position.z );
 		
 		// undo rotation of the view transform
 		rotationMatrix.extractRotation( this._camera.matrixWorldInverse );
@@ -40909,7 +40958,7 @@ Impostor.prototype._computeGeometry = ( function(){
 		geometry.applyMatrix( rotationMatrix );
 		
 		// apply geometry
-		this.mesh.geometry = geometry;
+		this.billboard.geometry = geometry;
 	};
 	
 } () );
@@ -42560,7 +42609,7 @@ PerformanceManager.prototype.update = function(){
 
 /**
  * Generates all impostors. Because the geometry of impostors changes over time,
- * it's necessary to create new (impostor) meshes every time. These meshes are
+ * it's necessary to create new (impostor) billboard. These billboard are
  * replaced with the old ones, via adding and removing to the scene object.
  */
 PerformanceManager.prototype.generateImpostors = function(){
@@ -42587,9 +42636,9 @@ PerformanceManager.prototype.generateImpostors = function(){
 	for( index = 0; index < this._impostors.length; index++ ){
 		
 		// remove old impostor
-		if( this._impostors[index].mesh !== null ){
+		if( this._impostors[index].billboard !== null ){
 			
-			scene.remove( this._impostors[index].mesh );
+			scene.remove( this._impostors[index].billboard );
 		}
 		
 		// prepare the generation...
@@ -42599,7 +42648,7 @@ PerformanceManager.prototype.generateImpostors = function(){
 		this._impostors[index].generate();
 		
 		// add new mesh to scene
-		scene.add( this._impostors[index].mesh );
+		scene.add( this._impostors[index].billboard );
 	}
 };
 
