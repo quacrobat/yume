@@ -10,7 +10,7 @@
 var PubSub = require("pubsub-js");
 var WebSocket = require("ws");
 
-var Message = require("../core/Message");
+var Message = require("./Message");
 var threadMananger = require("../core/ThreadManager");
 var utils = require("../etc/Utils");
 
@@ -70,7 +70,7 @@ NetworkManager.prototype._startUp = function(event){
  * Handles the "message.chat" topic. Sends a chat-message to the server.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 NetworkManager.prototype._onMessageChat = function(message, data){
 	
@@ -81,7 +81,7 @@ NetworkManager.prototype._onMessageChat = function(message, data){
  * Handles the "message.game" topic. Sends a game-message to the server.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 NetworkManager.prototype._onMessageGame = function(message, data){
 	

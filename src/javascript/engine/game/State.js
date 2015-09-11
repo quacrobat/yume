@@ -1,0 +1,45 @@
+/**
+ * @file Super prototype for states used by FSMs.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+/**
+ * Creates a new state.
+ * 
+ * @param {BaseGameEntity} entity - A reference to the entity.
+ */
+function State(){}
+
+/**
+ * This executes when the state is entered.
+ * 
+ * @param {BaseGameEntity} entity - A reference to the entity.
+ */
+State.prototype.enter = function( entity ){};
+
+/**
+ * This is called by the FSM's update function each update step.
+ * 
+ * @param {BaseGameEntity} entity - A reference to the entity.
+ */
+State.prototype.execute = function( entity ){};
+
+/**
+ * This executes when the state is exited.
+ * 
+ * @param {BaseGameEntity} entity - A reference to the entity.
+ */
+State.prototype.exit = function( entity ){};
+
+/**
+ * This executes if the agent receives a message from the messaging system.
+ * 
+ * @param {BaseGameEntity} entity - A reference to the entity.
+ * @param {object} data - The data of the message.
+ */
+State.prototype.onMessage = function( entity, data ){};
+
+module.exports = State;

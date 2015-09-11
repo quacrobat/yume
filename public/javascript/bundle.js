@@ -35780,7 +35780,7 @@ ActionTrigger.prototype = Object.create(THREE.Mesh.prototype);
 ActionTrigger.prototype.constructor = ActionTrigger;
 
 module.exports = ActionTrigger;
-},{"../etc/Utils":41,"three":2}],8:[function(require,module,exports){
+},{"../etc/Utils":39,"three":2}],8:[function(require,module,exports){
 /**
  * @file The prototype InteractiveObject enables ordinary 3D-Objects to be interactive. 
  * Any interactive object is part of the collision-detection logic and ready for interacting with the player.
@@ -35968,7 +35968,7 @@ InteractiveObject.RAYCASTPRECISION = {
 };
 
 module.exports = InteractiveObject;
-},{"../etc/OBB":34,"three":2}],9:[function(require,module,exports){
+},{"../etc/OBB":32,"three":2}],9:[function(require,module,exports){
 /**
  * @file The prototype StaticObject enables ordinary 3D-Objects to be static. 
  * Any interactive object is part of the collision-detection logic.
@@ -36054,7 +36054,7 @@ StaticObject.COLLISIONTYPES = {
 };
 
 module.exports = StaticObject;
-},{"../etc/OBB":34,"three":2}],10:[function(require,module,exports){
+},{"../etc/OBB":32,"three":2}],10:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for defining an animation for
@@ -36311,7 +36311,7 @@ Animation.prototype.setHover = function( isHover ){
 
 module.exports = Animation;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":41}],11:[function(require,module,exports){
+},{"../etc/Utils":39}],11:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire animation-handling. This prototype is used in stages
@@ -37115,7 +37115,7 @@ AudioBufferList.prototype.loadBuffer = function(file, index){
 
 module.exports = AudioBufferList;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":41,"pubsub-js":1}],15:[function(require,module,exports){
+},{"../etc/Utils":39,"pubsub-js":1}],15:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype holds the central Web Audio context and
@@ -37552,7 +37552,7 @@ AudioManager.prototype._onErrorBackgroundMusic = function(){
 
 module.exports = new AudioManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Camera":20,"../etc/Utils":41,"./AudioBufferList":14,"./AudioListener":15,"./DynamicAudio":17,"pubsub-js":1}],17:[function(require,module,exports){
+},{"../core/Camera":20,"../etc/Utils":39,"./AudioBufferList":14,"./AudioListener":15,"./DynamicAudio":17,"pubsub-js":1}],17:[function(require,module,exports){
 /**
  * @file Prototype for creating dynamic, full-buffered audio objects.
  * 
@@ -38819,7 +38819,7 @@ FirstPersonControls.prototype._reset = function() {
  * Sets the control status.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 FirstPersonControls.prototype._onActive = function(message, data) {
 	
@@ -39088,7 +39088,7 @@ FirstPersonControls.RUN = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":6,"../animation/Easing":12,"../audio/AudioManager":16,"../core/Camera":20,"../core/Scene":24,"../etc/SettingsManager":39,"../etc/Utils":41,"../ui/UserInterfaceManager":70,"pubsub-js":1,"three":2}],19:[function(require,module,exports){
+},{"../action/ActionManager":6,"../animation/Easing":12,"../audio/AudioManager":16,"../core/Camera":20,"../core/Scene":23,"../etc/SettingsManager":37,"../etc/Utils":39,"../ui/UserInterfaceManager":73,"pubsub-js":1,"three":2}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting
@@ -39107,8 +39107,8 @@ var camera = require("./Camera");
 var controls = require("../controls/FirstPersonControls");
 var userInterfaceManager = require("../ui/UserInterfaceManager");
 var saveGameManager = require("../etc/SaveGameManager");
-var networkManager = require("../etc/NetworkManager");
 var multiplayerManager = require("../etc/MultiplayerManager");
+var networkManager = require("../network/NetworkManager");
 var utils = require("../etc/Utils");
 
 /**
@@ -39183,7 +39183,7 @@ Bootstrap.prototype._loadStage = function(){
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":18,"../etc/MultiplayerManager":32,"../etc/NetworkManager":33,"../etc/SaveGameManager":38,"../etc/Utils":41,"../ui/UserInterfaceManager":70,"./Camera":20,"./Environment":21,"./Renderer":23,"pubsub-js":1}],20:[function(require,module,exports){
+},{"../controls/FirstPersonControls":18,"../etc/MultiplayerManager":31,"../etc/SaveGameManager":36,"../etc/Utils":39,"../network/NetworkManager":44,"../ui/UserInterfaceManager":73,"./Camera":20,"./Environment":21,"./Renderer":22,"pubsub-js":1}],20:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -39241,7 +39241,7 @@ Camera.prototype.init = function(fov, aspect, near, far){
  * Resizes the camera.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 Camera.prototype._onResize = function(message, data){
 		
@@ -39422,56 +39422,6 @@ Environment.prototype._testWebAudio = function(){
 module.exports = new Environment();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],22:[function(require,module,exports){
-/**
- * @file Prototype for network-messages.
- * 
- * @author Human Interactive
- */
-"use strict";
-
-/**
- * Creates a network message.
- * 
- * @constructor
- * 
- * @param {number} type - The type of the message.
- * @param {string} content - The content of the message.
- */
-function Message(type, content){
-
-	Object.defineProperties(this, {
-		time: {
-			value : Date.now(),
-			configurable: false,
-			enumerable: true,
-			writable: false
-		},
-		type: {
-			value : type,
-			configurable: false,
-			enumerable: true,
-			writable: true
-		},
-		content: {
-			value : content,
-			configurable: false,
-			enumerable: true,
-			writable: true
-		}
-	});
-}
-
-Message.TYPES = {
-	SYSTEM: 0,
-	GAME: 1,
-	STATUS: 2,
-	CHAT: 3,
-	INFO: 4,
-	ERROR: 5
-};
-
-module.exports = Message;
-},{}],23:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -39769,7 +39719,7 @@ Renderer.prototype.getClearAlpha = function(){
  * Resizes the render-dimensions.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 Renderer.prototype._onResize = function(message, data){
 	
@@ -39780,7 +39730,7 @@ Renderer.prototype._onResize = function(message, data){
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":41,"../postprocessing/EffectComposer":42,"../postprocessing/RenderPass":43,"../postprocessing/ShaderPass":44,"../shader/GaussianBlurShader":46,"../shader/GrayscaleShader":47,"../shader/VignetteShader":48,"pubsub-js":1,"three":2}],24:[function(require,module,exports){
+},{"../etc/Utils":39,"../postprocessing/EffectComposer":45,"../postprocessing/RenderPass":46,"../postprocessing/ShaderPass":47,"../shader/GaussianBlurShader":49,"../shader/GrayscaleShader":50,"../shader/VignetteShader":51,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic 
  * for scene-based functionality.
@@ -39821,7 +39771,7 @@ Scene.prototype.clear = function(){
 };
 
 module.exports = new Scene();
-},{"three":2}],25:[function(require,module,exports){
+},{"three":2}],24:[function(require,module,exports){
 (function (global){
 /**
  * @file Basis prototype for all stages. It is used to provide
@@ -40055,7 +40005,7 @@ StageBase.prototype._changeStage = function(stageId, isSaveGame){
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":16,"../controls/FirstPersonControls":18,"../etc/PerformanceManager":36,"../etc/SaveGameManager":38,"../etc/SettingsManager":39,"../etc/TextManager":40,"../etc/Utils":41,"../ui/UserInterfaceManager":70,"./Camera":20,"./Renderer":23,"./Scene":24,"pubsub-js":1,"three":2}],26:[function(require,module,exports){
+},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":16,"../controls/FirstPersonControls":18,"../etc/PerformanceManager":34,"../etc/SaveGameManager":36,"../etc/SettingsManager":37,"../etc/TextManager":38,"../etc/Utils":39,"../ui/UserInterfaceManager":73,"./Camera":20,"./Renderer":22,"./Scene":23,"pubsub-js":1,"three":2}],25:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -40224,7 +40174,7 @@ StageManager.prototype.clear = function() {
  * first scene after application start.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 StageManager.prototype._onApplicationStart = function(message, data){
 	
@@ -40245,7 +40195,7 @@ StageManager.prototype._onApplicationStart = function(message, data){
  * one stage to an other.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 StageManager.prototype._onStageChange = function(message, data){
 	
@@ -40279,7 +40229,7 @@ StageManager.prototype._onStageChange = function(message, data){
  * the finished setup process of the new scene.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 StageManager.prototype._onStageStart = function(message, data){
 	
@@ -40291,7 +40241,7 @@ StageManager.prototype._onStageStart = function(message, data){
  * the loads per stage.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 StageManager.prototype._onLoadStart = function(message, data){
 	
@@ -40307,7 +40257,7 @@ StageManager.prototype._onLoadStart = function(message, data){
  * topics in the "loading.complete" hierarchy.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 StageManager.prototype._onLoadComplete = function(message, data){
 	
@@ -40345,7 +40295,7 @@ StageManager.prototype._onLoadComplete = function(message, data){
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":38,"../etc/Utils":41,"../stages/Stage_001":49,"../stages/Stage_002":50,"../stages/Stage_003":51,"../stages/Stage_004":52,"../stages/Stage_005":53,"../stages/Stage_006":54,"../stages/Stage_007":55,"../stages/Stage_008":56,"../stages/Stage_009":57,"../stages/Stage_010":58,"../stages/Stage_011":59,"../ui/UserInterfaceManager":70,"pubsub-js":1}],27:[function(require,module,exports){
+},{"../etc/SaveGameManager":36,"../etc/Utils":39,"../stages/Stage_001":52,"../stages/Stage_002":53,"../stages/Stage_003":54,"../stages/Stage_004":55,"../stages/Stage_005":56,"../stages/Stage_006":57,"../stages/Stage_007":58,"../stages/Stage_008":59,"../stages/Stage_009":60,"../stages/Stage_010":61,"../stages/Stage_011":62,"../ui/UserInterfaceManager":73,"pubsub-js":1}],26:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It 
@@ -40425,7 +40375,7 @@ Thread.prototype.onError = function(listener){
 
 module.exports = Thread;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],28:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -40561,7 +40511,7 @@ ThreadManager.prototype._getScriptURL = function(script){
 
 module.exports = new ThreadManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Thread":27}],29:[function(require,module,exports){
+},{"./Thread":26}],28:[function(require,module,exports){
 /**
  * @file This prototype handles all stuff for impostors. An impostor
  * is a billboard that is created on the fly by rendering a complex
@@ -41025,7 +40975,7 @@ Impostor.prototype._render = function(){
 };
 
 module.exports = Impostor;
-},{"three":2}],30:[function(require,module,exports){
+},{"three":2}],29:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading 3D objects in JSON-format 
@@ -41120,7 +41070,7 @@ JSONLoader.prototype.load = function(url, onLoad) {
 
 module.exports = JSONLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":41,"pubsub-js":1,"three":2}],31:[function(require,module,exports){
+},{"./Utils":39,"pubsub-js":1,"three":2}],30:[function(require,module,exports){
 /**
  * @file This prototype is used for LOD handling. It is an 
  * enhancement of the LOD functionality of three.js. Instead of
@@ -41294,7 +41244,7 @@ LOD.MODE = {
 };
 
 module.exports = LOD;
-},{"three":2}],32:[function(require,module,exports){
+},{"three":2}],31:[function(require,module,exports){
 /**
  * @file This prototype manages the characters of
  * the other players.
@@ -41345,7 +41295,7 @@ MultiplayerManager.prototype.init = function(){
  * the world information of other players. 
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 MultiplayerManager.prototype._onUpdate = (function(){
 	
@@ -41367,7 +41317,7 @@ MultiplayerManager.prototype._onUpdate = (function(){
  * the status of other players. 
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 MultiplayerManager.prototype._onStatus = function(message, data){
 	
@@ -41456,223 +41406,7 @@ MultiplayerManager.prototype._getPlayer = function(id){
 };
 
 module.exports = new MultiplayerManager();
-},{"../core/Scene":24,"../etc/Utils":41,"./Player":37,"pubsub-js":1,"three":2}],33:[function(require,module,exports){
-(function (global){
-/**
- * @file This prototype contains the entire logic 
- * for network-based functionality. The core logic is 
- * executed in a separate thread.
- * 
- * @author Human Interactive
- */
-"use strict";
-
-var PubSub = require("pubsub-js");
-var WebSocket = require("ws");
-
-var Message = require("../core/Message");
-var threadMananger = require("../core/ThreadManager");
-var utils = require("../etc/Utils");
-
-var script;
-var self;
-/**
- * Creates the network manager.
- * 
- * @constructor
- * 
- */
-function NetworkManager(){
-	
-	Object.defineProperties(this, {
-		_thread: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
-		}
-	});
-	
-	self = this;
-}
-
-/**
- * Inits the network manager.
- */
-NetworkManager.prototype.init = function(){
-	
-	// create thread
-	this._thread = threadMananger.createThread("network", script);
-	
-	// setup event listener
-	this._thread.onMessage(this._onMessageThread);
-	this._thread.onError(this._onErrorThread);
-	
-	// begin communication to server
-	this._startUp();
-	
-	// subscriptions
-	PubSub.subscribe("message.chat", this._onMessageChat);
-	PubSub.subscribe("message.game", this._onMessageGame);
-};
-
-/**
- * Starts the communication to the server. It provides information
- * like hostname and port to the thread.
- */
-NetworkManager.prototype._startUp = function(event){
-	
-	var message = new Message( Message.TYPES.SYSTEM, {location: global.window.location.hostname, port: NetworkManager.SERVER.PORT} );
-	this._thread.postMessage(message);
-};
-
-/**
- * Handles the "message.chat" topic. Sends a chat-message to the server.
- * 
- * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
- */
-NetworkManager.prototype._onMessageChat = function(message, data){
-	
-	self._thread.postMessage( new Message( Message.TYPES.CHAT, {message: data} ) );
-};
-
-/**
- * Handles the "message.game" topic. Sends a game-message to the server.
- * 
- * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
- */
-NetworkManager.prototype._onMessageGame = function(message, data){
-	
-	self._thread.postMessage( new Message( Message.TYPES.GAME, {player: data} ) );
-};
-
-/**
- * Handles the onMessage event. This is fired, when the
- * thread posts a received message to the manager.
- * 
- * @param {object} event - The message event.
- */
-NetworkManager.prototype._onMessageThread = function(event){
-	
-	if(event.data.type === Message.TYPES.CHAT){
-		
-		PubSub.publish("multiplayer.message", event.data.content);
-		
-	}else if(event.data.type === Message.TYPES.GAME){
-		
-		PubSub.publish("multiplayer.update", event.data.content);
-		
-	}else if(event.data.type === Message.TYPES.STATUS){
-		
-		PubSub.publish("multiplayer.status", event.data.content);
-		
-	}else if(event.data.type === Message.TYPES.INFO){
-		
-		if(utils.isDevelopmentModeActive() === true){
-			
-			console.log(event.data.content.message);		
-		}
-	}else if(event.data.type === Message.TYPES.ERROR){
-		
-		console.error(event.data.content.message);
-	}
-};
-
-/**
- * Handles the onError event. This is fired, when the
- * thread posts an error message to the manager.
- * 
- * @param {object} event - The message event.
- */
-NetworkManager.prototype._onErrorThread = function(event){
-	
-	if(utils.isDevelopmentModeActive() === true){
-		
-		console.log("ERROR: NetworkManager: Runtime-Error in thread \"NetworkManager\", line %s in %s: %s", event.lineno, event.filename, event.message);
-	}
-};
-
-/**
- * The script for the thread. It creates and manages a WebSocket
- * for communication with the server.
- */
-script = function(){
-	
-	var ws = null;
-	
-	function init(location, port){
-		
-		ws = new WebSocket("ws://" + location  + ":" + port);
-		
-		ws.onopen = function(event) {
-			self.postMessage({type: 4, content: {message: "INFO: NetworkManager: Connected to multiplayer-server: " + location + " port: " + port}});
-		};
-		
-		ws.onclose = function(event) {
-			self.postMessage({type: 4, content: {message: "INFO: NetworkManager: Disconnected from multiplayer-server: " + location + " port: " + port}});
-		};
-		
-		ws.onmessage = function(event) {
-			// convert string to JSON before posting to main-thread
-			self.postMessage(JSON.parse(event.data));
-		};
-		
-		ws.onerror = function(error) {
-			self.postMessage({type: 5, content: {message: "ERROR: NetworkManager: WebSocket Error: " +  error}});
-		};
-	}
-	
-	function onMessage(event){
-		
-		// evaluate event data
-		if(event.data !== null && event.data.type !== null){
-			
-			// startup
-			if(event.data.type === 0){
-				
-				 if(ws === null){
-					 
-					 init(event.data.content.location, event.data.content.port);
-					 
-				 }
-			// message
-			 }else if(event.data.type === 1 || event.data.type === 2 || event.data.type === 3){
-				 
-				 if(ws !== null){
-					 
-					if(ws.readyState === WebSocket.OPEN){
-						
-						 // convert JSON to string before sending to server
-						 ws.send(JSON.stringify(event.data));
-						 
-				 	}else if(ws.readyState === WebSocket.CONNECTING){
-				 		
-				 		self.postMessage({type: 4, content: {message: "ERROR: NetworkManager: The connection to the server has not yet been established. Please try againg."}});
-				 		
-				 	}else if(ws.readyState === WebSocket.CLOSING && ws.readyState === WebSocket.CLOSED){
-				 		
-				 		self.postMessage({type: 4, content: {message: "ERROR: NetworkManager: Messaging not possible. The connection to the server has been closed or could not be opened."}});
-				 	}
-				 }else{
-					 
-					 self.postMessage({type: 4, content: {message: "ERROR: NetworkManager: Messaging not possible. No connection to server."}});
-				 }
-			 }
-		}
-	}
-	
-	self.onmessage = onMessage;
-};
-
-NetworkManager.SERVER = {
-	PORT : 8000
-};
-
-module.exports = new NetworkManager();
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Message":22,"../core/ThreadManager":28,"../etc/Utils":41,"pubsub-js":1,"ws":3}],34:[function(require,module,exports){
+},{"../core/Scene":23,"../etc/Utils":39,"./Player":35,"pubsub-js":1,"three":2}],32:[function(require,module,exports){
 /**
  * @file A 3D arbitrarily oriented bounding box.
  * 
@@ -42311,7 +42045,7 @@ OBB.prototype.clone = function(){
 };
 
 module.exports = OBB;
-},{"three":2}],35:[function(require,module,exports){
+},{"three":2}],33:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading 3D objects in object-format 
@@ -42402,7 +42136,7 @@ ObjectLoader.prototype.load = function (url, onLoad) {
 
 module.exports = ObjectLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":41,"pubsub-js":1,"three":2}],36:[function(require,module,exports){
+},{"./Utils":39,"pubsub-js":1,"three":2}],34:[function(require,module,exports){
 /**
  * @file Interface for performance handling. This prototype is used in scenes
  * to create e.g. LOD instances.
@@ -42691,7 +42425,7 @@ PerformanceManager.prototype._updateImpostors = (function(){
 }());
 
 module.exports = new PerformanceManager();
-},{"../core/Camera":20,"../core/Renderer":23,"../core/Scene":24,"./Impostor":29,"./LOD":31,"three":2}],37:[function(require,module,exports){
+},{"../core/Camera":20,"../core/Renderer":22,"../core/Scene":23,"./Impostor":28,"./LOD":30,"three":2}],35:[function(require,module,exports){
 /**
  * @file This prototype represents the character of
  * an other player.
@@ -42740,7 +42474,7 @@ Player.prototype = Object.create(THREE.Mesh.prototype);
 Player.prototype.constructor = Player;
 
 module.exports = Player;
-},{"three":2}],38:[function(require,module,exports){
+},{"three":2}],36:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire savegame-handling. This prototype is using
@@ -42817,7 +42551,7 @@ SaveGameManager.prototype.remove = function(){
 
 module.exports = new SaveGameManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],39:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire settings-handling. This prototype is used
@@ -42993,7 +42727,7 @@ SettingsManager.MOUSE = {
 
 module.exports = new SettingsManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":41,"three":2}],40:[function(require,module,exports){
+},{"./Utils":39,"three":2}],38:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire text-handling. This prototype is used in scenes
@@ -43149,7 +42883,7 @@ TextManager.prototype._searchAndRepalce = function(){
 
 module.exports = new TextManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":41,"pubsub-js":1}],41:[function(require,module,exports){
+},{"./Utils":39,"pubsub-js":1}],39:[function(require,module,exports){
 (function (global){
 /**
  * @file All helper and util functions are
@@ -43340,7 +43074,461 @@ Utils.CDN = {
 
 module.exports = new Utils();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Renderer":23}],42:[function(require,module,exports){
+},{"../core/Renderer":22}],40:[function(require,module,exports){
+/**
+ * @file All entities that are part of the game logic
+ * inherit from this prototype.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var nextValidId = 0;
+
+function BaseGameEntity(){
+		
+	Object.defineProperties(this, {
+		
+		// every entity has a unique identifying number
+		id: {
+			value: nextValidId ++,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		}
+	});
+}
+
+/**
+ * All entities must implement an update function.
+ */
+BaseGameEntity.prototype.update = function(){};
+
+module.exports = BaseGameEntity;
+},{}],41:[function(require,module,exports){
+/**
+ * @file Super prototype for states used by FSMs.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+/**
+ * Creates a new state.
+ * 
+ * @param {BaseGameEntity} entity - A reference to the entity.
+ */
+function State(){}
+
+/**
+ * This executes when the state is entered.
+ * 
+ * @param {BaseGameEntity} entity - A reference to the entity.
+ */
+State.prototype.enter = function( entity ){};
+
+/**
+ * This is called by the FSM's update function each update step.
+ * 
+ * @param {BaseGameEntity} entity - A reference to the entity.
+ */
+State.prototype.execute = function( entity ){};
+
+/**
+ * This executes when the state is exited.
+ * 
+ * @param {BaseGameEntity} entity - A reference to the entity.
+ */
+State.prototype.exit = function( entity ){};
+
+/**
+ * This executes if the agent receives a message from the messaging system.
+ * 
+ * @param {BaseGameEntity} entity - A reference to the entity.
+ * @param {object} data - The data of the message.
+ */
+State.prototype.onMessage = function( entity, data ){};
+
+module.exports = State;
+},{}],42:[function(require,module,exports){
+/**
+ * @file This prototype is a basic finite state machine
+ * used for AI logic.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var State = require("./State");
+
+/**
+ * Creates an finite state machine.
+ * 
+ * @constructor
+ * 
+ * @param {BaseGameEntity} owner - A reference to the agent that owns this instance.
+ */
+function StateMachine( owner ){
+	
+	Object.defineProperties(this, {
+		_owner: {
+			value: owner,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		currentState: {
+			value: null,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		// a record of the last state the agent was in
+		previousState: {
+			value: null,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		// this state logic is called every time the FSM is updated
+		globalState: {
+			value: null,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		}	
+	});
+}
+
+/**
+ * This method update the FSM. This method should not be called
+ * in render loop, but in an separate loop for AI logic.
+ */
+StateMachine.prototype.update = function( ){
+	
+	// if a global state exists, call its execute method
+	if( this.globalState !== null ){
+		this.globalState.execute( this._owner );
+	}
+	
+	// same for the current state
+	if( this.currentState !== null ){
+		this.currentState.execute( this._owner );
+	}
+};
+
+/**
+ * Changes the state of the FSM.
+ * 
+ * @param {State} newState - The new state of the FSM.
+ */
+StateMachine.prototype.changeState = function( newState ){
+	
+	// check type of parameter
+	console.assert( newState instanceof State, "StateMachine: State parameter is no instance of type 'State'." );
+	
+	// keep a record of the previous state
+	this.previousState = this.currentState;
+	
+	// call the exit method of the existing state
+	this.currentState.exit( this._owner );
+	
+	// change state to the new state
+	this.currentState = newState;
+	
+	// call the entry method of the new state
+	this.currentState.enter( this._owner );
+};
+
+/**
+ * This method changes state back to the previous state.
+ */
+StateMachine.prototype.revertToPrevoiusState = function(){
+	
+	this.changeState( this.previousState );
+};
+
+/**
+ * Returns true, if the current state’s type is equal to the type of the object passed as a parameter.
+ * 
+ * @returns {boolean} Is the current state equal to the passed parameter?
+ */
+StateMachine.prototype.isInState = function( state ){
+	
+	return state === this.currentState;
+};
+
+module.exports = StateMachine;
+},{"./State":41}],43:[function(require,module,exports){
+/**
+ * @file Prototype for network-messages.
+ * 
+ * @author Human Interactive
+ */
+"use strict";
+
+/**
+ * Creates a network message.
+ * 
+ * @constructor
+ * 
+ * @param {number} type - The type of the message.
+ * @param {string} content - The content of the message.
+ */
+function Message(type, content){
+
+	Object.defineProperties(this, {
+		time: {
+			value : Date.now(),
+			configurable: false,
+			enumerable: true,
+			writable: false
+		},
+		type: {
+			value : type,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		content: {
+			value : content,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		}
+	});
+}
+
+Message.TYPES = {
+	SYSTEM: 0,
+	GAME: 1,
+	STATUS: 2,
+	CHAT: 3,
+	INFO: 4,
+	ERROR: 5
+};
+
+module.exports = Message;
+},{}],44:[function(require,module,exports){
+(function (global){
+/**
+ * @file This prototype contains the entire logic 
+ * for network-based functionality. The core logic is 
+ * executed in a separate thread.
+ * 
+ * @author Human Interactive
+ */
+"use strict";
+
+var PubSub = require("pubsub-js");
+var WebSocket = require("ws");
+
+var Message = require("./Message");
+var threadMananger = require("../core/ThreadManager");
+var utils = require("../etc/Utils");
+
+var script;
+var self;
+/**
+ * Creates the network manager.
+ * 
+ * @constructor
+ * 
+ */
+function NetworkManager(){
+	
+	Object.defineProperties(this, {
+		_thread: {
+			value: null,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		}
+	});
+	
+	self = this;
+}
+
+/**
+ * Inits the network manager.
+ */
+NetworkManager.prototype.init = function(){
+	
+	// create thread
+	this._thread = threadMananger.createThread("network", script);
+	
+	// setup event listener
+	this._thread.onMessage(this._onMessageThread);
+	this._thread.onError(this._onErrorThread);
+	
+	// begin communication to server
+	this._startUp();
+	
+	// subscriptions
+	PubSub.subscribe("message.chat", this._onMessageChat);
+	PubSub.subscribe("message.game", this._onMessageGame);
+};
+
+/**
+ * Starts the communication to the server. It provides information
+ * like hostname and port to the thread.
+ */
+NetworkManager.prototype._startUp = function(event){
+	
+	var message = new Message( Message.TYPES.SYSTEM, {location: global.window.location.hostname, port: NetworkManager.SERVER.PORT} );
+	this._thread.postMessage(message);
+};
+
+/**
+ * Handles the "message.chat" topic. Sends a chat-message to the server.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ */
+NetworkManager.prototype._onMessageChat = function(message, data){
+	
+	self._thread.postMessage( new Message( Message.TYPES.CHAT, {message: data} ) );
+};
+
+/**
+ * Handles the "message.game" topic. Sends a game-message to the server.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ */
+NetworkManager.prototype._onMessageGame = function(message, data){
+	
+	self._thread.postMessage( new Message( Message.TYPES.GAME, {player: data} ) );
+};
+
+/**
+ * Handles the onMessage event. This is fired, when the
+ * thread posts a received message to the manager.
+ * 
+ * @param {object} event - The message event.
+ */
+NetworkManager.prototype._onMessageThread = function(event){
+	
+	if(event.data.type === Message.TYPES.CHAT){
+		
+		PubSub.publish("multiplayer.message", event.data.content);
+		
+	}else if(event.data.type === Message.TYPES.GAME){
+		
+		PubSub.publish("multiplayer.update", event.data.content);
+		
+	}else if(event.data.type === Message.TYPES.STATUS){
+		
+		PubSub.publish("multiplayer.status", event.data.content);
+		
+	}else if(event.data.type === Message.TYPES.INFO){
+		
+		if(utils.isDevelopmentModeActive() === true){
+			
+			console.log(event.data.content.message);		
+		}
+	}else if(event.data.type === Message.TYPES.ERROR){
+		
+		console.error(event.data.content.message);
+	}
+};
+
+/**
+ * Handles the onError event. This is fired, when the
+ * thread posts an error message to the manager.
+ * 
+ * @param {object} event - The message event.
+ */
+NetworkManager.prototype._onErrorThread = function(event){
+	
+	if(utils.isDevelopmentModeActive() === true){
+		
+		console.log("ERROR: NetworkManager: Runtime-Error in thread \"NetworkManager\", line %s in %s: %s", event.lineno, event.filename, event.message);
+	}
+};
+
+/**
+ * The script for the thread. It creates and manages a WebSocket
+ * for communication with the server.
+ */
+script = function(){
+	
+	var ws = null;
+	
+	function init(location, port){
+		
+		ws = new WebSocket("ws://" + location  + ":" + port);
+		
+		ws.onopen = function(event) {
+			self.postMessage({type: 4, content: {message: "INFO: NetworkManager: Connected to multiplayer-server: " + location + " port: " + port}});
+		};
+		
+		ws.onclose = function(event) {
+			self.postMessage({type: 4, content: {message: "INFO: NetworkManager: Disconnected from multiplayer-server: " + location + " port: " + port}});
+		};
+		
+		ws.onmessage = function(event) {
+			// convert string to JSON before posting to main-thread
+			self.postMessage(JSON.parse(event.data));
+		};
+		
+		ws.onerror = function(error) {
+			self.postMessage({type: 5, content: {message: "ERROR: NetworkManager: WebSocket Error: " +  error}});
+		};
+	}
+	
+	function onMessage(event){
+		
+		// evaluate event data
+		if(event.data !== null && event.data.type !== null){
+			
+			// startup
+			if(event.data.type === 0){
+				
+				 if(ws === null){
+					 
+					 init(event.data.content.location, event.data.content.port);
+					 
+				 }
+			// message
+			 }else if(event.data.type === 1 || event.data.type === 2 || event.data.type === 3){
+				 
+				 if(ws !== null){
+					 
+					if(ws.readyState === WebSocket.OPEN){
+						
+						 // convert JSON to string before sending to server
+						 ws.send(JSON.stringify(event.data));
+						 
+				 	}else if(ws.readyState === WebSocket.CONNECTING){
+				 		
+				 		self.postMessage({type: 4, content: {message: "ERROR: NetworkManager: The connection to the server has not yet been established. Please try againg."}});
+				 		
+				 	}else if(ws.readyState === WebSocket.CLOSING && ws.readyState === WebSocket.CLOSED){
+				 		
+				 		self.postMessage({type: 4, content: {message: "ERROR: NetworkManager: Messaging not possible. The connection to the server has been closed or could not be opened."}});
+				 	}
+				 }else{
+					 
+					 self.postMessage({type: 4, content: {message: "ERROR: NetworkManager: Messaging not possible. No connection to server."}});
+				 }
+			 }
+		}
+	}
+	
+	self.onmessage = onMessage;
+};
+
+NetworkManager.SERVER = {
+	PORT : 8000
+};
+
+module.exports = new NetworkManager();
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../core/ThreadManager":27,"../etc/Utils":39,"./Message":43,"pubsub-js":1,"ws":3}],45:[function(require,module,exports){
 /**
  * @file This prototype manages effects for post-processing.
  * 
@@ -43520,7 +43708,7 @@ EffectComposer.prototype._reset = function(renderTarget){
 };
 
 module.exports = EffectComposer;
-},{"three":2}],43:[function(require,module,exports){
+},{"three":2}],46:[function(require,module,exports){
 /**
  * @file This prototype provides a render pass for post-processing.
  * 
@@ -43582,7 +43770,7 @@ RenderPass.prototype.render = function(renderer, writeBuffer, readBuffer){
 };
 
 module.exports = RenderPass;
-},{"three":2}],44:[function(require,module,exports){
+},{"three":2}],47:[function(require,module,exports){
 /**
  * @file This prototype provides a shader pass for post-processing.
  * 
@@ -43687,7 +43875,7 @@ ShaderPass.prototype.render = function(renderer, writeBuffer, readBuffer){
 };
 
 module.exports = ShaderPass;
-},{"three":2}],45:[function(require,module,exports){
+},{"three":2}],48:[function(require,module,exports){
 /**
  * @file This shader can be used for vertex displacement to create
  * water or fabric materials. It implements an exemplary diffuse lighting
@@ -43789,7 +43977,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":2}],46:[function(require,module,exports){
+},{"three":2}],49:[function(require,module,exports){
 /**
  * @file This shader applies a gaussian blur effect.
  * It can be used for both x and y direction.
@@ -43856,7 +44044,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":2}],47:[function(require,module,exports){
+},{"three":2}],50:[function(require,module,exports){
 /**
  * @file This shader transforms all colors to grayscale.
  * 
@@ -43905,7 +44093,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],48:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 /**
  * @file This shader creates a vignette effect.
  * 
@@ -43966,7 +44154,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],49:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -44078,7 +44266,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],50:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],53:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -44251,7 +44439,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],51:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],54:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -44415,7 +44603,7 @@ function colorMesh(mesh){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],52:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],55:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -44587,7 +44775,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],53:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],56:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -44708,7 +44896,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],54:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],57:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -44886,7 +45074,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],55:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],58:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -45054,7 +45242,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],56:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],59:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -45206,7 +45394,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],57:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],60:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -45373,7 +45561,7 @@ function showLODCircles(scene){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],58:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],61:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -45544,7 +45732,7 @@ function onKeyDown(event){
 
 module.exports = Stage;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],59:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],62:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -45683,7 +45871,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":25,"../etc/JSONLoader":30,"three":2}],60:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],63:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -45848,7 +46036,7 @@ Chat.prototype._checkAndSend = function(){
  * to a chat-box on the ui.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 Chat.prototype._onMessage = function(message, data){
 	
@@ -45857,7 +46045,7 @@ Chat.prototype._onMessage = function(message, data){
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":69,"pubsub-js":1}],61:[function(require,module,exports){
+},{"./UiElement":72,"pubsub-js":1}],64:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel.
@@ -45921,7 +46109,7 @@ DevelopmentPanel.prototype.setText = function(text){
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":69}],62:[function(require,module,exports){
+},{"./UiElement":72}],65:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -45982,7 +46170,7 @@ InformationPanel.prototype.setText = function(textKey){
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":69}],63:[function(require,module,exports){
+},{"./UiElement":72}],66:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -46057,7 +46245,7 @@ InteractionLabel.prototype.hide = function(){
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":69}],64:[function(require,module,exports){
+},{"./UiElement":72}],67:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -46216,7 +46404,7 @@ LoadingScreen.prototype.hide = function(){
  * This method updates the progress bar.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 LoadingScreen.prototype._onUpdate = function(message, data){
 	
@@ -46229,7 +46417,7 @@ LoadingScreen.prototype._onUpdate = function(message, data){
  * Sets loading screen to ready.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 LoadingScreen.prototype._onReady = function(message, data){
 	
@@ -46242,7 +46430,7 @@ LoadingScreen.prototype._onReady = function(message, data){
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":69,"pubsub-js":1}],65:[function(require,module,exports){
+},{"./UiElement":72,"pubsub-js":1}],68:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -46358,7 +46546,7 @@ Menu.prototype._onClick = function(){
  * This method updates the progress bar.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 Menu.prototype._onUpdate = function(message, data){
 	
@@ -46371,7 +46559,7 @@ Menu.prototype._onUpdate = function(message, data){
  * Removes the ready progressbar and shows the play-button
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 Menu.prototype._onReady = function(message, data){
 	
@@ -46393,7 +46581,7 @@ Menu.prototype._publishFinishEvent = function(message, data){
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":41,"./UiElement":69,"pubsub-js":1}],66:[function(require,module,exports){
+},{"../etc/Utils":39,"./UiElement":72,"pubsub-js":1}],69:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -46520,7 +46708,7 @@ ModalDialog.prototype._onClose = function(event){
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":41,"./UiElement":69,"pubsub-js":1}],67:[function(require,module,exports){
+},{"../etc/Utils":39,"./UiElement":72,"pubsub-js":1}],70:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor.
@@ -46740,7 +46928,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":69}],68:[function(require,module,exports){
+},{"./UiElement":72}],71:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -46940,7 +47128,7 @@ TextScreen.prototype._printName = function(){
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":69}],69:[function(require,module,exports){
+},{"./UiElement":72}],72:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -46988,7 +47176,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":40}],70:[function(require,module,exports){
+},{"../etc/TextManager":38}],73:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in scenes
@@ -47240,4 +47428,4 @@ UserInterfaceManager.prototype._onKeyDown = function(event){
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":41,"./Chat":60,"./DevelopmentPanel":61,"./InformationPanel":62,"./InteractionLabel":63,"./LoadingScreen":64,"./Menu":65,"./ModalDialog":66,"./PerformanceMonitor":67,"./TextScreen":68,"pubsub-js":1}]},{},[4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70]);
+},{"../etc/Utils":39,"./Chat":63,"./DevelopmentPanel":64,"./InformationPanel":65,"./InteractionLabel":66,"./LoadingScreen":67,"./Menu":68,"./ModalDialog":69,"./PerformanceMonitor":70,"./TextScreen":71,"pubsub-js":1}]},{},[4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73]);

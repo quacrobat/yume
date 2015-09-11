@@ -161,7 +161,7 @@ Chat.prototype._checkAndSend = function(){
  * to a chat-box on the ui.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 Chat.prototype._onMessage = function(message, data){
 	

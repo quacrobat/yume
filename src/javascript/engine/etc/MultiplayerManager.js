@@ -48,7 +48,7 @@ MultiplayerManager.prototype.init = function(){
  * the world information of other players. 
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 MultiplayerManager.prototype._onUpdate = (function(){
 	
@@ -70,7 +70,7 @@ MultiplayerManager.prototype._onUpdate = (function(){
  * the status of other players. 
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 MultiplayerManager.prototype._onStatus = function(message, data){
 	

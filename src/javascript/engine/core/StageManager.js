@@ -166,7 +166,7 @@ StageManager.prototype.clear = function() {
  * first scene after application start.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 StageManager.prototype._onApplicationStart = function(message, data){
 	
@@ -187,7 +187,7 @@ StageManager.prototype._onApplicationStart = function(message, data){
  * one stage to an other.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 StageManager.prototype._onStageChange = function(message, data){
 	
@@ -221,7 +221,7 @@ StageManager.prototype._onStageChange = function(message, data){
  * the finished setup process of the new scene.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 StageManager.prototype._onStageStart = function(message, data){
 	
@@ -233,7 +233,7 @@ StageManager.prototype._onStageStart = function(message, data){
  * the loads per stage.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 StageManager.prototype._onLoadStart = function(message, data){
 	
@@ -249,7 +249,7 @@ StageManager.prototype._onLoadStart = function(message, data){
  * topics in the "loading.complete" hierarchy.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 StageManager.prototype._onLoadComplete = function(message, data){
 	

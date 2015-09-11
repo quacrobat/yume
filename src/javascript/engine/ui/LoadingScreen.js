@@ -155,7 +155,7 @@ LoadingScreen.prototype.hide = function(){
  * This method updates the progress bar.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 LoadingScreen.prototype._onUpdate = function(message, data){
 	
@@ -168,7 +168,7 @@ LoadingScreen.prototype._onUpdate = function(message, data){
  * Sets loading screen to ready.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 LoadingScreen.prototype._onReady = function(message, data){
 	

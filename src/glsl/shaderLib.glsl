@@ -243,7 +243,7 @@ mat3 rotate( in float angle ) {
  */
 mat2 scale2d( in vec2 scale ) {
     return mat2( scale.x,     0.0,
-                     0.0, scale.y) ;
+                     0.0, scale.y );
 }
 
 /* 

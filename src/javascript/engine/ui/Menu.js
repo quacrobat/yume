@@ -112,7 +112,7 @@ Menu.prototype._onClick = function(){
  * This method updates the progress bar.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 Menu.prototype._onUpdate = function(message, data){
 	
@@ -125,7 +125,7 @@ Menu.prototype._onUpdate = function(message, data){
  * Removes the ready progressbar and shows the play-button
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 Menu.prototype._onReady = function(message, data){
 	

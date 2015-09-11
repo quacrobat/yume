@@ -54,7 +54,7 @@ Camera.prototype.init = function(fov, aspect, near, far){
  * Resizes the camera.
  * 
  * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
+ * @param {object} data - The data of the message.
  */
 Camera.prototype._onResize = function(message, data){
 		

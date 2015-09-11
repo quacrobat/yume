@@ -11,7 +11,7 @@ var debug = require("debug")("YUME");
 var ws = require("ws");
 
 var metadata = require("../../../../package.json");
-var Message = require("../../engine/core/Message");
+var Message = require("../../engine/network/Message");
 
 var self;
 

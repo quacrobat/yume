@@ -15,8 +15,8 @@ var camera = require("./Camera");
 var controls = require("../controls/FirstPersonControls");
 var userInterfaceManager = require("../ui/UserInterfaceManager");
 var saveGameManager = require("../etc/SaveGameManager");
-var networkManager = require("../etc/NetworkManager");
 var multiplayerManager = require("../etc/MultiplayerManager");
+var networkManager = require("../network/NetworkManager");
 var utils = require("../etc/Utils");
 
 /**
