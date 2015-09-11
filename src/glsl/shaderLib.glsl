@@ -189,9 +189,9 @@ float fbm( in vec3 x ) {
   float v = 0.0;
   float a = 0.5;
   
-  vec3 shift = vec3(100);
+  vec3 shift = vec3( 100 );
   
-  for ( int i = 0; i < NUM_OCTAVES; ++i) {
+  for ( int i = 0; i < NUM_OCTAVES; ++i ) {
     
     // sum noise functions
     v += a * noise( x );
