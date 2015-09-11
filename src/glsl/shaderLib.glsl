@@ -29,7 +29,7 @@
  * 
  * @returns {float} The pseudo-random value.
  */
-float random(float x){
+float random( in float x ) {
     
     return fract( sin( x ) * 1e4 ); 
 }
@@ -42,9 +42,9 @@ float random(float x){
  * 
  * @returns {float} The pseudo-random value.
  */
-float random(vec2 uv){
+float random( in vec2 uv ) {
     
-    return fract( 1e4 * sin( 17.0 * uv.x + uv.y * 0.1) * (0.1 + abs( sin( uv.y * 13.0 + uv.x ) ) ) );
+    return fract( 1e4 * sin( 17.0 * uv.x + uv.y * 0.1 ) * ( 0.1 + abs( sin( uv.y * 13.0 + uv.x ) ) ) );
 }
 
 /* 
@@ -59,10 +59,10 @@ float random(vec2 uv){
   * 
   * @returns {float} The noise value.
   */
-float noise(float x) {
+float noise( in float x ) {
     
-    float i = floor(x);
-    float f = fract(x);
+    float i = floor( x );
+    float f = fract( x );
     
     // cubic curve for interpolation
     float u = f * f * ( 3.0 - 2.0 * f );
@@ -78,21 +78,21 @@ float noise(float x) {
   * 
   * @returns {float} The noise value.
   */
-float noise( in vec2 x ){
+float noise( in vec2 x ) {
     
     vec2 i = floor( x );
     vec2 f = fract( x );
     
     // these four points are used for interpolation in 2D
-    float a = random(i);
-    float b = random(i + vec2(1.0, 0.0));
-    float c = random(i + vec2(0.0, 1.0));
-    float d = random(i + vec2(1.0, 1.0));
+    float a = random( i );
+    float b = random( i + vec2( 1.0, 0.0 ) );
+    float c = random( i + vec2( 0.0, 1.0 ) );
+    float d = random( i + vec2( 1.0, 1.0 ) );
     
     // cubic curve for interpolation
-    vec2 u = f * f * (3.0 - 2.0 * f);
+    vec2 u = f * f * ( 3.0 - 2.0 * f );
     
-    return mix(a, b, u.x) + (c - a)* u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+    return mix( a, b, u.x ) + ( c - a ) * u.y * ( 1.0 - u.x ) + ( d - b ) * u.x * u.y;
 }
 
  /* 
@@ -102,7 +102,7 @@ float noise( in vec2 x ){
   * 
   * @returns {float} The noise value.
   */
-float noise(vec3 x) {
+float noise( in vec3 x ) {
     
     const vec3 step = vec3( 110, 241, 171 );
 
@@ -112,12 +112,12 @@ float noise(vec3 x) {
     float n = dot(i, step);
 
     // cubic curve for interpolation
-    vec3 u = f * f * (3.0 - 2.0 * f);
+    vec3 u = f * f * ( 3.0 - 2.0 * f );
 
-    return mix(mix(mix( random(n + dot(step, vec3(0, 0, 0))), random(n + dot(step, vec3(1, 0, 0))), u.x),
-                   mix( random(n + dot(step, vec3(0, 1, 0))), random(n + dot(step, vec3(1, 1, 0))), u.x), u.y),
-               mix(mix( random(n + dot(step, vec3(0, 0, 1))), random(n + dot(step, vec3(1, 0, 1))), u.x),
-                   mix( random(n + dot(step, vec3(0, 1, 1))), random(n + dot(step, vec3(1, 1, 1))), u.x), u.y), u.z);
+    return mix( mix( mix( random( n + dot( step, vec3( 0, 0, 0 ) ) ), random( n + dot( step, vec3( 1, 0, 0 ) ) ), u.x ),
+                     mix( random( n + dot( step, vec3( 0, 1, 0 ) ) ), random( n + dot( step, vec3( 1, 1, 0 ) ) ), u.x ), u.y ),
+                mix( mix( random( n + dot( step, vec3( 0, 0, 1 ) ) ), random( n + dot( step, vec3( 1, 0, 1 ) ) ), u.x ),
+                     mix( random( n + dot( step, vec3( 0, 1, 1 ) ) ), random( n + dot( step, vec3( 1, 1, 1 ) ) ), u.x ), u.y ), u.z );
 }
 
 /* 
@@ -132,7 +132,7 @@ float noise(vec3 x) {
   * 
   * @returns {float} The fbm-noise value.
   */
-float fbm(float x) {
+float fbm( in float x ) {
   
   float v = 0.0;
   float a = 0.5;
@@ -156,7 +156,7 @@ float fbm(float x) {
   * 
   * @returns {float} The fbm-noise value.
   */
-float fbm(vec2 x) {
+float fbm( in vec2 x ) {
   
   float v = 0.0;
   float a = 0.5;
@@ -164,7 +164,7 @@ float fbm(vec2 x) {
   vec2 shift = vec2( 100 );
   
   // rotate to reduce axial bias
-  mat2 rot = mat2( cos(0.5), sin(0.5), -sin(0.5), cos(0.50) );
+  mat2 rot = mat2( cos( 0.5 ), sin( 0.5 ), -sin( 0.5 ), cos( 0.5 ) );
   
   for ( int i = 0; i < NUM_OCTAVES; ++i ) {
     
@@ -184,17 +184,17 @@ float fbm(vec2 x) {
   * 
   * @returns {float} The fbm-noise value.
   */
-float fbm(vec3 x) {
+float fbm( in vec3 x ) {
   
   float v = 0.0;
   float a = 0.5;
   
   vec3 shift = vec3(100);
   
-  for (int i = 0; i < NUM_OCTAVES; ++i) {
+  for ( int i = 0; i < NUM_OCTAVES; ++i) {
     
     // sum noise functions
-    v += a * noise(x);
+    v += a * noise( x );
     x = x * 2.0 + shift;
     a *= 0.5;
   }
@@ -215,9 +215,9 @@ float fbm(vec3 x) {
  * 
  * @returns {mat2} The 2x2 rotation matrix.
  */
-mat2 rotate2d(float angle){
+mat2 rotate2d( in float angle ) {
      return mat2(  cos( angle ),  sin( angle ),
-                  -sin( angle ),  cos( angle ));
+                  -sin( angle ),  cos( angle ) );
 }
 
 /* 
@@ -228,7 +228,7 @@ mat2 rotate2d(float angle){
  * 
  * @returns {mat3} The 3x3 rotation matrix.
  */
-mat3 rotate(float angle){
+mat3 rotate( in float angle ) {
      return mat3(  cos( angle ),  sin( angle ), 0.0,
                   -sin( angle ),  cos( angle ), 0.0,
                             0.0,           0.0, 1.0 );
@@ -241,9 +241,9 @@ mat3 rotate(float angle){
  * 
  * @returns {mat3} The 2x2 scaling matrix.
  */
-mat2 scale2d(vec2 scale){
+mat2 scale2d( in vec2 scale ) {
     return mat2( scale.x,     0.0,
-                     0.0, scale.y);
+                     0.0, scale.y) ;
 }
 
 /* 
@@ -253,7 +253,7 @@ mat2 scale2d(vec2 scale){
  * 
  * @returns {mat3} The 3x3 scaling matrix.
  */
-mat3 scale(vec2 scale){
+mat3 scale( in vec2 scale ) {
     return mat3( scale.x,     0.0, 0.0,
                      0.0, scale.y, 0.0,
                      0.0,     0.0, 1.0 );
@@ -266,7 +266,7 @@ mat3 scale(vec2 scale){
  * 
  * @returns {mat3} The 3x3 translation matrix.
  */
-mat3 translate(vec2 translate){
+mat3 translate( in vec2 translate ) {
     return mat3( 1.0, 0.0, 0.0,
                  0.0, 1.0, 0.0,
                  translate.x,  translate.y, 1.0 );
@@ -286,7 +286,7 @@ mat3 translate(vec2 translate){
  * 
  * @returns {float} Amount to mix per fragment.
  */
-float border(in float width, in vec2 uv){
+float border( in float width, in vec2 uv ) {
     
     vec2 border = step( vec2( width ), uv ) -
                   step( vec2( 1.0 - width ), uv );
@@ -304,7 +304,7 @@ float border(in float width, in vec2 uv){
  * 
  * @returns {float} Amount to mix per fragment.
  */
-float borderSmooth(in float width, in float smoothness, in vec2 uv){
+float borderSmooth( in float width, in float smoothness, in vec2 uv ) {
     
     vec2 border = smoothstep( vec2( width - smoothness ), vec2( width ), uv ) -
                   smoothstep( vec2( 1.0 - width ), vec2( 1.0 - width + smoothness ), uv );
@@ -322,7 +322,7 @@ float borderSmooth(in float width, in float smoothness, in vec2 uv){
  * 
  * @returns {float} Amount to mix per fragment.
  */
-float line(in float width, in float f, in float y){
+float line( in float width, in float f, in float y ) {
     
    return step( f - width, y ) - 
           step( f + width, y );
@@ -338,7 +338,7 @@ float line(in float width, in float f, in float y){
  * 
  * @returns {float} Amount to mix per fragment.
  */
-float lineSmooth(in float width, in float f, in float y){
+float lineSmooth( in float width, in float f, in float y ) {
     
    return smoothstep( f - width, f, y ) - 
           smoothstep( f, f + width, y );
@@ -355,15 +355,15 @@ float lineSmooth(in float width, in float f, in float y){
  * 
  * @returns {float} Amount to mix per fragment.
  */
-float rectangle( in vec2 position, in float width, in float height, in vec2 uv){
+float rectangle( in vec2 position, in float width, in float height, in vec2 uv ) {
     
-    vec4 coord = vec4(position.x - width  * 0.5,
-                      position.y - height * 0.5,
-                      position.x + width  * 0.5,
-                      position.y + height * 0.5);
+    vec4 coord = vec4( position.x - width  * 0.5,
+                       position.y - height * 0.5,
+                       position.x + width  * 0.5,
+                       position.y + height * 0.5 );
     
     
-    vec2 rect = step(coord.xy, uv) * step(uv, coord.zw);
+    vec2 rect = step( coord.xy, uv ) * step( uv, coord.zw );
     
     return rect.x * rect.y;
 }
@@ -380,16 +380,16 @@ float rectangle( in vec2 position, in float width, in float height, in vec2 uv){
  * 
  * @returns {float} Amount to mix per fragment.
  */
-float rectangleSmooth( in vec2 position, in float width, in float height, in float smoothness, in vec2 uv){
+float rectangleSmooth( in vec2 position, in float width, in float height, in float smoothness, in vec2 uv ) {
     
-    vec4 coord = vec4(position.x - width  * 0.5,
-                      position.y - height * 0.5,
-                      position.x + width  * 0.5,
-                      position.y + height * 0.5);
+    vec4 coord = vec4( position.x - width  * 0.5,
+                       position.y - height * 0.5,
+                       position.x + width  * 0.5,
+                       position.y + height * 0.5 );
     
     
-    vec2 rect = smoothstep(coord.xy, coord.xy + smoothness,  uv) * 
-                smoothstep(uv, uv + smoothness, coord.zw);
+    vec2 rect = smoothstep( coord.xy, coord.xy + smoothness,  uv ) *
+                smoothstep( uv, uv + smoothness, coord.zw );
     
     return rect.x * rect.y;
 }
@@ -404,7 +404,7 @@ float rectangleSmooth( in vec2 position, in float width, in float height, in flo
  * 
  * @returns {float} Amount to mix per fragment.
  */
-float circle(in vec2 center, in float radius, in vec2 uv){
+float circle( in vec2 center, in float radius, in vec2 uv ) {
     
     return 1.0 - ( step( radius, length( uv - center ) ) );
 }
@@ -420,7 +420,7 @@ float circle(in vec2 center, in float radius, in vec2 uv){
  * 
  * @returns {float} Amount to mix per fragment.
  */
-float circleSmooth(in vec2 center, in float radius, in float smoothness, in vec2 uv){
+float circleSmooth( in vec2 center, in float radius, in float smoothness, in vec2 uv ) {
     
     return 1.0 - ( smoothstep( radius, radius + smoothness, length( uv - center ) ) );
 }
@@ -435,14 +435,14 @@ float circleSmooth(in vec2 center, in float radius, in float smoothness, in vec2
  * 
  * @returns {float} Amount to mix per fragment.
  */
-float polygon(in float size, in int sides, in vec2 uv){
+float polygon( in float size, in int sides, in vec2 uv ) {
     
     float angle = atan( uv.x, uv.y ) + PI;
-    float radius = TWO_PI / float(sides);
+    float radius = TWO_PI / float( sides );
     
-    float distance = cos( floor( 0.5 + angle / radius ) * radius - angle ) * length(uv);
+    float distance = cos( floor( 0.5 + angle / radius ) * radius - angle ) * length( uv );
     
-    return 1.0 - step( size, distance);
+    return 1.0 - step( size, distance );
 }
 
 /* 
@@ -456,12 +456,12 @@ float polygon(in float size, in int sides, in vec2 uv){
  * 
  * @returns {float} Amount to mix per fragment.
  */
-float polygonSmooth(in float size, in int sides, in float smoothness, in vec2 uv){
+float polygonSmooth( in float size, in int sides, in float smoothness, in vec2 uv ) {
     
     float angle = atan( uv.x, uv.y ) + PI;
-    float radius = TWO_PI / float(sides);
+    float radius = TWO_PI / float( sides );
     
-    float distance = cos( floor( 0.5 + angle / radius ) * radius - angle ) * length(uv);
+    float distance = cos( floor( 0.5 + angle / radius ) * radius - angle ) * length( uv );
     
-    return 1.0 - smoothstep( size, size + smoothness, distance);
+    return 1.0 - smoothstep( size, size + smoothness, distance );
 }
