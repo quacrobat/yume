@@ -18,6 +18,7 @@ var saveGameManager = require("../etc/SaveGameManager");
 var multiplayerManager = require("../etc/MultiplayerManager");
 var networkManager = require("../network/NetworkManager");
 var utils = require("../etc/Utils");
+var logger = require("../etc/Logger");
 
 /**
  * Creates a Bootstrap instance, which initializes the entire application.
@@ -51,6 +52,7 @@ Bootstrap.prototype._initEngine = function(){
 	// check capabilities of the runtime environment/ browser 
 	if(environment.check() === true){
 		
+		logger.init();
 		renderer.init();
 		camera.init();
 		controls.init();

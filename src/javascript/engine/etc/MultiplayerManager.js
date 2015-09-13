@@ -11,7 +11,7 @@ var THREE = require("three");
 
 var Player = require("./Player");
 var scene = require("../core/Scene");
-var utils = require("../etc/Utils");
+var logger = require("./Logger");
 
 var self;
 /**
@@ -85,9 +85,8 @@ MultiplayerManager.prototype._onStatus = function(message, data){
 		self._addPlayer(player);
 		
 		// logging
-		if(utils.isDevelopmentModeActive() === true){		
-			console.log("INFO: MultiplayerManager: Player with ID %i online.", data.clientId);
-		}
+		logger.log("INFO: MultiplayerManager: Player with ID %i online.", data.clientId);
+		
 	}
 	else
 	{
@@ -98,9 +97,8 @@ MultiplayerManager.prototype._onStatus = function(message, data){
 		self._removePlayer(player);
 		
 		// logging
-		if(utils.isDevelopmentModeActive() === true){			
-			console.log("INFO: MultiplayerManager: Player with ID %i offline.", data.clientId);
-		}
+		logger.log("INFO: MultiplayerManager: Player with ID %i offline.", data.clientId);
+		
 	}
 };
 

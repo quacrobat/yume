@@ -18,7 +18,7 @@ var actionManager = require("../action/ActionManager");
 var audioManager = require("../audio/AudioManager");
 var userInterfaceManager = require("../ui/UserInterfaceManager");
 var settingsManager = require("../etc/SettingsManager");
-var utils = require("../etc/Utils");
+var logger = require("../etc/Logger");
 var Easing = require("../animation/Easing");
 
 var self;
@@ -741,18 +741,25 @@ FirstPersonControls.prototype._checkAndProcessTrigger = (function() {
 		intersects = this._rayCaster.intersectObjects(actionManager.triggers);
 
 		if (intersects.length > 0) {
+			
 			if(intersects[0].object.action !== undefined){
+				
 				if(inRadius === false && intersects[0].object.action.isActive === true){
+					
 					intersects[0].object.action.run();
+					
 					inRadius = true;
-					if(utils.isDevelopmentModeActive() === true){
-						console.log("INFO: FirstPersonControls: Trigger released and action \"%s\" executed.", intersects[0].object.action.label);
-					}
-				}				
-			}else{
+					
+					logger.log("INFO: FirstPersonControls: Trigger released and action \"%s\" executed.", intersects[0].object.action.label);
+				}			
+			}
+			else{
+				
 				throw "ERROR: FirstPersonControls: No action defined for trigger object.";
 			}
-		}else{
+		}
+		else{
+			
 			inRadius = false;
 		}
 	};
@@ -1150,13 +1157,6 @@ FirstPersonControls.prototype._onKeyDown = function(event) {
 			case 70:
 				// f 
 				userInterfaceManager.tooglePerformanceMonitor();
-				break;
-				
-			case 80:
-				// p
-				if(utils.isDevelopmentModeActive() === true){
-					utils.printWorldInformation();
-				}
 				break;
 				
 			case 32:

@@ -19,7 +19,7 @@ var GrayscaleShader = require("../shader/GrayscaleShader");
 var VignetteShader = require("../shader/VignetteShader");
 var GaussianBlurShader = require("../shader/GaussianBlurShader");
 
-var utils = require("../etc/Utils");
+var logger = require("../etc/Logger");
 
 var self;
 
@@ -62,7 +62,7 @@ function Renderer(){
 }
 
 /**
- * Inits the renderer.
+ * Initializes the renderer.
  */
 Renderer.prototype.init = function(){
 	
@@ -114,9 +114,7 @@ Renderer.prototype.preparePostProcessing = function(scene, camera){
 	
 	this._composer.addPass(new RenderPass(scene, camera));
 	
-	if(utils.isDevelopmentModeActive() === true){
-		console.log("INFO: Renderer: Init post-processing for stage.");
-	}
+	logger.log("INFO: Renderer: Init post-processing for stage.");
 };
 
 /**
@@ -135,10 +133,8 @@ Renderer.prototype.addGrayscaleEffect = function(options){
 	this._composer.addPass(effect);
 	this._effectCount++;
 	
-	if(utils.isDevelopmentModeActive() === true){
-		console.log("INFO: Renderer: Added grayscale effect.");
-	}
-	
+	logger.log("INFO: Renderer: Added grayscale effect.");
+
 	return effect;
 };
 
@@ -164,9 +160,7 @@ Renderer.prototype.addVignetteEffect = function(options){
 	this._composer.addPass(effect);
 	this._effectCount++;
 	
-	if(utils.isDevelopmentModeActive() === true){
-		console.log("INFO: Renderer: Added vignette effect.");
-	}
+	logger.log("INFO: Renderer: Added vignette effect.");
 	
 	return effect;
 };
@@ -192,9 +186,7 @@ Renderer.prototype.addHBlurEffect = function(options){
 	this._composer.addPass(effect);
 	this._effectCount++;
 	
-	if(utils.isDevelopmentModeActive() === true){
-		console.log("INFO: Renderer: Added horizonzal blur effect.");
-	}
+	logger.log("INFO: Renderer: Added horizonzal blur effect.");
 	
 	return effect;
 };
@@ -220,10 +212,8 @@ Renderer.prototype.addVBlurEffect = function(options){
 	this._composer.addPass(effect);
 	this._effectCount++;
 	
-	if(utils.isDevelopmentModeActive() === true){
-		console.log("INFO: Renderer: Added vertical blur effect.");
-	}
-	
+	logger.log("INFO: Renderer: Added vertical blur effect.");
+
 	return effect;
 };
 

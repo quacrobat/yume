@@ -7,6 +7,7 @@
 
 "use strict";
 
+var logger = require("../etc/Logger");
 var State = require("./State");
 
 /**
@@ -73,7 +74,7 @@ StateMachine.prototype.update = function( ){
 StateMachine.prototype.changeState = function( newState ){
 	
 	// check type of parameter
-	console.assert( newState instanceof State, "StateMachine: State parameter is no instance of type 'State'." );
+	logger.assert( newState instanceof State, "StateMachine: State parameter is no instance of type 'State'." );
 	
 	// keep a record of the previous state
 	this.previousState = this.currentState;

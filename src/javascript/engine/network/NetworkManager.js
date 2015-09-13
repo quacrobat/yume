@@ -12,7 +12,7 @@ var WebSocket = require("ws");
 
 var Message = require("./Message");
 var threadMananger = require("../core/ThreadManager");
-var utils = require("../etc/Utils");
+var logger = require("../etc/Logger");
 
 var script;
 var self;
@@ -110,13 +110,11 @@ NetworkManager.prototype._onMessageThread = function(event){
 		
 	}else if(event.data.type === Message.TYPES.INFO){
 		
-		if(utils.isDevelopmentModeActive() === true){
-			
-			console.log(event.data.content.message);		
-		}
+		logger.log(event.data.content.message);		
+		
 	}else if(event.data.type === Message.TYPES.ERROR){
 		
-		console.error(event.data.content.message);
+		logger.error(event.data.content.message);
 	}
 };
 
@@ -128,10 +126,8 @@ NetworkManager.prototype._onMessageThread = function(event){
  */
 NetworkManager.prototype._onErrorThread = function(event){
 	
-	if(utils.isDevelopmentModeActive() === true){
-		
-		console.log("ERROR: NetworkManager: Runtime-Error in thread \"NetworkManager\", line %s in %s: %s", event.lineno, event.filename, event.message);
-	}
+	logger.log("ERROR: NetworkManager: Runtime-Error in thread \"NetworkManager\", line %s in %s: %s", event.lineno, event.filename, event.message);
+
 };
 
 /**

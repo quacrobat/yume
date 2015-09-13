@@ -7,7 +7,8 @@
 
 "use strict";
 
-var utils = require("../etc/Utils");
+var logger = require("../etc/Logger");
+
 /**
  * Creates an animation.
  * 
@@ -109,9 +110,7 @@ function Animation(options) {
 		if( this.hasOwnProperty( property ) === true ){
 			this[ property ] = options[ property ];
 		}else{
-			if(utils.isDevelopmentModeActive() === true){
-				console.warn("WARN: Animation: Object created with faulty options. Property '%s' is no member of Animation.", property);
-			}
+			logger.warn("WARN: Animation: Object created with faulty options. Property '%s' is no member of Animation.", property);
 		}
 	}
 }

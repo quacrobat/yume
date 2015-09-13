@@ -7,8 +7,6 @@
 
 "use strict";
 
-var renderer = require("../core/Renderer");
-
 /**
  * Creates a Utils instance.
  * 
@@ -95,29 +93,6 @@ Utils.prototype.getAppInformation = function(){
 Utils.prototype.isMultiplayerActive = function(){
 	
 	return this._runtimeInformation.isMultiplayerActive;
-};
-
-/**
- * Prints information about the memory- and render-status to console.
- */
-Utils.prototype.printWorldInformation = function() {
-
-	console.group("INFO: Utils: World Information, %s", new Date().toTimeString());
-
-		console.group("Memory");
-			console.log("%i Geometries", renderer.info.memory.geometries);
-			console.log("%i Programs", renderer.info.memory.programs);
-			console.log("%i Textures", renderer.info.memory.textures);
-		console.groupEnd();
-
-		console.group("Render");
-			console.log("%i Calls", renderer.info.render.calls);
-			console.log("%i Faces", renderer.info.render.faces);
-			console.log("%i Points", renderer.info.render.points);
-			console.log("%i Vertices", renderer.info.render.vertices);
-		console.groupEnd();
-
-	console.groupEnd();
 };
 
 /**

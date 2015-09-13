@@ -4,6 +4,7 @@
  * 
  * @author Human Interactive
  */
+
 "use strict";
 
 var PubSub = require("pubsub-js");
@@ -11,8 +12,9 @@ var PubSub = require("pubsub-js");
 var AudioListener = require("./AudioListener");
 var DynamicAudio = require("./DynamicAudio");
 var AudioBufferList = require("./AudioBufferList");
-var utils = require("../etc/Utils");
 var camera = require("../core/Camera");
+var logger = require("../etc/Logger");
+
 /**
  * Creates the audio manager.
  * 
@@ -160,9 +162,7 @@ AudioManager.prototype.setBackgroundMusic = function(file, volume, isLoop) {
 		event.target.oncanplay = null;
 	};
 	
-	if(utils.isDevelopmentModeActive() === true){
-		console.log("INFO: AudioManager: Set new background music. URL: %s", url);
-	}
+	logger.log("INFO: AudioManager: Set new background music. URL: %s", url);
 	
 	// publish message to inform about status
 	PubSub.publish("loading.start.music", {url: url});
@@ -192,9 +192,7 @@ AudioManager.prototype.playBackgroundMusic = function(isFadeIn, duration) {
 	}
 	
 	// logging
-	if(utils.isDevelopmentModeActive() === true){
-		console.log("INFO: AudioManager: Start playing background music.");
-	}
+	logger.log("INFO: AudioManager: Start playing background music.");
 };
 
 /**
@@ -240,9 +238,7 @@ AudioManager.prototype.pauseBackgroundMusic = function(isFadeOut, duration, onPa
 	}
 	
 	// logging
-	if(utils.isDevelopmentModeActive() === true){
-		console.log("INFO: AudioManager: Pause playing background music.");
-	}
+	logger.log("INFO: AudioManager: Pause playing background music.");
 };
 
 /**
@@ -266,9 +262,7 @@ AudioManager.prototype.stopBackgroundMusic = function(isFadeOut, duration, onSto
 	});
 	
 	// logging
-	if(utils.isDevelopmentModeActive() === true){
-		console.log("INFO: AudioManager: Stop playing background music.");
-	}
+	logger.log("INFO: AudioManager: Stop playing background music.");
 };
 
 /**
@@ -327,7 +321,7 @@ AudioManager.prototype.setBackgroundMusicVolume = function(volume) {
  */
 AudioManager.prototype._onErrorBackgroundMusic = function(){
 
-	console.error("ERROR: AudioManager: Media resource could not be processed.");
+	logger.error("ERROR: AudioManager: Media resource could not be processed.");
 	PubSub.publish("audio.backgroundmusic.error", "Media resource could not be processed");
 };
 

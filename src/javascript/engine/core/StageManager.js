@@ -11,7 +11,7 @@ var PubSub = require("pubsub-js");
 
 var saveGameManager = require("../etc/SaveGameManager");
 var userInterfaceManager = require("../ui/UserInterfaceManager");
-var utils = require("../etc/Utils");
+var logger = require("../etc/Logger");
 
 // stages
 var Stage_001 = require("../stages/Stage_001");
@@ -144,9 +144,7 @@ StageManager.prototype.load = function(stageId) {
 			throw "ERROR: StageManager: Invalid Stage-ID: " + stageId;
 	}
 	
-	if(utils.isDevelopmentModeActive() === true){
-		console.log("INFO: StageManager: Start loading scene with ID: %s", stageId);
-	}
+	logger.log("INFO: StageManager: Start loading scene with ID: %s", stageId);
 	
 	this._stage.setup();
 };
@@ -237,9 +235,7 @@ StageManager.prototype._onStageStart = function(message, data){
  */
 StageManager.prototype._onLoadStart = function(message, data){
 	
-	if(utils.isDevelopmentModeActive() === true){
-		console.log("INFO: StageManager: Start asset loading. Message: %s. URL: %s", message, data.url);
-	}
+	logger.log("INFO: StageManager: Start asset loading. Message: %s. URL: %s", message, data.url);
 	
 	self._total++;
 };
@@ -255,9 +251,8 @@ StageManager.prototype._onLoadComplete = function(message, data){
 	
 	if(self._isStageChangeActive === true || self._isApplicationStartActive === true){
 		
-		if(utils.isDevelopmentModeActive() === true){
-			console.log("INFO: StageManager: Asset loading complete. Message: %s. URL: %s", message, data.url);
-		}
+		logger.log("INFO: StageManager: Asset loading complete. Message: %s. URL: %s", message, data.url);
+
 		self._loaded++;
 		
 		// calculate progress
@@ -279,9 +274,8 @@ StageManager.prototype._onLoadComplete = function(message, data){
 			self._total = 0;
 			
 			// log event
-			if(utils.isDevelopmentModeActive() === true){
-				console.log("INFO: StageManager: Scene completely loaded and ready.");
-			}
+			logger.log("INFO: StageManager: Scene completely loaded and ready.");
+
 		}
 	}
 };
