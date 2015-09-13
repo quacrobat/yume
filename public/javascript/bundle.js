@@ -37646,7 +37646,7 @@ function DynamicAudio(id, listener, buffer, isLoop, isStageIndependent) {
 	this._panner.connect(this._gain);
 }
 
-DynamicAudio.prototype = Object.create(THREE.Audio.prototype);
+DynamicAudio.prototype = Object.create(THREE.Object3D.prototype);
 DynamicAudio.prototype.constructor = DynamicAudio;
 
 /**
@@ -43135,29 +43135,30 @@ module.exports = new Utils();
 
 "use strict";
 
-var nextValidId = 0;
+var THREE = require("three");
 
-function BaseGameEntity(){
+/**
+ * Creates a new state.
+ * 
+ * @constructor
+ *  
+ * @param {BaseGameEntity} entity - A reference to the entity.
+ */
+function GameEntity(){
 		
-	Object.defineProperties(this, {
-		
-		// every entity has a unique identifying number
-		id: {
-			value: nextValidId ++,
-			configurable: false,
-			enumerable: true,
-			writable: true
-		}
-	});
+	THREE.Object3D.call( this );
 }
+
+GameEntity.prototype = Object.create( THREE.Object3D.prototype );
+GameEntity.prototype.constructor = GameEntity;
 
 /**
  * All entities must implement an update function.
  */
-BaseGameEntity.prototype.update = function(){};
+GameEntity.prototype.update = function(){};
 
-module.exports = BaseGameEntity;
-},{}],42:[function(require,module,exports){
+module.exports = GameEntity;
+},{"three":2}],42:[function(require,module,exports){
 /**
  * @file Super prototype for states used by FSMs.
  * 
@@ -43169,35 +43170,36 @@ module.exports = BaseGameEntity;
 /**
  * Creates a new state.
  * 
- * @param {BaseGameEntity} entity - A reference to the entity.
+ * @constructor
+ *  
  */
 function State(){}
 
 /**
  * This executes when the state is entered.
  * 
- * @param {BaseGameEntity} entity - A reference to the entity.
+ * @param {GameEntity} entity - A reference to the entity.
  */
 State.prototype.enter = function( entity ){};
 
 /**
  * This is called by the FSM's update function each update step.
  * 
- * @param {BaseGameEntity} entity - A reference to the entity.
+ * @param {GameEntity} entity - A reference to the entity.
  */
 State.prototype.execute = function( entity ){};
 
 /**
  * This executes when the state is exited.
  * 
- * @param {BaseGameEntity} entity - A reference to the entity.
+ * @param {GameEntity} entity - A reference to the entity.
  */
 State.prototype.exit = function( entity ){};
 
 /**
  * This executes if the agent receives a message from the messaging system.
  * 
- * @param {BaseGameEntity} entity - A reference to the entity.
+ * @param {GameEntity} entity - A reference to the entity.
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  * 
@@ -43224,7 +43226,7 @@ var State = require("./State");
  * 
  * @constructor
  * 
- * @param {BaseGameEntity} owner - A reference to the agent that owns this instance.
+ * @param {GameEntity} owner - A reference to the agent that owns this instance.
  */
 function StateMachine( owner ){
 	

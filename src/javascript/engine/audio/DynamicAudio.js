@@ -98,7 +98,7 @@ function DynamicAudio(id, listener, buffer, isLoop, isStageIndependent) {
 	this._panner.connect(this._gain);
 }
 
-DynamicAudio.prototype = Object.create(THREE.Audio.prototype);
+DynamicAudio.prototype = Object.create(THREE.Object3D.prototype);
 DynamicAudio.prototype.constructor = DynamicAudio;
 
 /**

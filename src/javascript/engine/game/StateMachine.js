@@ -15,7 +15,7 @@ var State = require("./State");
  * 
  * @constructor
  * 
- * @param {BaseGameEntity} owner - A reference to the agent that owns this instance.
+ * @param {GameEntity} owner - A reference to the agent that owns this instance.
  */
 function StateMachine( owner ){
 	
