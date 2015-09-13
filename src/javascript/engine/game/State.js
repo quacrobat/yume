@@ -38,8 +38,11 @@ State.prototype.exit = function( entity ){};
  * This executes if the agent receives a message from the messaging system.
  * 
  * @param {BaseGameEntity} entity - A reference to the entity.
+ * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
+ * 
+ * @returns {boolean} Is the message handled successfully by a state?
  */
-State.prototype.onMessage = function( entity, data ){};
+State.prototype.onMessage = function( entity, message, data ){ return false; };
 
 module.exports = State;
