@@ -13,8 +13,7 @@ var THREE = require("three");
  * Creates a new state.
  * 
  * @constructor
- *  
- * @param {BaseGameEntity} entity - A reference to the entity.
+ * 
  */
 function GameEntity(){
 		
