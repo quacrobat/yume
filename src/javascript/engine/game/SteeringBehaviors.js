@@ -25,6 +25,33 @@ function SteeringBehaviors( vehicle ){
 			enumerable: true,
 			writable: false
 		},
+		// the radius of the constraining circle for the wander behavior
+		wanderRadius: {
+			value: 5,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		// distance the wander sphere is projected in front of the agent
+		wanderDistance: {
+			value: 10,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		// the maximum amount of displacement along the sphere each frame
+		wanderJitter: {
+			value: 80,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		_wanderTarget: {
+			value: new THREE.Vector3(),
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
 		_steeringForce: {
 			value: new THREE.Vector3(),
 			configurable: false,
@@ -32,22 +59,25 @@ function SteeringBehaviors( vehicle ){
 			writable: true
 		}
 	});
-
+	
+	this.setupWanderTarget();
 }
 
 /**
  * Calculates and sums the steering forces from any active behaviors.
  * 
+ * @param {number} delta - The time delta value.
+ * 
  * @returns {THREE.Vector3} The steering force.
  */
-SteeringBehaviors.prototype.calculate = function(){
+SteeringBehaviors.prototype.calculate = function( delta ){
 	
 	// reset steering force
 	this._steeringForce.set( 0, 0, 0 );
 	
 	// calculate seek steering behavior
-	this._steeringForce = this.arrive( this.vehicle.target.position, SteeringBehaviors.DECELERATION.MIDDLE );
-//	this._steeringForce = this.pursuit( this.vehicle.target );
+//	this._steeringForce = this.arrive( this.vehicle.target.position, SteeringBehaviors.DECELERATION.MIDDLE );
+	this._steeringForce = this.wander( delta );
 	
 	// make sure vehicle does not exceed maximum force
 	if( this._steeringForce.length() > this.vehicle.maxForce ){
@@ -73,7 +103,7 @@ SteeringBehaviors.prototype.seek = ( function(){
 	
 	return function( targetPosition ){
 		
-		var result = new THREE.Vector3();
+		var force = new THREE.Vector3();
 		
 		// First the desired velocity is calculated. 
 		// This is the velocity the agent would need to reach the target position in an ideal world. 
@@ -86,9 +116,9 @@ SteeringBehaviors.prototype.seek = ( function(){
 		// The steering force returned by this method is the force required, 
 		// which when added to the agent’s current velocity vector gives the desired velocity. 
 		// To achieve this you simply subtract the agent’s current velocity from the desired velocity. 
-		result.subVectors( desiredVelocity, this.vehicle.velocity );
+		force.subVectors( desiredVelocity, this.vehicle.velocity );
 		
-		return result;
+		return force;
 		
 	};
 	
@@ -107,22 +137,22 @@ SteeringBehaviors.prototype.flee = ( function(){
 		
 	return function( targetPosition ){
 		
-		var result = new THREE.Vector3();
+		var force = new THREE.Vector3();
 		
-		// only flee if the target is within panic distance.
-		if( this.vehicle.position.distanceTo( targetPosition ) < SteeringBehaviors.FLEE.RANGE ){
+		// only flee if the target is within panic distance
+		if( this.vehicle.position.distanceToSquared( targetPosition ) < ( SteeringBehaviors.FLEE.RANGE * SteeringBehaviors.FLEE.RANGE ) ){
 			
 			// from here, the only difference compared to seek is that the desired velocity
-			// is calculated using a vector pointing in the opposite direction.
+			// is calculated using a vector pointing in the opposite direction
 			desiredVelocity.subVectors( this.vehicle.position, targetPosition ).normalize();
 			
 			desiredVelocity.multiplyScalar( this.vehicle.maxSpeed );
 	
-			result.subVectors( desiredVelocity, this.vehicle.velocity );
+			force.subVectors( desiredVelocity, this.vehicle.velocity );
 			
 		}
 		
-		return result;
+		return force;
 		
 	};
 	
@@ -146,7 +176,7 @@ SteeringBehaviors.prototype.arrive = ( function(){
 	
 	return function( targetPosition, deceleration ){
 		
-		var result = new THREE.Vector3();
+		var force = new THREE.Vector3();
 		
 		// calculate displacement vector
 		toTarget.subVectors( targetPosition, this.vehicle.position );
@@ -167,10 +197,10 @@ SteeringBehaviors.prototype.arrive = ( function(){
 		    // of calculating its length: distance.	
 			desiredVelocity.copy( toTarget ).multiplyScalar( speed ).divideScalar( distance );
 			
-			result.subVectors( desiredVelocity, this.vehicle.velocity );
+			force.subVectors( desiredVelocity, this.vehicle.velocity );
 		}
 		
-		return result;
+		return force;
 	};
 	
 } ( ) );
@@ -257,7 +287,7 @@ SteeringBehaviors.prototype.evade = ( function(){
 		toPursuer.subVectors( pursuer.position, this.vehicle.position );
 		
 		// evade only when pursuers are inside a threat range.
-		if( toPursuer.length() > SteeringBehaviors.FLEE.RANGE ){
+		if( toPursuer.lengthSq() > ( SteeringBehaviors.FLEE.RANGE * SteeringBehaviors.FLEE.RANGE ) ){
 			return new THREE.Vector3();
 		}
 		
@@ -276,6 +306,73 @@ SteeringBehaviors.prototype.evade = ( function(){
 	};
 	
 } ( ) );
+
+/**
+ * This behavior makes the agent wander about randomly.
+ * 
+ * @param {number} delta - The time delta value.
+ * 
+ * @returns {THREE.Vector3} The calculated force.
+ */
+SteeringBehaviors.prototype.wander = ( function(){
+	
+	var randomDisplacement = new THREE.Vector3();
+	var distanceVector = new THREE.Vector3();
+	
+	var jitterThisTimeSlice = 0;
+	
+	return function( delta ){
+		
+		var target = new THREE.Vector3();
+		
+		// this behavior is dependent on the update rate, so this line must be included 
+		// when using time independent frame rate.
+		jitterThisTimeSlice = this.wanderJitter * delta;
+		
+		// first, add a small random vector to the target's position
+		randomDisplacement.x = THREE.Math.randFloat( -1, 1 ) * jitterThisTimeSlice;
+		randomDisplacement.y = 0; // plane movement
+		randomDisplacement.z = THREE.Math.randFloat( -1, 1 ) * jitterThisTimeSlice;
+		
+		this._wanderTarget.add( randomDisplacement );
+		
+		// re-project this new vector back onto a unit sphere
+		this._wanderTarget.normalize();
+		
+		// increase the length of the vector to the same as the radius of the wander sphere
+		this._wanderTarget.multiplyScalar( this.wanderRadius );
+		
+		// move the target into a position wanderDist in front of the agent
+		distanceVector.z = this.wanderDistance;
+		target.addVectors( this._wanderTarget, distanceVector );
+		
+		// ensure model matrix is up to date
+		this.vehicle.updateMatrix();
+		
+		// project the target into world space
+		target.applyMatrix4( this.vehicle.matrix );
+		
+		// and steer towards it
+		target.sub( this.vehicle.position );
+		
+		return target;
+	};
+	
+} ( ) );
+
+/**
+ * Setup wander target.
+ */
+SteeringBehaviors.prototype.setupWanderTarget = function(){
+	
+	var theta = Math.random() * Math.PI * 2;
+	
+	// setup a vector to a target position on the wander sphere
+	this._wanderTarget.x = this.wanderRadius * Math.cos( theta );
+	this._wanderTarget.y = 0;
+	this._wanderTarget.z = this.wanderRadius * Math.sin( theta );
+
+};
 
 SteeringBehaviors.FLEE = {
 		RANGE: 50

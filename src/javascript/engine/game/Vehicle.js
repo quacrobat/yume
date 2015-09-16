@@ -60,7 +60,7 @@ Vehicle.prototype.update = ( function( ){
 	return function( delta ){
 		
 		// calculate steering force
-		steeringForce = this.steering.calculate();
+		steeringForce = this.steering.calculate( delta );
 				
 		// acceleration = force / mass
 		acceleration.copy( steeringForce ).divideScalar( this.mass );

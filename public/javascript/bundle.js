@@ -35803,7 +35803,7 @@ var OBB = require("../etc/OBB");
  * @param {number} raycastPrecision - The precision of the raycast operation.
  * @param {Action} action - The action, that should be executed.
  */
-function InteractiveObject(mesh, collisionType, raycastPrecision, action) {
+function InteractiveObject( mesh, collisionType, raycastPrecision, action ) {
 
 	Object.defineProperties(this, {
 		mesh: {
@@ -35852,7 +35852,6 @@ function InteractiveObject(mesh, collisionType, raycastPrecision, action) {
  * relevant object. According to raycast precision, different algorithm
  * are used to detect an intersection.
  * 
- * 
  * @param {THREE.Raycaster} raycaster - A raycaster instance.
  * @param {object} intersects - An array with intersection points.
  */
@@ -35863,98 +35862,150 @@ InteractiveObject.prototype.raycast = ( function(){
 	var intersectionPoint = null;
 	var distance = 0;
 	
-	return function(raycaster, intersects){
+	return function( raycaster, intersects ){
 		
-		if( this.raycastPrecision === InteractiveObject.RAYCASTPRECISION.FACE ){
-			
-			// call default raycast method of the mesh object
-			this.mesh.raycast(raycaster, intersectsRay);
-			
-			for(index = 0; index < intersectsRay.length; index++){
+		// check raycast precision
+		switch ( this.raycastPrecision ){
+		
+			case InteractiveObject.RAYCASTPRECISION.AABB: {
 				
-				// set the interactive object as result object, not mesh
-				intersectsRay[index].object = this;
+				// compute bounding box only once
+				if( this.mesh.geometry.boundingBox === null ){
+					this.mesh.geometry.computeBoundingBox();
+				}
 				
-				// push to result array
-				intersects.push(intersectsRay[index]);
+				// apply transformation
+				this._aabb.copy( this.mesh.geometry.boundingBox );
+				this._aabb.applyMatrix4( this.mesh.matrixWorld );
+				
+				// do intersection test
+				intersectionPoint = raycaster.ray.intersectBox( this._aabb );
+				
+				break;
 			}
-			 // reset the array for next call
-			intersectsRay.length = 0;
 			
-		}else{
-			
-			if( this.raycastPrecision === InteractiveObject.RAYCASTPRECISION.OBB ){
+			case InteractiveObject.RAYCASTPRECISION.OBB: {
 				
-				// setup obb
+				// calculate OBB
 				this._obb.setFromObject( this.mesh );
 				
 				// do intersection test
 				intersectionPoint = this._obb.intersectRay( raycaster.ray );
+				
+				break;
+			}
 			
-			}else{
+			case InteractiveObject.RAYCASTPRECISION.FACE: {
 				
-				// setup aabb
-				if (this.mesh.geometry.boundingBox === null){
-					this.mesh.geometry.computeBoundingBox();
+				// call default raycast method of the mesh object
+				this.mesh.raycast( raycaster, intersectsRay );
+				
+				for( index = 0; index < intersectsRay.length; index++ ){
+					
+					// set the interactive object as result object
+					intersectsRay[ index ].object = this;
+					
+					// push to result array
+					intersects.push( intersectsRay[ index ] );
 				}
-
-				this._aabb.copy(this.mesh.geometry.boundingBox);
-				this._aabb.applyMatrix4(this.mesh.matrixWorld);
-
-				// do intersection test
-				intersectionPoint = raycaster.ray.intersectBox(this._aabb);
+				 // reset array for next call
+				intersectsRay.length = 0;
+				
+				break;
 			}
+			
+			default: {
 				
-			if ( intersectionPoint !== null)  {
-				
-				// get the distance to the intersection point
-				distance = raycaster.ray.origin.distanceTo(intersectionPoint);
-				
-				if (distance >= raycaster.precision && distance >= raycaster.near && distance <= raycaster.far){
-				
-					// store the result in special data structure, see THREE.Mesh.raycast
-					intersects.push({
-						distance: distance,
-						point: intersectionPoint,
-						face: null,
-						faceIndex: null,
-						object: this
-					});
-				}
-				
-				// reset member
-				intersectionPoint = null;
+				throw "ERROR: InteractiveObject: No valid raycast precision applied to object.";
 			}
+		
 		}
+		
+		// if a single intersectionPoint is found, we need to calculate
+		// additional data and push the point into the intersects array
+		if ( intersectionPoint !== null)  {
+			
+			// get the distance to the intersection point
+			distance = raycaster.ray.origin.distanceTo(intersectionPoint);
+			
+			if (distance >= raycaster.precision && distance >= raycaster.near && distance <= raycaster.far){
+			
+				// store the result in special data structure, see THREE.Mesh.raycast
+				intersects.push({
+					distance: distance,
+					point: intersectionPoint,
+					face: null,
+					faceIndex: null,
+					object: this
+				});
+			}
+			
+			// reset value
+			intersectionPoint = null;
+		}
+		
 	};
 	
 }());
 	
 /**
- * This method detects an intersection between the bounding box
- * of the controls and the bounding volume of the interactive object.
+ * This method detects an intersection between the given bounding box
+ * and the bounding volume of the interactive object.
  * 
  * @param {THREE.Box3} boundingBox - The boundingBox of the controls.
+ * 
+ * @returns {boolean} Intersects the object with the given bounding box?
  */
-InteractiveObject.prototype.isIntersection = function( boundingBox ){
+InteractiveObject.prototype.isIntersection = ( function(){
 	
-	if( this.collisionType === InteractiveObject.COLLISIONTYPES.OBB ){
+	var isIntersection;
+	
+	return function( boundingBox ){
 		
-		this._obb.setFromObject( this.mesh );
-		return this._obb.isIntersectionAABB( boundingBox );
+		isIntersection = false;
 		
-	}else{
+		// check type of collision test
+		switch ( this.collisionType ){
 		
-		if (this.mesh.geometry.boundingBox === null){
-			this.mesh.geometry.computeBoundingBox();
+			case InteractiveObject.COLLISIONTYPES.AABB: {
+				
+				// compute bounding box only once
+				if( this.mesh.geometry.boundingBox === null ){
+					this.mesh.geometry.computeBoundingBox();
+				}
+				
+				// apply transformation
+				this._aabb.copy( this.mesh.geometry.boundingBox );
+				this._aabb.applyMatrix4( this.mesh.matrixWorld );
+				
+				// do intersection test
+				isIntersection = this._aabb.isIntersectionBox( boundingBox );
+				
+				break;
+			}
+		
+			case InteractiveObject.COLLISIONTYPES.OBB: {
+				
+				// calculate OBB
+				this._obb.setFromObject( this.mesh );
+				
+				// do intersection test
+				isIntersection =  this._obb.isIntersectionAABB( boundingBox );
+				
+				break;
+			}
+			
+			default: {
+				
+				throw "ERROR: InteractiveObject: No valid collision type applied to object.";
+			}
 		}
-	
-		this._aabb.copy(this.mesh.geometry.boundingBox);
-		this._aabb.applyMatrix4(this.mesh.matrixWorld);
 		
-		return this._aabb.isIntersectionBox(boundingBox);
-	}
-};
+		return isIntersection;
+		
+	};
+	
+} ( ) );
 
 InteractiveObject.COLLISIONTYPES = {
 	AABB: 0,
@@ -35989,7 +36040,7 @@ var OBB = require("../etc/OBB");
  * @param {THREE.Mesh} mesh - The mesh object.
  * @param {number} collisionType - The type of collision detection.
  */
-function StaticObject(object, collisionType) {
+function StaticObject( object, collisionType ) {
 
 	Object.defineProperties(this, {
 		mesh: {
@@ -36021,32 +36072,63 @@ function StaticObject(object, collisionType) {
 }
 
 /**
- * This method detects an intersection between the bounding box
- * of the controls and the bounding volume of the static object.
+ * This method detects an intersection between the given bounding box
+ * and the bounding volume of the static object.
  * 
  * @param {THREE.Box3} boundingBox - The boundingBox of the controls.
+ * 
+ * @returns {boolean} Intersects the object with the given bounding box?
  */
-StaticObject.prototype.isIntersection = function(boundingBox){
+StaticObject.prototype.isIntersection = ( function(){
 	
-	if( this.collisionType === StaticObject.COLLISIONTYPES.OBB ){
+	var isIntersection;
+	
+	return function( boundingBox ){
 		
-		this._obb.setFromObject( this.mesh );
-		return this._obb.isIntersectionAABB( boundingBox );
+		isIntersection = false;
 		
-	}else{
+		// check type of collision test
+		switch ( this.collisionType ){
 		
-		if (this.mesh.geometry.boundingBox === null){
-			this.mesh.geometry.computeBoundingBox();
+			case StaticObject.COLLISIONTYPES.AABB: {
+				
+				// compute bounding box only once
+				if( this.mesh.geometry.boundingBox === null ){
+					this.mesh.geometry.computeBoundingBox();
+				}
+				
+				// apply transformation
+				this._aabb.copy( this.mesh.geometry.boundingBox );
+				this._aabb.applyMatrix4( this.mesh.matrixWorld );
+				
+				// do intersection test
+				isIntersection = this._aabb.isIntersectionBox( boundingBox );
+				
+				break;
+			}
+		
+			case StaticObject.COLLISIONTYPES.OBB: {
+				
+				// calculate OBB
+				this._obb.setFromObject( this.mesh );
+				
+				// do intersection test
+				isIntersection =  this._obb.isIntersectionAABB( boundingBox );
+				
+				break;
+			}
+			
+			default: {
+				
+				throw "ERROR: StaticObject: No valid collision type applied to object.";
+			}
 		}
-
-		this._aabb.copy(this.mesh.geometry.boundingBox);
-		this._aabb.applyMatrix4(this.mesh.matrixWorld);
 		
-		return this._aabb.isIntersectionBox(boundingBox);
+		return isIntersection;
 		
-	}
+	};
 	
-};
+} ( ) );
 
 StaticObject.COLLISIONTYPES = {
 	AABB : 0,
@@ -43511,6 +43593,33 @@ function SteeringBehaviors( vehicle ){
 			enumerable: true,
 			writable: false
 		},
+		// the radius of the constraining circle for the wander behavior
+		wanderRadius: {
+			value: 5,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		// distance the wander sphere is projected in front of the agent
+		wanderDistance: {
+			value: 10,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		// the maximum amount of displacement along the sphere each frame
+		wanderJitter: {
+			value: 80,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		_wanderTarget: {
+			value: new THREE.Vector3(),
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
 		_steeringForce: {
 			value: new THREE.Vector3(),
 			configurable: false,
@@ -43518,22 +43627,25 @@ function SteeringBehaviors( vehicle ){
 			writable: true
 		}
 	});
-
+	
+	this.setupWanderTarget();
 }
 
 /**
  * Calculates and sums the steering forces from any active behaviors.
  * 
+ * @param {number} delta - The time delta value.
+ * 
  * @returns {THREE.Vector3} The steering force.
  */
-SteeringBehaviors.prototype.calculate = function(){
+SteeringBehaviors.prototype.calculate = function( delta ){
 	
 	// reset steering force
 	this._steeringForce.set( 0, 0, 0 );
 	
 	// calculate seek steering behavior
-	this._steeringForce = this.arrive( this.vehicle.target.position, SteeringBehaviors.DECELERATION.MIDDLE );
-//	this._steeringForce = this.pursuit( this.vehicle.target );
+//	this._steeringForce = this.arrive( this.vehicle.target.position, SteeringBehaviors.DECELERATION.MIDDLE );
+	this._steeringForce = this.wander( delta );
 	
 	// make sure vehicle does not exceed maximum force
 	if( this._steeringForce.length() > this.vehicle.maxForce ){
@@ -43559,7 +43671,7 @@ SteeringBehaviors.prototype.seek = ( function(){
 	
 	return function( targetPosition ){
 		
-		var result = new THREE.Vector3();
+		var force = new THREE.Vector3();
 		
 		// First the desired velocity is calculated. 
 		// This is the velocity the agent would need to reach the target position in an ideal world. 
@@ -43572,9 +43684,9 @@ SteeringBehaviors.prototype.seek = ( function(){
 		// The steering force returned by this method is the force required, 
 		// which when added to the agent’s current velocity vector gives the desired velocity. 
 		// To achieve this you simply subtract the agent’s current velocity from the desired velocity. 
-		result.subVectors( desiredVelocity, this.vehicle.velocity );
+		force.subVectors( desiredVelocity, this.vehicle.velocity );
 		
-		return result;
+		return force;
 		
 	};
 	
@@ -43593,22 +43705,22 @@ SteeringBehaviors.prototype.flee = ( function(){
 		
 	return function( targetPosition ){
 		
-		var result = new THREE.Vector3();
+		var force = new THREE.Vector3();
 		
-		// only flee if the target is within panic distance.
-		if( this.vehicle.position.distanceTo( targetPosition ) < SteeringBehaviors.FLEE.RANGE ){
+		// only flee if the target is within panic distance
+		if( this.vehicle.position.distanceToSquared( targetPosition ) < ( SteeringBehaviors.FLEE.RANGE * SteeringBehaviors.FLEE.RANGE ) ){
 			
 			// from here, the only difference compared to seek is that the desired velocity
-			// is calculated using a vector pointing in the opposite direction.
+			// is calculated using a vector pointing in the opposite direction
 			desiredVelocity.subVectors( this.vehicle.position, targetPosition ).normalize();
 			
 			desiredVelocity.multiplyScalar( this.vehicle.maxSpeed );
 	
-			result.subVectors( desiredVelocity, this.vehicle.velocity );
+			force.subVectors( desiredVelocity, this.vehicle.velocity );
 			
 		}
 		
-		return result;
+		return force;
 		
 	};
 	
@@ -43632,7 +43744,7 @@ SteeringBehaviors.prototype.arrive = ( function(){
 	
 	return function( targetPosition, deceleration ){
 		
-		var result = new THREE.Vector3();
+		var force = new THREE.Vector3();
 		
 		// calculate displacement vector
 		toTarget.subVectors( targetPosition, this.vehicle.position );
@@ -43653,10 +43765,10 @@ SteeringBehaviors.prototype.arrive = ( function(){
 		    // of calculating its length: distance.	
 			desiredVelocity.copy( toTarget ).multiplyScalar( speed ).divideScalar( distance );
 			
-			result.subVectors( desiredVelocity, this.vehicle.velocity );
+			force.subVectors( desiredVelocity, this.vehicle.velocity );
 		}
 		
-		return result;
+		return force;
 	};
 	
 } ( ) );
@@ -43743,7 +43855,7 @@ SteeringBehaviors.prototype.evade = ( function(){
 		toPursuer.subVectors( pursuer.position, this.vehicle.position );
 		
 		// evade only when pursuers are inside a threat range.
-		if( toPursuer.length() > SteeringBehaviors.FLEE.RANGE ){
+		if( toPursuer.lengthSq() > ( SteeringBehaviors.FLEE.RANGE * SteeringBehaviors.FLEE.RANGE ) ){
 			return new THREE.Vector3();
 		}
 		
@@ -43762,6 +43874,73 @@ SteeringBehaviors.prototype.evade = ( function(){
 	};
 	
 } ( ) );
+
+/**
+ * This behavior makes the agent wander about randomly.
+ * 
+ * @param {number} delta - The time delta value.
+ * 
+ * @returns {THREE.Vector3} The calculated force.
+ */
+SteeringBehaviors.prototype.wander = ( function(){
+	
+	var randomDisplacement = new THREE.Vector3();
+	var distanceVector = new THREE.Vector3();
+	
+	var jitterThisTimeSlice = 0;
+	
+	return function( delta ){
+		
+		var target = new THREE.Vector3();
+		
+		// this behavior is dependent on the update rate, so this line must be included 
+		// when using time independent frame rate.
+		jitterThisTimeSlice = this.wanderJitter * delta;
+		
+		// first, add a small random vector to the target's position
+		randomDisplacement.x = THREE.Math.randFloat( -1, 1 ) * jitterThisTimeSlice;
+		randomDisplacement.y = 0; // plane movement
+		randomDisplacement.z = THREE.Math.randFloat( -1, 1 ) * jitterThisTimeSlice;
+		
+		this._wanderTarget.add( randomDisplacement );
+		
+		// re-project this new vector back onto a unit sphere
+		this._wanderTarget.normalize();
+		
+		// increase the length of the vector to the same as the radius of the wander sphere
+		this._wanderTarget.multiplyScalar( this.wanderRadius );
+		
+		// move the target into a position wanderDist in front of the agent
+		distanceVector.z = this.wanderDistance;
+		target.addVectors( this._wanderTarget, distanceVector );
+		
+		// ensure model matrix is up to date
+		this.vehicle.updateMatrix();
+		
+		// project the target into world space
+		target.applyMatrix4( this.vehicle.matrix );
+		
+		// and steer towards it
+		target.sub( this.vehicle.position );
+		
+		return target;
+	};
+	
+} ( ) );
+
+/**
+ * Setup wander target.
+ */
+SteeringBehaviors.prototype.setupWanderTarget = function(){
+	
+	var theta = Math.random() * Math.PI * 2;
+	
+	// setup a vector to a target position on the wander sphere
+	this._wanderTarget.x = this.wanderRadius * Math.cos( theta );
+	this._wanderTarget.y = 0;
+	this._wanderTarget.z = this.wanderRadius * Math.sin( theta );
+
+};
 
 SteeringBehaviors.FLEE = {
 		RANGE: 50
@@ -43837,7 +44016,7 @@ Vehicle.prototype.update = ( function( ){
 	return function( delta ){
 		
 		// calculate steering force
-		steeringForce = this.steering.calculate();
+		steeringForce = this.steering.calculate( delta );
 				
 		// acceleration = force / mass
 		acceleration.copy( steeringForce ).divideScalar( this.mass );

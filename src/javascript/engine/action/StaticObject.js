@@ -18,7 +18,7 @@ var OBB = require("../etc/OBB");
  * @param {THREE.Mesh} mesh - The mesh object.
  * @param {number} collisionType - The type of collision detection.
  */
-function StaticObject(object, collisionType) {
+function StaticObject( object, collisionType ) {
 
 	Object.defineProperties(this, {
 		mesh: {
@@ -50,32 +50,63 @@ function StaticObject(object, collisionType) {
 }
 
 /**
- * This method detects an intersection between the bounding box
- * of the controls and the bounding volume of the static object.
+ * This method detects an intersection between the given bounding box
+ * and the bounding volume of the static object.
  * 
  * @param {THREE.Box3} boundingBox - The boundingBox of the controls.
+ * 
+ * @returns {boolean} Intersects the object with the given bounding box?
  */
-StaticObject.prototype.isIntersection = function(boundingBox){
+StaticObject.prototype.isIntersection = ( function(){
 	
-	if( this.collisionType === StaticObject.COLLISIONTYPES.OBB ){
+	var isIntersection;
+	
+	return function( boundingBox ){
 		
-		this._obb.setFromObject( this.mesh );
-		return this._obb.isIntersectionAABB( boundingBox );
+		isIntersection = false;
 		
-	}else{
+		// check type of collision test
+		switch ( this.collisionType ){
 		
-		if (this.mesh.geometry.boundingBox === null){
-			this.mesh.geometry.computeBoundingBox();
+			case StaticObject.COLLISIONTYPES.AABB: {
+				
+				// compute bounding box only once
+				if( this.mesh.geometry.boundingBox === null ){
+					this.mesh.geometry.computeBoundingBox();
+				}
+				
+				// apply transformation
+				this._aabb.copy( this.mesh.geometry.boundingBox );
+				this._aabb.applyMatrix4( this.mesh.matrixWorld );
+				
+				// do intersection test
+				isIntersection = this._aabb.isIntersectionBox( boundingBox );
+				
+				break;
+			}
+		
+			case StaticObject.COLLISIONTYPES.OBB: {
+				
+				// calculate OBB
+				this._obb.setFromObject( this.mesh );
+				
+				// do intersection test
+				isIntersection =  this._obb.isIntersectionAABB( boundingBox );
+				
+				break;
+			}
+			
+			default: {
+				
+				throw "ERROR: StaticObject: No valid collision type applied to object.";
+			}
 		}
-
-		this._aabb.copy(this.mesh.geometry.boundingBox);
-		this._aabb.applyMatrix4(this.mesh.matrixWorld);
 		
-		return this._aabb.isIntersectionBox(boundingBox);
+		return isIntersection;
 		
-	}
+	};
 	
-};
+} ( ) );
 
 StaticObject.COLLISIONTYPES = {
 	AABB : 0,
