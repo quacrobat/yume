@@ -8,6 +8,7 @@
 "use strict";
 
 var THREE = require("three");
+var Path = require("./Path");
 
 /**
  * Creates a steering behaviors instance.
@@ -25,6 +26,19 @@ function SteeringBehaviors( vehicle ){
 			enumerable: true,
 			writable: false
 		},
+		path: {
+			value: new Path(),
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		// the distance a waypoint is set to the new target
+		waypointSeekDist: {
+			value: 5,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
 		// the radius of the constraining circle for the wander behavior
 		wanderRadius: {
 			value: 5,
@@ -32,7 +46,7 @@ function SteeringBehaviors( vehicle ){
 			enumerable: true,
 			writable: true
 		},
-		// distance the wander sphere is projected in front of the agent
+		// the distance the wander sphere is projected in front of the agent
 		wanderDistance: {
 			value: 10,
 			configurable: false,
@@ -75,9 +89,12 @@ SteeringBehaviors.prototype.calculate = function( delta ){
 	// reset steering force
 	this._steeringForce.set( 0, 0, 0 );
 	
+	// update model matrices
+	this.vehicle.updateMatrix();
+	this.vehicle.target.updateMatrix();
+	
 	// calculate seek steering behavior
-//	this._steeringForce = this.arrive( this.vehicle.target.position, SteeringBehaviors.DECELERATION.MIDDLE );
-	this._steeringForce = this.wander( delta );
+	this._steeringForce = this.seek( this.vehicle.target.position, SteeringBehaviors.DECELERATION.MIDDLE );
 	
 	// make sure vehicle does not exceed maximum force
 	if( this._steeringForce.length() > this.vehicle.maxForce ){
@@ -265,6 +282,49 @@ SteeringBehaviors.prototype.pursuit = ( function(){
 } ( ) );
 
 /**
+ *  Produces a steering force that keeps a vehicle at a specified 
+ *  offset from a leader vehicle.
+ *  
+ * @param {Vehicle} leader - The leader vehicle.
+ * @param {THREE.Vector3} offset - The offset of the leader.
+ * 
+ * @returns {THREE.Vector3} The calculated force.
+ */
+SteeringBehaviors.prototype.offsetPursuit = ( function(){
+	
+	var offsetWorld = new THREE.Vector3();
+	var toOffset = new THREE.Vector3();
+	
+	var lookAheadTime = 0;
+	
+	var newLeaderVelocity = new THREE.Vector3();
+	var predcitedPosition = new THREE.Vector3();
+
+	return function( leader, offset ){
+
+		// calculate the offset's position in world space
+		offsetWorld.copy( offset ).applyMatrix4( leader.matrix );
+		
+		toOffset.subVectors( offsetWorld, this.vehicle.position );
+		
+		// the lookahead time is proportional to the distance between the leader
+		// and the pursuer; and is inversely proportional to the sum of both
+		// agent's velocities
+		lookAheadTime = toOffset.length() / ( this.vehicle.maxSpeed + leader.getSpeed() );
+		
+		// calculate new velocity and predicted future position
+		newLeaderVelocity.copy( leader.velocity ).multiplyScalar( lookAheadTime );
+		
+		predcitedPosition.addVectors( offsetWorld, newLeaderVelocity );
+		
+		// now arrive at the predicted future position of the offset
+		return this.arrive( predcitedPosition, 1 );
+		
+	};
+	
+} ( ) );
+
+/**
  * Similar to pursuit except the agent flees from the estimated future position of the pursuer.
  * 
  * @param {Vehicle} pursuer - The pursuer.
@@ -308,7 +368,7 @@ SteeringBehaviors.prototype.evade = ( function(){
 } ( ) );
 
 /**
- * This behavior makes the agent wander about randomly.
+ * This behavior makes the agent wander about randomly on a planar surface.
  * 
  * @param {number} delta - The time delta value.
  * 
@@ -329,11 +389,12 @@ SteeringBehaviors.prototype.wander = ( function(){
 		// when using time independent frame rate.
 		jitterThisTimeSlice = this.wanderJitter * delta;
 		
-		// first, add a small random vector to the target's position
+		// prepare random vector
 		randomDisplacement.x = THREE.Math.randFloat( -1, 1 ) * jitterThisTimeSlice;
-		randomDisplacement.y = 0; // plane movement
+		randomDisplacement.y = 0;
 		randomDisplacement.z = THREE.Math.randFloat( -1, 1 ) * jitterThisTimeSlice;
 		
+		// add random vector to the target's position
 		this._wanderTarget.add( randomDisplacement );
 		
 		// re-project this new vector back onto a unit sphere
@@ -346,9 +407,6 @@ SteeringBehaviors.prototype.wander = ( function(){
 		distanceVector.z = this.wanderDistance;
 		target.addVectors( this._wanderTarget, distanceVector );
 		
-		// ensure model matrix is up to date
-		this.vehicle.updateMatrix();
-		
 		// project the target into world space
 		target.applyMatrix4( this.vehicle.matrix );
 		
@@ -356,6 +414,41 @@ SteeringBehaviors.prototype.wander = ( function(){
 		target.sub( this.vehicle.position );
 		
 		return target;
+	};
+	
+} ( ) );
+
+/**
+ *  Given a series of Vector2Ds, this method produces a force that will
+ *  move the agent along the waypoints in order. The agent uses the
+ * "seek" behavior to move to the next waypoint - unless it is the last
+ *  waypoint, in which case it "arrives".
+ * 
+ * @returns {THREE.Vector3} The calculated force.
+ */
+SteeringBehaviors.prototype.followPath = ( function(){
+	
+	var distanceSq = 0;
+
+	return function(){
+		
+		// calculate distance in square space from current waypoint to vehicle
+		distanceSq = this.path.getCurrentWaypoint().distanceToSquared( this.vehicle.position );
+		
+		// move to next waypoint if close enough to current target
+		if( distanceSq < ( this.waypointSeekDist * this.waypointSeekDist ) ){
+			
+			this.path.setNextWaypoint();
+		}
+		
+		if( !this.path.isFinished() ){
+			
+			return this.seek( this.path.getCurrentWaypoint() );
+		}
+		else{
+			
+			return this.arrive( this.path.getCurrentWaypoint(), SteeringBehaviors.DECELERATION.MIDDLE );
+		}
 	};
 	
 } ( ) );
@@ -379,9 +472,11 @@ SteeringBehaviors.FLEE = {
 };
 
 SteeringBehaviors.DECELERATION = {
+		VERY_FAST: 1.5,
 		FAST: 3,
 		MIDDLE: 4,
-		SLOW: 5	
+		SLOW: 5,
+		VERY_SLOW: 6
 };
 
 module.exports = SteeringBehaviors;

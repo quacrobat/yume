@@ -39163,7 +39163,7 @@ FirstPersonControls.RUN = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":6,"../animation/Easing":12,"../audio/AudioManager":16,"../core/Camera":20,"../core/Scene":23,"../etc/Logger":31,"../etc/SettingsManager":38,"../ui/UserInterfaceManager":77,"pubsub-js":1,"three":2}],19:[function(require,module,exports){
+},{"../action/ActionManager":6,"../animation/Easing":12,"../audio/AudioManager":16,"../core/Camera":20,"../core/Scene":23,"../etc/Logger":31,"../etc/SettingsManager":38,"../ui/UserInterfaceManager":78,"pubsub-js":1,"three":2}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting
@@ -39260,7 +39260,7 @@ Bootstrap.prototype._loadStage = function(){
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":18,"../etc/Logger":31,"../etc/MultiplayerManager":32,"../etc/SaveGameManager":37,"../etc/Utils":40,"../network/NetworkManager":48,"../ui/UserInterfaceManager":77,"./Camera":20,"./Environment":21,"./Renderer":22,"pubsub-js":1}],20:[function(require,module,exports){
+},{"../controls/FirstPersonControls":18,"../etc/Logger":31,"../etc/MultiplayerManager":32,"../etc/SaveGameManager":37,"../etc/Utils":40,"../network/NetworkManager":49,"../ui/UserInterfaceManager":78,"./Camera":20,"./Environment":21,"./Renderer":22,"pubsub-js":1}],20:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -39797,7 +39797,7 @@ Renderer.prototype._onResize = function(message, data){
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Logger":31,"../postprocessing/EffectComposer":49,"../postprocessing/RenderPass":50,"../postprocessing/ShaderPass":51,"../shader/GaussianBlurShader":53,"../shader/GrayscaleShader":54,"../shader/VignetteShader":55,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
+},{"../etc/Logger":31,"../postprocessing/EffectComposer":50,"../postprocessing/RenderPass":51,"../postprocessing/ShaderPass":52,"../shader/GaussianBlurShader":54,"../shader/GrayscaleShader":55,"../shader/VignetteShader":56,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic 
  * for scene-based functionality.
@@ -40072,7 +40072,7 @@ StageBase.prototype._changeStage = function(stageId, isSaveGame){
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":16,"../controls/FirstPersonControls":18,"../etc/PerformanceManager":35,"../etc/SaveGameManager":37,"../etc/SettingsManager":38,"../etc/TextManager":39,"../etc/Utils":40,"../ui/UserInterfaceManager":77,"./Camera":20,"./Renderer":22,"./Scene":23,"pubsub-js":1,"three":2}],25:[function(require,module,exports){
+},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":16,"../controls/FirstPersonControls":18,"../etc/PerformanceManager":35,"../etc/SaveGameManager":37,"../etc/SettingsManager":38,"../etc/TextManager":39,"../etc/Utils":40,"../ui/UserInterfaceManager":78,"./Camera":20,"./Renderer":22,"./Scene":23,"pubsub-js":1,"three":2}],25:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -40356,7 +40356,7 @@ StageManager.prototype._onLoadComplete = function(message, data){
 };
 
 module.exports = new StageManager();
-},{"../etc/Logger":31,"../etc/SaveGameManager":37,"../stages/Stage_001":56,"../stages/Stage_002":57,"../stages/Stage_003":58,"../stages/Stage_004":59,"../stages/Stage_005":60,"../stages/Stage_006":61,"../stages/Stage_007":62,"../stages/Stage_008":63,"../stages/Stage_009":64,"../stages/Stage_010":65,"../stages/Stage_011":66,"../ui/UserInterfaceManager":77,"pubsub-js":1}],26:[function(require,module,exports){
+},{"../etc/Logger":31,"../etc/SaveGameManager":37,"../stages/Stage_001":57,"../stages/Stage_002":58,"../stages/Stage_003":59,"../stages/Stage_004":60,"../stages/Stage_005":61,"../stages/Stage_006":62,"../stages/Stage_007":63,"../stages/Stage_008":64,"../stages/Stage_009":65,"../stages/Stage_010":66,"../stages/Stage_011":67,"../ui/UserInterfaceManager":78,"pubsub-js":1}],26:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It 
@@ -43383,6 +43383,167 @@ MovingEntity.prototype.getDirection = function(){
 module.exports = MovingEntity;
 },{"./GameEntity":41,"three":2}],43:[function(require,module,exports){
 /**
+ * @file Prototype to define, manage, and traverse a path 
+ * 	     defined by a series of 3D vectors.
+ * 
+ * @author Human Interactive
+ */
+"use strict";
+
+var THREE = require("three");
+
+var logger = require("../etc/Logger");
+
+/**
+ * Creates a new path.
+ * 
+ * @constructor
+ *  
+ * @param {boolean} isLoop - Flag to indicate if the path should be looped.
+ */
+function Path( isLoop ){
+	
+	Object.defineProperties( this, {
+		isLoop: {
+			value: false,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		_waypoints: {
+			value: [],
+			configurable: false,
+			enumerable: false,
+			writable: false
+		},
+		_index: {
+			value: 0,
+			configurable: false,
+			enumerable: false,
+			writable: true
+		}
+	});
+}
+
+/**
+ * Adds a waypoint to the end of the path.
+ * 
+ * @param {THREE.Vector3} waypoint - The waypoint to add.
+ * 
+ * @returns {Path} The reference to the instance.
+ */
+Path.prototype.addWaypoint = function( waypoint ){
+	
+	this._waypoints.push( waypoint );
+	
+	return this;
+};
+
+/**
+ * Clears the path.
+ * 
+ * @returns {Path} The reference to the instance.
+ */
+Path.prototype.clear = function(){
+	
+	this._waypoints.length = 0;
+	
+	return this;
+};
+
+/**
+ * Returns true if the end of the array has been reached.
+ * 
+ * @returns {boolean} Is the end of the array reached.
+ */
+Path.prototype.isFinished = function(){
+		
+	return this.isLoop === true ? false : ( this._index === this._waypoints.length - 1 );
+};
+
+/**
+ * Moves the index to the next waypoint in the array.
+ * 
+ * @returns {Path} The reference to the instance.
+ */
+Path.prototype.setNextWaypoint = function(){
+	
+	logger.assert( this._waypoints.length > 0, "Path: No waypoints are assigned to path object." );
+
+	if( ++this._index === this._waypoints.length ){
+		
+		if( this.isLoop === true ){
+			
+			this._index = 0;
+		}
+		else{
+			this._index--;
+		}
+		
+	}
+	
+	return this;
+};
+
+/**
+ * Returns the current waypoint.
+ * 
+ * @returns {THREE.Vector3} The current waypoint.
+ */
+Path.prototype.getCurrentWaypoint = function(){
+	
+	return this._waypoints[ this._index ];
+};
+
+/**
+ * Creates a random path which is bound by a bounding box.
+ * 
+ * @param {number} Number of waypoints.
+ * @param {THREE.Box3} This bounding box describes the area of points.
+ * 
+ * @returns {Path} The reference to the instance.
+ */
+Path.prototype.createRandomPath = function( numberOfWaypoints, boundingBox ){
+	
+	// buffer some entities
+	var radialDistance = new THREE.Vector3();
+	var axis = new THREE.Vector3( 0, 1, 0 );
+	var spacing = 2 * Math.PI / numberOfWaypoints;
+	var center = boundingBox.center();
+	
+	// clear existing waypoints
+	this.clear();
+	
+	// create new waypoints
+	for( var index = 0; index < numberOfWaypoints; index++ ){
+		
+		var waypoint = new THREE.Vector3();
+		
+		// new random position on planar surface
+		radialDistance.x = THREE.Math.randFloat(  boundingBox.min.x * 0.2,  boundingBox.min.x );
+		radialDistance.y = 0;
+		radialDistance.z = THREE.Math.randFloat(  boundingBox.min.z * 0.2,  boundingBox.min.z );
+		
+		waypoint.copy( radialDistance );
+		
+		// rotate around y-axis to better distribute the waypoints
+		waypoint.applyAxisAngle( axis, spacing * index);
+		
+		// add center value
+		waypoint.x += center.x;
+		waypoint.y += center.y;
+		waypoint.z += center.z;
+		
+		// add waypoint to array
+		this.addWaypoint( waypoint );
+	}
+	
+	return this;
+};
+
+module.exports = Path;
+},{"../etc/Logger":31,"three":2}],44:[function(require,module,exports){
+/**
  * @file Super prototype for states used by FSMs.
  * 
  * @author Human Interactive
@@ -43431,7 +43592,7 @@ State.prototype.exit = function( entity ){};
 State.prototype.onMessage = function( entity, message, data ){ return false; };
 
 module.exports = State;
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 /**
  * @file This prototype is a basic finite state machine
  * used for AI logic.
@@ -43565,7 +43726,7 @@ StateMachine.prototype.isInState = function( state ){
 };
 
 module.exports = StateMachine;
-},{"../etc/Logger":31,"./State":43}],45:[function(require,module,exports){
+},{"../etc/Logger":31,"./State":44}],46:[function(require,module,exports){
 /**
  * @file Prototype to encapsulate steering behaviors for a vehicle.
  * 
@@ -43576,6 +43737,7 @@ module.exports = StateMachine;
 "use strict";
 
 var THREE = require("three");
+var Path = require("./Path");
 
 /**
  * Creates a steering behaviors instance.
@@ -43593,6 +43755,19 @@ function SteeringBehaviors( vehicle ){
 			enumerable: true,
 			writable: false
 		},
+		path: {
+			value: new Path(),
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		// the distance a waypoint is set to the new target
+		waypointSeekDist: {
+			value: 5,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
 		// the radius of the constraining circle for the wander behavior
 		wanderRadius: {
 			value: 5,
@@ -43600,7 +43775,7 @@ function SteeringBehaviors( vehicle ){
 			enumerable: true,
 			writable: true
 		},
-		// distance the wander sphere is projected in front of the agent
+		// the distance the wander sphere is projected in front of the agent
 		wanderDistance: {
 			value: 10,
 			configurable: false,
@@ -43643,9 +43818,12 @@ SteeringBehaviors.prototype.calculate = function( delta ){
 	// reset steering force
 	this._steeringForce.set( 0, 0, 0 );
 	
+	// update model matrices
+	this.vehicle.updateMatrix();
+	this.vehicle.target.updateMatrix();
+	
 	// calculate seek steering behavior
-//	this._steeringForce = this.arrive( this.vehicle.target.position, SteeringBehaviors.DECELERATION.MIDDLE );
-	this._steeringForce = this.wander( delta );
+	this._steeringForce = this.seek( this.vehicle.target.position, SteeringBehaviors.DECELERATION.MIDDLE );
 	
 	// make sure vehicle does not exceed maximum force
 	if( this._steeringForce.length() > this.vehicle.maxForce ){
@@ -43833,6 +44011,49 @@ SteeringBehaviors.prototype.pursuit = ( function(){
 } ( ) );
 
 /**
+ *  Produces a steering force that keeps a vehicle at a specified 
+ *  offset from a leader vehicle.
+ *  
+ * @param {Vehicle} leader - The leader vehicle.
+ * @param {THREE.Vector3} offset - The offset of the leader.
+ * 
+ * @returns {THREE.Vector3} The calculated force.
+ */
+SteeringBehaviors.prototype.offsetPursuit = ( function(){
+	
+	var offsetWorld = new THREE.Vector3();
+	var toOffset = new THREE.Vector3();
+	
+	var lookAheadTime = 0;
+	
+	var newLeaderVelocity = new THREE.Vector3();
+	var predcitedPosition = new THREE.Vector3();
+
+	return function( leader, offset ){
+
+		// calculate the offset's position in world space
+		offsetWorld.copy( offset ).applyMatrix4( leader.matrix );
+		
+		toOffset.subVectors( offsetWorld, this.vehicle.position );
+		
+		// the lookahead time is proportional to the distance between the leader
+		// and the pursuer; and is inversely proportional to the sum of both
+		// agent's velocities
+		lookAheadTime = toOffset.length() / ( this.vehicle.maxSpeed + leader.getSpeed() );
+		
+		// calculate new velocity and predicted future position
+		newLeaderVelocity.copy( leader.velocity ).multiplyScalar( lookAheadTime );
+		
+		predcitedPosition.addVectors( offsetWorld, newLeaderVelocity );
+		
+		// now arrive at the predicted future position of the offset
+		return this.arrive( predcitedPosition, 1 );
+		
+	};
+	
+} ( ) );
+
+/**
  * Similar to pursuit except the agent flees from the estimated future position of the pursuer.
  * 
  * @param {Vehicle} pursuer - The pursuer.
@@ -43876,7 +44097,7 @@ SteeringBehaviors.prototype.evade = ( function(){
 } ( ) );
 
 /**
- * This behavior makes the agent wander about randomly.
+ * This behavior makes the agent wander about randomly on a planar surface.
  * 
  * @param {number} delta - The time delta value.
  * 
@@ -43897,11 +44118,12 @@ SteeringBehaviors.prototype.wander = ( function(){
 		// when using time independent frame rate.
 		jitterThisTimeSlice = this.wanderJitter * delta;
 		
-		// first, add a small random vector to the target's position
+		// prepare random vector
 		randomDisplacement.x = THREE.Math.randFloat( -1, 1 ) * jitterThisTimeSlice;
-		randomDisplacement.y = 0; // plane movement
+		randomDisplacement.y = 0;
 		randomDisplacement.z = THREE.Math.randFloat( -1, 1 ) * jitterThisTimeSlice;
 		
+		// add random vector to the target's position
 		this._wanderTarget.add( randomDisplacement );
 		
 		// re-project this new vector back onto a unit sphere
@@ -43914,9 +44136,6 @@ SteeringBehaviors.prototype.wander = ( function(){
 		distanceVector.z = this.wanderDistance;
 		target.addVectors( this._wanderTarget, distanceVector );
 		
-		// ensure model matrix is up to date
-		this.vehicle.updateMatrix();
-		
 		// project the target into world space
 		target.applyMatrix4( this.vehicle.matrix );
 		
@@ -43924,6 +44143,41 @@ SteeringBehaviors.prototype.wander = ( function(){
 		target.sub( this.vehicle.position );
 		
 		return target;
+	};
+	
+} ( ) );
+
+/**
+ *  Given a series of Vector2Ds, this method produces a force that will
+ *  move the agent along the waypoints in order. The agent uses the
+ * "seek" behavior to move to the next waypoint - unless it is the last
+ *  waypoint, in which case it "arrives".
+ * 
+ * @returns {THREE.Vector3} The calculated force.
+ */
+SteeringBehaviors.prototype.followPath = ( function(){
+	
+	var distanceSq = 0;
+
+	return function(){
+		
+		// calculate distance in square space from current waypoint to vehicle
+		distanceSq = this.path.getCurrentWaypoint().distanceToSquared( this.vehicle.position );
+		
+		// move to next waypoint if close enough to current target
+		if( distanceSq < ( this.waypointSeekDist * this.waypointSeekDist ) ){
+			
+			this.path.setNextWaypoint();
+		}
+		
+		if( !this.path.isFinished() ){
+			
+			return this.seek( this.path.getCurrentWaypoint() );
+		}
+		else{
+			
+			return this.arrive( this.path.getCurrentWaypoint(), SteeringBehaviors.DECELERATION.MIDDLE );
+		}
 	};
 	
 } ( ) );
@@ -43947,13 +44201,15 @@ SteeringBehaviors.FLEE = {
 };
 
 SteeringBehaviors.DECELERATION = {
+		VERY_FAST: 1.5,
 		FAST: 3,
 		MIDDLE: 4,
-		SLOW: 5	
+		SLOW: 5,
+		VERY_SLOW: 6
 };
 
 module.exports = SteeringBehaviors;
-},{"three":2}],46:[function(require,module,exports){
+},{"./Path":43,"three":2}],47:[function(require,module,exports){
 /**
  * @file A simple vehicle that uses steering behaviors.
  * 
@@ -44097,7 +44353,7 @@ Vehicle.prototype._updateOrientation = ( function(){
 } () );
 
 module.exports = Vehicle;
-},{"./MovingEntity":42,"./SteeringBehaviors":45,"three":2}],47:[function(require,module,exports){
+},{"./MovingEntity":42,"./SteeringBehaviors":46,"three":2}],48:[function(require,module,exports){
 /**
  * @file Prototype for network-messages.
  * 
@@ -44147,7 +44403,7 @@ Message.TYPES = {
 };
 
 module.exports = Message;
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -44359,7 +44615,7 @@ NetworkManager.SERVER = {
 
 module.exports = new NetworkManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/ThreadManager":27,"../etc/Logger":31,"./Message":47,"pubsub-js":1,"ws":3}],49:[function(require,module,exports){
+},{"../core/ThreadManager":27,"../etc/Logger":31,"./Message":48,"pubsub-js":1,"ws":3}],50:[function(require,module,exports){
 /**
  * @file This prototype manages effects for post-processing.
  * 
@@ -44539,7 +44795,7 @@ EffectComposer.prototype._reset = function(renderTarget){
 };
 
 module.exports = EffectComposer;
-},{"three":2}],50:[function(require,module,exports){
+},{"three":2}],51:[function(require,module,exports){
 /**
  * @file This prototype provides a render pass for post-processing.
  * 
@@ -44601,7 +44857,7 @@ RenderPass.prototype.render = function(renderer, writeBuffer, readBuffer){
 };
 
 module.exports = RenderPass;
-},{"three":2}],51:[function(require,module,exports){
+},{"three":2}],52:[function(require,module,exports){
 /**
  * @file This prototype provides a shader pass for post-processing.
  * 
@@ -44706,7 +44962,7 @@ ShaderPass.prototype.render = function(renderer, writeBuffer, readBuffer){
 };
 
 module.exports = ShaderPass;
-},{"three":2}],52:[function(require,module,exports){
+},{"three":2}],53:[function(require,module,exports){
 /**
  * @file This shader can be used for vertex displacement to create
  * water or fabric materials. It implements an exemplary diffuse lighting
@@ -44808,7 +45064,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":2}],53:[function(require,module,exports){
+},{"three":2}],54:[function(require,module,exports){
 /**
  * @file This shader applies a gaussian blur effect.
  * It can be used for both x and y direction.
@@ -44875,7 +45131,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":2}],54:[function(require,module,exports){
+},{"three":2}],55:[function(require,module,exports){
 /**
  * @file This shader transforms all colors to grayscale.
  * 
@@ -44924,7 +45180,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],55:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 /**
  * @file This shader creates a vignette effect.
  * 
@@ -44985,7 +45241,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -45097,7 +45353,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],57:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],58:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -45270,7 +45526,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],58:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],59:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -45434,7 +45690,7 @@ function colorMesh(mesh){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],59:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],60:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -45606,7 +45862,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],60:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],61:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -45727,7 +45983,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],61:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],62:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -45905,7 +46161,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],62:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],63:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -46073,7 +46329,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],63:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],64:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -46225,7 +46481,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],64:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],65:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -46392,7 +46648,7 @@ function showLODCircles(scene){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],65:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],66:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -46563,7 +46819,7 @@ function onKeyDown(event){
 
 module.exports = Stage;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],66:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],67:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
@@ -46702,7 +46958,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],67:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],68:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -46876,7 +47132,7 @@ Chat.prototype._onMessage = function(message, data){
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":76,"pubsub-js":1}],68:[function(require,module,exports){
+},{"./UiElement":77,"pubsub-js":1}],69:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel.
@@ -46940,7 +47196,7 @@ DevelopmentPanel.prototype.setText = function(text){
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":76}],69:[function(require,module,exports){
+},{"./UiElement":77}],70:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -47001,7 +47257,7 @@ InformationPanel.prototype.setText = function(textKey){
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":76}],70:[function(require,module,exports){
+},{"./UiElement":77}],71:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -47076,7 +47332,7 @@ InteractionLabel.prototype.hide = function(){
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":76}],71:[function(require,module,exports){
+},{"./UiElement":77}],72:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -47261,7 +47517,7 @@ LoadingScreen.prototype._onReady = function(message, data){
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":76,"pubsub-js":1}],72:[function(require,module,exports){
+},{"./UiElement":77,"pubsub-js":1}],73:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -47412,7 +47668,7 @@ Menu.prototype._publishFinishEvent = function(message, data){
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"./UiElement":76,"pubsub-js":1}],73:[function(require,module,exports){
+},{"../etc/Utils":40,"./UiElement":77,"pubsub-js":1}],74:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -47539,7 +47795,7 @@ ModalDialog.prototype._onClose = function(event){
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"./UiElement":76,"pubsub-js":1}],74:[function(require,module,exports){
+},{"../etc/Utils":40,"./UiElement":77,"pubsub-js":1}],75:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor.
@@ -47759,7 +48015,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":76}],75:[function(require,module,exports){
+},{"./UiElement":77}],76:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -47959,7 +48215,7 @@ TextScreen.prototype._printName = function(){
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":76}],76:[function(require,module,exports){
+},{"./UiElement":77}],77:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -48007,7 +48263,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":39}],77:[function(require,module,exports){
+},{"../etc/TextManager":39}],78:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in scenes
@@ -48259,4 +48515,4 @@ UserInterfaceManager.prototype._onKeyDown = function(event){
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"./Chat":67,"./DevelopmentPanel":68,"./InformationPanel":69,"./InteractionLabel":70,"./LoadingScreen":71,"./Menu":72,"./ModalDialog":73,"./PerformanceMonitor":74,"./TextScreen":75,"pubsub-js":1}]},{},[4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77]);
+},{"../etc/Utils":40,"./Chat":68,"./DevelopmentPanel":69,"./InformationPanel":70,"./InteractionLabel":71,"./LoadingScreen":72,"./Menu":73,"./ModalDialog":74,"./PerformanceMonitor":75,"./TextScreen":76,"pubsub-js":1}]},{},[4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78]);
