@@ -39168,7 +39168,7 @@ FirstPersonControls.RUN = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":6,"../animation/Easing":12,"../audio/AudioManager":16,"../core/Camera":20,"../core/Scene":23,"../etc/Logger":31,"../etc/SettingsManager":38,"../ui/UserInterfaceManager":78,"pubsub-js":1,"three":2}],19:[function(require,module,exports){
+},{"../action/ActionManager":6,"../animation/Easing":12,"../audio/AudioManager":16,"../core/Camera":20,"../core/Scene":23,"../etc/Logger":31,"../etc/SettingsManager":37,"../ui/UserInterfaceManager":78,"pubsub-js":1,"three":2}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting
@@ -39265,7 +39265,7 @@ Bootstrap.prototype._loadStage = function(){
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":18,"../etc/Logger":31,"../etc/MultiplayerManager":32,"../etc/SaveGameManager":37,"../etc/Utils":40,"../network/NetworkManager":49,"../ui/UserInterfaceManager":78,"./Camera":20,"./Environment":21,"./Renderer":22,"pubsub-js":1}],20:[function(require,module,exports){
+},{"../controls/FirstPersonControls":18,"../etc/Logger":31,"../etc/MultiplayerManager":32,"../etc/SaveGameManager":36,"../etc/Utils":40,"../network/NetworkManager":49,"../ui/UserInterfaceManager":78,"./Camera":20,"./Environment":21,"./Renderer":22,"pubsub-js":1}],20:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic 
@@ -40077,7 +40077,7 @@ StageBase.prototype._changeStage = function(stageId, isSaveGame){
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":16,"../controls/FirstPersonControls":18,"../etc/PerformanceManager":35,"../etc/SaveGameManager":37,"../etc/SettingsManager":38,"../etc/TextManager":39,"../etc/Utils":40,"../ui/UserInterfaceManager":78,"./Camera":20,"./Renderer":22,"./Scene":23,"pubsub-js":1,"three":2}],25:[function(require,module,exports){
+},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":16,"../controls/FirstPersonControls":18,"../etc/PerformanceManager":35,"../etc/SaveGameManager":36,"../etc/SettingsManager":37,"../etc/TextManager":39,"../etc/Utils":40,"../ui/UserInterfaceManager":78,"./Camera":20,"./Renderer":22,"./Scene":23,"pubsub-js":1,"three":2}],25:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -40361,7 +40361,7 @@ StageManager.prototype._onLoadComplete = function(message, data){
 };
 
 module.exports = new StageManager();
-},{"../etc/Logger":31,"../etc/SaveGameManager":37,"../stages/Stage_001":57,"../stages/Stage_002":58,"../stages/Stage_003":59,"../stages/Stage_004":60,"../stages/Stage_005":61,"../stages/Stage_006":62,"../stages/Stage_007":63,"../stages/Stage_008":64,"../stages/Stage_009":65,"../stages/Stage_010":66,"../stages/Stage_011":67,"../ui/UserInterfaceManager":78,"pubsub-js":1}],26:[function(require,module,exports){
+},{"../etc/Logger":31,"../etc/SaveGameManager":36,"../stages/Stage_001":57,"../stages/Stage_002":58,"../stages/Stage_003":59,"../stages/Stage_004":60,"../stages/Stage_005":61,"../stages/Stage_006":62,"../stages/Stage_007":63,"../stages/Stage_008":64,"../stages/Stage_009":65,"../stages/Stage_010":66,"../stages/Stage_011":67,"../ui/UserInterfaceManager":78,"pubsub-js":1}],26:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It 
@@ -41412,7 +41412,7 @@ module.exports = new Logger();
 },{"./Utils":40}],32:[function(require,module,exports){
 /**
  * @file This prototype manages the characters of
- * the other players.
+ * the other teammates.
  * 
  * @author Human Interactive
  */
@@ -41421,7 +41421,7 @@ module.exports = new Logger();
 var PubSub = require("pubsub-js");
 var THREE = require("three");
 
-var Player = require("./Player");
+var Teammate = require("./Teammate");
 var scene = require("../core/Scene");
 var logger = require("./Logger");
 
@@ -41435,7 +41435,7 @@ var self;
 function MultiplayerManager(){
 
 	Object.defineProperties(this, {
-		_players: {
+		_teammates: {
 			value: [],
 			configurable: false,
 			enumerable: true,
@@ -41451,125 +41451,139 @@ function MultiplayerManager(){
  */
 MultiplayerManager.prototype.init = function(){
 	
-	PubSub.subscribe("multiplayer.update", this._onUpdate);
-	PubSub.subscribe("multiplayer.status", this._onStatus);
+	PubSub.subscribe( "multiplayer.update", this._onUpdate );
+	PubSub.subscribe( "multiplayer.status", this._onStatus );
 };
 
 /**
  * Handles the "multiplayer.update" topic. This topic is used update
- * the world information of other players. 
+ * the world information of other teammates. 
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
 MultiplayerManager.prototype._onUpdate = (function(){
 	
-	var player = null;
+	var teammate = null;
 	
-	return function(message, data){
+	var position = new THREE.Vector3();
+	var quaternion = new THREE.Quaternion();
+	
+	return function( message, data ){
 		
-		player = self._getPlayer(data.clientId);
+		// get correct teammate
+		teammate = self._getTeammate( data.clientId );
 		
-		// set position and rotation
-		player.position.set(data.player.position.x, data.player.position.y, data.player.position.z);
-		player.quaternion.set(data.player.quaternion._x, data.player.quaternion._y, data.player.quaternion._z, data.player.quaternion._w);
+		// process position and orientation
+		position.set( data.player.position.x, data.player.position.y, data.player.position.z );
+		quaternion.set( data.player.quaternion._x, data.player.quaternion._y, data.player.quaternion._z, data.player.quaternion._w );
+		
+		// update teammate
+		teammate.update( position, quaternion );
 	};
 	
 })();
 
 /**
  * Handles the "multiplayer.status" topic. This topic is used update
- * the status of other players. 
+ * the status of other teammates. 
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-MultiplayerManager.prototype._onStatus = function(message, data){
+MultiplayerManager.prototype._onStatus = function( message, data ){
 	
-	var player = null;
+	var teammate = null;
 	
-	if(data.online === true)
+	if( data.online === true )
 	{
-		// create new player	
-		player = new Player(data.clientId);
+		// create new teammate	
+		teammate = new Teammate( data.clientId );
 		
-		// add player
-		self._addPlayer(player);
+		// add teammate
+		self._addTeammate( teammate );
 		
 		// logging
-		logger.log("INFO: MultiplayerManager: Player with ID %i online.", data.clientId);
+		logger.log( "INFO: MultiplayerManager: Teammate with ID %i online.", data.clientId );
 		
 	}
 	else
 	{
-		// get the player by its id
-		player = self._getPlayer(data.clientId);
+		// get the teammate by its id
+		teammate = self._getTeammate( data.clientId );
 		
-		// remove player
-		self._removePlayer(player);
+		// remove teammate
+		self._removeTeammate( teammate );
 		
 		// logging
-		logger.log("INFO: MultiplayerManager: Player with ID %i offline.", data.clientId);
+		logger.log( "INFO: MultiplayerManager: Teammate with ID %i offline.", data.clientId );
 		
 	}
 };
 
 /**
- * Adds a player object.
+ * Adds a teammate object.
  * 
- * @param {Player} player - The player object to be added.
+ * @param {Teammate} teammate - The teammate object to be added.
  */
-MultiplayerManager.prototype._addPlayer = function(player){
+MultiplayerManager.prototype._addTeammate = function( teammate ){
 	
 	// add to internal array
-	this._players.push(player);
+	this._teammates.push( teammate );
 	
 	// add to scene
-	scene.add(player);
+	scene.add( teammate );
 };
 
 /**
- * Removes a player.
+ * Removes a teammate.
  * 
- * @param {Player} player - The player object to be removed.
+ * @param {Teammate} teammate - The teammate object to be removed.
  */
-MultiplayerManager.prototype._removePlayer = function(player) {
+MultiplayerManager.prototype._removeTeammate = function( teammate ) {
 
 	// remove from array
-	var index = this._players.indexOf(player);
-	this._players.splice(index, 1);
+	var index = this._teammates.indexOf( teammate );
+	this._teammates.splice( index, 1 );
 	
 	// remove from scene
-	scene.remove(player);
+	scene.remove( teammate );
 };
 
 /**
- * Gets a player of the internal array.
+ * Gets a teammate of the internal array.
  * 
- * @param {number} id - The id of the player.
+ * @param {number} id - The id of the teammate.
  * 
- * @returns {Player} The player.
+ * @returns {Teammate} The teammate.
  */
-MultiplayerManager.prototype._getPlayer = function(id){
+MultiplayerManager.prototype._getTeammate = function(id){
 	
-	var player = null;
+	var teammate = null;
 	
-	for( var index = 0; index < this._players.length; index++){
-		if(this._players[index].playerId === id){
-			player =  this._players[index];
+	for( var index = 0; index < this._teammates.length; index++ ){
+		
+		if( this._teammates[index].teammateId === id ){
+			
+			teammate =  this._teammates[ index ];
+			
 			break;
 		}
 	}
 	
-	if(player === null){
-		throw "ERROR: MultiplayerManager: Player with ID " + id + " not existing.";
+	if( teammate === null ){
+		
+		throw "ERROR: MultiplayerManager: Teammate with ID " + id + " not existing.";
+		
 	}else{
-		return player;
+		
+		return teammate;
+		
 	}
 };
 
 module.exports = new MultiplayerManager();
-},{"../core/Scene":23,"./Logger":31,"./Player":36,"pubsub-js":1,"three":2}],33:[function(require,module,exports){
+},{"../core/Scene":23,"./Logger":31,"./Teammate":38,"pubsub-js":1,"three":2}],33:[function(require,module,exports){
 /**
  * @file A 3D arbitrarily oriented bounding box.
  * 
@@ -42622,55 +42636,6 @@ PerformanceManager.prototype._updateImpostors = (function(){
 
 module.exports = new PerformanceManager();
 },{"../core/Camera":20,"../core/Renderer":22,"../core/Scene":23,"./Impostor":28,"./LOD":30,"three":2}],36:[function(require,module,exports){
-/**
- * @file This prototype represents the character of
- * an other player.
- * 
- * @author Human Interactive
- */
-"use strict";
-
-var THREE = require("three");
-
-/**
- * Creates a player instance.
- * 
- * @constructor
- * @augments THREE.Mesh
- * 
- * @param {number} id - The id of the player.
- */
-function Player(id){
-	
-	THREE.Mesh.call(this);
-
-	Object.defineProperties(this, {
-		type: {
-			value: "Player",
-			configurable: false,
-			enumerable: true,
-			writable: false
-		},
-		playerId: {
-			value: id,
-			configurable: false,
-			enumerable: true,
-			writable: true
-		}
-	});
-	
-	// apply exemplary geometry
-	this.geometry = new THREE.BoxGeometry(4, 4, 4);
-	
-	// apply exemplary material
-	this.material = new THREE.MeshBasicMaterial({color: "#ff0000"});
-}
-
-Player.prototype = Object.create(THREE.Mesh.prototype);
-Player.prototype.constructor = Player;
-
-module.exports = Player;
-},{"three":2}],37:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire savegame-handling. This prototype is using
@@ -42747,7 +42712,7 @@ SaveGameManager.prototype.remove = function(){
 
 module.exports = new SaveGameManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],38:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire settings-handling. This prototype is used
@@ -42923,7 +42888,69 @@ SettingsManager.MOUSE = {
 
 module.exports = new SettingsManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":40,"three":2}],39:[function(require,module,exports){
+},{"./Utils":40,"three":2}],38:[function(require,module,exports){
+/**
+ * @file This prototype represents the character of
+ * a teammate.
+ * 
+ * @author Human Interactive
+ */
+"use strict";
+
+var THREE = require("three");
+var GameEntity = require("../game/GameEntity");
+
+/**
+ * Creates a teammate instance.
+ * 
+ * @constructor
+ * @augments GameEntity
+ * 
+ * @param {number} id - The id of the teammate.
+ */
+function Teammate(id){
+	
+	GameEntity.call(this);
+
+	Object.defineProperties(this, {
+		type: {
+			value: "Teammate",
+			configurable: false,
+			enumerable: true,
+			writable: false
+		},
+		teammateId: {
+			value: id,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		}
+	});
+	
+	// apply exemplary geometry
+	this.geometry = new THREE.BoxGeometry(4, 4, 4);
+	
+	// apply exemplary material
+	this.material = new THREE.MeshBasicMaterial({color: "#ff0000"});
+}
+
+Teammate.prototype = Object.create(GameEntity.prototype);
+Teammate.prototype.constructor = Teammate;
+
+/**
+ * Updates the teammate.
+ * 
+ * @param {THREE.Vector3} position - The new position of the teammate.
+ * @param {THREE.Quaternion} quaternion - The new orientation of the teammate.
+ */
+Teammate.prototype.update = function( position, quaternion ){
+	
+	this.position.copy( position );
+	this.quaternion.copy( quaternion );
+};
+
+module.exports = Teammate;
+},{"../game/GameEntity":41,"three":2}],39:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire text-handling. This prototype is used in scenes
@@ -44594,10 +44621,113 @@ SteeringBehaviors.prototype._wander = ( function(){
  * @returns {THREE.Vector3} The calculated force.
  */
 SteeringBehaviors.prototype._obstacleAvoidance = ( function(){
+	
+	// bounding volumes
+	var boundingBox = new THREE.Box3();
+	var boundingSphere = new THREE.Sphere();
+	
+	var vehicleSize = new THREE.Vector3();
+	var localPositionOfObstacle = new THREE.Vector3();
+	var localPositionOfClosestObstacle = new THREE.Vector3();
+	
+	var intersectionPoint;
+	var detectionBoxLength;
+	var closestObstacle;
+	var distanceToClosestObstacle;
+	var obstacle;
+	var index;
+	var expandedRadius;
+	var multiplier;
+	var brakingWeight = 0.2;
+	
+	//  this will be used to transform obstacles to the local space of the vehicle
+	var inverseMatrix = new THREE.Matrix4();
+	
+	// this will be used for ray/sphere intersection test
+	var ray = new THREE.Ray( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, 1 ) );
 
 	return function(){
 		
 		var force = new THREE.Vector3();
+		
+		// calculate bounding box of vehicle
+		boundingBox.setFromObject( this.vehicle );
+		
+		// get size of bounding box
+		boundingBox.size( vehicleSize );
+		
+		// the detection box length is proportional to the agent's velocity
+		detectionBoxLength = this.vehicle.getSpeed() + this.vehicle.maxSpeed +  vehicleSize.z * 0.5;
+		
+		// this will keep track of the closest intersecting obstacle
+		closestObstacle = null;
+		
+		// this will be used to track the distance to the closest obstacle
+		distanceToClosestObstacle = Infinity;
+		
+		// this matrix will transform points to the local space of the vehicle
+		inverseMatrix.getInverse( this.vehicle.matrixWorld );
+		
+		for( index = 0; index < this._obstacles.length ; index++ ){
+			
+			obstacle = this._obstacles[index];
+			
+			// calculate this obstacle's position in local space
+			localPositionOfObstacle.copy( obstacle._boundingSphere.center ).applyMatrix4( inverseMatrix );
+			
+			// if the local position has a positive z value then it must lay
+		    // behind the agent. besides the absolute z value must be smaller than
+			// the length of the detection box
+			if( localPositionOfObstacle.z > 0 && Math.abs( localPositionOfObstacle.z ) < detectionBoxLength ){
+				
+				// if the distance from the x axis to the object's position is less
+		        // than its radius + half the width of the detection box then there
+		        // is a potential intersection.
+				expandedRadius = obstacle._boundingSphere.radius + vehicleSize.x * 0.5;
+				
+				// if the distance from the x axis to the object's position is less
+		        // than its radius + half the width/height of the detection box then there
+		        // is a potential intersection.
+				if( Math.abs( localPositionOfObstacle.x ) < expandedRadius ){
+					
+					// prepare intersection test
+					boundingSphere.center = localPositionOfObstacle;
+					boundingSphere.radius = expandedRadius;
+					
+					// do intersection test in local space of the vehicle
+					intersectionPoint = ray.intersectSphere( boundingSphere );
+					
+					// compare distances
+					if( intersectionPoint.z < distanceToClosestObstacle ){
+						
+						// save new minimum distance
+						distanceToClosestObstacle =  intersectionPoint.z;
+						
+						// save closest obstacle
+						closestObstacle = obstacle;
+						
+						// save local position for force calculation
+						localPositionOfClosestObstacle.copy( localPositionOfObstacle );
+					}
+				}
+			}
+		}
+		
+		// if we have found an intersecting obstacle, calculate a steering force away from it
+		if( closestObstacle !== null ){
+			
+			// the closer the agent is to an object, the stronger the steering force should be
+			multiplier = 1 + ( detectionBoxLength - localPositionOfClosestObstacle.z ) / detectionBoxLength;
+			
+			//calculate the lateral force
+			force.x = ( closestObstacle._boundingSphere.radius - localPositionOfClosestObstacle.x ) * multiplier;
+			
+			// apply a braking force proportional to the obstacles distance from the vehicle
+			force.z = ( closestObstacle._boundingSphere.radius - localPositionOfClosestObstacle.z ) * brakingWeight;
+			
+			// finally, convert the steering vector from local to world space
+			force.transformDirection( this.vehicle.matrixWorld );
+		}
 		
 		return force;
 	};

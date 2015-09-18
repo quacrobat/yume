@@ -1,6 +1,6 @@
 /**
  * @file This prototype manages the characters of
- * the other players.
+ * the other teammates.
  * 
  * @author Human Interactive
  */
@@ -9,7 +9,7 @@
 var PubSub = require("pubsub-js");
 var THREE = require("three");
 
-var Player = require("./Player");
+var Teammate = require("./Teammate");
 var scene = require("../core/Scene");
 var logger = require("./Logger");
 
@@ -23,7 +23,7 @@ var self;
 function MultiplayerManager(){
 
 	Object.defineProperties(this, {
-		_players: {
+		_teammates: {
 			value: [],
 			configurable: false,
 			enumerable: true,
@@ -39,120 +39,134 @@ function MultiplayerManager(){
  */
 MultiplayerManager.prototype.init = function(){
 	
-	PubSub.subscribe("multiplayer.update", this._onUpdate);
-	PubSub.subscribe("multiplayer.status", this._onStatus);
+	PubSub.subscribe( "multiplayer.update", this._onUpdate );
+	PubSub.subscribe( "multiplayer.status", this._onStatus );
 };
 
 /**
  * Handles the "multiplayer.update" topic. This topic is used update
- * the world information of other players. 
+ * the world information of other teammates. 
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
 MultiplayerManager.prototype._onUpdate = (function(){
 	
-	var player = null;
+	var teammate = null;
 	
-	return function(message, data){
+	var position = new THREE.Vector3();
+	var quaternion = new THREE.Quaternion();
+	
+	return function( message, data ){
 		
-		player = self._getPlayer(data.clientId);
+		// get correct teammate
+		teammate = self._getTeammate( data.clientId );
 		
-		// set position and rotation
-		player.position.set(data.player.position.x, data.player.position.y, data.player.position.z);
-		player.quaternion.set(data.player.quaternion._x, data.player.quaternion._y, data.player.quaternion._z, data.player.quaternion._w);
+		// process position and orientation
+		position.set( data.player.position.x, data.player.position.y, data.player.position.z );
+		quaternion.set( data.player.quaternion._x, data.player.quaternion._y, data.player.quaternion._z, data.player.quaternion._w );
+		
+		// update teammate
+		teammate.update( position, quaternion );
 	};
 	
 })();
 
 /**
  * Handles the "multiplayer.status" topic. This topic is used update
- * the status of other players. 
+ * the status of other teammates. 
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-MultiplayerManager.prototype._onStatus = function(message, data){
+MultiplayerManager.prototype._onStatus = function( message, data ){
 	
-	var player = null;
+	var teammate = null;
 	
-	if(data.online === true)
+	if( data.online === true )
 	{
-		// create new player	
-		player = new Player(data.clientId);
+		// create new teammate	
+		teammate = new Teammate( data.clientId );
 		
-		// add player
-		self._addPlayer(player);
+		// add teammate
+		self._addTeammate( teammate );
 		
 		// logging
-		logger.log("INFO: MultiplayerManager: Player with ID %i online.", data.clientId);
+		logger.log( "INFO: MultiplayerManager: Teammate with ID %i online.", data.clientId );
 		
 	}
 	else
 	{
-		// get the player by its id
-		player = self._getPlayer(data.clientId);
+		// get the teammate by its id
+		teammate = self._getTeammate( data.clientId );
 		
-		// remove player
-		self._removePlayer(player);
+		// remove teammate
+		self._removeTeammate( teammate );
 		
 		// logging
-		logger.log("INFO: MultiplayerManager: Player with ID %i offline.", data.clientId);
+		logger.log( "INFO: MultiplayerManager: Teammate with ID %i offline.", data.clientId );
 		
 	}
 };
 
 /**
- * Adds a player object.
+ * Adds a teammate object.
  * 
- * @param {Player} player - The player object to be added.
+ * @param {Teammate} teammate - The teammate object to be added.
  */
-MultiplayerManager.prototype._addPlayer = function(player){
+MultiplayerManager.prototype._addTeammate = function( teammate ){
 	
 	// add to internal array
-	this._players.push(player);
+	this._teammates.push( teammate );
 	
 	// add to scene
-	scene.add(player);
+	scene.add( teammate );
 };
 
 /**
- * Removes a player.
+ * Removes a teammate.
  * 
- * @param {Player} player - The player object to be removed.
+ * @param {Teammate} teammate - The teammate object to be removed.
  */
-MultiplayerManager.prototype._removePlayer = function(player) {
+MultiplayerManager.prototype._removeTeammate = function( teammate ) {
 
 	// remove from array
-	var index = this._players.indexOf(player);
-	this._players.splice(index, 1);
+	var index = this._teammates.indexOf( teammate );
+	this._teammates.splice( index, 1 );
 	
 	// remove from scene
-	scene.remove(player);
+	scene.remove( teammate );
 };
 
 /**
- * Gets a player of the internal array.
+ * Gets a teammate of the internal array.
  * 
- * @param {number} id - The id of the player.
+ * @param {number} id - The id of the teammate.
  * 
- * @returns {Player} The player.
+ * @returns {Teammate} The teammate.
  */
-MultiplayerManager.prototype._getPlayer = function(id){
+MultiplayerManager.prototype._getTeammate = function(id){
 	
-	var player = null;
+	var teammate = null;
 	
-	for( var index = 0; index < this._players.length; index++){
-		if(this._players[index].playerId === id){
-			player =  this._players[index];
+	for( var index = 0; index < this._teammates.length; index++ ){
+		
+		if( this._teammates[index].teammateId === id ){
+			
+			teammate =  this._teammates[ index ];
+			
 			break;
 		}
 	}
 	
-	if(player === null){
-		throw "ERROR: MultiplayerManager: Player with ID " + id + " not existing.";
+	if( teammate === null ){
+		
+		throw "ERROR: MultiplayerManager: Teammate with ID " + id + " not existing.";
+		
 	}else{
-		return player;
+		
+		return teammate;
+		
 	}
 };
 

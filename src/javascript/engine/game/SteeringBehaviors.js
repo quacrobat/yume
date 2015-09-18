@@ -825,10 +825,113 @@ SteeringBehaviors.prototype._wander = ( function(){
  * @returns {THREE.Vector3} The calculated force.
  */
 SteeringBehaviors.prototype._obstacleAvoidance = ( function(){
+	
+	// bounding volumes
+	var boundingBox = new THREE.Box3();
+	var boundingSphere = new THREE.Sphere();
+	
+	var vehicleSize = new THREE.Vector3();
+	var localPositionOfObstacle = new THREE.Vector3();
+	var localPositionOfClosestObstacle = new THREE.Vector3();
+	
+	var intersectionPoint;
+	var detectionBoxLength;
+	var closestObstacle;
+	var distanceToClosestObstacle;
+	var obstacle;
+	var index;
+	var expandedRadius;
+	var multiplier;
+	var brakingWeight = 0.2;
+	
+	//  this will be used to transform obstacles to the local space of the vehicle
+	var inverseMatrix = new THREE.Matrix4();
+	
+	// this will be used for ray/sphere intersection test
+	var ray = new THREE.Ray( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, 1 ) );
 
 	return function(){
 		
 		var force = new THREE.Vector3();
+		
+		// calculate bounding box of vehicle
+		boundingBox.setFromObject( this.vehicle );
+		
+		// get size of bounding box
+		boundingBox.size( vehicleSize );
+		
+		// the detection box length is proportional to the agent's velocity
+		detectionBoxLength = this.vehicle.getSpeed() + this.vehicle.maxSpeed +  vehicleSize.z * 0.5;
+		
+		// this will keep track of the closest intersecting obstacle
+		closestObstacle = null;
+		
+		// this will be used to track the distance to the closest obstacle
+		distanceToClosestObstacle = Infinity;
+		
+		// this matrix will transform points to the local space of the vehicle
+		inverseMatrix.getInverse( this.vehicle.matrixWorld );
+		
+		for( index = 0; index < this._obstacles.length ; index++ ){
+			
+			obstacle = this._obstacles[index];
+			
+			// calculate this obstacle's position in local space
+			localPositionOfObstacle.copy( obstacle._boundingSphere.center ).applyMatrix4( inverseMatrix );
+			
+			// if the local position has a positive z value then it must lay
+		    // behind the agent. besides the absolute z value must be smaller than
+			// the length of the detection box
+			if( localPositionOfObstacle.z > 0 && Math.abs( localPositionOfObstacle.z ) < detectionBoxLength ){
+				
+				// if the distance from the x axis to the object's position is less
+		        // than its radius + half the width of the detection box then there
+		        // is a potential intersection.
+				expandedRadius = obstacle._boundingSphere.radius + vehicleSize.x * 0.5;
+				
+				// if the distance from the x axis to the object's position is less
+		        // than its radius + half the width/height of the detection box then there
+		        // is a potential intersection.
+				if( Math.abs( localPositionOfObstacle.x ) < expandedRadius ){
+					
+					// prepare intersection test
+					boundingSphere.center = localPositionOfObstacle;
+					boundingSphere.radius = expandedRadius;
+					
+					// do intersection test in local space of the vehicle
+					intersectionPoint = ray.intersectSphere( boundingSphere );
+					
+					// compare distances
+					if( intersectionPoint.z < distanceToClosestObstacle ){
+						
+						// save new minimum distance
+						distanceToClosestObstacle =  intersectionPoint.z;
+						
+						// save closest obstacle
+						closestObstacle = obstacle;
+						
+						// save local position for force calculation
+						localPositionOfClosestObstacle.copy( localPositionOfObstacle );
+					}
+				}
+			}
+		}
+		
+		// if we have found an intersecting obstacle, calculate a steering force away from it
+		if( closestObstacle !== null ){
+			
+			// the closer the agent is to an object, the stronger the steering force should be
+			multiplier = 1 + ( detectionBoxLength - localPositionOfClosestObstacle.z ) / detectionBoxLength;
+			
+			//calculate the lateral force
+			force.x = ( closestObstacle._boundingSphere.radius - localPositionOfClosestObstacle.x ) * multiplier;
+			
+			// apply a braking force proportional to the obstacles distance from the vehicle
+			force.z = ( closestObstacle._boundingSphere.radius - localPositionOfClosestObstacle.z ) * brakingWeight;
+			
+			// finally, convert the steering vector from local to world space
+			force.transformDirection( this.vehicle.matrixWorld );
+		}
 		
 		return force;
 	};
