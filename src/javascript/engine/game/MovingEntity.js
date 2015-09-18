@@ -13,6 +13,7 @@ var GameEntity = require("./GameEntity");
  * Creates a new moving entity.
  * 
  * @constructor
+ * @augments GameEntity
  * 
  * @param {THREE.Vector3} velocity - The velocity of the agent.
  * @param {number} mass - The mass of the agent.

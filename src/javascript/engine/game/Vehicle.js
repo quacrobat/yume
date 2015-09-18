@@ -14,25 +14,19 @@ var SteeringBehaviors = require("./SteeringBehaviors");
  * Creates a new vehicle.
  * 
  * @constructor
+ * @augments MovingEntity
  *
- * @param {Vehicle} target - The target vehicle of the agent.
  * @param {THREE.Vector3} velocity - The velocity of the agent.
  * @param {number} mass - The mass of the agent.
  * @param {number} maxSpeed - The maximum speed at which this entity may travel.
  * @param {number} maxForce - The maximum force this entity can produce to power itself (think rockets and thrust).
  * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
  */
-function Vehicle( target, velocity, mass, maxSpeed, maxForce, maxTurnRate ){
+function Vehicle( velocity, mass, maxSpeed, maxForce, maxTurnRate ){
 		
 	MovingEntity.call( this, velocity, mass, maxSpeed, maxForce, maxTurnRate );
 	
 	Object.defineProperties( this, {
-		target: {
-			value: target,
-			configurable: false,
-			enumerable: true,
-			writable: true
-		},
 		steering: {
 			value: new SteeringBehaviors( this ),
 			configurable: false,
@@ -40,6 +34,7 @@ function Vehicle( target, velocity, mass, maxSpeed, maxForce, maxTurnRate ){
 			writable: true
 		}
 	});
+	
 }
 
 Vehicle.prototype = Object.create( MovingEntity.prototype );

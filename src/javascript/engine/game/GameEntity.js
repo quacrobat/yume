@@ -13,14 +13,15 @@ var THREE = require("three");
  * Creates a new state.
  * 
  * @constructor
+ * @augments THREE.Mesh
  * 
  */
 function GameEntity(){
 		
-	THREE.Object3D.call( this );
+	THREE.Mesh.call( this );
 }
 
-GameEntity.prototype = Object.create( THREE.Object3D.prototype );
+GameEntity.prototype = Object.create( THREE.Mesh.prototype );
 GameEntity.prototype.constructor = GameEntity;
 
 /**

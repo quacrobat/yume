@@ -159,7 +159,6 @@ OBB.prototype.setFromBS = function( sphere ){
 OBB.prototype.closestPoint = (function( ){
 	
 	var displacement = new THREE.Vector3();
-	var closesPoint = new THREE.Vector3();
 	
 	var xAxis = new THREE.Vector3();
 	var yAxis = new THREE.Vector3();
@@ -170,6 +169,8 @@ OBB.prototype.closestPoint = (function( ){
 	var index = 0, value = 0;
 	
 	return function( point ){
+		
+		var closesPoint = new THREE.Vector3();
 		
 		// extract each axis
 		this.basis.extractBasis( xAxis, yAxis, zAxis );
@@ -311,6 +312,18 @@ OBB.prototype.isTriangleContained = function( triangle ){
 OBB.prototype.isIntersectionAABB = function( box ){
 	
 	return this.isIntersectionOBB( new OBB().setFromAABB( box ) );
+};
+
+/**
+ * Tests whether this OBB and the given sphere intersect.
+ *
+ * @param {THREE.Sphere} sphere - The sphere to test.
+ * 
+ * @returns {boolean} Is there an intersection between the given sphere and the OBB?
+ */
+OBB.prototype.isIntersectionSphere = function( sphere ){
+	
+	return this.intersectSphere( sphere ) !== null;
 };
 
 /**
@@ -553,13 +566,14 @@ OBB.prototype.intersectRay = (function(){
 	
 	var aabb = new THREE.Box3();
 	var rayLocal = new THREE.Ray();
-	var intersection = null;
 	
 	var transformationMatrix = new THREE.Matrix4();
 	var transformationMatrixInverse = new THREE.Matrix4();
 	
 	return function( ray ){
 		
+		var intersection;
+
 		// set AABB to origin with the size of the OBB
 		aabb.setFromCenterAndSize( new THREE.Vector3(), this.size() );
 
@@ -582,6 +596,27 @@ OBB.prototype.intersectRay = (function(){
 	};
 	
 }());
+
+/**
+ * Calculates the intersection point between this OBB and the given sphere.
+ *
+ * @param {THREE.Sphere} sphere - The sphere to test.
+ * 
+ * @returns {THREE.Vector3} The intersection point.
+ */
+OBB.prototype.intersectSphere = function( sphere ){
+	
+	// find the point on this OBB closest to the sphere center
+	var closestPoint = this.closestPoint( sphere.center );
+	
+	// if that point is inside the sphere, the OBB and sphere intersect
+	if( closestPoint.distanceToSquared( sphere.center ) <= sphere.radius * sphere.radius ){
+		
+		return closestPoint;
+	}
+
+	return null;
+};
 
 /**
  * Gets the size of the OBB.
@@ -619,8 +654,6 @@ OBB.prototype.copy = function( obb ){
 	this.position.copy( obb.position );
 	this.halfSizes.copy( obb.halfSizes );
 	this.basis.copy( obb.basis );
-	
-	this._matrixWorld.copy( obb._matrixWorld );
 	
 	return this;
 };

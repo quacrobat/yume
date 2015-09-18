@@ -48,6 +48,12 @@ function InteractiveObject( mesh, collisionType, raycastPrecision, action ) {
 			writable: true
 		},
 		// bounding volumes
+		_boundingSphere: {
+			value: new THREE.Sphere(),
+			configurable: false,
+			enumerable: false,
+			writable: true
+		},
 		_aabb: {
 			value: new THREE.Box3(),
 			configurable: false,
@@ -62,6 +68,10 @@ function InteractiveObject( mesh, collisionType, raycastPrecision, action ) {
 		},
 		
 	});
+	
+	// compute default bounding volumes
+	this.mesh.geometry.computeBoundingBox();
+	this.mesh.geometry.computeBoundingSphere();
 }
 
 /**
@@ -85,12 +95,7 @@ InteractiveObject.prototype.raycast = ( function(){
 		switch ( this.raycastPrecision ){
 		
 			case InteractiveObject.RAYCASTPRECISION.AABB: {
-				
-				// compute bounding box only once
-				if( this.mesh.geometry.boundingBox === null ){
-					this.mesh.geometry.computeBoundingBox();
-				}
-				
+							
 				// apply transformation
 				this._aabb.copy( this.mesh.geometry.boundingBox );
 				this._aabb.applyMatrix4( this.mesh.matrixWorld );
@@ -185,11 +190,6 @@ InteractiveObject.prototype.isIntersection = ( function(){
 		switch ( this.collisionType ){
 		
 			case InteractiveObject.COLLISIONTYPES.AABB: {
-				
-				// compute bounding box only once
-				if( this.mesh.geometry.boundingBox === null ){
-					this.mesh.geometry.computeBoundingBox();
-				}
 				
 				// apply transformation
 				this._aabb.copy( this.mesh.geometry.boundingBox );
