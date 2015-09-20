@@ -43963,6 +43963,13 @@ function SteeringBehaviors( vehicle ){
 			enumerable: true,
 			writable: true
 		},
+		// distance from the hiding spot
+		distanceFromBoundary: {
+			value: 10,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
 		// amount of deceleration for arrive behavior
 		deceleration: {
 			value: 1,
@@ -44219,6 +44226,19 @@ SteeringBehaviors.prototype._calculatePrioritized = ( function(){
 			
 		}
 		
+		// hide
+		if( this._isOn( SteeringBehaviors.TYPES.HIDE )){
+			
+			logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Hide target not assigned" );
+			
+			force = this._hide( this.targetAgent1 );
+			
+			force.multiplyScalar( this.weights.hide );
+			
+			if( !this._accumulateForce( force ) ) {return;}
+			
+		}
+		
 		// follow path
 		if( this._isOn( SteeringBehaviors.TYPES.FOLLOWPATH )){
 			
@@ -44363,7 +44383,39 @@ SteeringBehaviors.prototype._createFeelers = ( function(){
 		this._feelers[2].direction.transformDirection( rotation );
 	};
 
-} ( ) ); 
+} ( ) );
+
+/**
+ * Given the position of a hunter, and the position and radius of
+ * an obstacle, this method calculates a position distanceFromBoundary 
+ * away from its bounding radius and directly opposite the hunter.
+ * 
+ * @param {THREE.Vector3} positionObstacle - The position of the obstacle.
+ * @param {THREE.Vector3} radiusObstacle - The radius of the obstacle.
+ * @param {THREE.Vector3} positionHunter - The position of the hunter.
+ * @param {THREE.Vector3} hidingSpot - The calculated hiding spot.
+ */
+SteeringBehaviors.prototype._getHidingPosition = ( function(){
+	
+	var toHidingSpot = new THREE.Vector3();
+	var distanceAway;
+	
+	return function( positionObstacle, radiusObstacle, positionHunter, hidingSpot ){
+		
+		// calculate how far away the agent is to be from the chosen obstacle's bounding radius
+		distanceAway = radiusObstacle + this.distanceFromBoundary;
+		
+		// calculate the heading toward the object from the hunter
+		toHidingSpot.subVectors( positionObstacle, positionHunter ).normalize();
+		
+		// scale it to size 
+		toHidingSpot.multiplyScalar( distanceAway );
+		
+		// add direction vector to the obstacles position to get the hiding spot
+		hidingSpot.addVectors( toHidingSpot, positionObstacle );
+	};
+	
+} ( ) );
 
 /**
  * Setup wander target.
@@ -44687,6 +44739,62 @@ SteeringBehaviors.prototype._interpose = ( function(){
 } ( ) );
 
 /**
+ * Given another agent position to hide from and a list of obstacles this
+ * method attempts to put an obstacle between itself and its opponent.
+ * 
+ * @param {Vehicle} hunter - The hunter agent.
+ * 
+ * @returns {THREE.Vector3} The calculated force.
+ */
+SteeringBehaviors.prototype._hide = ( function(){
+	
+	var hidingSpot = new THREE.Vector3();
+	var bestHidingSpot = new THREE.Vector3();
+	
+	var boundingSphere;
+	var distanceSq;
+	var closestDistanceSq;
+	var index;
+	
+	return function( hunter ){
+		
+		// this will be used to track the distance to the closest hiding spot
+		closestDistanceSq = Infinity;
+		
+		for( index = 0; index < this._obstacles.length; index++ ){
+			
+			// get bounding volume of obstacle
+			boundingSphere = this._obstacles[ index ]._boundingSphere;
+			
+			// calculate the position of the hiding spot for this obstacle
+			this._getHidingPosition( boundingSphere.center, boundingSphere.radius, hunter.position, hidingSpot );
+			
+			// work in distance-squared space to find the closest hiding spot to the agent
+			distanceSq = hidingSpot.distanceToSquared( this.vehicle.position );
+			
+			if( distanceSq < closestDistanceSq ){
+				
+				// save values
+				closestDistanceSq = distanceSq;
+				
+				bestHidingSpot = hidingSpot;
+			}
+		}
+		
+		// if no suitable obstacles found then evade the hunter
+		if( closestDistanceSq === Infinity ){
+			
+			return this._evade( hunter );
+		}
+		else
+		{
+			return this._arrive( bestHidingSpot, SteeringBehaviors.DECELERATION.VERY_FAST );
+		}
+	};
+	
+} ( ) );
+
+/**
  * This behavior makes the agent wander about randomly on a planar surface.
  * 
  * @param {number} delta - The time delta value.
@@ -44986,6 +45094,7 @@ SteeringBehaviors.prototype.pursuitOn = function(){ this._behaviorFlag |= Steeri
 SteeringBehaviors.prototype.offsetPursuitOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.OFFSETPURSUIT; };
 SteeringBehaviors.prototype.evadeOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.EVADE; };
 SteeringBehaviors.prototype.interposeOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.INTERPOSE; };
+SteeringBehaviors.prototype.hideOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.HIDE; };
 SteeringBehaviors.prototype.wanderOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.WANDER; };
 SteeringBehaviors.prototype.obstacleAvoidanceOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE; };
 SteeringBehaviors.prototype.wallAvoidanceOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.WALLAVOIDANCE; };
@@ -44998,6 +45107,7 @@ SteeringBehaviors.prototype.pursuitOff = function(){ if( this._isOn( SteeringBeh
 SteeringBehaviors.prototype.offsetPursuitOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.OFFSETPURSUIT ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.OFFSETPURSUIT; };
 SteeringBehaviors.prototype.evadeOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.EVADE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.EVADE; };
 SteeringBehaviors.prototype.interposeOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.INTERPOSE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.INTERPOSE; };
+SteeringBehaviors.prototype.hideOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.HIDE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.HIDE; };
 SteeringBehaviors.prototype.wanderOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.WANDER ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.WANDER; };
 SteeringBehaviors.prototype.obstacleAvoidanceOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE; };
 SteeringBehaviors.prototype.wallAvoidanceOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.WALLAVOIDANCE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.WALLAVOIDANCE; };
@@ -46106,12 +46216,7 @@ var StageBase = require("../core/StageBase");
 var JSONLoader = require("../etc/JSONLoader");
 var Easing = require("../animation/Easing");
 
-var Vehicle = require("../game/Vehicle");
-var MovingEntity = require("../game/MovingEntity");
-
 var self;
-
-var vehicle, shapeVehicle, target, shapeTarget;
 
 function Stage(){
 	
@@ -46177,47 +46282,6 @@ Stage.prototype.setup = function(){
 	stageTrigger.position.set(0, 0, 75);
 	this.scene.add(stageTrigger);
 	
-	var staticBoxOne = new THREE.Mesh( new THREE.BoxGeometry(5, 5, 5) , new THREE.MeshBasicMaterial({color: 0x6083c2}));
-	staticBoxOne.matrixAutoUpdate = false;
-	staticBoxOne.position.set(0, 20, -20);
-	staticBoxOne.castShadow = true;
-	staticBoxOne.updateMatrix();
-	this.scene.add(staticBoxOne);
-	
-	this.actionManager.createStatic(staticBoxOne, this.actionManager.COLLISIONTYPES.AABB );
-	
-	var staticBoxTwo = new THREE.Mesh( new THREE.BoxGeometry(5, 5, 5) , new THREE.MeshBasicMaterial({color: 0x6083c2}));
-	staticBoxTwo.matrixAutoUpdate = false;
-	staticBoxTwo.position.set(0, 20, 20);
-	staticBoxTwo.castShadow = true;
-	staticBoxTwo.updateMatrix();
-	this.scene.add(staticBoxTwo);
-	
-	this.actionManager.createStatic(staticBoxTwo, this.actionManager.COLLISIONTYPES.AABB );
-	
-	// ai
-	target = new Vehicle( new THREE.Vector3( 5, 0, 5 ), 1, 10 );
-	target.position.set(0, 20, 0);
-	target.geometry = new THREE.BoxGeometry(1, 1, 1);
-	target.material = new THREE.MeshBasicMaterial({color: 0x6083c2});
-	this.scene.add(target);
-	
-	vehicle = new Vehicle( new THREE.Vector3(), 1, 10 );
-	vehicle.position.set( 0, 20, 30);
-	vehicle.geometry = new THREE.CylinderGeometry(5, 5, 5);
-	vehicle.material = new THREE.MeshBasicMaterial({color: 0x455066});
-	this.scene.add(vehicle);
-	
-	vehicle.steering.path.isLoop = true;
-
-	vehicle.steering.followPathOn();
-	vehicle.steering.obstacleAvoidanceOn();
-
-	vehicle.steering.path.addWaypoint( new THREE.Vector3(  40, 20,  20 ));
-	vehicle.steering.path.addWaypoint( new THREE.Vector3(  40, 20, -20 ));
-	vehicle.steering.path.addWaypoint( new THREE.Vector3( -40, 20, -20 ));
-	vehicle.steering.path.addWaypoint( new THREE.Vector3( -40, 20,  20 ));
-	
 	// start rendering
 	this._render();
 };
@@ -46235,16 +46299,7 @@ Stage.prototype.destroy = function(){
 	StageBase.prototype.destroy.call(this);
 };
 
-var step = 0;
-
 Stage.prototype._render = function(){
-	
-	step += 0.005;
-	
-	target.position.x = Math.cos( step ) * 40;
-	target.position.z = Math.sin( step ) * 40;
-	
-	vehicle.update( self._delta );
 	
 	StageBase.prototype._render.call(self);
 };
@@ -46264,7 +46319,7 @@ function colorFaces(geometry){
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"../game/MovingEntity":42,"../game/Vehicle":48,"three":2}],59:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":29,"three":2}],59:[function(require,module,exports){
 "use strict";
 
 var THREE = require("three");
