@@ -9,6 +9,7 @@ var THREE = require("three");
 
 var MovingEntity = require("./MovingEntity");
 var SteeringBehaviors = require("./SteeringBehaviors");
+var Smoother = require("./Smoother");
 
 /**
  * Creates a new vehicle.
@@ -21,8 +22,9 @@ var SteeringBehaviors = require("./SteeringBehaviors");
  * @param {number} maxSpeed - The maximum speed at which this entity may travel.
  * @param {number} maxForce - The maximum force this entity can produce to power itself (think rockets and thrust).
  * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
+ * @param {number} numSamplesForSmoothing - How many samples the smoother will use to average the velocity.
  */
-function Vehicle( velocity, mass, maxSpeed, maxForce, maxTurnRate ){
+function Vehicle( velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ){
 		
 	MovingEntity.call( this, velocity, mass, maxSpeed, maxForce, maxTurnRate );
 	
@@ -31,6 +33,24 @@ function Vehicle( velocity, mass, maxSpeed, maxForce, maxTurnRate ){
 			value: new SteeringBehaviors( this ),
 			configurable: false,
 			enumerable: true,
+			writable: true
+		},
+		isSmoothingOn: {
+			value: false,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		_smoother:{
+			value: new Smoother( numSamplesForSmoothing ),
+			configurable: false,
+			enumerable: false,
+			writable: false
+		},
+		_smoothedVelocity: {
+			value: new THREE.Vector3(),
+			configurable: false,
+			enumerable: false,
 			writable: true
 		}
 	});
@@ -80,7 +100,19 @@ Vehicle.prototype.update = ( function( ){
 		// update the orientation if the vehicle has a non zero velocity
 		if( this.velocity.lengthSq() > 0.00000001 ){
 			
-			this._updateOrientation( this.velocity );
+			// check smoothing
+			if( this.isSmoothingOn === true ){
+				
+				// decouple velocity and heading. calculate the orientation
+				// with an averaged velocity to avoid oscillations/judder.
+				this._smoother.update( this.velocity, this._smoothedVelocity );
+				
+				this._updateOrientation( this._smoothedVelocity );
+			}
+			else{
+				// couple velocity and orientation
+				this._updateOrientation( this.velocity );
+			}	
 		}
 		
 	};

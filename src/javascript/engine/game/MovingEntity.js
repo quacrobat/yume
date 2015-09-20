@@ -70,7 +70,7 @@ MovingEntity.prototype.constructor = MovingEntity;
  * 
  * @returns {boolean} Is the entity facing in the desired direction?
  */
-MovingEntity.prototype.rotateToTarget = ( function( ){
+MovingEntity.prototype.isRotateToTarget = ( function( ){
 	
 	var look = new THREE.Vector3();
 	

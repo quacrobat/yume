@@ -49,31 +49,6 @@ function SteeringBehaviors( vehicle ){
 			enumerable: true,
 			writable: true
 		},
-		// types of behavior as flags
-		behaviorTypes: {
-			value: {
-				none			  : 0x00000,
-				seek              : 0x00002,
-				flee              : 0x00004,
-				arrive            : 0x00008,
-				wander            : 0x00010,
-				cohesion          : 0x00020,
-				separation        : 0x00040,
-				allignment        : 0x00080,
-				obstacleAvoidance : 0x00100,
-			    wallAvoidance     : 0x00200,
-			    followPath        : 0x00400,
-			    pursuit           : 0x00800,
-			    evade             : 0x01000,
-			    interpose         : 0x02000,
-			    hide              : 0x04000,
-			    flock             : 0x08000,
-			    offsetPursuit     : 0x10000
-			},
-			configurable: false,
-			enumerable: true,
-			writable: false
-		},
 		// use these values to tweak the amount that each steering force
 		// contributes to the total steering force
 		weights: {
@@ -127,16 +102,16 @@ function SteeringBehaviors( vehicle ){
 			enumerable: true,
 			writable: true
 		},
-		// detection length for obstacle avoidance
-		minDetectionLength: {
-			value: 50,
+		// the distance a waypoint is set to the new target
+		waypointSeekDist: {
+			value: 5,
 			configurable: false,
 			enumerable: true,
 			writable: true
 		},
-		// the distance a waypoint is set to the new target
-		waypointSeekDist: {
-			value: 5,
+		// the length of the "feeler/s" used in wall detection
+		wallDetectionFeelerLength:{
+			value: 20,
 			configurable: false,
 			enumerable: true,
 			writable: true
@@ -189,6 +164,20 @@ function SteeringBehaviors( vehicle ){
 			configurable: false,
 			enumerable: false,
 			writable: true
+		},
+		// array with "feelers" for wall avoidance 
+		_feelers: {
+			value: [ new THREE.Ray(), new THREE.Ray(), new THREE.Ray() ],
+			configurable: false,
+			enumerable: false,
+			writable: false
+		},
+		// array with walls for wall avoidance 
+		_walls: {
+			value: [],
+			configurable: false,
+			enumerable: false,
+			writable: false
 		}
 	});
 	
@@ -230,8 +219,19 @@ SteeringBehaviors.prototype._calculatePrioritized = ( function(){
 	
 	return function( delta ){
 		
+		// wall avoidance
+		if( this._isOn( SteeringBehaviors.TYPES.WALLAVOIDANCE )){
+						
+			force = this._wallAvoidance();
+			
+			force.multiplyScalar( this.weights.wallAvoidance );
+			
+			if( !this._accumulateForce( force ) ) {return;}
+			
+		}
+		
 		// obstacle avoidance
-		if( this._isOn( this.behaviorTypes.obstacleAvoidance )){
+		if( this._isOn( SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE )){
 						
 			force = this._obstacleAvoidance();
 			
@@ -242,7 +242,7 @@ SteeringBehaviors.prototype._calculatePrioritized = ( function(){
 		}
 		
 		// evade
-		if( this._isOn( this.behaviorTypes.evade )){
+		if( this._isOn( SteeringBehaviors.TYPES.EVADE )){
 			
 			logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Evade target not assigned" );
 			
@@ -255,7 +255,7 @@ SteeringBehaviors.prototype._calculatePrioritized = ( function(){
 		}
 		
 		// flee
-		if( this._isOn( this.behaviorTypes.flee )){
+		if( this._isOn( SteeringBehaviors.TYPES.FLEE )){
 			
 			force = this._flee( this.target );
 			
@@ -266,7 +266,7 @@ SteeringBehaviors.prototype._calculatePrioritized = ( function(){
 		}
 		
 		// seek
-		if( this._isOn( this.behaviorTypes.seek )){
+		if( this._isOn( SteeringBehaviors.TYPES.SEEK )){
 			
 			force = this._seek( this.target );
 			
@@ -277,7 +277,7 @@ SteeringBehaviors.prototype._calculatePrioritized = ( function(){
 		}
 		
 		// arrive
-		if( this._isOn( this.behaviorTypes.arrive )){
+		if( this._isOn( SteeringBehaviors.TYPES.ARRIVE )){
 			
 			force = this._arrive( this.target, this.deceleration );
 			
@@ -288,7 +288,7 @@ SteeringBehaviors.prototype._calculatePrioritized = ( function(){
 		}
 		
 		// wander
-		if( this._isOn( this.behaviorTypes.wander )){
+		if( this._isOn( SteeringBehaviors.TYPES.WANDER )){
 			
 			force = this._wander( delta );
 			
@@ -299,7 +299,7 @@ SteeringBehaviors.prototype._calculatePrioritized = ( function(){
 		}
 		
 		// pursuit
-		if( this._isOn( this.behaviorTypes.pursuit )){
+		if( this._isOn( SteeringBehaviors.TYPES.PURSUIT )){
 			
 			logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Pursuit target not assigned" );
 			
@@ -312,7 +312,7 @@ SteeringBehaviors.prototype._calculatePrioritized = ( function(){
 		}
 		
 		// offset pursuit
-		if( this._isOn( this.behaviorTypes.offsetPursuit )){
+		if( this._isOn( SteeringBehaviors.TYPES.OFFSETPURSUIT )){
 			
 			logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Pursuit target not assigned" );
 			
@@ -325,7 +325,7 @@ SteeringBehaviors.prototype._calculatePrioritized = ( function(){
 		}
 		
 		// interpose
-		if( this._isOn( this.behaviorTypes.interpose )){
+		if( this._isOn( SteeringBehaviors.TYPES.INTERPOSE )){
 			
 			logger.assert( this.targetAgent1 !== null && this.targetAgent2 !== null, "SteeringBehaviors: Interpose targets not assigned" );
 			
@@ -338,7 +338,7 @@ SteeringBehaviors.prototype._calculatePrioritized = ( function(){
 		}
 		
 		// follow path
-		if( this._isOn( this.behaviorTypes.followPath )){
+		if( this._isOn( SteeringBehaviors.TYPES.FOLLOWPATH )){
 			
 			force = this._followPath();
 			
@@ -445,6 +445,43 @@ SteeringBehaviors.prototype._prepareCalculation = ( function(){
 	};
 	
 } () );
+
+/**
+ * Creates the antenna utilized by wallAvoidance.
+ */
+SteeringBehaviors.prototype._createFeelers = ( function(){
+	
+	var rotation = new THREE.Matrix4();
+	
+	return function(){
+		
+		// feeler pointing straight in front
+		this._feelers[0].origin.copy( this.vehicle.position );
+		this._feelers[0].direction = this.vehicle.getDirection();
+		this._feelers[0].distance = this.wallDetectionFeelerLength;
+
+		// feeler to left
+		rotation.identity();
+		rotation.makeRotationY( Math.PI * 1.75 );
+		
+		this._feelers[1].origin.copy( this.vehicle.position );
+		this._feelers[1].direction = this.vehicle.getDirection();
+		this._feelers[1].distance = this.wallDetectionFeelerLength * 0.5;
+		
+		this._feelers[1].direction.transformDirection( rotation );
+		
+		// feeler to right
+		rotation.identity();
+		rotation.makeRotationY( Math.PI * 0.25 );
+		
+		this._feelers[2].origin.copy( this.vehicle.position );
+		this._feelers[2].direction = this.vehicle.getDirection();
+		this._feelers[2].distance = this.wallDetectionFeelerLength * 0.5;
+		
+		this._feelers[2].direction.transformDirection( rotation );
+	};
+
+} ( ) ); 
 
 /**
  * Setup wander target.
@@ -779,7 +816,7 @@ SteeringBehaviors.prototype._wander = ( function(){
 	var randomDisplacement = new THREE.Vector3();
 	var distanceVector = new THREE.Vector3();
 	
-	var jitterThisTimeSlice = 0;
+	var jitterThisTimeSlice;
 	
 	return function( delta ){
 		
@@ -826,15 +863,14 @@ SteeringBehaviors.prototype._wander = ( function(){
  */
 SteeringBehaviors.prototype._obstacleAvoidance = ( function(){
 	
-	// bounding volumes
 	var boundingBox = new THREE.Box3();
 	var boundingSphere = new THREE.Sphere();
 	
 	var vehicleSize = new THREE.Vector3();
 	var localPositionOfObstacle = new THREE.Vector3();
 	var localPositionOfClosestObstacle = new THREE.Vector3();
+	var intersectionPoint = new THREE.Vector3();
 	
-	var intersectionPoint;
 	var detectionBoxLength;
 	var closestObstacle;
 	var distanceToClosestObstacle;
@@ -844,7 +880,6 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function(){
 	var multiplier;
 	var brakingWeight = 0.2;
 	
-	//  this will be used to transform obstacles to the local space of the vehicle
 	var inverseMatrix = new THREE.Matrix4();
 	
 	// this will be used for ray/sphere intersection test
@@ -899,7 +934,7 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function(){
 					boundingSphere.radius = expandedRadius;
 					
 					// do intersection test in local space of the vehicle
-					intersectionPoint = ray.intersectSphere( boundingSphere );
+					ray.intersectSphere( boundingSphere, intersectionPoint );
 					
 					// compare distances
 					if( intersectionPoint.z < distanceToClosestObstacle ){
@@ -936,6 +971,90 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function(){
 		return force;
 	};
 	
+} ( ) );
+
+/**
+ *  This returns a steering force that will keep the agent away from any
+ *  walls it may encounter.
+ * 
+ * @returns {THREE.Vector3} The calculated force.
+ */
+SteeringBehaviors.prototype._wallAvoidance = ( function(){
+	
+	var intersectionPoint = new THREE.Vector3();
+	var overShoot = new THREE.Vector3();
+	
+	var indexFeeler;
+	var indexWall;
+	
+	var feeler;
+	var closestWall;
+	var closestPoint;
+	var intersectionFeeler;
+	var distanceToClosestWall;
+	var distance;
+	
+	return function(){
+		
+		var force = new THREE.Vector3();
+		
+		// this will be used to track the distance to the closest wall
+		distanceToClosestWall = Infinity;
+		
+		// this will keep track of the closest wall
+		closestWall = null;
+		
+		// this will keep track of the feeler that caused an intersection
+		intersectionFeeler = null;
+		
+		// create feelers for test
+		this._createFeelers();
+		
+		// examine each feeler in turn
+		for( indexFeeler = 0; indexFeeler < this._feelers.length ; indexFeeler++ ){
+			
+			// run through each wall checking for any intersection points
+			for( indexWall = 0; indexWall < this._walls.length ; indexWall++ ){
+				
+				feeler = this._feelers[ indexFeeler ];
+				
+				// do intersection test
+				feeler.intersectPlane( this._walls[ indexWall ], intersectionPoint );
+				
+				// calculate distance from origin to intersection point
+				distance = feeler.origin.distanceTo( intersectionPoint );
+				
+				// if intersection point is within the range of the ray and
+				// smaller than the current distanceToClosestWall, continue
+				if( distance < feeler.distance && distance < distanceToClosestWall ){
+					
+					distanceToClosestWall = distance;
+					
+					closestWall = this._walls[ indexWall ];
+					
+					closestPoint = intersectionPoint;
+					
+					intersectionFeeler = feeler;
+				}
+			}
+			
+		}
+		
+		// if an intersection point has been detected, calculate a force  
+	    // that will direct the agent away
+		if( closestWall !== null){
+			
+			// calculate by what distance the projected position of the agent will overshoot the wall
+			overShoot.copy( intersectionFeeler.direction ).multiplyScalar( intersectionFeeler.distance ).add( intersectionFeeler.origin );
+			overShoot.sub( closestPoint );
+			
+			// create a force in the direction of the wall normal, with a magnitude of the overshoot
+			force.copy( closestWall.normal ).multiplyScalar( overShoot.length() );
+			
+		}
+		
+		return force;
+	};
 } ( ) );
 
 /**
@@ -978,32 +1097,56 @@ SteeringBehaviors.prototype._followPath = ( function(){
 /////////////////////////////////////////////////////////////////////////////// START OF CONTROL METHODS
 
 /* jshint ignore:start */
-SteeringBehaviors.prototype.seekOn = function(){ this._behaviorFlag |= this.behaviorTypes.seek; };
-SteeringBehaviors.prototype.fleeOn = function(){ this._behaviorFlag |= this.behaviorTypes.flee; };
-SteeringBehaviors.prototype.arriveOn = function(){ this._behaviorFlag |= this.behaviorTypes.arrive; };
-SteeringBehaviors.prototype.pursuitOn = function(){ this._behaviorFlag |= this.behaviorTypes.pursuit; };
-SteeringBehaviors.prototype.offsetPursuitOn = function(){ this._behaviorFlag |= this.behaviorTypes.offsetPursuit; };
-SteeringBehaviors.prototype.evadeOn = function(){ this._behaviorFlag |= this.behaviorTypes.evade; };
-SteeringBehaviors.prototype.interposeOn = function(){ this._behaviorFlag |= this.behaviorTypes.interpose; };
-SteeringBehaviors.prototype.wanderOn = function(){ this._behaviorFlag |= this.behaviorTypes.wander; };
-SteeringBehaviors.prototype.obstacleAvoidanceOn = function(){ this._behaviorFlag |= this.behaviorTypes.obstacleAvoidance; };
-SteeringBehaviors.prototype.followPathOn = function(){ this._behaviorFlag |= this.behaviorTypes.followPath; };
+SteeringBehaviors.prototype.seekOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.SEEK; };
+SteeringBehaviors.prototype.fleeOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.FLEE; };
+SteeringBehaviors.prototype.arriveOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.ARRIVE; };
+SteeringBehaviors.prototype.pursuitOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.PURSUIT; };
+SteeringBehaviors.prototype.offsetPursuitOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.OFFSETPURSUIT; };
+SteeringBehaviors.prototype.evadeOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.EVADE; };
+SteeringBehaviors.prototype.interposeOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.INTERPOSE; };
+SteeringBehaviors.prototype.wanderOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.WANDER; };
+SteeringBehaviors.prototype.obstacleAvoidanceOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE; };
+SteeringBehaviors.prototype.wallAvoidanceOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.WALLAVOIDANCE; };
+SteeringBehaviors.prototype.followPathOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.FOLLOWPATH; };
 
-SteeringBehaviors.prototype.seekOff = function(){ if( this._isOn( this.behaviorTypes.seek ) ) this._behaviorFlag ^= this.behaviorTypes.seek; };
-SteeringBehaviors.prototype.fleeOff = function(){ if( this._isOn( this.behaviorTypes.flee ) ) this._behaviorFlag ^= this.behaviorTypes.flee; };
-SteeringBehaviors.prototype.arriveOff = function(){ if( this._isOn( this.behaviorTypes.arrive ) ) this._behaviorFlag ^= this.behaviorTypes.arrive; };
-SteeringBehaviors.prototype.pursuitOff = function(){ if( this._isOn( this.behaviorTypes.pursuit ) ) this._behaviorFlag ^= this.behaviorTypes.pursuit; };
-SteeringBehaviors.prototype.offsetPursuitOff = function(){ if( this._isOn( this.behaviorTypes.offsetPursuit ) ) this._behaviorFlag ^= this.behaviorTypes.offsetPursuit; };
-SteeringBehaviors.prototype.evadeOff = function(){ if( this._isOn( this.behaviorTypes.evade ) ) this._behaviorFlag ^= this.behaviorTypes.evade; };
-SteeringBehaviors.prototype.interposeOff = function(){ if( this._isOn( this.behaviorTypes.interpose ) ) this._behaviorFlag ^= this.behaviorTypes.interpose; };
-SteeringBehaviors.prototype.wanderOff = function(){ if( this._isOn( this.behaviorTypes.wander ) ) this._behaviorFlag ^= this.behaviorTypes.wander; };
-SteeringBehaviors.prototype.obstacleAvoidanceOff = function(){ if( this._isOn( this.behaviorTypes.obstacleAvoidance ) ) this._behaviorFlag ^= this.behaviorTypes.obstacleAvoidance; };
-SteeringBehaviors.prototype.followPathOff = function(){ if( this._isOn( this.behaviorTypes.followPath ) ) this._behaviorFlag ^= this.behaviorTypes.followPath; };
+SteeringBehaviors.prototype.seekOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.SEEK ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.SEEK; };
+SteeringBehaviors.prototype.fleeOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.FLEE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.FLEE; };
+SteeringBehaviors.prototype.arriveOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.ARRIVE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.ARRIVE; };
+SteeringBehaviors.prototype.pursuitOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.PURSUIT ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.PURSUIT; };
+SteeringBehaviors.prototype.offsetPursuitOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.OFFSETPURSUIT ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.OFFSETPURSUIT; };
+SteeringBehaviors.prototype.evadeOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.EVADE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.EVADE; };
+SteeringBehaviors.prototype.interposeOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.INTERPOSE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.INTERPOSE; };
+SteeringBehaviors.prototype.wanderOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.WANDER ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.WANDER; };
+SteeringBehaviors.prototype.obstacleAvoidanceOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE; };
+SteeringBehaviors.prototype.wallAvoidanceOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.WALLAVOIDANCE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.WALLAVOIDANCE; };
+SteeringBehaviors.prototype.followPathOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.FOLLOWPATH ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.FOLLOWPATH; };
 
 /* jshint ignore:end */
 
 /////////////////////////////////////////////////////////////////////////////// END OF CONTROL METHODS
 
+// types of behavior as flags
+SteeringBehaviors.TYPES = {
+		NONE			  : 0x00000,
+		SEEK              : 0x00002,
+		FLEE              : 0x00004,
+		ARRIVE            : 0x00008,
+		WANDER            : 0x00010,
+		COHESION          : 0x00020,
+		SEPARATION        : 0x00040,
+		ALIGNMENT         : 0x00080,
+		OBSTACLEAVOIDANCE : 0x00100,
+	    WALLAVOIDANCE     : 0x00200,
+	    FOLLOWPATH        : 0x00400,
+	    PURSUIT           : 0x00800,
+	    EVADE             : 0x01000,
+	    INTERPOSE         : 0x02000,
+	    HIDE              : 0x04000,
+	    FLOCK             : 0x08000,
+	    OFFSETPURSUIT     : 0x10000
+};
+
+// amounts of deceleration
 SteeringBehaviors.DECELERATION = {
 		VERY_FAST: 1.5,
 		FAST: 3,
