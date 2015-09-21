@@ -1,6 +1,8 @@
 /**
  * @file Super prototype for states used by FSMs.
  * 
+ * see "Programming Game AI by Example", Mat Buckland, Chapter 2
+ * 
  * @author Human Interactive
  */
 

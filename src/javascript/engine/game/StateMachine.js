@@ -2,6 +2,8 @@
  * @file This prototype is a basic finite state machine
  * used for AI logic.
  * 
+ * see "Programming Game AI by Example", Mat Buckland, Chapter 2
+ * 
  * @author Human Interactive
  */
 
@@ -11,7 +13,7 @@ var logger = require("../etc/Logger");
 var State = require("./State");
 
 /**
- * Creates an finite state machine.
+ * Creates a finite state machine.
  * 
  * @constructor
  * 
@@ -74,7 +76,7 @@ StateMachine.prototype.update = function( ){
 StateMachine.prototype.changeState = function( newState ){
 	
 	// check type of parameter
-	logger.assert( newState instanceof State, "StateMachine: State parameter is no instance of type 'State'." );
+	logger.assert( newState instanceof State, "StateMachine: State parameter is no instance of type \"State\"." );
 	
 	// keep a record of the previous state
 	this.previousState = this.currentState;

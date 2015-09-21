@@ -174,7 +174,7 @@ function SteeringBehaviors( vehicle ){
 		},
 		// array with "feelers" for wall avoidance 
 		_feelers: {
-			value: [ new THREE.Ray(), new THREE.Ray(), new THREE.Ray() ],
+			value: [],
 			configurable: false,
 			enumerable: false,
 			writable: false
@@ -451,16 +451,21 @@ SteeringBehaviors.prototype._prepareCalculation = ( function(){
 			this.targetAgent2.updateMatrixWorld();
 		}
 		
-		// prepare obstacles
-		this._obstacles = actionManager.interactiveObjects.concat( actionManager.staticObjects );
+		// prepare obstacles for specific steering behaviors
+		if( this._isOn( SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE ) ||
+			this._isOn( SteeringBehaviors.TYPES.HIDE ) ){
 		
-		for( index = 0; index < this._obstacles.length ; index++ ){
-			
-			obstacle = this._obstacles[index];
-			
-			// compute bounding sphere
-			obstacle._boundingSphere.copy( obstacle.mesh.geometry.boundingSphere );
-			obstacle._boundingSphere.applyMatrix4( obstacle.mesh.matrixWorld );
+			// merge all interactive and static objects into one array
+			this._obstacles = actionManager.interactiveObjects.concat( actionManager.staticObjects );
+		
+			// compute for each obstacle a bounding sphere
+			for( index = 0; index < this._obstacles.length ; index++ ){
+				
+				obstacle = this._obstacles[index];
+				
+				obstacle._boundingSphere.copy( obstacle.mesh.geometry.boundingSphere );
+				obstacle._boundingSphere.applyMatrix4( obstacle.mesh.matrixWorld );
+			}
 		}
 	};
 	
@@ -475,30 +480,31 @@ SteeringBehaviors.prototype._createFeelers = ( function(){
 	
 	return function(){
 		
-		// feeler pointing straight in front
+		// if there are no feelers yet, create them
+		if( this._feelers.length === 0){
+			this._feelers.push( new THREE.Ray(), new THREE.Ray(), new THREE.Ray() );
+		}
+		
+		// first feeler pointing straight in front
 		this._feelers[0].origin.copy( this.vehicle.position );
-		this._feelers[0].direction = this.vehicle.getDirection();
 		this._feelers[0].distance = this.wallDetectionFeelerLength;
+		this._feelers[0].direction = this.vehicle.getDirection();
 
-		// feeler to left
+		// second feeler to left
 		rotation.identity();
 		rotation.makeRotationY( Math.PI * 1.75 );
 		
 		this._feelers[1].origin.copy( this.vehicle.position );
-		this._feelers[1].direction = this.vehicle.getDirection();
 		this._feelers[1].distance = this.wallDetectionFeelerLength * 0.5;
+		this._feelers[1].direction = this.vehicle.getDirection().transformDirection( rotation );
 		
-		this._feelers[1].direction.transformDirection( rotation );
-		
-		// feeler to right
+		// third feeler to right
 		rotation.identity();
 		rotation.makeRotationY( Math.PI * 0.25 );
 		
 		this._feelers[2].origin.copy( this.vehicle.position );
-		this._feelers[2].direction = this.vehicle.getDirection();
 		this._feelers[2].distance = this.wallDetectionFeelerLength * 0.5;
-		
-		this._feelers[2].direction.transformDirection( rotation );
+		this._feelers[2].direction = this.vehicle.getDirection().transformDirection( rotation );
 	};
 
 } ( ) );
@@ -921,6 +927,7 @@ SteeringBehaviors.prototype._hide = ( function(){
  */
 SteeringBehaviors.prototype._wander = ( function(){
 	
+	var target = new THREE.Vector3();
 	var randomDisplacement = new THREE.Vector3();
 	var distanceVector = new THREE.Vector3();
 	
@@ -928,7 +935,7 @@ SteeringBehaviors.prototype._wander = ( function(){
 	
 	return function( delta ){
 		
-		var target = new THREE.Vector3();
+		var force = new THREE.Vector3();
 		
 		// this behavior is dependent on the update rate, so this line must be included 
 		// when using time independent frame rate.
@@ -956,9 +963,9 @@ SteeringBehaviors.prototype._wander = ( function(){
 		target.applyMatrix4( this.vehicle.matrixWorld );
 		
 		// and steer towards it
-		target.sub( this.vehicle.position );
+		force.subVectors( target, this.vehicle.position );
 		
-		return target;
+		return force;
 	};
 	
 } ( ) );

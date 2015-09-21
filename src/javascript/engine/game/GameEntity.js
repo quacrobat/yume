@@ -10,7 +10,7 @@
 var THREE = require("three");
 
 /**
- * Creates a new state.
+ * Creates a game entity.
  * 
  * @constructor
  * @augments THREE.Mesh
