@@ -58,8 +58,8 @@ function SteeringBehaviors( vehicle ){
 				arrive            : 1,
 				wander            : 1,
 				cohesion          : 2,
-				separation        : 1,
-				allignment        : 1,
+				separation        : 0.1,
+				alignment         : 0.1,
 				obstacleAvoidance : 10,
 			    wallAvoidance     : 10,
 			    followPath        : 1,
@@ -144,6 +144,13 @@ function SteeringBehaviors( vehicle ){
 			enumerable: true,
 			writable: true
 		},
+		// how close a neighbour must be before an agent perceives it (considers it to be within its neighborhood)
+		viewDistance: {
+			value: 200,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
 		// the actual target of the wander behavior
 		_wanderTarget: {
 			value: new THREE.Vector3(),
@@ -174,6 +181,13 @@ function SteeringBehaviors( vehicle ){
 		},
 		// array with "feelers" for wall avoidance 
 		_feelers: {
+			value: [],
+			configurable: false,
+			enumerable: false,
+			writable: false
+		},
+		// array with neighbors for flocking 
+		_neighbors: {
 			value: [],
 			configurable: false,
 			enumerable: false,
@@ -256,6 +270,39 @@ SteeringBehaviors.prototype._calculatePrioritized = ( function(){
 			force = this._evade( this.targetAgent1 );
 			
 			force.multiplyScalar( this.weights.evade );
+			
+			if( !this._accumulateForce( force ) ) {return;}
+			
+		}
+		
+		// separation
+		if( this._isOn( SteeringBehaviors.TYPES.SEPARATION )){
+			
+			force = this._separation();
+			
+			force.multiplyScalar( this.weights.separation );
+			
+			if( !this._accumulateForce( force ) ) {return;}
+			
+		}
+		
+		// alignment
+		if( this._isOn( SteeringBehaviors.TYPES.ALIGNMENT )){
+			
+			force = this._alignment();
+			
+			force.multiplyScalar( this.weights.alignment );
+			
+			if( !this._accumulateForce( force ) ) {return;}
+			
+		}
+		
+		// cohesion
+		if( this._isOn( SteeringBehaviors.TYPES.COHESION )){
+			
+			force = this._cohesion();
+			
+			force.multiplyScalar( this.weights.cohesion );
 			
 			if( !this._accumulateForce( force ) ) {return;}
 			
@@ -465,6 +512,51 @@ SteeringBehaviors.prototype._prepareCalculation = ( function(){
 				
 				obstacle._boundingSphere.copy( obstacle.mesh.geometry.boundingSphere );
 				obstacle._boundingSphere.applyMatrix4( obstacle.mesh.matrixWorld );
+			}
+		}
+		
+		if( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) ||
+			this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) ||
+			this._isOn( SteeringBehaviors.TYPES.COHESION ) ){
+						
+			// calculate neighbors
+			this._calculateNeighbors();
+		}
+	};
+	
+} () );
+
+/**
+ * Calculates all neighbors of the vehicle.
+ */
+SteeringBehaviors.prototype._calculateNeighbors = ( function(){
+	
+	var toEntity = new THREE.Vector3();
+	var entity;
+	var index;
+	
+	return function(){
+		
+		// reset array
+		this._neighbors.length = 0;
+		
+		// iterate over all entities
+		for( index = 0; index < this.vehicle.entityManager.entities.length; index++ ){
+			
+			entity = this.vehicle.entityManager.entities[index];
+			
+			if( entity !== this.vehicle ){
+				
+				// calculate displacement vector
+				toEntity.subVectors( entity.position, this.vehicle.position );
+				
+				// if entity within range, push into neighbors array for further consideration. 
+				// ( working in distance-squared space to avoid sqrt )
+				if( toEntity.lengthSq() < ( this.viewDistance * this.viewDistance ) ){
+					
+					this._neighbors.push( entity );
+				}
+
 			}
 		}
 	};
@@ -1207,6 +1299,158 @@ SteeringBehaviors.prototype._followPath = ( function(){
 	
 } ( ) );
 
+/**
+ * This calculates a force repelling from the other neighbors
+ * 
+ * @returns {THREE.Vector3} The calculated force.
+ */
+SteeringBehaviors.prototype._separation = ( function(){
+	
+	var toAgent = new THREE.Vector3();
+	
+	var index;
+	var neighbor;
+	var length;
+
+	return function(){
+		
+		var force = new THREE.Vector3();
+		
+		for( index = 0; index < this._neighbors.length; index ++ ){
+			
+			neighbor = this._neighbors[ index ];
+			
+			// make sure this agent isn't included in the calculations
+			// also make sure it doesn't include the evade target
+			if( neighbor !== this.vehicle && neighbor !== this.targetAgent1 ){
+				
+				// calculate displacement vector
+				toAgent.subVectors( this.vehicle.position, neighbor.position );
+				
+				// get length
+				length = toAgent.length();
+				
+				// handle zero length. this is necessary if both vehicles have the same position
+				if( length === 0 ){ length = 0.0001; }
+	
+				// scale the force inversely proportional to the agents distance from its neighbor
+				toAgent.normalize().divideScalar( length );
+		
+				// add force
+				force.add( toAgent );
+
+			}
+		}
+		
+		return force;
+	};
+	
+} ( ) );
+
+/**
+ * Returns a force that attempts to align this agents heading with that of its neighbors.
+ * 
+ * @returns {THREE.Vector3} The calculated force.
+ */
+SteeringBehaviors.prototype._alignment = ( function(){
+	
+	var averageHeading = new THREE.Vector3(); // used to record the average heading of the neighbors
+	
+	var neighborCount; // used to count the number of vehicles in the neighborhood
+	var index;
+	var neighbor;
+	
+	return function(){
+		
+		var force = new THREE.Vector3();
+		
+		// reset values
+		neighborCount = 0;
+		averageHeading.set( 0, 0, 0 );
+		
+		for( index = 0; index < this._neighbors.length; index ++ ){
+			
+			neighbor = this._neighbors[ index ];
+			
+			// make sure this agent isn't included in the calculations
+			// also make sure it doesn't include the evade target
+			if( neighbor !== this.vehicle && neighbor !== this.targetAgent1 ){
+				
+				averageHeading.add( neighbor.getDirection() );
+				
+				neighborCount++;
+			}
+		}
+		
+		// if the neighborhood contained one or more vehicles, average their heading vectors.
+		if( neighborCount > 0 ){
+			
+			averageHeading.divideScalar( neighborCount );
+			
+			force.subVectors( averageHeading, this.vehicle.getDirection() );
+		}
+		
+		return force;
+	
+	};
+
+} ( ) );
+
+/**
+ * Returns a steering force that attempts to move the agent towards 
+ * the center of mass of the agents in its immediate area.
+ * 
+ * @returns {THREE.Vector3} The calculated force.
+ */
+SteeringBehaviors.prototype._cohesion = ( function(){
+	
+var averageHeading = new THREE.Vector3();
+	
+	var centerOfMass = new THREE.Vector3();   // center of mass of all the agents
+	
+	var neighborCount; // used to count the number of vehicles in the neighborhood
+	var index;
+	var neighbor;
+	
+	return function(){
+	
+		var force = new THREE.Vector3();
+		
+		// reset values
+		neighborCount = 0;
+		centerOfMass.set( 0, 0, 0 );
+		
+		for( index = 0; index < this._neighbors.length; index ++ ){
+			
+			neighbor = this._neighbors[ index ];
+			
+			// make sure this agent isn't included in the calculations
+			// also make sure it doesn't include the evade target
+			if( neighbor !== this.vehicle && neighbor !== this.targetAgent1 ){
+				
+				centerOfMass.add( neighbor.position );
+				
+				neighborCount++;
+			}
+			
+		}
+		
+		if( neighborCount > 0 ){
+			
+			// the center of mass is the average of the sum of positions
+			centerOfMass.divideScalar( neighborCount );
+			
+			// now seek towards that position
+			force = this._seek( centerOfMass );
+		}
+		
+		// the magnitude of cohesion is usually much larger than separation or 
+		// allignment so it usually helps to normalize it
+		return force.normalize();	
+	};
+
+} ( ) );
+
 /////////////////////////////////////////////////////////////////////////////// END OF BEHAVIORS
 
 /////////////////////////////////////////////////////////////////////////////// START OF CONTROL METHODS
@@ -1224,6 +1468,10 @@ SteeringBehaviors.prototype.wanderOn = function(){ this._behaviorFlag |= Steerin
 SteeringBehaviors.prototype.obstacleAvoidanceOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE; };
 SteeringBehaviors.prototype.wallAvoidanceOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.WALLAVOIDANCE; };
 SteeringBehaviors.prototype.followPathOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.FOLLOWPATH; };
+SteeringBehaviors.prototype.cohesionOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.COHESION; };
+SteeringBehaviors.prototype.separationOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.SEPARATION; };
+SteeringBehaviors.prototype.alignmentOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.ALIGNMENT; };
+SteeringBehaviors.prototype.flockingOn = function(){ this.cohesionOn(); this.separationOn(); this.alignmentOn(); this.wanderOn(); };
 
 SteeringBehaviors.prototype.seekOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.SEEK ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.SEEK; };
 SteeringBehaviors.prototype.fleeOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.FLEE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.FLEE; };
@@ -1237,6 +1485,10 @@ SteeringBehaviors.prototype.wanderOff = function(){ if( this._isOn( SteeringBeha
 SteeringBehaviors.prototype.obstacleAvoidanceOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE; };
 SteeringBehaviors.prototype.wallAvoidanceOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.WALLAVOIDANCE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.WALLAVOIDANCE; };
 SteeringBehaviors.prototype.followPathOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.FOLLOWPATH ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.FOLLOWPATH; };
+SteeringBehaviors.prototype.cohesionOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.COHESION ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.COHESION; };
+SteeringBehaviors.prototype.separationOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.SEPARATION; };
+SteeringBehaviors.prototype.alignmentOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.ALIGNMENT; };
+SteeringBehaviors.prototype.flockingOff = function(){ this.cohesionOff(); this.separationOff(); this.alignmentOff(); this.wanderOff(); };
 
 /* jshint ignore:end */
 

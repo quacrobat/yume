@@ -17,6 +17,7 @@ var Smoother = require("./Smoother");
  * @constructor
  * @augments MovingEntity
  *
+ * @param {EntityManager} entityManager - The reference to the entity manager.
  * @param {THREE.Vector3} velocity - The velocity of the agent.
  * @param {number} mass - The mass of the agent.
  * @param {number} maxSpeed - The maximum speed at which this entity may travel.
@@ -24,16 +25,22 @@ var Smoother = require("./Smoother");
  * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
  * @param {number} numSamplesForSmoothing - How many samples the smoother will use to average the velocity.
  */
-function Vehicle( velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ){
+function Vehicle( entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ){
 		
 	MovingEntity.call( this, velocity, mass, maxSpeed, maxForce, maxTurnRate );
 	
 	Object.defineProperties( this, {
+		entityManager: {
+			value: entityManager,
+			configurable: false,
+			enumerable: true,
+			writable: false
+		},
 		steering: {
 			value: new SteeringBehaviors( this ),
 			configurable: false,
 			enumerable: true,
-			writable: true
+			writable: false
 		},
 		isSmoothingOn: {
 			value: false,
@@ -123,7 +130,6 @@ Vehicle.prototype.update = ( function( ){
  * This method rotates the vehicle to the given direction.
  * 
  * @param {THREE.Vector3} - The direction to rotate.
- * 
  */
 Vehicle.prototype._updateOrientation = ( function(){
 	

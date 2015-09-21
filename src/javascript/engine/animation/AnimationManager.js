@@ -83,6 +83,8 @@ AnimationManager.prototype.createSpriteAnimation = function( rows, columns, numb
 
 /**
  * Update method for animations. Called in render-loop.
+ * 
+ * @param {number} delta - The time delta value.
  */
 AnimationManager.prototype.update = function( delta ){
 	
@@ -130,7 +132,9 @@ AnimationManager.prototype._updateAnimations = (function(){
 }());
 
 /**
- * Updates the sprites.
+ * Updates the sprite objects.
+ * 
+ * @param {number} delta - The time delta value.
  */
 AnimationManager.prototype._updateSprites = (function(){
 	
