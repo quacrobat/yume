@@ -8,8 +8,8 @@
 var THREE = require("three");
 
 var MovingEntity = require("./MovingEntity");
-var SteeringBehaviors = require("./SteeringBehaviors");
-var Smoother = require("./Smoother");
+var SteeringBehaviors = require("../steering/SteeringBehaviors");
+var Smoother = require("../steering/Smoother");
 
 /**
  * Creates a new vehicle.

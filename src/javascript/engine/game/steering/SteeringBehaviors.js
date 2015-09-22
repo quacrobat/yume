@@ -9,9 +9,9 @@
 
 var THREE = require("three");
 
-var actionManager = require("../action/ActionManager");
+var actionManager = require("../../action/ActionManager");
 var Path = require("./Path");
-var logger = require("../etc/Logger");
+var logger = require("../../etc/Logger");
 
 /**
  * Creates a steering behaviors instance.

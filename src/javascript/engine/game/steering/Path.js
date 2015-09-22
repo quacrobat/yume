@@ -8,7 +8,7 @@
 
 var THREE = require("three");
 
-var logger = require("../etc/Logger");
+var logger = require("../../etc/Logger");
 
 /**
  * Creates a new path.

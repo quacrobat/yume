@@ -9,7 +9,7 @@
 
 "use strict";
 
-var logger = require("../etc/Logger");
+var logger = require("../../etc/Logger");
 var State = require("./State");
 
 /**

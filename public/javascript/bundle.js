@@ -39868,7 +39868,7 @@ var controls = require("../controls/FirstPersonControls");
 var actionManager = require("../action/ActionManager");
 var audioManager = require("../audio/AudioManager");
 var animationManager = require("../animation/AnimationManager");
-var entityManager = require("../game/EntityManager");
+var entityManager = require("../game/entity/EntityManager");
 var performanceManager = require("../etc/PerformanceManager");
 var textManager = require("../etc/TextManager");
 var saveGameManager = require("../etc/SaveGameManager");
@@ -40091,7 +40091,7 @@ StageBase.prototype._changeStage = function(stageId, isSaveGame){
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":16,"../controls/FirstPersonControls":18,"../etc/PerformanceManager":35,"../etc/SaveGameManager":36,"../etc/SettingsManager":37,"../etc/TextManager":39,"../etc/Utils":40,"../game/EntityManager":41,"../ui/UserInterfaceManager":80,"./Camera":20,"./Renderer":22,"./Scene":23,"pubsub-js":1,"three":2}],25:[function(require,module,exports){
+},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":16,"../controls/FirstPersonControls":18,"../etc/PerformanceManager":35,"../etc/SaveGameManager":36,"../etc/SettingsManager":37,"../etc/TextManager":39,"../etc/Utils":40,"../game/entity/EntityManager":41,"../ui/UserInterfaceManager":80,"./Camera":20,"./Renderer":22,"./Scene":23,"pubsub-js":1,"three":2}],25:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -42912,7 +42912,7 @@ module.exports = new SettingsManager();
 "use strict";
 
 var THREE = require("three");
-var GameEntity = require("../game/GameEntity");
+var GameEntity = require("../game/entity/GameEntity");
 
 /**
  * Creates a teammate instance.
@@ -42964,7 +42964,7 @@ Teammate.prototype.update = function( position, quaternion ){
 };
 
 module.exports = Teammate;
-},{"../game/GameEntity":42,"three":2}],39:[function(require,module,exports){
+},{"../game/entity/GameEntity":42,"three":2}],39:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire text-handling. This prototype is used in scenes
@@ -43383,7 +43383,7 @@ EntityManager.prototype.removeEntities = function(){
 };
 
 module.exports = new EntityManager();
-},{"./Vehicle":49}],42:[function(require,module,exports){
+},{"./Vehicle":44}],42:[function(require,module,exports){
 /**
  * @file All entities that are part of the game logic
  * inherit from this prototype.
@@ -43573,6 +43573,365 @@ MovingEntity.prototype.getDirection = function(){
 module.exports = MovingEntity;
 },{"./GameEntity":42,"three":2}],44:[function(require,module,exports){
 /**
+ * @file A simple vehicle that uses steering behaviors.
+ * 
+ * @author Human Interactive
+ */
+"use strict";
+
+var THREE = require("three");
+
+var MovingEntity = require("./MovingEntity");
+var SteeringBehaviors = require("../steering/SteeringBehaviors");
+var Smoother = require("../steering/Smoother");
+
+/**
+ * Creates a new vehicle.
+ * 
+ * @constructor
+ * @augments MovingEntity
+ *
+ * @param {EntityManager} entityManager - The reference to the entity manager.
+ * @param {THREE.Vector3} velocity - The velocity of the agent.
+ * @param {number} mass - The mass of the agent.
+ * @param {number} maxSpeed - The maximum speed at which this entity may travel.
+ * @param {number} maxForce - The maximum force this entity can produce to power itself (think rockets and thrust).
+ * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
+ * @param {number} numSamplesForSmoothing - How many samples the smoother will use to average the velocity.
+ */
+function Vehicle( entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ){
+		
+	MovingEntity.call( this, entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate );
+	
+	Object.defineProperties( this, {
+		steering: {
+			value: new SteeringBehaviors( this ),
+			configurable: false,
+			enumerable: true,
+			writable: false
+		},
+		isSmoothingOn: {
+			value: false,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		_smoother:{
+			value: new Smoother( numSamplesForSmoothing || 0 ),
+			configurable: false,
+			enumerable: false,
+			writable: false
+		},
+		_smoothedVelocity: {
+			value: new THREE.Vector3(),
+			configurable: false,
+			enumerable: false,
+			writable: true
+		}
+	});
+	
+}
+
+Vehicle.prototype = Object.create( MovingEntity.prototype );
+Vehicle.prototype.constructor = Vehicle;
+
+/**
+ * Updates the position and orientation of the vehicle.
+ * 
+ * @param {number} delta - The time delta value.
+ */
+Vehicle.prototype.update = ( function( ){
+	
+	var steeringForce = null;
+	
+	var displacement = new THREE.Vector3();
+	var acceleration = new THREE.Vector3();
+	
+	return function( delta ){
+		
+		// calculate steering force
+		steeringForce = this.steering.calculate( delta );
+				
+		// acceleration = force / mass
+		acceleration.copy( steeringForce ).divideScalar( this.mass );
+
+		// update velocity
+		this.velocity.add( acceleration.multiplyScalar( delta ) );
+		
+		// make sure vehicle does not exceed maximum velocity
+		if( this.velocity.length() > this.maxSpeed ){
+			
+			this.velocity.normalize();
+			
+			this.velocity.multiplyScalar( this.maxSpeed );
+		}
+		
+		// calculate displacement
+		displacement.copy( this.velocity ).multiplyScalar( delta );
+		
+		// update the position
+		this.position.add( displacement );
+		
+		// update the orientation if the vehicle has a non zero velocity
+		if( this.velocity.lengthSq() > 0.00000001 ){
+			
+			// check smoothing
+			if( this.isSmoothingOn === true ){
+				
+				// decouple velocity and heading. calculate the orientation
+				// with an averaged velocity to avoid oscillations/judder.
+				this._smoother.update( this.velocity, this._smoothedVelocity );
+				
+				this._updateOrientation( this._smoothedVelocity );
+			}
+			else{
+				// couple velocity and orientation
+				this._updateOrientation( this.velocity );
+			}	
+		}
+		
+	};
+	
+} ( ) );
+
+/**
+ * This method rotates the vehicle to the given direction.
+ * 
+ * @param {THREE.Vector3} - The direction to rotate.
+ */
+Vehicle.prototype._updateOrientation = ( function(){
+	
+	var xAxis = new THREE.Vector3(); // right
+	var yAxis = new THREE.Vector3(); // up
+	var zAxis = new THREE.Vector3(); // front
+	
+	var upTemp = new THREE.Vector3( 0, 1, 0 ); 
+	
+	var rotationMatrix = new THREE.Matrix4();
+	
+	return function( direction ){
+		
+		// the front vector always points to the direction vector
+		zAxis.copy( direction ).normalize();	
+		
+		// avoid zero-length axis
+		if ( zAxis.length() === 0 ) {
+			zAxis.z = 1;
+		}
+		
+		// compute right vector
+		xAxis.crossVectors( zAxis, upTemp );
+		
+		// avoid zero-length axis
+		if ( xAxis.length() === 0 ) {
+			zAxis.x += 0.0001;
+			xAxis.crossVectors( zAxis, upTemp ).normalize();
+		}
+		
+		// compute up vector
+		yAxis.crossVectors( zAxis, xAxis );
+		
+		// setup a rotation matrix of the basis
+		rotationMatrix.makeBasis( xAxis, yAxis, zAxis );
+		
+		// apply rotation
+		this.quaternion.setFromRotationMatrix( rotationMatrix );
+		
+	};
+	
+} () );
+
+module.exports = Vehicle;
+},{"../steering/Smoother":48,"../steering/SteeringBehaviors":49,"./MovingEntity":43,"three":2}],45:[function(require,module,exports){
+/**
+ * @file Super prototype for states used by FSMs.
+ * 
+ * see "Programming Game AI by Example", Mat Buckland, Chapter 2
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+/**
+ * Creates a new state.
+ * 
+ * @constructor
+ *  
+ */
+function State(){}
+
+/**
+ * This executes when the state is entered.
+ * 
+ * @param {GameEntity} entity - A reference to the entity.
+ */
+State.prototype.enter = function( entity ){};
+
+/**
+ * This is called by the FSM's update function each update step.
+ * 
+ * @param {GameEntity} entity - A reference to the entity.
+ */
+State.prototype.execute = function( entity ){};
+
+/**
+ * This executes when the state is exited.
+ * 
+ * @param {GameEntity} entity - A reference to the entity.
+ */
+State.prototype.exit = function( entity ){};
+
+/**
+ * This executes if the agent receives a message from the messaging system.
+ * 
+ * @param {GameEntity} entity - A reference to the entity.
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ * 
+ * @returns {boolean} Is the message handled successfully by a state?
+ */
+State.prototype.onMessage = function( entity, message, data ){ return false; };
+
+module.exports = State;
+},{}],46:[function(require,module,exports){
+/**
+ * @file This prototype is a basic finite state machine
+ * used for AI logic.
+ * 
+ * see "Programming Game AI by Example", Mat Buckland, Chapter 2
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var logger = require("../../etc/Logger");
+var State = require("./State");
+
+/**
+ * Creates a finite state machine.
+ * 
+ * @constructor
+ * 
+ * @param {GameEntity} owner - A reference to the agent that owns this instance.
+ */
+function StateMachine( owner ){
+	
+	Object.defineProperties(this, {
+		_owner: {
+			value: owner,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		currentState: {
+			value: null,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		// a record of the last state the agent was in
+		previousState: {
+			value: null,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		},
+		// this state logic is called every time the FSM is updated
+		globalState: {
+			value: null,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		}	
+	});
+}
+
+/**
+ * This method update the FSM. This method should not be called
+ * in render loop, but in an separate loop for AI logic.
+ */
+StateMachine.prototype.update = function( ){
+	
+	// if a global state exists, call its execute method
+	if( this.globalState !== null ){
+		this.globalState.execute( this._owner );
+	}
+	
+	// same for the current state
+	if( this.currentState !== null ){
+		this.currentState.execute( this._owner );
+	}
+};
+
+/**
+ * Changes the state of the FSM.
+ * 
+ * @param {State} newState - The new state of the FSM.
+ */
+StateMachine.prototype.changeState = function( newState ){
+	
+	// check type of parameter
+	logger.assert( newState instanceof State, "StateMachine: State parameter is no instance of type \"State\"." );
+	
+	// keep a record of the previous state
+	this.previousState = this.currentState;
+	
+	// call the exit method of the existing state
+	this.currentState.exit( this._owner );
+	
+	// change state to the new state
+	this.currentState = newState;
+	
+	// call the entry method of the new state
+	this.currentState.enter( this._owner );
+};
+
+/**
+ * Handles the messages of an agent.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ * 
+ * @returns {boolean} Is the message handled successfully by a state?
+ */
+StateMachine.prototype.handleMessage = function( message, data ){
+	
+  // first see, if the current state is valid and that it can handle the message
+  if( this.currentState !== null && this.currentState.onMessage( this._owner, message, data ) === true ){
+    return true;
+  }
+
+  // if not, and if a global state has been implemented, send the message to the global state
+  if( this.globalState !== null && this.globalState.onMessage( this._owner, message, data ) === true ){
+    return true;
+  }
+
+  return false;
+};
+
+/**
+ * This method changes state back to the previous state.
+ */
+StateMachine.prototype.revertToPrevoiusState = function(){
+	
+	this.changeState( this.previousState );
+};
+
+/**
+ * Returns true, if the current state’s type is equal to the type of the object passed as a parameter.
+ * 
+ * @returns {boolean} Is the current state equal to the passed parameter?
+ */
+StateMachine.prototype.isInState = function( state ){
+	
+	return state === this.currentState;
+};
+
+module.exports = StateMachine;
+},{"../../etc/Logger":31,"./State":45}],47:[function(require,module,exports){
+/**
  * @file Prototype to define, manage, and traverse a path 
  * 	     defined by a series of 3D vectors.
  * 
@@ -43582,7 +43941,7 @@ module.exports = MovingEntity;
 
 var THREE = require("three");
 
-var logger = require("../etc/Logger");
+var logger = require("../../etc/Logger");
 
 /**
  * Creates a new path.
@@ -43732,7 +44091,7 @@ Path.prototype.createRandomPath = function( numberOfWaypoints, boundingBox ){
 };
 
 module.exports = Path;
-},{"../etc/Logger":31,"three":2}],45:[function(require,module,exports){
+},{"../../etc/Logger":31,"three":2}],48:[function(require,module,exports){
 /**
  * @file Prototype to help calculate the average value of a history
  * 		 of vector values.
@@ -43818,195 +44177,7 @@ Smoother.prototype.update = ( function(){
 } ( ) );
 
 module.exports = Smoother;
-},{"three":2}],46:[function(require,module,exports){
-/**
- * @file Super prototype for states used by FSMs.
- * 
- * see "Programming Game AI by Example", Mat Buckland, Chapter 2
- * 
- * @author Human Interactive
- */
-
-"use strict";
-
-/**
- * Creates a new state.
- * 
- * @constructor
- *  
- */
-function State(){}
-
-/**
- * This executes when the state is entered.
- * 
- * @param {GameEntity} entity - A reference to the entity.
- */
-State.prototype.enter = function( entity ){};
-
-/**
- * This is called by the FSM's update function each update step.
- * 
- * @param {GameEntity} entity - A reference to the entity.
- */
-State.prototype.execute = function( entity ){};
-
-/**
- * This executes when the state is exited.
- * 
- * @param {GameEntity} entity - A reference to the entity.
- */
-State.prototype.exit = function( entity ){};
-
-/**
- * This executes if the agent receives a message from the messaging system.
- * 
- * @param {GameEntity} entity - A reference to the entity.
- * @param {string} message - The message topic of the subscription.
- * @param {object} data - The data of the message.
- * 
- * @returns {boolean} Is the message handled successfully by a state?
- */
-State.prototype.onMessage = function( entity, message, data ){ return false; };
-
-module.exports = State;
-},{}],47:[function(require,module,exports){
-/**
- * @file This prototype is a basic finite state machine
- * used for AI logic.
- * 
- * see "Programming Game AI by Example", Mat Buckland, Chapter 2
- * 
- * @author Human Interactive
- */
-
-"use strict";
-
-var logger = require("../etc/Logger");
-var State = require("./State");
-
-/**
- * Creates a finite state machine.
- * 
- * @constructor
- * 
- * @param {GameEntity} owner - A reference to the agent that owns this instance.
- */
-function StateMachine( owner ){
-	
-	Object.defineProperties(this, {
-		_owner: {
-			value: owner,
-			configurable: false,
-			enumerable: true,
-			writable: true
-		},
-		currentState: {
-			value: null,
-			configurable: false,
-			enumerable: true,
-			writable: true
-		},
-		// a record of the last state the agent was in
-		previousState: {
-			value: null,
-			configurable: false,
-			enumerable: true,
-			writable: true
-		},
-		// this state logic is called every time the FSM is updated
-		globalState: {
-			value: null,
-			configurable: false,
-			enumerable: true,
-			writable: true
-		}	
-	});
-}
-
-/**
- * This method update the FSM. This method should not be called
- * in render loop, but in an separate loop for AI logic.
- */
-StateMachine.prototype.update = function( ){
-	
-	// if a global state exists, call its execute method
-	if( this.globalState !== null ){
-		this.globalState.execute( this._owner );
-	}
-	
-	// same for the current state
-	if( this.currentState !== null ){
-		this.currentState.execute( this._owner );
-	}
-};
-
-/**
- * Changes the state of the FSM.
- * 
- * @param {State} newState - The new state of the FSM.
- */
-StateMachine.prototype.changeState = function( newState ){
-	
-	// check type of parameter
-	logger.assert( newState instanceof State, "StateMachine: State parameter is no instance of type \"State\"." );
-	
-	// keep a record of the previous state
-	this.previousState = this.currentState;
-	
-	// call the exit method of the existing state
-	this.currentState.exit( this._owner );
-	
-	// change state to the new state
-	this.currentState = newState;
-	
-	// call the entry method of the new state
-	this.currentState.enter( this._owner );
-};
-
-/**
- * Handles the messages of an agent.
- * 
- * @param {string} message - The message topic of the subscription.
- * @param {object} data - The data of the message.
- * 
- * @returns {boolean} Is the message handled successfully by a state?
- */
-StateMachine.prototype.handleMessage = function( message, data ){
-	
-  // first see, if the current state is valid and that it can handle the message
-  if( this.currentState !== null && this.currentState.onMessage( this._owner, message, data ) === true ){
-    return true;
-  }
-
-  // if not, and if a global state has been implemented, send the message to the global state
-  if( this.globalState !== null && this.globalState.onMessage( this._owner, message, data ) === true ){
-    return true;
-  }
-
-  return false;
-};
-
-/**
- * This method changes state back to the previous state.
- */
-StateMachine.prototype.revertToPrevoiusState = function(){
-	
-	this.changeState( this.previousState );
-};
-
-/**
- * Returns true, if the current state’s type is equal to the type of the object passed as a parameter.
- * 
- * @returns {boolean} Is the current state equal to the passed parameter?
- */
-StateMachine.prototype.isInState = function( state ){
-	
-	return state === this.currentState;
-};
-
-module.exports = StateMachine;
-},{"../etc/Logger":31,"./State":46}],48:[function(require,module,exports){
+},{"three":2}],49:[function(require,module,exports){
 /**
  * @file Prototype to encapsulate steering behaviors for a vehicle.
  * 
@@ -44018,9 +44189,9 @@ module.exports = StateMachine;
 
 var THREE = require("three");
 
-var actionManager = require("../action/ActionManager");
+var actionManager = require("../../action/ActionManager");
 var Path = require("./Path");
-var logger = require("../etc/Logger");
+var logger = require("../../etc/Logger");
 
 /**
  * Creates a steering behaviors instance.
@@ -45533,178 +45704,7 @@ SteeringBehaviors.DECELERATION = {
 };
 
 module.exports = SteeringBehaviors;
-},{"../action/ActionManager":6,"../etc/Logger":31,"./Path":44,"three":2}],49:[function(require,module,exports){
-/**
- * @file A simple vehicle that uses steering behaviors.
- * 
- * @author Human Interactive
- */
-"use strict";
-
-var THREE = require("three");
-
-var MovingEntity = require("./MovingEntity");
-var SteeringBehaviors = require("./SteeringBehaviors");
-var Smoother = require("./Smoother");
-
-/**
- * Creates a new vehicle.
- * 
- * @constructor
- * @augments MovingEntity
- *
- * @param {EntityManager} entityManager - The reference to the entity manager.
- * @param {THREE.Vector3} velocity - The velocity of the agent.
- * @param {number} mass - The mass of the agent.
- * @param {number} maxSpeed - The maximum speed at which this entity may travel.
- * @param {number} maxForce - The maximum force this entity can produce to power itself (think rockets and thrust).
- * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
- * @param {number} numSamplesForSmoothing - How many samples the smoother will use to average the velocity.
- */
-function Vehicle( entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ){
-		
-	MovingEntity.call( this, entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate );
-	
-	Object.defineProperties( this, {
-		steering: {
-			value: new SteeringBehaviors( this ),
-			configurable: false,
-			enumerable: true,
-			writable: false
-		},
-		isSmoothingOn: {
-			value: false,
-			configurable: false,
-			enumerable: true,
-			writable: true
-		},
-		_smoother:{
-			value: new Smoother( numSamplesForSmoothing || 0 ),
-			configurable: false,
-			enumerable: false,
-			writable: false
-		},
-		_smoothedVelocity: {
-			value: new THREE.Vector3(),
-			configurable: false,
-			enumerable: false,
-			writable: true
-		}
-	});
-	
-}
-
-Vehicle.prototype = Object.create( MovingEntity.prototype );
-Vehicle.prototype.constructor = Vehicle;
-
-/**
- * Updates the position and orientation of the vehicle.
- * 
- * @param {number} delta - The time delta value.
- */
-Vehicle.prototype.update = ( function( ){
-	
-	var steeringForce = null;
-	
-	var displacement = new THREE.Vector3();
-	var acceleration = new THREE.Vector3();
-	
-	return function( delta ){
-		
-		// calculate steering force
-		steeringForce = this.steering.calculate( delta );
-				
-		// acceleration = force / mass
-		acceleration.copy( steeringForce ).divideScalar( this.mass );
-
-		// update velocity
-		this.velocity.add( acceleration.multiplyScalar( delta ) );
-		
-		// make sure vehicle does not exceed maximum velocity
-		if( this.velocity.length() > this.maxSpeed ){
-			
-			this.velocity.normalize();
-			
-			this.velocity.multiplyScalar( this.maxSpeed );
-		}
-		
-		// calculate displacement
-		displacement.copy( this.velocity ).multiplyScalar( delta );
-		
-		// update the position
-		this.position.add( displacement );
-		
-		// update the orientation if the vehicle has a non zero velocity
-		if( this.velocity.lengthSq() > 0.00000001 ){
-			
-			// check smoothing
-			if( this.isSmoothingOn === true ){
-				
-				// decouple velocity and heading. calculate the orientation
-				// with an averaged velocity to avoid oscillations/judder.
-				this._smoother.update( this.velocity, this._smoothedVelocity );
-				
-				this._updateOrientation( this._smoothedVelocity );
-			}
-			else{
-				// couple velocity and orientation
-				this._updateOrientation( this.velocity );
-			}	
-		}
-		
-	};
-	
-} ( ) );
-
-/**
- * This method rotates the vehicle to the given direction.
- * 
- * @param {THREE.Vector3} - The direction to rotate.
- */
-Vehicle.prototype._updateOrientation = ( function(){
-	
-	var xAxis = new THREE.Vector3(); // right
-	var yAxis = new THREE.Vector3(); // up
-	var zAxis = new THREE.Vector3(); // front
-	
-	var upTemp = new THREE.Vector3( 0, 1, 0 ); 
-	
-	var rotationMatrix = new THREE.Matrix4();
-	
-	return function( direction ){
-		
-		// the front vector always points to the direction vector
-		zAxis.copy( direction ).normalize();	
-		
-		// avoid zero-length axis
-		if ( zAxis.length() === 0 ) {
-			zAxis.z = 1;
-		}
-		
-		// compute right vector
-		xAxis.crossVectors( zAxis, upTemp );
-		
-		// avoid zero-length axis
-		if ( xAxis.length() === 0 ) {
-			zAxis.x += 0.0001;
-			xAxis.crossVectors( zAxis, upTemp ).normalize();
-		}
-		
-		// compute up vector
-		yAxis.crossVectors( zAxis, xAxis );
-		
-		// setup a rotation matrix of the basis
-		rotationMatrix.makeBasis( xAxis, yAxis, zAxis );
-		
-		// apply rotation
-		this.quaternion.setFromRotationMatrix( rotationMatrix );
-		
-	};
-	
-} () );
-
-module.exports = Vehicle;
-},{"./MovingEntity":43,"./Smoother":45,"./SteeringBehaviors":48,"three":2}],50:[function(require,module,exports){
+},{"../../action/ActionManager":6,"../../etc/Logger":31,"./Path":47,"three":2}],50:[function(require,module,exports){
 /**
  * @file Prototype for network-messages.
  * 

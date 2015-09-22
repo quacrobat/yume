@@ -7,7 +7,7 @@
 "use strict";
 
 var THREE = require("three");
-var GameEntity = require("../game/GameEntity");
+var GameEntity = require("../game/entity/GameEntity");
 
 /**
  * Creates a teammate instance.
