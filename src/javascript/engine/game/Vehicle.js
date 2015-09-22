@@ -27,15 +27,9 @@ var Smoother = require("./Smoother");
  */
 function Vehicle( entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ){
 		
-	MovingEntity.call( this, velocity, mass, maxSpeed, maxForce, maxTurnRate );
+	MovingEntity.call( this, entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate );
 	
 	Object.defineProperties( this, {
-		entityManager: {
-			value: entityManager,
-			configurable: false,
-			enumerable: true,
-			writable: false
-		},
 		steering: {
 			value: new SteeringBehaviors( this ),
 			configurable: false,
@@ -49,7 +43,7 @@ function Vehicle( entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate
 			writable: true
 		},
 		_smoother:{
-			value: new Smoother( numSamplesForSmoothing ),
+			value: new Smoother( numSamplesForSmoothing || 0 ),
 			configurable: false,
 			enumerable: false,
 			writable: false

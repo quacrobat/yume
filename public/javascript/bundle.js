@@ -43401,10 +43401,21 @@ var THREE = require("three");
  * @constructor
  * @augments THREE.Mesh
  * 
+ * @param {EntityManager} entityManager - The reference to the entity manager.
+ * 
  */
-function GameEntity(){
+function GameEntity( entityManager ){
 		
 	THREE.Mesh.call( this );
+	
+	Object.defineProperties( this, {
+		entityManager: {
+			value: entityManager,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		}
+	});
 }
 
 GameEntity.prototype = Object.create( THREE.Mesh.prototype );
@@ -43434,15 +43445,16 @@ var GameEntity = require("./GameEntity");
  * @constructor
  * @augments GameEntity
  * 
+ * @param {EntityManager} entityManager - The reference to the entity manager.
  * @param {THREE.Vector3} velocity - The velocity of the agent.
  * @param {number} mass - The mass of the agent.
  * @param {number} maxSpeed - The maximum speed at which this entity may travel.
  * @param {number} maxForce - The maximum force this entity can produce to power itself (think rockets and thrust).
  * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
  */
-function MovingEntity( velocity, mass, maxSpeed, maxForce, maxTurnRate ){
+function MovingEntity( entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate ){
 		
-	GameEntity.call( this );
+	GameEntity.call( this, entityManager );
 	
 	Object.defineProperties(this, {
 		velocity: {
@@ -44054,9 +44066,9 @@ function SteeringBehaviors( vehicle ){
 				flee              : 1,
 				arrive            : 1,
 				wander            : 1,
-				cohesion          : 2,
-				separation        : 0.1,
-				alignment         : 0.1,
+				cohesion          : 3,
+				separation        : 1,
+				alignment         : 1,
 				obstacleAvoidance : 10,
 			    wallAvoidance     : 10,
 			    followPath        : 1,
@@ -44233,7 +44245,6 @@ SteeringBehaviors.prototype.calculate = function( delta ){
 SteeringBehaviors.prototype._calculatePrioritized = ( function(){
 	
 	var force;
-	var obstacles;
 	
 	return function( delta ){
 		
@@ -45552,15 +45563,9 @@ var Smoother = require("./Smoother");
  */
 function Vehicle( entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ){
 		
-	MovingEntity.call( this, velocity, mass, maxSpeed, maxForce, maxTurnRate );
+	MovingEntity.call( this, entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate );
 	
 	Object.defineProperties( this, {
-		entityManager: {
-			value: entityManager,
-			configurable: false,
-			enumerable: true,
-			writable: false
-		},
 		steering: {
 			value: new SteeringBehaviors( this ),
 			configurable: false,
@@ -45574,7 +45579,7 @@ function Vehicle( entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate
 			writable: true
 		},
 		_smoother:{
-			value: new Smoother( numSamplesForSmoothing ),
+			value: new Smoother( numSamplesForSmoothing || 0 ),
 			configurable: false,
 			enumerable: false,
 			writable: false

@@ -15,15 +15,16 @@ var GameEntity = require("./GameEntity");
  * @constructor
  * @augments GameEntity
  * 
+ * @param {EntityManager} entityManager - The reference to the entity manager.
  * @param {THREE.Vector3} velocity - The velocity of the agent.
  * @param {number} mass - The mass of the agent.
  * @param {number} maxSpeed - The maximum speed at which this entity may travel.
  * @param {number} maxForce - The maximum force this entity can produce to power itself (think rockets and thrust).
  * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
  */
-function MovingEntity( velocity, mass, maxSpeed, maxForce, maxTurnRate ){
+function MovingEntity( entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate ){
 		
-	GameEntity.call( this );
+	GameEntity.call( this, entityManager );
 	
 	Object.defineProperties(this, {
 		velocity: {

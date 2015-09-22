@@ -57,9 +57,9 @@ function SteeringBehaviors( vehicle ){
 				flee              : 1,
 				arrive            : 1,
 				wander            : 1,
-				cohesion          : 2,
-				separation        : 0.1,
-				alignment         : 0.1,
+				cohesion          : 3,
+				separation        : 1,
+				alignment         : 1,
 				obstacleAvoidance : 10,
 			    wallAvoidance     : 10,
 			    followPath        : 1,
@@ -236,7 +236,6 @@ SteeringBehaviors.prototype.calculate = function( delta ){
 SteeringBehaviors.prototype._calculatePrioritized = ( function(){
 	
 	var force;
-	var obstacles;
 	
 	return function( delta ){
 		

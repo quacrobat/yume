@@ -15,10 +15,21 @@ var THREE = require("three");
  * @constructor
  * @augments THREE.Mesh
  * 
+ * @param {EntityManager} entityManager - The reference to the entity manager.
+ * 
  */
-function GameEntity(){
+function GameEntity( entityManager ){
 		
 	THREE.Mesh.call( this );
+	
+	Object.defineProperties( this, {
+		entityManager: {
+			value: entityManager,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		}
+	});
 }
 
 GameEntity.prototype = Object.create( THREE.Mesh.prototype );
