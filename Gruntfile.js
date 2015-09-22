@@ -1,19 +1,30 @@
+"use strict";
+
 module.exports = function(grunt) {
 
-	'use strict';
-
 	grunt.initConfig({
+		
 		// config
-		pkg : grunt.file.readJSON('package.json'),
+		pkg : grunt.file.readJSON("package.json"),
 		
 		// non-task-specific properties
-		srcPath: 'src/javascript',
-		distPath: 'public/javascript',
+		
+		// javascript
+		srcPathJavascript: "src/javascript",
+		distPathJavascript: "public/javascript",
+		
+		// less
+		srcPathLess: "src/less",
+		distPathLess: "src/css",
+		
+		// css
+		srcPathCss: "src/css",
+		distPathCss: "public/stylesheets",
 		
 		// tasks
 		autoprefixer: {
 			no_dist : {
-				src: ['src/stylesheets/style.min.css']
+				src: ["<%= distPathLess %>/style.min.css"]
 			}
 		},
 		
@@ -23,64 +34,64 @@ module.exports = function(grunt) {
 			},
 			dist : {
 				files : {
-					'src/stylesheets/style.min.css' : [ 'src/less/**/*.less']
+					"<%= distPathLess %>/style.min.css" : [ "<%= srcPathLess %>/**/*.less"]
 				}
 			}
 		},
 		
 		watch : {
-			css : {
-				files: ['src/less/**/*.less'],
-				tasks : ['less', 'autoprefixer', 'concat', 'clean']
+			less : {
+				files: ["<%= srcPathLess %>/**/*.less"],
+				tasks : ["less", "autoprefixer", "concat", "clean"]
 			},
 			javascript : {
-				files: ['<%= srcPath %>/engine/**/*.js'],
-				tasks : ['browserify', 'uglify']
+				files: ["<%= srcPathJavascript %>/engine/**/*.js"],
+				tasks : ["browserify", "uglify"]
 			}
 		},
 		
 		browserify: {
-	      dist: {
-	        src: ['<%= srcPath %>/engine/**/*.js'],
-	        dest: '<%= distPath %>/bundle.js'
-	      }
+			dist: {
+				src: ["<%= srcPathJavascript %>/engine/**/*.js"],
+				dest: "<%= distPathJavascript %>/bundle.js"
+			}
 		},
 		
 		uglify : {
 			options : {
-				banner : '/* Version: <%= pkg.version %>, <%= grunt.template.today("dd-mm-yyyy") %> */\n',
+				banner : "/* Version: <%= pkg.version %>, <%= grunt.template.today('dd-mm-yyyy') %> */\n",
 				// The following identifiers must not changed, otherwise WebWorkers cause reference erros
 				mangle: {
-			        except: ['self', 'WebSocket']
+			        except: ["self", "WebSocket"]
 			      }
 			},
 			dist : {
 				files : {
-					'<%= distPath %>/bundle.min.js' : [ '<%= browserify.dist.dest %>' ]
+					"<%= distPathJavascript %>/bundle.min.js" : [ "<%= browserify.dist.dest %>" ]
 				}
 			}
 		},
 		
 		concat : {
 			options : {
-				separator : '\n'
+				separator : "\n"
 			},
 			dist : {
-				src : [ 'src/stylesheets/bootstrap.min.css', 'src/stylesheets/bootstrap-theme.min.css', 'src/stylesheets/style.min.css' ],
-				dest : 'public/stylesheets/bundle.min.css'
+				src : [ "<%= srcPathCss %>/bootstrap.min.css", "<%= srcPathCss %>/bootstrap-theme.min.css", "<%= srcPathCss %>/style.min.css" ],
+				dest : "<%= distPathCss %>/bundle.min.css"
 			}
 		},
 		
-		clean: ['src/stylesheets/style.min.css']
+		clean: ["<%= distPathLess %>/style.min.css"]
 	});
 
-	grunt.loadNpmTasks('grunt-contrib-concat');
-	grunt.loadNpmTasks('grunt-contrib-uglify');
-	grunt.loadNpmTasks('grunt-contrib-watch');
-	grunt.loadNpmTasks('grunt-contrib-less');
-	grunt.loadNpmTasks('grunt-autoprefixer');
-	grunt.loadNpmTasks('grunt-contrib-clean');
-	grunt.loadNpmTasks('grunt-browserify');
+	grunt.loadNpmTasks("grunt-contrib-concat");
+	grunt.loadNpmTasks("grunt-contrib-uglify");
+	grunt.loadNpmTasks("grunt-contrib-watch");
+	grunt.loadNpmTasks("grunt-contrib-less");
+	grunt.loadNpmTasks("grunt-autoprefixer");
+	grunt.loadNpmTasks("grunt-contrib-clean");
+	grunt.loadNpmTasks("grunt-browserify");
 
-	grunt.registerTask('default', ['browserify', 'uglify', 'less', 'autoprefixer', 'concat', 'clean' ]);
+	grunt.registerTask("default", ["browserify", "uglify", "less", "autoprefixer", "concat", "clean" ]);
 };
