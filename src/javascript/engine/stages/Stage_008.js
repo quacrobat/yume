@@ -40,7 +40,7 @@ Stage.prototype.setup = function(){
 	groundDown.rotation.x = -0.5 * Math.PI;
 	groundDown.updateMatrix();
 	groundDown.receiveShadow = true;
-	this.controls.addGround(groundDown);
+	this.world.addGround(groundDown);
 	this.scene.add(groundDown);
 	
 	// add ground up	
@@ -50,7 +50,7 @@ Stage.prototype.setup = function(){
 	groundUp.rotation.x = -0.5 * Math.PI;
 	groundUp.updateMatrix();
 	groundUp.receiveShadow = true;
-	this.controls.addGround(groundUp);
+	this.world.addGround(groundUp);
 	this.scene.add(groundUp);
 	
 	// color faces
@@ -101,7 +101,7 @@ Stage.prototype.setup = function(){
 	ramp.rotation.x = 1.378 * Math.PI;
 	ramp.updateMatrix();
 	ramp.visible = false;
-	this.controls.addGround(ramp);
+	this.world.addGround(ramp);
 	this.scene.add(ramp);
 	
 	// add trigger for scene change

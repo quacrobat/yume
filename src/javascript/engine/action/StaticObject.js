@@ -34,22 +34,22 @@ function StaticObject( object, collisionType ) {
 			writable: true
 		},
 		// bounding volumes
-		_boundingSphere: {
+		boundingSphere: {
 			value: new THREE.Sphere(),
 			configurable: false,
-			enumerable: false,
+			enumerable: true,
 			writable: true
 		},
-		_aabb: {
+		aabb: {
 			value: new THREE.Box3(),
 			configurable: false,
-			enumerable: false,
+			enumerable: true,
 			writable: true
 		},
-		_obb: {
+		obb: {
 			value: new OBB(),
 			configurable: false,
-			enumerable: false,
+			enumerable: true,
 			writable: true
 		},
 	});
@@ -58,6 +58,17 @@ function StaticObject( object, collisionType ) {
 	this.mesh.geometry.computeBoundingBox();
 	this.mesh.geometry.computeBoundingSphere();
 }
+
+/**
+ * Updates the static object.
+ */
+StaticObject.prototype.update = function(){
+	
+	// always update bounding sphere
+	// other bounding volumes are only calculated if required
+	this.boundingSphere.copy( this.mesh.geometry.boundingSphere );
+	this.boundingSphere.applyMatrix4( this.mesh.matrixWorld );
+};
 
 /**
  * This method detects an intersection between the given bounding box
@@ -81,11 +92,11 @@ StaticObject.prototype.isIntersection = ( function(){
 			case StaticObject.COLLISIONTYPES.AABB: {
 							
 				// apply transformation
-				this._aabb.copy( this.mesh.geometry.boundingBox );
-				this._aabb.applyMatrix4( this.mesh.matrixWorld );
+				this.aabb.copy( this.mesh.geometry.boundingBox );
+				this.aabb.applyMatrix4( this.mesh.matrixWorld );
 				
 				// do intersection test
-				isIntersection = this._aabb.isIntersectionBox( boundingBox );
+				isIntersection = this.aabb.isIntersectionBox( boundingBox );
 				
 				break;
 			}
@@ -93,10 +104,10 @@ StaticObject.prototype.isIntersection = ( function(){
 			case StaticObject.COLLISIONTYPES.OBB: {
 				
 				// calculate OBB
-				this._obb.setFromObject( this.mesh );
+				this.obb.setFromObject( this.mesh );
 				
 				// do intersection test
-				isIntersection =  this._obb.isIntersectionAABB( boundingBox );
+				isIntersection =  this.obb.isIntersectionAABB( boundingBox );
 				
 				break;
 			}

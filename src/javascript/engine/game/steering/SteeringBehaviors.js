@@ -9,7 +9,7 @@
 
 var THREE = require("three");
 
-var actionManager = require("../../action/ActionManager");
+var world = require("../../core/World");
 var Path = require("./Path");
 var logger = require("../../etc/Logger");
 
@@ -172,13 +172,6 @@ function SteeringBehaviors( vehicle ){
 			enumerable: false,
 			writable: true
 		},
-		// array with obstacles
-		_obstacles: {
-			value: [],
-			configurable: false,
-			enumerable: false,
-			writable: true
-		},
 		// array with "feelers" for wall avoidance 
 		_feelers: {
 			value: [],
@@ -188,13 +181,6 @@ function SteeringBehaviors( vehicle ){
 		},
 		// array with neighbors for flocking 
 		_neighbors: {
-			value: [],
-			configurable: false,
-			enumerable: false,
-			writable: false
-		},
-		// array with walls for wall avoidance 
-		_walls: {
 			value: [],
 			configurable: false,
 			enumerable: false,
@@ -497,28 +483,11 @@ SteeringBehaviors.prototype._prepareCalculation = ( function(){
 			this.targetAgent2.updateMatrixWorld();
 		}
 		
-		// prepare obstacles for specific steering behaviors
-		if( this._isOn( SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE ) ||
-			this._isOn( SteeringBehaviors.TYPES.HIDE ) ){
-		
-			// merge all interactive and static objects into one array
-			this._obstacles = actionManager.interactiveObjects.concat( actionManager.staticObjects );
-		
-			// compute for each obstacle a bounding sphere
-			for( index = 0; index < this._obstacles.length ; index++ ){
-				
-				obstacle = this._obstacles[index];
-				
-				obstacle._boundingSphere.copy( obstacle.mesh.geometry.boundingSphere );
-				obstacle._boundingSphere.applyMatrix4( obstacle.mesh.matrixWorld );
-			}
-		}
-		
+		// calculate neighbors if one of the following group behaviors is active
 		if( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) ||
 			this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) ||
 			this._isOn( SteeringBehaviors.TYPES.COHESION ) ){
-						
-			// calculate neighbors
+
 			this._calculateNeighbors();
 		}
 	};
@@ -966,9 +935,10 @@ SteeringBehaviors.prototype._hide = ( function(){
 	var hidingSpot = new THREE.Vector3();
 	var bestHidingSpot = new THREE.Vector3();
 	
-	var boundingSphere;
 	var distanceSq;
 	var closestDistanceSq;
+	var numberOfObstacle;
+	var obstacle;
 	var index;
 	
 	return function( hunter ){
@@ -976,13 +946,16 @@ SteeringBehaviors.prototype._hide = ( function(){
 		// this will be used to track the distance to the closest hiding spot
 		closestDistanceSq = Infinity;
 		
-		for( index = 0; index < this._obstacles.length; index++ ){
+		// get number of obstacles in the world
+		numberOfObstacle = world.getNumberOfObstacles();
+		
+		for( index = 0; index < numberOfObstacle; index++ ){
 			
-			// get bounding volume of obstacle
-			boundingSphere = this._obstacles[ index ]._boundingSphere;
-			
+			// retrieve obstacle
+			obstacle = world.getObstacle( index );
+					
 			// calculate the position of the hiding spot for this obstacle
-			this._getHidingPosition( boundingSphere.center, boundingSphere.radius, hunter.position, hidingSpot );
+			this._getHidingPosition( obstacle.boundingSphere.center, obstacle.boundingSphere.radius, hunter.position, hidingSpot );
 			
 			// work in distance-squared space to find the closest hiding spot to the agent
 			distanceSq = hidingSpot.distanceToSquared( this.vehicle.position );
@@ -1077,6 +1050,7 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function(){
 	var localPositionOfClosestObstacle = new THREE.Vector3();
 	var intersectionPoint = new THREE.Vector3();
 	
+	var numberOfObstacle;
 	var detectionBoxLength;
 	var closestObstacle;
 	var distanceToClosestObstacle;
@@ -1113,12 +1087,16 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function(){
 		// this matrix will transform points to the local space of the vehicle
 		inverseMatrix.getInverse( this.vehicle.matrixWorld );
 		
-		for( index = 0; index < this._obstacles.length ; index++ ){
+		// get number of obstacles in the world
+		numberOfObstacle = world.getNumberOfObstacles();
+		
+		for( index = 0; index < numberOfObstacle; index++ ){
 			
-			obstacle = this._obstacles[index];
+			// retrieve obstacle
+			obstacle = world.getObstacle( index );
 			
 			// calculate this obstacle's position in local space
-			localPositionOfObstacle.copy( obstacle._boundingSphere.center ).applyMatrix4( inverseMatrix );
+			localPositionOfObstacle.copy( obstacle.boundingSphere.center ).applyMatrix4( inverseMatrix );
 			
 			// if the local position has a positive z value then it must lay
 		    // behind the agent. besides the absolute z value must be smaller than
@@ -1128,7 +1106,7 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function(){
 				// if the distance from the x axis to the object's position is less
 		        // than its radius + half the width of the detection box then there
 		        // is a potential intersection.
-				expandedRadius = obstacle._boundingSphere.radius + vehicleSize.x * 0.5;
+				expandedRadius = obstacle.boundingSphere.radius + vehicleSize.x * 0.5;
 				
 				// if the distance from the x axis to the object's position is less
 		        // than its radius + half the width/height of the detection box then there
@@ -1165,10 +1143,10 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function(){
 			multiplier = 1 + ( detectionBoxLength - localPositionOfClosestObstacle.z ) / detectionBoxLength;
 			
 			//calculate the lateral force
-			force.x = ( closestObstacle._boundingSphere.radius - localPositionOfClosestObstacle.x ) * multiplier;
+			force.x = ( closestObstacle.boundingSphere.radius - localPositionOfClosestObstacle.x ) * multiplier;
 			
 			// apply a braking force proportional to the obstacles distance from the vehicle
-			force.z = ( closestObstacle._boundingSphere.radius - localPositionOfClosestObstacle.z ) * brakingWeight;
+			force.z = ( closestObstacle.boundingSphere.radius - localPositionOfClosestObstacle.z ) * brakingWeight;
 			
 			// finally, convert the steering vector from local to world space
 			force.transformDirection( this.vehicle.matrixWorld );
@@ -1220,12 +1198,12 @@ SteeringBehaviors.prototype._wallAvoidance = ( function(){
 		for( indexFeeler = 0; indexFeeler < this._feelers.length ; indexFeeler++ ){
 			
 			// run through each wall checking for any intersection points
-			for( indexWall = 0; indexWall < this._walls.length ; indexWall++ ){
+			for( indexWall = 0; indexWall < world.walls.length ; indexWall++ ){
 				
 				feeler = this._feelers[ indexFeeler ];
 				
 				// do intersection test
-				feeler.intersectPlane( this._walls[ indexWall ], intersectionPoint );
+				feeler.intersectPlane( world.walls[ indexWall ], intersectionPoint );
 				
 				// calculate distance from origin to intersection point
 				distance = feeler.origin.distanceTo( intersectionPoint );
@@ -1236,7 +1214,7 @@ SteeringBehaviors.prototype._wallAvoidance = ( function(){
 					
 					distanceToClosestWall = distance;
 					
-					closestWall = this._walls[ indexWall ];
+					closestWall = world.walls[ indexWall ];
 					
 					closestPoint = intersectionPoint;
 					

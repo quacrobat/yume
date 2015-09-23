@@ -40,7 +40,7 @@ Stage.prototype.setup = function(){
 	ground.rotation.x = -0.5 * Math.PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
-	this.controls.addGround(ground);
+	this.world.addGround(ground);
 	this.scene.add(ground);
 	
 	// color faces

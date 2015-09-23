@@ -14,6 +14,7 @@ var THREE = require("three");
 
 var scene = require("../core/Scene");
 var camera = require("../core/Camera");
+var world = require("../core/World");
 var actionManager = require("../action/ActionManager");
 var audioManager = require("../audio/AudioManager");
 var userInterfaceManager = require("../ui/UserInterfaceManager");
@@ -40,16 +41,6 @@ function FirstPersonControls(){
 		},
 		_pitchObject: {
 			value: new THREE.Object3D(),
-			configurable: false,
-			enumerable: false,
-			writable: false
-		}
-	});
-	
-	// ground array
-	Object.defineProperties(this, {
-		_grounds: {
-			value: [],
 			configurable: false,
 			enumerable: false,
 			writable: false
@@ -309,24 +300,6 @@ FirstPersonControls.prototype.setRotation = function(rotation) {
 FirstPersonControls.prototype.getRotation = function() {
 	
 	return new THREE.Euler(this._pitchObject.rotation.x, this._yawObject.rotation.y, 0);
-};
-
-/**
- * Adds a ground object to the internal grounds array.
- * 
- * @param {THREE.Mesh} object - The ground to add.
- */
-FirstPersonControls.prototype.addGround = function(object) {
-	
-	this._grounds.push(object);
-};
-
-/**
- * Removes all ground objects from the internal array.
- */
-FirstPersonControls.prototype.removeGrounds = function() {
-	
-	this._grounds.length = 0;
 };
 
 /**
@@ -646,7 +619,7 @@ FirstPersonControls.prototype._calculateStrafeVelocity = (function() {
  * 
  * @param {number} distance - The distance between yawObject and ground.
  */
-FirstPersonControls.prototype._calculateHeight = function(distance) {
+FirstPersonControls.prototype._calculateHeight = function( distance ) {
 	
 	this._yawObject.position.y += ( this._height - distance );
 };
@@ -772,11 +745,12 @@ FirstPersonControls.prototype._checkAndProcessTrigger = (function() {
  * 
  * @returns {boolean} - Is there a collision after the latest movement?
  */
-FirstPersonControls.prototype._isCollisionHandlingRequired = (function() {
+FirstPersonControls.prototype._isCollisionHandlingRequired = ( function() {
 	
-	var objects = [];
 	var intersects = [];
-	var direction = new THREE.Vector3(0, -1, 0);
+	var direction = new THREE.Vector3( 0, -1, 0 );
+	var numberOfObstacle;
+	var obstacle;
 	var index;
 	
 	var boundingBox = new THREE.Box3();	// mathematical representation of the player body
@@ -785,58 +759,71 @@ FirstPersonControls.prototype._isCollisionHandlingRequired = (function() {
 	
 	return function(){
 		
-		if(this._grounds.length !== 0){
+		if( world.grounds.length !== 0 ){
 						
-			this._rayCaster.set(this._yawObject.position, direction);
+			this._rayCaster.set( this._yawObject.position, direction );
 			this._rayCaster.far = FirstPersonControls.DEFAULT.HEIGHT + 1;
 			
 			// first, check grounds
-			intersects = this._rayCaster.intersectObjects(this._grounds);
+			intersects = this._rayCaster.intersectObjects( world.grounds );
 			
-			if (intersects.length > 0){
+			// if there is an intersection, the player's position is inside the level boundaries
+			// now check intersections between the player and obstacle objects
+			if ( intersects.length > 0 ){
+				
+				// before doing the intersection test with action objects
+				// update the player's bounding volume (AABB)
 				
 				// adjust height
-				this._calculateHeight(intersects[0].distance);
+				this._calculateHeight( intersects[ 0 ].distance );
+
+				// calculate center of the player
+				center.copy( this._yawObject.position );
+				center.y -= this._height * 0.5;
 				
-				// clear array
-				objects = [];
+				// calculate size of the player
+				size.set( 4, this._height, 4 );
 				
-				// concat arrays
-				objects = actionManager.interactiveObjects.concat(actionManager.staticObjects);
+				// create bounding box
+				boundingBox.setFromCenterAndSize( center, size );
 				
-				// compute center of player
-				center.copy(this._yawObject.position);
-				center.y -= (this._height * 0.5);
+				// get number of obstacles in the world
+				numberOfObstacle = world.getNumberOfObstacles();
 				
-				// set size of BB
-				size.set(4, this._height, 4);
-				
-				// compute BB, which represents the body of the player
-				boundingBox.setFromCenterAndSize(center, size);
-				
-				for(index = 0; index < objects.length; index++){
+				// check obstacles
+				for( index = 0; index < numberOfObstacle; index++ ){
+					
+					// retrieve obstacle
+					obstacle = world.getObstacle( index );
 					
 					// regard only visible objects
-					if(objects[index].mesh.visible === true){
+					if( obstacle.mesh.visible === true ){
 						
 						// do collision detection
-						if(objects[index].isIntersection(boundingBox) === true){
-							// Yes, we are inside an visible object and inside our level
+						if( obstacle.isIntersection( boundingBox ) === true ){
+							
+							// true, because there is a collision with an obstacle
 							return true;
 						}
-					}
+						
+					}	
 					
-				}	
-				// No, we are only in our level
+				}
+				
+				// false, because there is no collision
 				return false;
 				
 			}else{
-				// Yes, because we are outside the level
+				
+				// true, because the player is not over a ground
 				return true;
 			}
+			
 		}
+		
 	};
-}());
+	
+} () );
 
 /**
  * Handles the "crouch" command. Crouching decreases the

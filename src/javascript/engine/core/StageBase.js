@@ -13,6 +13,7 @@ var PubSub = require("pubsub-js");
 var scene = require("./Scene");
 var renderer = require("./Renderer");
 var camera = require("./Camera");
+var world = require("./World");
 var controls = require("../controls/FirstPersonControls");
 var actionManager = require("../action/ActionManager");
 var audioManager = require("../audio/AudioManager");
@@ -56,6 +57,12 @@ function StageBase(stageId){
 		},
 		camera: {
 			value: camera,
+			configurable: false,
+			enumerable: true,
+			writable: false
+		},
+		world: {
+			value: world,
 			configurable: false,
 			enumerable: true,
 			writable: false
@@ -184,13 +191,14 @@ StageBase.prototype.destroy = function(){
 	
 	this.entityManager.removeEntities();
 	
-	this.controls.removeGrounds();
-	
 	this.performanceManager.removeLODs();
 	
 	this.performanceManager.removeImpostors();
 		
 	this.textManager.removeTexts();
+	
+	// clear world
+	this.world.clear();
 	
 	// clear scene
 	this.scene.clear();
@@ -209,15 +217,18 @@ StageBase.prototype._render = function(){
 	
 	// get delta time value
 	this._delta = this.timeManager.getDelta();
+		
+	// update managers
+	this.actionManager.update();
+	this.animationManager.update( this._delta );
+	this.performanceManager.update();
+	this.userInterfaceManager.update();
+	
+	// finally update entity manager
+	this.entityManager.update( this._delta );
 	
 	// update controls
 	this.controls.update( this._delta );
-	
-	// update managers
-	this.animationManager.update( this._delta );
-	this.entityManager.update( this._delta );
-	this.performanceManager.update();
-	this.userInterfaceManager.update();
 	
 	// render frame
 	this.renderer.render( this.scene, this.camera );

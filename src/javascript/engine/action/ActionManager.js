@@ -61,6 +61,30 @@ function ActionManager() {
 }
 
 /**
+ * Updates the action manager and all action objects.
+ */
+ActionManager.prototype.update = ( function(){
+	
+	var index;
+	
+	return function(){
+		
+		// update interactive objects
+		for( index = 0; index < this.interactiveObjects.length; index++ ){
+			
+			this.interactiveObjects[ index ].update();
+		}
+		
+		// update static objects
+		for( index = 0; index < this.staticObjects.length; index++ ){
+					
+				this.staticObjects[ index ].update();
+			}
+		};
+
+} () );
+
+/**
  * Creates a new interactive object and stores it to the respective internal array.
  * 
  * @param {THREE.Mesh} mesh - The mesh object.
