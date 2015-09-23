@@ -38376,7 +38376,7 @@ FirstPersonControls.prototype.getRotation = function() {
 };
 
 /**
- * Gets the direction of the camera.
+ * Gets the direction of the controls.
  * 
  * @returns {THREE.Vector3} The direction vector.
  */
@@ -39303,7 +39303,6 @@ FirstPersonControls.prototype._onKeyUp = function( event ) {
 				// shift
 				if ( self._isCrouch === false )
 				{
-
 					self._setRun( false );
 				}
 		}
@@ -41817,7 +41816,6 @@ Logger.prototype.log = function() {
 	// log messages only in dev mode
 	if ( this._isDevModeActive === true )
 	{
-
 		console.log.apply( console, arguments );
 	}
 };
@@ -41853,7 +41851,7 @@ Logger.prototype.assert = function() {
  */
 Logger.prototype.logSystemInfo = function( renderer ) {
 
-	console.group( "INFO: Utils: World Information, %s", new Date().toTimeString() );
+	console.group( "INFO: Logger: World Information, %s", new Date().toTimeString() );
 
 	console.group( "Memory" );
 	console.log( "%i Geometries", renderer.info.memory.geometries );
@@ -44304,36 +44302,28 @@ module.exports = Vehicle;
  * @constructor
  * 
  */
-function State() {
-
-}
+function State() { }
 
 /**
  * This executes when the state is entered.
  * 
  * @param {GameEntity} entity - A reference to the entity.
  */
-State.prototype.enter = function( entity ) {
-
-};
+State.prototype.enter = function( entity ) { };
 
 /**
  * This is called by the FSM's update function each update step.
  * 
  * @param {GameEntity} entity - A reference to the entity.
  */
-State.prototype.execute = function( entity ) {
-
-};
+State.prototype.execute = function( entity ) { };
 
 /**
  * This executes when the state is exited.
  * 
  * @param {GameEntity} entity - A reference to the entity.
  */
-State.prototype.exit = function( entity ) {
-
-};
+State.prototype.exit = function( entity ) { };
 
 /**
  * This executes if the agent receives a message from the messaging system.
@@ -44344,10 +44334,7 @@ State.prototype.exit = function( entity ) {
  * 
  * @returns {boolean} Is the message handled successfully by a state?
  */
-State.prototype.onMessage = function( entity, message, data ) {
-
-	return false;
-};
+State.prototype.onMessage = function( entity, message, data ) { return false; };
 
 module.exports = State;
 },{}],47:[function(require,module,exports){
@@ -45663,7 +45650,7 @@ SteeringBehaviors.prototype._evade = ( function() {
 		// calculate displacement vector
 		toPursuer.subVectors( pursuer.position, this.vehicle.position );
 
-		// evade only when pursuers are inside a threat range.
+		// evade only when pursuers are inside a threat range
 		if ( toPursuer.lengthSq() > ( this.panicDistance * this.panicDistance ) )
 		{
 			return new THREE.Vector3();
@@ -46210,8 +46197,7 @@ SteeringBehaviors.prototype._cohesion = ( function() {
 
 	var centerOfMass = new THREE.Vector3(); // center of mass of all the agents
 
-	var neighborCount; // used to count the number of vehicles in the
-						// neighborhood
+	var neighborCount; // used to count the number of vehicles in the neighborhood
 	var index;
 	var neighbor;
 
@@ -46718,7 +46704,6 @@ script = function() {
 								message : "ERROR: NetworkManager: The connection to the server has not yet been established. Please try againg."
 							}
 						} );
-
 					}
 					else if ( ws.readyState === WebSocket.CLOSING && ws.readyState === WebSocket.CLOSED )
 					{

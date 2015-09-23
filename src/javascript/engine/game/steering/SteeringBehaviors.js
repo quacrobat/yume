@@ -916,7 +916,7 @@ SteeringBehaviors.prototype._evade = ( function() {
 		// calculate displacement vector
 		toPursuer.subVectors( pursuer.position, this.vehicle.position );
 
-		// evade only when pursuers are inside a threat range.
+		// evade only when pursuers are inside a threat range
 		if ( toPursuer.lengthSq() > ( this.panicDistance * this.panicDistance ) )
 		{
 			return new THREE.Vector3();
@@ -1463,8 +1463,7 @@ SteeringBehaviors.prototype._cohesion = ( function() {
 
 	var centerOfMass = new THREE.Vector3(); // center of mass of all the agents
 
-	var neighborCount; // used to count the number of vehicles in the
-						// neighborhood
+	var neighborCount; // used to count the number of vehicles in the neighborhood
 	var index;
 	var neighbor;
 

@@ -217,7 +217,6 @@ script = function() {
 								message : "ERROR: NetworkManager: The connection to the server has not yet been established. Please try againg."
 							}
 						} );
-
 					}
 					else if ( ws.readyState === WebSocket.CLOSING && ws.readyState === WebSocket.CLOSED )
 					{

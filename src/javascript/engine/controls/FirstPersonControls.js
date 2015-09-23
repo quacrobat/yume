@@ -301,7 +301,7 @@ FirstPersonControls.prototype.getRotation = function() {
 };
 
 /**
- * Gets the direction of the camera.
+ * Gets the direction of the controls.
  * 
  * @returns {THREE.Vector3} The direction vector.
  */
@@ -1228,7 +1228,6 @@ FirstPersonControls.prototype._onKeyUp = function( event ) {
 				// shift
 				if ( self._isCrouch === false )
 				{
-
 					self._setRun( false );
 				}
 		}

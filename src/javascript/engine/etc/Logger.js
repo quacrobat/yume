@@ -41,7 +41,6 @@ Logger.prototype.log = function() {
 	// log messages only in dev mode
 	if ( this._isDevModeActive === true )
 	{
-
 		console.log.apply( console, arguments );
 	}
 };
@@ -77,7 +76,7 @@ Logger.prototype.assert = function() {
  */
 Logger.prototype.logSystemInfo = function( renderer ) {
 
-	console.group( "INFO: Utils: World Information, %s", new Date().toTimeString() );
+	console.group( "INFO: Logger: World Information, %s", new Date().toTimeString() );
 
 	console.group( "Memory" );
 	console.log( "%i Geometries", renderer.info.memory.geometries );
