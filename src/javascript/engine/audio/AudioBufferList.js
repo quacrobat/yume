@@ -6,8 +6,8 @@
  */
 "use strict";
 
-var PubSub = require("pubsub-js");
-var utils = require("../etc/Utils");
+var PubSub = require( "pubsub-js" );
+var utils = require( "../etc/Utils" );
 
 /**
  * Creates an audiobuffer-list.
@@ -16,118 +16,131 @@ var utils = require("../etc/Utils");
  * 
  * @param {object} context - The central Web Audio context.
  * @param {object} audioList - An array with name of audiofiles.
- * @param {function} onLoadCallback - This callback is executed when all audiofiles are loaded.
+ * @param {function} onLoadCallback - This callback is executed when all
+ * audiofiles are loaded.
  */
-function AudioBufferList(context, audioList, onLoadCallback) {
+function AudioBufferList( context, audioList, onLoadCallback ) {
 
-	Object.defineProperties(this, {
-		context: {
-			value: context,
-			configurable: false,
-			enumerable: true,
-			writable: false
+	Object.defineProperties( this, {
+		context : {
+			value : context,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		audioList: {
-			value: audioList,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		audioList : {
+			value : audioList,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		bufferList: {
-			value: [],
-			configurable: false,
-			enumerable: true,
-			writable: true
+		bufferList : {
+			value : [],
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		_onload: {
-			value: onLoadCallback,
-			configurable: false,
-			enumerable: false,
-			writable: false
+		_onload : {
+			value : onLoadCallback,
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		_loadCount: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_loadCount : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
+	} );
 }
 
 /**
- * This method iterates over the audio-array and loads each entry via a separate method.
+ * This method iterates over the audio-array and loads each entry via a separate
+ * method.
  */
-AudioBufferList.prototype.load = function(){
-	
-	for (var i = 0; i < this.audioList.length; i++){
-		this.loadBuffer(this.audioList[i], i);
+AudioBufferList.prototype.load = function() {
+
+	for ( var i = 0; i < this.audioList.length; i++ )
+	{
+		this.loadBuffer( this.audioList[ i ], i );
 	}
 };
 
 /**
- * This method loads a single audio-file and decodes it to a buffer object.
- * When all audiofiles form the corresponding array are loaded, a custom
- * callback function will be executed.
+ * This method loads a single audio-file and decodes it to a buffer object. When
+ * all audiofiles form the corresponding array are loaded, a custom callback
+ * function will be executed.
  * 
  * @param {string} file - The name of the audio file.
  * @param {number} index - The array-index of the audio file.
  */
-AudioBufferList.prototype.loadBuffer = function(file, index){
-	
+AudioBufferList.prototype.loadBuffer = function( file, index ) {
+
 	var self = this;
-	
+
 	// build url
 	var url = utils.getCDNHost() + "assets/audio/dynamic/" + file + ".mp3";
-	
+
 	// add nocache, if necessary
-	if(utils.isDevelopmentModeActive() === true){
+	if ( utils.isDevelopmentModeActive() === true )
+	{
 		url = url + "?" + new Date().getTime();
 	}
-	
+
 	// create XMLHttpRequest object
-	var xhr = new global.XMLHttpRequest(); 
-		
-	xhr.onreadystatechange = function() { 
-		
-		if (xhr.readyState === xhr.DONE) {
-			
-			if (xhr.status === 200) {
-				
+	var xhr = new global.XMLHttpRequest();
+
+	xhr.onreadystatechange = function() {
+
+		if ( xhr.readyState === xhr.DONE )
+		{
+			if ( xhr.status === 200 )
+			{
 				// decode audio data
-				self.context.decodeAudioData( xhr.response, function(buffer) { 
-					if (!buffer) { 
-						throw "ERROR: AudioBufferList: Unable to decode audio file: " + url;  
-					} 
+				self.context.decodeAudioData( xhr.response, function( buffer ) {
+
+					if ( !buffer )
+					{
+						throw "ERROR: AudioBufferList: Unable to decode audio file: " + url;
+					}
 					// add buffer to bufferlist
-					self.bufferList[index] = buffer;
-					
+					self.bufferList[ index ] = buffer;
+
 					// publish message to inform about status
-					PubSub.publish("loading.complete.audio", {url: url});
-					
+					PubSub.publish( "loading.complete.audio", {
+						url : url
+					} );
+
 					// increase internal counter and compare to length of
 					// the audio list
-					if (++self._loadCount === self.audioList.length){
-						
-						self._onload(self.bufferList);
-					} 
-				}, function(){
-					throw "ERROR: AudioBufferList: Unable to decode audio file " + url;  
-				}); 
-				
-			} else {
+					if ( ++self._loadCount === self.audioList.length )
+					{
+						self._onload( self.bufferList );
+					}
+				}, function() {
+
+					throw "ERROR: AudioBufferList: Unable to decode audio file " + url;
+				} );
+
+			}
+			else
+			{
 				throw "ERROR: AudioBufferList: Could not load '" + url + "' (Status: " + xhr.status + ").";
 			}
 		}
 	};
-	
+
 	// send request
-	xhr.open("GET", url, true);
+	xhr.open( "GET", url, true );
 	xhr.responseType = "arraybuffer";
 	xhr.withCredentials = true;
 	xhr.send();
-	
+
 	// publish message to inform about status
-	PubSub.publish("loading.start.audio", {url: url});
+	PubSub.publish( "loading.start.audio", {
+		url : url
+	} );
 };
 
 module.exports = AudioBufferList;

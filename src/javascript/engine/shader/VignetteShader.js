@@ -10,10 +10,10 @@ module.exports  = {
 
 	uniforms: {
 
-		"tDiffuse": {type: "t", value: null},   
-		"radius":   {type: "f", value: 0.75},	// radius of the vignette, where 0.5 results in a circle fitting the screen, between 0.0 and 1.0
-		"strength": {type: "f", value: 0.8},  	// strength of the vignette, between 0.0 and 1.0
-		"softness": {type: "f", value: 0.45}   	// softness of the vignette, between 0.0 and 1.0
+		"tDiffuse": { type: "t", value: null },   
+		"radius":   { type: "f", value: 0.75 },	// radius of the vignette, where 0.5 results in a circle fitting the screen, between 0.0 and 1.0
+		"strength": { type: "f", value: 0.8 },  	// strength of the vignette, between 0.0 and 1.0
+		"softness": { type: "f", value: 0.45 }   	// softness of the vignette, between 0.0 and 1.0
 		
 	},
 

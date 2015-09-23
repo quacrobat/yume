@@ -12,10 +12,10 @@ var THREE = require("three");
 
 module.exports  = {
 		
-	uniforms: THREE.UniformsUtils.merge([
+	uniforms: THREE.UniformsUtils.merge( [
 	                                     THREE.UniformsLib.lights,
-	                                     {"fTime": {type: "f", value: 0}}
-	                                     ]),
+	                                     { "fTime": { type: "f", value: 0 } }
+	                                     ] ),
 	
 	lights: true, // use lights of scene in this shader
 

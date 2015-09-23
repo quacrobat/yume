@@ -10,7 +10,7 @@ module.exports  = {
 
 	uniforms: {
 
-		"tDiffuse": {type: "t", value: null}
+		"tDiffuse": { type: "t", value: null }
 
 	},
 

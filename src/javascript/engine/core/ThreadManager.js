@@ -1,35 +1,36 @@
 /**
- * @file This prototype contains the entire logic 
- * for thread-based functionality.
+ * @file This prototype contains the entire logic for thread-based
+ * functionality.
  * 
  * @author Human Interactive
  */
 "use strict";
 
-var Thread = require("./Thread");
+var Thread = require( "./Thread" );
 /**
  * Creates the network manager.
  * 
  * @constructor
  * 
  */
-function ThreadManager(){
-	
-	Object.defineProperties(this, {
-		_threads: {
-			value: [],
-			configurable: false,
-			enumerable: false,
-			writable: false
+function ThreadManager() {
+
+	Object.defineProperties( this, {
+		_threads : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
 		}
-	});
-	
+	} );
+
 	var self = this;
-	
+
 	// terminate all threads when refreshing/ leaving the application
-	global.window.addEventListener("beforeunload", function(){
+	global.window.addEventListener( "beforeunload", function() {
+
 		self.terminateAllThreads();
-	});
+	} );
 }
 
 /**
@@ -40,15 +41,15 @@ function ThreadManager(){
  * 
  * @returns {Thread} The new thread.
  */
-ThreadManager.prototype.createThread = function(id, script){
-	
+ThreadManager.prototype.createThread = function( id, script ) {
+
 	// get URL of script
-	var scriptURL = this._getScriptURL(script);
-	
+	var scriptURL = this._getScriptURL( script );
+
 	// create thread and add to internal array
-	var thread = new Thread(id, scriptURL);
-	this._threads.push(thread);
-	
+	var thread = new Thread( id, scriptURL );
+	this._threads.push( thread );
+
 	return thread;
 };
 
@@ -59,20 +60,25 @@ ThreadManager.prototype.createThread = function(id, script){
  * 
  * @returns {Thread} The thread.
  */
-ThreadManager.prototype.get = function(id) {
+ThreadManager.prototype.get = function( id ) {
 
 	var thread = null;
-	
-	for( var index = 0; index < this._threads.length; index++){
-		if(this._threads[index].id === id){
-			thread =  this._threads[index];
+
+	for ( var index = 0; index < this._threads.length; index++ )
+	{
+		if ( this._threads[ index ].id === id )
+		{
+			thread = this._threads[ index ];
 			break;
 		}
 	}
-	
-	if(thread === null){
+
+	if ( thread === null )
+	{
 		throw "ERROR: ThreadManager: Thread with ID " + id + " not existing.";
-	}else{
+	}
+	else
+	{
 		return thread;
 	}
 };
@@ -83,15 +89,15 @@ ThreadManager.prototype.get = function(id) {
  * @param {Thread} thread - The thread to terminate.
  * 
  */
-ThreadManager.prototype.terminateThread = function(thread){
-	
+ThreadManager.prototype.terminateThread = function( thread ) {
+
 	// remove form internal array
-	var index = this._threads.indexOf(thread);
-	this._threads.splice(index, 1);
-	
+	var index = this._threads.indexOf( thread );
+	this._threads.splice( index, 1 );
+
 	// release object URL
-	global.URL.revokeObjectURL(thread.scriptURL);
-	
+	global.URL.revokeObjectURL( thread.scriptURL );
+
 	// terminate thread
 	thread.terminate();
 };
@@ -99,34 +105,35 @@ ThreadManager.prototype.terminateThread = function(thread){
 /**
  * Terminates all threads.
  */
-ThreadManager.prototype.terminateAllThreads = function(){
-	
-	for(var index = 0; index < this._threads.length; index++){
-		
+ThreadManager.prototype.terminateAllThreads = function() {
+
+	for ( var index = 0; index < this._threads.length; index++ )
+	{
 		// release object URL
-		global.URL.revokeObjectURL(this._threads[index].scriptURL);
-		
+		global.URL.revokeObjectURL( this._threads[ index ].scriptURL );
+
 		// terminate thread
-		this._threads[index].terminate();
+		this._threads[ index ].terminate();
 	}
-	
+
 	// clear internal array
 	this._threads.length = 0;
 };
 
 /**
- * This method prepares the script, so it can run as a
- * separate thread. It creates a BLOB and provides a
- * object URL to generated content.
+ * This method prepares the script, so it can run as a separate thread. It
+ * creates a BLOB and provides a object URL to generated content.
  * 
  * @param {string} script - The script for the thread.
  * 
  * @returns {string} The URL of the serialized script.
  */
-ThreadManager.prototype._getScriptURL = function(script){
-	
-	var blob = new global.Blob(["(", script.toString(), ")()"], {type: "application/javascript"});
-	var url = global.URL.createObjectURL(blob);
+ThreadManager.prototype._getScriptURL = function( script ) {
+
+	var blob = new global.Blob( [ "(", script.toString(), ")()" ], {
+		type : "application/javascript"
+	} );
+	var url = global.URL.createObjectURL( blob );
 	return url;
 };
 

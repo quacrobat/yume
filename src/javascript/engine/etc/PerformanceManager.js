@@ -1,20 +1,20 @@
 /**
- * @file Interface for performance handling. This prototype is used in scenes
- * to create e.g. LOD instances.
+ * @file Interface for performance handling. This prototype is used in scenes to
+ * create e.g. LOD instances.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
-var LOD = require("./LOD");
-var Impostor = require("./Impostor");
+var LOD = require( "./LOD" );
+var Impostor = require( "./Impostor" );
 
-var camera = require("../core/Camera");
-var scene = require("../core/Scene");
-var renderer = require("../core/Renderer");
+var camera = require( "../core/Camera" );
+var scene = require( "../core/Scene" );
+var renderer = require( "../core/Renderer" );
 
 /**
  * Creates the performance manager.
@@ -23,48 +23,50 @@ var renderer = require("../core/Renderer");
  */
 function PerformanceManager() {
 
-	Object.defineProperties(this, {
-		_lods: {
+	Object.defineProperties( this, {
+		_lods : {
 			value : [],
-			configurable: false,
-			enumerable: false,
-			writable: false
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		_impostors: {
+		_impostors : {
 			value : [],
-			configurable: false,
-			enumerable: false,
-			writable: false
+			configurable : false,
+			enumerable : false,
+			writable : false
 		}
-	});
+	} );
 }
 
 /**
- * Creates a LOD instance with direct transitions and stores it to the internal array.
+ * Creates a LOD instance with direct transitions and stores it to the internal
+ * array.
  * 
  * @param {string} id - The id of the LOD instance.
  * 
  * @returns {LOD} The new LOD instance.
  */
-PerformanceManager.prototype.createDirectLOD = function(id) {
-	
-	var lod = new LOD(id, LOD.MODE.DIRECT, camera);
-	this.addLOD(lod);
+PerformanceManager.prototype.createDirectLOD = function( id ) {
+
+	var lod = new LOD( id, LOD.MODE.DIRECT, camera );
+	this.addLOD( lod );
 	return lod;
 };
 
 /**
- * Creates a LOD instance with smooth transitions and stores it to the internal array.
+ * Creates a LOD instance with smooth transitions and stores it to the internal
+ * array.
  * 
  * @param {string} id - The id of the LOD instance.
  * @param {number} threshold - The threshold where the blending is done.
  * 
  * @returns {LOD} The new LOD instance.
  */
-PerformanceManager.prototype.createSmoothLOD = function(id, threshold) {
-	
-	var lod = new LOD(id, LOD.MODE.SMOOTH, camera, threshold);
-	this.addLOD(lod);
+PerformanceManager.prototype.createSmoothLOD = function( id, threshold ) {
+
+	var lod = new LOD( id, LOD.MODE.SMOOTH, camera, threshold );
+	this.addLOD( lod );
 	return lod;
 };
 
@@ -77,10 +79,10 @@ PerformanceManager.prototype.createSmoothLOD = function(id, threshold) {
  * 
  * @returns {Impostor} The new impostor instance.
  */
-PerformanceManager.prototype.createImpostor = function(id, object, resolution) {
-	
-	var impostor = new Impostor(id, object, resolution);
-	this.addImpostor(impostor);
+PerformanceManager.prototype.createImpostor = function( id, object, resolution ) {
+
+	var impostor = new Impostor( id, object, resolution );
+	this.addImpostor( impostor );
 	return impostor;
 };
 
@@ -89,9 +91,9 @@ PerformanceManager.prototype.createImpostor = function(id, object, resolution) {
  * 
  * @param {LOD} lod - The LOD instance to be added.
  */
-PerformanceManager.prototype.addLOD = function(lod){
-	
-	this._lods.push(lod);
+PerformanceManager.prototype.addLOD = function( lod ) {
+
+	this._lods.push( lod );
 };
 
 /**
@@ -99,9 +101,9 @@ PerformanceManager.prototype.addLOD = function(lod){
  * 
  * @param {Impostor} impostor - The impostor instance to be added.
  */
-PerformanceManager.prototype.addImpostor = function(impostor){
-	
-	this._impostors.push(impostor);
+PerformanceManager.prototype.addImpostor = function( impostor ) {
+
+	this._impostors.push( impostor );
 };
 
 /**
@@ -109,10 +111,10 @@ PerformanceManager.prototype.addImpostor = function(impostor){
  * 
  * @param {LOD} lod - The LOD instance to be removed.
  */
-PerformanceManager.prototype.removeLOD = function(lod) {
+PerformanceManager.prototype.removeLOD = function( lod ) {
 
-	var index = this._lods.indexOf(lod);
-	this._lods.splice(index, 1);
+	var index = this._lods.indexOf( lod );
+	this._lods.splice( index, 1 );
 };
 
 /**
@@ -120,10 +122,10 @@ PerformanceManager.prototype.removeLOD = function(lod) {
  * 
  * @param {Impostor} impostor - The impostor instance to be removed.
  */
-PerformanceManager.prototype.removeImpostor = function(impostor) {
+PerformanceManager.prototype.removeImpostor = function( impostor ) {
 
-	var index = this._impostors.indexOf(impostor);
-	this._impostors.splice(index, 1);
+	var index = this._impostors.indexOf( impostor );
+	this._impostors.splice( index, 1 );
 };
 
 /**
@@ -149,20 +151,25 @@ PerformanceManager.prototype.removeImpostors = function() {
  * 
  * @returns {LOD} The LOD instance.
  */
-PerformanceManager.prototype.getLOD = function(id) {
+PerformanceManager.prototype.getLOD = function( id ) {
 
 	var lod = null;
-	
-	for( var index = 0; index < this._lods.length; index++){
-		if(this._lods[index].idLOD === id){
-			lod =  this._lods[index];
+
+	for ( var index = 0; index < this._lods.length; index++ )
+	{
+		if ( this._lods[ index ].idLOD === id )
+		{
+			lod = this._lods[ index ];
 			break;
 		}
 	}
-	
-	if(lod === null){
+
+	if ( lod === null )
+	{
 		throw "ERROR: PerformanceManager: LOD instance with ID " + id + " not existing.";
-	}else{
+	}
+	else
+	{
 		return lod;
 	}
 };
@@ -174,20 +181,25 @@ PerformanceManager.prototype.getLOD = function(id) {
  * 
  * @returns {Impostor} The impostor instance.
  */
-PerformanceManager.prototype.getImpostor = function(id) {
+PerformanceManager.prototype.getImpostor = function( id ) {
 
 	var impostor = null;
-	
-	for( var index = 0; index < this._impostors.length; index++){
-		if(this._impostors[index].idImpostor === id){
-			impostor =  this._impostors[index];
+
+	for ( var index = 0; index < this._impostors.length; index++ )
+	{
+		if ( this._impostors[ index ].idImpostor === id )
+		{
+			impostor = this._impostors[ index ];
 			break;
 		}
 	}
-	
-	if(impostor === null){
+
+	if ( impostor === null )
+	{
 		throw "ERROR: PerformanceManager: Impostor instance with ID " + id + " not existing.";
-	}else{
+	}
+	else
+	{
 		return impostor;
 	}
 };
@@ -195,10 +207,10 @@ PerformanceManager.prototype.getImpostor = function(id) {
 /**
  * Updates the performance manager.
  */
-PerformanceManager.prototype.update = function(){
-	
+PerformanceManager.prototype.update = function() {
+
 	this._updateLODs();
-	
+
 	this._updateImpostors();
 };
 
@@ -207,82 +219,82 @@ PerformanceManager.prototype.update = function(){
  * it's necessary to create new (impostor) billboard. These billboard are
  * replaced with the old ones, via adding and removing to the scene object.
  */
-PerformanceManager.prototype.generateImpostors = function(){
-	
+PerformanceManager.prototype.generateImpostors = function() {
+
 	// clone camera object
 	var impostorCamera = camera.clone();
-	
+
 	// ensure the position of the camera is in world coordinates
 	var cameraWorldPosition = camera.getWorldPosition();
 	impostorCamera.position.set( cameraWorldPosition.x, cameraWorldPosition.y, cameraWorldPosition.z );
-	
+
 	// create an array with the entire lighting of the actual scene
 	var lights = [];
-	
-	for( var index = 0; index < scene.children.length; index++ ){
-		
-		if( scene.children[index] instanceof THREE.Light ){
-			
-			lights.push( scene.children[index] );
+
+	for ( var index = 0; index < scene.children.length; index++ )
+	{
+		if ( scene.children[ index ] instanceof THREE.Light )
+		{
+			lights.push( scene.children[ index ] );
 		}
 	}
-	
+
 	// generate each impostor
-	for( index = 0; index < this._impostors.length; index++ ){
-		
+	for ( index = 0; index < this._impostors.length; index++ )
+	{
 		// remove old impostor
-		if( this._impostors[index].billboard !== null ){
-			
-			scene.remove( this._impostors[index].billboard );
+		if ( this._impostors[ index ].billboard !== null )
+		{
+			scene.remove( this._impostors[ index ].billboard );
 		}
-		
+
 		// prepare the generation...
-		this._impostors[index].prepareGeneration( renderer, impostorCamera, lights );
-		
+		this._impostors[ index ].prepareGeneration( renderer, impostorCamera, lights );
+
 		// ...and run it
-		this._impostors[index].generate();
-		
+		this._impostors[ index ].generate();
+
 		// add new mesh to scene
-		scene.add( this._impostors[index].billboard );
+		scene.add( this._impostors[ index ].billboard );
 	}
 };
 
 /**
  * Updates all LOD instances.
  */
-PerformanceManager.prototype._updateLODs = (function(){
-	
+PerformanceManager.prototype._updateLODs = ( function() {
+
 	var index = 0;
-	
-	return function(){
-		
-		for(index = 0; index < this._lods.length; index++){
-			
-			this._lods[index].update();
+
+	return function() {
+
+		for ( index = 0; index < this._lods.length; index++ )
+		{
+			this._lods[ index ].update();
 		}
 	};
-	
-}());
+
+}() );
 
 /**
  * Updates all LOD instances.
  */
-PerformanceManager.prototype._updateImpostors = (function(){
-	
+PerformanceManager.prototype._updateImpostors = ( function() {
+
 	var index = 0;
 	var cameraWorldPosition = new THREE.Vector3();
-	
-	return function(){
-		
+
+	return function() {
+
 		// the camera world position is equal for each impostor
 		cameraWorldPosition = camera.getWorldPosition();
-		
-		for(index = 0; index < this._impostors.length; index++){
-			
-			this._impostors[index].update(cameraWorldPosition);
+
+		for ( index = 0; index < this._impostors.length; index++ )
+		{
+			this._impostors[ index ].update( cameraWorldPosition );
 		}
 	};
-	
-}());
+
+}() );
 
 module.exports = new PerformanceManager();

@@ -1,6 +1,5 @@
 /**
- * @file All helper and util functions are
- * organized in this module.
+ * @file All helper and util functions are organized in this module.
  * 
  * @author Human Interactive
  */
@@ -12,45 +11,54 @@
  * 
  * @constructor
  */
-function Utils(){
-	
-	Object.defineProperties(this, {
-		_runtimeInformation: {
-			value: {},
-			configurable: false,
-			enumerable: false,
-			writable: true
+function Utils() {
+
+	Object.defineProperties( this, {
+		_runtimeInformation : {
+			value : {},
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
+	} );
 }
 
 /**
- * Sets runtime-information 
+ * Sets runtime-information
  * 
  * @param {object} params - Startup parameters of the engine.
  */
-Utils.prototype.setRuntimeInformation = function(params){
-	
+Utils.prototype.setRuntimeInformation = function( params ) {
+
 	this._runtimeInformation.appName = params.name;
 	this._runtimeInformation.version = params.version;
-	
-	if(params.mode === "development" ){
+
+	if ( params.mode === "development" )
+	{
 		this._runtimeInformation.mode = Utils.MODES.DEVELOPMENT;
 		this._runtimeInformation.CDN = Utils.CDN.LOCAL;
-	}else{
+	}
+	else
+	{
 		this._runtimeInformation.mode = Utils.MODES.PRODUCTION;
 		this._runtimeInformation.CDN = Utils.CDN.CLOUD;
 	}
-	
-	if(params.locale === "de"){
+
+	if ( params.locale === "de" )
+	{
 		this._runtimeInformation.locale = Utils.LOCALES.DE;
-	}else{
+	}
+	else
+	{
 		this._runtimeInformation.locale = Utils.LOCALES.EN;
 	}
-	
-	if(params.isMultiplayerActive === true){
+
+	if ( params.isMultiplayerActive === true )
+	{
 		this._runtimeInformation.isMultiplayerActive = true;
-	}else{
+	}
+	else
+	{
 		this._runtimeInformation.isMultiplayerActive = false;
 	}
 };
@@ -60,8 +68,8 @@ Utils.prototype.setRuntimeInformation = function(params){
  * 
  * @returns {string} The CDN-Host.
  */
-Utils.prototype.getCDNHost = function(){
-	
+Utils.prototype.getCDNHost = function() {
+
 	return this._runtimeInformation.CDN;
 };
 
@@ -70,8 +78,8 @@ Utils.prototype.getCDNHost = function(){
  * 
  * @returns {string} The local.
  */
-Utils.prototype.getLocale= function(){
-	
+Utils.prototype.getLocale = function() {
+
 	return this._runtimeInformation.locale;
 };
 
@@ -80,8 +88,8 @@ Utils.prototype.getLocale= function(){
  * 
  * @returns {string} The name and bersion of Application.
  */
-Utils.prototype.getAppInformation = function(){
-	
+Utils.prototype.getAppInformation = function() {
+
 	return this._runtimeInformation.appName + ", Version: " + this._runtimeInformation.version;
 };
 
@@ -90,8 +98,8 @@ Utils.prototype.getAppInformation = function(){
  * 
  * @returns {boolean} Is the multiplayer active?
  */
-Utils.prototype.isMultiplayerActive = function(){
-	
+Utils.prototype.isMultiplayerActive = function() {
+
 	return this._runtimeInformation.isMultiplayerActive;
 };
 
@@ -99,27 +107,32 @@ Utils.prototype.isMultiplayerActive = function(){
  * Preloads images and executes a callback, when all work is done.
  * 
  * @param{object} images - An array with URLs of images.
- * @param{function} callback - This function is executed, when all images are loaded.
+ * @param{function} callback - This function is executed, when all images are
+ * loaded.
  */
-Utils.prototype.preloadImages = function(images, callback) {
+Utils.prototype.preloadImages = function( images, callback ) {
 
 	var count = 0;
 
 	var onLoad = function() {
-		if (++count === images.length && typeof callback === "function") {
+
+		if ( ++count === images.length && typeof callback === "function" )
+		{
 			callback();
 		}
 	};
 
-	var onError = function(e) {
+	var onError = function( e ) {
+
 		throw "ERROR: Utils: Unable to preload image with URL: " + e.target.src;
 	};
 
-	for (var i = 0; i < images.length; i++) {
+	for ( var i = 0; i < images.length; i++ )
+	{
 
 		var image = new global.Image();
-		image.src = images[i];
-		
+		image.src = images[ i ];
+
 		image.onload = onLoad;
 		image.onerror = onError;
 	}
@@ -130,8 +143,8 @@ Utils.prototype.preloadImages = function(images, callback) {
  * 
  * @returns {boolean} Is development mode activ?
  */
-Utils.prototype.isDevelopmentModeActive = function(){
-	
+Utils.prototype.isDevelopmentModeActive = function() {
+
 	return this._runtimeInformation.mode === Utils.MODES.DEVELOPMENT;
 };
 
@@ -140,9 +153,9 @@ Utils.prototype.isDevelopmentModeActive = function(){
  * 
  * @returns {boolean} Is the current user-agent a firefox?
  */
-Utils.prototype.isFirefox = function(){
-	
-	return global.navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+Utils.prototype.isFirefox = function() {
+
+	return global.navigator.userAgent.toLowerCase().indexOf( 'firefox' ) > -1;
 };
 
 Utils.MODES = {

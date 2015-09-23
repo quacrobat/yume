@@ -1,51 +1,51 @@
 /**
- * @file Interface for entire ui-handling. This prototype is used in scenes
- * to access ui-based logic and to create ui-entities.
+ * @file Interface for entire ui-handling. This prototype is used in scenes to
+ * access ui-based logic and to create ui-entities.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-var PubSub = require("pubsub-js");
+var PubSub = require( "pubsub-js" );
 
-var developmentPanel = require("./DevelopmentPanel");
-var performanceMonitor = require("./PerformanceMonitor");
-var informationPanel = require("./InformationPanel");
-var interactionLabel = require("./InteractionLabel");
-var loadingScreen = require("./LoadingScreen");
-var menu = require("./Menu");
-var textScreen = require("./TextScreen");
-var modalDialog = require("./ModalDialog");
-var chat = require("./Chat");
+var developmentPanel = require( "./DevelopmentPanel" );
+var performanceMonitor = require( "./PerformanceMonitor" );
+var informationPanel = require( "./InformationPanel" );
+var interactionLabel = require( "./InteractionLabel" );
+var loadingScreen = require( "./LoadingScreen" );
+var menu = require( "./Menu" );
+var textScreen = require( "./TextScreen" );
+var modalDialog = require( "./ModalDialog" );
+var chat = require( "./Chat" );
 
-var utils = require("../etc/Utils");
+var utils = require( "../etc/Utils" );
 
 /**
  * Creates the user interface manager.
  * 
  * @constructor
  */
-function UserInterfaceManager(){
-	
-	Object.defineProperties(this, {	
-		_$uiContainer: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+function UserInterfaceManager() {
+
+	Object.defineProperties( this, {
+		_$uiContainer : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
+	} );
 }
 
 /**
  * Initializes the user interface manager.
  */
-UserInterfaceManager.prototype.init = function(){
-	
+UserInterfaceManager.prototype.init = function() {
+
 	// get reference to central ui-container
-	this._$uiContainer = global.document.querySelector("#ui-container");
-	
+	this._$uiContainer = global.document.querySelector( "#ui-container" );
+
 	// init controls
 	informationPanel.init();
 	interactionLabel.init();
@@ -54,16 +54,16 @@ UserInterfaceManager.prototype.init = function(){
 	textScreen.init();
 	modalDialog.init();
 	chat.init();
-	
+
 	// add development information
-	if(utils.isDevelopmentModeActive() === true){
-		
+	if ( utils.isDevelopmentModeActive() === true )
+	{
 		performanceMonitor.init();
-		
+
 		developmentPanel.init();
 		developmentPanel.setText( "Development Mode Active: " + utils.getAppInformation() );
 	}
-	
+
 	// eventing
 	this._mapGlobalEventsToTopics();
 	this._initGlobalEventHandler();
@@ -72,9 +72,10 @@ UserInterfaceManager.prototype.init = function(){
 /**
  * Updates the UserInterface-Logic, called from render-loop.
  */
-UserInterfaceManager.prototype.update = function(){
-	
-	if(utils.isDevelopmentModeActive() === true){
+UserInterfaceManager.prototype.update = function() {
+
+	if ( utils.isDevelopmentModeActive() === true )
+	{
 		performanceMonitor.update();
 	}
 };
@@ -84,8 +85,9 @@ UserInterfaceManager.prototype.update = function(){
  * 
  * @param {string} textKey - The text-content of the information panel.
  */
-UserInterfaceManager.prototype.setInformationPanelText = function(textKey){	
-	informationPanel.setText(textKey);
+UserInterfaceManager.prototype.setInformationPanelText = function( textKey ) {
+
+	informationPanel.setText( textKey );
 };
 
 /**
@@ -93,14 +95,16 @@ UserInterfaceManager.prototype.setInformationPanelText = function(textKey){
  * 
  * @param {string} textKey - The label of the corresponding action.
  */
-UserInterfaceManager.prototype.showInteractionLabel = function(textKey){	
-	interactionLabel.show(textKey);
+UserInterfaceManager.prototype.showInteractionLabel = function( textKey ) {
+
+	interactionLabel.show( textKey );
 };
 
 /**
  * Hides the interaction label.
  */
-UserInterfaceManager.prototype.hideInteractionLabel = function(){	
+UserInterfaceManager.prototype.hideInteractionLabel = function() {
+
 	interactionLabel.hide();
 };
 
@@ -108,14 +112,16 @@ UserInterfaceManager.prototype.hideInteractionLabel = function(){
  * Shows the menu.
  * 
  */
-UserInterfaceManager.prototype.showMenu = function(){
+UserInterfaceManager.prototype.showMenu = function() {
+
 	menu.show();
 };
 
 /**
  * Hides the menu.
  */
-UserInterfaceManager.prototype.hideMenu = function(){
+UserInterfaceManager.prototype.hideMenu = function() {
+
 	menu.hide();
 	chat.hide();
 };
@@ -124,36 +130,38 @@ UserInterfaceManager.prototype.hideMenu = function(){
  * Shows the text screen.
  * 
  * @param {object} textObject - The conversation of the text screen.
- * @param {function} completeCallback - This function is executed, when all texts are shown
- * and the ui-element is going to hide.
+ * @param {function} completeCallback - This function is executed, when all
+ * texts are shown and the ui-element is going to hide.
  */
-UserInterfaceManager.prototype.showTextScreen = function(textKeys, completeCallback){
-	
-	textScreen.show(textKeys, completeCallback);	
+UserInterfaceManager.prototype.showTextScreen = function( textKeys, completeCallback ) {
 
+	textScreen.show( textKeys, completeCallback );
 };
 
 /**
  * Hides the text screen.
  */
-UserInterfaceManager.prototype.hideTextScreen = function(){
-	
+UserInterfaceManager.prototype.hideTextScreen = function() {
+
 	textScreen.hide();
 };
 
 /**
  * Shows the loading screen.
  * 
- * @param {function} callback - This function is executed, when the loading screen is shown.
+ * @param {function} callback - This function is executed, when the loading
+ * screen is shown.
  */
-UserInterfaceManager.prototype.showLoadingScreen = function(callback){
-	loadingScreen.show(callback);	
+UserInterfaceManager.prototype.showLoadingScreen = function( callback ) {
+
+	loadingScreen.show( callback );
 };
 
 /**
  * Hides the loading screen.
  */
-UserInterfaceManager.prototype.hideLoadingScreen = function(){
+UserInterfaceManager.prototype.hideLoadingScreen = function() {
+
 	loadingScreen.hide();
 };
 
@@ -162,14 +170,16 @@ UserInterfaceManager.prototype.hideLoadingScreen = function(){
  * 
  * @param {object} textKeys - The texts to display.
  */
-UserInterfaceManager.prototype.showModalDialog = function(textKeys){
-	modalDialog.show(textKeys);	
+UserInterfaceManager.prototype.showModalDialog = function( textKeys ) {
+
+	modalDialog.show( textKeys );
 };
 
 /**
  * Hides the modal dialog.
  */
-UserInterfaceManager.prototype.hideModalDialog = function(){
+UserInterfaceManager.prototype.hideModalDialog = function() {
+
 	modalDialog.hide();
 };
 
@@ -178,45 +188,47 @@ UserInterfaceManager.prototype.hideModalDialog = function(){
  * 
  * @param {object} event - The event object.
  */
-UserInterfaceManager.prototype.handleUiInteraction = function(event){
-	
+UserInterfaceManager.prototype.handleUiInteraction = function( event ) {
+
 	event.preventDefault(); // prevent scrolling
-	
-	if(textScreen.isActive === true){		
-		textScreen.complete();		
+
+	if ( textScreen.isActive === true )
+	{
+		textScreen.complete();
 	}
-	else if(loadingScreen.isActive === true && loadingScreen.isReady === true){	
-		PubSub.publish("stage.start", undefined);
-		loadingScreen.hide();	
+	else if ( loadingScreen.isActive === true && loadingScreen.isReady === true )
+	{
+		PubSub.publish( "stage.start", undefined );
+		loadingScreen.hide();
 	}
 };
 
 /**
  * Toggles the visibility of the performance-monitor.
  */
-UserInterfaceManager.prototype.tooglePerformanceMonitor = function(){
-	
+UserInterfaceManager.prototype.tooglePerformanceMonitor = function() {
+
 	performanceMonitor.toggle();
 };
-
 
 /**
  * Maps global events to topics
  */
-UserInterfaceManager.prototype._mapGlobalEventsToTopics = function(){
-	
-	global.window.addEventListener("resize", function(){
-		PubSub.publish("ui.event.resize", undefined);
-	});
+UserInterfaceManager.prototype._mapGlobalEventsToTopics = function() {
+
+	global.window.addEventListener( "resize", function() {
+
+		PubSub.publish( "ui.event.resize", undefined );
+	} );
 };
 
 /**
  * Inits global event handlers
  */
-UserInterfaceManager.prototype._initGlobalEventHandler = function(){
-	
-	global.window.addEventListener("contextmenu", this._onContextMenu);
-	global.window.addEventListener("keydown", this._onKeyDown);
+UserInterfaceManager.prototype._initGlobalEventHandler = function() {
+
+	global.window.addEventListener( "contextmenu", this._onContextMenu );
+	global.window.addEventListener( "keydown", this._onKeyDown );
 };
 
 /**
@@ -224,7 +236,8 @@ UserInterfaceManager.prototype._initGlobalEventHandler = function(){
  * 
  * @param {object} event - The event object.
  */
-UserInterfaceManager.prototype._onContextMenu = function(event){
+UserInterfaceManager.prototype._onContextMenu = function( event ) {
+
 	// disable contextmenu
 	event.preventDefault();
 };
@@ -234,16 +247,16 @@ UserInterfaceManager.prototype._onContextMenu = function(event){
  * 
  * @param {object} event - Default event object.
  */
-UserInterfaceManager.prototype._onKeyDown = function(event){
-	
-	switch( event.keyCode ) {
-	
-	case 13:
-		// enter
-		chat.toogle();
-		break;
+UserInterfaceManager.prototype._onKeyDown = function( event ) {
+
+	switch ( event.keyCode )
+	{
+		case 13:
+			// enter
+			chat.toogle();
+			break;
 	}
-	
+
 };
 
 module.exports = new UserInterfaceManager();

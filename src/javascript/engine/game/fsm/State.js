@@ -12,30 +12,38 @@
  * Creates a new state.
  * 
  * @constructor
- *  
+ * 
  */
-function State(){}
+function State() {
+
+}
 
 /**
  * This executes when the state is entered.
  * 
  * @param {GameEntity} entity - A reference to the entity.
  */
-State.prototype.enter = function( entity ){};
+State.prototype.enter = function( entity ) {
+
+};
 
 /**
  * This is called by the FSM's update function each update step.
  * 
  * @param {GameEntity} entity - A reference to the entity.
  */
-State.prototype.execute = function( entity ){};
+State.prototype.execute = function( entity ) {
+
+};
 
 /**
  * This executes when the state is exited.
  * 
  * @param {GameEntity} entity - A reference to the entity.
  */
-State.prototype.exit = function( entity ){};
+State.prototype.exit = function( entity ) {
+
+};
 
 /**
  * This executes if the agent receives a message from the messaging system.
@@ -46,6 +54,9 @@ State.prototype.exit = function( entity ){};
  * 
  * @returns {boolean} Is the message handled successfully by a state?
  */
-State.prototype.onMessage = function( entity, message, data ){ return false; };
+State.prototype.onMessage = function( entity, message, data ) {
+
+	return false;
+};
 
 module.exports = State;

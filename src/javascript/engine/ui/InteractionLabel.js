@@ -6,7 +6,7 @@
 
 "use strict";
 
-var UiElement = require("./UiElement");
+var UiElement = require( "./UiElement" );
 
 /**
  * Creates the interaction label.
@@ -14,34 +14,34 @@ var UiElement = require("./UiElement");
  * @constructor
  */
 function InteractionLabel() {
-	
-	UiElement.call(this);
-	
-	Object.defineProperties(this, {	
-		_$interactionLabel: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+
+	UiElement.call( this );
+
+	Object.defineProperties( this, {
+		_$interactionLabel : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		isInteractionLabelActive: {
-			value: false,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		isInteractionLabelActive : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
-	});
+	} );
 }
 
-InteractionLabel.prototype = Object.create(UiElement.prototype);
+InteractionLabel.prototype = Object.create( UiElement.prototype );
 InteractionLabel.prototype.constructor = InteractionLabel;
 
 /**
  * Inits the control
  */
-InteractionLabel.prototype.init = function(){
-	
-	this._$interactionLabel = global.document.querySelector("#interaction-label .label");
+InteractionLabel.prototype.init = function() {
+
+	this._$interactionLabel = global.document.querySelector( "#interaction-label .label" );
 };
 
 /**
@@ -49,10 +49,11 @@ InteractionLabel.prototype.init = function(){
  * 
  * @param {string} textKey - The label of the corresponding action.
  */
-InteractionLabel.prototype.show = function(textKey){
-	
-	if(this.isInteractionLabelActive === false){
-		this._$interactionLabel.textContent = this.textManager.get(textKey);
+InteractionLabel.prototype.show = function( textKey ) {
+
+	if ( this.isInteractionLabelActive === false )
+	{
+		this._$interactionLabel.textContent = this.textManager.get( textKey );
 		this._$interactionLabel.style.display = "block";
 		this.isInteractionLabelActive = true;
 	}
@@ -61,9 +62,10 @@ InteractionLabel.prototype.show = function(textKey){
 /**
  * Hides the interaction label.
  */
-InteractionLabel.prototype.hide = function(){
-	
-	if(this.isInteractionLabelActive === true){
+InteractionLabel.prototype.hide = function() {
+
+	if ( this.isInteractionLabelActive === true )
+	{
 		this._$interactionLabel.style.display = "none";
 		this.isInteractionLabelActive = false;
 	}

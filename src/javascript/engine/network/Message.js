@@ -13,37 +13,37 @@
  * @param {number} type - The type of the message.
  * @param {string} content - The content of the message.
  */
-function Message(type, content){
+function Message( type, content ) {
 
-	Object.defineProperties(this, {
-		time: {
+	Object.defineProperties( this, {
+		time : {
 			value : Date.now(),
-			configurable: false,
-			enumerable: true,
-			writable: false
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		type: {
+		type : {
 			value : type,
-			configurable: false,
-			enumerable: true,
-			writable: true
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		content: {
+		content : {
 			value : content,
-			configurable: false,
-			enumerable: true,
-			writable: true
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
-	});
+	} );
 }
 
 Message.TYPES = {
-	SYSTEM: 0,
-	GAME: 1,
-	STATUS: 2,
-	CHAT: 3,
-	INFO: 4,
-	ERROR: 5
+	SYSTEM : 0,
+	GAME : 1,
+	STATUS : 2,
+	CHAT : 3,
+	INFO : 4,
+	ERROR : 5
 };
 
 module.exports = Message;

@@ -14,34 +14,34 @@
  * @param {function} actionCallback - The action callback.
  * @param {string} label - The label of the action.
  */
-function Action(type, actionCallback, label) {
+function Action( type, actionCallback, label ) {
 
-	Object.defineProperties(this, {
-		type: {
-			value: type,
-			configurable: false,
-			enumerable: true,
-			writable: false
+	Object.defineProperties( this, {
+		type : {
+			value : type,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		label: {
-			value: label || "",
-			configurable: false,
-			enumerable: true,
-			writable: true
+		label : {
+			value : label || "",
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		isActive: {
-			value: true,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		isActive : {
+			value : true,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		_actionCallback: {
-			value: actionCallback,
-			configurable: false,
-			enumerable: false,
-			writable: false
+		_actionCallback : {
+			value : actionCallback,
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-	});
+	} );
 }
 
 /**
@@ -49,9 +49,12 @@ function Action(type, actionCallback, label) {
  */
 Action.prototype.run = function() {
 
-	if (typeof this._actionCallback === "function") {
+	if ( typeof this._actionCallback === "function" )
+	{
 		this._actionCallback();
-	} else {
+	}
+	else
+	{
 		throw "ERROR: Action: Assigned callback not type of 'function'.";
 	}
 };

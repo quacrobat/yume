@@ -7,13 +7,13 @@
 
 "use strict";
 
-var PubSub = require("pubsub-js");
+var PubSub = require( "pubsub-js" );
 
-var AudioListener = require("./AudioListener");
-var DynamicAudio = require("./DynamicAudio");
-var AudioBufferList = require("./AudioBufferList");
-var camera = require("../core/Camera");
-var logger = require("../etc/Logger");
+var AudioListener = require( "./AudioListener" );
+var DynamicAudio = require( "./DynamicAudio" );
+var AudioBufferList = require( "./AudioBufferList" );
+var camera = require( "../core/Camera" );
+var logger = require( "../etc/Logger" );
 
 /**
  * Creates the audio manager.
@@ -22,63 +22,65 @@ var logger = require("../etc/Logger");
  * 
  */
 function AudioManager() {
-	
-	Object.defineProperties(this, {	
-		_listener: {
-			value: new AudioListener(),
-			configurable: false,
-			enumerable: false,
+
+	Object.defineProperties( this, {
+		_listener : {
+			value : new AudioListener(),
+			configurable : false,
+			enumerable : false,
 			writable : false
 		},
-		_backgroundMusicGain: {
-			value: null,
-			configurable: false,
-			enumerable: false,
+		_backgroundMusicGain : {
+			value : null,
+			configurable : false,
+			enumerable : false,
 			writable : true
 		},
-		_backgroundMusic: {
-			value: new global.Audio(),
-			configurable: false,
-			enumerable: false,
+		_backgroundMusic : {
+			value : new global.Audio(),
+			configurable : false,
+			enumerable : false,
 			writable : true
 		},
-		_dynamicAudios: {
-			value: [],
-			configurable: false,
-			enumerable: false,
-			writable: false
+		_dynamicAudios : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
 		}
-	});
-	
+	} );
+
 	// gain node for background music, used for fadeIn/ fadeOut
 	this._backgroundMusicGain = this._listener.context.createGain();
-	this._backgroundMusicGain.connect(this._listener.gain);
-	
+	this._backgroundMusicGain.connect( this._listener.gain );
+
 	// connect background music to web audio pipeline
-	var source = this._listener.context.createMediaElementSource(this._backgroundMusic);
-	source.connect(this._backgroundMusicGain);
-	
+	var source = this._listener.context.createMediaElementSource( this._backgroundMusic );
+	source.connect( this._backgroundMusicGain );
+
 	// set error handling for background music
 	this._backgroundMusic.onerror = this._onErrorBackgroundMusic;
-	
+
 	// add listener to camera
-	camera.add(this._listener);
+	camera.add( this._listener );
 }
 
 /**
- * Creates a dynamic audio object and stores it to the respective internal array.
+ * Creates a dynamic audio object and stores it to the respective internal
+ * array.
  * 
  * @param {string} id - The ID of the dynamic audio.
  * @param {object} buffer - The buffered audio file.
  * @param {boolean} isLoop - Should the audio played in a loop?
- * @param {boolean} isStageIndependent - Should the audio independent of the stage?
+ * @param {boolean} isStageIndependent - Should the audio independent of the
+ * stage?
  * 
  * @returns {DynamicAudio} The new dynamic audio.
  */
-AudioManager.prototype.createDynamicSound = function(id, buffer, isLoop, isStageIndependent) {
+AudioManager.prototype.createDynamicSound = function( id, buffer, isLoop, isStageIndependent ) {
 
-	var audio = new DynamicAudio(id, this._listener, buffer, isLoop, isStageIndependent);
-	this._dynamicAudios.push(audio);
+	var audio = new DynamicAudio( id, this._listener, buffer, isLoop, isStageIndependent );
+	this._dynamicAudios.push( audio );
 	return audio;
 };
 
@@ -86,28 +88,35 @@ AudioManager.prototype.createDynamicSound = function(id, buffer, isLoop, isStage
  * Creates an audio buffer list.
  * 
  * @param {object} audioList - An array with name of audio files.
- * @param {function} callback - This callback is executed when all audio files are loaded.
+ * @param {function} callback - This callback is executed when all audio files
+ * are loaded.
  * 
  * @returns {AudioBufferList} The new audio buffer list.
  */
-AudioManager.prototype.createAudioBufferList = function(audioList, callback) {
+AudioManager.prototype.createAudioBufferList = function( audioList, callback ) {
 
-	return new AudioBufferList(this._listener.context, audioList, callback);
+	return new AudioBufferList( this._listener.context, audioList, callback );
 };
 
 /**
  * Removes dynamic audio objects from the internal array.
  * 
- * @param {boolean} isClear - Should all dynamic audios deleted or only stage dependent audios?
+ * @param {boolean} isClear - Should all dynamic audios deleted or only stage
+ * dependent audios?
  */
-AudioManager.prototype.removeDynamicAudios = function(isClear){
-	
-	if(isClear === true){
+AudioManager.prototype.removeDynamicAudios = function( isClear ) {
+
+	if ( isClear === true )
+	{
 		this._dynamicAudios.length = 0;
-	}else{
-		for (var i = this._dynamicAudios.length -1; i >= 0; i--) {
-			if(this._dynamicAudios[i].isStageIndependent === false){
-				this._dynamicAudios.splice(i,1);
+	}
+	else
+	{
+		for ( var i = this._dynamicAudios.length - 1; i >= 0; i-- )
+		{
+			if ( this._dynamicAudios[ i ].isStageIndependent === false )
+			{
+				this._dynamicAudios.splice( i, 1 );
 			}
 		}
 	}
@@ -120,20 +129,25 @@ AudioManager.prototype.removeDynamicAudios = function(isClear){
  * 
  * @returns {DynamicAudio} The dynamic audio.
  */
-AudioManager.prototype.getDynamicAudio = function(id) {
+AudioManager.prototype.getDynamicAudio = function( id ) {
 
 	var dynamicAudio = null;
-	
-	for( var i = 0; i < this._dynamicAudios.length; i++){
-		if(this._dynamicAudios[i].audioId === id){
-			dynamicAudio =  this._dynamicAudios[i];
+
+	for ( var i = 0; i < this._dynamicAudios.length; i++ )
+	{
+		if ( this._dynamicAudios[ i ].audioId === id )
+		{
+			dynamicAudio = this._dynamicAudios[ i ];
 			break;
 		}
 	}
-	
-	if(dynamicAudio === null){
+
+	if ( dynamicAudio === null )
+	{
 		throw "ERROR: AudioManager: Dynamic Audio with ID " + id + " not existing.";
-	}else{
+	}
+	else
+	{
 		return dynamicAudio;
 	}
 };
@@ -145,27 +159,31 @@ AudioManager.prototype.getDynamicAudio = function(id) {
  * @param {number} volume - The volume of the audio.
  * @param {boolean} isLoop - Should the audio played in a loop?
  */
-AudioManager.prototype.setBackgroundMusic = function(file, volume, isLoop) {
-	
+AudioManager.prototype.setBackgroundMusic = function( file, volume, isLoop ) {
+
 	var url = "assets/audio/static/" + file + ".mp3";
 
 	this._backgroundMusic.src = url;
 	this._backgroundMusic.volume = volume || 1;
 	this._backgroundMusic.loop = isLoop || true;
-	
-	this._backgroundMusic.oncanplay = function(event){
+
+	this._backgroundMusic.oncanplay = function( event ) {
 
 		// publish message to inform about status
-		PubSub.publish("loading.complete.music", {url: url});
-		
+		PubSub.publish( "loading.complete.music", {
+			url : url
+		} );
+
 		// execute this handler just one time
 		event.target.oncanplay = null;
 	};
-	
-	logger.log("INFO: AudioManager: Set new background music. URL: %s", url);
-	
+
+	logger.log( "INFO: AudioManager: Set new background music. URL: %s", url );
+
 	// publish message to inform about status
-	PubSub.publish("loading.start.music", {url: url});
+	PubSub.publish( "loading.start.music", {
+		url : url
+	} );
 };
 
 /**
@@ -174,25 +192,26 @@ AudioManager.prototype.setBackgroundMusic = function(file, volume, isLoop) {
  * @param {boolean} isFadeIn - Should the audio fade in?
  * @param {number} duration - The duration of the fade in.
  */
-AudioManager.prototype.playBackgroundMusic = function(isFadeIn, duration) {
-	
+AudioManager.prototype.playBackgroundMusic = function( isFadeIn, duration ) {
+
 	// start playing
 	this._backgroundMusic.play();
-	
+
 	// adjust gain node of background music
-	if(isFadeIn === true){
-		
+	if ( isFadeIn === true )
+	{
 		// fade in
-		this._backgroundMusicGain.gain.linearRampToValueAtTime(0, this._backgroundMusic.currentTime);
-		this._backgroundMusicGain.gain.linearRampToValueAtTime(1, this._backgroundMusic.currentTime + duration || 2);
-	
-	}else{
-		
+		this._backgroundMusicGain.gain.linearRampToValueAtTime( 0, this._backgroundMusic.currentTime );
+		this._backgroundMusicGain.gain.linearRampToValueAtTime( 1, this._backgroundMusic.currentTime + duration || 2 );
+
+	}
+	else
+	{
 		this._backgroundMusicGain.gain.value = 1;
 	}
-	
+
 	// logging
-	logger.log("INFO: AudioManager: Start playing background music.");
+	logger.log( "INFO: AudioManager: Start playing background music." );
 };
 
 /**
@@ -202,43 +221,47 @@ AudioManager.prototype.playBackgroundMusic = function(isFadeIn, duration) {
  * @param {number} duration - The duration of the fade out.
  * @param {function} onPausedCallback - Executed, when the audio is paused.
  */
-AudioManager.prototype.pauseBackgroundMusic = function(isFadeOut, duration, onPausedCallback) {
-	
+AudioManager.prototype.pauseBackgroundMusic = function( isFadeOut, duration, onPausedCallback ) {
+
 	// save context
 	var self = this;
 
-	if(isFadeOut === true){
-		
+	if ( isFadeOut === true )
+	{
 		// fade out
-		this._backgroundMusicGain.gain.linearRampToValueAtTime(1, this._backgroundMusic.currentTime);
-		this._backgroundMusicGain.gain.linearRampToValueAtTime(0, this._backgroundMusic.currentTime + duration || 2);
-		
+		this._backgroundMusicGain.gain.linearRampToValueAtTime( 1, this._backgroundMusic.currentTime );
+		this._backgroundMusicGain.gain.linearRampToValueAtTime( 0, this._backgroundMusic.currentTime + duration || 2 );
+
 		// pause music with delay, at the end of the animation
-		setTimeout(function(){
-			
+		setTimeout( function() {
+
 			self._backgroundMusic.pause();
-			
+
 			// execute callback
-			if(typeof onPausedCallback === "function"){
-				onPausedCallback.call(self);
+			if ( typeof onPausedCallback === "function" )
+			{
+				onPausedCallback.call( self );
 			}
-			
-		}, (duration || 2) * 1000);
-		
-	}else{
-		
-		// immediately pause music 
+
+		}, ( duration || 2 ) * 1000 );
+
+	}
+	else
+	{
+
+		// immediately pause music
 		this._backgroundMusic.pause();
 		this._backgroundMusicGain.gain.value = 0;
-		
+
 		// execute callback
-		if(typeof onPausedCallback === "function"){
-			onPausedCallback.call(this);
+		if ( typeof onPausedCallback === "function" )
+		{
+			onPausedCallback.call( this );
 		}
 	}
-	
+
 	// logging
-	logger.log("INFO: AudioManager: Pause playing background music.");
+	logger.log( "INFO: AudioManager: Pause playing background music." );
 };
 
 /**
@@ -248,21 +271,22 @@ AudioManager.prototype.pauseBackgroundMusic = function(isFadeOut, duration, onPa
  * @param {number} duration - The duration of the fade out.
  * @param {function} onStoppedCallback - Executed, when the audio is stopped.
  */
-AudioManager.prototype.stopBackgroundMusic = function(isFadeOut, duration, onStoppedCallback) {
+AudioManager.prototype.stopBackgroundMusic = function( isFadeOut, duration, onStoppedCallback ) {
 
-	this.pauseBackgroundMusic(isFadeOut, duration, function(){
-		
+	this.pauseBackgroundMusic( isFadeOut, duration, function() {
+
 		// reset currentTime
 		this._backgroundMusic.currentTime = 0.0;
-		
+
 		// execute callback
-		if(typeof onStoppedCallback === "function"){
-			onStoppedCallback.call(this);
+		if ( typeof onStoppedCallback === "function" )
+		{
+			onStoppedCallback.call( this );
 		}
-	});
-	
+	} );
+
 	// logging
-	logger.log("INFO: AudioManager: Stop playing background music.");
+	logger.log( "INFO: AudioManager: Stop playing background music." );
 };
 
 /**
@@ -290,7 +314,7 @@ AudioManager.prototype.isBackgroundMusicLoop = function() {
  * 
  * @param {boolean} isLoop - The loop-flag to set.
  */
-AudioManager.prototype.setBackgroundMusicLoop = function(isLoop) {
+AudioManager.prototype.setBackgroundMusicLoop = function( isLoop ) {
 
 	this._backgroundMusic.loop = isLoop;
 };
@@ -310,19 +334,20 @@ AudioManager.prototype.getBackgroundMusicVolume = function() {
  * 
  * @param {number} volume - The volume to set.
  */
-AudioManager.prototype.setBackgroundMusicVolume = function(volume) {
+AudioManager.prototype.setBackgroundMusicVolume = function( volume ) {
 
 	this._backgroundMusic.volume = volume;
 };
 
 /**
- * This method handles error-situations when playing the background music.
- * It triggers a custom event, which can processed of e.g. the UserInterfaceManager.
+ * This method handles error-situations when playing the background music. It
+ * triggers a custom event, which can processed of e.g. the
+ * UserInterfaceManager.
  */
-AudioManager.prototype._onErrorBackgroundMusic = function(){
+AudioManager.prototype._onErrorBackgroundMusic = function() {
 
-	logger.error("ERROR: AudioManager: Media resource could not be processed.");
-	PubSub.publish("audio.backgroundmusic.error", "Media resource could not be processed");
+	logger.error( "ERROR: AudioManager: Media resource could not be processed." );
+	PubSub.publish( "audio.backgroundmusic.error", "Media resource could not be processed" );
 };
 
 module.exports = new AudioManager();

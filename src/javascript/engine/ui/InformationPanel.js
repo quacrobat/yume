@@ -6,7 +6,7 @@
 
 "use strict";
 
-var UiElement = require("./UiElement");
+var UiElement = require( "./UiElement" );
 
 /**
  * Creates the information panel.
@@ -14,35 +14,35 @@ var UiElement = require("./UiElement");
  * @constructor
  */
 function InformationPanel() {
-	
-	UiElement.call(this);
-	
-	Object.defineProperties(this, {	
-		_$informationPanel: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+
+	UiElement.call( this );
+
+	Object.defineProperties( this, {
+		_$informationPanel : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$informationPanelContent: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$informationPanelContent : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
+	} );
 }
 
-InformationPanel.prototype = Object.create(UiElement.prototype);
+InformationPanel.prototype = Object.create( UiElement.prototype );
 InformationPanel.prototype.constructor = InformationPanel;
 
 /**
  * Inits the control
  */
-InformationPanel.prototype.init = function(){
-	
-	this._$informationPanel = global.document.querySelector("#information-panel");
-	this._$informationPanelContent = this._$informationPanel.querySelector(".text");
+InformationPanel.prototype.init = function() {
+
+	this._$informationPanel = global.document.querySelector( "#information-panel" );
+	this._$informationPanelContent = this._$informationPanel.querySelector( ".text" );
 };
 
 /**
@@ -50,9 +50,9 @@ InformationPanel.prototype.init = function(){
  * 
  * @param {string} textKey - The text-content of the information panel.
  */
-InformationPanel.prototype.setText = function(textKey){
-	
-	this._$informationPanelContent.innerHTML = this.textManager.get(textKey);
+InformationPanel.prototype.setText = function( textKey ) {
+
+	this._$informationPanelContent.innerHTML = this.textManager.get( textKey );
 };
 
 module.exports = new InformationPanel();

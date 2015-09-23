@@ -6,7 +6,7 @@
 
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
 /**
  * Creates a render pass.
@@ -16,34 +16,34 @@ var THREE = require("three");
  * @param {Scene} scene - The scene object.
  * @param {Camera} camera - The camera object.
  */
-function RenderPass(scene, camera){
-	
-	Object.defineProperties(this, {
-		_scene: {
-			value: scene,
-			configurable: false,
-			enumerable: false,
-			writable: false
+function RenderPass( scene, camera ) {
+
+	Object.defineProperties( this, {
+		_scene : {
+			value : scene,
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		_camera: {
-			value: camera,
-			configurable: false,
-			enumerable: false,
-			writable: false
+		_camera : {
+			value : camera,
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		enabled: {
-			value: true,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		enabled : {
+			value : true,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		needsSwap: {
-			value:  false,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		needsSwap : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		}
-	});
+	} );
 }
 
 /**
@@ -53,9 +53,9 @@ function RenderPass(scene, camera){
  * @param {THREE.WebGLRenderTarget} writeBuffer - The target framebuffer.
  * @param {THREE.WebGLRenderTarget} readBuffer - The source framebuffer.
  */
-RenderPass.prototype.render = function(renderer, writeBuffer, readBuffer){
+RenderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 
-	renderer.render(this._scene, this._camera, readBuffer, true);
+	renderer.render( this._scene, this._camera, readBuffer, true );
 };
 
 module.exports = RenderPass;

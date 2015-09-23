@@ -1,29 +1,29 @@
 /**
- * @file Interface for entire text-handling. This prototype is used in scenes
- * to access text-based logic and to load localized texts.
+ * @file Interface for entire text-handling. This prototype is used in scenes to
+ * access text-based logic and to load localized texts.
  * 
  * @author Human Interactive
  */
 "use strict";
 
-var utils = require("./Utils");
+var utils = require( "./Utils" );
 
-var PubSub = require("pubsub-js");
+var PubSub = require( "pubsub-js" );
 /**
  * Creates the text manager.
  * 
  * @constructor
  */
-function TextManager() {	
-	
-	Object.defineProperties(this, {
-		_texts: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+function TextManager() {
+
+	Object.defineProperties( this, {
+		_texts : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
+	} );
 }
 
 /**
@@ -32,58 +32,68 @@ function TextManager() {
  * @param {string} stageId - The ID of the stage.
  * @param {function} callback - Executed, when the loading was successful.
  */
-TextManager.prototype.load = function(stageId, callback){
-	
+TextManager.prototype.load = function( stageId, callback ) {
+
 	var self = this;
-	
+
 	// build url
-	var	url = utils.getCDNHost() + "assets/locales/" + utils.getLocale() + "/stage_" + stageId + ".js";
-	
+	var url = utils.getCDNHost() + "assets/locales/" + utils.getLocale() + "/stage_" + stageId + ".js";
+
 	// add nocache, if necessary
-	if(utils.isDevelopmentModeActive() === true){
+	if ( utils.isDevelopmentModeActive() === true )
+	{
 		url = url + "?" + new Date().getTime();
 	}
-	
+
 	// create XMLHttpRequest object
 	var xhr = new global.XMLHttpRequest();
-	
+
 	xhr.onreadystatechange = function() {
 
-		if (xhr.readyState === xhr.DONE) {
-
-			if (xhr.status === 200) {
-
-				if (xhr.responseText !== "") {
-					
+		if ( xhr.readyState === xhr.DONE )
+		{
+			if ( xhr.status === 200 )
+			{
+				if ( xhr.responseText !== "" )
+				{
 					// assign texts
-					self._texts = JSON.parse(xhr.responseText);
-					
+					self._texts = JSON.parse( xhr.responseText );
+
 					// search for keys and replace with text
 					self._searchAndRepalce();
-					
-					// publish message to inform about status
-					PubSub.publish("loading.complete.text", {url: url});
 
-					if(typeof callback === "function"){
+					// publish message to inform about status
+					PubSub.publish( "loading.complete.text", {
+						url : url
+					} );
+
+					if ( typeof callback === "function" )
+					{
 						callback();
 					}
-					
-				} else {
+
+				}
+				else
+				{
 					throw "ERROR: TextManager: Unable to parse texts for stageId '" + stageId + "'. Textfile could be empty.";
 				}
-			} else {
+			}
+			else
+			{
 				throw "ERROR: TextManager: Could not load '" + url + "' (Status: " + xhr.status + ").";
 			}
 		}
 	};
-	
+
 	// start request
-	xhr.open('GET', url, true);
+	xhr.open( 'GET', url, true );
 	xhr.withCredentials = true;
 	xhr.send();
-	
+
 	// publish message to inform about status
-	PubSub.publish("loading.start.text", {url: url});
+	PubSub.publish( "loading.start.text", {
+		url : url
+	} );
 };
 
 /**
@@ -93,24 +103,27 @@ TextManager.prototype.load = function(stageId, callback){
  * 
  * @returns {string} The localized text.
  */
-TextManager.prototype.get = function(key){
-	
+TextManager.prototype.get = function( key ) {
+
 	var value;
-	
-	if(this._texts !== null && this._texts[key] !== undefined){
-		value = this._texts[key];
-	}else{
+
+	if ( this._texts !== null && this._texts[ key ] !== undefined )
+	{
+		value = this._texts[ key ];
+	}
+	else
+	{
 		value = key;
 	}
-	
+
 	return value;
 };
 
 /**
  * Removes the buffered texts.
  */
-TextManager.prototype.removeTexts = function(){
-	
+TextManager.prototype.removeTexts = function() {
+
 	this._texts = null;
 };
 
@@ -121,33 +134,38 @@ TextManager.prototype.removeTexts = function(){
  * 
  * @returns {object} An array with text nodes.
  */
-TextManager.prototype._getAllTextNodes = function(element){
+TextManager.prototype._getAllTextNodes = function( element ) {
 
-  var textNodeList = [];
-  var treeWalker = global.document.createTreeWalker(element, global.NodeFilter.SHOW_TEXT, null, false);
-  while(treeWalker.nextNode()){
-	  textNodeList.push(treeWalker.currentNode);
-  }
-  return textNodeList;
+	var textNodeList = [];
+	var treeWalker = global.document.createTreeWalker( element, global.NodeFilter.SHOW_TEXT, null, false );
+	while ( treeWalker.nextNode() )
+	{
+		textNodeList.push( treeWalker.currentNode );
+	}
+	return textNodeList;
 };
 
 /**
  * Searches for Text-IDs and replaces it with the actual text.
  */
-TextManager.prototype._searchAndRepalce = function(){
-	
+TextManager.prototype._searchAndRepalce = function() {
+
 	var key = null;
 	var index = 0;
-	var textNodes = this._getAllTextNodes(global.document.querySelector("#ui-container"));
-	
-	for(key in this._texts){
-		if(this._texts.hasOwnProperty(key)){
-			for(index = 0; index < textNodes.length; index++){
-				// because the property textContent is used, it's not possible to replace an ID with text, which contains HTML-entities
-				textNodes[index].textContent = textNodes[index].textContent.replace(key, this._texts[key]);
+	var textNodes = this._getAllTextNodes( global.document.querySelector( "#ui-container" ) );
+
+	for ( key in this._texts )
+	{
+		if ( this._texts.hasOwnProperty( key ) )
+		{
+			for ( index = 0; index < textNodes.length; index++ )
+			{
+				// because the property textContent is used, it's not possible
+				// to replace an ID with text, which contains HTML-entities
+				textNodes[ index ].textContent = textNodes[ index ].textContent.replace( key, this._texts[ key ] );
 			}
 		}
-    }
+	}
 };
 
 module.exports = new TextManager();

@@ -1,13 +1,13 @@
 /**
- * @file This prototype contains the entire logic 
- * for camera-based functionality.
+ * @file This prototype contains the entire logic for camera-based
+ * functionality.
  * 
  * @author Human Interactive
  */
 "use strict";
 
-var THREE = require("three");
-var PubSub = require("pubsub-js");
+var THREE = require( "three" );
+var PubSub = require( "pubsub-js" );
 
 var self;
 
@@ -18,14 +18,14 @@ var self;
  * @augments THREE.PerspectiveCamera
  * 
  */
-function Camera(){
+function Camera() {
 
-	 THREE.PerspectiveCamera.call(this);
-	 
-	 self = this;
+	THREE.PerspectiveCamera.call( this );
+
+	self = this;
 }
 
-Camera.prototype = Object.create(THREE.PerspectiveCamera.prototype);
+Camera.prototype = Object.create( THREE.PerspectiveCamera.prototype );
 Camera.prototype.constructor = Camera;
 
 /**
@@ -36,19 +36,18 @@ Camera.prototype.constructor = Camera;
  * @param {number} near - The near distance.
  * @param {number} far - The far distance.
  */
-Camera.prototype.init = function(fov, aspect, near, far){
-	
+Camera.prototype.init = function( fov, aspect, near, far ) {
+
 	this.fov = fov || 45;
 	this.aspect = aspect || global.window.innerWidth / global.window.innerHeight;
 	this.near = near || 0.1;
 	this.far = far || 1000;
-	
-	this.updateProjectionMatrix();
-	
-	// set subscriptions
-	PubSub.subscribe("ui.event.resize", this._onResize);
-};
 
+	this.updateProjectionMatrix();
+
+	// set subscriptions
+	PubSub.subscribe( "ui.event.resize", this._onResize );
+};
 
 /**
  * Resizes the camera.
@@ -56,8 +55,8 @@ Camera.prototype.init = function(fov, aspect, near, far){
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-Camera.prototype._onResize = function(message, data){
-		
+Camera.prototype._onResize = function( message, data ) {
+
 	// update camera dimensions
 	self.aspect = global.window.innerWidth / global.window.innerHeight;
 	self.updateProjectionMatrix();

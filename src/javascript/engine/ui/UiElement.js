@@ -6,7 +6,7 @@
 
 "use strict";
 
-var textManager = require("../etc/TextManager");
+var textManager = require( "../etc/TextManager" );
 
 /**
  * Creates an ui-element
@@ -14,8 +14,8 @@ var textManager = require("../etc/TextManager");
  * @constructor
  */
 function UiElement() {
-	
-	this.textManager = textManager; 
+
+	this.textManager = textManager;
 }
 
 /**
@@ -26,20 +26,22 @@ function UiElement() {
 UiElement.prototype._getTransitionEndEvent = function() {
 
 	var transition;
-	var element = global.document.querySelector("body");
-	
+	var element = global.document.querySelector( "body" );
+
 	var transitions = {
-	  'transition':'transitionend',
-	  'OTransition':'oTransitionEnd',
-	  'MozTransition':'transitionend',
-	  'WebkitTransition':'webkitTransitionEnd'
+		'transition' : 'transitionend',
+		'OTransition' : 'oTransitionEnd',
+		'MozTransition' : 'transitionend',
+		'WebkitTransition' : 'webkitTransitionEnd'
 	};
 
-    for(transition in transitions){
-        if( element.style[transition] !== undefined ){
-            return transitions[transition];
-        }
-    }
+	for ( transition in transitions )
+	{
+		if ( element.style[ transition ] !== undefined )
+		{
+			return transitions[ transition ];
+		}
+	}
 };
 
 module.exports = UiElement;

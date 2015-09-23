@@ -13,9 +13,9 @@ module.exports  = {
 
 	uniforms: {
 
-		"tDiffuse": {type: "t", value: null},
-		"direction": {type: "v2", value: new THREE.Vector2()},  // the direction of the blur: (1.0, 0.0) -> x-axis blur, (0.0, 1.0) -> y-axis blur
-		"blur": {type: "f", value: 0.0},  // the amount of blur
+		"tDiffuse": { type: "t", value: null },
+		"direction": { type: "v2", value: new THREE.Vector2() },  // the direction of the blur: (1.0, 0.0) -> x-axis blur, (0.0, 1.0) -> y-axis blur
+		"blur": { type: "f", value: 0.0 },  // the amount of blur
 
 	},
 

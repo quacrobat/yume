@@ -35439,10 +35439,10 @@ if (WebSocket) ws.prototype = WebSocket.prototype;
 (function (global){
 "use strict";
 
-var Bootstrap = require("./core/Bootstrap");
+var Bootstrap = require( "./core/Bootstrap" );
 
-global.window.onload = function(){
-	
+global.window.onload = function() {
+
 	// run engine
 	var bootstrap = new Bootstrap();
 };
@@ -35464,34 +35464,34 @@ global.window.onload = function(){
  * @param {function} actionCallback - The action callback.
  * @param {string} label - The label of the action.
  */
-function Action(type, actionCallback, label) {
+function Action( type, actionCallback, label ) {
 
-	Object.defineProperties(this, {
-		type: {
-			value: type,
-			configurable: false,
-			enumerable: true,
-			writable: false
+	Object.defineProperties( this, {
+		type : {
+			value : type,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		label: {
-			value: label || "",
-			configurable: false,
-			enumerable: true,
-			writable: true
+		label : {
+			value : label || "",
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		isActive: {
-			value: true,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		isActive : {
+			value : true,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		_actionCallback: {
-			value: actionCallback,
-			configurable: false,
-			enumerable: false,
-			writable: false
+		_actionCallback : {
+			value : actionCallback,
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-	});
+	} );
 }
 
 /**
@@ -35499,9 +35499,12 @@ function Action(type, actionCallback, label) {
  */
 Action.prototype.run = function() {
 
-	if (typeof this._actionCallback === "function") {
+	if ( typeof this._actionCallback === "function" )
+	{
 		this._actionCallback();
-	} else {
+	}
+	else
+	{
 		throw "ERROR: Action: Assigned callback not type of 'function'.";
 	}
 };
@@ -35522,10 +35525,10 @@ module.exports = Action;
 
 "use strict";
 
-var Action = require("./Action");
-var InteractiveObject = require("./InteractiveObject");
-var StaticObject = require("./StaticObject");
-var ActionTrigger = require("./ActionTrigger");
+var Action = require( "./Action" );
+var InteractiveObject = require( "./InteractiveObject" );
+var StaticObject = require( "./StaticObject" );
+var ActionTrigger = require( "./ActionTrigger" );
 
 /**
  * Creates the action manager.
@@ -35533,74 +35536,75 @@ var ActionTrigger = require("./ActionTrigger");
  * @constructor
  */
 function ActionManager() {
-	
-	Object.defineProperties(this, {	
-		interactiveObjects: {
-			value: [],
-			configurable: false,
-			enumerable: false,
-			writable: false
+
+	Object.defineProperties( this, {
+		interactiveObjects : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		staticObjects: {
-			value: [],
-			configurable: false,
-			enumerable: false,
-			writable: false
+		staticObjects : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		triggers: {
-			value: [],
-			configurable: false,
-			enumerable: false,
-			writable: false
+		triggers : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		COLLISIONTYPES: {
-			value: {
-				AABB: 0,
-				OBB: 1
+		COLLISIONTYPES : {
+			value : {
+				AABB : 0,
+				OBB : 1
 			},
-			configurable: false,
-			enumerable: false,
-			writable: false
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		RAYCASTPRECISION: {
-			value: {
-				AABB: 0,
-				OBB: 1,
-				FACE: 2
+		RAYCASTPRECISION : {
+			value : {
+				AABB : 0,
+				OBB : 1,
+				FACE : 2
 			},
-			configurable: false,
-			enumerable: false,
-			writable: false
+			configurable : false,
+			enumerable : false,
+			writable : false
 		}
-	});
+	} );
 }
 
 /**
  * Updates the action manager and all action objects.
  */
-ActionManager.prototype.update = ( function(){
-	
+ActionManager.prototype.update = ( function() {
+
 	var index;
-	
-	return function(){
-		
+
+	return function() {
+
 		// update interactive objects
-		for( index = 0; index < this.interactiveObjects.length; index++ ){
-			
+		for ( index = 0; index < this.interactiveObjects.length; index++ )
+		{
 			this.interactiveObjects[ index ].update();
 		}
-		
-		// update static objects
-		for( index = 0; index < this.staticObjects.length; index++ ){
-					
-				this.staticObjects[ index ].update();
-			}
-		};
 
-} () );
+		// update static objects
+		for ( index = 0; index < this.staticObjects.length; index++ )
+		{
+			this.staticObjects[ index ].update();
+		}
+	};
+
+}() );
 
 /**
- * Creates a new interactive object and stores it to the respective internal array.
+ * Creates a new interactive object and stores it to the respective internal
+ * array.
  * 
  * @param {THREE.Mesh} mesh - The mesh object.
  * @param {number} collisionType - The type of collision detection.
@@ -35610,10 +35614,10 @@ ActionManager.prototype.update = ( function(){
  * 
  * @returns {InteractiveObject} The new interactive object.
  */
-ActionManager.prototype.createInteraction = function(mesh, collisionType, raycastPrecision, label, actionCallback){
-	
-	var interactiveObject = new InteractiveObject(mesh, collisionType, raycastPrecision, new Action(Action.TYPES.INTERACTION, actionCallback, label));
-	this.addInteractiveObject(interactiveObject);
+ActionManager.prototype.createInteraction = function( mesh, collisionType, raycastPrecision, label, actionCallback ) {
+
+	var interactiveObject = new InteractiveObject( mesh, collisionType, raycastPrecision, new Action( Action.TYPES.INTERACTION, actionCallback, label ) );
+	this.addInteractiveObject( interactiveObject );
 	return interactiveObject;
 };
 
@@ -35625,10 +35629,10 @@ ActionManager.prototype.createInteraction = function(mesh, collisionType, raycas
  * 
  * @returns {StaticObject} The new static object.
  */
-ActionManager.prototype.createStatic = function(mesh, collisionType){
-	
-	var staticObject = new StaticObject(mesh, collisionType);
-	this.addStaticObject(staticObject);
+ActionManager.prototype.createStatic = function( mesh, collisionType ) {
+
+	var staticObject = new StaticObject( mesh, collisionType );
+	this.addStaticObject( staticObject );
 	return staticObject;
 };
 
@@ -35641,39 +35645,41 @@ ActionManager.prototype.createStatic = function(mesh, collisionType){
  * 
  * @returns {ActionTrigger} The new action trigger.
  */
-ActionManager.prototype.createTrigger = function(label, radius, actionCallback){
-	
-	var trigger = new ActionTrigger(radius, new Action(Action.TYPES.SCRIPT, actionCallback, label));
-	this.addTrigger(trigger);
+ActionManager.prototype.createTrigger = function( label, radius, actionCallback ) {
+
+	var trigger = new ActionTrigger( radius, new Action( Action.TYPES.SCRIPT, actionCallback, label ) );
+	this.addTrigger( trigger );
 	return trigger;
 };
 
 /**
  * Adds a single interactive object to the internal array.
  * 
- * @param {InteractiveObject} interactiveObject - The interactive object to be added.
+ * @param {InteractiveObject} interactiveObject - The interactive object to be
+ * added.
  */
-ActionManager.prototype.addInteractiveObject = function(interactiveObject){
-	
-	this.interactiveObjects.push(interactiveObject);
+ActionManager.prototype.addInteractiveObject = function( interactiveObject ) {
+
+	this.interactiveObjects.push( interactiveObject );
 };
 
 /**
  * Removes a single interactive object from the internal array.
  * 
- * @param {InteractiveObject} interactiveObject - The interactive object to be removed.
+ * @param {InteractiveObject} interactiveObject - The interactive object to be
+ * removed.
  */
-ActionManager.prototype.removeInteractiveObject = function(interactiveObject){
-	
-	var index = this.interactiveObjects.indexOf(interactiveObject);
-	this.interactiveObjects.splice(index, 1);
+ActionManager.prototype.removeInteractiveObject = function( interactiveObject ) {
+
+	var index = this.interactiveObjects.indexOf( interactiveObject );
+	this.interactiveObjects.splice( index, 1 );
 };
 
 /**
  * Removes all interactive objects from the internal array.
  */
-ActionManager.prototype.removeInteractiveObjects = function(){
-	
+ActionManager.prototype.removeInteractiveObjects = function() {
+
 	this.interactiveObjects.length = 0;
 };
 
@@ -35682,9 +35688,9 @@ ActionManager.prototype.removeInteractiveObjects = function(){
  * 
  * @param {ActionTrigger} trigger - The trigger to be added.
  */
-ActionManager.prototype.addTrigger = function(trigger){
-	
-	this.triggers.push(trigger);
+ActionManager.prototype.addTrigger = function( trigger ) {
+
+	this.triggers.push( trigger );
 };
 
 /**
@@ -35692,17 +35698,17 @@ ActionManager.prototype.addTrigger = function(trigger){
  * 
  * @param {ActionTrigger} trigger - The trigger to be removed.
  */
-ActionManager.prototype.removeTrigger = function(trigger){
-	
-	var index = this.triggers.indexOf(trigger);
-	this.triggers.splice(index, 1);
+ActionManager.prototype.removeTrigger = function( trigger ) {
+
+	var index = this.triggers.indexOf( trigger );
+	this.triggers.splice( index, 1 );
 };
 
 /**
  * Removes all triggers from the internal array.
  */
-ActionManager.prototype.removeTriggers = function(){
-	
+ActionManager.prototype.removeTriggers = function() {
+
 	this.triggers.length = 0;
 };
 
@@ -35711,9 +35717,9 @@ ActionManager.prototype.removeTriggers = function(){
  * 
  * @param {StaticObject} staticObject - The static object to be added.
  */
-ActionManager.prototype.addStaticObject = function(staticObject){
-	
-	this.staticObjects.push(staticObject);
+ActionManager.prototype.addStaticObject = function( staticObject ) {
+
+	this.staticObjects.push( staticObject );
 };
 
 /**
@@ -35721,17 +35727,17 @@ ActionManager.prototype.addStaticObject = function(staticObject){
  * 
  * @param {StaticObject} staticObject - The static object to be removed.
  */
-ActionManager.prototype.removeStaticObject = function(staticObject){
-	
-	var index = this.staticObjects.indexOf(staticObject);
-	this.staticObjects.splice(index, 1);
+ActionManager.prototype.removeStaticObject = function( staticObject ) {
+
+	var index = this.staticObjects.indexOf( staticObject );
+	this.staticObjects.splice( index, 1 );
 };
 
 /**
  * Removes all static objects from the internal array.
  */
-ActionManager.prototype.removeStaticObjects = function(){
-	
+ActionManager.prototype.removeStaticObjects = function() {
+
 	this.staticObjects.length = 0;
 };
 
@@ -35745,12 +35751,13 @@ module.exports = new ActionManager();
 
 "use strict";
 
-var THREE = require("three");
-var utils = require("../etc/Utils");
+var THREE = require( "three" );
+var utils = require( "../etc/Utils" );
 
 /**
- * The constructor creates an internal mesh, which represents the trigger in 3D-space.
- * A player activates a trigger by entering in the corresponding circle geometry.
+ * The constructor creates an internal mesh, which represents the trigger in
+ * 3D-space. A player activates a trigger by entering in the corresponding
+ * circle geometry.
  * 
  * @constructor
  * @augments THREE.Mesh
@@ -35758,64 +35765,66 @@ var utils = require("../etc/Utils");
  * @param {number} radius - The radius of the trigger.
  * @param {Action} action - The action, that should be executed.
  */
-function ActionTrigger(radius, action) {
+function ActionTrigger( radius, action ) {
 
-	THREE.Mesh.call(this);
-	
-	Object.defineProperties(this, {
-		type: {
-			value: "ActionTrigger",
-			configurable: false,
-			enumerable: true,
-			writable: false
+	THREE.Mesh.call( this );
+
+	Object.defineProperties( this, {
+		type : {
+			value : "ActionTrigger",
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		radius: {
-			value: radius,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		radius : {
+			value : radius,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		action: {
-			value: action,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		action : {
+			value : action,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
-	});
-	
+	} );
+
 	// by default, trigger is parallel to the floor
 	this.rotation.x = -0.5 * Math.PI;
-	
+
 	// apply geometry
 	this.geometry = new THREE.CircleGeometry( this.radius );
-	
+
 	// hide default material
 	this.material.visible = false;
-	
+
 	// show wireframe only in dev mode
-	if(utils.isDevelopmentModeActive() === true){
+	if ( utils.isDevelopmentModeActive() === true )
+	{
 		this.material.visible = true;
 		this.material.wireframe = true;
 		this.material.color = new THREE.Color( 0xffffff );
 	}
 }
 
-ActionTrigger.prototype = Object.create(THREE.Mesh.prototype);
+ActionTrigger.prototype = Object.create( THREE.Mesh.prototype );
 ActionTrigger.prototype.constructor = ActionTrigger;
 
 module.exports = ActionTrigger;
 },{"../etc/Utils":41,"three":2}],8:[function(require,module,exports){
 /**
- * @file The prototype InteractiveObject enables ordinary 3D-Objects to be interactive. 
- * Any interactive object is part of the collision-detection logic and ready for interacting with the player.
+ * @file The prototype InteractiveObject enables ordinary 3D-Objects to be
+ * interactive. Any interactive object is part of the collision-detection logic
+ * and ready for interacting with the player.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-var THREE = require("three");
-var OBB = require("../etc/OBB");
+var THREE = require( "three" );
+var OBB = require( "../etc/OBB" );
 
 /**
  * Creates an interactive object.
@@ -35829,53 +35838,53 @@ var OBB = require("../etc/OBB");
  */
 function InteractiveObject( mesh, collisionType, raycastPrecision, action ) {
 
-	Object.defineProperties(this, {
-		mesh: {
-			value: mesh,
-			configurable: false,
-			enumerable: true,
-			writable: true
+	Object.defineProperties( this, {
+		mesh : {
+			value : mesh,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		collisionType: {
-			value: collisionType,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		collisionType : {
+			value : collisionType,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		raycastPrecision: {
-			value: raycastPrecision,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		raycastPrecision : {
+			value : raycastPrecision,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		action: {
-			value: action,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		action : {
+			value : action,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
 		// bounding volumes
-		boundingSphere: {
-			value: new THREE.Sphere(),
-			configurable: false,
-			enumerable: true,
-			writable: true
+		boundingSphere : {
+			value : new THREE.Sphere(),
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		aabb: {
-			value: new THREE.Box3(),
-			configurable: false,
-			enumerable: true,
-			writable: true
+		aabb : {
+			value : new THREE.Box3(),
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		obb: {
-			value: new OBB(),
-			configurable: false,
-			enumerable: true,
-			writable: true
+		obb : {
+			value : new OBB(),
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		
-	});
-	
+
+	} );
+
 	// compute default bounding volumes
 	this.mesh.geometry.computeBoundingBox();
 	this.mesh.geometry.computeBoundingSphere();
@@ -35884,8 +35893,8 @@ function InteractiveObject( mesh, collisionType, raycastPrecision, action ) {
 /**
  * Updates the static object.
  */
-InteractiveObject.prototype.update = function(){
-	
+InteractiveObject.prototype.update = function() {
+
 	// always update bounding sphere
 	// other bounding volumes are only calculated if required
 	this.boundingSphere.copy( this.mesh.geometry.boundingSphere );
@@ -35893,170 +35902,174 @@ InteractiveObject.prototype.update = function(){
 };
 
 /**
- * This method detects an intersection between the raycaster and the 
- * relevant object. According to raycast precision, different algorithm
- * are used to detect an intersection.
+ * This method detects an intersection between the raycaster and the relevant
+ * object. According to raycast precision, different algorithm are used to
+ * detect an intersection.
  * 
  * @param {THREE.Raycaster} raycaster - A raycaster instance.
  * @param {object} intersects - An array with intersection points.
  */
-InteractiveObject.prototype.raycast = ( function(){
-	
+InteractiveObject.prototype.raycast = ( function() {
+
 	var index = 0;
 	var intersectsRay = [];
 	var intersectionPoint = null;
 	var distance = 0;
-	
-	return function( raycaster, intersects ){
-		
+
+	return function( raycaster, intersects ) {
+
 		// check raycast precision
-		switch ( this.raycastPrecision ){
-		
-			case InteractiveObject.RAYCASTPRECISION.AABB: {
-							
+		switch ( this.raycastPrecision )
+		{
+
+			case InteractiveObject.RAYCASTPRECISION.AABB:
+			{
 				// apply transformation
 				this.aabb.copy( this.mesh.geometry.boundingBox );
 				this.aabb.applyMatrix4( this.mesh.matrixWorld );
-				
+
 				// do intersection test
 				intersectionPoint = raycaster.ray.intersectBox( this.aabb );
-				
+
 				break;
 			}
-			
-			case InteractiveObject.RAYCASTPRECISION.OBB: {
-				
+
+			case InteractiveObject.RAYCASTPRECISION.OBB:
+			{
 				// calculate OBB
 				this.obb.setFromObject( this.mesh );
-				
+
 				// do intersection test
 				intersectionPoint = this.obb.intersectRay( raycaster.ray );
-				
+
 				break;
 			}
-			
-			case InteractiveObject.RAYCASTPRECISION.FACE: {
-				
+
+			case InteractiveObject.RAYCASTPRECISION.FACE:
+			{
 				// call default raycast method of the mesh object
 				this.mesh.raycast( raycaster, intersectsRay );
-				
-				for( index = 0; index < intersectsRay.length; index++ ){
-					
+
+				for ( index = 0; index < intersectsRay.length; index++ )
+				{
 					// set the interactive object as result object
 					intersectsRay[ index ].object = this;
-					
+
 					// push to result array
 					intersects.push( intersectsRay[ index ] );
 				}
-				 // reset array for next call
+				// reset array for next call
 				intersectsRay.length = 0;
-				
+
 				break;
 			}
-			
-			default: {
-				
+
+			default:
+			{
+
 				throw "ERROR: InteractiveObject: No valid raycast precision applied to object.";
 			}
-		
+
 		}
-		
+
 		// if a single intersectionPoint is found, we need to calculate
 		// additional data and push the point into the intersects array
-		if ( intersectionPoint !== null)  {
-			
+		if ( intersectionPoint !== null )
+		{
 			// get the distance to the intersection point
-			distance = raycaster.ray.origin.distanceTo(intersectionPoint);
-			
-			if (distance >= raycaster.precision && distance >= raycaster.near && distance <= raycaster.far){
-			
-				// store the result in special data structure, see THREE.Mesh.raycast
-				intersects.push({
-					distance: distance,
-					point: intersectionPoint,
-					face: null,
-					faceIndex: null,
-					object: this
-				});
+			distance = raycaster.ray.origin.distanceTo( intersectionPoint );
+
+			if ( distance >= raycaster.precision && distance >= raycaster.near && distance <= raycaster.far )
+			{
+				// store the result in special data structure, see
+				// THREE.Mesh.raycast
+				intersects.push( {
+					distance : distance,
+					point : intersectionPoint,
+					face : null,
+					faceIndex : null,
+					object : this
+				} );
 			}
-			
+
 			// reset value
 			intersectionPoint = null;
 		}
-		
+
 	};
-	
-}());
-	
+
+}() );
+
 /**
- * This method detects an intersection between the given bounding box
- * and the bounding volume of the interactive object.
+ * This method detects an intersection between the given bounding box and the
+ * bounding volume of the interactive object.
  * 
  * @param {THREE.Box3} boundingBox - The boundingBox of the controls.
  * 
  * @returns {boolean} Intersects the object with the given bounding box?
  */
-InteractiveObject.prototype.isIntersection = ( function(){
-	
+InteractiveObject.prototype.isIntersection = ( function() {
+
 	var isIntersection;
-	
-	return function( boundingBox ){
-		
+
+	return function( boundingBox ) {
+
 		isIntersection = false;
-		
+
 		// check type of collision test
-		switch ( this.collisionType ){
-		
-			case InteractiveObject.COLLISIONTYPES.AABB: {
-				
+		switch ( this.collisionType )
+		{
+
+			case InteractiveObject.COLLISIONTYPES.AABB:
+			{
 				// apply transformation
 				this.aabb.copy( this.mesh.geometry.boundingBox );
 				this.aabb.applyMatrix4( this.mesh.matrixWorld );
-				
+
 				// do intersection test
 				isIntersection = this.aabb.isIntersectionBox( boundingBox );
-				
+
 				break;
 			}
-		
-			case InteractiveObject.COLLISIONTYPES.OBB: {
-				
+
+			case InteractiveObject.COLLISIONTYPES.OBB:
+			{
 				// calculate OBB
 				this.obb.setFromObject( this.mesh );
-				
+
 				// do intersection test
-				isIntersection =  this.obb.isIntersectionAABB( boundingBox );
-				
+				isIntersection = this.obb.isIntersectionAABB( boundingBox );
+
 				break;
 			}
-			
-			default: {
-				
+
+			default:
+			{
 				throw "ERROR: InteractiveObject: No valid collision type applied to object.";
 			}
 		}
-		
+
 		return isIntersection;
-		
+
 	};
-	
-} ( ) );
+
+}() );
 
 InteractiveObject.COLLISIONTYPES = {
-	AABB: 0,
-	OBB: 1
+	AABB : 0,
+	OBB : 1
 };
 
 InteractiveObject.RAYCASTPRECISION = {
-	AABB: 0,
-	OBB: 1,
-	FACE: 2
+	AABB : 0,
+	OBB : 1,
+	FACE : 2
 };
 
 module.exports = InteractiveObject;
 },{"../etc/OBB":34,"three":2}],9:[function(require,module,exports){
 /**
- * @file The prototype StaticObject enables ordinary 3D-Objects to be static. 
+ * @file The prototype StaticObject enables ordinary 3D-Objects to be static.
  * Any interactive object is part of the collision-detection logic.
  * 
  * @author Human Interactive
@@ -36064,8 +36077,8 @@ module.exports = InteractiveObject;
 
 "use strict";
 
-var THREE = require("three");
-var OBB = require("../etc/OBB");
+var THREE = require( "three" );
+var OBB = require( "../etc/OBB" );
 
 /**
  * Creates a static object.
@@ -36077,40 +36090,40 @@ var OBB = require("../etc/OBB");
  */
 function StaticObject( object, collisionType ) {
 
-	Object.defineProperties(this, {
-		mesh: {
-			value: object,
-			configurable: false,
-			enumerable: true,
-			writable: true
+	Object.defineProperties( this, {
+		mesh : {
+			value : object,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		collisionType: {
-			value: collisionType,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		collisionType : {
+			value : collisionType,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
 		// bounding volumes
-		boundingSphere: {
-			value: new THREE.Sphere(),
-			configurable: false,
-			enumerable: true,
-			writable: true
+		boundingSphere : {
+			value : new THREE.Sphere(),
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		aabb: {
-			value: new THREE.Box3(),
-			configurable: false,
-			enumerable: true,
-			writable: true
+		aabb : {
+			value : new THREE.Box3(),
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		obb: {
-			value: new OBB(),
-			configurable: false,
-			enumerable: true,
-			writable: true
+		obb : {
+			value : new OBB(),
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-	});
-	
+	} );
+
 	// compute default bounding volumes
 	this.mesh.geometry.computeBoundingBox();
 	this.mesh.geometry.computeBoundingSphere();
@@ -36119,8 +36132,8 @@ function StaticObject( object, collisionType ) {
 /**
  * Updates the static object.
  */
-StaticObject.prototype.update = function(){
-	
+StaticObject.prototype.update = function() {
+
 	// always update bounding sphere
 	// other bounding volumes are only calculated if required
 	this.boundingSphere.copy( this.mesh.geometry.boundingSphere );
@@ -36128,58 +36141,59 @@ StaticObject.prototype.update = function(){
 };
 
 /**
- * This method detects an intersection between the given bounding box
- * and the bounding volume of the static object.
+ * This method detects an intersection between the given bounding box and the
+ * bounding volume of the static object.
  * 
  * @param {THREE.Box3} boundingBox - The boundingBox of the controls.
  * 
  * @returns {boolean} Intersects the object with the given bounding box?
  */
-StaticObject.prototype.isIntersection = ( function(){
-	
+StaticObject.prototype.isIntersection = ( function() {
+
 	var isIntersection;
-	
-	return function( boundingBox ){
-		
+
+	return function( boundingBox ) {
+
 		isIntersection = false;
-		
+
 		// check type of collision test
-		switch ( this.collisionType ){
-		
-			case StaticObject.COLLISIONTYPES.AABB: {
-							
+		switch ( this.collisionType )
+		{
+
+			case StaticObject.COLLISIONTYPES.AABB:
+			{
 				// apply transformation
 				this.aabb.copy( this.mesh.geometry.boundingBox );
 				this.aabb.applyMatrix4( this.mesh.matrixWorld );
-				
+
 				// do intersection test
 				isIntersection = this.aabb.isIntersectionBox( boundingBox );
-				
+
 				break;
 			}
-		
-			case StaticObject.COLLISIONTYPES.OBB: {
-				
+
+			case StaticObject.COLLISIONTYPES.OBB:
+			{
 				// calculate OBB
 				this.obb.setFromObject( this.mesh );
-				
+
 				// do intersection test
-				isIntersection =  this.obb.isIntersectionAABB( boundingBox );
-				
+				isIntersection = this.obb.isIntersectionAABB( boundingBox );
+
 				break;
 			}
-			
-			default: {
-				
+
+			default:
+			{
 				throw "ERROR: StaticObject: No valid collision type applied to object.";
 			}
 		}
-		
+
 		return isIntersection;
-		
+
 	};
-	
-} ( ) );
+
+}() );
 
 StaticObject.COLLISIONTYPES = {
 	AABB : 0,
@@ -36190,15 +36204,14 @@ module.exports = StaticObject;
 },{"../etc/OBB":34,"three":2}],10:[function(require,module,exports){
 (function (global){
 /**
- * @file Prototype for defining an animation for
- * a single property.
+ * @file Prototype for defining an animation for a single property.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-var logger = require("../etc/Logger");
+var logger = require( "../etc/Logger" );
 
 /**
  * Creates an animation.
@@ -36207,101 +36220,105 @@ var logger = require("../etc/Logger");
  * 
  * @param {object} options - The parameter for the animation.
  */
-function Animation(options) {
+function Animation( options ) {
 
-	Object.defineProperties(this, {
-		object: {
-			value: null,
-			configurable: false,
-			enumerable: true,
-			writable: true
+	Object.defineProperties( this, {
+		object : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		property: {
-			value: null,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		property : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		duration: {
-			value: 0,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		duration : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		start: {
-			value: 0,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		start : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		end: {
-			value: 0,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		end : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		delayTime: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		delayTime : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		easing: {
-			value: undefined,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		easing : {
+			value : undefined,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		onStartCallback: {
-			value: undefined,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		onStartCallback : {
+			value : undefined,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		onUpdateCallback: {
-			value: undefined,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		onUpdateCallback : {
+			value : undefined,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		onCompleteCallback: {
-			value: undefined,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		onCompleteCallback : {
+			value : undefined,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		onStopCallback: {
-			value: undefined,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		onStopCallback : {
+			value : undefined,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		isPlaying: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		isPlaying : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_startTime: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_startTime : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_isHover: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_isHover : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
-	
+	} );
+
 	// set options
-	for(var property in options){
-		if( this.hasOwnProperty( property ) === true ){
+	for ( var property in options )
+	{
+		if ( this.hasOwnProperty( property ) === true )
+		{
 			this[ property ] = options[ property ];
-		}else{
-			logger.warn("WARN: Animation: Object created with faulty options. Property '%s' is no member of Animation.", property);
+		}
+		else
+		{
+			logger.warn( "WARN: Animation: Object created with faulty options. Property '%s' is no member of Animation.", property );
 		}
 	}
 }
@@ -36313,103 +36330,108 @@ function Animation(options) {
  * 
  * @returns {boolean} Is the animation finished?
  */
-Animation.prototype.update = (function(){
-	
+Animation.prototype.update = ( function() {
+
 	var index, elapsed, value, temp = 0;
 	var isFinished = false;
-	
-	return function( time ){
-		
+
+	return function( time ) {
+
 		// set default value
 		isFinished = false;
-		
+
 		// if the startTime is greater than the current time,
 		// we will skip the update. this is important for delayed
 		// start time.
-		if ( time < this._startTime ) {
-
+		if ( time < this._startTime )
+		{
 			return isFinished;
 
 		}
-		
+
 		// calculate elapsed time. the final value of "elapsed"
 		// will always be inside the range of [0, 1].
 		elapsed = ( time - this._startTime ) / this.duration;
 		elapsed = elapsed > 1 ? 1 : elapsed;
-		
+
 		// execute easing function
-		if( typeof this.easing === "function" ){
-			
+		if ( typeof this.easing === "function" )
+		{
 			value = this.easing( elapsed );
-			
-		}else{
-			
+
+		}
+		else
+		{
+
 			throw "ERROR: Animation: No easing function assigned.";
 		}
-		
+
 		// check, if the object has the specified property
-		if( this.object.hasOwnProperty( this.property ) === true ){
-			
+		if ( this.object.hasOwnProperty( this.property ) === true )
+		{
 			// calculate and assign new value
 			this.object[ this.property ] = this.start + ( this.end - this.start ) * value;
 		}
-		
+
 		// execute callback
-		if( typeof this.onUpdateCallback === "function" ){
-			
+		if ( typeof this.onUpdateCallback === "function" )
+		{
 			this.onUpdateCallback();
 		}
-		
+
 		// check finish
-		if( elapsed === 1 ){
-			
+		if ( elapsed === 1 )
+		{
 			// when the hover flag is set, the animation
 			// will be played in an endless loop.
-			if( this._isHover === true ){
-				
+			if ( this._isHover === true )
+			{
 				// swtich start and end values
 				temp = this.start;
 				this.start = this.end;
-				this.end =  temp;
-				
+				this.end = temp;
+
 				// set new start time
 				this._startTime = time + this.delayTime;
-				
-			}else{
-				
+
+			}
+			else
+			{
 				// exectue callback
-				if ( typeof this.onCompleteCallback ===  "function" ) {
+				if ( typeof this.onCompleteCallback === "function" )
+				{
 
 					this.onCompleteCallback();
 
 				}
-				
+
 				isFinished = true;
-				
+
 			}
-		
+
 		}
-		
+
 		return isFinished;
 	};
-	
-}());
+
+}() );
 
 /**
  * Plays the animation.
  * 
  * @param {number} time - The starting time.
  */
-Animation.prototype.play = function( time ){
-	
+Animation.prototype.play = function( time ) {
+
 	this.isPlaying = true;
-	
+
 	this._startTime = time !== undefined ? time : global.performance.now();
 	this._startTime += this.delayTime;
-	
+
 	// execute callback
-	if( typeof this.onStartCallback === "function" ){
-		
+	if ( typeof this.onStartCallback === "function" )
+	{
+
 		this.onStartCallback();
 	}
 };
@@ -36417,16 +36439,18 @@ Animation.prototype.play = function( time ){
 /**
  * Stops the animation.
  */
-Animation.prototype.stop = function(){
-	
-	if( this.isPlaying === true ){
-		
+Animation.prototype.stop = function() {
+
+	if ( this.isPlaying === true )
+	{
+
 		this.isPlaying = false;
 	}
-	
+
 	// execute callback
-	if( typeof this.onStopCallback === "function" ){
-		
+	if ( typeof this.onStopCallback === "function" )
+	{
+
 		this.onStopCallback();
 	}
 };
@@ -36436,8 +36460,8 @@ Animation.prototype.stop = function(){
  * 
  * @param {boolean} hover - Should the animation has an endless hover effect?
  */
-Animation.prototype.setHover = function( isHover ){
-	
+Animation.prototype.setHover = function( isHover ) {
+
 	this._isHover = isHover;
 };
 
@@ -36446,15 +36470,15 @@ module.exports = Animation;
 },{"../etc/Logger":32}],11:[function(require,module,exports){
 (function (global){
 /**
- * @file Interface for entire animation-handling. This prototype is used in stages
- * to access animation-based logic and to create animation-entities.
+ * @file Interface for entire animation-handling. This prototype is used in
+ * stages to access animation-based logic and to create animation-entities.
  * 
  * @author Human Interactive
  */
 "use strict";
 
-var BasicAnimation = require("../animation/Animation");
-var SpriteAnimation = require("../animation/SpriteAnimation");
+var BasicAnimation = require( "../animation/Animation" );
+var SpriteAnimation = require( "../animation/SpriteAnimation" );
 
 /**
  * Creates the animation manager.
@@ -36462,21 +36486,21 @@ var SpriteAnimation = require("../animation/SpriteAnimation");
  * @constructor
  */
 function AnimationManager() {
-	
-	Object.defineProperties(this, {	
-		_animations: {
-			value: [],
-			configurable: false,
-			enumerable: false,
-			writable: false
+
+	Object.defineProperties( this, {
+		_animations : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		_sprites: {
-			value: [],
-			configurable: false,
-			enumerable: false,
-			writable: false
+		_sprites : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
 		}
-	});
+	} );
 }
 
 /**
@@ -36486,26 +36510,27 @@ function AnimationManager() {
  * 
  * @returns {Animation} The new animation.
  */
-AnimationManager.prototype.createBasicAnimation = function(options){
-	
-	var animation = new BasicAnimation(options);
-	this.addAnimation(animation);
+AnimationManager.prototype.createBasicAnimation = function( options ) {
+
+	var animation = new BasicAnimation( options );
+	this.addAnimation( animation );
 	return animation;
 };
 
 /**
- * Creates an animation, which animates one property of an object in an endless loop.
+ * Creates an animation, which animates one property of an object in an endless
+ * loop.
  * 
  * @param {object} options - The options for the animation.
  * 
  * @returns {Animation} The new animation.
  */
-AnimationManager.prototype.createHoverAnimation = function(options){
-	
-	var animation = new BasicAnimation(options);
-	animation.setHover(true);
-	this.addAnimation(animation);
-	
+AnimationManager.prototype.createHoverAnimation = function( options ) {
+
+	var animation = new BasicAnimation( options );
+	animation.setHover( true );
+	this.addAnimation( animation );
+
 	return animation;
 };
 
@@ -36515,16 +36540,18 @@ AnimationManager.prototype.createHoverAnimation = function(options){
  * @param {number} rows - Number of images in y-direction.
  * @param {number} columns - Number of images in x-direction.
  * @param {number} numberOfImages - Total number of images in the sprite.
- * @param {THREE.Texture} texture - Contains the sprite image. The dimension of the texture should be a power of two, but it's not necessary.
- * @param {number} imagesPerSecond - How many images should be displayed per second.
+ * @param {THREE.Texture} texture - Contains the sprite image. The dimension of
+ * the texture should be a power of two, but it's not necessary.
+ * @param {number} imagesPerSecond - How many images should be displayed per
+ * second.
  * 
  * @returns {SpriteAnimation} The new sprite animation.
  */
-AnimationManager.prototype.createSpriteAnimation = function( rows, columns, numberOfImages, texture, imagesPerSecond ){
-	
+AnimationManager.prototype.createSpriteAnimation = function( rows, columns, numberOfImages, texture, imagesPerSecond ) {
+
 	var sprite = new SpriteAnimation( rows, columns, numberOfImages, texture, imagesPerSecond );
-	this.addSpriteAnimation(sprite);
-	
+	this.addSpriteAnimation( sprite );
+
 	return sprite;
 };
 
@@ -36533,78 +36560,78 @@ AnimationManager.prototype.createSpriteAnimation = function( rows, columns, numb
  * 
  * @param {number} delta - The time delta value.
  */
-AnimationManager.prototype.update = function( delta ){
-	
+AnimationManager.prototype.update = function( delta ) {
+
 	this._updateAnimations();
-	
+
 	this._updateSprites( delta );
 };
 
 /**
  * Updates the standard animations.
  */
-AnimationManager.prototype._updateAnimations = (function(){
-	
+AnimationManager.prototype._updateAnimations = ( function() {
+
 	var index, time = 0;
 	var isFinished = false;
 	var animation = null;
-	
+
 	return function() {
-		
+
 		// use the same time value for all animations
 		time = global.performance.now();
-		
+
 		// iterate over all animations
-		for( index = 0; index < this._animations.length; index++ ){
-			
+		for ( index = 0; index < this._animations.length; index++ )
+		{
 			// buffer current animation
-			animation = this._animations[index];
-			
+			animation = this._animations[ index ];
+
 			// only update the animation if it actually runs
-			if( animation.isPlaying === true ){
-				
+			if ( animation.isPlaying === true )
+			{
 				// update it and receive status
 				isFinished = animation.update( time );
-				
+
 				// check status
-				if( isFinished === true ){
-					
-					// remove automatically  the animation after ending
+				if ( isFinished === true )
+				{
+					// remove automatically the animation after ending
 					this.removeAnimation( animation );
 				}
-			}		
+			}
 		}
 	};
-	
-}());
+
+}() );
 
 /**
  * Updates the sprite objects.
  * 
  * @param {number} delta - The time delta value.
  */
-AnimationManager.prototype._updateSprites = (function(){
-	
+AnimationManager.prototype._updateSprites = ( function() {
+
 	var index = 0;
-	
-	return function( delta ){
-		
-		for( index = 0; index < this._sprites.length; index++ ){
-			
-			this._sprites[index].update( delta );
+
+	return function( delta ) {
+
+		for ( index = 0; index < this._sprites.length; index++ )
+		{
+			this._sprites[ index ].update( delta );
 		}
 	};
-	
-}());
+
+}() );
 
 /**
  * Adds a single animation object to the internal array.
  * 
  * @param {Animation} animation - The animation object to be added.
  */
-AnimationManager.prototype.addAnimation = function( animation ){
-	
-	this._animations.push(animation);
+AnimationManager.prototype.addAnimation = function( animation ) {
+
+	this._animations.push( animation );
 };
 
 /**
@@ -36612,9 +36639,9 @@ AnimationManager.prototype.addAnimation = function( animation ){
  * 
  * @param {SpriteAnimation} sprite - The sprite object to be added.
  */
-AnimationManager.prototype.addSpriteAnimation = function( sprite ){
-	
-	this._sprites.push(sprite);
+AnimationManager.prototype.addSpriteAnimation = function( sprite ) {
+
+	this._sprites.push( sprite );
 };
 
 /**
@@ -36622,10 +36649,10 @@ AnimationManager.prototype.addSpriteAnimation = function( sprite ){
  * 
  * @param {Animation} animation - The animation object to be removed.
  */
-AnimationManager.prototype.removeAnimation = function( animation ){
-	
-	var index = this._animations.indexOf(animation);
-	this._animations.splice(index, 1);
+AnimationManager.prototype.removeAnimation = function( animation ) {
+
+	var index = this._animations.indexOf( animation );
+	this._animations.splice( index, 1 );
 };
 
 /**
@@ -36633,25 +36660,25 @@ AnimationManager.prototype.removeAnimation = function( animation ){
  * 
  * @param {SpriteAnimation} sprite - The sprite object to be removed.
  */
-AnimationManager.prototype.removeAnimation = function( sprite ){
-	
-	var index = this._sprites.indexOf(sprite);
-	this._sprites.splice(index, 1);
+AnimationManager.prototype.removeAnimation = function( sprite ) {
+
+	var index = this._sprites.indexOf( sprite );
+	this._sprites.splice( index, 1 );
 };
 
 /**
  * Removes all animations from the internal array.
  */
-AnimationManager.prototype.removeAnimations = function(){
-	
+AnimationManager.prototype.removeAnimations = function() {
+
 	this._animations.length = 0;
 };
 
 /**
  * Removes all sprites from the internal array.
  */
-AnimationManager.prototype.removeSprites = function(){
-	
+AnimationManager.prototype.removeSprites = function() {
+
 	this._sprites.length = 0;
 };
 
@@ -36672,34 +36699,35 @@ var Easing = {
 
 	Linear : {
 
-		None : function(k) {
+		None : function( k ) {
 
 			return k;
-		
+
 		}
-	
+
 	},
 
 	Quadratic : {
 
-		In : function(k) {
+		In : function( k ) {
 
 			return k * k;
 
 		},
 
-		Out : function(k) {
+		Out : function( k ) {
 
-			return k * (2 - k);
+			return k * ( 2 - k );
 
 		},
 
-		InOut : function(k) {
+		InOut : function( k ) {
 
-			if ((k *= 2) < 1){
+			if ( ( k *= 2 ) < 1 )
+			{
 				return 0.5 * k * k;
-			}	
-			return -0.5 * (--k * (k - 2) - 1);
+			}
+			return -0.5 * ( --k * ( k - 2 ) - 1 );
 
 		}
 
@@ -36707,24 +36735,25 @@ var Easing = {
 
 	Cubic : {
 
-		In : function(k) {
+		In : function( k ) {
 
 			return k * k * k;
 
 		},
 
-		Out : function(k) {
+		Out : function( k ) {
 
 			return --k * k * k + 1;
 
 		},
 
-		InOut : function(k) {
+		InOut : function( k ) {
 
-			if ((k *= 2) < 1){
+			if ( ( k *= 2 ) < 1 )
+			{
 				return 0.5 * k * k * k;
-			}	
-			return 0.5 * ((k -= 2) * k * k + 2);
+			}
+			return 0.5 * ( ( k -= 2 ) * k * k + 2 );
 
 		}
 
@@ -36732,24 +36761,25 @@ var Easing = {
 
 	Quartic : {
 
-		In : function(k) {
+		In : function( k ) {
 
 			return k * k * k * k;
 
 		},
 
-		Out : function(k) {
+		Out : function( k ) {
 
-			return 1 - (--k * k * k * k);
+			return 1 - ( --k * k * k * k );
 
 		},
 
-		InOut : function(k) {
+		InOut : function( k ) {
 
-			if ((k *= 2) < 1){
+			if ( ( k *= 2 ) < 1 )
+			{
 				return 0.5 * k * k * k * k;
 			}
-			return -0.5 * ((k -= 2) * k * k * k - 2);
+			return -0.5 * ( ( k -= 2 ) * k * k * k - 2 );
 
 		}
 
@@ -36757,24 +36787,25 @@ var Easing = {
 
 	Quintic : {
 
-		In : function(k) {
+		In : function( k ) {
 
 			return k * k * k * k * k;
 
 		},
 
-		Out : function(k) {
+		Out : function( k ) {
 
 			return --k * k * k * k * k + 1;
 
 		},
 
-		InOut : function(k) {
+		InOut : function( k ) {
 
-			if ((k *= 2) < 1){
+			if ( ( k *= 2 ) < 1 )
+			{
 				return 0.5 * k * k * k * k * k;
-			}	
-			return 0.5 * ((k -= 2) * k * k * k * k + 2);
+			}
+			return 0.5 * ( ( k -= 2 ) * k * k * k * k + 2 );
 
 		}
 
@@ -36782,21 +36813,21 @@ var Easing = {
 
 	Sinusoidal : {
 
-		In : function(k) {
+		In : function( k ) {
 
-			return 1 - Math.cos(k * Math.PI / 2);
-
-		},
-
-		Out : function(k) {
-
-			return Math.sin(k * Math.PI / 2);
+			return 1 - Math.cos( k * Math.PI / 2 );
 
 		},
 
-		InOut : function(k) {
+		Out : function( k ) {
 
-			return 0.5 * (1 - Math.cos(Math.PI * k));
+			return Math.sin( k * Math.PI / 2 );
+
+		},
+
+		InOut : function( k ) {
+
+			return 0.5 * ( 1 - Math.cos( Math.PI * k ) );
 
 		}
 
@@ -36804,30 +36835,33 @@ var Easing = {
 
 	Exponential : {
 
-		In : function(k) {
+		In : function( k ) {
 
-			return k === 0 ? 0 : Math.pow(1024, k - 1);
-
-		},
-
-		Out : function(k) {
-
-			return k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
+			return k === 0 ? 0 : Math.pow( 1024, k - 1 );
 
 		},
 
-		InOut : function(k) {
+		Out : function( k ) {
 
-			if (k === 0){
+			return k === 1 ? 1 : 1 - Math.pow( 2, -10 * k );
+
+		},
+
+		InOut : function( k ) {
+
+			if ( k === 0 )
+			{
 				return 0;
-			}	
-			if (k === 1){
+			}
+			if ( k === 1 )
+			{
 				return 1;
-			}			
-			if ((k *= 2) < 1){
-				return 0.5 * Math.pow(1024, k - 1);
-			}			
-			return 0.5 * (-Math.pow(2, -10 * (k - 1)) + 2);
+			}
+			if ( ( k *= 2 ) < 1 )
+			{
+				return 0.5 * Math.pow( 1024, k - 1 );
+			}
+			return 0.5 * ( -Math.pow( 2, -10 * ( k - 1 ) ) + 2 );
 
 		}
 
@@ -36835,24 +36869,25 @@ var Easing = {
 
 	Circular : {
 
-		In : function(k) {
+		In : function( k ) {
 
-			return 1 - Math.sqrt(1 - k * k);
-
-		},
-
-		Out : function(k) {
-
-			return Math.sqrt(1 - (--k * k));
+			return 1 - Math.sqrt( 1 - k * k );
 
 		},
 
-		InOut : function(k) {
+		Out : function( k ) {
 
-			if ((k *= 2) < 1){
-				return -0.5 * (Math.sqrt(1 - k * k) - 1);
-			}		
-			return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
+			return Math.sqrt( 1 - ( --k * k ) );
+
+		},
+
+		InOut : function( k ) {
+
+			if ( ( k *= 2 ) < 1 )
+			{
+				return -0.5 * ( Math.sqrt( 1 - k * k ) - 1 );
+			}
+			return 0.5 * ( Math.sqrt( 1 - ( k -= 2 ) * k ) + 1 );
 
 		}
 
@@ -36860,67 +36895,85 @@ var Easing = {
 
 	Elastic : {
 
-		In : function(k) {
+		In : function( k ) {
 
 			var s, a = 0.1, p = 0.4;
-			
-			if (k === 0){
+
+			if ( k === 0 )
+			{
 				return 0;
 			}
-			if (k === 1){
+			if ( k === 1 )
+			{
 				return 1;
-			}	
-			if (!a || a < 1) {
+			}
+			if ( !a || a < 1 )
+			{
 				a = 1;
 				s = p / 4;
-			} else {
-				s = p * Math.asin(1 / a) / (2 * Math.PI);
 			}
-			return -(a * Math.pow(2, 10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p));
+			else
+			{
+				s = p * Math.asin( 1 / a ) / ( 2 * Math.PI );
+			}
+			return -( a * Math.pow( 2, 10 * ( k -= 1 ) ) * Math.sin( ( k - s ) * ( 2 * Math.PI ) / p ) );
 
 		},
 
-		Out : function(k) {
+		Out : function( k ) {
 
 			var s, a = 0.1, p = 0.4;
-			
-			if (k === 0){
+
+			if ( k === 0 )
+			{
 				return 0;
 			}
-			if (k === 1){
+			if ( k === 1 )
+			{
 				return 1;
-			}	
-			if (!a || a < 1) {
+			}
+			if ( !a || a < 1 )
+			{
 				a = 1;
 				s = p / 4;
-			} else{
-				s = p * Math.asin(1 / a) / (2 * Math.PI);
 			}
-			return (a * Math.pow(2, -10 * k) * Math.sin((k - s) * (2 * Math.PI) / p) + 1);
+			else
+			{
+				s = p * Math.asin( 1 / a ) / ( 2 * Math.PI );
+			}
+			return ( a * Math.pow( 2, -10 * k ) * Math.sin( ( k - s ) * ( 2 * Math.PI ) / p ) + 1 );
 
 		},
 
-		InOut : function(k) {
+		InOut : function( k ) {
 
 			var s, a = 0.1, p = 0.4;
-			
-			if (k === 0){
+
+			if ( k === 0 )
+			{
 				return 0;
 			}
-			if (k === 1){
+			if ( k === 1 )
+			{
 				return 1;
-			}		
-			if (!a || a < 1) {
+			}
+			if ( !a || a < 1 )
+			{
 				a = 1;
 				s = p / 4;
-			} else{
-				s = p * Math.asin(1 / a) / (2 * Math.PI);
 			}
-				
-			if ((k *= 2) < 1){
-				return -0.5 * (a * Math.pow(2, 10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p));
-			}else{
-				return a * Math.pow(2, -10 * (k -= 1)) * Math.sin((k - s) * (2 * Math.PI) / p) * 0.5 + 1;
+			else
+			{
+				s = p * Math.asin( 1 / a ) / ( 2 * Math.PI );
+			}
+
+			if ( ( k *= 2 ) < 1 )
+			{
+				return -0.5 * ( a * Math.pow( 2, 10 * ( k -= 1 ) ) * Math.sin( ( k - s ) * ( 2 * Math.PI ) / p ) );
+			}
+			else
+			{
+				return a * Math.pow( 2, -10 * ( k -= 1 ) ) * Math.sin( ( k - s ) * ( 2 * Math.PI ) / p ) * 0.5 + 1;
 			}
 
 		}
@@ -36929,27 +36982,28 @@ var Easing = {
 
 	Back : {
 
-		In : function(k) {
+		In : function( k ) {
 
 			var s = 1.70158;
-			return k * k * ((s + 1) * k - s);
+			return k * k * ( ( s + 1 ) * k - s );
 
 		},
 
-		Out : function(k) {
+		Out : function( k ) {
 
 			var s = 1.70158;
-			return --k * k * ((s + 1) * k + s) + 1;
+			return --k * k * ( ( s + 1 ) * k + s ) + 1;
 
 		},
 
-		InOut : function(k) {
+		InOut : function( k ) {
 
 			var s = 1.70158 * 1.525;
-			if ((k *= 2) < 1){
-				return 0.5 * (k * k * ((s + 1) * k - s));
-			}	
-			return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
+			if ( ( k *= 2 ) < 1 )
+			{
+				return 0.5 * ( k * k * ( ( s + 1 ) * k - s ) );
+			}
+			return 0.5 * ( ( k -= 2 ) * k * ( ( s + 1 ) * k + s ) + 2 );
 
 		}
 
@@ -36957,40 +37011,48 @@ var Easing = {
 
 	Bounce : {
 
-		In : function(k) {
+		In : function( k ) {
 
-			return 1 - Easing.Bounce.Out(1 - k);
+			return 1 - Easing.Bounce.Out( 1 - k );
 
 		},
 
-		Out : function(k) {
+		Out : function( k ) {
 
-			if (k < (1 / 2.75)) {
+			if ( k < ( 1 / 2.75 ) )
+			{
 
 				return 7.5625 * k * k;
 
-			} else if (k < (2 / 2.75)) {
+			}
+			else if ( k < ( 2 / 2.75 ) )
+			{
 
-				return 7.5625 * (k -= (1.5 / 2.75)) * k + 0.75;
+				return 7.5625 * ( k -= ( 1.5 / 2.75 ) ) * k + 0.75;
 
-			} else if (k < (2.5 / 2.75)) {
+			}
+			else if ( k < ( 2.5 / 2.75 ) )
+			{
 
-				return 7.5625 * (k -= (2.25 / 2.75)) * k + 0.9375;
+				return 7.5625 * ( k -= ( 2.25 / 2.75 ) ) * k + 0.9375;
 
-			} else {
+			}
+			else
+			{
 
-				return 7.5625 * (k -= (2.625 / 2.75)) * k + 0.984375;
+				return 7.5625 * ( k -= ( 2.625 / 2.75 ) ) * k + 0.984375;
 
 			}
 
 		},
 
-		InOut : function(k) {
+		InOut : function( k ) {
 
-			if (k < 0.5){
-				return Easing.Bounce.In(k * 2) * 0.5;
-			}	
-			return Easing.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
+			if ( k < 0.5 )
+			{
+				return Easing.Bounce.In( k * 2 ) * 0.5;
+			}
+			return Easing.Bounce.Out( k * 2 - 1 ) * 0.5 + 0.5;
 
 		}
 
@@ -37000,15 +37062,14 @@ var Easing = {
 module.exports = Easing;
 },{}],13:[function(require,module,exports){
 /**
- * @file Prototype for defining an animation based
- * on sprites.
+ * @file Prototype for defining an animation based on sprites.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
 /**
  * Creates a sprite animation.
@@ -37018,57 +37079,60 @@ var THREE = require("three");
  * @param {number} rows - Number of images in y-direction.
  * @param {number} columns - Number of images in x-direction.
  * @param {number} numberOfImages - Total number of images in the sprite.
- * @param {THREE.Texture} texture - Contains the sprite image. The dimension of the texture should be a power of two, but it's not necessary.
- * @param {number} imagesPerSecond - How many images should be displayed per second.
+ * @param {THREE.Texture} texture - Contains the sprite image. The dimension of
+ * the texture should be a power of two, but it's not necessary.
+ * @param {number} imagesPerSecond - How many images should be displayed per
+ * second.
  */
 function SpriteAnimation( rows, columns, numberOfImages, texture, imagesPerSecond ) {
 
-	Object.defineProperties(this, {
-		rows: {
-			value: rows,
-			configurable: false,
-			enumerable: true,
-			writable: false
+	Object.defineProperties( this, {
+		rows : {
+			value : rows,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		columns: {
-			value: columns,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		columns : {
+			value : columns,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		numberOfImages: {
-			value: numberOfImages,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		numberOfImages : {
+			value : numberOfImages,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		texture: {
-			value: texture,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		texture : {
+			value : texture,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		imagesPerSecond: {
-			value: imagesPerSecond,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		imagesPerSecond : {
+			value : imagesPerSecond,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		_currentImage: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_currentImage : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_elapsedTime:{
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_elapsedTime : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
-	
-	// this will zoom into the texture, so you see exactly on image of the sprite
+	} );
+
+	// this will zoom into the texture, so you see exactly on image of the
+	// sprite
 	this.texture.repeat.set( 1 / this.columns, 1 / this.rows );
 }
 
@@ -37077,42 +37141,43 @@ function SpriteAnimation( rows, columns, numberOfImages, texture, imagesPerSecon
  * 
  * @param {number} delta - The update time.
  */
-SpriteAnimation.prototype.update = (function(){
-	
+SpriteAnimation.prototype.update = ( function() {
+
 	var elapsedTime = 0;
 	var currentColumn, currentRow = 0;
-	
-	return function( delta ){
-		
+
+	return function( delta ) {
+
 		// calculate the elapsed time
 		elapsedTime += delta * this.imagesPerSecond;
-	
+
 		// derive the index of the current image
 		this._currentImage = Math.floor( elapsedTime );
-		
+
 		// if the index is greater than the total number of images,
 		// reset the the counter to zero.
-		if( this._currentImage >= this.numberOfImages){
+		if ( this._currentImage >= this.numberOfImages )
+		{
 			this._currentImage = 0;
 			elapsedTime = 0;
 		}
-		
+
 		// calculate the index of the current column
 		currentColumn = this._currentImage % this.columns;
-		
+
 		// calculate texture offset in x-direction
 		this.texture.offset.x = currentColumn / this.columns;
-		
+
 		// calculate the index of the current row
 		currentRow = Math.floor( this._currentImage / this.columns );
-		
+
 		// calculate texture offset in y-direction.
 		// because the first picture in sprites is usually in the upper left,
 		// you need to start from 1 instead from zero.
-		this.texture.offset.y = 1 - (currentRow / this.rows + 1 / this.rows);
+		this.texture.offset.y = 1 - ( currentRow / this.rows + 1 / this.rows );
 	};
-	
-}());
+
+}() );
 
 module.exports = SpriteAnimation;
 },{"three":2}],14:[function(require,module,exports){
@@ -37125,8 +37190,8 @@ module.exports = SpriteAnimation;
  */
 "use strict";
 
-var PubSub = require("pubsub-js");
-var utils = require("../etc/Utils");
+var PubSub = require( "pubsub-js" );
+var utils = require( "../etc/Utils" );
 
 /**
  * Creates an audiobuffer-list.
@@ -37135,118 +37200,131 @@ var utils = require("../etc/Utils");
  * 
  * @param {object} context - The central Web Audio context.
  * @param {object} audioList - An array with name of audiofiles.
- * @param {function} onLoadCallback - This callback is executed when all audiofiles are loaded.
+ * @param {function} onLoadCallback - This callback is executed when all
+ * audiofiles are loaded.
  */
-function AudioBufferList(context, audioList, onLoadCallback) {
+function AudioBufferList( context, audioList, onLoadCallback ) {
 
-	Object.defineProperties(this, {
-		context: {
-			value: context,
-			configurable: false,
-			enumerable: true,
-			writable: false
+	Object.defineProperties( this, {
+		context : {
+			value : context,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		audioList: {
-			value: audioList,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		audioList : {
+			value : audioList,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		bufferList: {
-			value: [],
-			configurable: false,
-			enumerable: true,
-			writable: true
+		bufferList : {
+			value : [],
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		_onload: {
-			value: onLoadCallback,
-			configurable: false,
-			enumerable: false,
-			writable: false
+		_onload : {
+			value : onLoadCallback,
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		_loadCount: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_loadCount : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
+	} );
 }
 
 /**
- * This method iterates over the audio-array and loads each entry via a separate method.
+ * This method iterates over the audio-array and loads each entry via a separate
+ * method.
  */
-AudioBufferList.prototype.load = function(){
-	
-	for (var i = 0; i < this.audioList.length; i++){
-		this.loadBuffer(this.audioList[i], i);
+AudioBufferList.prototype.load = function() {
+
+	for ( var i = 0; i < this.audioList.length; i++ )
+	{
+		this.loadBuffer( this.audioList[ i ], i );
 	}
 };
 
 /**
- * This method loads a single audio-file and decodes it to a buffer object.
- * When all audiofiles form the corresponding array are loaded, a custom
- * callback function will be executed.
+ * This method loads a single audio-file and decodes it to a buffer object. When
+ * all audiofiles form the corresponding array are loaded, a custom callback
+ * function will be executed.
  * 
  * @param {string} file - The name of the audio file.
  * @param {number} index - The array-index of the audio file.
  */
-AudioBufferList.prototype.loadBuffer = function(file, index){
-	
+AudioBufferList.prototype.loadBuffer = function( file, index ) {
+
 	var self = this;
-	
+
 	// build url
 	var url = utils.getCDNHost() + "assets/audio/dynamic/" + file + ".mp3";
-	
+
 	// add nocache, if necessary
-	if(utils.isDevelopmentModeActive() === true){
+	if ( utils.isDevelopmentModeActive() === true )
+	{
 		url = url + "?" + new Date().getTime();
 	}
-	
+
 	// create XMLHttpRequest object
-	var xhr = new global.XMLHttpRequest(); 
-		
-	xhr.onreadystatechange = function() { 
-		
-		if (xhr.readyState === xhr.DONE) {
-			
-			if (xhr.status === 200) {
-				
+	var xhr = new global.XMLHttpRequest();
+
+	xhr.onreadystatechange = function() {
+
+		if ( xhr.readyState === xhr.DONE )
+		{
+			if ( xhr.status === 200 )
+			{
 				// decode audio data
-				self.context.decodeAudioData( xhr.response, function(buffer) { 
-					if (!buffer) { 
-						throw "ERROR: AudioBufferList: Unable to decode audio file: " + url;  
-					} 
+				self.context.decodeAudioData( xhr.response, function( buffer ) {
+
+					if ( !buffer )
+					{
+						throw "ERROR: AudioBufferList: Unable to decode audio file: " + url;
+					}
 					// add buffer to bufferlist
-					self.bufferList[index] = buffer;
-					
+					self.bufferList[ index ] = buffer;
+
 					// publish message to inform about status
-					PubSub.publish("loading.complete.audio", {url: url});
-					
+					PubSub.publish( "loading.complete.audio", {
+						url : url
+					} );
+
 					// increase internal counter and compare to length of
 					// the audio list
-					if (++self._loadCount === self.audioList.length){
-						
-						self._onload(self.bufferList);
-					} 
-				}, function(){
-					throw "ERROR: AudioBufferList: Unable to decode audio file " + url;  
-				}); 
-				
-			} else {
+					if ( ++self._loadCount === self.audioList.length )
+					{
+						self._onload( self.bufferList );
+					}
+				}, function() {
+
+					throw "ERROR: AudioBufferList: Unable to decode audio file " + url;
+				} );
+
+			}
+			else
+			{
 				throw "ERROR: AudioBufferList: Could not load '" + url + "' (Status: " + xhr.status + ").";
 			}
 		}
 	};
-	
+
 	// send request
-	xhr.open("GET", url, true);
+	xhr.open( "GET", url, true );
 	xhr.responseType = "arraybuffer";
 	xhr.withCredentials = true;
 	xhr.send();
-	
+
 	// publish message to inform about status
-	PubSub.publish("loading.start.audio", {url: url});
+	PubSub.publish( "loading.start.audio", {
+		url : url
+	} );
 };
 
 module.exports = AudioBufferList;
@@ -37254,19 +37332,20 @@ module.exports = AudioBufferList;
 },{"../etc/Utils":41,"pubsub-js":1}],15:[function(require,module,exports){
 (function (global){
 /**
- * @file This prototype holds the central Web Audio context and
- * manages the requirements for spatial sound effects.
+ * @file This prototype holds the central Web Audio context and manages the
+ * requirements for spatial sound effects.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
 /**
- * Creates an audioListener. The constructor creates the central WebAudio context
- * of the application, a compressor and a gain-node for adjusting the master volume.
+ * Creates an audioListener. The constructor creates the central WebAudio
+ * context of the application, a compressor and a gain-node for adjusting the
+ * master volume.
  * 
  * node sequence: master gain -> compressor -> destination
  * 
@@ -37275,58 +37354,58 @@ var THREE = require("three");
  * 
  */
 function AudioListener() {
-	
-	THREE.Object3D.call(this);
-	
+
+	THREE.Object3D.call( this );
+
 	// central Web Audio context
 	global.window.AudioContext = global.window.AudioContext || global.window.webkitAudioContext;
-	
-	Object.defineProperties(this, {
-		type: {
-			value: "AudioListener",
-			configurable: false,
-			enumerable: true,
-			writable: false
+
+	Object.defineProperties( this, {
+		type : {
+			value : "AudioListener",
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		context: {
-			value: new global.window.AudioContext(),
-			configurable: false,
-			enumerable: true,
-			writable: false
+		context : {
+			value : new global.window.AudioContext(),
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		compressor: {
-			value: {},
-			configurable: false,
-			enumerable: true,
-			writable: true
+		compressor : {
+			value : {},
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		gain: {
-			value: {},
-			configurable: false,
-			enumerable: true,
-			writable: true
+		gain : {
+			value : {},
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
-	});
-	
+	} );
+
 	// dynamics compression
 	this.compressor = this.context.createDynamicsCompressor();
-	this.compressor.connect(this.context.destination);
+	this.compressor.connect( this.context.destination );
 
 	// master gain
 	this.gain = this.context.createGain();
-	this.gain.connect(this.compressor);
+	this.gain.connect( this.compressor );
 }
 
-AudioListener.prototype = Object.create(THREE.Object3D.prototype);
+AudioListener.prototype = Object.create( THREE.Object3D.prototype );
 AudioListener.prototype.constructor = AudioListener;
 
 /**
- * This method updates the position of the audioListener in 3D-space.
- * Only then, spatial sound effects can be emitted correctly.
+ * This method updates the position of the audioListener in 3D-space. Only then,
+ * spatial sound effects can be emitted correctly.
  * 
  * @param {boolean} force - Flag for calculation the world matrix.
  */
-AudioListener.prototype.updateMatrixWorld = (function() {
+AudioListener.prototype.updateMatrixWorld = ( function() {
 
 	var position = new THREE.Vector3();
 	var quaternion = new THREE.Quaternion();
@@ -37334,20 +37413,20 @@ AudioListener.prototype.updateMatrixWorld = (function() {
 
 	var orientation = new THREE.Vector3();
 
-	return function (force) {
+	return function( force ) {
 
-		THREE.Object3D.prototype.updateMatrixWorld.call(this, force);
+		THREE.Object3D.prototype.updateMatrixWorld.call( this, force );
 
-		this.matrixWorld.decompose(position, quaternion, scale);
+		this.matrixWorld.decompose( position, quaternion, scale );
 
-		orientation.set(0, 0, -1).applyQuaternion(quaternion);
+		orientation.set( 0, 0, -1 ).applyQuaternion( quaternion );
 
 		// set position and orientation of the audio listener
-		this.context.listener.setPosition(position.x, position.y, position.z);
-		this.context.listener.setOrientation(orientation.x, orientation.y, orientation.z, this.up.x, this.up.y, this.up.z);
+		this.context.listener.setPosition( position.x, position.y, position.z );
+		this.context.listener.setOrientation( orientation.x, orientation.y, orientation.z, this.up.x, this.up.y, this.up.z );
 	};
 
-})();
+} )();
 
 module.exports = AudioListener;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
@@ -37362,13 +37441,13 @@ module.exports = AudioListener;
 
 "use strict";
 
-var PubSub = require("pubsub-js");
+var PubSub = require( "pubsub-js" );
 
-var AudioListener = require("./AudioListener");
-var DynamicAudio = require("./DynamicAudio");
-var AudioBufferList = require("./AudioBufferList");
-var camera = require("../core/Camera");
-var logger = require("../etc/Logger");
+var AudioListener = require( "./AudioListener" );
+var DynamicAudio = require( "./DynamicAudio" );
+var AudioBufferList = require( "./AudioBufferList" );
+var camera = require( "../core/Camera" );
+var logger = require( "../etc/Logger" );
 
 /**
  * Creates the audio manager.
@@ -37377,63 +37456,65 @@ var logger = require("../etc/Logger");
  * 
  */
 function AudioManager() {
-	
-	Object.defineProperties(this, {	
-		_listener: {
-			value: new AudioListener(),
-			configurable: false,
-			enumerable: false,
+
+	Object.defineProperties( this, {
+		_listener : {
+			value : new AudioListener(),
+			configurable : false,
+			enumerable : false,
 			writable : false
 		},
-		_backgroundMusicGain: {
-			value: null,
-			configurable: false,
-			enumerable: false,
+		_backgroundMusicGain : {
+			value : null,
+			configurable : false,
+			enumerable : false,
 			writable : true
 		},
-		_backgroundMusic: {
-			value: new global.Audio(),
-			configurable: false,
-			enumerable: false,
+		_backgroundMusic : {
+			value : new global.Audio(),
+			configurable : false,
+			enumerable : false,
 			writable : true
 		},
-		_dynamicAudios: {
-			value: [],
-			configurable: false,
-			enumerable: false,
-			writable: false
+		_dynamicAudios : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
 		}
-	});
-	
+	} );
+
 	// gain node for background music, used for fadeIn/ fadeOut
 	this._backgroundMusicGain = this._listener.context.createGain();
-	this._backgroundMusicGain.connect(this._listener.gain);
-	
+	this._backgroundMusicGain.connect( this._listener.gain );
+
 	// connect background music to web audio pipeline
-	var source = this._listener.context.createMediaElementSource(this._backgroundMusic);
-	source.connect(this._backgroundMusicGain);
-	
+	var source = this._listener.context.createMediaElementSource( this._backgroundMusic );
+	source.connect( this._backgroundMusicGain );
+
 	// set error handling for background music
 	this._backgroundMusic.onerror = this._onErrorBackgroundMusic;
-	
+
 	// add listener to camera
-	camera.add(this._listener);
+	camera.add( this._listener );
 }
 
 /**
- * Creates a dynamic audio object and stores it to the respective internal array.
+ * Creates a dynamic audio object and stores it to the respective internal
+ * array.
  * 
  * @param {string} id - The ID of the dynamic audio.
  * @param {object} buffer - The buffered audio file.
  * @param {boolean} isLoop - Should the audio played in a loop?
- * @param {boolean} isStageIndependent - Should the audio independent of the stage?
+ * @param {boolean} isStageIndependent - Should the audio independent of the
+ * stage?
  * 
  * @returns {DynamicAudio} The new dynamic audio.
  */
-AudioManager.prototype.createDynamicSound = function(id, buffer, isLoop, isStageIndependent) {
+AudioManager.prototype.createDynamicSound = function( id, buffer, isLoop, isStageIndependent ) {
 
-	var audio = new DynamicAudio(id, this._listener, buffer, isLoop, isStageIndependent);
-	this._dynamicAudios.push(audio);
+	var audio = new DynamicAudio( id, this._listener, buffer, isLoop, isStageIndependent );
+	this._dynamicAudios.push( audio );
 	return audio;
 };
 
@@ -37441,28 +37522,35 @@ AudioManager.prototype.createDynamicSound = function(id, buffer, isLoop, isStage
  * Creates an audio buffer list.
  * 
  * @param {object} audioList - An array with name of audio files.
- * @param {function} callback - This callback is executed when all audio files are loaded.
+ * @param {function} callback - This callback is executed when all audio files
+ * are loaded.
  * 
  * @returns {AudioBufferList} The new audio buffer list.
  */
-AudioManager.prototype.createAudioBufferList = function(audioList, callback) {
+AudioManager.prototype.createAudioBufferList = function( audioList, callback ) {
 
-	return new AudioBufferList(this._listener.context, audioList, callback);
+	return new AudioBufferList( this._listener.context, audioList, callback );
 };
 
 /**
  * Removes dynamic audio objects from the internal array.
  * 
- * @param {boolean} isClear - Should all dynamic audios deleted or only stage dependent audios?
+ * @param {boolean} isClear - Should all dynamic audios deleted or only stage
+ * dependent audios?
  */
-AudioManager.prototype.removeDynamicAudios = function(isClear){
-	
-	if(isClear === true){
+AudioManager.prototype.removeDynamicAudios = function( isClear ) {
+
+	if ( isClear === true )
+	{
 		this._dynamicAudios.length = 0;
-	}else{
-		for (var i = this._dynamicAudios.length -1; i >= 0; i--) {
-			if(this._dynamicAudios[i].isStageIndependent === false){
-				this._dynamicAudios.splice(i,1);
+	}
+	else
+	{
+		for ( var i = this._dynamicAudios.length - 1; i >= 0; i-- )
+		{
+			if ( this._dynamicAudios[ i ].isStageIndependent === false )
+			{
+				this._dynamicAudios.splice( i, 1 );
 			}
 		}
 	}
@@ -37475,20 +37563,25 @@ AudioManager.prototype.removeDynamicAudios = function(isClear){
  * 
  * @returns {DynamicAudio} The dynamic audio.
  */
-AudioManager.prototype.getDynamicAudio = function(id) {
+AudioManager.prototype.getDynamicAudio = function( id ) {
 
 	var dynamicAudio = null;
-	
-	for( var i = 0; i < this._dynamicAudios.length; i++){
-		if(this._dynamicAudios[i].audioId === id){
-			dynamicAudio =  this._dynamicAudios[i];
+
+	for ( var i = 0; i < this._dynamicAudios.length; i++ )
+	{
+		if ( this._dynamicAudios[ i ].audioId === id )
+		{
+			dynamicAudio = this._dynamicAudios[ i ];
 			break;
 		}
 	}
-	
-	if(dynamicAudio === null){
+
+	if ( dynamicAudio === null )
+	{
 		throw "ERROR: AudioManager: Dynamic Audio with ID " + id + " not existing.";
-	}else{
+	}
+	else
+	{
 		return dynamicAudio;
 	}
 };
@@ -37500,27 +37593,31 @@ AudioManager.prototype.getDynamicAudio = function(id) {
  * @param {number} volume - The volume of the audio.
  * @param {boolean} isLoop - Should the audio played in a loop?
  */
-AudioManager.prototype.setBackgroundMusic = function(file, volume, isLoop) {
-	
+AudioManager.prototype.setBackgroundMusic = function( file, volume, isLoop ) {
+
 	var url = "assets/audio/static/" + file + ".mp3";
 
 	this._backgroundMusic.src = url;
 	this._backgroundMusic.volume = volume || 1;
 	this._backgroundMusic.loop = isLoop || true;
-	
-	this._backgroundMusic.oncanplay = function(event){
+
+	this._backgroundMusic.oncanplay = function( event ) {
 
 		// publish message to inform about status
-		PubSub.publish("loading.complete.music", {url: url});
-		
+		PubSub.publish( "loading.complete.music", {
+			url : url
+		} );
+
 		// execute this handler just one time
 		event.target.oncanplay = null;
 	};
-	
-	logger.log("INFO: AudioManager: Set new background music. URL: %s", url);
-	
+
+	logger.log( "INFO: AudioManager: Set new background music. URL: %s", url );
+
 	// publish message to inform about status
-	PubSub.publish("loading.start.music", {url: url});
+	PubSub.publish( "loading.start.music", {
+		url : url
+	} );
 };
 
 /**
@@ -37529,25 +37626,26 @@ AudioManager.prototype.setBackgroundMusic = function(file, volume, isLoop) {
  * @param {boolean} isFadeIn - Should the audio fade in?
  * @param {number} duration - The duration of the fade in.
  */
-AudioManager.prototype.playBackgroundMusic = function(isFadeIn, duration) {
-	
+AudioManager.prototype.playBackgroundMusic = function( isFadeIn, duration ) {
+
 	// start playing
 	this._backgroundMusic.play();
-	
+
 	// adjust gain node of background music
-	if(isFadeIn === true){
-		
+	if ( isFadeIn === true )
+	{
 		// fade in
-		this._backgroundMusicGain.gain.linearRampToValueAtTime(0, this._backgroundMusic.currentTime);
-		this._backgroundMusicGain.gain.linearRampToValueAtTime(1, this._backgroundMusic.currentTime + duration || 2);
-	
-	}else{
-		
+		this._backgroundMusicGain.gain.linearRampToValueAtTime( 0, this._backgroundMusic.currentTime );
+		this._backgroundMusicGain.gain.linearRampToValueAtTime( 1, this._backgroundMusic.currentTime + duration || 2 );
+
+	}
+	else
+	{
 		this._backgroundMusicGain.gain.value = 1;
 	}
-	
+
 	// logging
-	logger.log("INFO: AudioManager: Start playing background music.");
+	logger.log( "INFO: AudioManager: Start playing background music." );
 };
 
 /**
@@ -37557,43 +37655,47 @@ AudioManager.prototype.playBackgroundMusic = function(isFadeIn, duration) {
  * @param {number} duration - The duration of the fade out.
  * @param {function} onPausedCallback - Executed, when the audio is paused.
  */
-AudioManager.prototype.pauseBackgroundMusic = function(isFadeOut, duration, onPausedCallback) {
-	
+AudioManager.prototype.pauseBackgroundMusic = function( isFadeOut, duration, onPausedCallback ) {
+
 	// save context
 	var self = this;
 
-	if(isFadeOut === true){
-		
+	if ( isFadeOut === true )
+	{
 		// fade out
-		this._backgroundMusicGain.gain.linearRampToValueAtTime(1, this._backgroundMusic.currentTime);
-		this._backgroundMusicGain.gain.linearRampToValueAtTime(0, this._backgroundMusic.currentTime + duration || 2);
-		
+		this._backgroundMusicGain.gain.linearRampToValueAtTime( 1, this._backgroundMusic.currentTime );
+		this._backgroundMusicGain.gain.linearRampToValueAtTime( 0, this._backgroundMusic.currentTime + duration || 2 );
+
 		// pause music with delay, at the end of the animation
-		setTimeout(function(){
-			
+		setTimeout( function() {
+
 			self._backgroundMusic.pause();
-			
+
 			// execute callback
-			if(typeof onPausedCallback === "function"){
-				onPausedCallback.call(self);
+			if ( typeof onPausedCallback === "function" )
+			{
+				onPausedCallback.call( self );
 			}
-			
-		}, (duration || 2) * 1000);
-		
-	}else{
-		
-		// immediately pause music 
+
+		}, ( duration || 2 ) * 1000 );
+
+	}
+	else
+	{
+
+		// immediately pause music
 		this._backgroundMusic.pause();
 		this._backgroundMusicGain.gain.value = 0;
-		
+
 		// execute callback
-		if(typeof onPausedCallback === "function"){
-			onPausedCallback.call(this);
+		if ( typeof onPausedCallback === "function" )
+		{
+			onPausedCallback.call( this );
 		}
 	}
-	
+
 	// logging
-	logger.log("INFO: AudioManager: Pause playing background music.");
+	logger.log( "INFO: AudioManager: Pause playing background music." );
 };
 
 /**
@@ -37603,21 +37705,22 @@ AudioManager.prototype.pauseBackgroundMusic = function(isFadeOut, duration, onPa
  * @param {number} duration - The duration of the fade out.
  * @param {function} onStoppedCallback - Executed, when the audio is stopped.
  */
-AudioManager.prototype.stopBackgroundMusic = function(isFadeOut, duration, onStoppedCallback) {
+AudioManager.prototype.stopBackgroundMusic = function( isFadeOut, duration, onStoppedCallback ) {
 
-	this.pauseBackgroundMusic(isFadeOut, duration, function(){
-		
+	this.pauseBackgroundMusic( isFadeOut, duration, function() {
+
 		// reset currentTime
 		this._backgroundMusic.currentTime = 0.0;
-		
+
 		// execute callback
-		if(typeof onStoppedCallback === "function"){
-			onStoppedCallback.call(this);
+		if ( typeof onStoppedCallback === "function" )
+		{
+			onStoppedCallback.call( this );
 		}
-	});
-	
+	} );
+
 	// logging
-	logger.log("INFO: AudioManager: Stop playing background music.");
+	logger.log( "INFO: AudioManager: Stop playing background music." );
 };
 
 /**
@@ -37645,7 +37748,7 @@ AudioManager.prototype.isBackgroundMusicLoop = function() {
  * 
  * @param {boolean} isLoop - The loop-flag to set.
  */
-AudioManager.prototype.setBackgroundMusicLoop = function(isLoop) {
+AudioManager.prototype.setBackgroundMusicLoop = function( isLoop ) {
 
 	this._backgroundMusic.loop = isLoop;
 };
@@ -37665,19 +37768,20 @@ AudioManager.prototype.getBackgroundMusicVolume = function() {
  * 
  * @param {number} volume - The volume to set.
  */
-AudioManager.prototype.setBackgroundMusicVolume = function(volume) {
+AudioManager.prototype.setBackgroundMusicVolume = function( volume ) {
 
 	this._backgroundMusic.volume = volume;
 };
 
 /**
- * This method handles error-situations when playing the background music.
- * It triggers a custom event, which can processed of e.g. the UserInterfaceManager.
+ * This method handles error-situations when playing the background music. It
+ * triggers a custom event, which can processed of e.g. the
+ * UserInterfaceManager.
  */
-AudioManager.prototype._onErrorBackgroundMusic = function(){
+AudioManager.prototype._onErrorBackgroundMusic = function() {
 
-	logger.error("ERROR: AudioManager: Media resource could not be processed.");
-	PubSub.publish("audio.backgroundmusic.error", "Media resource could not be processed");
+	logger.error( "ERROR: AudioManager: Media resource could not be processed." );
+	PubSub.publish( "audio.backgroundmusic.error", "Media resource could not be processed" );
 };
 
 module.exports = new AudioManager();
@@ -37691,7 +37795,7 @@ module.exports = new AudioManager();
 
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 /**
  * Creates a dynamic audio object.
  * 
@@ -37704,124 +37808,131 @@ var THREE = require("three");
  * @param {AudioListener} listener - The listener object.
  * @param {object} buffer - The buffered audio file.
  * @param {boolean} isLoop - Should the audio played in a loop?
- * @param {boolean} isStageIndependent - Should the audio independent of the stage?
+ * @param {boolean} isStageIndependent - Should the audio independent of the
+ * stage?
  * 
  */
-function DynamicAudio(id, listener, buffer, isLoop, isStageIndependent) {
-	
+function DynamicAudio( id, listener, buffer, isLoop, isStageIndependent ) {
+
 	THREE.Object3D.call( this );
-	
-	Object.defineProperties(this, {
-		type: {
-			value: "DynamicAudio",
-			configurable: false,
-			enumerable: true,
-			writable: false
+
+	Object.defineProperties( this, {
+		type : {
+			value : "DynamicAudio",
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		audioId: {
-			value: id,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		audioId : {
+			value : id,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		buffer:{
-			value: buffer,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		buffer : {
+			value : buffer,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		isLoop: {
-			value: isLoop || false,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		isLoop : {
+			value : isLoop || false,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		isStageIndependent: {
-			value: isStageIndependent || false,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		isStageIndependent : {
+			value : isStageIndependent || false,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		_context: {
-			value: listener.context,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		_context : {
+			value : listener.context,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		_gain: {
-			value: listener.context.createGain(),
-			configurable: false,
-			enumerable: true,
-			writable: false
+		_gain : {
+			value : listener.context.createGain(),
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		_panner: {
-			value: listener.context.createPanner(),
-			configurable: false,
-			enumerable: true,
-			writable: false
+		_panner : {
+			value : listener.context.createPanner(),
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		_source: {
-			value: null,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		_source : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		_pitchVariation:  {
-			value: undefined,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_pitchVariation : {
+			value : undefined,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-	});
-	
+	} );
+
 	// audio-node for volume
-	this._gain.connect(listener.gain);
-	
+	this._gain.connect( listener.gain );
+
 	// audio-node for spatial effects
 	this._panner.distanceModel = "linear";
-	this._panner.panningModel  = "HRTF";
-	this._panner.connect(this._gain);
+	this._panner.panningModel = "HRTF";
+	this._panner.connect( this._gain );
 }
 
-DynamicAudio.prototype = Object.create(THREE.Object3D.prototype);
+DynamicAudio.prototype = Object.create( THREE.Object3D.prototype );
 DynamicAudio.prototype.constructor = DynamicAudio;
 
 /**
- * Plays an audio file once. You always have to create a new AudioBufferSource when
- * playing the file more than one time.
+ * Plays an audio file once. You always have to create a new AudioBufferSource
+ * when playing the file more than one time.
  * 
- * @param {number} time - The time offset, where the audio file should start playing.
+ * @param {number} time - The time offset, where the audio file should start
+ * playing.
  */
-DynamicAudio.prototype.play = function(time){
-	
+DynamicAudio.prototype.play = function( time ) {
+
 	// disconnect source node, if necessary
-	if(this._source !== null){
+	if ( this._source !== null )
+	{
 		this._source.disconnect();
 	}
 
 	// build new source node
-	this._source = this._context.createBufferSource(); // sources can just played once, see https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode
+	this._source = this._context.createBufferSource(); // sources can just
+														// played once, see
+														// https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode
 	this._source.buffer = this.buffer;
 	this._source.loop = this.isLoop;
-	this._source.connect(this._panner);	
-	
+	this._source.connect( this._panner );
+
 	// regard pitch variation
-	if(typeof this._pitchVariation === "function"){
+	if ( typeof this._pitchVariation === "function" )
+	{
 		this._source.playbackRate.value = this._pitchVariation();
 	}
-	
+
 	// play sound
-	this._source.start(time || 0);
+	this._source.start( time || 0 );
 };
 
 /**
  * Stops an audio file.
  * 
- * @param {number} time - The time offset, where the audio file should stop playing.
+ * @param {number} time - The time offset, where the audio file should stop
+ * playing.
  */
-DynamicAudio.prototype.stop = function(time){
-	
-	this._source.stop(time || 0);
+DynamicAudio.prototype.stop = function( time ) {
+
+	this._source.stop( time || 0 );
 };
 
 /**
@@ -37829,8 +37940,8 @@ DynamicAudio.prototype.stop = function(time){
  * 
  * @return {number} The volume.
  */
-DynamicAudio.prototype.getVolume = function(){
-	
+DynamicAudio.prototype.getVolume = function() {
+
 	return this._gain.gain.value;
 };
 
@@ -37839,83 +37950,94 @@ DynamicAudio.prototype.getVolume = function(){
  * 
  * @param {number} volume - The volume to set.
  */
-DynamicAudio.prototype.setVolume = function(volume){
-	
+DynamicAudio.prototype.setVolume = function( volume ) {
+
 	this._gain.gain.value = volume;
 };
 
 /**
  * Gets the refDistance.
  * 
- * @return {number} Reference distance for reducing volume as the audio source moves further from the listener.
+ * @return {number} Reference distance for reducing volume as the audio source
+ * moves further from the listener.
  */
-DynamicAudio.prototype.getRefDistance = function(){
-	
+DynamicAudio.prototype.getRefDistance = function() {
+
 	return this._panner.refDistance;
 };
 
 /**
  * Sets the refDistance.
  * 
- * @param {number} refDistance - Reference distance for reducing volume as the audio source moves further from the listener.
+ * @param {number} refDistance - Reference distance for reducing volume as the
+ * audio source moves further from the listener.
  */
-DynamicAudio.prototype.setRefDistance = function(refDistance){
-	
+DynamicAudio.prototype.setRefDistance = function( refDistance ) {
+
 	this._panner.refDistance = refDistance;
 };
 
 /**
  * Gets the rolloffFactor.
  * 
- * @return {number} How quickly the volume is reduced as the source moves away from the listener.
+ * @return {number} How quickly the volume is reduced as the source moves away
+ * from the listener.
  */
-DynamicAudio.prototype.getRolloffFactor = function(){
-	
+DynamicAudio.prototype.getRolloffFactor = function() {
+
 	return this._panner.rolloffFactor;
 };
 
 /**
  * Sets the rolloffFactor.
  * 
- * @param {number} rolloffFactor - How quickly the volume is reduced as the source moves away from the listener.
+ * @param {number} rolloffFactor - How quickly the volume is reduced as the
+ * source moves away from the listener.
  */
-DynamicAudio.prototype.setRolloffFactor = function(rolloffFactor){
-	
+DynamicAudio.prototype.setRolloffFactor = function( rolloffFactor ) {
+
 	this._panner.rolloffFactor = rolloffFactor;
 };
 
 /**
  * Gets the maxDistance.
  * 
- * @return {number} Maximum distance between the audio source and the listener, after which the volume is not reduced any further.
+ * @return {number} Maximum distance between the audio source and the listener,
+ * after which the volume is not reduced any further.
  */
-DynamicAudio.prototype.getMaxDistance = function(){
-	
+DynamicAudio.prototype.getMaxDistance = function() {
+
 	return this._panner.maxDistance;
 };
 
 /**
  * Sets the maxDistance.
  * 
- * @param {number} maxDistance - Maximum distance between the audio source and the listener, after which the volume is not reduced any further.
+ * @param {number} maxDistance - Maximum distance between the audio source and
+ * the listener, after which the volume is not reduced any further.
  */
-DynamicAudio.prototype.setMaxDistance = function(maxDistance){
-	
+DynamicAudio.prototype.setMaxDistance = function( maxDistance ) {
+
 	this._panner.maxDistance = maxDistance;
 };
 
 /**
  * Special method to add specific spatial effects to a dynamic audio.
  * 
- * @param {number} coneInnerAngle - Describing the angle, in degrees, of a cone inside of which there will be no volume reduction.
- * @param {number} coneOuterAngle - Describing the angle, in degrees, of a cone outside of which the volume will be reduced by a constant value, defined by the coneOuterGain attribute.
- * @param {number} coneOuterGain - Describing the amount of volume reduction outside the cone defined by the coneOuterAngle attribute. Its default value is 0, meaning that no sound can be heard.
+ * @param {number} coneInnerAngle - Describing the angle, in degrees, of a cone
+ * inside of which there will be no volume reduction.
+ * @param {number} coneOuterAngle - Describing the angle, in degrees, of a cone
+ * outside of which the volume will be reduced by a constant value, defined by
+ * the coneOuterGain attribute.
+ * @param {number} coneOuterGain - Describing the amount of volume reduction
+ * outside the cone defined by the coneOuterAngle attribute. Its default value
+ * is 0, meaning that no sound can be heard.
  */
-DynamicAudio.prototype.addDirection = function(coneInnerAngle, coneOuterAngle, coneOuterGain){
-	
+DynamicAudio.prototype.addDirection = function( coneInnerAngle, coneOuterAngle, coneOuterGain ) {
+
 	this._panner.coneInnerAngle = coneInnerAngle;
 	this._panner.coneOuterAngle = coneOuterAngle;
-	this._panner.coneOuterGain  = coneOuterGain;
+	this._panner.coneOuterGain = coneOuterGain;
 };
 
 /**
@@ -37923,57 +38045,56 @@ DynamicAudio.prototype.addDirection = function(coneInnerAngle, coneOuterAngle, c
  * 
  * @param {function} pitchVariation - Function for calculation pitch variations.
  */
-DynamicAudio.prototype.addPitchVariation = function(pitchVariation){
-	
+DynamicAudio.prototype.addPitchVariation = function( pitchVariation ) {
+
 	this._pitchVariation = pitchVariation;
 };
 
 /**
- * This method updates the position of the dynamicAudio in 3D-space.
- * Only then, spatial sound effects can be emitted correctly.
+ * This method updates the position of the dynamicAudio in 3D-space. Only then,
+ * spatial sound effects can be emitted correctly.
  * 
  * @param {boolean} force - Flag for calculation the world matrix.
  */
-DynamicAudio.prototype.updateMatrixWorld = (function() {
+DynamicAudio.prototype.updateMatrixWorld = ( function() {
 
 	var position = new THREE.Vector3();
 
-	return function (force) {
+	return function( force ) {
 
-		THREE.Object3D.prototype.updateMatrixWorld.call(this, force);
+		THREE.Object3D.prototype.updateMatrixWorld.call( this, force );
 
-		position.setFromMatrixPosition(this.matrixWorld);
+		position.setFromMatrixPosition( this.matrixWorld );
 
-		this._panner.setPosition(position.x, position.y, position.z);
+		this._panner.setPosition( position.x, position.y, position.z );
 	};
-})();
+} )();
 
 module.exports = DynamicAudio;
 },{"three":2}],18:[function(require,module,exports){
 (function (global){
 /**
- * @file Prototype for first person controls. The logic uses
- * HTML5 Pointer Lock API to capture mouse-movements. The camera is stored
- * within two 3D-objects (yaw and pitch) to effectively handle
- * orientation stuff and head motions.
+ * @file Prototype for first person controls. The logic uses HTML5 Pointer Lock
+ * API to capture mouse-movements. The camera is stored within two 3D-objects
+ * (yaw and pitch) to effectively handle orientation stuff and head motions.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-var PubSub = require("pubsub-js");
-var THREE = require("three");
+var PubSub = require( "pubsub-js" );
+var THREE = require( "three" );
 
-var scene = require("../core/Scene");
-var camera = require("../core/Camera");
-var world = require("../core/World");
-var actionManager = require("../action/ActionManager");
-var audioManager = require("../audio/AudioManager");
-var userInterfaceManager = require("../ui/UserInterfaceManager");
-var settingsManager = require("../etc/SettingsManager");
-var logger = require("../etc/Logger");
-var Easing = require("../animation/Easing");
+var scene = require( "../core/Scene" );
+var camera = require( "../core/Camera" );
+var world = require( "../core/World" );
+var actionManager = require( "../action/ActionManager" );
+var audioManager = require( "../audio/AudioManager" );
+var userInterfaceManager = require( "../ui/UserInterfaceManager" );
+var settingsManager = require( "../etc/SettingsManager" );
+var logger = require( "../etc/Logger" );
+var Easing = require( "../animation/Easing" );
 
 var self;
 
@@ -37982,231 +38103,230 @@ var self;
  * 
  * @constructor
  */
-function FirstPersonControls(){
-	
+function FirstPersonControls() {
+
 	// parents of camera object
-	Object.defineProperties(this, {
-		_yawObject: {
-			value: new THREE.Object3D(),
-			configurable: false,
-			enumerable: false,
-			writable: false
+	Object.defineProperties( this, {
+		_yawObject : {
+			value : new THREE.Object3D(),
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		_pitchObject: {
-			value: new THREE.Object3D(),
-			configurable: false,
-			enumerable: false,
-			writable: false
+		_pitchObject : {
+			value : new THREE.Object3D(),
+			configurable : false,
+			enumerable : false,
+			writable : false
 		}
-	});
-	
+	} );
+
 	// movement properties
-	Object.defineProperties(this, {
-		_moveForward: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+	Object.defineProperties( this, {
+		_moveForward : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_moveBackward: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_moveBackward : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_moveLeft: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_moveLeft : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_moveRight: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_moveRight : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_move: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_move : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_strafe: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_strafe : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_moveSpeed: {
-			value: FirstPersonControls.DEFAULT.SPEED.MOVE,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_moveSpeed : {
+			value : FirstPersonControls.DEFAULT.SPEED.MOVE,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_strafeSpeed: {
-			value: FirstPersonControls.DEFAULT.SPEED.STRAFE,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_strafeSpeed : {
+			value : FirstPersonControls.DEFAULT.SPEED.STRAFE,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_height: {
-			value: FirstPersonControls.DEFAULT.HEIGHT,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_height : {
+			value : FirstPersonControls.DEFAULT.HEIGHT,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
-	
+	} );
+
 	// used for animations
-	Object.defineProperties(this, {
-		_animationCrouchTime: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+	Object.defineProperties( this, {
+		_animationCrouchTime : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_animationHeight: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_animationHeight : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_animationRunTime: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_animationRunTime : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_animationMove: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_animationMove : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_animationStrafe: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_animationStrafe : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_animationDeflection: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_animationDeflection : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_animationFrequency: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_animationFrequency : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
-	
+	} );
+
 	// used for head motion calculation
-	Object.defineProperties(this, {
-		_deflection: {
-			value: FirstPersonControls.DEFAULT.CAMERA.DEFLECTION,
-			configurable: false,
-			enumerable: false,
-			writable: true
+	Object.defineProperties( this, {
+		_deflection : {
+			value : FirstPersonControls.DEFAULT.CAMERA.DEFLECTION,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_frequency: {
-			value: FirstPersonControls.DEFAULT.CAMERA.FREQUENCY,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_frequency : {
+			value : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_phase: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_phase : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_lastFrequency: {
-			value: FirstPersonControls.DEFAULT.CAMERA.FREQUENCY,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_lastFrequency : {
+			value : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_motionFactor: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_motionFactor : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_motionCurveUp: {
-			value: true,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_motionCurveUp : {
+			value : true,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_motionLastValue: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_motionLastValue : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-	});
-	
+	} );
+
 	// flags
-	Object.defineProperties(this, {
-		_isCrouch: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+	Object.defineProperties( this, {
+		_isCrouch : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_isRun: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_isRun : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_isControlsActive: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_isControlsActive : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_isUiElementActive: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_isUiElementActive : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		isActionInProgress: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		isActionInProgress : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-	});
-	
+	} );
+
 	// raycaster
-	Object.defineProperties(this, {
-		_rayCaster: {
-			value: new THREE.Raycaster(),
-			configurable: false,
-			enumerable: false,
-			writable: false
+	Object.defineProperties( this, {
+		_rayCaster : {
+			value : new THREE.Raycaster(),
+			configurable : false,
+			enumerable : false,
+			writable : false
 		}
-	});
+	} );
 
 	// build relationship
 	this._pitchObject.add( camera ); // camera -> pitch
 	this._yawObject.add( this._pitchObject ); // pitch -> yaw
-	
+
 	// add to scene
 	scene.add( this._yawObject );
-	
+
 	// type definition
 	this._yawObject.type = "Controls";
-	
+
 	self = this;
 }
-
 
 /**
  * Sets the position of the controls.
@@ -38214,11 +38334,11 @@ function FirstPersonControls(){
  * @param {THREE.Vector3} position - The position to set.
  */
 FirstPersonControls.prototype.setPosition = function( position ) {
-	
+
 	this._yawObject.position.x = position.x;
 	this._yawObject.position.y = position.y + this._height;
 	this._yawObject.position.z = position.z;
-	
+
 	this._yawObject.updateMatrixWorld();
 };
 
@@ -38228,7 +38348,7 @@ FirstPersonControls.prototype.setPosition = function( position ) {
  * @returns {THREE.Vector3} The position vector.
  */
 FirstPersonControls.prototype.getPosition = function() {
-	
+
 	return new THREE.Vector3().copy( this._yawObject.position );
 };
 
@@ -38238,10 +38358,10 @@ FirstPersonControls.prototype.getPosition = function() {
  * @param {THREE.Euler} rotation - The rotation to set.
  */
 FirstPersonControls.prototype.setRotation = function( rotation ) {
-	
+
 	this._pitchObject.rotation.x = rotation.x;
 	this._yawObject.rotation.y = rotation.y;
-	
+
 	this._yawObject.updateMatrixWorld();
 };
 
@@ -38251,7 +38371,7 @@ FirstPersonControls.prototype.setRotation = function( rotation ) {
  * @returns {THREE.Euler} The rotation in euler.
  */
 FirstPersonControls.prototype.getRotation = function() {
-	
+
 	return new THREE.Euler( this._pitchObject.rotation.x, this._yawObject.rotation.y, 0 );
 };
 
@@ -38265,29 +38385,29 @@ FirstPersonControls.prototype.getDirection = ( function() {
 	var result = new THREE.Vector3();
 	var direction = new THREE.Vector3( 0, 0, -1 );
 	var rotation = new THREE.Euler( 0, 0, 0, "YXZ" );
-	
-	return function(){
-		
+
+	return function() {
+
 		// calculate direction
 		rotation.set( this._pitchObject.rotation.x, this._yawObject.rotation.y, 0 );
 		result.copy( direction ).applyEuler( rotation );
-		return result;	
+		return result;
 	};
-	
-} () );
+
+}() );
 
 /**
  * Initializes the controls
  */
 FirstPersonControls.prototype.init = function() {
-	
+
 	// subscriptions
 	PubSub.subscribe( "controls.active", this._onActive );
-	
+
 	// events
 	global.document.addEventListener( "lockPointer", this._onLockPointer );
 	global.document.addEventListener( "releasePointer", this._onReleasePointer );
-	
+
 	global.document.addEventListener( "mousemove", this._onMouseMove );
 	global.document.addEventListener( "keydown", this._onKeyDown );
 	global.document.addEventListener( "keyup", this._onKeyUp );
@@ -38295,26 +38415,28 @@ FirstPersonControls.prototype.init = function() {
 	global.document.addEventListener( "pointerlockchange", this._onPointerlockchange );
 	global.document.addEventListener( "mozpointerlockchange", this._onPointerlockchange );
 	global.document.addEventListener( "webkitpointerlockchange", this._onPointerlockchange );
-	
+
 	global.document.addEventListener( "pointerlockerror", this._onPointerlockerror );
 	global.document.addEventListener( "mozpointerlockerror", this._onPointerlockerror );
 	global.document.addEventListener( "webkitpointerlockerror", this._onPointerlockerror );
-	
+
 	// load and assign audio buffers for steps
-	audioManager.createAudioBufferList( [ "step1", "step2" ], function( bufferList ){
-		
+	audioManager.createAudioBufferList( [ "step1", "step2" ], function( bufferList ) {
+
 		// create new audios
 		var audioStep1 = audioManager.createDynamicSound( "controls.step1", bufferList[ 0 ], false, true );
 		var audioStep2 = audioManager.createDynamicSound( "controls.step2", bufferList[ 1 ], false, 1, true );
-		
+
 		// add variations
-		audioStep1.addPitchVariation( function(){
+		audioStep1.addPitchVariation( function() {
+
 			return 0.9 + Math.random() * 0.4;
 		} );
-		audioStep2.addPitchVariation( function(){
+		audioStep2.addPitchVariation( function() {
+
 			return 0.9 + Math.random() * 0.4;
 		} );
-		
+
 		// assign audios to camera
 		camera.add( audioStep1 );
 		camera.add( audioStep2 );
@@ -38327,23 +38449,24 @@ FirstPersonControls.prototype.init = function() {
  * 
  * @param {number} delta - Elapsed time between two frames.
  */
-FirstPersonControls.prototype.update = function( delta ){
-	
-	if( this._isControlsActive === true && this.isActionInProgress === false ){
-		
+FirstPersonControls.prototype.update = function( delta ) {
+
+	if ( this._isControlsActive === true && this.isActionInProgress === false )
+	{
 		this._translate( delta );
-		
+
 		this._checkInteractiveObjects();
-		
+
 		this._checkAndProcessTrigger();
-		
+
 		this._animateCrouch();
-		
+
 		this._animateRun();
-		
+
 		this._publishPlayerStatus();
 	}
-	else{
+	else
+	{
 		// reset camera position
 		this._translateCameraToOrigin();
 	}
@@ -38355,157 +38478,161 @@ FirstPersonControls.prototype.update = function( delta ){
  * @param {number} delta - Elapsed time between two frames.
  */
 FirstPersonControls.prototype._translate = ( function() {
-	
+
 	var velocity = new THREE.Vector3();
 	var normalizedMovement = new THREE.Vector3();
 	var lastPosition = new THREE.Vector3();
-	
-	return function( delta ){
-		
+
+	return function( delta ) {
+
 		// store last position
 		lastPosition.copy( this._yawObject.position );
-		
+
 		// convert booleans to one number per axis (1, 0, -1)
-		this._move = Number( this._moveBackward ) - Number( this._moveForward );	
+		this._move = Number( this._moveBackward ) - Number( this._moveForward );
 		this._strafe = Number( this._moveRight ) - Number( this._moveLeft );
-		
+
 		// calculate velocity
 		velocity.z = this._calculateMoveVelocity( delta );
 		velocity.x = this._calculateStrafeVelocity( delta );
-		
+
 		// initialize movement vectors
 		normalizedMovement.z = this._move;
 		normalizedMovement.x = this._strafe;
-		
+
 		// this prevents, that the player moves to fast when
 		// e.g. forward and right are pressed simultaneously
 		normalizedMovement.normalize().multiply( velocity );
-		
+
 		// actual translation of the controls position
 		this._yawObject.translateX( normalizedMovement.x );
 		this._yawObject.translateY( normalizedMovement.y );
 		this._yawObject.translateZ( normalizedMovement.z );
-		
-		if( this._isCollisionHandlingRequired() === true ){
-			
+
+		if ( this._isCollisionHandlingRequired() === true )
+		{
 			// restore last position
 			this._yawObject.position.copy( lastPosition );
-			
+
 			// reset camera position
 			this._translateCameraToOrigin();
 		}
-		else{
+		else
+		{
 			// calculate camera motions
 			this._calculateCameraMotion( normalizedMovement, delta );
 		}
 	};
-	
-} () );
+
+}() );
 
 /**
  * This method calculates the motions of the camera.
  * 
- * @param {THREE.Vector3} normalizedMovement - This vector contains the translation of the current frame
+ * @param {THREE.Vector3} normalizedMovement - This vector contains the
+ * translation of the current frame
  * @param {number} delta - Elapsed time between two frames.
  */
 FirstPersonControls.prototype._calculateCameraMotion = ( function() {
-	
+
 	var motion = 0;
 	var audioStep1 = null;
 	var audioStep2 = null;
-	
-	return function( normalizedMovement, delta ){
-		
-		if( audioStep1 === null ){
-			
+
+	return function( normalizedMovement, delta ) {
+
+		if ( audioStep1 === null )
+		{
 			audioStep1 = audioManager.getDynamicAudio( "controls.step1" );
 		}
-		if( audioStep2 === null ){
-			
+		if ( audioStep2 === null )
+		{
 			audioStep2 = audioManager.getDynamicAudio( "controls.step2" );
 		}
-		
-		if( this._move !== 0 || this._strafe !== 0 ){
-			
+
+		if ( this._move !== 0 || this._strafe !== 0 )
+		{
 			// get motion factor from normalized movement
 			this._motionFactor += delta * normalizedMovement.length();
-			
-			// calculate frequency for sine curve 
+
+			// calculate frequency for sine curve
 			this._calculateFrequency();
-			
+
 			// calculate actual motion
 			motion = Math.sin( this._motionFactor * this._frequency + this._phase );
-						
+
 			// play audio steps
-			if( motion < this._motionLastValue && this._motionCurveUp === true ){
-				
+			if ( motion < this._motionLastValue && this._motionCurveUp === true )
+			{
 				this._motionCurveUp = false;
-				audioStep1.play();			
+				audioStep1.play();
 			}
-			else if( motion > this._motionLastValue && this._motionCurveUp === false ){
-				
+			else if ( motion > this._motionLastValue && this._motionCurveUp === false )
+			{
 				this._motionCurveUp = true;
 				audioStep2.play();
 			}
-			
+
 			// set values to camera
 			camera.position.y = Math.abs( motion ) * this._deflection;
 			camera.position.x = motion * this._deflection;
-			
+
 			// store current motion for next calculation
 			this._motionLastValue = motion;
-			
-		}else{
+
+		}
+		else
+		{
 			// if player is not moving, translate camera back to origin
 			this._translateCameraToOrigin();
 		}
 	};
-	
-} () );
+
+}() );
 
 /**
- * Calculates a new sine frequency for camera motion. It ensures, that
- * the new sine cuvre is in-sync to the old one.
+ * Calculates a new sine frequency for camera motion. It ensures, that the new
+ * sine cuvre is in-sync to the old one.
  */
-FirstPersonControls.prototype._calculateFrequency = ( function(){
-	
+FirstPersonControls.prototype._calculateFrequency = ( function() {
+
 	var current, next = 0;
 	var TWO_PI = 2 * Math.PI;
-	
-	return function(){
-			
-		if( this._frequency !== this._lastFrequency ){
-			
-			current = ( this._motionFactor * this._lastFrequency + this._phase ) % TWO_PI;
-			next    = ( this._motionFactor * this._frequency)   % TWO_PI;
-			
-	        this._phase = current - next;
-	        this._lastFrequency = this._frequency;
-		}	
-	};
-} () );
 
+	return function() {
+
+		if ( this._frequency !== this._lastFrequency )
+		{
+			current = ( this._motionFactor * this._lastFrequency + this._phase ) % TWO_PI;
+			next = ( this._motionFactor * this._frequency ) % TWO_PI;
+
+			this._phase = current - next;
+			this._lastFrequency = this._frequency;
+		}
+	};
+}() );
 
 /**
- * This method resets the camera to its origin. The reset is done with a simple linear transition.
+ * This method resets the camera to its origin. The reset is done with a simple
+ * linear transition.
  */
-FirstPersonControls.prototype._translateCameraToOrigin = function(){
-	
+FirstPersonControls.prototype._translateCameraToOrigin = function() {
+
 	// only translate if necessary
-	if( camera.position.x !== 0 || camera.position.y !== 0 ){
-		
+	if ( camera.position.x !== 0 || camera.position.y !== 0 )
+	{
 		// reset y value
 		camera.position.y -= FirstPersonControls.DEFAULT.CAMERA.RESETFACTOR;
 		camera.position.y = Math.max( camera.position.y, 0 );
-		
+
 		// reset x value
-		if( camera.position.x < 0 ){
-			
+		if ( camera.position.x < 0 )
+		{
 			camera.position.x += FirstPersonControls.DEFAULT.CAMERA.RESETFACTOR;
 			camera.position.x = Math.min( camera.position.x, 0 );
 		}
-		else if( camera.position.x > 0 ){
-			
+		else if ( camera.position.x > 0 )
+		{
 			camera.position.x -= FirstPersonControls.DEFAULT.CAMERA.RESETFACTOR;
 			camera.position.x = Math.max( camera.position.x, 0 );
 		}
@@ -38526,29 +38653,30 @@ FirstPersonControls.prototype._translateCameraToOrigin = function(){
  * @returns {number} The velocity in z-direction.
  */
 FirstPersonControls.prototype._calculateMoveVelocity = ( function() {
-	
+
 	var acceleration = 0;
-	
-	return function( delta ){
-									
-		if( this._move !== 0 ){
-			
+
+	return function( delta ) {
+
+		if ( this._move !== 0 )
+		{
 			acceleration += this._move * delta * FirstPersonControls.DEFAULT.SPEED.ACCELERATION.FACTOR;
-			
-			if( Math.abs( acceleration ) > FirstPersonControls.DEFAULT.SPEED.ACCELERATION.MAX ){
-				
+
+			if ( Math.abs( acceleration ) > FirstPersonControls.DEFAULT.SPEED.ACCELERATION.MAX )
+			{
 				acceleration = FirstPersonControls.DEFAULT.SPEED.ACCELERATION.MAX * this._move;
 			}
-			
+
 		}
-		else{
+		else
+		{
 			acceleration = 0;
 		}
-		
+
 		return Math.abs( Math.tan( acceleration ) * this._moveSpeed );
 	};
-	
-} () );
+
+}() );
 
 /**
  * This method calculates the movement velocity in x-direction.
@@ -38558,28 +38686,29 @@ FirstPersonControls.prototype._calculateMoveVelocity = ( function() {
  * @returns {number} The velocity in x-direction.
  */
 FirstPersonControls.prototype._calculateStrafeVelocity = ( function() {
-	
+
 	var acceleration = 0;
-	
-	return function( delta ){
-		
-		if( this._strafe !== 0 ){
-			
+
+	return function( delta ) {
+
+		if ( this._strafe !== 0 )
+		{
 			acceleration += this._strafe * delta * FirstPersonControls.DEFAULT.SPEED.ACCELERATION.FACTOR;
-			
-			if( Math.abs( acceleration ) > FirstPersonControls.DEFAULT.SPEED.ACCELERATION.MAX ){
-				
+
+			if ( Math.abs( acceleration ) > FirstPersonControls.DEFAULT.SPEED.ACCELERATION.MAX )
+			{
 				acceleration = FirstPersonControls.DEFAULT.SPEED.ACCELERATION.MAX * this._strafe;
 			}
 		}
-		else{
+		else
+		{
 			acceleration = 0;
 		}
-		
+
 		return Math.abs( Math.tan( acceleration ) * this._strafeSpeed );
 	};
-	
-} () );
+
+}() );
 
 /**
  * This method calculates the height of the controls.
@@ -38587,140 +38716,139 @@ FirstPersonControls.prototype._calculateStrafeVelocity = ( function() {
  * @param {number} distance - The distance between yawObject and ground.
  */
 FirstPersonControls.prototype._calculateHeight = function( distance ) {
-	
+
 	this._yawObject.position.y += ( this._height - distance );
 };
 
 /**
  * Gets the first intersection of the controls with an interactive object.
  * 
- * @returns {InteractiveObject|undefined} The interactive object if there is an intersection.
+ * @returns {InteractiveObject|undefined} The interactive object if there is an
+ * intersection.
  */
 FirstPersonControls.prototype._getFirstInteractiveIntersection = ( function() {
-	
+
 	var intersects = [];
 	var index;
-	
-	return function(){
-		
+
+	return function() {
+
 		this._rayCaster.set( this._yawObject.position, this.getDirection() );
 		this._rayCaster.far = 20;
-		
+
 		intersects = this._rayCaster.intersectObjects( actionManager.interactiveObjects );
 
-		if( intersects.length > 0 ) {
-			
-			for( index = 0; index < intersects.length; index++ ){
-				
-				// return only an object, which is visible and has an active action
-				if( intersects[ index ].object.mesh.visible === true && intersects[ index ].object.action.isActive === true){
-					
+		if ( intersects.length > 0 )
+		{
+			for ( index = 0; index < intersects.length; index++ )
+			{
+				// return only an object, which is visible and has an active
+				// action
+				if ( intersects[ index ].object.mesh.visible === true && intersects[ index ].object.action.isActive === true )
+				{
 					return intersects[ index ].object;
 				}
 			}
-		} 
+		}
 	};
-	
-} () );
+
+}() );
 
 /**
  * This method controls the visibility of the interaction label.
  */
 FirstPersonControls.prototype._checkInteractiveObjects = ( function() {
-	
+
 	var object;
-	
-	return function(){
-		
+
+	return function() {
+
 		object = this._getFirstInteractiveIntersection();
-		
-		if( object !== undefined) {
-			
-			if( object.action !== undefined ){
-				
-				userInterfaceManager.showInteractionLabel( object.action.label );	
-				
+
+		if ( object !== undefined )
+		{
+			if ( object.action !== undefined )
+			{
+				userInterfaceManager.showInteractionLabel( object.action.label );
 			}
-			else{
-				
+			else
+			{
 				userInterfaceManager.hideInteractionLabel();
-				
 			}
 		}
-		else{
-			
+		else
+		{
 			userInterfaceManager.hideInteractionLabel();
-			
 		}
 	};
-	
-} () );
+
+}() );
 
 /**
- * When the player wants to interact with an object, this method
- * determines the interactive object and runs the respective action.
+ * When the player wants to interact with an object, this method determines the
+ * interactive object and runs the respective action.
  */
 FirstPersonControls.prototype._interact = ( function() {
-	
+
 	var object;
-	
-	return function(){
-		
+
+	return function() {
+
 		object = this._getFirstInteractiveIntersection();
-		
-		if( object !== undefined ){
-			
-			if( object.action !== undefined ){
-				
+
+		if ( object !== undefined )
+		{
+			if ( object.action !== undefined )
+			{
 				object.action.run();
 			}
 		}
 	};
-	
-} () );
+
+}() );
 
 /**
- * This method checks the necessity of processing triggers and
- * running the respective action.
+ * This method checks the necessity of processing triggers and running the
+ * respective action.
  */
 FirstPersonControls.prototype._checkAndProcessTrigger = ( function() {
-	
+
 	var intersects = [];
 	var direction = new THREE.Vector3( 0, -1, 0 );
 	var inRadius = false;
-	
-	return function(){
-		
+
+	return function() {
+
 		this._rayCaster.set( this._yawObject.position, direction );
 		this._rayCaster.far = this._height + 1;
-		
+
 		intersects = this._rayCaster.intersectObjects( actionManager.triggers );
 
-		if( intersects.length > 0 ){
-			
-			if( intersects[ 0 ].object.action !== undefined ){
-				
-				if( inRadius === false && intersects[ 0 ].object.action.isActive === true ){
-					
+		if ( intersects.length > 0 )
+		{
+			if ( intersects[ 0 ].object.action !== undefined )
+			{
+				if ( inRadius === false && intersects[ 0 ].object.action.isActive === true )
+				{
 					intersects[ 0 ].object.action.run();
-					
+
 					inRadius = true;
-					
+
 					logger.log( "INFO: FirstPersonControls: Trigger released and action \"%s\" executed.", intersects[ 0 ].object.action.label );
-				}			
+				}
 			}
-			else{
-				
+			else
+			{
 				throw "ERROR: FirstPersonControls: No action defined for trigger object.";
 			}
 		}
-		else{
-			
+		else
+		{
 			inRadius = false;
 		}
 	};
 
-} () );
+}() );
 
 /**
  * Does the actual collision detection and returns a boolean value, that
@@ -38729,240 +38857,242 @@ FirstPersonControls.prototype._checkAndProcessTrigger = ( function() {
  * @returns {boolean} - Is there a collision after the latest movement?
  */
 FirstPersonControls.prototype._isCollisionHandlingRequired = ( function() {
-	
+
 	var intersects = [];
 	var direction = new THREE.Vector3( 0, -1, 0 );
 	var numberOfObstacle;
 	var obstacle;
 	var index;
-	
-	var boundingBox = new THREE.Box3();	// mathematical representation of the player body
-	var center = new THREE.Vector3();	// center of body
-	var size = new THREE.Vector3(); 	// body size
-	
-	return function(){
-		
-		if( world.grounds.length !== 0 ){
-						
+
+	var boundingBox = new THREE.Box3(); // mathematical representation of the
+	// player body
+	var center = new THREE.Vector3(); // center of body
+	var size = new THREE.Vector3(); // body size
+
+	return function() {
+
+		if ( world.grounds.length !== 0 )
+		{
 			this._rayCaster.set( this._yawObject.position, direction );
 			this._rayCaster.far = FirstPersonControls.DEFAULT.HEIGHT + 1;
-			
+
 			// first, check grounds
 			intersects = this._rayCaster.intersectObjects( world.grounds );
-			
-			// if there is an intersection, the player's position is inside the level boundaries
+
+			// if there is an intersection, the player's position is inside the
+			// level boundaries
 			// now check intersections between the player and obstacle objects
-			if ( intersects.length > 0 ){
-				
+			if ( intersects.length > 0 )
+			{
 				// before doing the intersection test with action objects
 				// update the player's bounding volume (AABB)
-				
+
 				// adjust height
 				this._calculateHeight( intersects[ 0 ].distance );
 
 				// calculate center of the player
 				center.copy( this._yawObject.position );
 				center.y -= this._height * 0.5;
-				
+
 				// calculate size of the player
 				size.set( 4, this._height, 4 );
-				
+
 				// create bounding box
 				boundingBox.setFromCenterAndSize( center, size );
-				
+
 				// get number of obstacles in the world
 				numberOfObstacle = world.getNumberOfObstacles();
-				
+
 				// check obstacles
-				for( index = 0; index < numberOfObstacle; index++ ){
-					
+				for ( index = 0; index < numberOfObstacle; index++ )
+				{
 					// retrieve obstacle
 					obstacle = world.getObstacle( index );
-					
+
 					// regard only visible objects
-					if( obstacle.mesh.visible === true ){
-						
+					if ( obstacle.mesh.visible === true )
+					{
 						// do collision detection
-						if( obstacle.isIntersection( boundingBox ) === true ){
-							
-							// true, because there is a collision with an obstacle
+						if ( obstacle.isIntersection( boundingBox ) === true )
+						{
+							// true, because there is a collision with an
+							// obstacle
 							return true;
 						}
-						
-					}	
-					
+
+					}
+
 				}
-				
+
 				// false, because there is no collision
 				return false;
-				
-			}else{
-				
+			}
+			else
+			{
 				// true, because the player is not over a ground
 				return true;
 			}
-			
+
 		}
-		
+
 	};
-	
-} () );
+
+}() );
 
 /**
- * Handles the "crouch" command. Crouching decreases the
- * height and movement speed of the player. These values
- * are changed via animations.
+ * Handles the "crouch" command. Crouching decreases the height and movement
+ * speed of the player. These values are changed via animations.
  */
-FirstPersonControls.prototype._toogleCrouch = function(){
-	
+FirstPersonControls.prototype._toogleCrouch = function() {
+
 	// toogle boolean value
 	this._isCrouch = !this._isCrouch;
-	
+
 	// running in crouch-mode not possible
 	this._isRun = false;
-	
+
 	// save current timestamp and values for animation
 	this._animationCrouchTime = global.performance.now();
-	this._animationHeight 	  = this._height;
-	this._animationMove  	  = this._moveSpeed;
-	this._animationStrafe 	  = this._strafeSpeed;
+	this._animationHeight = this._height;
+	this._animationMove = this._moveSpeed;
+	this._animationStrafe = this._strafeSpeed;
 	this._animationDeflection = this._deflection;
-	this._animationFrequency  = this._frequency;
+	this._animationFrequency = this._frequency;
 };
 
 /**
- * Handles the "run" command. Running increases the
- * movement speed and the camera shaking of the player. These values
- * are changed via animations.
+ * Handles the "run" command. Running increases the movement speed and the
+ * camera shaking of the player. These values are changed via animations.
  * 
  * @param {boolean} isActive - Should the player run.
  */
-FirstPersonControls.prototype._setRun = function(isRun){
-		
+FirstPersonControls.prototype._setRun = function( isRun ) {
+
 	this._isRun = isRun;
-	
+
 	// crouching in run-mode not possible
 	this._isCrouch = false;
-	
+
 	// save current timestamp and values for animation
-	this._animationRunTime    = global.performance.now();
-	this._animationHeight 	  = this._height;
-	this._animationMove  	  = this._moveSpeed;
-	this._animationStrafe 	  = this._strafeSpeed;
+	this._animationRunTime = global.performance.now();
+	this._animationHeight = this._height;
+	this._animationMove = this._moveSpeed;
+	this._animationStrafe = this._strafeSpeed;
 	this._animationDeflection = this._deflection;
-	this._animationFrequency  = this._frequency;
+	this._animationFrequency = this._frequency;
 };
 
 /**
  * Animates the transition between crouch and default position.
  */
-FirstPersonControls.prototype._animateCrouch = ( function(){
-	
+FirstPersonControls.prototype._animateCrouch = ( function() {
+
 	var elapsed, factor, targetHeight, targetMove, targetStrafe, targetDeflection, targetFrequency, valueHeight, valueSpeed = 0;
-	
-	return function(){
-		
+
+	return function() {
+
 		// animate only if necessary
-		if( this._isCrouch === true  && this._height > FirstPersonControls.CROUCH.HEIGHT ||
-		    this._isCrouch === false && this._isRun === false && this._height < FirstPersonControls.DEFAULT.HEIGHT ){
-		
+		if ( this._isCrouch === true && this._height > FirstPersonControls.CROUCH.HEIGHT || this._isCrouch === false && this._isRun === false && this._height < FirstPersonControls.DEFAULT.HEIGHT )
+		{
 			// calculate elapsed time
 			elapsed = ( global.performance.now() - this._animationCrouchTime ) * FirstPersonControls.CROUCH.ANIMATION.DURATION;
-			
+
 			// calculate factor for easing formula
 			factor = elapsed > 1 ? 1 : elapsed;
-			
+
 			// calculate easing value
-			valueSpeed  = Easing.Quartic.In( factor );
+			valueSpeed = Easing.Quartic.In( factor );
 			valueHeight = Easing.Quartic.Out( factor );
-			
+
 			// determine target values
-			targetHeight     = this._isCrouch === true ? FirstPersonControls.CROUCH.HEIGHT            : FirstPersonControls.DEFAULT.HEIGHT;
-			targetMove       = this._isCrouch === true ? FirstPersonControls.CROUCH.SPEED.MOVE        : FirstPersonControls.DEFAULT.SPEED.MOVE;
-			targetStrafe     = this._isCrouch === true ? FirstPersonControls.CROUCH.SPEED.STRAFE      : FirstPersonControls.DEFAULT.SPEED.STRAFE;
-			targetDeflection = this._isRun === true    ? FirstPersonControls.CROUCH.CAMERA.DEFLECTION : FirstPersonControls.DEFAULT.CAMERA.DEFLECTION;
-			targetFrequency  = this._isRun === true    ? FirstPersonControls.CROUCH.CAMERA.FREQUENCY  : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY;
-			
+			targetHeight = this._isCrouch === true ? FirstPersonControls.CROUCH.HEIGHT : FirstPersonControls.DEFAULT.HEIGHT;
+			targetMove = this._isCrouch === true ? FirstPersonControls.CROUCH.SPEED.MOVE : FirstPersonControls.DEFAULT.SPEED.MOVE;
+			targetStrafe = this._isCrouch === true ? FirstPersonControls.CROUCH.SPEED.STRAFE : FirstPersonControls.DEFAULT.SPEED.STRAFE;
+			targetDeflection = this._isRun === true ? FirstPersonControls.CROUCH.CAMERA.DEFLECTION : FirstPersonControls.DEFAULT.CAMERA.DEFLECTION;
+			targetFrequency = this._isRun === true ? FirstPersonControls.CROUCH.CAMERA.FREQUENCY : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY;
+
 			// do transition
-			this._height      = this._animationHeight     + ( targetHeight     - this._animationHeight )     * valueHeight;
-			this._moveSpeed   = this._animationMove       + ( targetMove       - this._animationMove   )     * valueSpeed;
-			this._strafeSpeed = this._animationStrafe     + ( targetStrafe     - this._animationStrafe )     * valueSpeed;
-			this._deflection  = this._animationDeflection + ( targetDeflection - this._animationDeflection ) * valueSpeed;
-			this._frequency   = this._animationFrequency  + ( targetFrequency  - this._animationFrequency )  * valueSpeed;
+			this._height = this._animationHeight + ( targetHeight - this._animationHeight ) * valueHeight;
+			this._moveSpeed = this._animationMove + ( targetMove - this._animationMove ) * valueSpeed;
+			this._strafeSpeed = this._animationStrafe + ( targetStrafe - this._animationStrafe ) * valueSpeed;
+			this._deflection = this._animationDeflection + ( targetDeflection - this._animationDeflection ) * valueSpeed;
+			this._frequency = this._animationFrequency + ( targetFrequency - this._animationFrequency ) * valueSpeed;
 		}
 	};
-	
-} () );
+
+}() );
 
 /**
  * Animates the transition between run and default movement.
  */
-FirstPersonControls.prototype._animateRun = ( function(){
-	
+FirstPersonControls.prototype._animateRun = ( function() {
+
 	var elapsed, factor, targetHeight, targetMove, targetStrafe, targetDeflection, targetFrequency, valueHeight, valueSpeed = 0;
-	
-	return function(){
-		
+
+	return function() {
+
 		// animate only if necessary
-		if( this._isRun === true   && this._moveSpeed < FirstPersonControls.RUN.SPEED.MOVE ||
-		    this._isRun === false  && this._isCrouch === false && this._moveSpeed > FirstPersonControls.DEFAULT.SPEED.MOVE ){
-		
+		if ( this._isRun === true && this._moveSpeed < FirstPersonControls.RUN.SPEED.MOVE || this._isRun === false && this._isCrouch === false && this._moveSpeed > FirstPersonControls.DEFAULT.SPEED.MOVE )
+		{
 			// calculate elapsed time
-			elapsed = (global.performance.now() - this._animationRunTime) * FirstPersonControls.RUN.ANIMATION.DURATION;
-			
+			elapsed = ( global.performance.now() - this._animationRunTime ) * FirstPersonControls.RUN.ANIMATION.DURATION;
+
 			// calculate factor for easing formula
 			factor = elapsed > 1 ? 1 : elapsed;
-			
+
 			// calculate easing value
-			valueSpeed  = Easing.Quartic.In( factor );
+			valueSpeed = Easing.Quartic.In( factor );
 			valueHeight = Easing.Quartic.Out( factor );
-			
+
 			// determine target values
-			targetHeight     = this._isRun === true ? FirstPersonControls.RUN.HEIGHT            : FirstPersonControls.DEFAULT.HEIGHT;
-			targetMove   	 = this._isRun === true ? FirstPersonControls.RUN.SPEED.MOVE   		: FirstPersonControls.DEFAULT.SPEED.MOVE;
-			targetStrafe     = this._isRun === true ? FirstPersonControls.RUN.SPEED.STRAFE 		: FirstPersonControls.DEFAULT.SPEED.STRAFE;
+			targetHeight = this._isRun === true ? FirstPersonControls.RUN.HEIGHT : FirstPersonControls.DEFAULT.HEIGHT;
+			targetMove = this._isRun === true ? FirstPersonControls.RUN.SPEED.MOVE : FirstPersonControls.DEFAULT.SPEED.MOVE;
+			targetStrafe = this._isRun === true ? FirstPersonControls.RUN.SPEED.STRAFE : FirstPersonControls.DEFAULT.SPEED.STRAFE;
 			targetDeflection = this._isRun === true ? FirstPersonControls.RUN.CAMERA.DEFLECTION : FirstPersonControls.DEFAULT.CAMERA.DEFLECTION;
-			targetFrequency  = this._isRun === true ? FirstPersonControls.RUN.CAMERA.FREQUENCY  : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY;
+			targetFrequency = this._isRun === true ? FirstPersonControls.RUN.CAMERA.FREQUENCY : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY;
 
 			// do transition
-			this._height      = this._animationHeight     + ( targetHeight     - this._animationHeight )     * valueHeight;
-			this._moveSpeed   = this._animationMove       + ( targetMove   	   - this._animationMove   )     * valueSpeed;
-			this._strafeSpeed = this._animationStrafe     + ( targetStrafe     - this._animationStrafe )     * valueSpeed;
-			this._deflection  = this._animationDeflection + ( targetDeflection - this._animationDeflection ) * valueSpeed;
-			this._frequency   = this._animationFrequency  + ( targetFrequency  - this._animationFrequency )  * valueSpeed;
+			this._height = this._animationHeight + ( targetHeight - this._animationHeight ) * valueHeight;
+			this._moveSpeed = this._animationMove + ( targetMove - this._animationMove ) * valueSpeed;
+			this._strafeSpeed = this._animationStrafe + ( targetStrafe - this._animationStrafe ) * valueSpeed;
+			this._deflection = this._animationDeflection + ( targetDeflection - this._animationDeflection ) * valueSpeed;
+			this._frequency = this._animationFrequency + ( targetFrequency - this._animationFrequency ) * valueSpeed;
 		}
 	};
-	
-} () );
+
+}() );
 
 /**
  * Publish the world information of the player for multiplayer.
  */
-FirstPersonControls.prototype._publishPlayerStatus = ( function(){
-	
+FirstPersonControls.prototype._publishPlayerStatus = ( function() {
+
 	var position = new THREE.Vector3();
 	var quaternion = new THREE.Quaternion();
 	var scale = new THREE.Vector3();
-	
-	return function(){
-		
-		// The pitch-object contains the entire position and  rotation
+
+	return function() {
+
+		// The pitch-object contains the entire position and rotation
 		// values of the player
 		this._pitchObject.matrixWorld.decompose( position, quaternion, scale );
-		
-		PubSub.publish( "message.game", { position: position, quaternion: quaternion } );
+
+		PubSub.publish( "message.game", {
+			position : position,
+			quaternion : quaternion
+		} );
 	};
 
-} () );
+}() );
 
 /**
- * Resets the movement. This avoids problems with moving players,
- * even when they hit no keys. This could happen, when you switch
- * to main menu with pressed wasd keys. The actual problem is, that
- * the "keyup" event is not fired under these circumstances.
+ * Resets the movement. This avoids problems with moving players, even when they
+ * hit no keys. This could happen, when you switch to main menu with pressed
+ * wasd keys. The actual problem is, that the "keyup" event is not fired under
+ * these circumstances.
  */
 FirstPersonControls.prototype._reset = function() {
-	
+
 	this._moveForward = false;
 	this._moveBackward = false;
 	this._moveLeft = false;
@@ -38975,166 +39105,164 @@ FirstPersonControls.prototype._reset = function() {
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-FirstPersonControls.prototype._onActive = function(message, data) {
-	
+FirstPersonControls.prototype._onActive = function( message, data ) {
+
 	self._isControlsActive = data.isActive;
-	
+
 	self._reset();
 };
-
 
 /**
  * Locks the pointer for detecting mouse movements.
  */
 FirstPersonControls.prototype._onLockPointer = function() {
-	
-	self._isUiElementActive = false; 
-		
-	var element = global.document.querySelector("canvas");
-	
+
+	self._isUiElementActive = false;
+
+	var element = global.document.querySelector( "canvas" );
+
 	// Ask the browser to lock the pointer
 	element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
-	element.requestPointerLock();	
+	element.requestPointerLock();
 };
 
 /**
- * Releases the locked pointer. This method is always called
- * by UI-Elements to release the pointer. It is not called, when
- * the Player goes via Esc to the Main Menu.
+ * Releases the locked pointer. This method is always called by UI-Elements to
+ * release the pointer. It is not called, when the Player goes via Esc to the
+ * Main Menu.
  */
 FirstPersonControls.prototype._onReleasePointer = function() {
-	
+
 	self._isUiElementActive = true;
-		
+
 	// Ask the browser to release the pointer
 	global.document.exitPointerLock = global.document.exitPointerLock || global.document.mozExitPointerLock || global.document.webkitExitPointerLock;
-	global.document.exitPointerLock();	
+	global.document.exitPointerLock();
 };
 
 /**
- * Detects the change of the pointer lock status. It is used to
- * control the Menu.
+ * Detects the change of the pointer lock status. It is used to control the
+ * Menu.
  */
 FirstPersonControls.prototype._onPointerlockchange = function() {
-	
-	var requestedElement = global.document.querySelector("canvas");
-	
-	if ( global.document.pointerLockElement === requestedElement || 
-	     global.document.mozPointerLockElement === requestedElement || 
-	     global.document.webkitPointerLockElement === requestedElement ) {
 
+	var requestedElement = global.document.querySelector( "canvas" );
+
+	if ( global.document.pointerLockElement === requestedElement || global.document.mozPointerLockElement === requestedElement || global.document.webkitPointerLockElement === requestedElement )
+	{
 		self._isControlsActive = true;
-		
-		if( self._isUiElementActive === false ){
-			
+
+		if ( self._isUiElementActive === false )
+		{
 			userInterfaceManager.hideMenu();
 		}
 
 	}
-	else{
-		
+	else
+	{
 		self._isControlsActive = false;
-		
-		if( self._isUiElementActive === false ){
-			
+
+		if ( self._isUiElementActive === false )
+		{
 			userInterfaceManager.showMenu();
-		}	
+		}
 	}
-	
+
 	self._reset();
 };
 
 /**
  * Any error situation should be marked with an exception.
  */
-FirstPersonControls.prototype._onPointerlockerror = function(event) {
+FirstPersonControls.prototype._onPointerlockerror = function( event ) {
+
 	throw "ERROR: FirstPersonControls: Pointer Lock Error.";
 };
 
 /**
- * Detects any mouse movements, when pointer lock is active. Then it calculates the
- * rotation of yaw and pitch object.
+ * Detects any mouse movements, when pointer lock is active. Then it calculates
+ * the rotation of yaw and pitch object.
  * 
  * @param {object} event - Default event object.
  */
 FirstPersonControls.prototype._onMouseMove = ( function() {
-	
+
 	var movementX, movementY = 0;
 	var HALF_PI = Math.PI * 0.5;
-	
-	return function( event ){
-		
-		if ( self._isControlsActive === true && self.isActionInProgress === false ){
-			
+
+	return function( event ) {
+
+		if ( self._isControlsActive === true && self.isActionInProgress === false )
+		{
 			// capture mouse movement
 			movementX = event.movementX || event.mozMovementX || 0;
 			movementY = event.movementY || event.mozMovementY || 0;
 
 			// manipulate rotation of yaw and pitch object
-			self._yawObject.rotation.y   -= movementX * ( settingsManager.getMouseSensitivity() * 0.0001 );
+			self._yawObject.rotation.y -= movementX * ( settingsManager.getMouseSensitivity() * 0.0001 );
 			self._pitchObject.rotation.x -= movementY * ( settingsManager.getMouseSensitivity() * 0.0001 );
 
 			// prevent "loop" of x-axis
-			self._pitchObject.rotation.x = Math.max( - HALF_PI, Math.min( HALF_PI, self._pitchObject.rotation.x ) );
+			self._pitchObject.rotation.x = Math.max( -HALF_PI, Math.min( HALF_PI, self._pitchObject.rotation.x ) );
 		}
 	};
-	
-} () );
+
+}() );
 
 /**
  * Executes, when a key is pressed down.
  * 
  * @param {object} event - Default event object.
  */
-FirstPersonControls.prototype._onKeyDown = function( event ){
+FirstPersonControls.prototype._onKeyDown = function( event ) {
 
-	if( self._isControlsActive === true ){
-
-		switch( event.keyCode ){
-	
+	if ( self._isControlsActive === true )
+	{
+		switch ( event.keyCode )
+		{
 			case 87:
 				// w
 				self._moveForward = true;
 				break;
-	
+
 			case 65:
 				// a
 				self._moveLeft = true;
 				break;
-	
+
 			case 83:
 				// s
 				self._moveBackward = true;
 				break;
-	
+
 			case 68:
 				// d
 				self._moveRight = true;
 				break;
-				
+
 			case 67:
 				// c
 				self._toogleCrouch();
 				break;
-				
+
 			case 16:
 				// shift
 				self._setRun( true );
 				break;
-				
+
 			case 69:
 				// e
 				self._interact();
 				break;
-				
+
 			case 70:
-				// f 
+				// f
 				userInterfaceManager.tooglePerformanceMonitor();
 				break;
-				
+
 			case 32:
 				// space
-				userInterfaceManager.handleUiInteraction( event );		
+				userInterfaceManager.handleUiInteraction( event );
 				break;
 		}
 	}
@@ -39145,36 +39273,37 @@ FirstPersonControls.prototype._onKeyDown = function( event ){
  * 
  * @param {object} event - Default event object.
  */
-FirstPersonControls.prototype._onKeyUp = function( event ){
-	
-	if( self._isControlsActive === true ){
-		
-		switch( event.keyCode ) {
-	
+FirstPersonControls.prototype._onKeyUp = function( event ) {
+
+	if ( self._isControlsActive === true )
+	{
+		switch ( event.keyCode )
+		{
 			case 87:
 				// w
 				self._moveForward = false;
 				break;
-	
+
 			case 65:
 				// a
 				self._moveLeft = false;
 				break;
-	
+
 			case 83:
 				// a
 				self._moveBackward = false;
 				break;
-	
+
 			case 68:
 				// d
 				self._moveRight = false;
 				break;
-				
+
 			case 16:
 				// shift
-				if( self._isCrouch === false ){
-					
+				if ( self._isCrouch === false )
+				{
+
 					self._setRun( false );
 				}
 		}
@@ -39182,59 +39311,59 @@ FirstPersonControls.prototype._onKeyUp = function( event ){
 };
 
 FirstPersonControls.DEFAULT = {
-	HEIGHT: 13,
-	SPEED: {
-		MOVE: 0.4,
-		STRAFE: 0.3,
-		ACCELERATION:{
-			FACTOR: 1,
-			MAX: Math.PI/4
+	HEIGHT : 13,
+	SPEED : {
+		MOVE : 0.4,
+		STRAFE : 0.3,
+		ACCELERATION : {
+			FACTOR : 1,
+			MAX : Math.PI / 4
 		}
 	},
-	CAMERA: {
-		DEFLECTION: 0.3,
-		FREQUENCY: 15,
-		RESETFACTOR: 0.02	
+	CAMERA : {
+		DEFLECTION : 0.3,
+		FREQUENCY : 15,
+		RESETFACTOR : 0.02
 	}
 };
 
 FirstPersonControls.CROUCH = {
-	HEIGHT: 6,
-	SPEED: {
-		MOVE: 0.2,
-		STRAFE: 0.15,
-		ACCELERATION:{
-			FACTOR: 1,
-			MAX: Math.PI/4
+	HEIGHT : 6,
+	SPEED : {
+		MOVE : 0.2,
+		STRAFE : 0.15,
+		ACCELERATION : {
+			FACTOR : 1,
+			MAX : Math.PI / 4
 		}
 	},
-	CAMERA: {
-		DEFLECTION: 0.3,
-		FREQUENCY: 15,
-		RESETFACTOR: 0.02	
+	CAMERA : {
+		DEFLECTION : 0.3,
+		FREQUENCY : 15,
+		RESETFACTOR : 0.02
 	},
-	ANIMATION: {
-		DURATION: 0.001
+	ANIMATION : {
+		DURATION : 0.001
 	},
 };
 
 FirstPersonControls.RUN = {
-	HEIGHT: 13,
-	SPEED: {
-		MOVE: 0.9,
-		STRAFE: 0.6,
-		ACCELERATION:{
-			FACTOR: 1,
-			MAX: Math.PI/4
+	HEIGHT : 13,
+	SPEED : {
+		MOVE : 0.9,
+		STRAFE : 0.6,
+		ACCELERATION : {
+			FACTOR : 1,
+			MAX : Math.PI / 4
 		}
 	},
-	CAMERA: {
-		DEFLECTION: 0.7,
-		FREQUENCY: 8,
-		RESETFACTOR: 0.02	
+	CAMERA : {
+		DEFLECTION : 0.7,
+		FREQUENCY : 8,
+		RESETFACTOR : 0.02
 	},
-	ANIMATION: {
-		DURATION: 0.002
+	ANIMATION : {
+		DURATION : 0.002
 	}
 };
 
@@ -39243,96 +39372,101 @@ module.exports = new FirstPersonControls();
 },{"../action/ActionManager":6,"../animation/Easing":12,"../audio/AudioManager":16,"../core/Camera":20,"../core/Scene":23,"../core/World":28,"../etc/Logger":32,"../etc/SettingsManager":38,"../ui/UserInterfaceManager":81,"pubsub-js":1,"three":2}],19:[function(require,module,exports){
 (function (global){
 /**
- * @file This prototype contains the entire logic for starting
- * the application.
+ * @file This prototype contains the entire logic for starting the application.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-var PubSub = require("pubsub-js");
+var PubSub = require( "pubsub-js" );
 
-var environment = require("./Environment");
-var renderer = require("./Renderer");
-var camera = require("./Camera");
-var controls = require("../controls/FirstPersonControls");
-var userInterfaceManager = require("../ui/UserInterfaceManager");
-var saveGameManager = require("../etc/SaveGameManager");
-var multiplayerManager = require("../etc/MultiplayerManager");
-var networkManager = require("../network/NetworkManager");
-var utils = require("../etc/Utils");
-var logger = require("../etc/Logger");
+var environment = require( "./Environment" );
+var renderer = require( "./Renderer" );
+var camera = require( "./Camera" );
+var controls = require( "../controls/FirstPersonControls" );
+var userInterfaceManager = require( "../ui/UserInterfaceManager" );
+var saveGameManager = require( "../etc/SaveGameManager" );
+var multiplayerManager = require( "../etc/MultiplayerManager" );
+var networkManager = require( "../network/NetworkManager" );
+var utils = require( "../etc/Utils" );
+var logger = require( "../etc/Logger" );
 
 /**
  * Creates a Bootstrap instance, which initializes the entire application.
  * 
  * @constructor
  */
-function Bootstrap(){
-	
+function Bootstrap() {
+
 	this._getStartupParameter();
-	
+
 	this._initEngine();
-	
-	this._loadStage();	
+
+	this._loadStage();
 }
 
 /**
  * Gets startup parameter from session context. The data were stored in the
  * session context by the index.html.
  */
-Bootstrap.prototype._getStartupParameter = function(){
-	
-	var parameters = JSON.parse(global.sessionStorage.getItem("parameters"));
-	utils.setRuntimeInformation(parameters);
+Bootstrap.prototype._getStartupParameter = function() {
+
+	var parameters = JSON.parse( global.sessionStorage.getItem( "parameters" ) );
+	utils.setRuntimeInformation( parameters );
 };
 
 /**
  * Initializes the core engine logic.
  */
-Bootstrap.prototype._initEngine = function(){
-	
-	// check capabilities of the runtime environment/ browser 
-	if(environment.check() === true){
-		
+Bootstrap.prototype._initEngine = function() {
+
+	// check capabilities of the runtime environment/ browser
+	if ( environment.check() === true )
+	{
 		logger.init();
 		renderer.init();
 		camera.init();
 		controls.init();
 		userInterfaceManager.init();
-		
+
 		// initialize network and multiplayer manager only if necessary
-		if(utils.isMultiplayerActive() === true){
+		if ( utils.isMultiplayerActive() === true )
+		{
 			networkManager.init();
 			multiplayerManager.init();
 		}
-	}else{
-		
+	}
+	else
+	{
 		var message = "ERROR: Bootstrap: The browser does not support all required APIs. Missing APIs: " + environment.unsupportedAPIs;
-		global.alert(message);
+		global.alert( message );
 		throw message;
 	}
 };
 
 /**
- * Loads the stage. The respective stage is determined by the
- * save game data. If no save game is available, the engine uses
- * the first stage.
+ * Loads the stage. The respective stage is determined by the save game data. If
+ * no save game is available, the engine uses the first stage.
  */
-Bootstrap.prototype._loadStage = function(){
-	
+Bootstrap.prototype._loadStage = function() {
+
 	var stageId = null;
 	var saveGame = saveGameManager.load();
-	
-	if(saveGame === null){
+
+	if ( saveGame === null )
+	{
 		stageId = "001";
-		saveGameManager.save(stageId);
-	}else{
+		saveGameManager.save( stageId );
+	}
+	else
+	{
 		stageId = saveGame.stageId;
 	}
-	
-	PubSub.publish("application.start", {stageId: stageId});
+
+	PubSub.publish( "application.start", {
+		stageId : stageId
+	} );
 };
 
 module.exports = Bootstrap;
@@ -39340,15 +39474,15 @@ module.exports = Bootstrap;
 },{"../controls/FirstPersonControls":18,"../etc/Logger":32,"../etc/MultiplayerManager":33,"../etc/SaveGameManager":37,"../etc/Utils":41,"../network/NetworkManager":52,"../ui/UserInterfaceManager":81,"./Camera":20,"./Environment":21,"./Renderer":22,"pubsub-js":1}],20:[function(require,module,exports){
 (function (global){
 /**
- * @file This prototype contains the entire logic 
- * for camera-based functionality.
+ * @file This prototype contains the entire logic for camera-based
+ * functionality.
  * 
  * @author Human Interactive
  */
 "use strict";
 
-var THREE = require("three");
-var PubSub = require("pubsub-js");
+var THREE = require( "three" );
+var PubSub = require( "pubsub-js" );
 
 var self;
 
@@ -39359,14 +39493,14 @@ var self;
  * @augments THREE.PerspectiveCamera
  * 
  */
-function Camera(){
+function Camera() {
 
-	 THREE.PerspectiveCamera.call(this);
-	 
-	 self = this;
+	THREE.PerspectiveCamera.call( this );
+
+	self = this;
 }
 
-Camera.prototype = Object.create(THREE.PerspectiveCamera.prototype);
+Camera.prototype = Object.create( THREE.PerspectiveCamera.prototype );
 Camera.prototype.constructor = Camera;
 
 /**
@@ -39377,19 +39511,18 @@ Camera.prototype.constructor = Camera;
  * @param {number} near - The near distance.
  * @param {number} far - The far distance.
  */
-Camera.prototype.init = function(fov, aspect, near, far){
-	
+Camera.prototype.init = function( fov, aspect, near, far ) {
+
 	this.fov = fov || 45;
 	this.aspect = aspect || global.window.innerWidth / global.window.innerHeight;
 	this.near = near || 0.1;
 	this.far = far || 1000;
-	
-	this.updateProjectionMatrix();
-	
-	// set subscriptions
-	PubSub.subscribe("ui.event.resize", this._onResize);
-};
 
+	this.updateProjectionMatrix();
+
+	// set subscriptions
+	PubSub.subscribe( "ui.event.resize", this._onResize );
+};
 
 /**
  * Resizes the camera.
@@ -39397,8 +39530,8 @@ Camera.prototype.init = function(fov, aspect, near, far){
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-Camera.prototype._onResize = function(message, data){
-		
+Camera.prototype._onResize = function( message, data ) {
+
 	// update camera dimensions
 	self.aspect = global.window.innerWidth / global.window.innerHeight;
 	self.updateProjectionMatrix();
@@ -39409,8 +39542,7 @@ module.exports = new Camera();
 },{"pubsub-js":1,"three":2}],21:[function(require,module,exports){
 (function (global){
 /**
- * @file This prototype is used to detect all
- * necessary browser-features.
+ * @file This prototype is used to detect all necessary browser-features.
  * 
  * @author Human Interactive
  */
@@ -39422,22 +39554,22 @@ module.exports = new Camera();
  * @constructor
  * 
  */
-function Environment(){
-	
-	Object.defineProperties(this, {
-		_test: {
-			value: "test",
-			configurable: false,
-			enumerable: false,
-			writable: false
+function Environment() {
+
+	Object.defineProperties( this, {
+		_test : {
+			value : "test",
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		unsupportedAPIs: {
-			value: [],
-			configurable: false,
-			enumerable: false,
-			writable: false
+		unsupportedAPIs : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
 		}
-	});
+	} );
 }
 
 /**
@@ -39445,34 +39577,52 @@ function Environment(){
  * 
  * @returns {boolean} Indicates the support of all features.
  */
-Environment.prototype.check = function(){
-	
+Environment.prototype.check = function() {
+
 	// clear message array
 	this.unsupportedAPIs.length = 0;
-	
+
 	// perform tests
-	if(this._testWebGL() === false){
-		this.unsupportedAPIs.push("WebGL");
-	}else if(this._testWebSockets() === false){
-		this.unsupportedAPIs.push("WebSockets");
-	}else if(this._testWebWorkers === false){
-		this.unsupportedAPIs.push("WebWorkers");
-	}else if(this._testPointerLock() === false){
-		this.unsupportedAPIs.push("Pointer Lock");
-	}else if(this._testLocalStorage() === false){
-		this.unsupportedAPIs.push("LocalStorage");
-	}else if(this._testSessionStorage() === false){
-		this.unsupportedAPIs.push("SessionStorage");
-	}else if(this._testHTML5Audio() === false){
-		this.unsupportedAPIs.push("HTML5 Audio Element");
-	}else if(this._testWebAudio() === false){
-		this.unsupportedAPIs.push("WebAudio");
+	if ( this._testWebGL() === false )
+	{
+		this.unsupportedAPIs.push( "WebGL" );
 	}
-	
+	else if ( this._testWebSockets() === false )
+	{
+		this.unsupportedAPIs.push( "WebSockets" );
+	}
+	else if ( this._testWebWorkers === false )
+	{
+		this.unsupportedAPIs.push( "WebWorkers" );
+	}
+	else if ( this._testPointerLock() === false )
+	{
+		this.unsupportedAPIs.push( "Pointer Lock" );
+	}
+	else if ( this._testLocalStorage() === false )
+	{
+		this.unsupportedAPIs.push( "LocalStorage" );
+	}
+	else if ( this._testSessionStorage() === false )
+	{
+		this.unsupportedAPIs.push( "SessionStorage" );
+	}
+	else if ( this._testHTML5Audio() === false )
+	{
+		this.unsupportedAPIs.push( "HTML5 Audio Element" );
+	}
+	else if ( this._testWebAudio() === false )
+	{
+		this.unsupportedAPIs.push( "WebAudio" );
+	}
+
 	// return result
-	if(this.unsupportedAPIs.length === 0){
+	if ( this.unsupportedAPIs.length === 0 )
+	{
 		return true;
-	}else{
+	}
+	else
+	{
 		return false;
 	}
 };
@@ -39480,125 +39630,135 @@ Environment.prototype.check = function(){
 /**
  * Tests the WebGL API.
  */
-Environment.prototype._testWebGL = function(){
-	
-	try{ 
-		var canvas = global.document.createElement("canvas"); 
-		return !!global.window.WebGLRenderingContext && (canvas.getContext("webgl") || canvas.getContext("experimental-webgl"));
+Environment.prototype._testWebGL = function() {
+
+	try
+	{
+		var canvas = global.document.createElement( "canvas" );
+		return !!global.window.WebGLRenderingContext && ( canvas.getContext( "webgl" ) || canvas.getContext( "experimental-webgl" ) );
 	}
-	catch(e)
-	{ 
-		return false; 
-	} 
+	catch ( e )
+	{
+		return false;
+	}
 };
 
 /**
  * Tests the WebSockets API.
  */
-Environment.prototype._testWebSockets = function(){
-	
+Environment.prototype._testWebSockets = function() {
+
 	return !!global.window.WebSocket;
 };
 
 /**
  * Tests the WebWorkers API.
  */
-Environment.prototype._testWebWorkers = function(){
-	
+Environment.prototype._testWebWorkers = function() {
+
 	return !!global.window.Worker;
 };
 
 /**
  * Tests the PointerLock API.
  */
-Environment.prototype._testPointerLock = function(){
-	
-	var canvas = global.document.createElement("canvas"); 
+Environment.prototype._testPointerLock = function() {
+
+	var canvas = global.document.createElement( "canvas" );
 	return !!canvas.requestPointerLock || !!canvas.mozRequestPointerLock || !!canvas.webkitRequestPointerLock;
 };
 
 /**
  * Tests the LocalStorage API.
  */
-Environment.prototype._testLocalStorage = function(){
-	
-	try {
-		global.localStorage.setItem(this._test, this._test);
-		global.localStorage.removeItem(this._test);
-        return true;
-    } catch(e) {
-        return false;
-    }
+Environment.prototype._testLocalStorage = function() {
+
+	try
+	{
+		global.localStorage.setItem( this._test, this._test );
+		global.localStorage.removeItem( this._test );
+		return true;
+	}
+	catch ( e )
+	{
+		return false;
+	}
 };
 
 /**
  * Tests the SessionStorage API.
  */
-Environment.prototype._testSessionStorage = function(){
-	
-	try {
-		global.sessionStorage.setItem(this._test, this._test);
-		global.sessionStorage.removeItem(this._test);
-        return true;
-    } catch(e) {
-        return false;
-    }
+Environment.prototype._testSessionStorage = function() {
+
+	try
+	{
+		global.sessionStorage.setItem( this._test, this._test );
+		global.sessionStorage.removeItem( this._test );
+		return true;
+	}
+	catch ( e )
+	{
+		return false;
+	}
 };
 
 /**
  * Tests the HTML5 Audio Element and MP3-Support.
  */
-Environment.prototype._testHTML5Audio = function(){
-	
-	var audio = global.document.createElement("audio");
+Environment.prototype._testHTML5Audio = function() {
+
+	var audio = global.document.createElement( "audio" );
 	var isSupport = !!audio.canPlayType;
- 
-	if(isSupport === true) {
-		if(audio.canPlayType("audio/mpeg;").replace(/^no$/,"") !== ""){	
+
+	if ( isSupport === true )
+	{
+		if ( audio.canPlayType( "audio/mpeg;" ).replace( /^no$/, "" ) !== "" )
+		{
 			isSupport = true;
-		}else{
+		}
+		else
+		{
 			isSupport = false;
 		}
 	}
-	
+
 	return isSupport;
 };
 
 /**
  * Tests the WebAudio-API.
  */
-Environment.prototype._testWebAudio = function(){
-	
-	return !!(global.window.AudioContext || global.window.webkitAudioContext);
-};
+Environment.prototype._testWebAudio = function() {
 
+	return !!( global.window.AudioContext || global.window.webkitAudioContext );
+};
 
 module.exports = new Environment();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],22:[function(require,module,exports){
 (function (global){
 /**
- * @file This prototype contains the entire logic 
- * for rendering-based functionality. The renderer can
- * add and remove post-processing effects at any time.
+ * @file This prototype contains the entire logic for rendering-based
+ * functionality. The renderer can add and remove post-processing effects at any
+ * time.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-var THREE = require("three");
-var PubSub = require("pubsub-js");
+var THREE = require( "three" );
+var PubSub = require( "pubsub-js" );
 
-var EffectComposer = require("../postprocessing/EffectComposer");
-var RenderPass = require("../postprocessing/RenderPass");
-var ShaderPass = require("../postprocessing/ShaderPass");
+var EffectComposer = require( "../postprocessing/EffectComposer" );
+var RenderPass = require( "../postprocessing/RenderPass" );
+var ShaderPass = require( "../postprocessing/ShaderPass" );
 
-var GrayscaleShader = require("../shader/GrayscaleShader");
-var VignetteShader = require("../shader/VignetteShader");
-var GaussianBlurShader = require("../shader/GaussianBlurShader");
+var GrayscaleShader = require( "../shader/GrayscaleShader" );
+var VignetteShader = require( "../shader/VignetteShader" );
+var GaussianBlurShader = require( "../shader/GaussianBlurShader" );
 
-var logger = require("../etc/Logger");
+var logger = require( "../etc/Logger" );
 
 var self;
 
@@ -39608,61 +39768,64 @@ var self;
  * @constructor
  * 
  */
-function Renderer(){
-	
-	Object.defineProperties(this, {
-		_renderer: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+function Renderer() {
+
+	Object.defineProperties( this, {
+		_renderer : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_composer: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_composer : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_effectCount: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_effectCount : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		enablePostProcessing: {
-			value: true,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		enablePostProcessing : {
+			value : true,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
-	});
-	
+	} );
+
 	self = this;
 }
 
 /**
  * Initializes the renderer.
  */
-Renderer.prototype.init = function(){
-	
-	// create WebGL renderer
-	this._renderer = new THREE.WebGLRenderer({antialias : true, alpha : true});
+Renderer.prototype.init = function() {
 
-//	this._renderer.setPixelRatio(global.window.devicePixelRatio);
-	this._renderer.setSize(global.window.innerWidth, global.window.innerHeight);
-	this._renderer.setClearColor(0x000000);
+	// create WebGL renderer
+	this._renderer = new THREE.WebGLRenderer( {
+		antialias : true,
+		alpha : true
+	} );
+
+	// this._renderer.setPixelRatio(global.window.devicePixelRatio);
+	this._renderer.setSize( global.window.innerWidth, global.window.innerHeight );
+	this._renderer.setClearColor( 0x000000 );
 	this._renderer.gammaInput = true;
 	this._renderer.gammaOutput = true;
 	this._renderer.shadowMapEnabled = true;
-	
+
 	// append renderer to DOM
-	global.document.querySelector("#canvas-container").appendChild(this._renderer.domElement);
-	
+	global.document.querySelector( "#canvas-container" ).appendChild( this._renderer.domElement );
+
 	// create effect composer for post-processing
-	this._composer = new EffectComposer(this._renderer);
-	
+	this._composer = new EffectComposer( this._renderer );
+
 	// set subscriptions
-	PubSub.subscribe("ui.event.resize", this._onResize);
+	PubSub.subscribe( "ui.event.resize", this._onResize );
 };
 
 /**
@@ -39671,29 +39834,33 @@ Renderer.prototype.init = function(){
  * @param {Scene} scene - The scene object.
  * @param {Camera} camera - The camera object.
  * @param {THREE.WebGLRenderTarget} renderTarget - An optional render target.
- * @param {boolean} forceClear - Should the renderer clear the scene before rendering?
+ * @param {boolean} forceClear - Should the renderer clear the scene before
+ * rendering?
  */
-Renderer.prototype.render = function(scene, camera, renderTarget, forceClear){
-	
-	if(this._effectCount > 0 && this.enablePostProcessing === true){
+Renderer.prototype.render = function( scene, camera, renderTarget, forceClear ) {
+
+	if ( this._effectCount > 0 && this.enablePostProcessing === true )
+	{
 		this._composer.render();
-	}else{
-		this._renderer.render(scene, camera, renderTarget, forceClear);
+	}
+	else
+	{
+		this._renderer.render( scene, camera, renderTarget, forceClear );
 	}
 };
 
 /**
- * Prepares the renderer for post-processing. This method
- * creates internally a custom framebuffer (render target).
+ * Prepares the renderer for post-processing. This method creates internally a
+ * custom framebuffer (render target).
  * 
  * @param {Scene} scene - The scene object.
  * @param {Camera} camera - The camera object.
  */
-Renderer.prototype.preparePostProcessing = function(scene, camera){
-	
-	this._composer.addPass(new RenderPass(scene, camera));
-	
-	logger.log("INFO: Renderer: Init post-processing for stage.");
+Renderer.prototype.preparePostProcessing = function( scene, camera ) {
+
+	this._composer.addPass( new RenderPass( scene, camera ) );
+
+	logger.log( "INFO: Renderer: Init post-processing for stage." );
 };
 
 /**
@@ -39703,16 +39870,16 @@ Renderer.prototype.preparePostProcessing = function(scene, camera){
  * 
  * @returns {ShaderPass} The new effect.
  */
-Renderer.prototype.addGrayscaleEffect = function(options){
-	
+Renderer.prototype.addGrayscaleEffect = function( options ) {
+
 	options = options || {};
-	
-	var effect = new ShaderPass(GrayscaleShader);
+
+	var effect = new ShaderPass( GrayscaleShader );
 	effect.renderToScreen = options.renderToScreen;
-	this._composer.addPass(effect);
+	this._composer.addPass( effect );
 	this._effectCount++;
-	
-	logger.log("INFO: Renderer: Added grayscale effect.");
+
+	logger.log( "INFO: Renderer: Added grayscale effect." );
 
 	return effect;
 };
@@ -39724,23 +39891,23 @@ Renderer.prototype.addGrayscaleEffect = function(options){
  * 
  * @returns {ShaderPass} The new effect.
  */
-Renderer.prototype.addVignetteEffect = function(options){
-	
+Renderer.prototype.addVignetteEffect = function( options ) {
+
 	options = options || {};
-	
-	var effect = new ShaderPass(VignetteShader);
+
+	var effect = new ShaderPass( VignetteShader );
 	effect.renderToScreen = options.renderToScreen;
-	
+
 	// set uniforms
-	effect.uniforms.radius.value   = options.radius   || effect.uniforms.radius.value;
+	effect.uniforms.radius.value = options.radius || effect.uniforms.radius.value;
 	effect.uniforms.strength.value = options.strength || effect.uniforms.strength.value;
 	effect.uniforms.softness.value = options.softness || effect.uniforms.softness.value;
-	
-	this._composer.addPass(effect);
+
+	this._composer.addPass( effect );
 	this._effectCount++;
-	
-	logger.log("INFO: Renderer: Added vignette effect.");
-	
+
+	logger.log( "INFO: Renderer: Added vignette effect." );
+
 	return effect;
 };
 
@@ -39751,22 +39918,22 @@ Renderer.prototype.addVignetteEffect = function(options){
  * 
  * @returns {ShaderPass} The new effect.
  */
-Renderer.prototype.addHBlurEffect = function(options){
-	
+Renderer.prototype.addHBlurEffect = function( options ) {
+
 	options = options || {};
-	
-	var effect = new ShaderPass(GaussianBlurShader);
+
+	var effect = new ShaderPass( GaussianBlurShader );
 	effect.renderToScreen = options.renderToScreen;
-	
+
 	// set uniforms
-	effect.uniforms.direction.value = new THREE.Vector2(1, 0); // x-axis
-	effect.uniforms.blur.value = (options.blur || 1) / global.window.innerWidth;
-	
-	this._composer.addPass(effect);
+	effect.uniforms.direction.value = new THREE.Vector2( 1, 0 ); // x-axis
+	effect.uniforms.blur.value = ( options.blur || 1 ) / global.window.innerWidth;
+
+	this._composer.addPass( effect );
 	this._effectCount++;
-	
-	logger.log("INFO: Renderer: Added horizonzal blur effect.");
-	
+
+	logger.log( "INFO: Renderer: Added horizonzal blur effect." );
+
 	return effect;
 };
 
@@ -39777,46 +39944,45 @@ Renderer.prototype.addHBlurEffect = function(options){
  * 
  * @returns {ShaderPass} The new effect.
  */
-Renderer.prototype.addVBlurEffect = function(options){
-	
+Renderer.prototype.addVBlurEffect = function( options ) {
+
 	options = options || {};
-	
-	var effect = new ShaderPass(GaussianBlurShader);
+
+	var effect = new ShaderPass( GaussianBlurShader );
 	effect.renderToScreen = options.renderToScreen;
-	
+
 	// set uniforms
-	effect.uniforms.direction.value = new THREE.Vector2(0, 1); // y-axis
-	effect.uniforms.blur.value = (options.blur || 1) / global.window.innerHeight;
-	
-	this._composer.addPass(effect);
+	effect.uniforms.direction.value = new THREE.Vector2( 0, 1 ); // y-axis
+	effect.uniforms.blur.value = ( options.blur || 1 ) / global.window.innerHeight;
+
+	this._composer.addPass( effect );
 	this._effectCount++;
-	
-	logger.log("INFO: Renderer: Added vertical blur effect.");
+
+	logger.log( "INFO: Renderer: Added vertical blur effect." );
 
 	return effect;
 };
 
-
 /**
  * Removes a post-processing effect from the renderer.
- *
+ * 
  * @param {ShaderPass} effect - The effect to remove.
  */
-Renderer.prototype.removeEffect = function(effect){
-	
-	this._composer.removePass(effect);
+Renderer.prototype.removeEffect = function( effect ) {
+
+	this._composer.removePass( effect );
 	this._effectCount--;
 };
 
 /**
  * Clears the renderer.
  */
-Renderer.prototype.clear = function(){
-	
+Renderer.prototype.clear = function() {
+
 	// stop post-processing
 	this._composer.removePasses();
 	this._effectCount = 0;
-	
+
 	// clear the internal renderer
 	this._renderer.clear();
 };
@@ -39826,7 +39992,8 @@ Renderer.prototype.clear = function(){
  * 
  * @returns {number} The maximum anisotropic filter value.
  */
-Renderer.prototype.getMaxAnisotropy = function(){
+Renderer.prototype.getMaxAnisotropy = function() {
+
 	return this._renderer.getMaxAnisotropy();
 };
 
@@ -39835,19 +40002,20 @@ Renderer.prototype.getMaxAnisotropy = function(){
  * 
  * @returns {THREE.Color} The clear color.
  */
-Renderer.prototype.getClearColor = function(){
+Renderer.prototype.getClearColor = function() {
+
 	return this._renderer.getClearColor();
 };
 
 /**
  * Sets the clear color and alpha of the renderer.
- *
+ * 
  * @param {THREE.Color} color - The clear color.
  * @param {number} alpha - The clear alpha.
  */
-Renderer.prototype.setClearColor = function(color, alpha){
-	
-	this._renderer.setClearColor(color, alpha);
+Renderer.prototype.setClearColor = function( color, alpha ) {
+
+	this._renderer.setClearColor( color, alpha );
 };
 
 /**
@@ -39855,7 +40023,8 @@ Renderer.prototype.setClearColor = function(color, alpha){
  * 
  * @returns {number} The clear alpha.
  */
-Renderer.prototype.getClearAlpha = function(){
+Renderer.prototype.getClearAlpha = function() {
+
 	return this._renderer.getClearAlpha();
 };
 
@@ -39865,51 +40034,52 @@ Renderer.prototype.getClearAlpha = function(){
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-Renderer.prototype._onResize = function(message, data){
-	
+Renderer.prototype._onResize = function( message, data ) {
+
 	// resize renderer and effect composer
-	self._renderer.setSize(global.window.innerWidth, global.window.innerHeight);
-	self._composer.setSize(global.window.innerWidth, global.window.innerHeight);
+	self._renderer.setSize( global.window.innerWidth, global.window.innerHeight );
+	self._composer.setSize( global.window.innerWidth, global.window.innerHeight );
 };
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../etc/Logger":32,"../postprocessing/EffectComposer":53,"../postprocessing/RenderPass":54,"../postprocessing/ShaderPass":55,"../shader/GaussianBlurShader":57,"../shader/GrayscaleShader":58,"../shader/VignetteShader":59,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
 /**
- * @file This prototype contains the entire logic 
- * for scene-based functionality.
+ * @file This prototype contains the entire logic for scene-based functionality.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
 /**
- * Creates a scene, which holds all 3D-objects 
- * of the application.
+ * Creates a scene, which holds all 3D-objects of the application.
  * 
  * @constructor
  * @augments THREE.Scene
  * 
  */
-function Scene(){
+function Scene() {
 
-	THREE.Scene.call(this);
+	THREE.Scene.call( this );
 }
 
-Scene.prototype = Object.create(THREE.Scene.prototype);
+Scene.prototype = Object.create( THREE.Scene.prototype );
 Scene.prototype.constructor = Scene;
 
 /**
  * Clears the scene from all objects.
  * 
  */
-Scene.prototype.clear = function(){
-	for(var index = this.children.length - 1; index >= 0; index--){
-		if(this.children[index].type !== "Controls" && this.children[index].type !== "Player"){
-			this.remove(this.children[index]);
+Scene.prototype.clear = function() {
+
+	for ( var index = this.children.length - 1; index >= 0; index-- )
+	{
+		if ( this.children[ index ].type !== "Controls" && this.children[ index ].type !== "Player" )
+		{
+			this.remove( this.children[ index ] );
 		}
 	}
 };
@@ -39918,32 +40088,32 @@ module.exports = new Scene();
 },{"three":2}],24:[function(require,module,exports){
 (function (global){
 /**
- * @file Basis prototype for all stages. It is used to provide
- * specific stages a set of managers and other common functionality.
+ * @file Basis prototype for all stages. It is used to provide specific stages a
+ * set of managers and other common functionality.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-var THREE = require("three");
-var PubSub = require("pubsub-js");
+var THREE = require( "three" );
+var PubSub = require( "pubsub-js" );
 
-var scene = require("./Scene");
-var renderer = require("./Renderer");
-var camera = require("./Camera");
-var world = require("./World");
-var controls = require("../controls/FirstPersonControls");
-var actionManager = require("../action/ActionManager");
-var audioManager = require("../audio/AudioManager");
-var animationManager = require("../animation/AnimationManager");
-var entityManager = require("../game/entity/EntityManager");
-var performanceManager = require("../etc/PerformanceManager");
-var textManager = require("../etc/TextManager");
-var saveGameManager = require("../etc/SaveGameManager");
-var settingsManager = require("../etc/SettingsManager");
-var userInterfaceManager = require("../ui/UserInterfaceManager");
-var utils = require("../etc/Utils");
+var scene = require( "./Scene" );
+var renderer = require( "./Renderer" );
+var camera = require( "./Camera" );
+var world = require( "./World" );
+var controls = require( "../controls/FirstPersonControls" );
+var actionManager = require( "../action/ActionManager" );
+var audioManager = require( "../audio/AudioManager" );
+var animationManager = require( "../animation/AnimationManager" );
+var entityManager = require( "../game/entity/EntityManager" );
+var performanceManager = require( "../etc/PerformanceManager" );
+var textManager = require( "../etc/TextManager" );
+var saveGameManager = require( "../etc/SaveGameManager" );
+var settingsManager = require( "../etc/SettingsManager" );
+var userInterfaceManager = require( "../ui/UserInterfaceManager" );
+var utils = require( "../etc/Utils" );
 
 var self;
 /**
@@ -39953,205 +40123,206 @@ var self;
  * 
  * @param {string} stageId - The ID of the stage.
  */
-function StageBase(stageId){
-	
-	Object.defineProperties(this, {
-		stageId: {
-			value: stageId,
-			configurable: false,
-			enumerable: true,
-			writable: true
+function StageBase( stageId ) {
+
+	Object.defineProperties( this, {
+		stageId : {
+			value : stageId,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		scene: {
-			value: scene,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		scene : {
+			value : scene,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		renderer: {
-			value: renderer,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		renderer : {
+			value : renderer,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		camera: {
-			value: camera,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		camera : {
+			value : camera,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		world: {
-			value: world,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		world : {
+			value : world,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		controls: {
-			value: controls,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		controls : {
+			value : controls,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		actionManager: {
-			value: actionManager,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		actionManager : {
+			value : actionManager,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		animationManager: {
-			value: animationManager,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		animationManager : {
+			value : animationManager,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		audioManager: {
-			value: audioManager,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		audioManager : {
+			value : audioManager,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		entityManager: {
-			value: entityManager,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		entityManager : {
+			value : entityManager,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		performanceManager: {
-			value: performanceManager,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		performanceManager : {
+			value : performanceManager,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		saveGameManager: {
-			value: saveGameManager,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		saveGameManager : {
+			value : saveGameManager,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		settingsManager: {
-			value: settingsManager,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		settingsManager : {
+			value : settingsManager,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		textManager: {
-			value: textManager,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		textManager : {
+			value : textManager,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		timeManager: {
-			value: new THREE.Clock(),
-			configurable: false,
-			enumerable: true,
-			writable: false
+		timeManager : {
+			value : new THREE.Clock(),
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		userInterfaceManager: {
-			value: userInterfaceManager,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		userInterfaceManager : {
+			value : userInterfaceManager,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		_delta: {
-			value: 0,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		_delta : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		_renderId: {
-			value: 0,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		_renderId : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
-	});
-	
+	} );
+
 	self = this;
 }
 
 /**
- * This method is called, when the all requirements are fulfilled 
- * to setup the stage. In dev-mode, additional helper objects are added.
+ * This method is called, when the all requirements are fulfilled to setup the
+ * stage. In dev-mode, additional helper objects are added.
  */
-StageBase.prototype.setup = function(){
-	
-	if(utils.isDevelopmentModeActive() === true){
-		this.scene.add(new THREE.AxisHelper(30));
-		this.scene.add(new THREE.GridHelper(200, 10));
+StageBase.prototype.setup = function() {
+
+	if ( utils.isDevelopmentModeActive() === true )
+	{
+		this.scene.add( new THREE.AxisHelper( 30 ) );
+		this.scene.add( new THREE.GridHelper( 200, 10 ) );
 	}
 };
 
 /**
  * This method is called, when the stage is ready and started by the player.
  */
-StageBase.prototype.start = function(){
-	
+StageBase.prototype.start = function() {
+
 	this.controls.isActionInProgress = false;
 };
 
 /**
- * This method is called, when the stage is destroyed. 
- * It removes all scene-related data.
+ * This method is called, when the stage is destroyed. It removes all
+ * scene-related data.
  */
-StageBase.prototype.destroy = function(){
-	
+StageBase.prototype.destroy = function() {
+
 	// remove stage objects from all managers
 	this.actionManager.removeInteractiveObjects();
-	
+
 	this.actionManager.removeStaticObjects();
-	
+
 	this.actionManager.removeTriggers();
-	
+
 	this.animationManager.removeAnimations();
-	
+
 	this.animationManager.removeSprites();
-	
+
 	this.audioManager.removeDynamicAudios();
-	
+
 	this.entityManager.removeEntities();
-	
+
 	this.performanceManager.removeLODs();
-	
+
 	this.performanceManager.removeImpostors();
-		
+
 	this.textManager.removeTexts();
-	
+
 	// clear world
 	this.world.clear();
-	
+
 	// clear scene
 	this.scene.clear();
-	
+
 	// clear renderer
 	this.renderer.clear();
-	
+
 	// stop render loop
-	global.cancelAnimationFrame(this._renderId);
+	global.cancelAnimationFrame( this._renderId );
 };
 
 /**
  * Renders the stage.
  */
-StageBase.prototype._render = function(){
-	
+StageBase.prototype._render = function() {
+
 	// get delta time value
 	this._delta = this.timeManager.getDelta();
-		
+
 	// update managers
 	this.actionManager.update();
 	this.animationManager.update( this._delta );
 	this.performanceManager.update();
 	this.userInterfaceManager.update();
-	
+
 	// finally update entity manager
 	this.entityManager.update( this._delta );
-	
+
 	// update controls
 	this.controls.update( this._delta );
-	
+
 	// render frame
 	this.renderer.render( this.scene, this.camera );
-	
+
 	// save render ID
 	this._renderId = global.requestAnimationFrame( this._render );
 };
@@ -40160,12 +40331,15 @@ StageBase.prototype._render = function(){
  * Changes the stage
  * 
  * @param {string} stageId - The new stageId
- * @param {boolean} isSaveGame -  Should the progress be saved?
+ * @param {boolean} isSaveGame - Should the progress be saved?
  */
-StageBase.prototype._changeStage = function(stageId, isSaveGame){
-	
+StageBase.prototype._changeStage = function( stageId, isSaveGame ) {
+
 	self.controls.isActionInProgress = true;
-	PubSub.publish("stage.change", {stageId: stageId, isSaveGame: isSaveGame});
+	PubSub.publish( "stage.change", {
+		stageId : stageId,
+		isSaveGame : isSaveGame
+	} );
 };
 
 module.exports = StageBase;
@@ -40177,27 +40351,27 @@ module.exports = StageBase;
  * @author Human Interactive
  */
 "use strict";
-	
+
 var self;
 
-var PubSub = require("pubsub-js");
+var PubSub = require( "pubsub-js" );
 
-var saveGameManager = require("../etc/SaveGameManager");
-var userInterfaceManager = require("../ui/UserInterfaceManager");
-var logger = require("../etc/Logger");
+var saveGameManager = require( "../etc/SaveGameManager" );
+var userInterfaceManager = require( "../ui/UserInterfaceManager" );
+var logger = require( "../etc/Logger" );
 
 // stages
-var Stage_001 = require("../stages/Stage_001");
-var Stage_002 = require("../stages/Stage_002");
-var Stage_003 = require("../stages/Stage_003");
-var Stage_004 = require("../stages/Stage_004");
-var Stage_005 = require("../stages/Stage_005");
-var Stage_006 = require("../stages/Stage_006");
-var Stage_007 = require("../stages/Stage_007");
-var Stage_008 = require("../stages/Stage_008");
-var Stage_009 = require("../stages/Stage_009");
-var Stage_010 = require("../stages/Stage_010");
-var Stage_011 = require("../stages/Stage_011");
+var Stage_001 = require( "../stages/Stage_001" );
+var Stage_002 = require( "../stages/Stage_002" );
+var Stage_003 = require( "../stages/Stage_003" );
+var Stage_004 = require( "../stages/Stage_004" );
+var Stage_005 = require( "../stages/Stage_005" );
+var Stage_006 = require( "../stages/Stage_006" );
+var Stage_007 = require( "../stages/Stage_007" );
+var Stage_008 = require( "../stages/Stage_008" );
+var Stage_009 = require( "../stages/Stage_009" );
+var Stage_010 = require( "../stages/Stage_010" );
+var Stage_011 = require( "../stages/Stage_011" );
 
 /**
  * Creates the stage manager.
@@ -40206,46 +40380,46 @@ var Stage_011 = require("../stages/Stage_011");
  */
 function StageManager() {
 
-	Object.defineProperties(this, {
-		_stage: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+	Object.defineProperties( this, {
+		_stage : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_total: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_total : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_loaded: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_loaded : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_isStageChangeActive: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_isStageChangeActive : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_isApplicationStartActive: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_isApplicationStartActive : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
-	
+	} );
+
 	// subscriptions
-	PubSub.subscribe("application.start", this._onApplicationStart);
-	PubSub.subscribe("stage.start", this._onStageStart);
-	PubSub.subscribe("stage.change", this._onStageChange);
-	PubSub.subscribe("loading.start", this._onLoadStart);
-	PubSub.subscribe("loading.complete", this._onLoadComplete);
-	
+	PubSub.subscribe( "application.start", this._onApplicationStart );
+	PubSub.subscribe( "stage.start", this._onStageStart );
+	PubSub.subscribe( "stage.change", this._onStageChange );
+	PubSub.subscribe( "loading.start", this._onLoadStart );
+	PubSub.subscribe( "loading.complete", this._onLoadComplete );
+
 	self = this;
 }
 
@@ -40254,71 +40428,71 @@ function StageManager() {
  * 
  * @param {string} stageId - The ID of the stage.
  */
-StageManager.prototype.load = function(stageId) {
+StageManager.prototype.load = function( stageId ) {
 
-	switch(stageId) {
-
+	switch ( stageId )
+	{
 		case "001":
-	
+
 			this._stage = new Stage_001();
 			break;
-	
+
 		case "002":
-		
+
 			this._stage = new Stage_002();
 			break;
-		
+
 		case "003":
-			
+
 			this._stage = new Stage_003();
 			break;
-			
+
 		case "004":
-			
+
 			this._stage = new Stage_004();
 			break;
-		
+
 		case "005":
-			
+
 			this._stage = new Stage_005();
 			break;
-	
+
 		case "006":
-			
+
 			this._stage = new Stage_006();
 			break;
-	
+
 		case "007":
-			
+
 			this._stage = new Stage_007();
 			break;
-			
+
 		case "008":
-			
+
 			this._stage = new Stage_008();
 			break;
-			
+
 		case "009":
-			
+
 			this._stage = new Stage_009();
 			break;
-			
+
 		case "010":
-			
+
 			this._stage = new Stage_010();
 			break;
-			
+
 		case "011":
-			
+
 			this._stage = new Stage_011();
 			break;
-			
+
 		default:
 			throw "ERROR: StageManager: Invalid Stage-ID: " + stageId;
 	}
-	
-	logger.log("INFO: StageManager: Start loading scene with ID: %s", stageId);
-	
+
+	logger.log( "INFO: StageManager: Start loading scene with ID: %s", stageId );
+
 	this._stage.setup();
 };
 
@@ -40327,62 +40501,68 @@ StageManager.prototype.load = function(stageId) {
  */
 StageManager.prototype.clear = function() {
 
-	if (this._stage !== null) {
+	if ( this._stage !== null )
+	{
 		this._stage.destroy();
 	}
 };
 
 /**
- * Handles the "application.start" topic. This topic is used load the
- * first scene after application start.
+ * Handles the "application.start" topic. This topic is used load the first
+ * scene after application start.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-StageManager.prototype._onApplicationStart = function(message, data){
-	
-	if(data !== undefined){
-		
-			// set flag
-			self._isApplicationStartActive = true;
-			
-			// load new stage
-			self.load(data.stageId);
-	}else{
+StageManager.prototype._onApplicationStart = function( message, data ) {
+
+	if ( data !== undefined )
+	{
+		// set flag
+		self._isApplicationStartActive = true;
+
+		// load new stage
+		self.load( data.stageId );
+	}
+	else
+	{
 		throw "ERROR: StageManager: Application start not possible. Missing message data.";
 	}
 };
 
 /**
- * Handles the "stage.change" topic. This topic is used to change from
- * one stage to an other.
+ * Handles the "stage.change" topic. This topic is used to change from one stage
+ * to an other.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-StageManager.prototype._onStageChange = function(message, data){
-	
-	if(data !== undefined){
-		
+StageManager.prototype._onStageChange = function( message, data ) {
+
+	if ( data !== undefined )
+	{
 		// show loading screen. execute scene change, when animation ends
-		userInterfaceManager.showLoadingScreen(function(){
-			
+		userInterfaceManager.showLoadingScreen( function() {
+
 			// set flag
 			self._isStageChangeActive = true;
-		
+
 			// clear stage
 			self.clear();
-			
+
 			// load new stage
-			self.load(data.stageId);
-			
+			self.load( data.stageId );
+
 			// save game
-			if(data.isSaveGame === true){
-				saveGameManager.save(data.stageId);
+			if ( data.isSaveGame === true )
+			{
+				saveGameManager.save( data.stageId );
 			}
-		});
-		
-	}else{
+		} );
+
+	}
+	else
+	{
 		throw "ERROR: StageManager: Stage change not possible. Missing message data.";
 	}
 };
@@ -40394,8 +40574,8 @@ StageManager.prototype._onStageChange = function(message, data){
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-StageManager.prototype._onStageStart = function(message, data){
-	
+StageManager.prototype._onStageStart = function( message, data ) {
+
 	self._stage.start();
 };
 
@@ -40406,48 +40586,53 @@ StageManager.prototype._onStageStart = function(message, data){
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-StageManager.prototype._onLoadStart = function(message, data){
-	
-	logger.log("INFO: StageManager: Start asset loading. Message: %s. URL: %s", message, data.url);
-	
+StageManager.prototype._onLoadStart = function( message, data ) {
+
+	logger.log( "INFO: StageManager: Start asset loading. Message: %s. URL: %s", message, data.url );
+
 	self._total++;
 };
 
 /**
- * Handles the "loading.complete" topic. This method subscribes to all 
- * topics in the "loading.complete" hierarchy.
+ * Handles the "loading.complete" topic. This method subscribes to all topics in
+ * the "loading.complete" hierarchy.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-StageManager.prototype._onLoadComplete = function(message, data){
-	
-	if(self._isStageChangeActive === true || self._isApplicationStartActive === true){
-		
-		logger.log("INFO: StageManager: Asset loading complete. Message: %s. URL: %s", message, data.url);
+StageManager.prototype._onLoadComplete = function( message, data ) {
+
+	if ( self._isStageChangeActive === true || self._isApplicationStartActive === true )
+	{
+		logger.log( "INFO: StageManager: Asset loading complete. Message: %s. URL: %s", message, data.url );
 
 		self._loaded++;
-		
+
 		// calculate progress
-		var loadingProgress = Math.round(self._loaded * 100 / self._total);
-		
+		var loadingProgress = Math.round( self._loaded * 100 / self._total );
+
 		// inform ui-element about progress
-		PubSub.publish("ui.loading.progress", {loadingProgress: loadingProgress, isApplicationStart: self._isApplicationStartActive});
-		
+		PubSub.publish( "ui.loading.progress", {
+			loadingProgress : loadingProgress,
+			isApplicationStart : self._isApplicationStartActive
+		} );
+
 		// check message limit
-		if(self._loaded === self._total){
-			
+		if ( self._loaded === self._total )
+		{
 			// publish message
-			PubSub.publish("ui.loading.ready", {isApplicationStart: self._isApplicationStartActive});
-			
+			PubSub.publish( "ui.loading.ready", {
+				isApplicationStart : self._isApplicationStartActive
+			} );
+
 			// reset attributes
 			self._isStageChangeActive = false;
 			self._isApplicationStartActive = false;
 			self._loaded = 0;
 			self._total = 0;
-			
+
 			// log event
-			logger.log("INFO: StageManager: Scene completely loaded and ready.");
+			logger.log( "INFO: StageManager: Scene completely loaded and ready." );
 
 		}
 	}
@@ -40457,9 +40642,8 @@ module.exports = new StageManager();
 },{"../etc/Logger":32,"../etc/SaveGameManager":37,"../stages/Stage_001":60,"../stages/Stage_002":61,"../stages/Stage_003":62,"../stages/Stage_004":63,"../stages/Stage_005":64,"../stages/Stage_006":65,"../stages/Stage_007":66,"../stages/Stage_008":67,"../stages/Stage_009":68,"../stages/Stage_010":69,"../stages/Stage_011":70,"../ui/UserInterfaceManager":81,"pubsub-js":1}],26:[function(require,module,exports){
 (function (global){
 /**
- * @file This prototype represents a thread-object. It 
- * uses the HTML5-API Web Workers to start scripts in
- * separate threads.
+ * @file This prototype represents a thread-object. It uses the HTML5-API Web
+ * Workers to start scripts in separate threads.
  * 
  * @author Human Interactive
  */
@@ -40472,30 +40656,30 @@ module.exports = new StageManager();
  * @param {string} id - The id of the thread.
  * @param {string} scriptURL - The URL of the serialized script.
  */
-function Thread(id, scriptURL){
+function Thread( id, scriptURL ) {
 
-	Object.defineProperties(this, {
-		id: {
-			value: id,
-			configurable: false,
-			enumerable: true,
-			writable: false
+	Object.defineProperties( this, {
+		id : {
+			value : id,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		scriptURL:{
-			value: scriptURL,
-			configurable: false,
-			enumerable: false,
-			writable: false
+		scriptURL : {
+			value : scriptURL,
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		_worker: {
-			value: null,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		_worker : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
-	});
-	
-	this._worker = new global.Worker(this.scriptURL);
+	} );
+
+	this._worker = new global.Worker( this.scriptURL );
 }
 
 /**
@@ -40503,15 +40687,17 @@ function Thread(id, scriptURL){
  * 
  * @param {object} message - The message.
  */
-Thread.prototype.postMessage = function(message){
-	this._worker.postMessage(message); 
+Thread.prototype.postMessage = function( message ) {
+
+	this._worker.postMessage( message );
 };
 
 /**
  * Terminates the internal web worker.
  */
-Thread.prototype.terminate = function(){
-	this._worker.terminate(); 
+Thread.prototype.terminate = function() {
+
+	this._worker.terminate();
 };
 
 /**
@@ -40519,8 +40705,9 @@ Thread.prototype.terminate = function(){
  * 
  * @param {function} listener - The event listener.
  */
-Thread.prototype.onMessage = function(listener){
-	this._worker.addEventListener("message", listener, false);
+Thread.prototype.onMessage = function( listener ) {
+
+	this._worker.addEventListener( "message", listener, false );
 };
 
 /**
@@ -40528,8 +40715,9 @@ Thread.prototype.onMessage = function(listener){
  * 
  * @param {function} listener - The event listener.
  */
-Thread.prototype.onError = function(listener){
-	this._worker.addEventListener("error", listener, false);
+Thread.prototype.onError = function( listener ) {
+
+	this._worker.addEventListener( "error", listener, false );
 };
 
 module.exports = Thread;
@@ -40537,37 +40725,38 @@ module.exports = Thread;
 },{}],27:[function(require,module,exports){
 (function (global){
 /**
- * @file This prototype contains the entire logic 
- * for thread-based functionality.
+ * @file This prototype contains the entire logic for thread-based
+ * functionality.
  * 
  * @author Human Interactive
  */
 "use strict";
 
-var Thread = require("./Thread");
+var Thread = require( "./Thread" );
 /**
  * Creates the network manager.
  * 
  * @constructor
  * 
  */
-function ThreadManager(){
-	
-	Object.defineProperties(this, {
-		_threads: {
-			value: [],
-			configurable: false,
-			enumerable: false,
-			writable: false
+function ThreadManager() {
+
+	Object.defineProperties( this, {
+		_threads : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
 		}
-	});
-	
+	} );
+
 	var self = this;
-	
+
 	// terminate all threads when refreshing/ leaving the application
-	global.window.addEventListener("beforeunload", function(){
+	global.window.addEventListener( "beforeunload", function() {
+
 		self.terminateAllThreads();
-	});
+	} );
 }
 
 /**
@@ -40578,15 +40767,15 @@ function ThreadManager(){
  * 
  * @returns {Thread} The new thread.
  */
-ThreadManager.prototype.createThread = function(id, script){
-	
+ThreadManager.prototype.createThread = function( id, script ) {
+
 	// get URL of script
-	var scriptURL = this._getScriptURL(script);
-	
+	var scriptURL = this._getScriptURL( script );
+
 	// create thread and add to internal array
-	var thread = new Thread(id, scriptURL);
-	this._threads.push(thread);
-	
+	var thread = new Thread( id, scriptURL );
+	this._threads.push( thread );
+
 	return thread;
 };
 
@@ -40597,20 +40786,25 @@ ThreadManager.prototype.createThread = function(id, script){
  * 
  * @returns {Thread} The thread.
  */
-ThreadManager.prototype.get = function(id) {
+ThreadManager.prototype.get = function( id ) {
 
 	var thread = null;
-	
-	for( var index = 0; index < this._threads.length; index++){
-		if(this._threads[index].id === id){
-			thread =  this._threads[index];
+
+	for ( var index = 0; index < this._threads.length; index++ )
+	{
+		if ( this._threads[ index ].id === id )
+		{
+			thread = this._threads[ index ];
 			break;
 		}
 	}
-	
-	if(thread === null){
+
+	if ( thread === null )
+	{
 		throw "ERROR: ThreadManager: Thread with ID " + id + " not existing.";
-	}else{
+	}
+	else
+	{
 		return thread;
 	}
 };
@@ -40621,15 +40815,15 @@ ThreadManager.prototype.get = function(id) {
  * @param {Thread} thread - The thread to terminate.
  * 
  */
-ThreadManager.prototype.terminateThread = function(thread){
-	
+ThreadManager.prototype.terminateThread = function( thread ) {
+
 	// remove form internal array
-	var index = this._threads.indexOf(thread);
-	this._threads.splice(index, 1);
-	
+	var index = this._threads.indexOf( thread );
+	this._threads.splice( index, 1 );
+
 	// release object URL
-	global.URL.revokeObjectURL(thread.scriptURL);
-	
+	global.URL.revokeObjectURL( thread.scriptURL );
+
 	// terminate thread
 	thread.terminate();
 };
@@ -40637,34 +40831,35 @@ ThreadManager.prototype.terminateThread = function(thread){
 /**
  * Terminates all threads.
  */
-ThreadManager.prototype.terminateAllThreads = function(){
-	
-	for(var index = 0; index < this._threads.length; index++){
-		
+ThreadManager.prototype.terminateAllThreads = function() {
+
+	for ( var index = 0; index < this._threads.length; index++ )
+	{
 		// release object URL
-		global.URL.revokeObjectURL(this._threads[index].scriptURL);
-		
+		global.URL.revokeObjectURL( this._threads[ index ].scriptURL );
+
 		// terminate thread
-		this._threads[index].terminate();
+		this._threads[ index ].terminate();
 	}
-	
+
 	// clear internal array
 	this._threads.length = 0;
 };
 
 /**
- * This method prepares the script, so it can run as a
- * separate thread. It creates a BLOB and provides a
- * object URL to generated content.
+ * This method prepares the script, so it can run as a separate thread. It
+ * creates a BLOB and provides a object URL to generated content.
  * 
  * @param {string} script - The script for the thread.
  * 
  * @returns {string} The URL of the serialized script.
  */
-ThreadManager.prototype._getScriptURL = function(script){
-	
-	var blob = new global.Blob(["(", script.toString(), ")()"], {type: "application/javascript"});
-	var url = global.URL.createObjectURL(blob);
+ThreadManager.prototype._getScriptURL = function( script ) {
+
+	var blob = new global.Blob( [ "(", script.toString(), ")()" ], {
+		type : "application/javascript"
+	} );
+	var url = global.URL.createObjectURL( blob );
 	return url;
 };
 
@@ -40672,15 +40867,14 @@ module.exports = new ThreadManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./Thread":26}],28:[function(require,module,exports){
 /**
- * @file This prototype contains all important
- * 		 environment data of a stage.
+ * @file This prototype contains all important environment data of a stage.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-var actionManager = require("../action/ActionManager");
+var actionManager = require( "../action/ActionManager" );
 
 /**
  * Creates a world object.
@@ -40688,24 +40882,24 @@ var actionManager = require("../action/ActionManager");
  * @constructor
  * 
  */
-function World(){
-	
-	Object.defineProperties(this, {
-		
-		grounds:{
-			value: [],
-			configurable: false,
-			enumerable: true,
-			writable: false
+function World() {
+
+	Object.defineProperties( this, {
+
+		grounds : {
+			value : [],
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		walls: {
-			value: [],
-			configurable: false,
-			enumerable: true,
-			writable: false
+		walls : {
+			value : [],
+			configurable : false,
+			enumerable : true,
+			writable : false
 		}
-		
-	});
+
+	} );
 }
 
 /**
@@ -40714,8 +40908,8 @@ function World(){
  * @param {THREE.Mesh} ground - The ground to add.
  * 
  */
-World.prototype.addGround = function( ground ){
-	
+World.prototype.addGround = function( ground ) {
+
 	this.grounds.push( ground );
 };
 
@@ -40724,8 +40918,8 @@ World.prototype.addGround = function( ground ){
  * 
  * @param {THREE.Mesh} ground - The ground to remove.
  */
-World.prototype.removeGround = function( ground ){
-	
+World.prototype.removeGround = function( ground ) {
+
 	var index = this.grounds.indexOf( ground );
 	this.grounds.splice( index, 1 );
 };
@@ -40733,8 +40927,8 @@ World.prototype.removeGround = function( ground ){
 /**
  * Removes all grounds from the internal array.
  */
-World.prototype.removeGrounds = function(){
-	
+World.prototype.removeGrounds = function() {
+
 	this.grounds.length = 0;
 };
 
@@ -40744,8 +40938,8 @@ World.prototype.removeGrounds = function(){
  * @param {THREE.Plane} wall - The wall to add.
  * 
  */
-World.prototype.addWall = function( wall ){
-	
+World.prototype.addWall = function( wall ) {
+
 	this.walls.push( wall );
 };
 
@@ -40754,8 +40948,8 @@ World.prototype.addWall = function( wall ){
  * 
  * @param {THREE.Plane} wall - The wall to remove.
  */
-World.prototype.removeWall = function( wall ){
-	
+World.prototype.removeWall = function( wall ) {
+
 	var index = this.walls.indexOf( wall );
 	this.walls.splice( index, 1 );
 };
@@ -40763,8 +40957,8 @@ World.prototype.removeWall = function( wall ){
 /**
  * Removes all walls from the internal array.
  */
-World.prototype.removeWalls = function(){
-	
+World.prototype.removeWalls = function() {
+
 	this.walls.length = 0;
 };
 
@@ -40775,52 +40969,51 @@ World.prototype.removeWalls = function(){
  * @param {object} obstacle - The target object.
  * 
  */
-World.prototype.getObstacle = ( function( ){
-	
+World.prototype.getObstacle = ( function() {
+
 	var i;
-	
-	return function( index ){
-		
+
+	return function( index ) {
+
 		i = index;
-		
-		if( i < actionManager.interactiveObjects.length ){
-			
+
+		if ( i < actionManager.interactiveObjects.length )
+		{
 			return actionManager.interactiveObjects[ i ];
 		}
-		else{
-			
+		else
+		{
 			i -= actionManager.interactiveObjects.length;
 		}
-		
-		if(  i < actionManager.staticObjects.length ){
-			
+
+		if ( i < actionManager.staticObjects.length )
+		{
 			return actionManager.staticObjects[ i ];
 		}
-		else{
-			
+		else
+		{
 			throw "ERROR: World: Obstacle index out of range.";
 		}
-		
+
 	};
-	
-} ( ) );
+
+}() );
 
 /**
  * Returns the number of obstacles in the game world.
  * 
  * @returns {number} The number of obstacles.
  */
-World.prototype.getNumberOfObstacles = function(){
-	
-	return actionManager.interactiveObjects.length + 
-		   actionManager.staticObjects.length;
+World.prototype.getNumberOfObstacles = function() {
+
+	return actionManager.interactiveObjects.length + actionManager.staticObjects.length;
 };
 
 /**
  * Clears the world object.
  */
-World.prototype.clear = function(){
-	
+World.prototype.clear = function() {
+
 	this.removeWalls();
 	this.removeGrounds();
 };
@@ -40828,10 +41021,9 @@ World.prototype.clear = function(){
 module.exports = new World();
 },{"../action/ActionManager":6}],29:[function(require,module,exports){
 /**
- * @file This prototype handles all stuff for impostors. An impostor
- * is a billboard that is created on the fly by rendering a complex
- * object from the current viewpoint into an image texture, which is mapped
- * on the billboard.
+ * @file This prototype handles all stuff for impostors. An impostor is a
+ * billboard that is created on the fly by rendering a complex object from the
+ * current viewpoint into an image texture, which is mapped on the billboard.
  * 
  * see: Real-Time Rendering, Third Edition, Akenine-Möller/Haines/Hoffman
  * Chapter 10.7.1, Impostors
@@ -40840,7 +41032,7 @@ module.exports = new World();
  */
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 /**
  * Creates an impostor.
  * 
@@ -40851,96 +41043,98 @@ var THREE = require("three");
  * @param {number} resolution - The resolution of the rendered texture.
  */
 function Impostor( id, sourceObject, resolution, angle ) {
-	
-	Object.defineProperties(this, {
-		idImpostor: {
-			value: id,
-			configurable: false,
-			enumerable: true,
-			writable: false
+
+	Object.defineProperties( this, {
+		idImpostor : {
+			value : id,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		billboard: {
-			value: null,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		billboard : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		sourceObject: {
-			value: sourceObject,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		sourceObject : {
+			value : sourceObject,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		resolution: {
-			value: resolution || 128,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		resolution : {
+			value : resolution || 128,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		angle: {
-			value: angle || 30,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		angle : {
+			value : angle || 30,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		_renderTarget: {
-			value: null,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		_renderTarget : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		_boundingBox: {
-			value: new THREE.Box3(),
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_boundingBox : {
+			value : new THREE.Box3(),
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_boundingRectangle: {
-			value: new THREE.Box2(),
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_boundingRectangle : {
+			value : new THREE.Box2(),
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_depth: {
-			value: Infinity,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_depth : {
+			value : Infinity,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_scene: {
-			value: new THREE.Scene(),
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_scene : {
+			value : new THREE.Scene(),
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_camera:  {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_camera : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_lights:  {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_lights : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_renderer: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_renderer : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_lastDirection: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_lastDirection : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
-	
+	} );
+
 	// create render target
-	this._renderTarget = new THREE.WebGLRenderTarget( this.resolution, this.resolution, {format: THREE.RGBAFormat});
+	this._renderTarget = new THREE.WebGLRenderTarget( this.resolution, this.resolution, {
+		format : THREE.RGBAFormat
+	} );
 }
 
 /**
@@ -40950,49 +41144,56 @@ function Impostor( id, sourceObject, resolution, angle ) {
  * @param {Camera} camera - The camera object.
  * @param {object} lights - The lights of the stage.
  */
-Impostor.prototype.prepareGeneration = function( renderer, camera, lights ){
+Impostor.prototype.prepareGeneration = function( renderer, camera, lights ) {
 
 	// constant for all impostors
 	this._renderer = renderer;
 	this._lights = lights;
-	
+
 	// the matrices of the camera get transformed, so it's necessary to clone it
-	this._camera = camera.clone(); 
-	
+	this._camera = camera.clone();
+
 	// create new billboard and apply impostor material
 	this.billboard = new THREE.Mesh();
-	
-	// apply material. the alpha value avoids semi-transparent black borders at the billboard
-	this.billboard.material = new THREE.MeshBasicMaterial( { map: this._renderTarget, transparent: true, alphaTest: 0.9 } );
-	
-	// the model matrix is calculated by the impostor so disable the automatic update
+
+	// apply material. the alpha value avoids semi-transparent black borders at
+	// the billboard
+	this.billboard.material = new THREE.MeshBasicMaterial( {
+		map : this._renderTarget,
+		transparent : true,
+		alphaTest : 0.9
+	} );
+
+	// the model matrix is calculated by the impostor so disable the automatic
+	// update
 	this.billboard.matrixAutoUpdate = false;
 };
 
 /**
  * Generates the impostor.
  */
-Impostor.prototype.generate = function(){
+Impostor.prototype.generate = function() {
 
 	this._computeBoundingBox();
-	
+
 	this._computeViewMatrix();
-	
+
 	this._computeBoundingRectangle();
-	
+
 	this._computePosition();
-	
+
 	this._computeGeometry();
-	
+
 	this._computeProjectionMatrix();
-	
+
 	this._prepareScene();
-	
+
 	this._render();
 };
 
 /**
- * Updates the model matrix of an impostor. The impostor is handled like a viewpoint-oriented, axis-aligned billboard.
+ * Updates the model matrix of an impostor. The impostor is handled like a
+ * viewpoint-oriented, axis-aligned billboard.
  * 
  * see: Real-Time Rendering, Third Edition, Akenine-Möller/Haines/Hoffman
  * Chapter 10.6.2, World-Oriented Billboards
@@ -41000,81 +41201,85 @@ Impostor.prototype.generate = function(){
  * @param {THREE.Vector3} cameraPosition - The position of the camera.
  * 
  */
-Impostor.prototype.update = (function(){
-	
-	var xAxis = new THREE.Vector3();		  // right
-	var yAxis = new THREE.Vector3( 0, 1, 0 ); // up
-	var zAxis = new THREE.Vector3();		  // front
+Impostor.prototype.update = ( function() {
 
-	return function( cameraPosition ){
-		
-		// first, compute zAxis 
+	var xAxis = new THREE.Vector3(); // right
+	var yAxis = new THREE.Vector3( 0, 1, 0 ); // up
+	var zAxis = new THREE.Vector3(); // front
+
+	return function( cameraPosition ) {
+
+		// first, compute zAxis
 		zAxis.subVectors( cameraPosition, this.billboard.position );
-		zAxis.y = 0; // this will ensure, that the impostor rotates correctly around the axis
+		zAxis.y = 0; // this will ensure, that the impostor rotates correctly
+						// around the axis
 		zAxis.normalize();
-		
+
 		// compute the last axis with the cross product
 		xAxis.crossVectors( yAxis, zAxis );
-		
+
 		// create new model matrix from basis vectors
 		this.billboard.matrix.makeBasis( xAxis, yAxis, zAxis );
-		
+
 		// apply the position
 		this.billboard.matrix.setPosition( this.billboard.position );
-		
+
 		// force world matrix to update
 		this.billboard.matrixWorldNeedsUpdate = true;
 	};
-	
-}());
+
+}() );
 
 /**
  * Checks, if it's necessary to generate the impostor.
  * 
- * @param {THREE.Vector3} direction - The current direction from impostor to camera.
+ * @param {THREE.Vector3} direction - The current direction from impostor to
+ * camera.
  * 
  * @returns {boolean} Is a generation necessary?
  */
-Impostor.prototype.isGenerationNeeded = ( function(){
+Impostor.prototype.isGenerationNeeded = ( function() {
 
 	var angle = 0;
-	
-	return function( currentDirection ){
-		
-		if( this._lastDirection === null ){
-			
+
+	return function( currentDirection ) {
+
+		if ( this._lastDirection === null )
+		{
 			this._lastDirection = currentDirection.clone();
-			
-		}else{
-			
+
+		}
+		else
+		{
 			// compute the angle between current and last direction
 			angle = Math.acos( this._lastDirection.dot( currentDirection ) );
-			
+
 			// convert radians to degrees
 			angle *= ( 180 / Math.PI );
-			
+
 			// check against property
-			if( angle > this.angle * 0.5 ){
-				
+			if ( angle > this.angle * 0.5 )
+			{
+
 				// save the direction
 				this._lastDirection = currentDirection.clone();
-				
+
 				// return true to trigger a generation
 				return true;
 			}
-			
+
 			return false;
 		}
-		
+
 		return false;
 	};
-	
-} () );
+
+}() );
 
 /**
  * Computes the axis-aligned bounding box of the object.
  */
-Impostor.prototype._computeBoundingBox = function(){
+Impostor.prototype._computeBoundingBox = function() {
 
 	this._boundingBox.setFromObject( this.sourceObject );
 };
@@ -41082,11 +41287,11 @@ Impostor.prototype._computeBoundingBox = function(){
 /**
  * Prepares the camera for rendering.
  */
-Impostor.prototype._computeViewMatrix = function(){
+Impostor.prototype._computeViewMatrix = function() {
 
 	// the camera should look at the center of the AABB
 	this._camera.lookAt( this._boundingBox.center() );
-	
+
 	// compute new matrices
 	this._camera.updateMatrix();
 	this._camera.updateMatrixWorld();
@@ -41094,47 +41299,45 @@ Impostor.prototype._computeViewMatrix = function(){
 };
 
 /**
- * Computes the bounding rectangle of the impostor. 
- * This 2D bounding box is the impostor in screen-space.
+ * Computes the bounding rectangle of the impostor. This 2D bounding box is the
+ * impostor in screen-space.
  */
-Impostor.prototype._computeBoundingRectangle = function(){
+Impostor.prototype._computeBoundingRectangle = function() {
 
-	var points = [
-		  new THREE.Vector3(),
-		  new THREE.Vector3(),
-		  new THREE.Vector3(),
-		  new THREE.Vector3(),
-		  new THREE.Vector3(),
-		  new THREE.Vector3(),
-		  new THREE.Vector3(),
-		  new THREE.Vector3()
-	];
-	
+	var points = [ new THREE.Vector3(), 
+	               new THREE.Vector3(), 
+	               new THREE.Vector3(), 
+	               new THREE.Vector3(), 
+	               new THREE.Vector3(), 
+	               new THREE.Vector3(), 
+	               new THREE.Vector3(), 
+	               new THREE.Vector3() ];
+
 	// calculate each point of the bounding box
-	points[0].set( this._boundingBox.min.x, this._boundingBox.min.y, this._boundingBox.min.z );
-	points[1].set( this._boundingBox.min.x, this._boundingBox.min.y, this._boundingBox.max.z );
-	points[2].set( this._boundingBox.min.x, this._boundingBox.max.y, this._boundingBox.min.z );
-	points[3].set( this._boundingBox.min.x, this._boundingBox.max.y, this._boundingBox.max.z );
-	points[4].set( this._boundingBox.max.x, this._boundingBox.min.y, this._boundingBox.min.z );
-	points[5].set( this._boundingBox.max.x, this._boundingBox.min.y, this._boundingBox.max.z );
-	points[6].set( this._boundingBox.max.x, this._boundingBox.max.y, this._boundingBox.min.z );
-	points[7].set( this._boundingBox.max.x, this._boundingBox.max.y, this._boundingBox.max.z );
-	
+	points[ 0 ].set( this._boundingBox.min.x, this._boundingBox.min.y, this._boundingBox.min.z );
+	points[ 1 ].set( this._boundingBox.min.x, this._boundingBox.min.y, this._boundingBox.max.z );
+	points[ 2 ].set( this._boundingBox.min.x, this._boundingBox.max.y, this._boundingBox.min.z );
+	points[ 3 ].set( this._boundingBox.min.x, this._boundingBox.max.y, this._boundingBox.max.z );
+	points[ 4 ].set( this._boundingBox.max.x, this._boundingBox.min.y, this._boundingBox.min.z );
+	points[ 5 ].set( this._boundingBox.max.x, this._boundingBox.min.y, this._boundingBox.max.z );
+	points[ 6 ].set( this._boundingBox.max.x, this._boundingBox.max.y, this._boundingBox.min.z );
+	points[ 7 ].set( this._boundingBox.max.x, this._boundingBox.max.y, this._boundingBox.max.z );
+
 	// reset values before calculating
 	this._depth = Infinity;
 	this._boundingRectangle.makeEmpty();
-	
+
 	// calculate the bounding rectangle and the minimum depth value
-	for( var index = 0; index < points.length; index++ ){
-		
+	for ( var index = 0; index < points.length; index++ )
+	{
 		// transform and project point from world to screen space
-		points[index].project( this._camera );
-		
+		points[ index ].project( this._camera );
+
 		// compute the bounding rectangle in screen space
-		this._boundingRectangle.expandByPoint( points[index] );
-		
+		this._boundingRectangle.expandByPoint( points[ index ] );
+
 		// determine the minimum depth value
-		this._depth = Math.min( this._depth, points[index].z );
+		this._depth = Math.min( this._depth, points[ index ].z );
 	}
 };
 
@@ -41142,130 +41345,125 @@ Impostor.prototype._computeBoundingRectangle = function(){
  * Computes the position of the impostor. The center point of the bounding
  * rectangle in world space will provide the exact value.
  */
-Impostor.prototype._computePosition = function(){
-	
+Impostor.prototype._computePosition = function() {
+
 	// calculate center
 	var centerScreenSpace = this._boundingRectangle.center();
-	
-	// use the center and the depth value to determine the new position of the impostor in screen space
+
+	// use the center and the depth value to determine the new position of the
+	// impostor in screen space
 	var positionWorldSpace = new THREE.Vector3( centerScreenSpace.x, centerScreenSpace.y, this._depth );
-	
+
 	// unproject the vector to get world position
 	this.billboard.position.copy( positionWorldSpace.unproject( this._camera ) );
 };
 
 /**
- * Computes the geometry of impostor. The method creates a simple plane geometry to
- * display the rendered texture.
+ * Computes the geometry of impostor. The method creates a simple plane geometry
+ * to display the rendered texture.
  */
-Impostor.prototype._computeGeometry = ( function(){
-	
+Impostor.prototype._computeGeometry = ( function() {
+
 	var geometry, index;
-	
+
 	var translationMatrix = new THREE.Matrix4();
 	var rotationMatrix = new THREE.Matrix4();
-	
+
 	// create point array
-	var points = [ 
-          new THREE.Vector3(),
-          new THREE.Vector3(),
-          new THREE.Vector3(),
-          new THREE.Vector3()
-   	];
-			
+	var points = [ new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3() ];
+
 	// create shared buffers for indices and uvs
 	var indices = new Uint16Array( [ 0, 2, 1, 2, 3, 1 ] ); // fix values
-	var uvs 	= new Float32Array( [ 0, 0, 0, 1, 1, 0, 1, 1 ] ); // fix values
-	
-	return function(){
-		
+	var uvs = new Float32Array( [ 0, 0, 0, 1, 1, 0, 1, 1 ] ); // fix values
+
+	return function() {
+
 		// create new geometry
 		geometry = new THREE.BufferGeometry();
-		
+
 		// create vertex buffer, unique for each impostor
 		var vertices = new Float32Array( 12 );
-		
-		// get the points of the bounding rectangle	
-		points[0].set( this._boundingRectangle.min.x, this._boundingRectangle.min.y, this._depth );
-		points[1].set( this._boundingRectangle.min.x, this._boundingRectangle.max.y, this._depth );
-		points[2].set( this._boundingRectangle.max.x, this._boundingRectangle.min.y, this._depth );
-		points[3].set( this._boundingRectangle.max.x, this._boundingRectangle.max.y, this._depth );
+
+		// get the points of the bounding rectangle
+		points[ 0 ].set( this._boundingRectangle.min.x, this._boundingRectangle.min.y, this._depth );
+		points[ 1 ].set( this._boundingRectangle.min.x, this._boundingRectangle.max.y, this._depth );
+		points[ 2 ].set( this._boundingRectangle.max.x, this._boundingRectangle.min.y, this._depth );
+		points[ 3 ].set( this._boundingRectangle.max.x, this._boundingRectangle.max.y, this._depth );
 
 		// set vertices
-		for( index = 0; index < points.length; index++ ){
-			
+		for ( index = 0; index < points.length; index++ )
+		{
 			// transform point from screen space to world space
-			points[index].unproject( this._camera );
-			
+			points[ index ].unproject( this._camera );
+
 			// set the vertices of the bounding rectangle
-			vertices[ index * 3 + 0 ] = points[index].x;
-			vertices[ index * 3 + 1 ] = points[index].y;
-			vertices[ index * 3 + 2 ] = points[index].z;
+			vertices[ index * 3 + 0 ] = points[ index ].x;
+			vertices[ index * 3 + 1 ] = points[ index ].y;
+			vertices[ index * 3 + 2 ] = points[ index ].z;
 		}
-		
+
 		// add vertices, indices and uvs to geometry
 		geometry.addAttribute( "position", new THREE.BufferAttribute( vertices, 3 ) );
 		geometry.addAttribute( "index", new THREE.BufferAttribute( indices, 1 ) );
 		geometry.addAttribute( "uv", new THREE.BufferAttribute( uvs, 2 ) );
-		
+
 		// prepare matrices
 		translationMatrix.identity();
 		rotationMatrix.identity();
-		
+
 		// reset the center of the geometry back to origin
 		translationMatrix.makeTranslation( -this.billboard.position.x, -this.billboard.position.y, -this.billboard.position.z );
-		
+
 		// undo rotation of the view transform
 		rotationMatrix.extractRotation( this._camera.matrixWorldInverse );
-		
+
 		// reset geometry
 		geometry.applyMatrix( translationMatrix );
 		geometry.applyMatrix( rotationMatrix );
-		
+
 		// apply geometry
 		this.billboard.geometry = geometry;
 	};
-	
-} () );
+
+}() );
 
 /**
- * Computes a projection matrix, that encloses the bounding rectangle of the impostor.
+ * Computes a projection matrix, that encloses the bounding rectangle of the
+ * impostor.
  */
-Impostor.prototype._computeProjectionMatrix = function(){
-		
+Impostor.prototype._computeProjectionMatrix = function() {
+
 	// calculate frustum
 	var frustumHeight = this._camera.near * Math.tan( THREE.Math.degToRad( this._camera.fov * 0.5 ) );
-	var frustumWidth  = frustumHeight * this._camera.aspect;
-	
+	var frustumWidth = frustumHeight * this._camera.aspect;
+
 	// create new projection matrix via min/max values of the bounding rectangle
-	this._camera.projectionMatrix.makeFrustum(  
-			frustumWidth  * this._boundingRectangle.min.x, 
-		    frustumWidth  * this._boundingRectangle.max.x,  
-		    frustumHeight * this._boundingRectangle.min.y,
-		    frustumHeight * this._boundingRectangle.max.y, 
-		    this._camera.near,
-		    this._camera.far
-		    );
+	this._camera.projectionMatrix.makeFrustum( frustumWidth  * this._boundingRectangle.min.x, 
+											   frustumWidth  * this._boundingRectangle.max.x, 
+											   frustumHeight * this._boundingRectangle.min.y, 
+											   frustumHeight * this._boundingRectangle.max.y, 
+											   this._camera.near, 
+											   this._camera.far );
 };
 
 /**
- * Prepares the scene for rendering. This method ensures, that the actual object and
- * the entire lightning of the scene are part of the rendering.
+ * Prepares the scene for rendering. This method ensures, that the actual object
+ * and the entire lightning of the scene are part of the rendering.
  */
-Impostor.prototype._prepareScene = function(){
-	
+Impostor.prototype._prepareScene = function() {
+
 	// reset scene
 	this._scene = new THREE.Scene();
 
 	// clone object
 	var object = this.sourceObject.clone();
-	
+
 	// ensure it's visible
 	object.visible = true;
 
 	// add to scene
 	this._scene.add( object );
-	
+
 	// add all light source
 	Array.prototype.push.apply( this._scene.children, this._lights );
 };
@@ -41273,36 +41471,36 @@ Impostor.prototype._prepareScene = function(){
 /**
  * Renders the scene to the render target.
  */
-Impostor.prototype._render = function(){
-	
+Impostor.prototype._render = function() {
+
 	// save existing clear color and alpha
 	var clearColor = this._renderer.getClearColor();
 	var clearAlpha = this._renderer.getClearAlpha();
-	
+
 	// the following clear ensures that the rendered texture has transparency
 	this._renderer.setClearColor( 0x000000, 0 );
-	
+
 	// render to target
 	this._renderer.render( this._scene, this._camera, this._renderTarget, true );
-	
+
 	// restore clear values
-	this._renderer.setClearColor(clearColor, clearAlpha);
+	this._renderer.setClearColor( clearColor, clearAlpha );
 };
 
 module.exports = Impostor;
 },{"three":2}],30:[function(require,module,exports){
 (function (global){
 /**
- * @file Prototype for loading 3D objects in JSON-format 
- * from the server. The objects are provided with Blender.
+ * @file Prototype for loading 3D objects in JSON-format from the server. The
+ * objects are provided with Blender.
  * 
  * @author Human Interactive
  */
 "use strict";
 
-var PubSub = require("pubsub-js");
-var THREE = require("three");
-var utils = require("./Utils");
+var PubSub = require( "pubsub-js" );
+var THREE = require( "three" );
+var utils = require( "./Utils" );
 /**
  * Creates a JSONLoader.
  * 
@@ -41312,35 +41510,38 @@ var utils = require("./Utils");
  */
 function JSONLoader() {
 
-	THREE.JSONLoader.call(this);
-	
+	THREE.JSONLoader.call( this );
+
 	this.crossOrigin = "anonymous";
 	this.texturePath = "";
 }
 
-JSONLoader.prototype = Object.create(THREE.JSONLoader.prototype);
+JSONLoader.prototype = Object.create( THREE.JSONLoader.prototype );
 JSONLoader.prototype.constructor = JSONLoader;
 
 /**
  * Loads a 3D object. Overwrites the standard method of three.js.
  * 
  * @param {string} url - The URL of the 3D object.
- * @param {function} onLoad - This callback function is executed, when the model is loaded and parsed.
+ * @param {function} onLoad - This callback function is executed, when the model
+ * is loaded and parsed.
  */
-JSONLoader.prototype.load = function(url, onLoad) {
-	
+JSONLoader.prototype.load = function( url, onLoad ) {
+
 	var self = this;
-	
+
 	// build url
 	url = utils.getCDNHost() + url;
-	
+
 	// build texturePath
-	if(this.texturePath === "") {
+	if ( this.texturePath === "" )
+	{
 		this.texturePath = url.substring( 0, url.lastIndexOf( "/" ) + 1 );
 	}
-	
+
 	// add nocache, if necessary
-	if(utils.isDevelopmentModeActive() === true){
+	if ( utils.isDevelopmentModeActive() === true )
+	{
 		url = url + "?" + new Date().getTime();
 	}
 
@@ -41349,25 +41550,31 @@ JSONLoader.prototype.load = function(url, onLoad) {
 
 	xhr.onreadystatechange = function() {
 
-		if (xhr.readyState === xhr.DONE) {
-
-			if (xhr.status === 200) {
-
-				if (xhr.responseText) {
-					
+		if ( xhr.readyState === xhr.DONE )
+		{
+			if ( xhr.status === 200 )
+			{
+				if ( xhr.responseText )
+				{
 					// parse result
-					var result = self.parse(JSON.parse(xhr.responseText), self.texturePath);
-					
-					// execute callback
-					onLoad(result.geometry, result.materials);
-					
-					// publish message
-					PubSub.publish("loading.complete.object", {url: url});
+					var result = self.parse( JSON.parse( xhr.responseText ), self.texturePath );
 
-				} else {
+					// execute callback
+					onLoad( result.geometry, result.materials );
+
+					// publish message
+					PubSub.publish( "loading.complete.object", {
+						url : url
+					} );
+					
+				}
+				else
+				{
 					throw "ERROR: JSONLoader: '" + url + "' seems to be unreachable or the file is empty.";
 				}
-			} else {
+			}
+			else
+			{
 				throw "ERROR: JSONLoader: Could not load '" + url + "' (Status: " + xhr.status + ").";
 			}
 
@@ -41375,23 +41582,24 @@ JSONLoader.prototype.load = function(url, onLoad) {
 	};
 
 	// start request
-	xhr.open('GET', url, true);
+	xhr.open( 'GET', url, true );
 	xhr.withCredentials = true;
 	xhr.send();
-	
+
 	// publish message to inform about status
-	PubSub.publish("loading.start.object", {url: url});
+	PubSub.publish( "loading.start.object", {
+		url : url
+	} );
 };
 
 module.exports = JSONLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./Utils":41,"pubsub-js":1,"three":2}],31:[function(require,module,exports){
 /**
- * @file This prototype is used for LOD handling. It is an 
- * enhancement of the LOD functionality of three.js. Instead of
- * switching directly between LOD objects, this prototype uses
- * a linear blend over a short period of time. This approach 
- * provides a smoother switch and so avoids popping.
+ * @file This prototype is used for LOD handling. It is an enhancement of the
+ * LOD functionality of three.js. Instead of switching directly between LOD
+ * objects, this prototype uses a linear blend over a short period of time. This
+ * approach provides a smoother switch and so avoids popping.
  * 
  * see: Real-Time Rendering, Third Edition, Akenine-Möller/Haines/Hoffman
  * Chapter 14.7.1, LOD Switching, Blend LODs
@@ -41400,11 +41608,11 @@ module.exports = JSONLoader;
  */
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 /**
  * Creates a LOD instance.
  * 
- * @constructor 
+ * @constructor
  * @augments THREE.LOD
  * 
  * @param {string} id - The id of the LOD instance.
@@ -41412,39 +41620,39 @@ var THREE = require("three");
  * @param {Camera} camera - The camera object.
  * @param {number} threshold - The threshold where the blending is done.
  */
-function LOD(id, mode, camera, threshold) {
-	
-	THREE.LOD.call(this);
+function LOD( id, mode, camera, threshold ) {
 
-	Object.defineProperties(this, {
-		idLOD: {
-			value: id,
-			configurable: false,
-			enumerable: true,
-			writable: false
+	THREE.LOD.call( this );
+
+	Object.defineProperties( this, {
+		idLOD : {
+			value : id,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		mode:{
-			value: mode || LOD.MODE.DIRECT,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		mode : {
+			value : mode || LOD.MODE.DIRECT,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		camera: {
-			value: camera,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		camera : {
+			value : camera,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		threshold: {
-			value: threshold || 0,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		threshold : {
+			value : threshold || 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
-	});
+	} );
 }
 
-LOD.prototype = Object.create(THREE.LOD.prototype);
+LOD.prototype = Object.create( THREE.LOD.prototype );
 LOD.prototype.constructor = LOD;
 
 /**
@@ -41452,98 +41660,104 @@ LOD.prototype.constructor = LOD;
  * 
  * @param {Camera} camera - The camera object.
  */
-LOD.prototype.update = (function(){
-	
+LOD.prototype.update = ( function() {
+
 	var positionCamera = new THREE.Vector3();
 	var positionObject = new THREE.Vector3();
-	
-	var distance = 0; 			// calculated distance
-	var edge = 0; 				// this distance marks the begin/end of the transition
-	var opacity = 0; 			// opacity value for blending
-	var index = 0; 				// index for loops
-	var currentObject = null;	// current object of the loop
-	var previousObject = null;	// previous object of the loop
 
-	return function () {
-		
-		if(this.mode === LOD.MODE.DIRECT){
-			
+	var distance = 0; // calculated distance
+	var edge = 0; // this distance marks the begin/end of the transition
+	var opacity = 0; // opacity value for blending
+	var index = 0; // index for loops
+	var currentObject = null; // current object of the loop
+	var previousObject = null; // previous object of the loop
+
+	return function() {
+
+		if ( this.mode === LOD.MODE.DIRECT )
+		{
 			// process code of parent prototype
-			THREE.LOD.prototype.update.call(this, this.camera);	
-			
-		}else if(this.mode === LOD.MODE.SMOOTH){
-		
+			THREE.LOD.prototype.update.call( this, this.camera );
+
+		}
+		else if ( this.mode === LOD.MODE.SMOOTH )
+		{
 			// process LOD selection only if there are at least two objects
-			if(this.objects.length > 1){
-					
+			if ( this.objects.length > 1 )
+			{
 				// get position of the camera and the LOD instance
-				positionCamera.setFromMatrixPosition(this.camera.matrixWorld);
-				positionObject.setFromMatrixPosition(this.matrixWorld);
-	
+				positionCamera.setFromMatrixPosition( this.camera.matrixWorld );
+				positionObject.setFromMatrixPosition( this.matrixWorld );
+
 				// calculate distance between camera and LOD instance
-				distance = positionCamera.distanceTo(positionObject);
-	
+				distance = positionCamera.distanceTo( positionObject );
+
 				// set first LOD object always visible and opaque
-				this.objects[0].object.visible = true;
-				this.objects[0].object.material.transparent = false;
-				this.objects[0].object.material.opacity = 1;
-	
+				this.objects[ 0 ].object.visible = true;
+				this.objects[ 0 ].object.material.transparent = false;
+				this.objects[ 0 ].object.material.opacity = 1;
+
 				// start the iteration with the second object in the array
-				for(index = 1; index < this.objects.length; index ++){
-					
+				for ( index = 1; index < this.objects.length; index++ )
+				{
 					// save current object
-					currentObject  = this.objects[index];
-					previousObject = this.objects[index - 1];
-					 
-					// if the calculated distance is smaller than the LOD-distance but greater than the threshold, 
+					currentObject = this.objects[ index ];
+					previousObject = this.objects[ index - 1 ];
+
+					// if the calculated distance is smaller than the
+					// LOD-distance but greater than the threshold,
 					// show the new object smoothly
-					if (distance < currentObject.distance && distance >= (currentObject.distance - this.threshold)){
-	
+					if ( distance < currentObject.distance && distance >= ( currentObject.distance - this.threshold ) )
+					{
 						edge = currentObject.distance - this.threshold;
-						opacity = Math.min(( distance - edge ) / this.threshold, 1);
-	
+						opacity = Math.min( ( distance - edge ) / this.threshold, 1 );
+
 						currentObject.object.visible = true;
-						currentObject.object.material.transparent = true;	
+						currentObject.object.material.transparent = true;
 						currentObject.object.material.opacity = opacity;
-						
+
 						previousObject.object.material.transparent = false;
-						previousObject.object.material.opacity = 1;	
-	
-					// if the calculated distance is greater than the LOD-distance but smaller than the threshold, 
-					// hide the old object smoothly
-					}else if(distance >= currentObject.distance && distance < (currentObject.distance + this.threshold)) {
-						
+						previousObject.object.material.opacity = 1;
+
+						// if the calculated distance is greater than the
+						// LOD-distance but smaller than the threshold,
+						// hide the old object smoothly
+					}
+					else if ( distance >= currentObject.distance && distance < ( currentObject.distance + this.threshold ) )
+					{
 						edge = currentObject.distance + this.threshold;
-						opacity = Math.max((edge - distance) / this.threshold, 0);
-						
+						opacity = Math.max( ( edge - distance ) / this.threshold, 0 );
+
 						currentObject.object.material.opacity = 1;
 						currentObject.object.material.transparent = false;
-						
+
 						previousObject.object.material.transparent = true;
-						previousObject.object.material.opacity = opacity;	
+						previousObject.object.material.opacity = opacity;
 					}
-					
-					// if the calculated distance is greater than the LOD-distance plus the threshold, show/ hide fully the objects
-					else if(distance >= currentObject.distance + this.threshold){
-							
+
+					// if the calculated distance is greater than the
+					// LOD-distance plus the threshold, show/ hide fully the
+					// objects
+					else if ( distance >= currentObject.distance + this.threshold )
+					{
 						currentObject.object.visible = true;
 						previousObject.object.visible = false;
 					}
-					
+
 					// if no condition is true, exit the loop
-					// this happens when the camera is very close to the LOD instance so the object with the highest details is chosen
-					else {
-	
+					// this happens when the camera is very close to the LOD
+					// instance so the object with the highest details is chosen
+					else
+					{
 						break;
-	
 					}
-	
+
 				}
-	
+
 				// hide all subsequent objects and reset values
 				// we use the index of the previous loop
-				for ( ; index < this.objects.length; index ++ ) {
-	
+				for ( ; index < this.objects.length; index++ )
+				{
 					this.objects[ index ].object.visible = false;
 					this.objects[ index ].object.material.transparent = false;
 					this.objects[ index ].object.material.opacity = 1;
@@ -41551,7 +41765,7 @@ LOD.prototype.update = (function(){
 			}
 		}
 	};
-}());
+}() );
 
 LOD.MODE = {
 	DIRECT : 0,
@@ -41561,48 +41775,49 @@ LOD.MODE = {
 module.exports = LOD;
 },{"three":2}],32:[function(require,module,exports){
 /**
- * @file This prototype provides logging functionality. It's
- * a wrapper for the browser console API.
+ * @file This prototype provides logging functionality. It's a wrapper for the
+ * browser console API.
  * 
  * @author Human Interactive
  */
 "use strict";
 
-var utils = require("./Utils");
+var utils = require( "./Utils" );
 
 /**
  * Creates a logger instance.
  * 
  * @constructor
  */
-function Logger(){
-	
-	Object.defineProperties(this, {
-		_isDevModeActive: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+function Logger() {
+
+	Object.defineProperties( this, {
+		_isDevModeActive : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
+	} );
 }
 
 /**
  * Initializes the logger.
  */
-Logger.prototype.init = function(){
-	
+Logger.prototype.init = function() {
+
 	this._isDevModeActive = utils.isDevelopmentModeActive();
 };
 
 /**
  * Logs standard/info messages.
  */
-Logger.prototype.log = function(){
-	
+Logger.prototype.log = function() {
+
 	// log messages only in dev mode
-	if( this._isDevModeActive === true ){
-		
+	if ( this._isDevModeActive === true )
+	{
+
 		console.log.apply( console, arguments );
 	}
 };
@@ -41610,24 +41825,24 @@ Logger.prototype.log = function(){
 /**
  * Logs warnings.
  */
-Logger.prototype.warn = function(){
-	
+Logger.prototype.warn = function() {
+
 	console.warn.apply( console, arguments );
 };
 
 /**
  * Logs errors.
  */
-Logger.prototype.error = function(){
-	
+Logger.prototype.error = function() {
+
 	console.error.apply( console, arguments );
 };
 
 /**
  * Handles assertions.
  */
-Logger.prototype.assert = function(){
-	
+Logger.prototype.assert = function() {
+
 	console.assert.apply( console, arguments );
 };
 
@@ -41638,41 +41853,39 @@ Logger.prototype.assert = function(){
  */
 Logger.prototype.logSystemInfo = function( renderer ) {
 
-	console.group("INFO: Utils: World Information, %s", new Date().toTimeString());
+	console.group( "INFO: Utils: World Information, %s", new Date().toTimeString() );
 
-		console.group("Memory");
-			console.log("%i Geometries", renderer.info.memory.geometries);
-			console.log("%i Programs", renderer.info.memory.programs);
-			console.log("%i Textures", renderer.info.memory.textures);
-		console.groupEnd();
+	console.group( "Memory" );
+	console.log( "%i Geometries", renderer.info.memory.geometries );
+	console.log( "%i Programs", renderer.info.memory.programs );
+	console.log( "%i Textures", renderer.info.memory.textures );
+	console.groupEnd();
 
-		console.group("Render");
-			console.log("%i Calls", renderer.info.render.calls);
-			console.log("%i Faces", renderer.info.render.faces);
-			console.log("%i Points", renderer.info.render.points);
-			console.log("%i Vertices", renderer.info.render.vertices);
-		console.groupEnd();
+	console.group( "Render" );
+	console.log( "%i Calls", renderer.info.render.calls );
+	console.log( "%i Faces", renderer.info.render.faces );
+	console.log( "%i Points", renderer.info.render.points );
+	console.log( "%i Vertices", renderer.info.render.vertices );
+	console.groupEnd();
 
 	console.groupEnd();
-	
 };
 
 module.exports = new Logger();
 },{"./Utils":41}],33:[function(require,module,exports){
 /**
- * @file This prototype manages the characters of
- * the other teammates.
+ * @file This prototype manages the characters of the other teammates.
  * 
  * @author Human Interactive
  */
 "use strict";
 
-var PubSub = require("pubsub-js");
-var THREE = require("three");
+var PubSub = require( "pubsub-js" );
+var THREE = require( "three" );
 
-var Teammate = require("./Teammate");
-var scene = require("../core/Scene");
-var logger = require("./Logger");
+var Teammate = require( "./Teammate" );
+var scene = require( "../core/Scene" );
+var logger = require( "./Logger" );
 
 var self;
 /**
@@ -41681,92 +41894,92 @@ var self;
  * @constructor
  * 
  */
-function MultiplayerManager(){
+function MultiplayerManager() {
 
-	Object.defineProperties(this, {
-		_teammates: {
-			value: [],
-			configurable: false,
-			enumerable: true,
-			writable: false
+	Object.defineProperties( this, {
+		_teammates : {
+			value : [],
+			configurable : false,
+			enumerable : true,
+			writable : false
 		}
-	});
-	
+	} );
+
 	self = this;
 }
 
 /**
  * Inits the multiplayer logic.
  */
-MultiplayerManager.prototype.init = function(){
-	
+MultiplayerManager.prototype.init = function() {
+
 	PubSub.subscribe( "multiplayer.update", this._onUpdate );
 	PubSub.subscribe( "multiplayer.status", this._onStatus );
 };
 
 /**
- * Handles the "multiplayer.update" topic. This topic is used update
- * the world information of other teammates. 
+ * Handles the "multiplayer.update" topic. This topic is used update the world
+ * information of other teammates.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-MultiplayerManager.prototype._onUpdate = (function(){
-	
+MultiplayerManager.prototype._onUpdate = ( function() {
+
 	var teammate = null;
-	
+
 	var position = new THREE.Vector3();
 	var quaternion = new THREE.Quaternion();
-	
-	return function( message, data ){
-		
+
+	return function( message, data ) {
+
 		// get correct teammate
 		teammate = self._getTeammate( data.clientId );
-		
+
 		// process position and orientation
 		position.set( data.player.position.x, data.player.position.y, data.player.position.z );
 		quaternion.set( data.player.quaternion._x, data.player.quaternion._y, data.player.quaternion._z, data.player.quaternion._w );
-		
+
 		// update teammate
 		teammate.update( position, quaternion );
 	};
-	
-})();
+
+} )();
 
 /**
- * Handles the "multiplayer.status" topic. This topic is used update
- * the status of other teammates. 
+ * Handles the "multiplayer.status" topic. This topic is used update the status
+ * of other teammates.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-MultiplayerManager.prototype._onStatus = function( message, data ){
-	
+MultiplayerManager.prototype._onStatus = function( message, data ) {
+
 	var teammate = null;
-	
-	if( data.online === true )
+
+	if ( data.online === true )
 	{
-		// create new teammate	
+		// create new teammate
 		teammate = new Teammate( data.clientId );
-		
+
 		// add teammate
 		self._addTeammate( teammate );
-		
+
 		// logging
 		logger.log( "INFO: MultiplayerManager: Teammate with ID %i online.", data.clientId );
-		
+
 	}
 	else
 	{
 		// get the teammate by its id
 		teammate = self._getTeammate( data.clientId );
-		
+
 		// remove teammate
 		self._removeTeammate( teammate );
-		
+
 		// logging
 		logger.log( "INFO: MultiplayerManager: Teammate with ID %i offline.", data.clientId );
-		
+
 	}
 };
 
@@ -41775,11 +41988,11 @@ MultiplayerManager.prototype._onStatus = function( message, data ){
  * 
  * @param {Teammate} teammate - The teammate object to be added.
  */
-MultiplayerManager.prototype._addTeammate = function( teammate ){
-	
+MultiplayerManager.prototype._addTeammate = function( teammate ) {
+
 	// add to internal array
 	this._teammates.push( teammate );
-	
+
 	// add to scene
 	scene.add( teammate );
 };
@@ -41794,7 +42007,7 @@ MultiplayerManager.prototype._removeTeammate = function( teammate ) {
 	// remove from array
 	var index = this._teammates.indexOf( teammate );
 	this._teammates.splice( index, 1 );
-	
+
 	// remove from scene
 	scene.remove( teammate );
 };
@@ -41806,28 +42019,27 @@ MultiplayerManager.prototype._removeTeammate = function( teammate ) {
  * 
  * @returns {Teammate} The teammate.
  */
-MultiplayerManager.prototype._getTeammate = function(id){
-	
+MultiplayerManager.prototype._getTeammate = function( id ) {
+
 	var teammate = null;
-	
-	for( var index = 0; index < this._teammates.length; index++ ){
-		
-		if( this._teammates[index].teammateId === id ){
-			
-			teammate =  this._teammates[ index ];
-			
+
+	for ( var index = 0; index < this._teammates.length; index++ )
+	{
+		if ( this._teammates[ index ].teammateId === id )
+		{
+			teammate = this._teammates[ index ];
+
 			break;
 		}
 	}
-	
-	if( teammate === null ){
-		
+
+	if ( teammate === null )
+	{
 		throw "ERROR: MultiplayerManager: Teammate with ID " + id + " not existing.";
-		
-	}else{
-		
+	}
+	else
+	{
 		return teammate;
-		
 	}
 };
 
@@ -41836,15 +42048,18 @@ module.exports = new MultiplayerManager();
 /**
  * @file A 3D arbitrarily oriented bounding box.
  * 
- * This data structure represents a box in 3D space. The local axes of this box can be arbitrarily oriented/rotated
- * with respect to the global world coordinate system. This allows OBBs to more tightly bound objects than AABBs do,
- * which always align with the world space axes. This flexibility has the drawback that the geometry tests and operations
- * involving OBBs are more costly, and representing an OBB in memory takes more space.
+ * This data structure represents a box in 3D space. The local axes of this box
+ * can be arbitrarily oriented/rotated with respect to the global world
+ * coordinate system. This allows OBBs to more tightly bound objects than AABBs
+ * do, which always align with the world space axes. This flexibility has the
+ * drawback that the geometry tests and operations involving OBBs are more
+ * costly, and representing an OBB in memory takes more space.
  * 
- * Reference: 
+ * Reference:
  * 
- * This file is a JavaScript/three.js implementation of the MathGeoLib by Jukka Jylänki. The prototype does not contain
- * the entire logic of the original source.
+ * This file is a JavaScript/three.js implementation of the MathGeoLib by Jukka
+ * Jylänki. The prototype does not contain the entire logic of the original
+ * source.
  * 
  * https://github.com/juj/MathGeoLib/blob/master/src/Geometry/OBB.h
  * https://github.com/juj/MathGeoLib/blob/master/src/Geometry/OBB.cpp
@@ -41853,7 +42068,7 @@ module.exports = new MultiplayerManager();
  */
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
 /**
  * Creates the OBB.
@@ -41861,92 +42076,97 @@ var THREE = require("three");
  * @constructor
  * 
  * @param {THREE.Vector3} position - The center position of the OBB.
- * @param {THREE.Vector3} halfSizes -  Stores half-sizes to x, y and z directions in the local space of the OBB.
- * @param {THREE.Matrix4} basis - Specifies normalized direction vectors for the local axes.
+ * @param {THREE.Vector3} halfSizes - Stores half-sizes to x, y and z directions
+ * in the local space of the OBB.
+ * @param {THREE.Matrix4} basis - Specifies normalized direction vectors for the
+ * local axes.
  */
-function OBB(position, halfSizes, basis) {	
-	
-	Object.defineProperties(this, {
-		position: {
-			value: position || new THREE.Vector3(),
-			configurable: false,
-			enumerable: true,
-			writable: true
+function OBB( position, halfSizes, basis ) {
+
+	Object.defineProperties( this, {
+		position : {
+			value : position || new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		halfSizes: {
-			value: halfSizes || new THREE.Vector3(),
-			configurable: false,
-			enumerable: true,
-			writable: true
+		halfSizes : {
+			value : halfSizes || new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		basis: {
-			value: basis || new THREE.Matrix4(),
-			configurable: false,
-			enumerable: true,
-			writable: true
+		basis : {
+			value : basis || new THREE.Matrix4(),
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		// The OBB-OBB test utilizes a SAT test to detect the intersection. A robust implementation requires
+		// The OBB-OBB test utilizes a SAT test to detect the intersection. A
+		// robust implementation requires
 		// an epsilon threshold to test that the used axes are not degenerate.
-		_EPSILON: {
-			value: 1e-3,
-			configurable: false,
-			enumerable: false,
-			writable: false
+		_EPSILON : {
+			value : 1e-3,
+			configurable : false,
+			enumerable : false,
+			writable : false
 		}
-	});
+	} );
 }
 
 /**
- * Sets the OBB from a mesh. 
+ * Sets the OBB from a mesh.
  * 
- * The basis of the objects world matrix is assumed to be orthogonal, which means no projection or shear is allowed. 
- * Additionally, the matrix must contain only uniform scaling.
+ * The basis of the objects world matrix is assumed to be orthogonal, which
+ * means no projection or shear is allowed. Additionally, the matrix must
+ * contain only uniform scaling.
  * 
  * @param {THREE.Mesh} object - The mesh object to convert to an OBB.
  * 
  * @returns {OBB} The reference to the OBB.
  */
-OBB.prototype.setFromObject = (function( ){
-	
+OBB.prototype.setFromObject = ( function() {
+
 	var vector = new THREE.Vector3();
-	
+
 	var aabb = null;
 	var w = null;
-	
-	return function( object ){
-		
+
+	return function( object ) {
+
 		// calculate AABB, if necessary
-		if( object.geometry.boundingBox === null ){
+		if ( object.geometry.boundingBox === null )
+		{
 			object.geometry.computeBoundingBox();
 		}
-		
+
 		// ensure, world matrix of the object is up to date
 		object.updateMatrixWorld();
-		
+
 		// shortcuts
 		aabb = object.geometry.boundingBox;
 		w = object.matrixWorld.elements;
-		
+
 		// assign the transform center to the position member
 		this.position = aabb.center().applyMatrix4( object.matrixWorld );
-		
+
 		// extract the rotation and assign it to the basis of the OBB
 		// for numerical stability, you could orthonormalize the basis
 		this.basis.extractRotation( object.matrixWorld );
-		
+
 		// calculate half sizes for each axis
 		this.halfSizes = aabb.size().multiplyScalar( 0.5 );
-		
+
 		// extract the (uniform) scaling and apply it to the halfSizes
 		var scale = vector.set( w[ 0 ], w[ 1 ], w[ 2 ] ).length();
-		
+
 		// do the scale
 		this.halfSizes.multiplyScalar( scale );
-		
+
 		return this;
 	};
-	
-} ( ) );
+
+}() );
 
 /**
  * Sets the OBB from an Axis-Aligned Bounding Box (AABB).
@@ -41955,14 +42175,14 @@ OBB.prototype.setFromObject = (function( ){
  * 
  * @returns {OBB} The reference to the OBB.
  */
-OBB.prototype.setFromAABB = function( aabb ){
-	
+OBB.prototype.setFromAABB = function( aabb ) {
+
 	this.position = aabb.center();
-	
+
 	this.halfSizes = aabb.size().multiplyScalar( 0.5 );
-	
+
 	this.basis.identity();
-	
+
 	return this;
 };
 
@@ -41973,119 +42193,108 @@ OBB.prototype.setFromAABB = function( aabb ){
  * 
  * @returns {OBB} The reference to the OBB.
  */
-OBB.prototype.setFromBS = function( sphere ){
-	
+OBB.prototype.setFromBS = function( sphere ) {
+
 	this.position = sphere.center;
-	
+
 	this.halfSizes.set( sphere.radius, sphere.radius, sphere.radius );
-	
+
 	this.basis.identity();
-	
+
 	return this;
 };
 
 /**
  * Computes the closest point inside the OBB to the given point.
- *
+ * 
  * @param {THREE.Vector3} point - The target point.
  * 
  * @returns {THREE.Vector3} The closest point inside the OBB.
  */
-OBB.prototype.closestPoint = (function( ){
-	
+OBB.prototype.closestPoint = ( function() {
+
 	var displacement = new THREE.Vector3();
-	
+
 	var xAxis = new THREE.Vector3();
 	var yAxis = new THREE.Vector3();
 	var zAxis = new THREE.Vector3();
-	
+
 	var axis = [];
-	
+
 	var index = 0, value = 0;
-	
-	return function( point ){
-		
+
+	return function( point ) {
+
 		var closesPoint = new THREE.Vector3();
-		
+
 		// extract each axis
 		this.basis.extractBasis( xAxis, yAxis, zAxis );
-		
+
 		// push axis to array
 		axis.push( xAxis, yAxis, zAxis );
-				
+
 		// calculate displacement vector of targetPoint and center position
 		displacement.subVectors( point, this.position );
-		
+
 		// start at the center position of the OBB
 		closesPoint.copy( this.position );
-		
+
 		// project the target onto the OBB axes and walk towards that point
-		for(index = 0; index < 3; index++){
-			
-			value = THREE.Math.clamp( displacement.dot( axis[index] ), -this.halfSizes.getComponent(index), this.halfSizes.getComponent(index) );
-			
-			closesPoint.add( axis[index].multiplyScalar( value ) );
+		for ( index = 0; index < 3; index++ )
+		{
+			value = THREE.Math.clamp( displacement.dot( axis[ index ] ), -this.halfSizes.getComponent( index ), this.halfSizes.getComponent( index ) );
+
+			closesPoint.add( axis[ index ].multiplyScalar( value ) );
 		}
-		
+
 		return closesPoint;
 	};
-	
-}());
+
+}() );
 
 /**
  * Tests if the given point is fully contained inside the OBB.
- *
+ * 
  * @param {THREE.Vector3} point - The point to test.
  * 
  * @returns {boolean} Is the point contained inside the OBB?
  */
-OBB.prototype.isPointContained = ( function( ){
-	
+OBB.prototype.isPointContained = ( function() {
+
 	var displacement = new THREE.Vector3();
-	
+
 	var xAxis = new THREE.Vector3();
 	var yAxis = new THREE.Vector3();
 	var zAxis = new THREE.Vector3();
-	
-	return function( point ){
-		
+
+	return function( point ) {
+
 		// calculate displacement vector of point and center position
 		displacement.subVectors( point, this.position );
-		
+
 		// extract each axis
 		this.basis.extractBasis( xAxis, yAxis, zAxis );
-		
-		// project the calculated displacement vector to each axis and 
+
+		// project the calculated displacement vector to each axis and
 		// compare the result with the respective half size.
-		return Math.abs( displacement.dot( xAxis ) ) <= this.halfSizes.x &&
-			   Math.abs( displacement.dot( yAxis ) ) <= this.halfSizes.y &&
-			   Math.abs( displacement.dot( zAxis ) ) <= this.halfSizes.z;
+		return Math.abs( displacement.dot( xAxis ) ) <= this.halfSizes.x && Math.abs( displacement.dot( yAxis ) ) <= this.halfSizes.y && Math.abs( displacement.dot( zAxis ) ) <= this.halfSizes.z;
 	};
-	
-} ( ) );
+
+}() );
 
 /**
  * Tests if the given AABB is fully contained inside the OBB.
- *
+ * 
  * @param {THREE.Box3} aabb - The AABB to test.
  * 
  * @returns {boolean} Is the AABB fully contained inside the OBB?
  */
-OBB.prototype.isAABBContained = ( function( ){
-	
-	var points = [
-	              new THREE.Vector3(),
-				  new THREE.Vector3(),
-				  new THREE.Vector3(),
-				  new THREE.Vector3(),
-				  new THREE.Vector3(),
-				  new THREE.Vector3(),
-				  new THREE.Vector3(),
-				  new THREE.Vector3()
-	];
-	
-	return function( aabb ){
-		
+OBB.prototype.isAABBContained = ( function() {
+
+	var points = [ new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3() ];
+
+	return function( aabb ) {
+
 		// determine all corner points
 		points[ 0 ].set( aabb.min.x, aabb.min.y, aabb.min.z );
 		points[ 1 ].set( aabb.min.x, aabb.min.y, aabb.max.z );
@@ -42095,318 +42304,335 @@ OBB.prototype.isAABBContained = ( function( ){
 		points[ 5 ].set( aabb.max.x, aabb.min.y, aabb.max.z );
 		points[ 6 ].set( aabb.max.x, aabb.max.y, aabb.min.z );
 		points[ 7 ].set( aabb.max.x, aabb.max.y, aabb.max.z );
-		
-		for(var index = 0; index < 8; ++index){
-			
+
+		for ( var index = 0; index < 8; ++index )
+		{
 			// check each point
-			if( this.isPointContained( points[ index ] ) === false){
+			if ( this.isPointContained( points[ index ] ) === false )
+			{
 				// as soon as one point is outside the OBB, return false
 				return false;
 			}
 		}
-		
+
 		return true;
 	};
-	
-} ( ) );
+
+}() );
 
 /**
  * Tests if the given line segment is fully contained inside the OBB.
- *
+ * 
  * @param {THREE.Line3} line - The line segment to test.
  * 
  * @returns {boolean} Is the line segment contained inside the OBB?
  */
-OBB.prototype.isLineContained = function( line ){
-	
-	return this.isPointContained( line.start ) && 
-		   this.isPointContained( line.end );
+OBB.prototype.isLineContained = function( line ) {
+
+	return this.isPointContained( line.start ) && this.isPointContained( line.end );
 };
 
 /**
  * Tests if the given triangle is fully contained inside the OBB.
- *
+ * 
  * @param {THREE.Triangle} triangle - The triangle to test.
  * 
  * @returns {boolean} Is the triangle contained inside the OBB?
  */
-OBB.prototype.isTriangleContained = function( triangle ){
-	
-	return this.isPointContained( triangle.a ) && 
-		   this.isPointContained( triangle.b ) && 
-		   this.isPointContained( triangle.c );
+OBB.prototype.isTriangleContained = function( triangle ) {
+
+	return this.isPointContained( triangle.a ) && this.isPointContained( triangle.b ) && this.isPointContained( triangle.c );
 };
 
 /**
  * Tests whether this OBB and the given AABB intersect.
- *
+ * 
  * @param {THREE.Box3} box - The AABB to test.
  * 
- * @returns {boolean} Is there an intersection between the given AABB and the OBB?
+ * @returns {boolean} Is there an intersection between the given AABB and the
+ * OBB?
  */
-OBB.prototype.isIntersectionAABB = function( box ){
-	
+OBB.prototype.isIntersectionAABB = function( box ) {
+
 	return this.isIntersectionOBB( new OBB().setFromAABB( box ) );
 };
 
 /**
  * Tests whether this OBB and the given sphere intersect.
- *
+ * 
  * @param {THREE.Sphere} sphere - The sphere to test.
  * 
- * @returns {boolean} Is there an intersection between the given sphere and the OBB?
+ * @returns {boolean} Is there an intersection between the given sphere and the
+ * OBB?
  */
-OBB.prototype.isIntersectionSphere = function( sphere ){
-	
+OBB.prototype.isIntersectionSphere = function( sphere ) {
+
 	return this.intersectSphere( sphere ) !== null;
 };
 
 /**
  * Tests whether this OBB and the given OBB intersect.
- *
+ * 
  * @param {OBB} box - The OBB to test.
  * 
- * @returns {boolean} Is there an intersection between the given OBB and the OBB?
+ * @returns {boolean} Is there an intersection between the given OBB and the
+ * OBB?
  */
-OBB.prototype.isIntersectionOBB = ( function(){
-		
+OBB.prototype.isIntersectionOBB = ( function() {
+
 	var xAxisA = new THREE.Vector3();
 	var yAxisA = new THREE.Vector3();
 	var zAxisA = new THREE.Vector3();
-	
+
 	var xAxisB = new THREE.Vector3();
 	var yAxisB = new THREE.Vector3();
 	var zAxisB = new THREE.Vector3();
-	
+
 	var axisA = [];
 	var axisB = [];
-	var rotationMatrix = [[],[],[]];
-	var rotationMatrixAbs = [[],[],[]];
-	
+	var rotationMatrix = [ [], [], [] ];
+	var rotationMatrixAbs = [ [], [], [] ];
+
 	var halfSizeA = 0;
 	var halfSizeB = 0;
-	
+
 	var translation = new THREE.Vector3();
-	
+
 	var vector = new THREE.Vector3();
 	var t = 0, i = 0;
-	
-	return function( obb ){
-		
+
+	return function( obb ) {
+
 		// extract each axis
 		this.basis.extractBasis( xAxisA, yAxisA, zAxisA );
 		obb.basis.extractBasis( xAxisB, yAxisB, zAxisB );
-		
+
 		// push basis vectors into arrays, so you can access them via indices
-		axisA.push( xAxisA, yAxisA, zAxisA);
-		axisB.push( xAxisB, yAxisB, zAxisB);
-		
+		axisA.push( xAxisA, yAxisA, zAxisA );
+		axisB.push( xAxisB, yAxisB, zAxisB );
+
 		// get displacement vector
-		vector.subVectors( obb.position , this.position );
-		
-		// express the translation vector in the coordinate frame of the current OBB (this)
-		for(i = 0; i < 3; i++){
-			translation.setComponent( i, vector.dot( axisA[i] ) );
+		vector.subVectors( obb.position, this.position );
+
+		// express the translation vector in the coordinate frame of the current
+		// OBB (this)
+		for ( i = 0; i < 3; i++ )
+		{
+			translation.setComponent( i, vector.dot( axisA[ i ] ) );
 		}
-		
-		// generate a rotation matrix that transforms from world space to the OBB's coordinate space
-		for(i = 0; i < 3; i++){
-			for(var j = 0; j < 3; j++){
-				rotationMatrix[i][j] = axisA[i].dot( axisB[j] );
-				rotationMatrixAbs[i][j] = Math.abs( rotationMatrix[i][j] ) + this._EPSILON;
+
+		// generate a rotation matrix that transforms from world space to the
+		// OBB's coordinate space
+		for ( i = 0; i < 3; i++ )
+		{
+			for ( var j = 0; j < 3; j++ )
+			{
+				rotationMatrix[ i ][ j ] = axisA[ i ].dot( axisB[ j ] );
+				rotationMatrixAbs[ i ][ j ] = Math.abs( rotationMatrix[ i ][ j ] ) + this._EPSILON;
 			}
 		}
 
 		// test the three major axes of this OBB
-		for(i = 0; i < 3; i++){
-			
-			vector.set( rotationMatrixAbs[i][0], rotationMatrixAbs[i][1], rotationMatrixAbs[i][2] );
-			
+		for ( i = 0; i < 3; i++ )
+		{
+			vector.set( rotationMatrixAbs[ i ][ 0 ], rotationMatrixAbs[ i ][ 1 ], rotationMatrixAbs[ i ][ 2 ] );
+
 			halfSizeA = this.halfSizes.getComponent( i );
 			halfSizeB = obb.halfSizes.dot( vector );
-			
-			if ( Math.abs( translation.getComponent( i ) ) > halfSizeA + halfSizeB ){
+
+			if ( Math.abs( translation.getComponent( i ) ) > halfSizeA + halfSizeB )
+			{
 				return false;
 			}
 		}
-		
-		
+
 		// test the three major axes of other OBB
-		for(i = 0; i < 3; i++){
-			
-			vector.set( rotationMatrixAbs[0][i], rotationMatrixAbs[1][i], rotationMatrixAbs[2][i] );
-			
+		for ( i = 0; i < 3; i++ )
+		{
+			vector.set( rotationMatrixAbs[ 0 ][ i ], rotationMatrixAbs[ 1 ][ i ], rotationMatrixAbs[ 2 ][ i ] );
+
 			halfSizeA = this.halfSizes.dot( vector );
 			halfSizeB = obb.halfSizes.getComponent( i );
-			
-			vector.set( rotationMatrix[0][i], rotationMatrix[1][i], rotationMatrix[2][i] );
+
+			vector.set( rotationMatrix[ 0 ][ i ], rotationMatrix[ 1 ][ i ], rotationMatrix[ 2 ][ i ] );
 			t = translation.dot( vector );
-			
-			if ( Math.abs( t ) > halfSizeA + halfSizeB ){
+
+			if ( Math.abs( t ) > halfSizeA + halfSizeB )
+			{
 				return false;
 			}
 		}
-		
+
 		// test the 9 different cross-axes
 
 		// A.x <cross> B.x
-		halfSizeA = this.halfSizes.y * rotationMatrixAbs[2][0] + this.halfSizes.z * rotationMatrixAbs[1][0];
-		halfSizeB = obb.halfSizes.y  * rotationMatrixAbs[0][2] + obb.halfSizes.z  * rotationMatrixAbs[0][1];
-		
-		t = translation.z * rotationMatrix[1][0] - translation.y * rotationMatrix[2][0];
-		
-		if ( Math.abs( t ) > halfSizeA + halfSizeB ){
+		halfSizeA = this.halfSizes.y * rotationMatrixAbs[ 2 ][ 0 ] + this.halfSizes.z * rotationMatrixAbs[ 1 ][ 0 ];
+		halfSizeB = obb.halfSizes.y * rotationMatrixAbs[ 0 ][ 2 ] + obb.halfSizes.z * rotationMatrixAbs[ 0 ][ 1 ];
+
+		t = translation.z * rotationMatrix[ 1 ][ 0 ] - translation.y * rotationMatrix[ 2 ][ 0 ];
+
+		if ( Math.abs( t ) > halfSizeA + halfSizeB )
+		{
 			return false;
 		}
-		
+
 		// A.x < cross> B.y
-		halfSizeA = this.halfSizes.y * rotationMatrixAbs[2][1] + this.halfSizes.z * rotationMatrixAbs[1][1];
-		halfSizeB = obb.halfSizes.x  * rotationMatrixAbs[0][2] + obb.halfSizes.z  * rotationMatrixAbs[0][0];
-		
-		t = translation.z * rotationMatrix[1][1] - translation.y * rotationMatrix[2][1];
+		halfSizeA = this.halfSizes.y * rotationMatrixAbs[ 2 ][ 1 ] + this.halfSizes.z * rotationMatrixAbs[ 1 ][ 1 ];
+		halfSizeB = obb.halfSizes.x * rotationMatrixAbs[ 0 ][ 2 ] + obb.halfSizes.z * rotationMatrixAbs[ 0 ][ 0 ];
 
-		if ( Math.abs( t ) > halfSizeA + halfSizeB ){
+		t = translation.z * rotationMatrix[ 1 ][ 1 ] - translation.y * rotationMatrix[ 2 ][ 1 ];
+
+		if ( Math.abs( t ) > halfSizeA + halfSizeB )
+		{
 			return false;
 		}
-		
+
 		// A.x <cross> B.z
-		halfSizeA = this.halfSizes.y * rotationMatrixAbs[2][2] + this.halfSizes.z * rotationMatrixAbs[1][2];
-		halfSizeB = obb.halfSizes.x  * rotationMatrixAbs[0][1] + obb.halfSizes.y  * rotationMatrixAbs[0][0];
-		
-		t = translation.z * rotationMatrix[1][2] - translation.y * rotationMatrix[2][2];
+		halfSizeA = this.halfSizes.y * rotationMatrixAbs[ 2 ][ 2 ] + this.halfSizes.z * rotationMatrixAbs[ 1 ][ 2 ];
+		halfSizeB = obb.halfSizes.x * rotationMatrixAbs[ 0 ][ 1 ] + obb.halfSizes.y * rotationMatrixAbs[ 0 ][ 0 ];
 
-		if ( Math.abs( t ) > halfSizeA + halfSizeB ){
+		t = translation.z * rotationMatrix[ 1 ][ 2 ] - translation.y * rotationMatrix[ 2 ][ 2 ];
+
+		if ( Math.abs( t ) > halfSizeA + halfSizeB )
+		{
 			return false;
 		}
-		
+
 		// A.y <cross> B.x
-		halfSizeA = this.halfSizes.x * rotationMatrixAbs[2][0] + this.halfSizes.z * rotationMatrixAbs[0][0];
-		halfSizeB = obb.halfSizes.y  * rotationMatrixAbs[1][2] + obb.halfSizes.z  * rotationMatrixAbs[1][1];
-		
-		t = translation.x * rotationMatrix[2][0] - translation.z * rotationMatrix[0][0];
+		halfSizeA = this.halfSizes.x * rotationMatrixAbs[ 2 ][ 0 ] + this.halfSizes.z * rotationMatrixAbs[ 0 ][ 0 ];
+		halfSizeB = obb.halfSizes.y * rotationMatrixAbs[ 1 ][ 2 ] + obb.halfSizes.z * rotationMatrixAbs[ 1 ][ 1 ];
 
-		if ( Math.abs( t ) > halfSizeA + halfSizeB ){
+		t = translation.x * rotationMatrix[ 2 ][ 0 ] - translation.z * rotationMatrix[ 0 ][ 0 ];
+
+		if ( Math.abs( t ) > halfSizeA + halfSizeB )
+		{
 			return false;
 		}
-		
+
 		// A.y <cross> B.y
-		halfSizeA = this.halfSizes.x * rotationMatrixAbs[2][1] + this.halfSizes.z * rotationMatrixAbs[0][1];
-		halfSizeB = obb.halfSizes.x  * rotationMatrixAbs[1][2] + obb.halfSizes.z  * rotationMatrixAbs[1][0];
-		
-		t = translation.x * rotationMatrix[2][1] - translation.z * rotationMatrix[0][1];
-	
-		if ( Math.abs( t ) > halfSizeA + halfSizeB ){
+		halfSizeA = this.halfSizes.x * rotationMatrixAbs[ 2 ][ 1 ] + this.halfSizes.z * rotationMatrixAbs[ 0 ][ 1 ];
+		halfSizeB = obb.halfSizes.x * rotationMatrixAbs[ 1 ][ 2 ] + obb.halfSizes.z * rotationMatrixAbs[ 1 ][ 0 ];
+
+		t = translation.x * rotationMatrix[ 2 ][ 1 ] - translation.z * rotationMatrix[ 0 ][ 1 ];
+
+		if ( Math.abs( t ) > halfSizeA + halfSizeB )
+		{
 			return false;
 		}
-		
+
 		// A.y <cross> B.z
-		halfSizeA = this.halfSizes.x * rotationMatrixAbs[2][2] + this.halfSizes.z * rotationMatrixAbs[0][2];
-		halfSizeB = obb.halfSizes.x  * rotationMatrixAbs[1][1] + obb.halfSizes.y  * rotationMatrixAbs[1][0];
-		
-		t = translation.x * rotationMatrix[2][2] - translation.z * rotationMatrix[0][2];
-		
-		if ( Math.abs( t ) > halfSizeA + halfSizeB ){
+		halfSizeA = this.halfSizes.x * rotationMatrixAbs[ 2 ][ 2 ] + this.halfSizes.z * rotationMatrixAbs[ 0 ][ 2 ];
+		halfSizeB = obb.halfSizes.x * rotationMatrixAbs[ 1 ][ 1 ] + obb.halfSizes.y * rotationMatrixAbs[ 1 ][ 0 ];
+
+		t = translation.x * rotationMatrix[ 2 ][ 2 ] - translation.z * rotationMatrix[ 0 ][ 2 ];
+
+		if ( Math.abs( t ) > halfSizeA + halfSizeB )
+		{
 			return false;
 		}
-		
+
 		// A.z <cross> B.x
-		halfSizeA = this.halfSizes.x * rotationMatrixAbs[1][0] + this.halfSizes.y * rotationMatrixAbs[0][0];
-		halfSizeB = obb.halfSizes.y  * rotationMatrixAbs[2][2] + obb.halfSizes.z * rotationMatrixAbs[2][1];
-		
-		t = translation.y * rotationMatrix[0][0] - translation.x * rotationMatrix[1][0];
-		
-		if ( Math.abs( t ) > halfSizeA + halfSizeB ){
+		halfSizeA = this.halfSizes.x * rotationMatrixAbs[ 1 ][ 0 ] + this.halfSizes.y * rotationMatrixAbs[ 0 ][ 0 ];
+		halfSizeB = obb.halfSizes.y * rotationMatrixAbs[ 2 ][ 2 ] + obb.halfSizes.z * rotationMatrixAbs[ 2 ][ 1 ];
+
+		t = translation.y * rotationMatrix[ 0 ][ 0 ] - translation.x * rotationMatrix[ 1 ][ 0 ];
+
+		if ( Math.abs( t ) > halfSizeA + halfSizeB )
+		{
 			return false;
 		}
-		
+
 		// A.z <cross> B.y
-		halfSizeA = this.halfSizes.x * rotationMatrixAbs[1][1] + this.halfSizes.y * rotationMatrixAbs[0][1];
-		halfSizeB = obb.halfSizes.x  * rotationMatrixAbs[2][2] + obb.halfSizes.z * rotationMatrixAbs[2][0];
-		
-		t = translation.y * rotationMatrix[0][1] - translation.x * rotationMatrix[1][1];
+		halfSizeA = this.halfSizes.x * rotationMatrixAbs[ 1 ][ 1 ] + this.halfSizes.y * rotationMatrixAbs[ 0 ][ 1 ];
+		halfSizeB = obb.halfSizes.x * rotationMatrixAbs[ 2 ][ 2 ] + obb.halfSizes.z * rotationMatrixAbs[ 2 ][ 0 ];
 
-		if ( Math.abs( t ) > halfSizeA + halfSizeB ){
+		t = translation.y * rotationMatrix[ 0 ][ 1 ] - translation.x * rotationMatrix[ 1 ][ 1 ];
+
+		if ( Math.abs( t ) > halfSizeA + halfSizeB )
+		{
 			return false;
 		}
-		
+
 		// A.z <cross> B.z
-		halfSizeA = this.halfSizes.x * rotationMatrixAbs[1][2] + this.halfSizes.y * rotationMatrixAbs[0][2];
-		halfSizeB = obb.halfSizes.x  * rotationMatrixAbs[2][1] + obb.halfSizes.y * rotationMatrixAbs[2][0];
+		halfSizeA = this.halfSizes.x * rotationMatrixAbs[ 1 ][ 2 ] + this.halfSizes.y * rotationMatrixAbs[ 0 ][ 2 ];
+		halfSizeB = obb.halfSizes.x * rotationMatrixAbs[ 2 ][ 1 ] + obb.halfSizes.y * rotationMatrixAbs[ 2 ][ 0 ];
 
-		t = translation.y * rotationMatrix[0][2] - translation.x * rotationMatrix[1][2];
-		
-		if ( Math.abs( t ) > halfSizeA + halfSizeB ){
+		t = translation.y * rotationMatrix[ 0 ][ 2 ] - translation.x * rotationMatrix[ 1 ][ 2 ];
+
+		if ( Math.abs( t ) > halfSizeA + halfSizeB )
+		{
 			return false;
 		}
-		
+
 		// no separating axis exists, so the two OBB don't intersect
 		return true;
 	};
-	
-} ( ) );
+
+}() );
 
 /**
  * Tests whether this OBB and the given plane intersect.
- *
+ * 
  * @param {THREE.Plane} plane - The plane to test.
  * 
- * @returns {boolean} Is there an intersection between the given plane and the OBB?
+ * @returns {boolean} Is there an intersection between the given plane and the
+ * OBB?
  */
-OBB.prototype.isIntersectionPlane = (function(){
-	
+OBB.prototype.isIntersectionPlane = ( function() {
+
 	var t = 0, s = 0;
-	
+
 	var xAxis = new THREE.Vector3();
 	var yAxis = new THREE.Vector3();
 	var zAxis = new THREE.Vector3();
-	
-	return function( plane ){
-		
+
+	return function( plane ) {
+
 		// extract each axis
 		this.basis.extractBasis( xAxis, yAxis, zAxis );
-		
-		// compute the projection interval radius of this OBB onto L(t) = this->pos + x * p.normal;
-		t = this.halfSizes.x * Math.abs( plane.normal.dot( xAxis ) ) +
-			this.halfSizes.y * Math.abs( plane.normal.dot( yAxis ) ) +
-			this.halfSizes.z * Math.abs( plane.normal.dot( zAxis ) );
-		
+
+		// compute the projection interval radius of this OBB onto L(t) =
+		// this->pos + x * p.normal;
+		t = this.halfSizes.x * Math.abs( plane.normal.dot( xAxis ) ) + this.halfSizes.y * Math.abs( plane.normal.dot( yAxis ) ) + this.halfSizes.z * Math.abs( plane.normal.dot( zAxis ) );
+
 		// compute the distance of this OBB center from the plane
 		s = plane.normal.dot( this.position ) - plane.constant;
-		
-		return Math.abs(s) <= t;
+
+		return Math.abs( s ) <= t;
 	};
-	
-}());
+
+}() );
 
 /**
  * Tests whether this OBB and the given ray intersect.
- *
+ * 
  * @param {THREE.Ray} ray - The ray to test.
  * 
- * @returns {boolean} Is there an intersection between the given ray and the OBB?
+ * @returns {boolean} Is there an intersection between the given ray and the
+ * OBB?
  */
-OBB.prototype.isIntersectionRay = function( ray ){
-	
-	return this.intersectRay(ray) !== null;
+OBB.prototype.isIntersectionRay = function( ray ) {
+
+	return this.intersectRay( ray ) !== null;
 };
 
 /**
  * Calculates the intersection point between this OBB and the given ray.
- *
+ * 
  * @param {THREE.Ray} ray - The ray to test.
  * 
  * @returns {THREE.Vector3} The intersection point.
  */
-OBB.prototype.intersectRay = (function(){
-	
+OBB.prototype.intersectRay = ( function() {
+
 	var aabb = new THREE.Box3();
 	var rayLocal = new THREE.Ray();
-	
+
 	var transformationMatrix = new THREE.Matrix4();
 	var transformationMatrixInverse = new THREE.Matrix4();
-	
-	return function( ray ){
-		
+
+	return function( ray ) {
+
 		var intersection;
 
 		// set AABB to origin with the size of the OBB
@@ -42415,38 +42641,39 @@ OBB.prototype.intersectRay = (function(){
 		// transform ray to the local space of the OBB
 		transformationMatrix.copy( this.basis );
 		transformationMatrix.setPosition( this.position );
-		
+
 		rayLocal.copy( ray );
 		rayLocal.applyMatrix4( transformationMatrixInverse.getInverse( transformationMatrix ) );
-		
+
 		// do ray <-> AABB intersection
 		intersection = rayLocal.intersectBox( aabb );
-		
-		if( intersection !== null){
+
+		if ( intersection !== null )
+		{
 			// transform the intersection point back to world space
 			intersection.applyMatrix4( transformationMatrix );
 		}
-		
+
 		return intersection;
 	};
-	
-}());
+
+}() );
 
 /**
  * Calculates the intersection point between this OBB and the given sphere.
- *
+ * 
  * @param {THREE.Sphere} sphere - The sphere to test.
  * 
  * @returns {THREE.Vector3} The intersection point.
  */
-OBB.prototype.intersectSphere = function( sphere ){
-	
+OBB.prototype.intersectSphere = function( sphere ) {
+
 	// find the point on this OBB closest to the sphere center
 	var closestPoint = this.closestPoint( sphere.center );
-	
+
 	// if that point is inside the sphere, the OBB and sphere intersect
-	if( closestPoint.distanceToSquared( sphere.center ) <= sphere.radius * sphere.radius ){
-		
+	if ( closestPoint.distanceToSquared( sphere.center ) <= sphere.radius * sphere.radius )
+	{
 		return closestPoint;
 	}
 
@@ -42458,22 +42685,23 @@ OBB.prototype.intersectSphere = function( sphere ){
  * 
  * @returns {THREE.Vector3} The size of the OBB.
  */
-OBB.prototype.size = function(){
-	
+OBB.prototype.size = function() {
+
 	return this.halfSizes.clone().multiplyScalar( 2 );
 };
 
 /**
  * Translates the OBB in world space.
  * 
- * @param {THREE.Vector3} offset - The amount of displacement to apply to this OBB, in world space coordinates.
+ * @param {THREE.Vector3} offset - The amount of displacement to apply to this
+ * OBB, in world space coordinates.
  * 
  * @returns {OBB} The reference to the OBB.
  */
-OBB.prototype.translate = function( offset ){
-	
+OBB.prototype.translate = function( offset ) {
+
 	this.position.add( offset );
-	
+
 	return this;
 };
 
@@ -42484,12 +42712,12 @@ OBB.prototype.translate = function( offset ){
  * 
  * @returns {OBB} The reference to the OBB.
  */
-OBB.prototype.copy = function( obb ){
-	
+OBB.prototype.copy = function( obb ) {
+
 	this.position.copy( obb.position );
 	this.halfSizes.copy( obb.halfSizes );
 	this.basis.copy( obb.basis );
-	
+
 	return this;
 };
 
@@ -42498,8 +42726,8 @@ OBB.prototype.copy = function( obb ){
  * 
  * @returns {OBB} The new OBB.
  */
-OBB.prototype.clone = function(){
-	
+OBB.prototype.clone = function() {
+
 	return new OBB().copy( this );
 };
 
@@ -42507,16 +42735,16 @@ module.exports = OBB;
 },{"three":2}],35:[function(require,module,exports){
 (function (global){
 /**
- * @file Prototype for loading 3D objects in object-format 
- * from the server. The objects are provided with Blender.
+ * @file Prototype for loading 3D objects in object-format from the server. The
+ * objects are provided with Blender.
  * 
  * @author Human Interactive
  */
 "use strict";
 
-var PubSub = require("pubsub-js");
-var THREE = require("three");
-var utils = require("./Utils");
+var PubSub = require( "pubsub-js" );
+var THREE = require( "three" );
+var utils = require( "./Utils" );
 
 /**
  * Creates a ObjectLoader.
@@ -42527,34 +42755,37 @@ var utils = require("./Utils");
  */
 function ObjectLoader() {
 
-	THREE.ObjectLoader.call(this);
-	
+	THREE.ObjectLoader.call( this );
+
 	this.crossOrigin = "anonymous";
 }
 
-ObjectLoader.prototype = Object.create(THREE.ObjectLoader.prototype);
+ObjectLoader.prototype = Object.create( THREE.ObjectLoader.prototype );
 ObjectLoader.prototype.constructor = ObjectLoader;
 
 /**
  * Loads a 3D object. Overwrites the standard method of three.js.
  * 
  * @param {string} url - The URL of the 3d object.
- * @param {function} onLoad - This callback function is executed, when the model is loaded and parsed.
+ * @param {function} onLoad - This callback function is executed, when the model
+ * is loaded and parsed.
  */
-ObjectLoader.prototype.load = function (url, onLoad) {
-	
+ObjectLoader.prototype.load = function( url, onLoad ) {
+
 	var self = this;
-	
+
 	// build url
 	url = utils.getCDNHost() + url;
 
 	// build texturePath
-	if(this.texturePath === "") {
+	if ( this.texturePath === "" )
+	{
 		this.texturePath = url.substring( 0, url.lastIndexOf( "/" ) + 1 );
 	}
-	
+
 	// add nocache, if necessary
-	if(utils.isDevelopmentModeActive() === true){
+	if ( utils.isDevelopmentModeActive() === true )
+	{
 		url = url + "?" + new Date().getTime();
 	}
 
@@ -42563,56 +42794,64 @@ ObjectLoader.prototype.load = function (url, onLoad) {
 
 	xhr.onreadystatechange = function() {
 
-		if (xhr.readyState === xhr.DONE) {
-
-			if (xhr.status === 200) {
-
-				if (xhr.responseText) {
-
+		if ( xhr.readyState === xhr.DONE )
+		{
+			if ( xhr.status === 200 )
+			{
+				if ( xhr.responseText )
+				{
 					// parse result
-					self.parse(JSON.parse(xhr.responseText), onLoad);
+					self.parse( JSON.parse( xhr.responseText ), onLoad );
 
 					// publish message
-					PubSub.publish("loading.complete.object", {url: url});
+					PubSub.publish( "loading.complete.object", {
+						url : url
+					} );
 
-				} else {
+				}
+				else
+				{
 					throw "ERROR: ObjectLoader: '" + url + "' seems to be unreachable or the file is empty.";
 				}
-			} else {
+			}
+			else
+			{
 				throw "ERROR: ObjectLoader: Could not load '" + url + "' (Status: " + xhr.status + ").";
 			}
 		}
 	};
 
 	// start request
-	xhr.open('GET', url, true);
+	xhr.open( 'GET', url, true );
 	xhr.withCredentials = true;
 	xhr.send();
-	
+
 	// publish message to inform about status
-	PubSub.publish("loading.start.object", {url: url});
+	PubSub.publish( "loading.start.object", {
+		url : url
+	} );
 };
 
 module.exports = ObjectLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./Utils":41,"pubsub-js":1,"three":2}],36:[function(require,module,exports){
 /**
- * @file Interface for performance handling. This prototype is used in scenes
- * to create e.g. LOD instances.
+ * @file Interface for performance handling. This prototype is used in scenes to
+ * create e.g. LOD instances.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
-var LOD = require("./LOD");
-var Impostor = require("./Impostor");
+var LOD = require( "./LOD" );
+var Impostor = require( "./Impostor" );
 
-var camera = require("../core/Camera");
-var scene = require("../core/Scene");
-var renderer = require("../core/Renderer");
+var camera = require( "../core/Camera" );
+var scene = require( "../core/Scene" );
+var renderer = require( "../core/Renderer" );
 
 /**
  * Creates the performance manager.
@@ -42621,48 +42860,50 @@ var renderer = require("../core/Renderer");
  */
 function PerformanceManager() {
 
-	Object.defineProperties(this, {
-		_lods: {
+	Object.defineProperties( this, {
+		_lods : {
 			value : [],
-			configurable: false,
-			enumerable: false,
-			writable: false
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		_impostors: {
+		_impostors : {
 			value : [],
-			configurable: false,
-			enumerable: false,
-			writable: false
+			configurable : false,
+			enumerable : false,
+			writable : false
 		}
-	});
+	} );
 }
 
 /**
- * Creates a LOD instance with direct transitions and stores it to the internal array.
+ * Creates a LOD instance with direct transitions and stores it to the internal
+ * array.
  * 
  * @param {string} id - The id of the LOD instance.
  * 
  * @returns {LOD} The new LOD instance.
  */
-PerformanceManager.prototype.createDirectLOD = function(id) {
-	
-	var lod = new LOD(id, LOD.MODE.DIRECT, camera);
-	this.addLOD(lod);
+PerformanceManager.prototype.createDirectLOD = function( id ) {
+
+	var lod = new LOD( id, LOD.MODE.DIRECT, camera );
+	this.addLOD( lod );
 	return lod;
 };
 
 /**
- * Creates a LOD instance with smooth transitions and stores it to the internal array.
+ * Creates a LOD instance with smooth transitions and stores it to the internal
+ * array.
  * 
  * @param {string} id - The id of the LOD instance.
  * @param {number} threshold - The threshold where the blending is done.
  * 
  * @returns {LOD} The new LOD instance.
  */
-PerformanceManager.prototype.createSmoothLOD = function(id, threshold) {
-	
-	var lod = new LOD(id, LOD.MODE.SMOOTH, camera, threshold);
-	this.addLOD(lod);
+PerformanceManager.prototype.createSmoothLOD = function( id, threshold ) {
+
+	var lod = new LOD( id, LOD.MODE.SMOOTH, camera, threshold );
+	this.addLOD( lod );
 	return lod;
 };
 
@@ -42675,10 +42916,10 @@ PerformanceManager.prototype.createSmoothLOD = function(id, threshold) {
  * 
  * @returns {Impostor} The new impostor instance.
  */
-PerformanceManager.prototype.createImpostor = function(id, object, resolution) {
-	
-	var impostor = new Impostor(id, object, resolution);
-	this.addImpostor(impostor);
+PerformanceManager.prototype.createImpostor = function( id, object, resolution ) {
+
+	var impostor = new Impostor( id, object, resolution );
+	this.addImpostor( impostor );
 	return impostor;
 };
 
@@ -42687,9 +42928,9 @@ PerformanceManager.prototype.createImpostor = function(id, object, resolution) {
  * 
  * @param {LOD} lod - The LOD instance to be added.
  */
-PerformanceManager.prototype.addLOD = function(lod){
-	
-	this._lods.push(lod);
+PerformanceManager.prototype.addLOD = function( lod ) {
+
+	this._lods.push( lod );
 };
 
 /**
@@ -42697,9 +42938,9 @@ PerformanceManager.prototype.addLOD = function(lod){
  * 
  * @param {Impostor} impostor - The impostor instance to be added.
  */
-PerformanceManager.prototype.addImpostor = function(impostor){
-	
-	this._impostors.push(impostor);
+PerformanceManager.prototype.addImpostor = function( impostor ) {
+
+	this._impostors.push( impostor );
 };
 
 /**
@@ -42707,10 +42948,10 @@ PerformanceManager.prototype.addImpostor = function(impostor){
  * 
  * @param {LOD} lod - The LOD instance to be removed.
  */
-PerformanceManager.prototype.removeLOD = function(lod) {
+PerformanceManager.prototype.removeLOD = function( lod ) {
 
-	var index = this._lods.indexOf(lod);
-	this._lods.splice(index, 1);
+	var index = this._lods.indexOf( lod );
+	this._lods.splice( index, 1 );
 };
 
 /**
@@ -42718,10 +42959,10 @@ PerformanceManager.prototype.removeLOD = function(lod) {
  * 
  * @param {Impostor} impostor - The impostor instance to be removed.
  */
-PerformanceManager.prototype.removeImpostor = function(impostor) {
+PerformanceManager.prototype.removeImpostor = function( impostor ) {
 
-	var index = this._impostors.indexOf(impostor);
-	this._impostors.splice(index, 1);
+	var index = this._impostors.indexOf( impostor );
+	this._impostors.splice( index, 1 );
 };
 
 /**
@@ -42747,20 +42988,25 @@ PerformanceManager.prototype.removeImpostors = function() {
  * 
  * @returns {LOD} The LOD instance.
  */
-PerformanceManager.prototype.getLOD = function(id) {
+PerformanceManager.prototype.getLOD = function( id ) {
 
 	var lod = null;
-	
-	for( var index = 0; index < this._lods.length; index++){
-		if(this._lods[index].idLOD === id){
-			lod =  this._lods[index];
+
+	for ( var index = 0; index < this._lods.length; index++ )
+	{
+		if ( this._lods[ index ].idLOD === id )
+		{
+			lod = this._lods[ index ];
 			break;
 		}
 	}
-	
-	if(lod === null){
+
+	if ( lod === null )
+	{
 		throw "ERROR: PerformanceManager: LOD instance with ID " + id + " not existing.";
-	}else{
+	}
+	else
+	{
 		return lod;
 	}
 };
@@ -42772,20 +43018,25 @@ PerformanceManager.prototype.getLOD = function(id) {
  * 
  * @returns {Impostor} The impostor instance.
  */
-PerformanceManager.prototype.getImpostor = function(id) {
+PerformanceManager.prototype.getImpostor = function( id ) {
 
 	var impostor = null;
-	
-	for( var index = 0; index < this._impostors.length; index++){
-		if(this._impostors[index].idImpostor === id){
-			impostor =  this._impostors[index];
+
+	for ( var index = 0; index < this._impostors.length; index++ )
+	{
+		if ( this._impostors[ index ].idImpostor === id )
+		{
+			impostor = this._impostors[ index ];
 			break;
 		}
 	}
-	
-	if(impostor === null){
+
+	if ( impostor === null )
+	{
 		throw "ERROR: PerformanceManager: Impostor instance with ID " + id + " not existing.";
-	}else{
+	}
+	else
+	{
 		return impostor;
 	}
 };
@@ -42793,10 +43044,10 @@ PerformanceManager.prototype.getImpostor = function(id) {
 /**
  * Updates the performance manager.
  */
-PerformanceManager.prototype.update = function(){
-	
+PerformanceManager.prototype.update = function() {
+
 	this._updateLODs();
-	
+
 	this._updateImpostors();
 };
 
@@ -42805,94 +43056,94 @@ PerformanceManager.prototype.update = function(){
  * it's necessary to create new (impostor) billboard. These billboard are
  * replaced with the old ones, via adding and removing to the scene object.
  */
-PerformanceManager.prototype.generateImpostors = function(){
-	
+PerformanceManager.prototype.generateImpostors = function() {
+
 	// clone camera object
 	var impostorCamera = camera.clone();
-	
+
 	// ensure the position of the camera is in world coordinates
 	var cameraWorldPosition = camera.getWorldPosition();
 	impostorCamera.position.set( cameraWorldPosition.x, cameraWorldPosition.y, cameraWorldPosition.z );
-	
+
 	// create an array with the entire lighting of the actual scene
 	var lights = [];
-	
-	for( var index = 0; index < scene.children.length; index++ ){
-		
-		if( scene.children[index] instanceof THREE.Light ){
-			
-			lights.push( scene.children[index] );
+
+	for ( var index = 0; index < scene.children.length; index++ )
+	{
+		if ( scene.children[ index ] instanceof THREE.Light )
+		{
+			lights.push( scene.children[ index ] );
 		}
 	}
-	
+
 	// generate each impostor
-	for( index = 0; index < this._impostors.length; index++ ){
-		
+	for ( index = 0; index < this._impostors.length; index++ )
+	{
 		// remove old impostor
-		if( this._impostors[index].billboard !== null ){
-			
-			scene.remove( this._impostors[index].billboard );
+		if ( this._impostors[ index ].billboard !== null )
+		{
+			scene.remove( this._impostors[ index ].billboard );
 		}
-		
+
 		// prepare the generation...
-		this._impostors[index].prepareGeneration( renderer, impostorCamera, lights );
-		
+		this._impostors[ index ].prepareGeneration( renderer, impostorCamera, lights );
+
 		// ...and run it
-		this._impostors[index].generate();
-		
+		this._impostors[ index ].generate();
+
 		// add new mesh to scene
-		scene.add( this._impostors[index].billboard );
+		scene.add( this._impostors[ index ].billboard );
 	}
 };
 
 /**
  * Updates all LOD instances.
  */
-PerformanceManager.prototype._updateLODs = (function(){
-	
+PerformanceManager.prototype._updateLODs = ( function() {
+
 	var index = 0;
-	
-	return function(){
-		
-		for(index = 0; index < this._lods.length; index++){
-			
-			this._lods[index].update();
+
+	return function() {
+
+		for ( index = 0; index < this._lods.length; index++ )
+		{
+			this._lods[ index ].update();
 		}
 	};
-	
-}());
+
+}() );
 
 /**
  * Updates all LOD instances.
  */
-PerformanceManager.prototype._updateImpostors = (function(){
-	
+PerformanceManager.prototype._updateImpostors = ( function() {
+
 	var index = 0;
 	var cameraWorldPosition = new THREE.Vector3();
-	
-	return function(){
-		
+
+	return function() {
+
 		// the camera world position is equal for each impostor
 		cameraWorldPosition = camera.getWorldPosition();
-		
-		for(index = 0; index < this._impostors.length; index++){
-			
-			this._impostors[index].update(cameraWorldPosition);
+
+		for ( index = 0; index < this._impostors.length; index++ )
+		{
+			this._impostors[ index ].update( cameraWorldPosition );
 		}
 	};
-	
-}());
+
+}() );
 
 module.exports = new PerformanceManager();
 },{"../core/Camera":20,"../core/Renderer":22,"../core/Scene":23,"./Impostor":29,"./LOD":31,"three":2}],37:[function(require,module,exports){
 (function (global){
 /**
- * @file Interface for entire savegame-handling. This prototype is using
- * HTML Storage API for saving data on the client-side.
+ * @file Interface for entire savegame-handling. This prototype is using HTML
+ * Storage API for saving data on the client-side.
  * 
  * @author Human Interactive
  */
-	
+
 "use strict";
 
 /**
@@ -42901,62 +43152,64 @@ module.exports = new PerformanceManager();
  * @constructor
  */
 function SaveGameManager() {
-	
-	Object.defineProperties(this, {
-		_storage: {
-			value: global.localStorage,
-			configurable: false,
-			enumerable: false,
-			writable: false
+
+	Object.defineProperties( this, {
+		_storage : {
+			value : global.localStorage,
+			configurable : false,
+			enumerable : false,
+			writable : false
 		}
-	});
+	} );
 }
 
 /**
- * Saves the progress to localStorage. The savegame object is
- * transformed to JSON and then encoded to BASE64.
+ * Saves the progress to localStorage. The savegame object is transformed to
+ * JSON and then encoded to BASE64.
  * 
  * @param {string} stageId - The ID of the scene.
  * @param {boolean} isFinish - Is the game finished?
  */
-SaveGameManager.prototype.save = function(stageId, isFinish){
-	
+SaveGameManager.prototype.save = function( stageId, isFinish ) {
+
 	var saveGame = {
-		time: new Date().getTime(),
-		stageId: stageId,
-		isFinish: isFinish || false
+		time : new Date().getTime(),
+		stageId : stageId,
+		isFinish : isFinish || false
 	};
-	
+
 	// transform object to JSON-string and encode to BASE64
-	saveGame = global.window.btoa(JSON.stringify(saveGame));
-	
+	saveGame = global.window.btoa( JSON.stringify( saveGame ) );
+
 	// save
-	this._storage.setItem("savegame", saveGame);
+	this._storage.setItem( "savegame", saveGame );
 };
 
 /**
- * Loads the savegame from localStorage. At first, the string gets
- * BASE64 decoded and then parsed from JSON to an object.
+ * Loads the savegame from localStorage. At first, the string gets BASE64
+ * decoded and then parsed from JSON to an object.
  * 
  * @returns {object} The savegame.
  */
-SaveGameManager.prototype.load = function(){
-	
-	var saveGame = this._storage.getItem("savegame");
-	
-	if(saveGame !== null){
-		// Decode BASE64 and parse JSON-string to object 
-		saveGame = JSON.parse(global.window.atob(saveGame));
+SaveGameManager.prototype.load = function() {
+
+	var saveGame = this._storage.getItem( "savegame" );
+
+	if ( saveGame !== null )
+	{
+		// Decode BASE64 and parse JSON-string to object
+		saveGame = JSON.parse( global.window.atob( saveGame ) );
 	}
-	
+
 	return saveGame;
 };
 
 /**
  * Removes the savegame from localStorage.
  */
-SaveGameManager.prototype.remove = function(){
-	this._storage.removeItem("savegame");
+SaveGameManager.prototype.remove = function() {
+
+	this._storage.removeItem( "savegame" );
 };
 
 module.exports = new SaveGameManager();
@@ -42964,190 +43217,206 @@ module.exports = new SaveGameManager();
 },{}],38:[function(require,module,exports){
 (function (global){
 /**
- * @file Interface for entire settings-handling. This prototype is used
- * to access and save settings via HTML5-Storage API.
+ * @file Interface for entire settings-handling. This prototype is used to
+ * access and save settings via HTML5-Storage API.
  * 
  * @author Human Interactive
  */
 "use strict";
 
-var THREE = require("three");
-var utils = require("./Utils");
+var THREE = require( "three" );
+var utils = require( "./Utils" );
 /**
  * Creates the settings manager and loads the current settings.
  * 
  * @constructor
  */
 function SettingsManager() {
-	
-	Object.defineProperties(this, {
-		_storage: {
-			value: global.localStorage,
-			configurable: false,
-			enumerable: false,
-			writable: false
+
+	Object.defineProperties( this, {
+		_storage : {
+			value : global.localStorage,
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		_settings: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_settings : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
+	} );
 
 	this._settings = this.load();
-	
+
 	// cross-domain settings
 	THREE.ImageUtils.crossOrigin = "anonymous";
 }
 
 /**
- * Saves the settings to storage. The settings object is
- * transformed to JSON and then encoded to BASE64.
+ * Saves the settings to storage. The settings object is transformed to JSON and
+ * then encoded to BASE64.
  * 
  * @param {string} graphicSettings - The common graphic settings.
  * @param {number} mouseSensitivity - The mouse sensitivity.
  */
-SettingsManager.prototype.save = function(graphicSettings, mouseSensitivity){
-	
+SettingsManager.prototype.save = function( graphicSettings, mouseSensitivity ) {
+
 	var settings = {
-		graphicSettings: graphicSettings,
-		mouseSensitivity: mouseSensitivity
+		graphicSettings : graphicSettings,
+		mouseSensitivity : mouseSensitivity
 	};
-	
+
 	// transform object to JSON-string and encode to BASE64
-	settings = global.window.btoa(JSON.stringify(settings));
-	
+	settings = global.window.btoa( JSON.stringify( settings ) );
+
 	// save
-	this._storage.setItem("settings", settings);
+	this._storage.setItem( "settings", settings );
 };
 
 /**
- * Loads the settings from storage. At first, the string gets
- * BASE64 decoded and then parsed from JSON to an object.
+ * Loads the settings from storage. At first, the string gets BASE64 decoded and
+ * then parsed from JSON to an object.
  * 
  * @returns {object} The settings.
  */
-SettingsManager.prototype.load = function(){
-	
-	var settings = this._storage.getItem("settings");
-	
-	if(settings !== null){
-		
-		// decode BASE64 and parse JSON-string to object 
-		settings = JSON.parse(global.window.atob(settings));	
-	}else{
+SettingsManager.prototype.load = function() {
+
+	var settings = this._storage.getItem( "settings" );
+
+	if ( settings !== null )
+	{
+
+		// decode BASE64 and parse JSON-string to object
+		settings = JSON.parse( global.window.atob( settings ) );
+	}
+	else
+	{
 		// default settings
 		settings = {
-			graphicSettings: SettingsManager.GRAPHICS.HIGH,
-			mouseSensitivity: SettingsManager.MOUSE.MIDDLE
+			graphicSettings : SettingsManager.GRAPHICS.HIGH,
+			mouseSensitivity : SettingsManager.MOUSE.MIDDLE
 		};
 	}
-	
+
 	return settings;
 };
 
 /**
  * Removes the settings from storage.
  */
-SettingsManager.prototype.remove = function(){
-	this._storage.removeItem("settings");
+SettingsManager.prototype.remove = function() {
+
+	this._storage.removeItem( "settings" );
 };
 
 /**
- * Adjusts some properties of the given materials. The result depends on the 
+ * Adjusts some properties of the given materials. The result depends on the
  * current graphic settings.
  * 
  * @param {object} materials - An arrays of THREE.Material objects.
  * @param {THREE.WebGLRenderer} renderer - The renderer of the application.
  */
-SettingsManager.prototype.adjustMaterials = function(materials, renderer){
-	
-	for( var i = 0; i < materials.length; i++){
-		
-		if(this._settings.graphicSettings === SettingsManager.GRAPHICS.HIGH){
+SettingsManager.prototype.adjustMaterials = function( materials, renderer ) {
+
+	for ( var i = 0; i < materials.length; i++ )
+	{
+		if ( this._settings.graphicSettings === SettingsManager.GRAPHICS.HIGH )
+		{
 			// anisotropy filter on high-settings
-			if(materials[i].map !== undefined && materials[i].map !== null){
-				materials[i].map.anisotropy = renderer.getMaxAnisotropy();
+			if ( materials[ i ].map !== undefined && materials[ i ].map !== null )
+			{
+				materials[ i ].map.anisotropy = renderer.getMaxAnisotropy();
 			}
-			if(materials[i].normalMap !== undefined && materials[i].normalMap !== null){
-				materials[i].normalMap.anisotropy = renderer.getMaxAnisotropy();
-			}	
-		}else if(this._settings.graphicSettings === SettingsManager.GRAPHICS.LOW){
+			if ( materials[ i ].normalMap !== undefined && materials[ i ].normalMap !== null )
+			{
+				materials[ i ].normalMap.anisotropy = renderer.getMaxAnisotropy();
+			}
+		}
+		else if ( this._settings.graphicSettings === SettingsManager.GRAPHICS.LOW )
+		{
 			// no anisotropy filter and normal maps on low-settings
-			if(materials[i].normalMap !== undefined && materials[i].normalMap !== null){
-				materials[i].normalMap = null;
+			if ( materials[ i ].normalMap !== undefined && materials[ i ].normalMap !== null )
+			{
+				materials[ i ].normalMap = null;
 			}
 		}
 	}
 };
 
 /**
- * Adjusts some properties of the given light. The result depends on the 
- * current graphic settings.
+ * Adjusts some properties of the given light. The result depends on the current
+ * graphic settings.
  * 
  * @param {THREE.Light} light - The light to adjusted.
  */
-SettingsManager.prototype.adjustLight = function(light){
-	
-	if(this._settings.graphicSettings === SettingsManager.GRAPHICS.HIGH){
-		// smoother shadows on  high-settings
+SettingsManager.prototype.adjustLight = function( light ) {
+
+	if ( this._settings.graphicSettings === SettingsManager.GRAPHICS.HIGH )
+	{
+		// smoother shadows on high-settings
 		light.castShadow = true;
 		light.shadowMapWidth = 1024;
 		light.shadowMapHeight = 1024;
-	}else if(this._settings.graphicSettings === SettingsManager.GRAPHICS.MIDDLE){
+	}
+	else if ( this._settings.graphicSettings === SettingsManager.GRAPHICS.MIDDLE )
+	{
 		// shadows on middle-settings
 		light.castShadow = true;
 		light.shadowMapWidth = 512;
 		light.shadowMapHeight = 512;
-	}else{
+	}
+	else
+	{
 		// no shadows on low-settings
 		light.castShadow = false;
 	}
-	
-	if(utils.isDevelopmentModeActive() === true){	
-		if(light instanceof THREE.SpotLight ||  light instanceof THREE.DirectionalLight){
+
+	if ( utils.isDevelopmentModeActive() === true )
+	{
+		if ( light instanceof THREE.SpotLight || light instanceof THREE.DirectionalLight )
+		{
 			light.castShadow = true;
-			light.shadowCameraVisible = true;	
+			light.shadowCameraVisible = true;
 		}
 	}
 };
 
 /**
- * Gets the  mouse sensitivity.
+ * Gets the mouse sensitivity.
  * 
  * @param {number} light - The mouse sensitivity.
  */
-SettingsManager.prototype.getMouseSensitivity = function(){
-	
+SettingsManager.prototype.getMouseSensitivity = function() {
+
 	return this._settings.mouseSensitivity;
 };
 
 SettingsManager.GRAPHICS = {
-	LOW: 0,
-	MIDDLE: 1,
-	HIGH: 2
+	LOW : 0,
+	MIDDLE : 1,
+	HIGH : 2
 };
 
 SettingsManager.MOUSE = {
-	LOW: 2,
-	MIDDLE: 5,
-	HIGH: 8
+	LOW : 2,
+	MIDDLE : 5,
+	HIGH : 8
 };
 
 module.exports = new SettingsManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./Utils":41,"three":2}],39:[function(require,module,exports){
 /**
- * @file This prototype represents the character of
- * a teammate.
+ * @file This prototype represents the character of a teammate.
  * 
  * @author Human Interactive
  */
 "use strict";
 
-var THREE = require("three");
-var GameEntity = require("../game/entity/GameEntity");
+var THREE = require( "three" );
+var GameEntity = require( "../game/entity/GameEntity" );
 
 /**
  * Creates a teammate instance.
@@ -43157,33 +43426,35 @@ var GameEntity = require("../game/entity/GameEntity");
  * 
  * @param {number} id - The id of the teammate.
  */
-function Teammate(id){
-	
-	GameEntity.call(this);
+function Teammate( id ) {
 
-	Object.defineProperties(this, {
-		type: {
-			value: "Teammate",
-			configurable: false,
-			enumerable: true,
-			writable: false
+	GameEntity.call( this );
+
+	Object.defineProperties( this, {
+		type : {
+			value : "Teammate",
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		teammateId: {
-			value: id,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		teammateId : {
+			value : id,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
-	});
-	
+	} );
+
 	// apply exemplary geometry
-	this.geometry = new THREE.BoxGeometry(4, 4, 4);
-	
+	this.geometry = new THREE.BoxGeometry( 4, 4, 4 );
+
 	// apply exemplary material
-	this.material = new THREE.MeshBasicMaterial({color: "#ff0000"});
+	this.material = new THREE.MeshBasicMaterial( {
+		color : "#ff0000"
+	} );
 }
 
-Teammate.prototype = Object.create(GameEntity.prototype);
+Teammate.prototype = Object.create( GameEntity.prototype );
 Teammate.prototype.constructor = Teammate;
 
 /**
@@ -43192,8 +43463,8 @@ Teammate.prototype.constructor = Teammate;
  * @param {THREE.Vector3} position - The new position of the teammate.
  * @param {THREE.Quaternion} quaternion - The new orientation of the teammate.
  */
-Teammate.prototype.update = function( position, quaternion ){
-	
+Teammate.prototype.update = function( position, quaternion ) {
+
 	this.position.copy( position );
 	this.quaternion.copy( quaternion );
 };
@@ -43202,31 +43473,31 @@ module.exports = Teammate;
 },{"../game/entity/GameEntity":43,"three":2}],40:[function(require,module,exports){
 (function (global){
 /**
- * @file Interface for entire text-handling. This prototype is used in scenes
- * to access text-based logic and to load localized texts.
+ * @file Interface for entire text-handling. This prototype is used in scenes to
+ * access text-based logic and to load localized texts.
  * 
  * @author Human Interactive
  */
 "use strict";
 
-var utils = require("./Utils");
+var utils = require( "./Utils" );
 
-var PubSub = require("pubsub-js");
+var PubSub = require( "pubsub-js" );
 /**
  * Creates the text manager.
  * 
  * @constructor
  */
-function TextManager() {	
-	
-	Object.defineProperties(this, {
-		_texts: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+function TextManager() {
+
+	Object.defineProperties( this, {
+		_texts : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
+	} );
 }
 
 /**
@@ -43235,58 +43506,68 @@ function TextManager() {
  * @param {string} stageId - The ID of the stage.
  * @param {function} callback - Executed, when the loading was successful.
  */
-TextManager.prototype.load = function(stageId, callback){
-	
+TextManager.prototype.load = function( stageId, callback ) {
+
 	var self = this;
-	
+
 	// build url
-	var	url = utils.getCDNHost() + "assets/locales/" + utils.getLocale() + "/stage_" + stageId + ".js";
-	
+	var url = utils.getCDNHost() + "assets/locales/" + utils.getLocale() + "/stage_" + stageId + ".js";
+
 	// add nocache, if necessary
-	if(utils.isDevelopmentModeActive() === true){
+	if ( utils.isDevelopmentModeActive() === true )
+	{
 		url = url + "?" + new Date().getTime();
 	}
-	
+
 	// create XMLHttpRequest object
 	var xhr = new global.XMLHttpRequest();
-	
+
 	xhr.onreadystatechange = function() {
 
-		if (xhr.readyState === xhr.DONE) {
-
-			if (xhr.status === 200) {
-
-				if (xhr.responseText !== "") {
-					
+		if ( xhr.readyState === xhr.DONE )
+		{
+			if ( xhr.status === 200 )
+			{
+				if ( xhr.responseText !== "" )
+				{
 					// assign texts
-					self._texts = JSON.parse(xhr.responseText);
-					
+					self._texts = JSON.parse( xhr.responseText );
+
 					// search for keys and replace with text
 					self._searchAndRepalce();
-					
-					// publish message to inform about status
-					PubSub.publish("loading.complete.text", {url: url});
 
-					if(typeof callback === "function"){
+					// publish message to inform about status
+					PubSub.publish( "loading.complete.text", {
+						url : url
+					} );
+
+					if ( typeof callback === "function" )
+					{
 						callback();
 					}
-					
-				} else {
+
+				}
+				else
+				{
 					throw "ERROR: TextManager: Unable to parse texts for stageId '" + stageId + "'. Textfile could be empty.";
 				}
-			} else {
+			}
+			else
+			{
 				throw "ERROR: TextManager: Could not load '" + url + "' (Status: " + xhr.status + ").";
 			}
 		}
 	};
-	
+
 	// start request
-	xhr.open('GET', url, true);
+	xhr.open( 'GET', url, true );
 	xhr.withCredentials = true;
 	xhr.send();
-	
+
 	// publish message to inform about status
-	PubSub.publish("loading.start.text", {url: url});
+	PubSub.publish( "loading.start.text", {
+		url : url
+	} );
 };
 
 /**
@@ -43296,24 +43577,27 @@ TextManager.prototype.load = function(stageId, callback){
  * 
  * @returns {string} The localized text.
  */
-TextManager.prototype.get = function(key){
-	
+TextManager.prototype.get = function( key ) {
+
 	var value;
-	
-	if(this._texts !== null && this._texts[key] !== undefined){
-		value = this._texts[key];
-	}else{
+
+	if ( this._texts !== null && this._texts[ key ] !== undefined )
+	{
+		value = this._texts[ key ];
+	}
+	else
+	{
 		value = key;
 	}
-	
+
 	return value;
 };
 
 /**
  * Removes the buffered texts.
  */
-TextManager.prototype.removeTexts = function(){
-	
+TextManager.prototype.removeTexts = function() {
+
 	this._texts = null;
 };
 
@@ -43324,33 +43608,38 @@ TextManager.prototype.removeTexts = function(){
  * 
  * @returns {object} An array with text nodes.
  */
-TextManager.prototype._getAllTextNodes = function(element){
+TextManager.prototype._getAllTextNodes = function( element ) {
 
-  var textNodeList = [];
-  var treeWalker = global.document.createTreeWalker(element, global.NodeFilter.SHOW_TEXT, null, false);
-  while(treeWalker.nextNode()){
-	  textNodeList.push(treeWalker.currentNode);
-  }
-  return textNodeList;
+	var textNodeList = [];
+	var treeWalker = global.document.createTreeWalker( element, global.NodeFilter.SHOW_TEXT, null, false );
+	while ( treeWalker.nextNode() )
+	{
+		textNodeList.push( treeWalker.currentNode );
+	}
+	return textNodeList;
 };
 
 /**
  * Searches for Text-IDs and replaces it with the actual text.
  */
-TextManager.prototype._searchAndRepalce = function(){
-	
+TextManager.prototype._searchAndRepalce = function() {
+
 	var key = null;
 	var index = 0;
-	var textNodes = this._getAllTextNodes(global.document.querySelector("#ui-container"));
-	
-	for(key in this._texts){
-		if(this._texts.hasOwnProperty(key)){
-			for(index = 0; index < textNodes.length; index++){
-				// because the property textContent is used, it's not possible to replace an ID with text, which contains HTML-entities
-				textNodes[index].textContent = textNodes[index].textContent.replace(key, this._texts[key]);
+	var textNodes = this._getAllTextNodes( global.document.querySelector( "#ui-container" ) );
+
+	for ( key in this._texts )
+	{
+		if ( this._texts.hasOwnProperty( key ) )
+		{
+			for ( index = 0; index < textNodes.length; index++ )
+			{
+				// because the property textContent is used, it's not possible
+				// to replace an ID with text, which contains HTML-entities
+				textNodes[ index ].textContent = textNodes[ index ].textContent.replace( key, this._texts[ key ] );
 			}
 		}
-    }
+	}
 };
 
 module.exports = new TextManager();
@@ -43358,8 +43647,7 @@ module.exports = new TextManager();
 },{"./Utils":41,"pubsub-js":1}],41:[function(require,module,exports){
 (function (global){
 /**
- * @file All helper and util functions are
- * organized in this module.
+ * @file All helper and util functions are organized in this module.
  * 
  * @author Human Interactive
  */
@@ -43371,45 +43659,54 @@ module.exports = new TextManager();
  * 
  * @constructor
  */
-function Utils(){
-	
-	Object.defineProperties(this, {
-		_runtimeInformation: {
-			value: {},
-			configurable: false,
-			enumerable: false,
-			writable: true
+function Utils() {
+
+	Object.defineProperties( this, {
+		_runtimeInformation : {
+			value : {},
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
+	} );
 }
 
 /**
- * Sets runtime-information 
+ * Sets runtime-information
  * 
  * @param {object} params - Startup parameters of the engine.
  */
-Utils.prototype.setRuntimeInformation = function(params){
-	
+Utils.prototype.setRuntimeInformation = function( params ) {
+
 	this._runtimeInformation.appName = params.name;
 	this._runtimeInformation.version = params.version;
-	
-	if(params.mode === "development" ){
+
+	if ( params.mode === "development" )
+	{
 		this._runtimeInformation.mode = Utils.MODES.DEVELOPMENT;
 		this._runtimeInformation.CDN = Utils.CDN.LOCAL;
-	}else{
+	}
+	else
+	{
 		this._runtimeInformation.mode = Utils.MODES.PRODUCTION;
 		this._runtimeInformation.CDN = Utils.CDN.CLOUD;
 	}
-	
-	if(params.locale === "de"){
+
+	if ( params.locale === "de" )
+	{
 		this._runtimeInformation.locale = Utils.LOCALES.DE;
-	}else{
+	}
+	else
+	{
 		this._runtimeInformation.locale = Utils.LOCALES.EN;
 	}
-	
-	if(params.isMultiplayerActive === true){
+
+	if ( params.isMultiplayerActive === true )
+	{
 		this._runtimeInformation.isMultiplayerActive = true;
-	}else{
+	}
+	else
+	{
 		this._runtimeInformation.isMultiplayerActive = false;
 	}
 };
@@ -43419,8 +43716,8 @@ Utils.prototype.setRuntimeInformation = function(params){
  * 
  * @returns {string} The CDN-Host.
  */
-Utils.prototype.getCDNHost = function(){
-	
+Utils.prototype.getCDNHost = function() {
+
 	return this._runtimeInformation.CDN;
 };
 
@@ -43429,8 +43726,8 @@ Utils.prototype.getCDNHost = function(){
  * 
  * @returns {string} The local.
  */
-Utils.prototype.getLocale= function(){
-	
+Utils.prototype.getLocale = function() {
+
 	return this._runtimeInformation.locale;
 };
 
@@ -43439,8 +43736,8 @@ Utils.prototype.getLocale= function(){
  * 
  * @returns {string} The name and bersion of Application.
  */
-Utils.prototype.getAppInformation = function(){
-	
+Utils.prototype.getAppInformation = function() {
+
 	return this._runtimeInformation.appName + ", Version: " + this._runtimeInformation.version;
 };
 
@@ -43449,8 +43746,8 @@ Utils.prototype.getAppInformation = function(){
  * 
  * @returns {boolean} Is the multiplayer active?
  */
-Utils.prototype.isMultiplayerActive = function(){
-	
+Utils.prototype.isMultiplayerActive = function() {
+
 	return this._runtimeInformation.isMultiplayerActive;
 };
 
@@ -43458,27 +43755,32 @@ Utils.prototype.isMultiplayerActive = function(){
  * Preloads images and executes a callback, when all work is done.
  * 
  * @param{object} images - An array with URLs of images.
- * @param{function} callback - This function is executed, when all images are loaded.
+ * @param{function} callback - This function is executed, when all images are
+ * loaded.
  */
-Utils.prototype.preloadImages = function(images, callback) {
+Utils.prototype.preloadImages = function( images, callback ) {
 
 	var count = 0;
 
 	var onLoad = function() {
-		if (++count === images.length && typeof callback === "function") {
+
+		if ( ++count === images.length && typeof callback === "function" )
+		{
 			callback();
 		}
 	};
 
-	var onError = function(e) {
+	var onError = function( e ) {
+
 		throw "ERROR: Utils: Unable to preload image with URL: " + e.target.src;
 	};
 
-	for (var i = 0; i < images.length; i++) {
+	for ( var i = 0; i < images.length; i++ )
+	{
 
 		var image = new global.Image();
-		image.src = images[i];
-		
+		image.src = images[ i ];
+
 		image.onload = onLoad;
 		image.onerror = onError;
 	}
@@ -43489,8 +43791,8 @@ Utils.prototype.preloadImages = function(images, callback) {
  * 
  * @returns {boolean} Is development mode activ?
  */
-Utils.prototype.isDevelopmentModeActive = function(){
-	
+Utils.prototype.isDevelopmentModeActive = function() {
+
 	return this._runtimeInformation.mode === Utils.MODES.DEVELOPMENT;
 };
 
@@ -43499,9 +43801,9 @@ Utils.prototype.isDevelopmentModeActive = function(){
  * 
  * @returns {boolean} Is the current user-agent a firefox?
  */
-Utils.prototype.isFirefox = function(){
-	
-	return global.navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+Utils.prototype.isFirefox = function() {
+
+	return global.navigator.userAgent.toLowerCase().indexOf( 'firefox' ) > -1;
 };
 
 Utils.MODES = {
@@ -43529,7 +43831,7 @@ module.exports = new Utils();
  */
 "use strict";
 
-var Vehicle = require("./Vehicle");
+var Vehicle = require( "./Vehicle" );
 
 /**
  * Creates the entity manager.
@@ -43537,17 +43839,17 @@ var Vehicle = require("./Vehicle");
  * @constructor
  */
 function EntityManager() {
-	
-	Object.defineProperties(this, {	
-		
-		entities: {
-			value: [],
-			configurable: false,
-			enumerable: false,
-			writable: false
+
+	Object.defineProperties( this, {
+
+		entities : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
 		}
-	
-	});
+
+	} );
 }
 
 /**
@@ -43558,12 +43860,13 @@ function EntityManager() {
  * @param {number} maxSpeed - The maximum speed at which this entity may travel.
  * @param {number} maxForce - The maximum force this entity can produce to power itself (think rockets and thrust).
  * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
- * @param {number} numSamplesForSmoothing - How many samples the smoother will use to average the velocity.
+ * @param {number} numSamplesForSmoothing - How many samples the smoother will
+ * use to average the velocity.
  * 
  * @returns {Vehicle} The new vehicle.
  */
-EntityManager.prototype.createVehicle = function( velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ){
-	
+EntityManager.prototype.createVehicle = function( velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ) {
+
 	var vehicle = new Vehicle( this, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing );
 	this.addEntity( vehicle );
 	return vehicle;
@@ -43574,37 +43877,37 @@ EntityManager.prototype.createVehicle = function( velocity, mass, maxSpeed, maxF
  * 
  * @param {number} delta - The time delta value.
  */
-EntityManager.prototype.update = ( function(){
-	
+EntityManager.prototype.update = ( function() {
+
 	var index = 0;
-	
-	return function( delta ){
-		
-		for( index = 0; index < this.entities.length; index++ ){
-			
-			this.entities[index].update( delta );
+
+	return function( delta ) {
+
+		for ( index = 0; index < this.entities.length; index++ )
+		{
+			this.entities[ index ].update( delta );
 		}
 	};
-	
-} () );
+
+}() );
 
 /**
  * Adds a single entity to the internal array.
  * 
- * @param {GameEntity} entity -  The entity to add.
+ * @param {GameEntity} entity - The entity to add.
  */
-EntityManager.prototype.addEntity = function( entity ){
-	
+EntityManager.prototype.addEntity = function( entity ) {
+
 	this.entities.push( entity );
 };
 
 /**
  * Removes a single entity from the internal array.
  * 
- * @param {GameEntity} entity -  The entity to remove.
+ * @param {GameEntity} entity - The entity to remove.
  */
-EntityManager.prototype.removeEntity = function( entity ){
-	
+EntityManager.prototype.removeEntity = function( entity ) {
+
 	var index = this.entities.indexOf( entity );
 	this.entities.splice( index, 1 );
 };
@@ -43612,23 +43915,23 @@ EntityManager.prototype.removeEntity = function( entity ){
 /**
  * Removes all entities from the internal array.
  */
-EntityManager.prototype.removeEntities = function(){
-	
+EntityManager.prototype.removeEntities = function() {
+
 	this.entities.length = 0;
 };
 
 module.exports = new EntityManager();
 },{"./Vehicle":45}],43:[function(require,module,exports){
 /**
- * @file All entities that are part of the game logic
- * inherit from this prototype.
+ * @file All entities that are part of the game logic inherit from this
+ * prototype.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
 /**
  * Creates a game entity.
@@ -43639,18 +43942,18 @@ var THREE = require("three");
  * @param {EntityManager} entityManager - The reference to the entity manager.
  * 
  */
-function GameEntity( entityManager ){
-		
+function GameEntity( entityManager ) {
+
 	THREE.Mesh.call( this );
-	
+
 	Object.defineProperties( this, {
-		entityManager: {
-			value: entityManager,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		entityManager : {
+			value : entityManager,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
-	});
+	} );
 }
 
 GameEntity.prototype = Object.create( THREE.Mesh.prototype );
@@ -43659,7 +43962,9 @@ GameEntity.prototype.constructor = GameEntity;
 /**
  * All entities must implement an update function.
  */
-GameEntity.prototype.update = function(){};
+GameEntity.prototype.update = function() {
+
+};
 
 module.exports = GameEntity;
 },{"three":2}],44:[function(require,module,exports){
@@ -43670,9 +43975,9 @@ module.exports = GameEntity;
  */
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
-var GameEntity = require("./GameEntity");
+var GameEntity = require( "./GameEntity" );
 
 /**
  * Creates a new moving entity.
@@ -43687,100 +43992,101 @@ var GameEntity = require("./GameEntity");
  * @param {number} maxForce - The maximum force this entity can produce to power itself (think rockets and thrust).
  * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
  */
-function MovingEntity( entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate ){
-		
+function MovingEntity( entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate ) {
+
 	GameEntity.call( this, entityManager );
-	
-	Object.defineProperties(this, {
-		velocity: {
-			value: velocity || new THREE.Vector3(),
-			configurable: false,
-			enumerable: true,
-			writable: true
+
+	Object.defineProperties( this, {
+		velocity : {
+			value : velocity || new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		mass: {
-			value: mass || 1,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		mass : {
+			value : mass || 1,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		maxSpeed: {
-			value: maxSpeed || 1,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		maxSpeed : {
+			value : maxSpeed || 1,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		maxForce: {
-			value: maxForce || 100,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		maxForce : {
+			value : maxForce || 100,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		maxTurnRate: {
-			value: maxTurnRate || Math.PI,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		maxTurnRate : {
+			value : maxTurnRate || Math.PI,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
-	});
+	} );
 }
 
 MovingEntity.prototype = Object.create( GameEntity.prototype );
 MovingEntity.prototype.constructor = MovingEntity;
 
 /**
- * Given a target object, this method rotates the entity by an amount not greater 
- * than maxTurnRate until it directly faces the target.
+ * Given a target object, this method rotates the entity by an amount not
+ * greater than maxTurnRate until it directly faces the target.
  * 
  * @param {THREE.Object3D} - The target object to face.
  * 
  * @returns {boolean} Is the entity facing in the desired direction?
  */
-MovingEntity.prototype.isRotateToTarget = ( function( ){
-	
+MovingEntity.prototype.isRotateToTarget = ( function() {
+
 	var look = new THREE.Vector3();
-	
+
 	var rotationToTarget = new THREE.Matrix4();
 	var quaternionToTarget = new THREE.Quaternion();
-	
+
 	var angle = 0, t = 0;
-	
-	return function( targetObject ){
-		
+
+	return function( targetObject ) {
+
 		// first determine the angle between the look vector and the target
 		look.set( 0, 0, -1 );
 		look.applyQuaternion( this.quaternion );
 		angle = look.angleTo( targetObject.position );
-		
+
 		// return true if the player is facing the target
-		if( angle < 0.00001 ){
+		if ( angle < 0.00001 )
+		{
 			return true;
 		}
-		
+
 		// clamp the amount to turn to the max turn rate
 		t = ( angle > this.maxTurnRate ) ? ( this.maxTurnRate / angle ) : 1;
-		
+
 		// get target rotation
 		rotationToTarget.lookAt( targetObject.position, this.position, this.up );
 		quaternionToTarget.setFromRotationMatrix( rotationToTarget );
-		
+
 		// interpolate rotation
 		this.quaternion.slerp( quaternionToTarget, t );
-		
+
 		// adjust velocity
 		this.velocity.applyQuaternion( this.quaternion );
-		
+
 		return false;
 	};
 
-} ( ) );
+}() );
 
 /**
  * Gets the speed of the moving entity.
  * 
  * @returns {number} The speed of the entity.
  */
-MovingEntity.prototype.getSpeed = function(){
+MovingEntity.prototype.getSpeed = function() {
 
 	return this.velocity.length();
 };
@@ -43790,7 +44096,7 @@ MovingEntity.prototype.getSpeed = function(){
  * 
  * @returns {number} The speed of the entity.
  */
-MovingEntity.prototype.getSpeedSq = function(){
+MovingEntity.prototype.getSpeedSq = function() {
 
 	return this.velocity.lengthSq();
 };
@@ -43800,7 +44106,7 @@ MovingEntity.prototype.getSpeedSq = function(){
  * 
  * @returns {THREE.Vector3} The direction vector.
  */
-MovingEntity.prototype.getDirection = function(){
+MovingEntity.prototype.getDirection = function() {
 
 	return new THREE.Vector3( 0, 0, 1 ).applyQuaternion( this.quaternion ).normalize();
 };
@@ -43814,18 +44120,18 @@ module.exports = MovingEntity;
  */
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
-var MovingEntity = require("./MovingEntity");
-var SteeringBehaviors = require("../steering/SteeringBehaviors");
-var Smoother = require("../steering/Smoother");
+var MovingEntity = require( "./MovingEntity" );
+var SteeringBehaviors = require( "../steering/SteeringBehaviors" );
+var Smoother = require( "../steering/Smoother" );
 
 /**
  * Creates a new vehicle.
  * 
  * @constructor
  * @augments MovingEntity
- *
+ * 
  * @param {EntityManager} entityManager - The reference to the entity manager.
  * @param {THREE.Vector3} velocity - The velocity of the agent.
  * @param {number} mass - The mass of the agent.
@@ -43834,37 +44140,37 @@ var Smoother = require("../steering/Smoother");
  * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
  * @param {number} numSamplesForSmoothing - How many samples the smoother will use to average the velocity.
  */
-function Vehicle( entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ){
-		
+function Vehicle( entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ) {
+
 	MovingEntity.call( this, entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate );
-	
+
 	Object.defineProperties( this, {
-		steering: {
-			value: new SteeringBehaviors( this ),
-			configurable: false,
-			enumerable: true,
-			writable: false
+		steering : {
+			value : new SteeringBehaviors( this ),
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		isSmoothingOn: {
-			value: false,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		isSmoothingOn : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		_smoother:{
-			value: new Smoother( numSamplesForSmoothing || 0 ),
-			configurable: false,
-			enumerable: false,
-			writable: false
+		_smoother : {
+			value : new Smoother( numSamplesForSmoothing || 0 ),
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		_smoothedVelocity: {
-			value: new THREE.Vector3(),
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_smoothedVelocity : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
-	
+	} );
+
 }
 
 Vehicle.prototype = Object.create( MovingEntity.prototype );
@@ -43875,106 +44181,110 @@ Vehicle.prototype.constructor = Vehicle;
  * 
  * @param {number} delta - The time delta value.
  */
-Vehicle.prototype.update = ( function( ){
-	
+Vehicle.prototype.update = ( function() {
+
 	var steeringForce = null;
-	
+
 	var displacement = new THREE.Vector3();
 	var acceleration = new THREE.Vector3();
-	
-	return function( delta ){
-		
+
+	return function( delta ) {
+
 		// calculate steering force
 		steeringForce = this.steering.calculate( delta );
-				
+
 		// acceleration = force / mass
 		acceleration.copy( steeringForce ).divideScalar( this.mass );
 
 		// update velocity
 		this.velocity.add( acceleration.multiplyScalar( delta ) );
-		
+
 		// make sure vehicle does not exceed maximum velocity
-		if( this.velocity.length() > this.maxSpeed ){
-			
+		if ( this.velocity.length() > this.maxSpeed )
+		{
+
 			this.velocity.normalize();
-			
+
 			this.velocity.multiplyScalar( this.maxSpeed );
 		}
-		
+
 		// calculate displacement
 		displacement.copy( this.velocity ).multiplyScalar( delta );
-		
+
 		// update the position
 		this.position.add( displacement );
-		
+
 		// update the orientation if the vehicle has a non zero velocity
-		if( this.velocity.lengthSq() > 0.00000001 ){
-			
+		if ( this.velocity.lengthSq() > 0.00000001 )
+		{
 			// check smoothing
-			if( this.isSmoothingOn === true ){
-				
+			if ( this.isSmoothingOn === true )
+			{
 				// decouple velocity and heading. calculate the orientation
 				// with an averaged velocity to avoid oscillations/judder.
 				this._smoother.update( this.velocity, this._smoothedVelocity );
-				
+
 				this._updateOrientation( this._smoothedVelocity );
 			}
-			else{
+			else
+			{
 				// couple velocity and orientation
 				this._updateOrientation( this.velocity );
-			}	
+			}
 		}
-		
+
 	};
-	
-} ( ) );
+
+}() );
 
 /**
  * This method rotates the vehicle to the given direction.
  * 
  * @param {THREE.Vector3} - The direction to rotate.
  */
-Vehicle.prototype._updateOrientation = ( function(){
-	
+Vehicle.prototype._updateOrientation = ( function() {
+
 	var xAxis = new THREE.Vector3(); // right
 	var yAxis = new THREE.Vector3(); // up
 	var zAxis = new THREE.Vector3(); // front
-	
-	var upTemp = new THREE.Vector3( 0, 1, 0 ); 
-	
+
+	var upTemp = new THREE.Vector3( 0, 1, 0 );
+
 	var rotationMatrix = new THREE.Matrix4();
-	
-	return function( direction ){
-		
+
+	return function( direction ) {
+
 		// the front vector always points to the direction vector
-		zAxis.copy( direction ).normalize();	
-		
+		zAxis.copy( direction ).normalize();
+
 		// avoid zero-length axis
-		if ( zAxis.length() === 0 ) {
+		if ( zAxis.length() === 0 )
+		{
 			zAxis.z = 1;
 		}
-		
+
 		// compute right vector
 		xAxis.crossVectors( zAxis, upTemp );
-		
+
 		// avoid zero-length axis
-		if ( xAxis.length() === 0 ) {
+		if ( xAxis.length() === 0 )
+		{
 			zAxis.x += 0.0001;
 			xAxis.crossVectors( zAxis, upTemp ).normalize();
 		}
-		
+
 		// compute up vector
 		yAxis.crossVectors( zAxis, xAxis );
-		
+
 		// setup a rotation matrix of the basis
 		rotationMatrix.makeBasis( xAxis, yAxis, zAxis );
-		
+
 		// apply rotation
 		this.quaternion.setFromRotationMatrix( rotationMatrix );
-		
+
 	};
-	
-} () );
+
+}() );
 
 module.exports = Vehicle;
 },{"../steering/Smoother":49,"../steering/SteeringBehaviors":50,"./MovingEntity":44,"three":2}],46:[function(require,module,exports){
@@ -43992,30 +44302,38 @@ module.exports = Vehicle;
  * Creates a new state.
  * 
  * @constructor
- *  
+ * 
  */
-function State(){}
+function State() {
+
+}
 
 /**
  * This executes when the state is entered.
  * 
  * @param {GameEntity} entity - A reference to the entity.
  */
-State.prototype.enter = function( entity ){};
+State.prototype.enter = function( entity ) {
+
+};
 
 /**
  * This is called by the FSM's update function each update step.
  * 
  * @param {GameEntity} entity - A reference to the entity.
  */
-State.prototype.execute = function( entity ){};
+State.prototype.execute = function( entity ) {
+
+};
 
 /**
  * This executes when the state is exited.
  * 
  * @param {GameEntity} entity - A reference to the entity.
  */
-State.prototype.exit = function( entity ){};
+State.prototype.exit = function( entity ) {
+
+};
 
 /**
  * This executes if the agent receives a message from the messaging system.
@@ -44026,13 +44344,15 @@ State.prototype.exit = function( entity ){};
  * 
  * @returns {boolean} Is the message handled successfully by a state?
  */
-State.prototype.onMessage = function( entity, message, data ){ return false; };
+State.prototype.onMessage = function( entity, message, data ) {
+
+	return false;
+};
 
 module.exports = State;
 },{}],47:[function(require,module,exports){
 /**
- * @file This prototype is a basic finite state machine
- * used for AI logic.
+ * @file This prototype is a basic finite state machine used for AI logic.
  * 
  * see "Programming Game AI by Example", Mat Buckland, Chapter 2
  * 
@@ -44041,8 +44361,8 @@ module.exports = State;
 
 "use strict";
 
-var logger = require("../../etc/Logger");
-var State = require("./State");
+var logger = require( "../../etc/Logger" );
+var State = require( "./State" );
 
 /**
  * Creates a finite state machine.
@@ -44051,51 +44371,53 @@ var State = require("./State");
  * 
  * @param {GameEntity} owner - A reference to the agent that owns this instance.
  */
-function StateMachine( owner ){
-	
-	Object.defineProperties(this, {
-		_owner: {
-			value: owner,
-			configurable: false,
-			enumerable: true,
-			writable: true
+function StateMachine( owner ) {
+
+	Object.defineProperties( this, {
+		_owner : {
+			value : owner,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		currentState: {
-			value: null,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		currentState : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
 		// a record of the last state the agent was in
-		previousState: {
-			value: null,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		previousState : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
 		// this state logic is called every time the FSM is updated
-		globalState: {
-			value: null,
-			configurable: false,
-			enumerable: true,
-			writable: true
-		}	
-	});
+		globalState : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		}
+	} );
 }
 
 /**
- * This method update the FSM. This method should not be called
- * in render loop, but in an separate loop for AI logic.
+ * This method update the FSM. This method should not be called in render loop,
+ * but in an separate loop for AI logic.
  */
-StateMachine.prototype.update = function( ){
-	
+StateMachine.prototype.update = function() {
+
 	// if a global state exists, call its execute method
-	if( this.globalState !== null ){
+	if ( this.globalState !== null )
+	{
 		this.globalState.execute( this._owner );
 	}
-	
+
 	// same for the current state
-	if( this.currentState !== null ){
+	if ( this.currentState !== null )
+	{
 		this.currentState.execute( this._owner );
 	}
 };
@@ -44105,20 +44427,20 @@ StateMachine.prototype.update = function( ){
  * 
  * @param {State} newState - The new state of the FSM.
  */
-StateMachine.prototype.changeState = function( newState ){
-	
+StateMachine.prototype.changeState = function( newState ) {
+
 	// check type of parameter
 	logger.assert( newState instanceof State, "StateMachine: State parameter is no instance of type \"State\"." );
-	
+
 	// keep a record of the previous state
 	this.previousState = this.currentState;
-	
+
 	// call the exit method of the existing state
 	this.currentState.exit( this._owner );
-	
+
 	// change state to the new state
 	this.currentState = newState;
-	
+
 	// call the entry method of the new state
 	this.currentState.enter( this._owner );
 };
@@ -44131,82 +44453,87 @@ StateMachine.prototype.changeState = function( newState ){
  * 
  * @returns {boolean} Is the message handled successfully by a state?
  */
-StateMachine.prototype.handleMessage = function( message, data ){
-	
-  // first see, if the current state is valid and that it can handle the message
-  if( this.currentState !== null && this.currentState.onMessage( this._owner, message, data ) === true ){
-    return true;
-  }
+StateMachine.prototype.handleMessage = function( message, data ) {
 
-  // if not, and if a global state has been implemented, send the message to the global state
-  if( this.globalState !== null && this.globalState.onMessage( this._owner, message, data ) === true ){
-    return true;
-  }
+	// first see, if the current state is valid and that it can handle the
+	// message
+	if ( this.currentState !== null && this.currentState.onMessage( this._owner, message, data ) === true )
+	{
+		return true;
+	}
 
-  return false;
+	// if not, and if a global state has been implemented, send the message to
+	// the global state
+	if ( this.globalState !== null && this.globalState.onMessage( this._owner, message, data ) === true )
+	{
+		return true;
+	}
+
+	return false;
 };
 
 /**
  * This method changes state back to the previous state.
  */
-StateMachine.prototype.revertToPrevoiusState = function(){
-	
+StateMachine.prototype.revertToPrevoiusState = function() {
+
 	this.changeState( this.previousState );
 };
 
 /**
- * Returns true, if the current state’s type is equal to the type of the object passed as a parameter.
+ * Returns true, if the current state’s type is equal to the type of the object
+ * passed as a parameter.
  * 
  * @returns {boolean} Is the current state equal to the passed parameter?
  */
-StateMachine.prototype.isInState = function( state ){
-	
+StateMachine.prototype.isInState = function( state ) {
+
 	return state === this.currentState;
 };
 
 module.exports = StateMachine;
 },{"../../etc/Logger":32,"./State":46}],48:[function(require,module,exports){
 /**
- * @file Prototype to define, manage, and traverse a path 
- * 	     defined by a series of 3D vectors.
+ * @file Prototype to define, manage, and traverse a path defined by a series of
+ * 3D vectors.
  * 
  * @author Human Interactive
  */
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
-var logger = require("../../etc/Logger");
+var logger = require( "../../etc/Logger" );
 
 /**
  * Creates a new path.
  * 
  * @constructor
- *  
+ * 
  * @param {boolean} isLoop - Flag to indicate if the path should be looped.
  */
-function Path( isLoop ){
-	
+function Path( isLoop ) {
+
 	Object.defineProperties( this, {
-		isLoop: {
-			value: false,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		isLoop : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		_waypoints: {
-			value: [],
-			configurable: false,
-			enumerable: false,
-			writable: false
+		_waypoints : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		_index: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_index : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
+	} );
 }
 
 /**
@@ -44216,10 +44543,10 @@ function Path( isLoop ){
  * 
  * @returns {Path} The reference to the instance.
  */
-Path.prototype.addWaypoint = function( waypoint ){
-	
+Path.prototype.addWaypoint = function( waypoint ) {
+
 	this._waypoints.push( waypoint );
-	
+
 	return this;
 };
 
@@ -44228,10 +44555,10 @@ Path.prototype.addWaypoint = function( waypoint ){
  * 
  * @returns {Path} The reference to the instance.
  */
-Path.prototype.clear = function(){
-	
+Path.prototype.clear = function() {
+
 	this._waypoints.length = 0;
-	
+
 	return this;
 };
 
@@ -44240,8 +44567,8 @@ Path.prototype.clear = function(){
  * 
  * @returns {boolean} Is the end of the array reached.
  */
-Path.prototype.isFinished = function(){
-		
+Path.prototype.isFinished = function() {
+
 	return this.isLoop === true ? false : ( this._index === this._waypoints.length - 1 );
 };
 
@@ -44250,22 +44577,23 @@ Path.prototype.isFinished = function(){
  * 
  * @returns {Path} The reference to the instance.
  */
-Path.prototype.setNextWaypoint = function(){
-	
+Path.prototype.setNextWaypoint = function() {
+
 	logger.assert( this._waypoints.length > 0, "Path: No waypoints are assigned to path object." );
 
-	if( ++this._index === this._waypoints.length ){
-		
-		if( this.isLoop === true ){
-			
+	if ( ++this._index === this._waypoints.length )
+	{
+		if ( this.isLoop === true )
+		{
 			this._index = 0;
 		}
-		else{
+		else
+		{
 			this._index--;
 		}
-		
+
 	}
-	
+
 	return this;
 };
 
@@ -44274,8 +44602,8 @@ Path.prototype.setNextWaypoint = function(){
  * 
  * @returns {THREE.Vector3} The current waypoint.
  */
-Path.prototype.getCurrentWaypoint = function(){
-	
+Path.prototype.getCurrentWaypoint = function() {
+
 	return this._waypoints[ this._index ];
 };
 
@@ -44287,129 +44615,133 @@ Path.prototype.getCurrentWaypoint = function(){
  * 
  * @returns {Path} The reference to the instance.
  */
-Path.prototype.createRandomPath = function( numberOfWaypoints, boundingBox ){
-	
+Path.prototype.createRandomPath = function( numberOfWaypoints, boundingBox ) {
+
 	// buffer some entities
 	var radialDistance = new THREE.Vector3();
 	var axis = new THREE.Vector3( 0, 1, 0 );
 	var spacing = 2 * Math.PI / numberOfWaypoints;
 	var center = boundingBox.center();
-	
+
 	// clear existing waypoints
 	this.clear();
-	
+
 	// create new waypoints
-	for( var index = 0; index < numberOfWaypoints; index++ ){
-		
+	for ( var index = 0; index < numberOfWaypoints; index++ )
+	{
 		var waypoint = new THREE.Vector3();
-		
+
 		// new random position on planar surface
-		radialDistance.x = THREE.Math.randFloat(  boundingBox.min.x * 0.2,  boundingBox.min.x );
+		radialDistance.x = THREE.Math.randFloat( boundingBox.min.x * 0.2, boundingBox.min.x );
 		radialDistance.y = 0;
-		radialDistance.z = THREE.Math.randFloat(  boundingBox.min.z * 0.2,  boundingBox.min.z );
-		
+		radialDistance.z = THREE.Math.randFloat( boundingBox.min.z * 0.2, boundingBox.min.z );
+
 		waypoint.copy( radialDistance );
-		
+
 		// rotate around y-axis to better distribute the waypoints
-		waypoint.applyAxisAngle( axis, spacing * index);
-		
+		waypoint.applyAxisAngle( axis, spacing * index );
+
 		// add center value
 		waypoint.x += center.x;
 		waypoint.y += center.y;
 		waypoint.z += center.z;
-		
+
 		// add waypoint to array
 		this.addWaypoint( waypoint );
 	}
-	
+
 	return this;
 };
 
 module.exports = Path;
 },{"../../etc/Logger":32,"three":2}],49:[function(require,module,exports){
 /**
- * @file Prototype to help calculate the average value of a history
- * 		 of vector values.
+ * @file Prototype to help calculate the average value of a history of vector
+ * values.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
 /**
  * Creates a new smoother.
  * 
  * @constructor
  * 
- * @param {number} numberOfSamples - How many samples the smoother will use to average a value.
+ * @param {number} numberOfSamples - How many samples the smoother will use to
+ * average a value.
  */
-function Smoother( numberOfSamples ){
-	
-	Object.defineProperties(this, {
-		_numberOfSamples: {
-			value: numberOfSamples || 10,
-			configurable: false,
-			enumerable: false,
-			writable: false
+function Smoother( numberOfSamples ) {
+
+	Object.defineProperties( this, {
+		_numberOfSamples : {
+			value : numberOfSamples || 10,
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		_history:{
-			value: [],
-			configurable: false,
-			enumerable: false,
-			writable: false
+		_history : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		_slot:{
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_slot : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
-	
+	} );
+
 	// initialize history with objects
-	for( var index = 0; index < this._numberOfSamples; index++ ){
-		
+	for ( var index = 0; index < this._numberOfSamples; index++ )
+	{
 		this._history[ index ] = new THREE.Vector3();
 	}
 }
 
 /**
- * Each time you want to get a new average, feed it the most recent value
- * and this method will return an average over the last numberOfSamples updates.
- *
+ * Each time you want to get a new average, feed it the most recent value and
+ * this method will return an average over the last numberOfSamples updates.
+ * 
  * @param {THREE.Vector3} mostRecentValue - The most recent value to add.
  * @param {THREE.Vector3} average - The target average vector.
  */
-Smoother.prototype.update = ( function(){
-	
+Smoother.prototype.update = ( function() {
+
 	var index, average;
-	
-	return function( mostRecentValue, average ){
-		
+
+	return function( mostRecentValue, average ) {
+
 		// reset average
 		average.set( 0, 0, 0 );
-		
+
 		// make sure the slot index wraps around
-		if( this._slot === this._numberOfSamples ){ this._slot  = 0; }
-		
+		if ( this._slot === this._numberOfSamples )
+		{
+			this._slot = 0;
+		}
+
 		// overwrite the oldest value with the newest
 		this._history[ this._slot ].copy( mostRecentValue );
-		
+
 		// increase slot index
 		this._slot++;
-		
+
 		// now calculate the average of the history array
-		for( index = 0; index < this._numberOfSamples; index++ ){
-			
-			average.add( this._history[ index ] );	
+		for ( index = 0; index < this._numberOfSamples; index++ )
+		{
+			average.add( this._history[ index ] );
 		}
-		
+
 		average.divideScalar( this._numberOfSamples );
 	};
-	
-} ( ) );
+
+}() );
 
 module.exports = Smoother;
 },{"three":2}],50:[function(require,module,exports){
@@ -44422,187 +44754,188 @@ module.exports = Smoother;
  */
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
-var world = require("../../core/World");
-var Path = require("./Path");
-var logger = require("../../etc/Logger");
+var world = require( "../../core/World" );
+var Path = require( "./Path" );
+var logger = require( "../../etc/Logger" );
 
 /**
  * Creates a steering behaviors instance.
  * 
  * @constructor
- *
+ * 
  * @param {Vehicle} vehicle - The vehicle agent.
  */
-function SteeringBehaviors( vehicle ){
-	
+function SteeringBehaviors( vehicle ) {
+
 	Object.defineProperties( this, {
-		vehicle: {
-			value: vehicle,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		vehicle : {
+			value : vehicle,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
 		// the current target
-		target: {
-			value: new THREE.Vector3(),
-			configurable: false,
-			enumerable: true,
-			writable: true
+		target : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
 		// these can be used to keep track of friends, pursuers or prey
-		targetAgent1: {
-			value: null,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		targetAgent1 : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		targetAgent2: {
-			value: null,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		targetAgent2 : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
 		// use these values to tweak the amount that each steering force
 		// contributes to the total steering force
-		weights: {
-			value: {
-				seek              : 1,
-				flee              : 1,
-				arrive            : 1,
-				wander            : 1,
-				cohesion          : 3,
-				separation        : 1,
-				alignment         : 1,
+		weights : {
+			value : {
+				seek : 1,
+				flee : 1,
+				arrive : 1,
+				wander : 1,
+				cohesion : 3,
+				separation : 1,
+				alignment : 1,
 				obstacleAvoidance : 10,
-			    wallAvoidance     : 10,
-			    followPath        : 1,
-			    pursuit           : 1,
-			    evade             : 1,
-			    interpose         : 1,
-			    hide              : 1,
-			    flock             : 1,
-			    offsetPursuit     : 1
+				wallAvoidance : 10,
+				followPath : 1,
+				pursuit : 1,
+				evade : 1,
+				interpose : 1,
+				hide : 1,
+				flock : 1,
+				offsetPursuit : 1
 			},
-			configurable: false,
-			enumerable: true,
-			writable: false
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
 		// the list of waypoints to follow
-		path: {
-			value: new Path(),
-			configurable: false,
-			enumerable: true,
-			writable: true
+		path : {
+			value : new Path(),
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
 		// distance from the hiding spot
-		distanceFromBoundary: {
-			value: 10,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		distanceFromBoundary : {
+			value : 10,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
 		// amount of deceleration for arrive behavior
-		deceleration: {
-			value: 1,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		deceleration : {
+			value : 1,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
 		// offset for offset pursuit behavior
-		offset: {
-			value: new THREE.Vector3(),
-			configurable: false,
-			enumerable: true,
-			writable: true
+		offset : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
 		// panic distance for flee and evade behavior
-		panicDistance: {
-			value: 50,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		panicDistance : {
+			value : 50,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
 		// the distance a waypoint is set to the new target
-		waypointSeekDist: {
-			value: 5,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		waypointSeekDist : {
+			value : 5,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
 		// the length of the "feeler/s" used in wall detection
-		wallDetectionFeelerLength:{
-			value: 20,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		wallDetectionFeelerLength : {
+			value : 20,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
 		// the radius of the constraining circle for the wander behavior
-		wanderRadius: {
-			value: 5,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		wanderRadius : {
+			value : 5,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
 		// the distance the wander sphere is projected in front of the agent
-		wanderDistance: {
-			value: 10,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		wanderDistance : {
+			value : 10,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
 		// the maximum amount of displacement along the sphere each frame
-		wanderJitter: {
-			value: 80,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		wanderJitter : {
+			value : 80,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		// how close a neighbour must be before an agent perceives it (considers it to be within its neighborhood)
-		viewDistance: {
-			value: 200,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		// how close a neighbour must be before an agent perceives it (considers
+		// it to be within its neighborhood)
+		viewDistance : {
+			value : 200,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
 		// the actual target of the wander behavior
-		_wanderTarget: {
-			value: new THREE.Vector3(),
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_wanderTarget : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
 		// the calculated steering force per simulation step
-		_steeringForce: {
-			value: new THREE.Vector3(),
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_steeringForce : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
 		// bitmask for enable/ disable behaviors
-		_behaviorFlag: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_behaviorFlag : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		// array with "feelers" for wall avoidance 
-		_feelers: {
-			value: [],
-			configurable: false,
-			enumerable: false,
-			writable: false
+		// array with "feelers" for wall avoidance
+		_feelers : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		// array with neighbors for flocking 
-		_neighbors: {
-			value: [],
-			configurable: false,
-			enumerable: false,
-			writable: false
+		// array with neighbors for flocking
+		_neighbors : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
 		}
-	});
-	
+	} );
+
 	this.setupWanderTarget();
 }
 
@@ -44613,255 +44946,303 @@ function SteeringBehaviors( vehicle ){
  * 
  * @returns {THREE.Vector3} The steering force.
  */
-SteeringBehaviors.prototype.calculate = function( delta ){
-	
+SteeringBehaviors.prototype.calculate = function( delta ) {
+
 	// preparations
 	this._prepareCalculation();
-	
+
 	// summing method
 	this._calculatePrioritized( delta );
-	
+
 	// return a copy of the member
 	return this._steeringForce.clone();
 };
 
 /**
- * This method calls each active steering behavior in order of priority
- * and accumulates their forces until the max steering force magnitude
- * is reached, at which time the function returns the steering force
- * accumulated to that point.
+ * This method calls each active steering behavior in order of priority and
+ * accumulates their forces until the max steering force magnitude is reached,
+ * at which time the function returns the steering force accumulated to that
+ * point.
  * 
  * @param {number} delta - The time delta value.
  * 
  */
-SteeringBehaviors.prototype._calculatePrioritized = ( function(){
-	
+SteeringBehaviors.prototype._calculatePrioritized = ( function() {
+
 	var force;
-	
-	return function( delta ){
-		
+
+	return function( delta ) {
+
 		// wall avoidance
-		if( this._isOn( SteeringBehaviors.TYPES.WALLAVOIDANCE )){
-						
+		if ( this._isOn( SteeringBehaviors.TYPES.WALLAVOIDANCE ) )
+		{
 			force = this._wallAvoidance();
-			
+
 			force.multiplyScalar( this.weights.wallAvoidance );
-			
-			if( !this._accumulateForce( force ) ) {return;}
-			
+
+			if ( !this._accumulateForce( force ) )
+			{
+				return;
+			}
+
 		}
-		
+
 		// obstacle avoidance
-		if( this._isOn( SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE )){
-						
+		if ( this._isOn( SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE ) )
+		{
 			force = this._obstacleAvoidance();
-			
+
 			force.multiplyScalar( this.weights.obstacleAvoidance );
-			
-			if( !this._accumulateForce( force ) ) {return;}
-			
+
+			if ( !this._accumulateForce( force ) )
+			{
+				return;
+			}
+
 		}
-		
+
 		// evade
-		if( this._isOn( SteeringBehaviors.TYPES.EVADE )){
-			
+		if ( this._isOn( SteeringBehaviors.TYPES.EVADE ) )
+		{
 			logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Evade target not assigned" );
-			
+
 			force = this._evade( this.targetAgent1 );
-			
+
 			force.multiplyScalar( this.weights.evade );
-			
-			if( !this._accumulateForce( force ) ) {return;}
-			
+
+			if ( !this._accumulateForce( force ) )
+			{
+				return;
+			}
+
 		}
-		
+
 		// separation
-		if( this._isOn( SteeringBehaviors.TYPES.SEPARATION )){
-			
+		if ( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) )
+		{
 			force = this._separation();
-			
+
 			force.multiplyScalar( this.weights.separation );
-			
-			if( !this._accumulateForce( force ) ) {return;}
-			
+
+			if ( !this._accumulateForce( force ) )
+			{
+				return;
+			}
+
 		}
-		
+
 		// alignment
-		if( this._isOn( SteeringBehaviors.TYPES.ALIGNMENT )){
-			
+		if ( this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) )
+		{
 			force = this._alignment();
-			
+
 			force.multiplyScalar( this.weights.alignment );
-			
-			if( !this._accumulateForce( force ) ) {return;}
-			
+
+			if ( !this._accumulateForce( force ) )
+			{
+				return;
+			}
+
 		}
-		
+
 		// cohesion
-		if( this._isOn( SteeringBehaviors.TYPES.COHESION )){
-			
+		if ( this._isOn( SteeringBehaviors.TYPES.COHESION ) )
+		{
 			force = this._cohesion();
-			
+
 			force.multiplyScalar( this.weights.cohesion );
-			
-			if( !this._accumulateForce( force ) ) {return;}
-			
+
+			if ( !this._accumulateForce( force ) )
+			{
+				return;
+			}
+
 		}
-		
+
 		// flee
-		if( this._isOn( SteeringBehaviors.TYPES.FLEE )){
-			
+		if ( this._isOn( SteeringBehaviors.TYPES.FLEE ) )
+		{
 			force = this._flee( this.target );
-			
+
 			force.multiplyScalar( this.weights.flee );
-			
-			if( !this._accumulateForce( force ) ) {return;}
-			
+
+			if ( !this._accumulateForce( force ) )
+			{
+				return;
+			}
+
 		}
-		
+
 		// seek
-		if( this._isOn( SteeringBehaviors.TYPES.SEEK )){
-			
+		if ( this._isOn( SteeringBehaviors.TYPES.SEEK ) )
+		{
+
 			force = this._seek( this.target );
-			
+
 			force.multiplyScalar( this.weights.seek );
-			
-			if( !this._accumulateForce( force ) ) {return;}
-			
+
+			if ( !this._accumulateForce( force ) )
+			{
+				return;
+			}
+
 		}
-		
+
 		// arrive
-		if( this._isOn( SteeringBehaviors.TYPES.ARRIVE )){
-			
+		if ( this._isOn( SteeringBehaviors.TYPES.ARRIVE ) )
+		{
 			force = this._arrive( this.target, this.deceleration );
-			
+
 			force.multiplyScalar( this.weights.arrive );
-			
-			if( !this._accumulateForce( force ) ) {return;}
-			
+
+			if ( !this._accumulateForce( force ) )
+			{
+				return;
+			}
+
 		}
-		
+
 		// wander
-		if( this._isOn( SteeringBehaviors.TYPES.WANDER )){
-			
+		if ( this._isOn( SteeringBehaviors.TYPES.WANDER ) )
+		{
 			force = this._wander( delta );
-			
+
 			force.multiplyScalar( this.weights.wander );
-			
-			if( !this._accumulateForce( force ) ) {return;}
-			
+
+			if ( !this._accumulateForce( force ) )
+			{
+				return;
+			}
+
 		}
-		
+
 		// pursuit
-		if( this._isOn( SteeringBehaviors.TYPES.PURSUIT )){
-			
+		if ( this._isOn( SteeringBehaviors.TYPES.PURSUIT ) )
+		{
 			logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Pursuit target not assigned" );
-			
+
 			force = this._pursuit( this.targetAgent1 );
-			
+
 			force.multiplyScalar( this.weights.pursuit );
-			
-			if( !this._accumulateForce( force ) ) {return;}
-			
+
+			if ( !this._accumulateForce( force ) )
+			{
+				return;
+			}
+
 		}
-		
+
 		// offset pursuit
-		if( this._isOn( SteeringBehaviors.TYPES.OFFSETPURSUIT )){
-			
+		if ( this._isOn( SteeringBehaviors.TYPES.OFFSETPURSUIT ) )
+		{
 			logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Pursuit target not assigned" );
-			
+
 			force = this._offsetPursuit( this.targetAgent1, this.offset );
-			
+
 			force.multiplyScalar( this.weights.offsetPursuit );
-			
-			if( !this._accumulateForce( force ) ) {return;}
-			
+
+			if ( !this._accumulateForce( force ) )
+			{
+				return;
+			}
+
 		}
-		
+
 		// interpose
-		if( this._isOn( SteeringBehaviors.TYPES.INTERPOSE )){
-			
+		if ( this._isOn( SteeringBehaviors.TYPES.INTERPOSE ) )
+		{
 			logger.assert( this.targetAgent1 !== null && this.targetAgent2 !== null, "SteeringBehaviors: Interpose targets not assigned" );
-			
+
 			force = this._interpose( this.targetAgent1, this.targetAgent2 );
-			
+
 			force.multiplyScalar( this.weights.interpose );
-			
-			if( !this._accumulateForce( force ) ) {return;}
-			
+
+			if ( !this._accumulateForce( force ) )
+			{
+				return;
+			}
+
 		}
-		
+
 		// hide
-		if( this._isOn( SteeringBehaviors.TYPES.HIDE )){
-			
+		if ( this._isOn( SteeringBehaviors.TYPES.HIDE ) )
+		{
 			logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Hide target not assigned" );
-			
+
 			force = this._hide( this.targetAgent1 );
-			
+
 			force.multiplyScalar( this.weights.hide );
-			
-			if( !this._accumulateForce( force ) ) {return;}
-			
+
+			if ( !this._accumulateForce( force ) )
+			{
+				return;
+			}
+
 		}
-		
+
 		// follow path
-		if( this._isOn( SteeringBehaviors.TYPES.FOLLOWPATH )){
-			
+		if ( this._isOn( SteeringBehaviors.TYPES.FOLLOWPATH ) )
+		{
 			force = this._followPath();
-			
+
 			force.multiplyScalar( this.weights.followPath );
-			
-			if( !this._accumulateForce( force ) ) {return;}
-			
+
+			if ( !this._accumulateForce( force ) )
+			{
+				return;
+			}
+
 		}
 
 	};
 
-} () );
+}() );
 
 /**
- * This function calculates how much of its max steering force the
- * vehicle has left to apply and then applies that amount of the
- * force to add.
+ * This function calculates how much of its max steering force the vehicle has
+ * left to apply and then applies that amount of the force to add.
  * 
  * @param {THREE.Vector3} forceToAdd - The time delta value.
  * 
  * @returns {boolean} The steering force.
  */
-SteeringBehaviors.prototype._accumulateForce = ( function(){
-	
+SteeringBehaviors.prototype._accumulateForce = ( function() {
+
 	var magnitudeSoFar;
 	var magnitudeRemaining;
 	var magnitudeToAdd;
-	
-	return function( forceToAdd ){
-		
+
+	return function( forceToAdd ) {
+
 		// calculate how much steering force the vehicle has used so far
 		magnitudeSoFar = this._steeringForce.length();
-		
+
 		// calculate how much steering force remains to be used by this vehicle
 		magnitudeRemaining = this.vehicle.maxForce - magnitudeSoFar;
-		
+
 		// return false if there is no more force left to use
-		if( magnitudeRemaining <= 0 ){ return false; }
-		
+		if ( magnitudeRemaining <= 0 )
+		{
+			return false;
+		}
+
 		// calculate the magnitude of the force we want to add
 		magnitudeToAdd = forceToAdd.length();
-		
+
 		// restrict the magnitude of forceToAdd, so we don't exceed the
 		// maximum force of the vehicle
-		if( magnitudeToAdd > magnitudeRemaining){
-			
-			forceToAdd.normalize().multiplyScalar( magnitudeRemaining );	
+		if ( magnitudeToAdd > magnitudeRemaining )
+		{
+			forceToAdd.normalize().multiplyScalar( magnitudeRemaining );
 		}
-		
+
 		// add force
 		this._steeringForce.add( forceToAdd );
-		
+
 		return true;
 	};
 
-} () );
+}() );
 
 /**
  * This method tests if a specific bit of m_iFlags is set.
@@ -44870,159 +45251,162 @@ SteeringBehaviors.prototype._accumulateForce = ( function(){
  * 
  * @returns {boolean} Is the behavior active?
  */
-SteeringBehaviors.prototype._isOn = function( behaviorType ){
-	
-	/* jslint bitwise: true */ return ( this._behaviorFlag & behaviorType ) === behaviorType;
+SteeringBehaviors.prototype._isOn = function( behaviorType ) {
+
+	/* jslint bitwise: true */return ( this._behaviorFlag & behaviorType ) === behaviorType;
 };
 
 /**
  * Prepares the calculation of the steering behaviors.
  */
-SteeringBehaviors.prototype._prepareCalculation = ( function(){
-	
+SteeringBehaviors.prototype._prepareCalculation = ( function() {
+
 	var index, obstacle;
-	
-	return function(){
-		
+
+	return function() {
+
 		// reset steering force
 		this._steeringForce.set( 0, 0, 0 );
-		
+
 		// update model matrices
 		this.vehicle.updateMatrixWorld();
-		
-		if( this.targetAgent1 !== null ){
+
+		if ( this.targetAgent1 !== null )
+		{
 			this.targetAgent1.updateMatrixWorld();
 		}
-		
-		if( this.targetAgent2 !== null ){
+
+		if ( this.targetAgent2 !== null )
+		{
 			this.targetAgent2.updateMatrixWorld();
 		}
-		
-		// calculate neighbors if one of the following group behaviors is active
-		if( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) ||
-			this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) ||
-			this._isOn( SteeringBehaviors.TYPES.COHESION ) ){
 
+		// calculate neighbors if one of the following group behaviors is active
+		if ( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) || this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) || this._isOn( SteeringBehaviors.TYPES.COHESION ) )
+		{
 			this._calculateNeighbors();
 		}
 	};
-	
-} () );
+
+}() );
 
 /**
  * Calculates all neighbors of the vehicle.
  */
-SteeringBehaviors.prototype._calculateNeighbors = ( function(){
-	
+SteeringBehaviors.prototype._calculateNeighbors = ( function() {
+
 	var toEntity = new THREE.Vector3();
 	var entity;
 	var index;
-	
-	return function(){
-		
+
+	return function() {
+
 		// reset array
 		this._neighbors.length = 0;
-		
+
 		// iterate over all entities
-		for( index = 0; index < this.vehicle.entityManager.entities.length; index++ ){
-			
-			entity = this.vehicle.entityManager.entities[index];
-			
-			if( entity !== this.vehicle ){
-				
+		for ( index = 0; index < this.vehicle.entityManager.entities.length; index++ )
+		{
+			entity = this.vehicle.entityManager.entities[ index ];
+
+			if ( entity !== this.vehicle )
+			{
 				// calculate displacement vector
 				toEntity.subVectors( entity.position, this.vehicle.position );
-				
-				// if entity within range, push into neighbors array for further consideration. 
+
+				// if entity within range, push into neighbors array for further
+				// consideration.
 				// ( working in distance-squared space to avoid sqrt )
-				if( toEntity.lengthSq() < ( this.viewDistance * this.viewDistance ) ){
-					
+				if ( toEntity.lengthSq() < ( this.viewDistance * this.viewDistance ) )
+				{
 					this._neighbors.push( entity );
 				}
 
 			}
 		}
 	};
-	
-} () );
+
+}() );
 
 /**
  * Creates the antenna utilized by wallAvoidance.
  */
-SteeringBehaviors.prototype._createFeelers = ( function(){
-	
+SteeringBehaviors.prototype._createFeelers = ( function() {
+
 	var rotation = new THREE.Matrix4();
-	
-	return function(){
-		
+
+	return function() {
+
 		// if there are no feelers yet, create them
-		if( this._feelers.length === 0){
+		if ( this._feelers.length === 0 )
+		{
 			this._feelers.push( new THREE.Ray(), new THREE.Ray(), new THREE.Ray() );
 		}
-		
+
 		// first feeler pointing straight in front
-		this._feelers[0].origin.copy( this.vehicle.position );
-		this._feelers[0].distance = this.wallDetectionFeelerLength;
-		this._feelers[0].direction = this.vehicle.getDirection();
+		this._feelers[ 0 ].origin.copy( this.vehicle.position );
+		this._feelers[ 0 ].distance = this.wallDetectionFeelerLength;
+		this._feelers[ 0 ].direction = this.vehicle.getDirection();
 
 		// second feeler to left
 		rotation.identity();
 		rotation.makeRotationY( Math.PI * 1.75 );
-		
-		this._feelers[1].origin.copy( this.vehicle.position );
-		this._feelers[1].distance = this.wallDetectionFeelerLength * 0.5;
-		this._feelers[1].direction = this.vehicle.getDirection().transformDirection( rotation );
-		
+
+		this._feelers[ 1 ].origin.copy( this.vehicle.position );
+		this._feelers[ 1 ].distance = this.wallDetectionFeelerLength * 0.5;
+		this._feelers[ 1 ].direction = this.vehicle.getDirection().transformDirection( rotation );
+
 		// third feeler to right
 		rotation.identity();
 		rotation.makeRotationY( Math.PI * 0.25 );
-		
-		this._feelers[2].origin.copy( this.vehicle.position );
-		this._feelers[2].distance = this.wallDetectionFeelerLength * 0.5;
-		this._feelers[2].direction = this.vehicle.getDirection().transformDirection( rotation );
+
+		this._feelers[ 2 ].origin.copy( this.vehicle.position );
+		this._feelers[ 2 ].distance = this.wallDetectionFeelerLength * 0.5;
+		this._feelers[ 2 ].direction = this.vehicle.getDirection().transformDirection( rotation );
 	};
 
-} ( ) );
+}() );
 
 /**
- * Given the position of a hunter, and the position and radius of
- * an obstacle, this method calculates a position distanceFromBoundary 
- * away from its bounding radius and directly opposite the hunter.
+ * Given the position of a hunter, and the position and radius of an obstacle,
+ * this method calculates a position distanceFromBoundary away from its bounding
+ * radius and directly opposite the hunter.
  * 
  * @param {THREE.Vector3} positionObstacle - The position of the obstacle.
  * @param {THREE.Vector3} radiusObstacle - The radius of the obstacle.
  * @param {THREE.Vector3} positionHunter - The position of the hunter.
  * @param {THREE.Vector3} hidingSpot - The calculated hiding spot.
  */
-SteeringBehaviors.prototype._getHidingPosition = ( function(){
-	
+SteeringBehaviors.prototype._getHidingPosition = ( function() {
+
 	var toHidingSpot = new THREE.Vector3();
 	var distanceAway;
-	
-	return function( positionObstacle, radiusObstacle, positionHunter, hidingSpot ){
-		
-		// calculate how far away the agent is to be from the chosen obstacle's bounding radius
+
+	return function( positionObstacle, radiusObstacle, positionHunter, hidingSpot ) {
+
+		// calculate how far away the agent is to be from the chosen obstacle's
+		// bounding radius
 		distanceAway = radiusObstacle + this.distanceFromBoundary;
-		
+
 		// calculate the heading toward the object from the hunter
 		toHidingSpot.subVectors( positionObstacle, positionHunter ).normalize();
-		
-		// scale it to size 
+
+		// scale it to size
 		toHidingSpot.multiplyScalar( distanceAway );
-		
+
 		// add direction vector to the obstacles position to get the hiding spot
 		hidingSpot.addVectors( toHidingSpot, positionObstacle );
 	};
-	
-} ( ) );
+
+}() );
 
 /**
  * Setup wander target.
  */
-SteeringBehaviors.prototype.setupWanderTarget = function(){
-	
+SteeringBehaviors.prototype.setupWanderTarget = function() {
+
 	var theta = Math.random() * Math.PI * 2;
-	
+
 	// setup a vector to a target position on the wander sphere
 	this._wanderTarget.x = this.wanderRadius * Math.cos( theta );
 	this._wanderTarget.y = 0;
@@ -45030,7 +45414,8 @@ SteeringBehaviors.prototype.setupWanderTarget = function(){
 
 };
 
-/////////////////////////////////////////////////////////////////////////////// START OF BEHAVIORS
+// /////////////////////////////////////////////////////////////////////////////
+// START OF BEHAVIORS
 
 /**
  * This behavior moves the agent towards a target position.
@@ -45039,32 +45424,35 @@ SteeringBehaviors.prototype.setupWanderTarget = function(){
  * 
  * @returns {THREE.Vector3} The calculated force.
  */
-SteeringBehaviors.prototype._seek = ( function(){
-	
+SteeringBehaviors.prototype._seek = ( function() {
+
 	var desiredVelocity = new THREE.Vector3();
-	
-	return function( targetPosition ){
-		
+
+	return function( targetPosition ) {
+
 		var force = new THREE.Vector3();
-		
-		// First the desired velocity is calculated. 
-		// This is the velocity the agent would need to reach the target position in an ideal world. 
-		// It represents the vector from the agent to the target, 
+
+		// First the desired velocity is calculated.
+		// This is the velocity the agent would need to reach the target
+		// position in an ideal world.
+		// It represents the vector from the agent to the target,
 		// scaled to be the length of the maximum possible speed of the agent.
 		desiredVelocity.subVectors( targetPosition, this.vehicle.position ).normalize();
-		
+
 		desiredVelocity.multiplyScalar( this.vehicle.maxSpeed );
-		
-		// The steering force returned by this method is the force required, 
-		// which when added to the agent’s current velocity vector gives the desired velocity. 
-		// To achieve this you simply subtract the agent’s current velocity from the desired velocity. 
+
+		// The steering force returned by this method is the force required,
+		// which when added to the agent’s current velocity vector gives the
+		// desired velocity.
+		// To achieve this you simply subtract the agent’s current velocity from
+		// the desired velocity.
 		force.subVectors( desiredVelocity, this.vehicle.velocity );
-		
+
 		return force;
-		
+
 	};
-	
-} ( ) );
+
+}() );
 
 /**
  * Does the opposite of seek.
@@ -45073,320 +45461,329 @@ SteeringBehaviors.prototype._seek = ( function(){
  * 
  * @returns {THREE.Vector3} The calculated force.
  */
-SteeringBehaviors.prototype._flee = ( function(){
-	
+SteeringBehaviors.prototype._flee = ( function() {
+
 	var desiredVelocity = new THREE.Vector3();
-		
-	return function( targetPosition ){
-		
+
+	return function( targetPosition ) {
+
 		var force = new THREE.Vector3();
-		
+
 		// only flee if the target is within panic distance
-		if( this.vehicle.position.distanceToSquared( targetPosition ) < ( this.panicDistance * this.panicDistance ) ){
-			
-			// from here, the only difference compared to seek is that the desired velocity
+		if ( this.vehicle.position.distanceToSquared( targetPosition ) < ( this.panicDistance * this.panicDistance ) )
+		{
+			// from here, the only difference compared to seek is that the
+			// desired velocity
 			// is calculated using a vector pointing in the opposite direction
 			desiredVelocity.subVectors( this.vehicle.position, targetPosition ).normalize();
-			
+
 			desiredVelocity.multiplyScalar( this.vehicle.maxSpeed );
-	
+
 			force.subVectors( desiredVelocity, this.vehicle.velocity );
-			
+
 		}
-		
+
 		return force;
-		
+
 	};
-	
-} ( ) );
+
+}() );
 
 /**
- *  This behavior is similar to seek but it attempts to arrive at the target with a zero velocity.
+ * This behavior is similar to seek but it attempts to arrive at the target with
+ * a zero velocity.
  * 
  * @param {THREE.Vector3} targetPosition - The target position.
  * @param {number} deceleration - The deceleration of the vehicle.
  * 
  * @returns {THREE.Vector3} The calculated force.
  */
-SteeringBehaviors.prototype._arrive = ( function(){
-	
+SteeringBehaviors.prototype._arrive = ( function() {
+
 	var desiredVelocity = new THREE.Vector3();
 	var toTarget = new THREE.Vector3();
-	
+
 	var distance = 0;
 	var speed = 0;
-	
-	return function( targetPosition, deceleration ){
-		
+
+	return function( targetPosition, deceleration ) {
+
 		var force = new THREE.Vector3();
-		
+
 		// calculate displacement vector
 		toTarget.subVectors( targetPosition, this.vehicle.position );
-		
+
 		// calculate the distance to the target
 		distance = toTarget.length();
-		
-		if( distance > 0 ){
-			
-			// calculate the speed required to reach the target given the desired deceleration
+
+		if ( distance > 0 )
+		{
+			// calculate the speed required to reach the target given the
+			// desired deceleration
 			speed = distance / deceleration;
-			
+
 			// make sure the velocity does not exceed the max
 			speed = Math.min( speed, this.vehicle.maxSpeed );
-			
-			// from here proceed just like "seek" except we don't need to normalize 
-		    // the "toTarget" vector because we have already gone to the trouble
-		    // of calculating its length: distance.	
+
+			// from here proceed just like "seek" except we don't need to
+			// normalize
+			// the "toTarget" vector because we have already gone to the trouble
+			// of calculating its length: distance.
 			desiredVelocity.copy( toTarget ).multiplyScalar( speed ).divideScalar( distance );
-			
+
 			force.subVectors( desiredVelocity, this.vehicle.velocity );
 		}
-		
+
 		return force;
 	};
-	
-} ( ) );
+
+}() );
 
 /**
- *  This behavior creates a force that steers the agent towards the evader.
+ * This behavior creates a force that steers the agent towards the evader.
  * 
  * @param {Vehicle} evader - The evader to pursuit.
  * 
  * @returns {THREE.Vector3} The calculated force.
  */
-SteeringBehaviors.prototype._pursuit = ( function(){
-	
+SteeringBehaviors.prototype._pursuit = ( function() {
+
 	var toEvader = new THREE.Vector3();
 	var newEvaderVelocity = new THREE.Vector3();
 	var predcitedPosition = new THREE.Vector3();
-	
+
 	var isFacing = false;
 	var isEvaderAhead = false;
-	
+
 	var vehicleDirection = null;
-	
+
 	var lookAheadTime = 0;
-	
-	return function( evader ){
-		
-		// 1. if the evader is ahead and facing the agent then we can just seek for the evader's current position
-		
+
+	return function( evader ) {
+
+		// 1. if the evader is ahead and facing the agent then we can just seek
+		// for the evader's current position
+
 		// calculate displacement vector
 		toEvader.subVectors( evader.position, this.vehicle.position );
-		
+
 		// buffer vehicle direction
 		vehicleDirection = this.vehicle.getDirection();
-		
+
 		// check first condition. evader must be in front of the pursuer
 		isEvaderAhead = toEvader.dot( vehicleDirection ) > 0;
-		
-		// check second condition. evader must almost directly facing the agent
-		isFacing = vehicleDirection.dot( evader.getDirection() ) < 0.95; // acos( 0.95 ) = 18 degs
 
-		if( isEvaderAhead && isFacing ){ 
-			
+		// check second condition. evader must almost directly facing the agent
+		isFacing = vehicleDirection.dot( evader.getDirection() ) < 0.95;
+
+		if ( isEvaderAhead && isFacing )
+		{
 			return this._seek( evader.position );
 		}
-		
+
 		// 2. not considered ahead so we predict where the evader will be
-		
+
 		// the lookahead time is proportional to the distance between the evader
 		// and the pursuer. and is inversely proportional to the sum of the
 		// agent's velocities
 		lookAheadTime = toEvader.length() / ( this.vehicle.maxSpeed + evader.getSpeed() );
-		
+
 		// calculate new velocity and predicted future position
 		newEvaderVelocity.copy( evader.velocity ).multiplyScalar( lookAheadTime );
-		
+
 		predcitedPosition.addVectors( evader.position, newEvaderVelocity );
-		
+
 		// now seek to the predicted future position of the evader
 		return this._seek( predcitedPosition );
 	};
-	
-} ( ) );
+
+}() );
 
 /**
- *  Produces a steering force that keeps a vehicle at a specified 
- *  offset from a leader vehicle.
- *  
+ * Produces a steering force that keeps a vehicle at a specified offset from a
+ * leader vehicle.
+ * 
  * @param {Vehicle} leader - The leader vehicle.
  * @param {THREE.Vector3} offset - The offset of the leader.
  * 
  * @returns {THREE.Vector3} The calculated force.
  */
-SteeringBehaviors.prototype._offsetPursuit = ( function(){
-	
+SteeringBehaviors.prototype._offsetPursuit = ( function() {
+
 	var offsetWorld = new THREE.Vector3();
 	var toOffset = new THREE.Vector3();
-	
+
 	var lookAheadTime = 0;
-	
+
 	var newLeaderVelocity = new THREE.Vector3();
 	var predcitedPosition = new THREE.Vector3();
 
-	return function( leader, offset ){
+	return function( leader, offset ) {
 
 		// calculate the offset's position in world space
 		offsetWorld.copy( offset ).applyMatrix4( leader.matrixWorld );
-		
+
 		toOffset.subVectors( offsetWorld, this.vehicle.position );
-		
+
 		// the lookahead time is proportional to the distance between the leader
 		// and the pursuer; and is inversely proportional to the sum of both
 		// agent's velocities
 		lookAheadTime = toOffset.length() / ( this.vehicle.maxSpeed + leader.getSpeed() );
-		
+
 		// calculate new velocity and predicted future position
 		newLeaderVelocity.copy( leader.velocity ).multiplyScalar( lookAheadTime );
-		
+
 		predcitedPosition.addVectors( offsetWorld, newLeaderVelocity );
-		
+
 		// now arrive at the predicted future position of the offset
 		return this._arrive( predcitedPosition, SteeringBehaviors.DECELERATION.VERY_FAST );
-		
+
 	};
-	
-} ( ) );
+
+}() );
 
 /**
- * Similar to pursuit except the agent flees from the estimated future position of the pursuer.
+ * Similar to pursuit except the agent flees from the estimated future position
+ * of the pursuer.
  * 
  * @param {Vehicle} pursuer - The pursuer.
  * 
  * @returns {THREE.Vector3} The calculated force.
  */
-SteeringBehaviors.prototype._evade = ( function(){
-	
+SteeringBehaviors.prototype._evade = ( function() {
+
 	var toPursuer = new THREE.Vector3();
 	var newPursuerVelocity = new THREE.Vector3();
 	var predcitedPosition = new THREE.Vector3();
-	
+
 	var lookAheadTime = 0;
-	 
-	return function( pursuer ){
-		
+
+	return function( pursuer ) {
+
 		// calculate displacement vector
 		toPursuer.subVectors( pursuer.position, this.vehicle.position );
-		
+
 		// evade only when pursuers are inside a threat range.
-		if( toPursuer.lengthSq() > ( this.panicDistance * this.panicDistance ) ){
+		if ( toPursuer.lengthSq() > ( this.panicDistance * this.panicDistance ) )
+		{
 			return new THREE.Vector3();
 		}
-		
+
 		// the lookahead time is proportional to the distance between the evader
 		// and the pursuer. and is inversely proportional to the sum of the
 		// agent's velocities
 		lookAheadTime = toPursuer.length() / ( this.vehicle.maxSpeed + pursuer.getSpeed() );
-		
+
 		// calculate new velocity and predicted future position
 		newPursuerVelocity.copy( pursuer.velocity ).multiplyScalar( lookAheadTime );
-		
+
 		predcitedPosition.addVectors( pursuer.position, newPursuerVelocity );
-		
+
 		// now flee away from predicted future position of the pursuer
 		return this._flee( predcitedPosition );
 	};
-	
-} ( ) );
+
+}() );
 
 /**
- * Given two agents, this method returns a force that attempts to
- * position the vehicle between them.
+ * Given two agents, this method returns a force that attempts to position the
+ * vehicle between them.
  * 
  * @param {Vehicle} agentA - The first agent.
  * @param {Vehicle} agentB - The second agent.
  * 
  * @returns {THREE.Vector3} The calculated force.
  */
-SteeringBehaviors.prototype._interpose = ( function(){
-	
+SteeringBehaviors.prototype._interpose = ( function() {
+
 	var midPoint = new THREE.Vector3();
-	
+
 	var newVelocityAgentA = new THREE.Vector3();
 	var newVelocityAgentB = new THREE.Vector3();
-	
+
 	var predcitedPositionAgentA = new THREE.Vector3();
 	var predcitedPositionAgentB = new THREE.Vector3();
-	
+
 	var time = 0;
-	 
-	return function( agentA, agentB ){
-		
+
+	return function( agentA, agentB ) {
+
 		// first we need to figure out where the two agents are going to be
 		// in the future. This is approximated by determining the time
 		// taken to reach the mid way point at the current time at at max speed
 		midPoint.addVectors( agentA.position, agentB.position ).multiplyScalar( 0.5 );
-		
+
 		time = this.vehicle.position.distanceTo( midPoint ) / this.vehicle.maxSpeed;
-		
-		// now we have the time, we assume that agent A and agent B will continue on a
+
+		// now we have the time, we assume that agent A and agent B will
+		// continue on a
 		// straight trajectory and extrapolate to get their future positions
 		newVelocityAgentA.copy( agentA.velocity ).multiplyScalar( time );
 		predcitedPositionAgentA.addVectors( agentA.position, newVelocityAgentA );
-		
+
 		newVelocityAgentB.copy( agentB.velocity ).multiplyScalar( time );
 		predcitedPositionAgentB.addVectors( agentB.position, newVelocityAgentB );
-		
+
 		// calculate the mid point of these predicted positions
 		midPoint.addVectors( predcitedPositionAgentA, predcitedPositionAgentB ).multiplyScalar( 0.5 );
-		
+
 		// then steer to arrive at it
 		return this._arrive( midPoint, SteeringBehaviors.DECELERATION.VERY_FAST );
 	};
-	
-} ( ) );
+
+}() );
 
 /**
- * Given another agent position to hide from and a list of obstacles this
- * method attempts to put an obstacle between itself and its opponent.
+ * Given another agent position to hide from and a list of obstacles this method
+ * attempts to put an obstacle between itself and its opponent.
  * 
  * @param {Vehicle} hunter - The hunter agent.
  * 
  * @returns {THREE.Vector3} The calculated force.
  */
-SteeringBehaviors.prototype._hide = ( function(){
-	
+SteeringBehaviors.prototype._hide = ( function() {
+
 	var hidingSpot = new THREE.Vector3();
 	var bestHidingSpot = new THREE.Vector3();
-	
+
 	var distanceSq;
 	var closestDistanceSq;
 	var numberOfObstacle;
 	var obstacle;
 	var index;
-	
-	return function( hunter ){
-		
+
+	return function( hunter ) {
+
 		// this will be used to track the distance to the closest hiding spot
 		closestDistanceSq = Infinity;
-		
+
 		// get number of obstacles in the world
 		numberOfObstacle = world.getNumberOfObstacles();
-		
-		for( index = 0; index < numberOfObstacle; index++ ){
-			
+
+		for ( index = 0; index < numberOfObstacle; index++ )
+		{
 			// retrieve obstacle
 			obstacle = world.getObstacle( index );
-					
+
 			// calculate the position of the hiding spot for this obstacle
 			this._getHidingPosition( obstacle.boundingSphere.center, obstacle.boundingSphere.radius, hunter.position, hidingSpot );
-			
-			// work in distance-squared space to find the closest hiding spot to the agent
+
+			// work in distance-squared space to find the closest hiding spot to
+			// the agent
 			distanceSq = hidingSpot.distanceToSquared( this.vehicle.position );
-			
-			if( distanceSq < closestDistanceSq ){
-				
+
+			if ( distanceSq < closestDistanceSq )
+			{
 				// save values
 				closestDistanceSq = distanceSq;
-				
+
 				bestHidingSpot = hidingSpot;
 			}
 		}
-		
+
 		// if no suitable obstacles found then evade the hunter
-		if( closestDistanceSq === Infinity ){
-			
+		if ( closestDistanceSq === Infinity )
+		{
 			return this._evade( hunter );
 		}
 		else
@@ -45394,8 +45791,8 @@ SteeringBehaviors.prototype._hide = ( function(){
 			return this._arrive( bestHidingSpot, SteeringBehaviors.DECELERATION.VERY_FAST );
 		}
 	};
-	
-} ( ) );
+
+}() );
 
 /**
  * This behavior makes the agent wander about randomly on a planar surface.
@@ -45404,67 +45801,69 @@ SteeringBehaviors.prototype._hide = ( function(){
  * 
  * @returns {THREE.Vector3} The calculated force.
  */
-SteeringBehaviors.prototype._wander = ( function(){
-	
+SteeringBehaviors.prototype._wander = ( function() {
+
 	var target = new THREE.Vector3();
 	var randomDisplacement = new THREE.Vector3();
 	var distanceVector = new THREE.Vector3();
-	
+
 	var jitterThisTimeSlice;
-	
-	return function( delta ){
-		
+
+	return function( delta ) {
+
 		var force = new THREE.Vector3();
-		
-		// this behavior is dependent on the update rate, so this line must be included 
+
+		// this behavior is dependent on the update rate, so this line must be
+		// included
 		// when using time independent frame rate.
 		jitterThisTimeSlice = this.wanderJitter * delta;
-		
+
 		// prepare random vector
 		randomDisplacement.x = THREE.Math.randFloat( -1, 1 ) * jitterThisTimeSlice;
 		randomDisplacement.y = 0;
 		randomDisplacement.z = THREE.Math.randFloat( -1, 1 ) * jitterThisTimeSlice;
-		
+
 		// add random vector to the target's position
 		this._wanderTarget.add( randomDisplacement );
-		
+
 		// re-project this new vector back onto a unit sphere
 		this._wanderTarget.normalize();
-		
-		// increase the length of the vector to the same as the radius of the wander sphere
+
+		// increase the length of the vector to the same as the radius of the
+		// wander sphere
 		this._wanderTarget.multiplyScalar( this.wanderRadius );
-		
+
 		// move the target into a position wanderDist in front of the agent
 		distanceVector.z = this.wanderDistance;
 		target.addVectors( this._wanderTarget, distanceVector );
-		
+
 		// project the target into world space
 		target.applyMatrix4( this.vehicle.matrixWorld );
-		
+
 		// and steer towards it
 		force.subVectors( target, this.vehicle.position );
-		
+
 		return force;
 	};
-	
-} ( ) );
+
+}() );
 
 /**
- *  Given an array of obstacles, this method returns a steering force
- *  that will prevent the agent colliding with the closest obstacle.
+ * Given an array of obstacles, this method returns a steering force that will
+ * prevent the agent colliding with the closest obstacle.
  * 
  * @returns {THREE.Vector3} The calculated force.
  */
-SteeringBehaviors.prototype._obstacleAvoidance = ( function(){
-	
+SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
+
 	var boundingBox = new THREE.Box3();
 	var boundingSphere = new THREE.Sphere();
-	
+
 	var vehicleSize = new THREE.Vector3();
 	var localPositionOfObstacle = new THREE.Vector3();
 	var localPositionOfClosestObstacle = new THREE.Vector3();
 	var intersectionPoint = new THREE.Vector3();
-	
+
 	var numberOfObstacle;
 	var detectionBoxLength;
 	var closestObstacle;
@@ -45474,446 +45873,577 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function(){
 	var expandedRadius;
 	var multiplier;
 	var brakingWeight = 0.2;
-	
+
 	var inverseMatrix = new THREE.Matrix4();
-	
+
 	// this will be used for ray/sphere intersection test
 	var ray = new THREE.Ray( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, 1 ) );
 
-	return function(){
-		
+	return function() {
+
 		var force = new THREE.Vector3();
-		
+
 		// calculate bounding box of vehicle
 		boundingBox.setFromObject( this.vehicle );
-		
+
 		// get size of bounding box
 		boundingBox.size( vehicleSize );
-		
+
 		// the detection box length is proportional to the agent's velocity
-		detectionBoxLength = this.vehicle.getSpeed() + this.vehicle.maxSpeed +  vehicleSize.z * 0.5;
-		
+		detectionBoxLength = this.vehicle.getSpeed() + this.vehicle.maxSpeed + vehicleSize.z * 0.5;
+
 		// this will keep track of the closest intersecting obstacle
 		closestObstacle = null;
-		
+
 		// this will be used to track the distance to the closest obstacle
 		distanceToClosestObstacle = Infinity;
-		
+
 		// this matrix will transform points to the local space of the vehicle
 		inverseMatrix.getInverse( this.vehicle.matrixWorld );
-		
+
 		// get number of obstacles in the world
 		numberOfObstacle = world.getNumberOfObstacles();
-		
-		for( index = 0; index < numberOfObstacle; index++ ){
-			
+
+		for ( index = 0; index < numberOfObstacle; index++ )
+		{
 			// retrieve obstacle
 			obstacle = world.getObstacle( index );
-			
+
 			// calculate this obstacle's position in local space
 			localPositionOfObstacle.copy( obstacle.boundingSphere.center ).applyMatrix4( inverseMatrix );
-			
+
 			// if the local position has a positive z value then it must lay
-		    // behind the agent. besides the absolute z value must be smaller than
-			// the length of the detection box
-			if( localPositionOfObstacle.z > 0 && Math.abs( localPositionOfObstacle.z ) < detectionBoxLength ){
-				
+			// behind the agent. besides the absolute z value must be smaller
+			// than the length of the detection box
+			if ( localPositionOfObstacle.z > 0 && Math.abs( localPositionOfObstacle.z ) < detectionBoxLength )
+			{
 				// if the distance from the x axis to the object's position is less
-		        // than its radius + half the width of the detection box then there
-		        // is a potential intersection.
+				// than its radius + half the width of the detection box then
+				// there is a potential intersection.
 				expandedRadius = obstacle.boundingSphere.radius + vehicleSize.x * 0.5;
-				
-				// if the distance from the x axis to the object's position is less
-		        // than its radius + half the width/height of the detection box then there
-		        // is a potential intersection.
-				if( Math.abs( localPositionOfObstacle.x ) < expandedRadius ){
-					
+
+				if ( Math.abs( localPositionOfObstacle.x ) < expandedRadius )
+				{
 					// prepare intersection test
 					boundingSphere.center = localPositionOfObstacle;
 					boundingSphere.radius = expandedRadius;
-					
+
 					// do intersection test in local space of the vehicle
 					ray.intersectSphere( boundingSphere, intersectionPoint );
-					
+
 					// compare distances
-					if( intersectionPoint.z < distanceToClosestObstacle ){
-						
+					if ( intersectionPoint.z < distanceToClosestObstacle )
+					{
 						// save new minimum distance
-						distanceToClosestObstacle =  intersectionPoint.z;
-						
+						distanceToClosestObstacle = intersectionPoint.z;
+
 						// save closest obstacle
 						closestObstacle = obstacle;
-						
+
 						// save local position for force calculation
 						localPositionOfClosestObstacle.copy( localPositionOfObstacle );
 					}
 				}
 			}
 		}
-		
-		// if we have found an intersecting obstacle, calculate a steering force away from it
-		if( closestObstacle !== null ){
-			
-			// the closer the agent is to an object, the stronger the steering force should be
+
+		// if we have found an intersecting obstacle, calculate a steering force
+		// away from it
+		if ( closestObstacle !== null )
+		{
+			// the closer the agent is to an object, the stronger the steering
+			// force should be
 			multiplier = 1 + ( detectionBoxLength - localPositionOfClosestObstacle.z ) / detectionBoxLength;
-			
-			//calculate the lateral force
+
+			// calculate the lateral force
 			force.x = ( closestObstacle.boundingSphere.radius - localPositionOfClosestObstacle.x ) * multiplier;
-			
-			// apply a braking force proportional to the obstacles distance from the vehicle
+
+			// apply a braking force proportional to the obstacles distance from
+			// the vehicle
 			force.z = ( closestObstacle.boundingSphere.radius - localPositionOfClosestObstacle.z ) * brakingWeight;
-			
+
 			// finally, convert the steering vector from local to world space
 			force.transformDirection( this.vehicle.matrixWorld );
 		}
-		
+
 		return force;
 	};
-	
-} ( ) );
+
+}() );
 
 /**
- *  This returns a steering force that will keep the agent away from any
- *  walls it may encounter.
+ * This returns a steering force that will keep the agent away from any walls it
+ * may encounter.
  * 
  * @returns {THREE.Vector3} The calculated force.
  */
-SteeringBehaviors.prototype._wallAvoidance = ( function(){
-	
+SteeringBehaviors.prototype._wallAvoidance = ( function() {
+
 	var intersectionPoint = new THREE.Vector3();
 	var overShoot = new THREE.Vector3();
-	
+
 	var indexFeeler;
 	var indexWall;
-	
+
 	var feeler;
 	var closestWall;
 	var closestPoint;
 	var intersectionFeeler;
 	var distanceToClosestWall;
 	var distance;
-	
-	return function(){
-		
+
+	return function() {
+
 		var force = new THREE.Vector3();
-		
+
 		// this will be used to track the distance to the closest wall
 		distanceToClosestWall = Infinity;
-		
+
 		// this will keep track of the closest wall
 		closestWall = null;
-		
+
 		// this will keep track of the feeler that caused an intersection
 		intersectionFeeler = null;
-		
+
 		// create feelers for test
 		this._createFeelers();
-		
+
 		// examine each feeler in turn
-		for( indexFeeler = 0; indexFeeler < this._feelers.length ; indexFeeler++ ){
-			
+		for ( indexFeeler = 0; indexFeeler < this._feelers.length; indexFeeler++ )
+		{
 			// run through each wall checking for any intersection points
-			for( indexWall = 0; indexWall < world.walls.length ; indexWall++ ){
-				
+			for ( indexWall = 0; indexWall < world.walls.length; indexWall++ )
+			{
 				feeler = this._feelers[ indexFeeler ];
-				
+
 				// do intersection test
 				feeler.intersectPlane( world.walls[ indexWall ], intersectionPoint );
-				
+
 				// calculate distance from origin to intersection point
 				distance = feeler.origin.distanceTo( intersectionPoint );
-				
+
 				// if intersection point is within the range of the ray and
 				// smaller than the current distanceToClosestWall, continue
-				if( distance < feeler.distance && distance < distanceToClosestWall ){
-					
+				if ( distance < feeler.distance && distance < distanceToClosestWall )
+				{
 					distanceToClosestWall = distance;
-					
+
 					closestWall = world.walls[ indexWall ];
-					
+
 					closestPoint = intersectionPoint;
-					
+
 					intersectionFeeler = feeler;
 				}
 			}
-			
+
 		}
-		
-		// if an intersection point has been detected, calculate a force  
-	    // that will direct the agent away
-		if( closestWall !== null){
-			
-			// calculate by what distance the projected position of the agent will overshoot the wall
+
+		// if an intersection point has been detected, calculate a force
+		// that will direct the agent away
+		if ( closestWall !== null )
+		{
+			// calculate by what distance the projected position of the agent
+			// will overshoot the wall
 			overShoot.copy( intersectionFeeler.direction ).multiplyScalar( intersectionFeeler.distance ).add( intersectionFeeler.origin );
 			overShoot.sub( closestPoint );
-			
-			// create a force in the direction of the wall normal, with a magnitude of the overshoot
+
+			// create a force in the direction of the wall normal, with a
+			// magnitude of the overshoot
 			force.copy( closestWall.normal ).multiplyScalar( overShoot.length() );
-			
+
 		}
-		
+
 		return force;
 	};
-} ( ) );
+}() );
 
 /**
- *  Given a series of Vector2Ds, this method produces a force that will
- *  move the agent along the waypoints in order. The agent uses the
- * "seek" behavior to move to the next waypoint - unless it is the last
- *  waypoint, in which case it "arrives".
+ * Given a series of Vector2Ds, this method produces a force that will move the
+ * agent along the waypoints in order. The agent uses the "seek" behavior to
+ * move to the next waypoint - unless it is the last waypoint, in which case it
+ * "arrives".
  * 
  * @returns {THREE.Vector3} The calculated force.
  */
-SteeringBehaviors.prototype._followPath = ( function(){
-	
+SteeringBehaviors.prototype._followPath = ( function() {
+
 	var distanceSq = 0;
 
-	return function(){
-		
+	return function() {
+
 		// calculate distance in square space from current waypoint to vehicle
 		distanceSq = this.path.getCurrentWaypoint().distanceToSquared( this.vehicle.position );
-		
+
 		// move to next waypoint if close enough to current target
-		if( distanceSq < ( this.waypointSeekDist * this.waypointSeekDist ) ){
-			
+		if ( distanceSq < ( this.waypointSeekDist * this.waypointSeekDist ) )
+		{
 			this.path.setNextWaypoint();
 		}
-		
-		if( !this.path.isFinished() ){
-			
+
+		if ( !this.path.isFinished() )
+		{
 			return this._seek( this.path.getCurrentWaypoint() );
 		}
-		else{
-			
+		else
+		{
 			return this._arrive( this.path.getCurrentWaypoint(), SteeringBehaviors.DECELERATION.MIDDLE );
 		}
 	};
-	
-} ( ) );
+
+}() );
 
 /**
  * This calculates a force repelling from the other neighbors
  * 
  * @returns {THREE.Vector3} The calculated force.
  */
-SteeringBehaviors.prototype._separation = ( function(){
-	
+SteeringBehaviors.prototype._separation = ( function() {
+
 	var toAgent = new THREE.Vector3();
-	
+
 	var index;
 	var neighbor;
 	var length;
 
-	return function(){
-		
+	return function() {
+
 		var force = new THREE.Vector3();
-		
-		for( index = 0; index < this._neighbors.length; index ++ ){
-			
+
+		for ( index = 0; index < this._neighbors.length; index++ )
+		{
 			neighbor = this._neighbors[ index ];
-			
+
 			// make sure this agent isn't included in the calculations
 			// also make sure it doesn't include the evade target
-			if( neighbor !== this.vehicle && neighbor !== this.targetAgent1 ){
-				
+			if ( neighbor !== this.vehicle && neighbor !== this.targetAgent1 )
+			{
 				// calculate displacement vector
 				toAgent.subVectors( this.vehicle.position, neighbor.position );
-				
+
 				// get length
 				length = toAgent.length();
-				
-				// handle zero length. this is necessary if both vehicles have the same position
-				if( length === 0 ){ length = 0.0001; }
-	
-				// scale the force inversely proportional to the agents distance from its neighbor
+
+				// handle zero length. this is necessary if both vehicles have
+				// the same position
+				if ( length === 0 )
+				{
+					length = 0.0001;
+				}
+
+				// scale the force inversely proportional to the agents distance
+				// from its neighbor
 				toAgent.normalize().divideScalar( length );
-		
+
 				// add force
 				force.add( toAgent );
 
 			}
 		}
-		
+
 		return force;
 	};
-	
-} ( ) );
+
+}() );
 
 /**
- * Returns a force that attempts to align this agents heading with that of its neighbors.
+ * Returns a force that attempts to align this agents heading with that of its
+ * neighbors.
  * 
  * @returns {THREE.Vector3} The calculated force.
  */
-SteeringBehaviors.prototype._alignment = ( function(){
-	
-	var averageHeading = new THREE.Vector3(); // used to record the average heading of the neighbors
-	
-	var neighborCount; // used to count the number of vehicles in the neighborhood
+SteeringBehaviors.prototype._alignment = ( function() {
+
+	var averageHeading = new THREE.Vector3(); // used to record the average
+												// heading of the neighbors
+
+	var neighborCount; // used to count the number of vehicles in the
+						// neighborhood
 	var index;
 	var neighbor;
-	
-	return function(){
-		
+
+	return function() {
+
 		var force = new THREE.Vector3();
-		
+
 		// reset values
 		neighborCount = 0;
 		averageHeading.set( 0, 0, 0 );
-		
-		for( index = 0; index < this._neighbors.length; index ++ ){
-			
+
+		for ( index = 0; index < this._neighbors.length; index++ )
+		{
 			neighbor = this._neighbors[ index ];
-			
+
 			// make sure this agent isn't included in the calculations
 			// also make sure it doesn't include the evade target
-			if( neighbor !== this.vehicle && neighbor !== this.targetAgent1 ){
-				
+			if ( neighbor !== this.vehicle && neighbor !== this.targetAgent1 )
+			{
 				averageHeading.add( neighbor.getDirection() );
-				
+
 				neighborCount++;
 			}
 		}
-		
-		// if the neighborhood contained one or more vehicles, average their heading vectors.
-		if( neighborCount > 0 ){
-			
+
+		// if the neighborhood contained one or more vehicles, average their
+		// heading vectors.
+		if ( neighborCount > 0 )
+		{
 			averageHeading.divideScalar( neighborCount );
-			
+
 			force.subVectors( averageHeading, this.vehicle.getDirection() );
 		}
-		
+
 		return force;
-	
+
 	};
 
-} ( ) );
+}() );
 
 /**
- * Returns a steering force that attempts to move the agent towards 
- * the center of mass of the agents in its immediate area.
+ * Returns a steering force that attempts to move the agent towards the center
+ * of mass of the agents in its immediate area.
  * 
  * @returns {THREE.Vector3} The calculated force.
  */
-SteeringBehaviors.prototype._cohesion = ( function(){
-	
-var averageHeading = new THREE.Vector3();
-	
-	var centerOfMass = new THREE.Vector3();   // center of mass of all the agents
-	
-	var neighborCount; // used to count the number of vehicles in the neighborhood
+SteeringBehaviors.prototype._cohesion = ( function() {
+
+	var averageHeading = new THREE.Vector3();
+
+	var centerOfMass = new THREE.Vector3(); // center of mass of all the agents
+
+	var neighborCount; // used to count the number of vehicles in the
+						// neighborhood
 	var index;
 	var neighbor;
-	
-	return function(){
-	
+
+	return function() {
+
 		var force = new THREE.Vector3();
-		
+
 		// reset values
 		neighborCount = 0;
 		centerOfMass.set( 0, 0, 0 );
-		
-		for( index = 0; index < this._neighbors.length; index ++ ){
-			
+
+		for ( index = 0; index < this._neighbors.length; index++ )
+		{
 			neighbor = this._neighbors[ index ];
-			
+
 			// make sure this agent isn't included in the calculations
 			// also make sure it doesn't include the evade target
-			if( neighbor !== this.vehicle && neighbor !== this.targetAgent1 ){
-				
+			if ( neighbor !== this.vehicle && neighbor !== this.targetAgent1 )
+			{
 				centerOfMass.add( neighbor.position );
-				
+
 				neighborCount++;
 			}
-			
+
 		}
-		
-		if( neighborCount > 0 ){
-			
+
+		if ( neighborCount > 0 )
+		{
 			// the center of mass is the average of the sum of positions
 			centerOfMass.divideScalar( neighborCount );
-			
+
 			// now seek towards that position
 			force = this._seek( centerOfMass );
 		}
-		
-		// the magnitude of cohesion is usually much larger than separation or 
+
+		// the magnitude of cohesion is usually much larger than separation or
 		// allignment so it usually helps to normalize it
-		return force.normalize();	
+		return force.normalize();
 	};
 
-} ( ) );
+}() );
 
-/////////////////////////////////////////////////////////////////////////////// END OF BEHAVIORS
+// /////////////////////////////////////////////////////////////////////////////
+// END OF BEHAVIORS
 
-/////////////////////////////////////////////////////////////////////////////// START OF CONTROL METHODS
+// /////////////////////////////////////////////////////////////////////////////
+// START OF CONTROL METHODS
 
 /* jshint ignore:start */
-SteeringBehaviors.prototype.seekOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.SEEK; };
-SteeringBehaviors.prototype.fleeOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.FLEE; };
-SteeringBehaviors.prototype.arriveOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.ARRIVE; };
-SteeringBehaviors.prototype.pursuitOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.PURSUIT; };
-SteeringBehaviors.prototype.offsetPursuitOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.OFFSETPURSUIT; };
-SteeringBehaviors.prototype.evadeOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.EVADE; };
-SteeringBehaviors.prototype.interposeOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.INTERPOSE; };
-SteeringBehaviors.prototype.hideOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.HIDE; };
-SteeringBehaviors.prototype.wanderOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.WANDER; };
-SteeringBehaviors.prototype.obstacleAvoidanceOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE; };
-SteeringBehaviors.prototype.wallAvoidanceOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.WALLAVOIDANCE; };
-SteeringBehaviors.prototype.followPathOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.FOLLOWPATH; };
-SteeringBehaviors.prototype.cohesionOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.COHESION; };
-SteeringBehaviors.prototype.separationOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.SEPARATION; };
-SteeringBehaviors.prototype.alignmentOn = function(){ this._behaviorFlag |= SteeringBehaviors.TYPES.ALIGNMENT; };
-SteeringBehaviors.prototype.flockingOn = function(){ this.cohesionOn(); this.separationOn(); this.alignmentOn(); this.wanderOn(); };
+SteeringBehaviors.prototype.seekOn = function() {
 
-SteeringBehaviors.prototype.seekOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.SEEK ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.SEEK; };
-SteeringBehaviors.prototype.fleeOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.FLEE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.FLEE; };
-SteeringBehaviors.prototype.arriveOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.ARRIVE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.ARRIVE; };
-SteeringBehaviors.prototype.pursuitOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.PURSUIT ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.PURSUIT; };
-SteeringBehaviors.prototype.offsetPursuitOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.OFFSETPURSUIT ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.OFFSETPURSUIT; };
-SteeringBehaviors.prototype.evadeOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.EVADE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.EVADE; };
-SteeringBehaviors.prototype.interposeOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.INTERPOSE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.INTERPOSE; };
-SteeringBehaviors.prototype.hideOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.HIDE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.HIDE; };
-SteeringBehaviors.prototype.wanderOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.WANDER ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.WANDER; };
-SteeringBehaviors.prototype.obstacleAvoidanceOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE; };
-SteeringBehaviors.prototype.wallAvoidanceOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.WALLAVOIDANCE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.WALLAVOIDANCE; };
-SteeringBehaviors.prototype.followPathOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.FOLLOWPATH ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.FOLLOWPATH; };
-SteeringBehaviors.prototype.cohesionOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.COHESION ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.COHESION; };
-SteeringBehaviors.prototype.separationOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.SEPARATION; };
-SteeringBehaviors.prototype.alignmentOff = function(){ if( this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.ALIGNMENT; };
-SteeringBehaviors.prototype.flockingOff = function(){ this.cohesionOff(); this.separationOff(); this.alignmentOff(); this.wanderOff(); };
+	this._behaviorFlag |= SteeringBehaviors.TYPES.SEEK;
+};
+SteeringBehaviors.prototype.fleeOn = function() {
+
+	this._behaviorFlag |= SteeringBehaviors.TYPES.FLEE;
+};
+SteeringBehaviors.prototype.arriveOn = function() {
+
+	this._behaviorFlag |= SteeringBehaviors.TYPES.ARRIVE;
+};
+SteeringBehaviors.prototype.pursuitOn = function() {
+
+	this._behaviorFlag |= SteeringBehaviors.TYPES.PURSUIT;
+};
+SteeringBehaviors.prototype.offsetPursuitOn = function() {
+
+	this._behaviorFlag |= SteeringBehaviors.TYPES.OFFSETPURSUIT;
+};
+SteeringBehaviors.prototype.evadeOn = function() {
+
+	this._behaviorFlag |= SteeringBehaviors.TYPES.EVADE;
+};
+SteeringBehaviors.prototype.interposeOn = function() {
+
+	this._behaviorFlag |= SteeringBehaviors.TYPES.INTERPOSE;
+};
+SteeringBehaviors.prototype.hideOn = function() {
+
+	this._behaviorFlag |= SteeringBehaviors.TYPES.HIDE;
+};
+SteeringBehaviors.prototype.wanderOn = function() {
+
+	this._behaviorFlag |= SteeringBehaviors.TYPES.WANDER;
+};
+SteeringBehaviors.prototype.obstacleAvoidanceOn = function() {
+
+	this._behaviorFlag |= SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE;
+};
+SteeringBehaviors.prototype.wallAvoidanceOn = function() {
+
+	this._behaviorFlag |= SteeringBehaviors.TYPES.WALLAVOIDANCE;
+};
+SteeringBehaviors.prototype.followPathOn = function() {
+
+	this._behaviorFlag |= SteeringBehaviors.TYPES.FOLLOWPATH;
+};
+SteeringBehaviors.prototype.cohesionOn = function() {
+
+	this._behaviorFlag |= SteeringBehaviors.TYPES.COHESION;
+};
+SteeringBehaviors.prototype.separationOn = function() {
+
+	this._behaviorFlag |= SteeringBehaviors.TYPES.SEPARATION;
+};
+SteeringBehaviors.prototype.alignmentOn = function() {
+
+	this._behaviorFlag |= SteeringBehaviors.TYPES.ALIGNMENT;
+};
+SteeringBehaviors.prototype.flockingOn = function() {
+
+	this.cohesionOn();
+	this.separationOn();
+	this.alignmentOn();
+	this.wanderOn();
+};
+
+SteeringBehaviors.prototype.seekOff = function() {
+
+	if ( this._isOn( SteeringBehaviors.TYPES.SEEK ) )
+		this._behaviorFlag ^= SteeringBehaviors.TYPES.SEEK;
+};
+SteeringBehaviors.prototype.fleeOff = function() {
+
+	if ( this._isOn( SteeringBehaviors.TYPES.FLEE ) )
+		this._behaviorFlag ^= SteeringBehaviors.TYPES.FLEE;
+};
+SteeringBehaviors.prototype.arriveOff = function() {
+
+	if ( this._isOn( SteeringBehaviors.TYPES.ARRIVE ) )
+		this._behaviorFlag ^= SteeringBehaviors.TYPES.ARRIVE;
+};
+SteeringBehaviors.prototype.pursuitOff = function() {
+
+	if ( this._isOn( SteeringBehaviors.TYPES.PURSUIT ) )
+		this._behaviorFlag ^= SteeringBehaviors.TYPES.PURSUIT;
+};
+SteeringBehaviors.prototype.offsetPursuitOff = function() {
+
+	if ( this._isOn( SteeringBehaviors.TYPES.OFFSETPURSUIT ) )
+		this._behaviorFlag ^= SteeringBehaviors.TYPES.OFFSETPURSUIT;
+};
+SteeringBehaviors.prototype.evadeOff = function() {
+
+	if ( this._isOn( SteeringBehaviors.TYPES.EVADE ) )
+		this._behaviorFlag ^= SteeringBehaviors.TYPES.EVADE;
+};
+SteeringBehaviors.prototype.interposeOff = function() {
+
+	if ( this._isOn( SteeringBehaviors.TYPES.INTERPOSE ) )
+		this._behaviorFlag ^= SteeringBehaviors.TYPES.INTERPOSE;
+};
+SteeringBehaviors.prototype.hideOff = function() {
+
+	if ( this._isOn( SteeringBehaviors.TYPES.HIDE ) )
+		this._behaviorFlag ^= SteeringBehaviors.TYPES.HIDE;
+};
+SteeringBehaviors.prototype.wanderOff = function() {
+
+	if ( this._isOn( SteeringBehaviors.TYPES.WANDER ) )
+		this._behaviorFlag ^= SteeringBehaviors.TYPES.WANDER;
+};
+SteeringBehaviors.prototype.obstacleAvoidanceOff = function() {
+
+	if ( this._isOn( SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE ) )
+		this._behaviorFlag ^= SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE;
+};
+SteeringBehaviors.prototype.wallAvoidanceOff = function() {
+
+	if ( this._isOn( SteeringBehaviors.TYPES.WALLAVOIDANCE ) )
+		this._behaviorFlag ^= SteeringBehaviors.TYPES.WALLAVOIDANCE;
+};
+SteeringBehaviors.prototype.followPathOff = function() {
+
+	if ( this._isOn( SteeringBehaviors.TYPES.FOLLOWPATH ) )
+		this._behaviorFlag ^= SteeringBehaviors.TYPES.FOLLOWPATH;
+};
+SteeringBehaviors.prototype.cohesionOff = function() {
+
+	if ( this._isOn( SteeringBehaviors.TYPES.COHESION ) )
+		this._behaviorFlag ^= SteeringBehaviors.TYPES.COHESION;
+};
+SteeringBehaviors.prototype.separationOff = function() {
+
+	if ( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) )
+		this._behaviorFlag ^= SteeringBehaviors.TYPES.SEPARATION;
+};
+SteeringBehaviors.prototype.alignmentOff = function() {
+
+	if ( this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) )
+		this._behaviorFlag ^= SteeringBehaviors.TYPES.ALIGNMENT;
+};
+SteeringBehaviors.prototype.flockingOff = function() {
+
+	this.cohesionOff();
+	this.separationOff();
+	this.alignmentOff();
+	this.wanderOff();
+};
 
 /* jshint ignore:end */
 
-/////////////////////////////////////////////////////////////////////////////// END OF CONTROL METHODS
-
+// /////////////////////////////////////////////////////////////////////////////
+// END OF CONTROL METHODS
 // types of behavior as flags
 SteeringBehaviors.TYPES = {
-		NONE			  : 0x00000,
-		SEEK              : 0x00002,
-		FLEE              : 0x00004,
-		ARRIVE            : 0x00008,
-		WANDER            : 0x00010,
-		COHESION          : 0x00020,
-		SEPARATION        : 0x00040,
-		ALIGNMENT         : 0x00080,
-		OBSTACLEAVOIDANCE : 0x00100,
-	    WALLAVOIDANCE     : 0x00200,
-	    FOLLOWPATH        : 0x00400,
-	    PURSUIT           : 0x00800,
-	    EVADE             : 0x01000,
-	    INTERPOSE         : 0x02000,
-	    HIDE              : 0x04000,
-	    FLOCK             : 0x08000,
-	    OFFSETPURSUIT     : 0x10000
+	NONE : 0x00000,
+	SEEK : 0x00002,
+	FLEE : 0x00004,
+	ARRIVE : 0x00008,
+	WANDER : 0x00010,
+	COHESION : 0x00020,
+	SEPARATION : 0x00040,
+	ALIGNMENT : 0x00080,
+	OBSTACLEAVOIDANCE : 0x00100,
+	WALLAVOIDANCE : 0x00200,
+	FOLLOWPATH : 0x00400,
+	PURSUIT : 0x00800,
+	EVADE : 0x01000,
+	INTERPOSE : 0x02000,
+	HIDE : 0x04000,
+	FLOCK : 0x08000,
+	OFFSETPURSUIT : 0x10000
 };
 
 // amounts of deceleration
 SteeringBehaviors.DECELERATION = {
-		VERY_FAST: 1.5,
-		FAST: 3,
-		MIDDLE: 4,
-		SLOW: 5,
-		VERY_SLOW: 6
+	VERY_FAST : 1.5,
+	FAST : 3,
+	MIDDLE : 4,
+	SLOW : 5,
+	VERY_SLOW : 6
 };
 
 module.exports = SteeringBehaviors;
@@ -45933,57 +46463,56 @@ module.exports = SteeringBehaviors;
  * @param {number} type - The type of the message.
  * @param {string} content - The content of the message.
  */
-function Message(type, content){
+function Message( type, content ) {
 
-	Object.defineProperties(this, {
-		time: {
+	Object.defineProperties( this, {
+		time : {
 			value : Date.now(),
-			configurable: false,
-			enumerable: true,
-			writable: false
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		type: {
+		type : {
 			value : type,
-			configurable: false,
-			enumerable: true,
-			writable: true
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		content: {
+		content : {
 			value : content,
-			configurable: false,
-			enumerable: true,
-			writable: true
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
-	});
+	} );
 }
 
 Message.TYPES = {
-	SYSTEM: 0,
-	GAME: 1,
-	STATUS: 2,
-	CHAT: 3,
-	INFO: 4,
-	ERROR: 5
+	SYSTEM : 0,
+	GAME : 1,
+	STATUS : 2,
+	CHAT : 3,
+	INFO : 4,
+	ERROR : 5
 };
 
 module.exports = Message;
 },{}],52:[function(require,module,exports){
 (function (global){
 /**
- * @file This prototype contains the entire logic 
- * for network-based functionality. The core logic is 
- * executed in a separate thread.
+ * @file This prototype contains the entire logic for network-based
+ * functionality. The core logic is executed in a separate thread.
  * 
  * @author Human Interactive
  */
 "use strict";
 
-var PubSub = require("pubsub-js");
-var WebSocket = require("ws");
+var PubSub = require( "pubsub-js" );
+var WebSocket = require( "ws" );
 
-var Message = require("./Message");
-var threadMananger = require("../core/ThreadManager");
-var logger = require("../etc/Logger");
+var Message = require( "./Message" );
+var threadMananger = require( "../core/ThreadManager" );
+var logger = require( "../etc/Logger" );
 
 var script;
 var self;
@@ -45993,48 +46522,51 @@ var self;
  * @constructor
  * 
  */
-function NetworkManager(){
-	
-	Object.defineProperties(this, {
-		_thread: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+function NetworkManager() {
+
+	Object.defineProperties( this, {
+		_thread : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
-	
+	} );
+
 	self = this;
 }
 
 /**
  * Inits the network manager.
  */
-NetworkManager.prototype.init = function(){
-	
+NetworkManager.prototype.init = function() {
+
 	// create thread
-	this._thread = threadMananger.createThread("network", script);
-	
+	this._thread = threadMananger.createThread( "network", script );
+
 	// setup event listener
-	this._thread.onMessage(this._onMessageThread);
-	this._thread.onError(this._onErrorThread);
-	
+	this._thread.onMessage( this._onMessageThread );
+	this._thread.onError( this._onErrorThread );
+
 	// begin communication to server
 	this._startUp();
-	
+
 	// subscriptions
-	PubSub.subscribe("message.chat", this._onMessageChat);
-	PubSub.subscribe("message.game", this._onMessageGame);
+	PubSub.subscribe( "message.chat", this._onMessageChat );
+	PubSub.subscribe( "message.game", this._onMessageGame );
 };
 
 /**
- * Starts the communication to the server. It provides information
- * like hostname and port to the thread.
+ * Starts the communication to the server. It provides information like hostname
+ * and port to the thread.
  */
-NetworkManager.prototype._startUp = function(event){
-	
-	var message = new Message( Message.TYPES.SYSTEM, {location: global.window.location.hostname, port: NetworkManager.SERVER.PORT} );
-	this._thread.postMessage(message);
+NetworkManager.prototype._startUp = function( event ) {
+
+	var message = new Message( Message.TYPES.SYSTEM, {
+		location : global.window.location.hostname,
+		port : NetworkManager.SERVER.PORT
+	} );
+	this._thread.postMessage( message );
 };
 
 /**
@@ -46043,9 +46575,11 @@ NetworkManager.prototype._startUp = function(event){
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-NetworkManager.prototype._onMessageChat = function(message, data){
-	
-	self._thread.postMessage( new Message( Message.TYPES.CHAT, {message: data} ) );
+NetworkManager.prototype._onMessageChat = function( message, data ) {
+
+	self._thread.postMessage( new Message( Message.TYPES.CHAT, {
+		message : data
+	} ) );
 };
 
 /**
@@ -46054,122 +46588,161 @@ NetworkManager.prototype._onMessageChat = function(message, data){
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-NetworkManager.prototype._onMessageGame = function(message, data){
-	
-	self._thread.postMessage( new Message( Message.TYPES.GAME, {player: data} ) );
+NetworkManager.prototype._onMessageGame = function( message, data ) {
+
+	self._thread.postMessage( new Message( Message.TYPES.GAME, {
+		player : data
+	} ) );
 };
 
 /**
- * Handles the onMessage event. This is fired, when the
- * thread posts a received message to the manager.
+ * Handles the onMessage event. This is fired, when the thread posts a received
+ * message to the manager.
  * 
  * @param {object} event - The message event.
  */
-NetworkManager.prototype._onMessageThread = function(event){
-	
-	if(event.data.type === Message.TYPES.CHAT){
-		
-		PubSub.publish("multiplayer.message", event.data.content);
-		
-	}else if(event.data.type === Message.TYPES.GAME){
-		
-		PubSub.publish("multiplayer.update", event.data.content);
-		
-	}else if(event.data.type === Message.TYPES.STATUS){
-		
-		PubSub.publish("multiplayer.status", event.data.content);
-		
-	}else if(event.data.type === Message.TYPES.INFO){
-		
-		logger.log(event.data.content.message);		
-		
-	}else if(event.data.type === Message.TYPES.ERROR){
-		
-		logger.error(event.data.content.message);
+NetworkManager.prototype._onMessageThread = function( event ) {
+
+	if ( event.data.type === Message.TYPES.CHAT )
+	{
+		PubSub.publish( "multiplayer.message", event.data.content );
+
+	}
+	else if ( event.data.type === Message.TYPES.GAME )
+	{
+		PubSub.publish( "multiplayer.update", event.data.content );
+	}
+	else if ( event.data.type === Message.TYPES.STATUS )
+	{
+		PubSub.publish( "multiplayer.status", event.data.content );
+	}
+	else if ( event.data.type === Message.TYPES.INFO )
+	{
+		logger.log( event.data.content.message );
+	}
+	else if ( event.data.type === Message.TYPES.ERROR )
+	{
+		logger.error( event.data.content.message );
 	}
 };
 
 /**
- * Handles the onError event. This is fired, when the
- * thread posts an error message to the manager.
+ * Handles the onError event. This is fired, when the thread posts an error
+ * message to the manager.
  * 
  * @param {object} event - The message event.
  */
-NetworkManager.prototype._onErrorThread = function(event){
-	
-	logger.log("ERROR: NetworkManager: Runtime-Error in thread \"NetworkManager\", line %s in %s: %s", event.lineno, event.filename, event.message);
+NetworkManager.prototype._onErrorThread = function( event ) {
+
+	logger.log( "ERROR: NetworkManager: Runtime-Error in thread \"NetworkManager\", line %s in %s: %s", event.lineno, event.filename, event.message );
 
 };
 
 /**
- * The script for the thread. It creates and manages a WebSocket
- * for communication with the server.
+ * The script for the thread. It creates and manages a WebSocket for
+ * communication with the server.
  */
-script = function(){
-	
+script = function() {
+
 	var ws = null;
-	
-	function init(location, port){
-		
-		ws = new WebSocket("ws://" + location  + ":" + port);
-		
-		ws.onopen = function(event) {
-			self.postMessage({type: 4, content: {message: "INFO: NetworkManager: Connected to multiplayer-server: " + location + " port: " + port}});
+
+	function init( location, port ) {
+
+		ws = new WebSocket( "ws://" + location + ":" + port );
+
+		ws.onopen = function( event ) {
+
+			self.postMessage( {
+				type : 4,
+				content : {
+					message : "INFO: NetworkManager: Connected to multiplayer-server: " + location + " port: " + port
+				}
+			} );
 		};
-		
-		ws.onclose = function(event) {
-			self.postMessage({type: 4, content: {message: "INFO: NetworkManager: Disconnected from multiplayer-server: " + location + " port: " + port}});
+
+		ws.onclose = function( event ) {
+
+			self.postMessage( {
+				type : 4,
+				content : {
+					message : "INFO: NetworkManager: Disconnected from multiplayer-server: " + location + " port: " + port
+				}
+			} );
 		};
-		
-		ws.onmessage = function(event) {
+
+		ws.onmessage = function( event ) {
+
 			// convert string to JSON before posting to main-thread
-			self.postMessage(JSON.parse(event.data));
+			self.postMessage( JSON.parse( event.data ) );
 		};
-		
-		ws.onerror = function(error) {
-			self.postMessage({type: 5, content: {message: "ERROR: NetworkManager: WebSocket Error: " +  error}});
+
+		ws.onerror = function( error ) {
+
+			self.postMessage( {
+				type : 5,
+				content : {
+					message : "ERROR: NetworkManager: WebSocket Error: " + error
+				}
+			} );
 		};
 	}
-	
-	function onMessage(event){
-		
+
+	function onMessage( event ) {
+
 		// evaluate event data
-		if(event.data !== null && event.data.type !== null){
-			
+		if ( event.data !== null && event.data.type !== null )
+		{
 			// startup
-			if(event.data.type === 0){
-				
-				 if(ws === null){
-					 
-					 init(event.data.content.location, event.data.content.port);
-					 
-				 }
-			// message
-			 }else if(event.data.type === 1 || event.data.type === 2 || event.data.type === 3){
-				 
-				 if(ws !== null){
-					 
-					if(ws.readyState === WebSocket.OPEN){
-						
-						 // convert JSON to string before sending to server
-						 ws.send(JSON.stringify(event.data));
-						 
-				 	}else if(ws.readyState === WebSocket.CONNECTING){
-				 		
-				 		self.postMessage({type: 4, content: {message: "ERROR: NetworkManager: The connection to the server has not yet been established. Please try againg."}});
-				 		
-				 	}else if(ws.readyState === WebSocket.CLOSING && ws.readyState === WebSocket.CLOSED){
-				 		
-				 		self.postMessage({type: 4, content: {message: "ERROR: NetworkManager: Messaging not possible. The connection to the server has been closed or could not be opened."}});
-				 	}
-				 }else{
-					 
-					 self.postMessage({type: 4, content: {message: "ERROR: NetworkManager: Messaging not possible. No connection to server."}});
-				 }
-			 }
+			if ( event.data.type === 0 )
+			{
+				if ( ws === null )
+				{
+					init( event.data.content.location, event.data.content.port );
+				}
+				// message
+			}
+			else if ( event.data.type === 1 || event.data.type === 2 || event.data.type === 3 )
+			{
+				if ( ws !== null )
+				{
+					if ( ws.readyState === WebSocket.OPEN )
+					{
+						// convert JSON to string before sending to server
+						ws.send( JSON.stringify( event.data ) );
+					}
+					else if ( ws.readyState === WebSocket.CONNECTING )
+					{
+						self.postMessage( {
+							type : 4,
+							content : {
+								message : "ERROR: NetworkManager: The connection to the server has not yet been established. Please try againg."
+							}
+						} );
+
+					}
+					else if ( ws.readyState === WebSocket.CLOSING && ws.readyState === WebSocket.CLOSED )
+					{
+						self.postMessage( {
+							type : 4,
+							content : {
+								message : "ERROR: NetworkManager: Messaging not possible. The connection to the server has been closed or could not be opened."
+							}
+						} );
+					}
+				}
+				else
+				{
+					self.postMessage( {
+						type : 4,
+						content : {
+							message : "ERROR: NetworkManager: Messaging not possible. No connection to server."
+						}
+					} );
+				}
+			}
 		}
 	}
-	
+
 	self.onmessage = onMessage;
 };
 
@@ -46188,7 +46761,7 @@ module.exports = new NetworkManager();
 
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
 /**
  * Creates the effect composer.
@@ -46198,51 +46771,56 @@ var THREE = require("three");
  * @param {THREE.WebGLRenderer} renderer - The WebGL renderer.
  * @param {THREE.WebGLRenderTarget} renderTarget - The render target.
  */
-function EffectComposer(renderer, renderTarget){
-	
-	Object.defineProperties(this, {
-		_passes: {
-			value: [],
-			configurable: false,
-			enumerable: false,
-			writable: false
+function EffectComposer( renderer, renderTarget ) {
+
+	Object.defineProperties( this, {
+		_passes : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		_renderer: {
-			value: renderer,
-			configurable: false,
-			enumerable: false,
-			writable: false
+		_renderer : {
+			value : renderer,
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		_renderTarget: {
-			value: renderTarget,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_renderTarget : {
+			value : renderTarget,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_readBuffer: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_readBuffer : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_writeBuffer: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_writeBuffer : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
-	
+	} );
+
 	// if no render target is assigned, let's create a new one
-	if (this._renderTarget === undefined) {
-	
-		var width  = this._renderer.context.drawingBufferWidth;
+	if ( this._renderTarget === undefined )
+	{
+		var width = this._renderer.context.drawingBufferWidth;
 		var height = this._renderer.context.drawingBufferHeight;
-		var parameters = {minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, stencilBuffer: false};
-	
-		this._renderTarget = new THREE.WebGLRenderTarget(width, height, parameters);
+		var parameters = {
+			minFilter : THREE.LinearFilter,
+			magFilter : THREE.LinearFilter,
+			format : THREE.RGBFormat,
+			stencilBuffer : false
+		};
+
+		this._renderTarget = new THREE.WebGLRenderTarget( width, height, parameters );
 	}
-	
+
 	// create read/write buffers based the render target
 	this._readBuffer = this._renderTarget;
 	this._writeBuffer = this._renderTarget.clone();
@@ -46253,9 +46831,9 @@ function EffectComposer(renderer, renderTarget){
  * 
  * @param {object} pass - Render or shader pass.
  */
-EffectComposer.prototype.addPass = function(pass){
-	
-	this._passes.push(pass);
+EffectComposer.prototype.addPass = function( pass ) {
+
+	this._passes.push( pass );
 };
 
 /**
@@ -46263,47 +46841,47 @@ EffectComposer.prototype.addPass = function(pass){
  * 
  * @param {object} pass - Render or shader pass.
  */
-EffectComposer.prototype.removePass = function(pass){
-	
-	var index = this._passes.indexOf(pass);
-	this._passes.splice(index, 1);
+EffectComposer.prototype.removePass = function( pass ) {
+
+	var index = this._passes.indexOf( pass );
+	this._passes.splice( index, 1 );
 };
 
 /**
  * Removes all Shader Passes from the internal array.
  */
-EffectComposer.prototype.removePasses = function(){
-	
+EffectComposer.prototype.removePasses = function() {
+
 	this._passes.length = 0;
 };
 
 /**
  * Renders the scene with all effects.
  */
-EffectComposer.prototype.render = (function(){
-	
+EffectComposer.prototype.render = ( function() {
+
 	var pass, index;
-	
-	return function(){
-		
+
+	return function() {
+
 		// process all assigned passes and call their render method
-		for (index = 0; index < this._passes.length; index++) {
+		for ( index = 0; index < this._passes.length; index++ )
+		{
+			pass = this._passes[ index ];
 
-			pass = this._passes[index];
+			if ( pass.enabled === true )
+			{
+				pass.render( this._renderer, this._writeBuffer, this._readBuffer );
 
-			if (pass.enabled === true){	
-
-				pass.render(this._renderer, this._writeBuffer, this._readBuffer);
-		
-				if (pass.needsSwap === true) {
-					
+				if ( pass.needsSwap === true )
+				{
 					this._swapBuffers();
 				}
 			}
 		}
 	};
 
-}());
+}() );
 
 /**
  * Sets the size of the render target.
@@ -46311,42 +46889,43 @@ EffectComposer.prototype.render = (function(){
  * @param {number} width - The width of render target.
  * @param {number} height - The height of render target.
  */
-EffectComposer.prototype.setSize = function(width, height){
-	
+EffectComposer.prototype.setSize = function( width, height ) {
+
 	var renderTarget = this._renderTarget.clone();
 
-	renderTarget.width = width  * this._renderer.getPixelRatio();
+	renderTarget.width = width * this._renderer.getPixelRatio();
 	renderTarget.height = height * this._renderer.getPixelRatio();
 
-	this._reset(renderTarget);
+	this._reset( renderTarget );
 };
 
 /**
  * Swaps the internal framebuffers.
  */
-EffectComposer.prototype._swapBuffers = (function(){
-	
+EffectComposer.prototype._swapBuffers = ( function() {
+
 	var temp = null;
-	
-	return function(){
+
+	return function() {
+
 		temp = this._readBuffer;
 		this._readBuffer = this._writeBuffer;
 		this._writeBuffer = temp;
 	};
-}());
+}() );
 
 /**
  * Resets the internal render targets/framebuffers.
  * 
  * @param {THREE.WebGLRenderTarget} renderTarget - The render target.
  */
-EffectComposer.prototype._reset = function(renderTarget){
-	
-	if (renderTarget === undefined) {
+EffectComposer.prototype._reset = function( renderTarget ) {
 
+	if ( renderTarget === undefined )
+	{
 		renderTarget = this._renderTarget.clone();
 
-		renderTarget.width  = this._renderer.context.drawingBufferWidth;
+		renderTarget.width = this._renderer.context.drawingBufferWidth;
 		renderTarget.height = this._renderer.context.drawingBufferHeight;
 
 	}
@@ -46355,7 +46934,7 @@ EffectComposer.prototype._reset = function(renderTarget){
 
 	this._readBuffer = this._renderTarget;
 	this._writeBuffer = this._renderTarget.clone();
-	
+
 };
 
 module.exports = EffectComposer;
@@ -46368,7 +46947,7 @@ module.exports = EffectComposer;
 
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
 /**
  * Creates a render pass.
@@ -46378,34 +46957,34 @@ var THREE = require("three");
  * @param {Scene} scene - The scene object.
  * @param {Camera} camera - The camera object.
  */
-function RenderPass(scene, camera){
-	
-	Object.defineProperties(this, {
-		_scene: {
-			value: scene,
-			configurable: false,
-			enumerable: false,
-			writable: false
+function RenderPass( scene, camera ) {
+
+	Object.defineProperties( this, {
+		_scene : {
+			value : scene,
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		_camera: {
-			value: camera,
-			configurable: false,
-			enumerable: false,
-			writable: false
+		_camera : {
+			value : camera,
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		enabled: {
-			value: true,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		enabled : {
+			value : true,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		needsSwap: {
-			value:  false,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		needsSwap : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		}
-	});
+	} );
 }
 
 /**
@@ -46415,9 +46994,9 @@ function RenderPass(scene, camera){
  * @param {THREE.WebGLRenderTarget} writeBuffer - The target framebuffer.
  * @param {THREE.WebGLRenderTarget} readBuffer - The source framebuffer.
  */
-RenderPass.prototype.render = function(renderer, writeBuffer, readBuffer){
+RenderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 
-	renderer.render(this._scene, this._camera, readBuffer, true);
+	renderer.render( this._scene, this._camera, readBuffer, true );
 };
 
 module.exports = RenderPass;
@@ -46430,7 +47009,7 @@ module.exports = RenderPass;
 
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
 /**
  * Creates a shader pass.
@@ -46438,66 +47017,67 @@ var THREE = require("three");
  * @constructor
  * 
  * @param {object} shader - The shader source code.
- * @param {string} textureID - The name of the texture, which represents the readBuffer.
+ * @param {string} textureID - The name of the texture, which represents the
+ * readBuffer.
  */
-function ShaderPass(shader, textureID){
-	
-	Object.defineProperties(this, {
-		_textureID: {
-			value: (textureID !== undefined) ? textureID : "tDiffuse",
-			configurable: false,
-			enumerable: false,
-			writable: false
+function ShaderPass( shader, textureID ) {
+
+	Object.defineProperties( this, {
+		_textureID : {
+			value : ( textureID !== undefined ) ? textureID : "tDiffuse",
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		_scene: {
-			value:  new THREE.Scene(),
-			configurable: false,
-			enumerable: false,
-			writable: false
+		_scene : {
+			value : new THREE.Scene(),
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		_camera: {
-			value:  new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1),
-			configurable: false,
-			enumerable: false,
-			writable: false
+		_camera : {
+			value : new THREE.OrthographicCamera( -1, 1, 1, -1, 0, 1 ),
+			configurable : false,
+			enumerable : false,
+			writable : false
 		},
-		uniforms: {
-			value:  THREE.UniformsUtils.clone(shader.uniforms),
-			configurable: false,
-			enumerable: true,
-			writable: false
+		uniforms : {
+			value : THREE.UniformsUtils.clone( shader.uniforms ),
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		enabled: {
-			value: true,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		enabled : {
+			value : true,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
-		needsSwap: {
-			value:  true,
-			configurable: false,
-			enumerable: true,
-			writable: false
+		needsSwap : {
+			value : true,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		},
-		renderToScreen: {
-			value:  false,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		renderToScreen : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
-	});
+	} );
 
-	var quad = new THREE.Mesh(new THREE.PlaneBufferGeometry(2, 2), null);
-	quad.material = new THREE.ShaderMaterial({
+	var quad = new THREE.Mesh( new THREE.PlaneBufferGeometry( 2, 2 ), null );
+	quad.material = new THREE.ShaderMaterial( {
 
-        defines: shader.defines || {},
-		uniforms: this.uniforms,
-		vertexShader: shader.vertexShader,
-		fragmentShader: shader.fragmentShader
+		defines : shader.defines || {},
+		uniforms : this.uniforms,
+		vertexShader : shader.vertexShader,
+		fragmentShader : shader.fragmentShader
 
-	});
-	
-	this._scene.add(quad);
+	} );
+
+	this._scene.add( quad );
 }
 
 /**
@@ -46507,21 +47087,21 @@ function ShaderPass(shader, textureID){
  * @param {THREE.WebGLRenderTarget} writeBuffer - The target framebuffer.
  * @param {THREE.WebGLRenderTarget} readBuffer - The source framebuffer.
  */
-ShaderPass.prototype.render = function(renderer, writeBuffer, readBuffer){
-	
-	if (this.uniforms[this._textureID] !== undefined) {
+ShaderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 
-		this.uniforms[this._textureID].value = readBuffer;
+	if ( this.uniforms[ this._textureID ] !== undefined )
+	{
+		this.uniforms[ this._textureID ].value = readBuffer;
 	}
-	
-	// determine screen/ off-screen rendering
-	if (this.renderToScreen === true) {
 
-		renderer.render(this._scene, this._camera);
-		
-	} else {
-		
-		renderer.render(this._scene, this._camera, writeBuffer, false);
+	// determine screen/ off-screen rendering
+	if ( this.renderToScreen === true )
+	{
+		renderer.render( this._scene, this._camera );
+	}
+	else
+	{
+		renderer.render( this._scene, this._camera, writeBuffer, false );
 	}
 };
 
@@ -46541,10 +47121,10 @@ var THREE = require("three");
 
 module.exports  = {
 		
-	uniforms: THREE.UniformsUtils.merge([
+	uniforms: THREE.UniformsUtils.merge( [
 	                                     THREE.UniformsLib.lights,
-	                                     {"fTime": {type: "f", value: 0}}
-	                                     ]),
+	                                     { "fTime": { type: "f", value: 0 } }
+	                                     ] ),
 	
 	lights: true, // use lights of scene in this shader
 
@@ -46644,9 +47224,9 @@ module.exports  = {
 
 	uniforms: {
 
-		"tDiffuse": {type: "t", value: null},
-		"direction": {type: "v2", value: new THREE.Vector2()},  // the direction of the blur: (1.0, 0.0) -> x-axis blur, (0.0, 1.0) -> y-axis blur
-		"blur": {type: "f", value: 0.0},  // the amount of blur
+		"tDiffuse": { type: "t", value: null },
+		"direction": { type: "v2", value: new THREE.Vector2() },  // the direction of the blur: (1.0, 0.0) -> x-axis blur, (0.0, 1.0) -> y-axis blur
+		"blur": { type: "f", value: 0.0 },  // the amount of blur
 
 	},
 
@@ -46708,7 +47288,7 @@ module.exports  = {
 
 	uniforms: {
 
-		"tDiffuse": {type: "t", value: null}
+		"tDiffuse": { type: "t", value: null }
 
 	},
 
@@ -46757,10 +47337,10 @@ module.exports  = {
 
 	uniforms: {
 
-		"tDiffuse": {type: "t", value: null},   
-		"radius":   {type: "f", value: 0.75},	// radius of the vignette, where 0.5 results in a circle fitting the screen, between 0.0 and 1.0
-		"strength": {type: "f", value: 0.8},  	// strength of the vignette, between 0.0 and 1.0
-		"softness": {type: "f", value: 0.45}   	// softness of the vignette, between 0.0 and 1.0
+		"tDiffuse": { type: "t", value: null },   
+		"radius":   { type: "f", value: 0.75 },	// radius of the vignette, where 0.5 results in a circle fitting the screen, between 0.0 and 1.0
+		"strength": { type: "f", value: 0.8 },  	// strength of the vignette, between 0.0 and 1.0
+		"softness": { type: "f", value: 0.45 }   	// softness of the vignette, between 0.0 and 1.0
 		
 	},
 
@@ -46808,110 +47388,116 @@ module.exports  = {
 },{}],60:[function(require,module,exports){
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
-var StageBase = require("../core/StageBase");
-var JSONLoader = require("../etc/JSONLoader");
-var Easing = require("../animation/Easing");
+var StageBase = require( "../core/StageBase" );
+var JSONLoader = require( "../etc/JSONLoader" );
+var Easing = require( "../animation/Easing" );
 
 var self;
 
-function Stage(){
-	
-	StageBase.call(this, "001");
-	
+function Stage() {
+
+	StageBase.call( this, "001" );
+
 	self = this;
 }
 
-Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype = Object.create( StageBase.prototype );
 Stage.prototype.constructor = Stage;
 
-Stage.prototype.setup = function(){
-	
-	StageBase.prototype.setup.call(this);
-	
+Stage.prototype.setup = function() {
+
+	StageBase.prototype.setup.call( this );
+
 	// controls setup
-	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
-	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
-	
+	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
+	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+
 	// load texts
-	this.textManager.load(this.stageId);
-	
+	this.textManager.load( this.stageId );
+
 	// add ground
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
-	var groundMaterial = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
-	
-	var ground = new THREE.Mesh(groundGeometry, groundMaterial);
+	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
+	var groundMaterial = new THREE.MeshBasicMaterial( {
+		vertexColors : THREE.FaceColors
+	} );
+
+	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
 	ground.rotation.x = -0.5 * Math.PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
-	this.world.addGround(ground);
-	this.scene.add(ground);
-	
+	this.world.addGround( ground );
+	this.scene.add( ground );
+
 	// color faces
-	colorFaces(groundGeometry);
-	
+	colorFaces( groundGeometry );
+
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load("assets/models/sign.json",  function(geometry, materials) {
-		
-		self.settingsManager.adjustMaterials(materials, self.renderer);
-		
-		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
-		sign.position.set(0, 20, 75);
-		sign.rotation.set(0, Math.PI * -0.5, 0);
-		self.scene.add(sign);
-		
-		self.animationManager.createHoverAnimation({
-			object: sign.position,
-			property: "y",
-			duration: 5000,
-			start: sign.position.y,
-			end: sign.position.y + 5,
-			easing: Easing.Sinusoidal.InOut
-		}).play();
-	});
-	
+	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+
+		self.settingsManager.adjustMaterials( materials, self.renderer );
+
+		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		sign.position.set( 0, 20, 75 );
+		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		self.scene.add( sign );
+
+		self.animationManager.createHoverAnimation( {
+			object : sign.position,
+			property : "y",
+			duration : 5000,
+			start : sign.position.y,
+			end : sign.position.y + 5,
+			easing : Easing.Sinusoidal.InOut
+		} ).play();
+	} );
+
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
-		self._changeStage("002", true);
-	});
-	stageTrigger.position.set(0, 0, 75);
-	this.scene.add(stageTrigger);
-	
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+
+		self._changeStage( "002", true );
+	} );
+	stageTrigger.position.set( 0, 0, 75 );
+	this.scene.add( stageTrigger );
+
 	// start rendering
 	this._render();
 };
 
-Stage.prototype.start = function(){
-	
-	StageBase.prototype.start.call(this);
-	
+Stage.prototype.start = function() {
+
+	StageBase.prototype.start.call( this );
+
 	// set information panel text
-	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
+	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
 };
 
-Stage.prototype.destroy = function(){
-	
-	StageBase.prototype.destroy.call(this);
+Stage.prototype.destroy = function() {
+
+	StageBase.prototype.destroy.call( this );
 };
 
-Stage.prototype._render = function(){
-	
-	StageBase.prototype._render.call(self);
+Stage.prototype._render = function() {
+
+	StageBase.prototype._render.call( self );
 };
 
-//custom functions
+// custom functions
 
-function colorFaces(geometry){
-	
-	for (var i = 0; i < geometry.faces.length; i ++){
-		
-		if(i % 2 === 0){
-			geometry.faces[i].color = new THREE.Color(0x6083c2);
-		}else{
-			geometry.faces[i].color = new THREE.Color(0x455066);
+function colorFaces( geometry ) {
+
+	for ( var i = 0; i < geometry.faces.length; i++ )
+	{
+		if ( i % 2 === 0 )
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x6083c2 );
+		}
+		else
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x455066 );
 		}
 	}
 }
@@ -46920,171 +47506,180 @@ module.exports = Stage;
 },{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":30,"three":2}],61:[function(require,module,exports){
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
-var StageBase = require("../core/StageBase");
-var JSONLoader = require("../etc/JSONLoader");
-var Easing = require("../animation/Easing");
+var StageBase = require( "../core/StageBase" );
+var JSONLoader = require( "../etc/JSONLoader" );
+var Easing = require( "../animation/Easing" );
 
 var self;
 
-function Stage(){
-	
-	StageBase.call(this, "002");
-	
+function Stage() {
+
+	StageBase.call( this, "002" );
+
 	self = this;
 }
 
-Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype = Object.create( StageBase.prototype );
 Stage.prototype.constructor = Stage;
 
-Stage.prototype.setup = function(){
-	
-	StageBase.prototype.setup.call(this);
-	
+Stage.prototype.setup = function() {
+
+	StageBase.prototype.setup.call( this );
+
 	// setup controls
-	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
-	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
-	
+	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
+	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+
 	// load texts
-	this.textManager.load(this.stageId);
-	
+	this.textManager.load( this.stageId );
+
 	// add ground
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
-	var groundMaterial = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
-	
-	var ground = new THREE.Mesh(groundGeometry, groundMaterial);
+	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
+	var groundMaterial = new THREE.MeshBasicMaterial( {
+		vertexColors : THREE.FaceColors
+	} );
+
+	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
 	ground.rotation.x = -0.5 * Math.PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
-	this.world.addGround(ground);
-	this.scene.add(ground);
-	
+	this.world.addGround( ground );
+	this.scene.add( ground );
+
 	// color faces
-	colorFaces(groundGeometry);
-	
+	colorFaces( groundGeometry );
+
 	// create interactive box
-	var interactiveBox = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0x455066}));
+	var interactiveBox = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+		color : 0x455066
+	} ) );
 	interactiveBox.matrixAutoUpdate = false;
-	interactiveBox.position.set(50, 5, 0);
+	interactiveBox.position.set( 50, 5, 0 );
 	interactiveBox.castShadow = true;
 	interactiveBox.updateMatrix();
-	this.scene.add(interactiveBox);
+	this.scene.add( interactiveBox );
 
-	this.actionManager.createInteraction(
-			interactiveBox, 
-			this.actionManager.COLLISIONTYPES.AABB, 
-			this.actionManager.RAYCASTPRECISION.FACE, 
-			"Label.Action", 
-			function(){
-				// nothing happens here...
-			}
-	);
-	
+	this.actionManager.createInteraction( interactiveBox, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Action", function() {
+
+		// nothing happens here...
+	} );
+
 	// create first static box with AABB collision detection
-	var staticBoxHover = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0x6083c2}));
+	var staticBoxHover = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+		color : 0x6083c2
+	} ) );
 	staticBoxHover.matrixAutoUpdate = false;
-	staticBoxHover.position.set(17, 15, 0);
+	staticBoxHover.position.set( 17, 15, 0 );
 	staticBoxHover.castShadow = true;
 	staticBoxHover.updateMatrix();
-	this.scene.add(staticBoxHover);
-	
-	this.actionManager.createStatic(staticBoxHover, this.actionManager.COLLISIONTYPES.AABB );
-	
+	this.scene.add( staticBoxHover );
+
+	this.actionManager.createStatic( staticBoxHover, this.actionManager.COLLISIONTYPES.AABB );
+
 	// create second static box with OBB collision detection
-	var staticBox = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 20) , new THREE.MeshLambertMaterial({color: 0x6083c2}));
+	var staticBox = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 20 ), new THREE.MeshLambertMaterial( {
+		color : 0x6083c2
+	} ) );
 	staticBox.matrixAutoUpdate = false;
-	staticBox.position.set(-17, 5, 0);
-	staticBox.rotation.set(0, Math.PI * 0.2, 0);
+	staticBox.position.set( -17, 5, 0 );
+	staticBox.rotation.set( 0, Math.PI * 0.2, 0 );
 	staticBox.castShadow = true;
 	staticBox.updateMatrix();
-	this.scene.add(staticBox);
-	
-	this.actionManager.createStatic(staticBox, this.actionManager.COLLISIONTYPES.OBB );
-	
+	this.scene.add( staticBox );
+
+	this.actionManager.createStatic( staticBox, this.actionManager.COLLISIONTYPES.OBB );
+
 	// create plain object
-	var plainBox = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0xf3f4f6}));
+	var plainBox = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+		color : 0xf3f4f6
+	} ) );
 	plainBox.matrixAutoUpdate = false;
-	plainBox.position.set(-50, 5, 0);
+	plainBox.position.set( -50, 5, 0 );
 	plainBox.castShadow = true;
 	plainBox.updateMatrix();
-	this.scene.add(plainBox);
-	
+	this.scene.add( plainBox );
+
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load("assets/models/sign.json",  function(geometry, materials) {
-		
-		self.settingsManager.adjustMaterials(materials, self.renderer);
-		
-		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
-		sign.position.set(0, 20, 75);
-		sign.rotation.set(0, Math.PI * -0.5, 0);
-		self.scene.add(sign);
-		
-		self.animationManager.createHoverAnimation({
-			object: sign.position,
-			property: "y",
-			duration: 5000,
-			start: sign.position.y,
-			end: sign.position.y + 5,
-			easing: Easing.Sinusoidal.InOut
-		}).play();
-	});
-	
+	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+
+		self.settingsManager.adjustMaterials( materials, self.renderer );
+
+		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		sign.position.set( 0, 20, 75 );
+		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		self.scene.add( sign );
+
+		self.animationManager.createHoverAnimation( {
+			object : sign.position,
+			property : "y",
+			duration : 5000,
+			start : sign.position.y,
+			end : sign.position.y + 5,
+			easing : Easing.Sinusoidal.InOut
+		} ).play();
+	} );
+
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
-		self._changeStage("003", true);
-	});
-	stageTrigger.position.set(0, 0, 75);
-	this.scene.add(stageTrigger);
-	
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+
+		self._changeStage( "003", true );
+	} );
+	stageTrigger.position.set( 0, 0, 75 );
+	this.scene.add( stageTrigger );
+
 	// light
-	var ambientLight = new THREE.AmbientLight(0x111111);
-	this.scene.add(ambientLight);
-	
-	var directionalLight = new THREE.DirectionalLight(0xffffff);
-	directionalLight.position.set(-100, 50, -100);
+	var ambientLight = new THREE.AmbientLight( 0x111111 );
+	this.scene.add( ambientLight );
+
+	var directionalLight = new THREE.DirectionalLight( 0xffffff );
+	directionalLight.position.set( -100, 50, -100 );
 	directionalLight.shadowCameraLeft = -50;
 	directionalLight.shadowCameraRight = 50;
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight(directionalLight);
-	this.scene.add(directionalLight);
+	this.settingsManager.adjustLight( directionalLight );
+	this.scene.add( directionalLight );
 
 	// start rendering
 	this._render();
-	
+
 };
 
-Stage.prototype.start = function(){
-	
-	StageBase.prototype.start.call(this);
-	
+Stage.prototype.start = function() {
+
+	StageBase.prototype.start.call( this );
+
 	// set information panel text
-	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
+	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
 };
 
-Stage.prototype.destroy = function(){
-	
-	StageBase.prototype.destroy.call(this);
+Stage.prototype.destroy = function() {
+
+	StageBase.prototype.destroy.call( this );
 };
 
-Stage.prototype._render = function(){
-	
-	StageBase.prototype._render.call(self);
+Stage.prototype._render = function() {
+
+	StageBase.prototype._render.call( self );
 };
 
-//custom functions
+// custom functions
 
-function colorFaces(geometry){
-	
-	for (var i = 0; i < geometry.faces.length; i ++){
-		
-		if(i % 2 === 0){
-			geometry.faces[i].color = new THREE.Color(0x6083c2);
-		}else{
-			geometry.faces[i].color = new THREE.Color(0x455066);
+function colorFaces( geometry ) {
+
+	for ( var i = 0; i < geometry.faces.length; i++ )
+	{
+		if ( i % 2 === 0 )
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x6083c2 );
+		}
+		else
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x455066 );
 		}
 	}
 }
@@ -47093,334 +47688,350 @@ module.exports = Stage;
 },{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":30,"three":2}],62:[function(require,module,exports){
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
-var StageBase = require("../core/StageBase");
-var JSONLoader = require("../etc/JSONLoader");
-var Easing = require("../animation/Easing");
+var StageBase = require( "../core/StageBase" );
+var JSONLoader = require( "../etc/JSONLoader" );
+var Easing = require( "../animation/Easing" );
 
 var self, index = 0;
 
-function Stage(){
-	
-	StageBase.call(this, "003");
-	
+function Stage() {
+
+	StageBase.call( this, "003" );
+
 	self = this;
 }
 
-Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype = Object.create( StageBase.prototype );
 Stage.prototype.constructor = Stage;
 
-Stage.prototype.setup = function(){
-	
-	StageBase.prototype.setup.call(this);
-	
+Stage.prototype.setup = function() {
+
+	StageBase.prototype.setup.call( this );
+
 	// setup controls
-	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
-	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
-	
+	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
+	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+
 	// load texts
-	this.textManager.load(this.stageId);
-	
+	this.textManager.load( this.stageId );
+
 	// add ground
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
-	var groundMaterial = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
-	
-	var ground = new THREE.Mesh(groundGeometry, groundMaterial);
+	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
+	var groundMaterial = new THREE.MeshBasicMaterial( {
+		vertexColors : THREE.FaceColors
+	} );
+
+	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
 	ground.rotation.x = -0.5 * Math.PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
-	this.world.addGround(ground);
-	this.scene.add(ground);
-	
+	this.world.addGround( ground );
+	this.scene.add( ground );
+
 	// color faces
-	colorFaces(groundGeometry);
-	
+	colorFaces( groundGeometry );
+
 	// create interactive box
-	var interactiveBox = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0x455066}));
+	var interactiveBox = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+		color : 0x455066
+	} ) );
 	interactiveBox.matrixAutoUpdate = false;
-	interactiveBox.position.set(20, 5, 0);
+	interactiveBox.position.set( 20, 5, 0 );
 	interactiveBox.castShadow = true;
 	interactiveBox.updateMatrix();
-	this.scene.add(interactiveBox);
-	
-	this.actionManager.createInteraction(
-			interactiveBox, 
-			this.actionManager.COLLISIONTYPES.AABB, 
-			this.actionManager.RAYCASTPRECISION.FACE, 
-			"Label.Color", 
-			function(){
-				colorMesh(interactiveBox);
-			}
-	);
-	
+	this.scene.add( interactiveBox );
+
+	this.actionManager.createInteraction( interactiveBox, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Color", function() {
+
+		colorMesh( interactiveBox );
+	} );
+
 	// add trigger for color change
-	var colorTrigger = this.actionManager.createTrigger("Color Change", 10, function(){
-		colorMesh(interactiveBox);
-	});
-	colorTrigger.position.set(-20, 0, 0);
-	this.scene.add(colorTrigger);
-	
+	var colorTrigger = this.actionManager.createTrigger( "Color Change", 10, function() {
+
+		colorMesh( interactiveBox );
+	} );
+	colorTrigger.position.set( -20, 0, 0 );
+	this.scene.add( colorTrigger );
+
 	// visualize trigger with circle
-	var triggerCircle = new THREE.Mesh(new THREE.CircleGeometry(10) , new THREE.MeshBasicMaterial({wireframe: true}));
-	colorTrigger.add(triggerCircle);
-	
+	var triggerCircle = new THREE.Mesh( new THREE.CircleGeometry( 10 ), new THREE.MeshBasicMaterial( {
+		wireframe : true
+	} ) );
+	colorTrigger.add( triggerCircle );
+
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load("assets/models/sign.json",  function(geometry, materials) {
-		
-		self.settingsManager.adjustMaterials(materials, self.renderer);
-		
-		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
-		sign.position.set(0, 20, 75);
-		sign.rotation.set(0, Math.PI * -0.5, 0);
-		self.scene.add(sign);
-		
-		self.animationManager.createHoverAnimation({
-			object: sign.position,
-			property: "y",
-			duration: 5000,
-			start: sign.position.y,
-			end: sign.position.y + 5,
-			easing: Easing.Sinusoidal.InOut
-		}).play();
-	});
-	
+	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+
+		self.settingsManager.adjustMaterials( materials, self.renderer );
+
+		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		sign.position.set( 0, 20, 75 );
+		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		self.scene.add( sign );
+
+		self.animationManager.createHoverAnimation( {
+			object : sign.position,
+			property : "y",
+			duration : 5000,
+			start : sign.position.y,
+			end : sign.position.y + 5,
+			easing : Easing.Sinusoidal.InOut
+		} ).play();
+	} );
+
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
-		self._changeStage("004", true);
-	});
-	stageTrigger.position.set(0, 0, 75);
-	this.scene.add(stageTrigger);
-	
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+
+		self._changeStage( "004", true );
+	} );
+	stageTrigger.position.set( 0, 0, 75 );
+	this.scene.add( stageTrigger );
+
 	// light
-	var ambientLight = new THREE.AmbientLight(0x111111);
-	this.scene.add(ambientLight);
-	
-	var directionalLight = new THREE.DirectionalLight(0xffffff);
-	directionalLight.position.set(-100, 50, -100);
+	var ambientLight = new THREE.AmbientLight( 0x111111 );
+	this.scene.add( ambientLight );
+
+	var directionalLight = new THREE.DirectionalLight( 0xffffff );
+	directionalLight.position.set( -100, 50, -100 );
 	directionalLight.shadowCameraLeft = -40;
 	directionalLight.shadowCameraRight = 40;
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight(directionalLight);
-	this.scene.add(directionalLight);
-	
+	this.settingsManager.adjustLight( directionalLight );
+	this.scene.add( directionalLight );
+
 	// start rendering
 	this._render();
-	
+
 };
 
-Stage.prototype.start = function(){
-	
-	StageBase.prototype.start.call(this);
-	
+Stage.prototype.start = function() {
+
+	StageBase.prototype.start.call( this );
+
 	// set information panel text
-	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
+	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
 };
 
-Stage.prototype.destroy = function(){
-	
-	StageBase.prototype.destroy.call(this);
+Stage.prototype.destroy = function() {
+
+	StageBase.prototype.destroy.call( this );
 };
 
-Stage.prototype._render = function(){
-	
-	StageBase.prototype._render.call(self);
+Stage.prototype._render = function() {
+
+	StageBase.prototype._render.call( self );
 };
 
 // custom functions
 
-function colorFaces(geometry){
-	
-	for (var i = 0; i < geometry.faces.length; i ++){
-		
-		if(i % 2 === 0){
-			geometry.faces[i].color = new THREE.Color(0x6083c2);
-		}else{
-			geometry.faces[i].color = new THREE.Color(0x455066);
+function colorFaces( geometry ) {
+
+	for ( var i = 0; i < geometry.faces.length; i++ )
+	{
+		if ( i % 2 === 0 )
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x6083c2 );
+		}
+		else
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x455066 );
 		}
 	}
 }
 
-function colorMesh(mesh){
-	
-	if(++index % 2 === 0){
-		mesh.material.color = new THREE.Color(0x455066);
-	}else{
-		mesh.material.color = new THREE.Color(0xffffff);
-	}	
+function colorMesh( mesh ) {
+
+	if ( ++index % 2 === 0 )
+	{
+		mesh.material.color = new THREE.Color( 0x455066 );
+	}
+	else
+	{
+		mesh.material.color = new THREE.Color( 0xffffff );
+	}
 }
 
 module.exports = Stage;
 },{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":30,"three":2}],63:[function(require,module,exports){
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
-var StageBase = require("../core/StageBase");
-var JSONLoader = require("../etc/JSONLoader");
-var Easing = require("../animation/Easing");
+var StageBase = require( "../core/StageBase" );
+var JSONLoader = require( "../etc/JSONLoader" );
+var Easing = require( "../animation/Easing" );
 
 var self;
 
-function Stage(){
-	
-	StageBase.call(this, "004");
-	
+function Stage() {
+
+	StageBase.call( this, "004" );
+
 	self = this;
 }
 
-Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype = Object.create( StageBase.prototype );
 Stage.prototype.constructor = Stage;
 
-Stage.prototype.setup = function(){
-	
-	StageBase.prototype.setup.call(this);
-	
+Stage.prototype.setup = function() {
+
+	StageBase.prototype.setup.call( this );
+
 	// setup controls
-	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
-	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
-	
+	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
+	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+
 	// load texts
-	this.textManager.load(this.stageId);
-	
+	this.textManager.load( this.stageId );
+
 	// add ground
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
-	var groundMaterial = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
-	
-	var ground = new THREE.Mesh(groundGeometry, groundMaterial);
+	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
+	var groundMaterial = new THREE.MeshBasicMaterial( {
+		vertexColors : THREE.FaceColors
+	} );
+
+	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
 	ground.rotation.x = -0.5 * Math.PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
-	this.world.addGround(ground);
-	this.scene.add(ground);
-	
+	this.world.addGround( ground );
+	this.scene.add( ground );
+
 	// color faces
-	colorFaces(groundGeometry);
-	
+	colorFaces( groundGeometry );
+
 	// create interactive box
-	var interactiveBoxTextScreen = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0x455066}));
+	var interactiveBoxTextScreen = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+		color : 0x455066
+	} ) );
 	interactiveBoxTextScreen.matrixAutoUpdate = false;
-	interactiveBoxTextScreen.position.set(20, 5, 0);
+	interactiveBoxTextScreen.position.set( 20, 5, 0 );
 	interactiveBoxTextScreen.castShadow = true;
 	interactiveBoxTextScreen.updateMatrix();
-	this.scene.add(interactiveBoxTextScreen);
-	
-	this.actionManager.createInteraction(
-			interactiveBoxTextScreen, 
-			this.actionManager.COLLISIONTYPES.AABB, 
-			this.actionManager.RAYCASTPRECISION.FACE, 
-			"Label.TextScreen", 
-			function(){
-				
-				self.controls.isActionInProgress = true;
-				self.userInterfaceManager.showTextScreen([{name: "Name.Daniel", text: "TextScreen.Part1"}, 
-		                                                  {name: "Name.Peter", text: "TextScreen.Part2"}, 
-		                                                  {name: undefined, text: "TextScreen.Part3"}], function(){
-					self.controls.isActionInProgress = false;
-				});
-			}
-	);
-	
+	this.scene.add( interactiveBoxTextScreen );
+
+	this.actionManager.createInteraction( interactiveBoxTextScreen, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.TextScreen", function() {
+
+		self.controls.isActionInProgress = true;
+		self.userInterfaceManager.showTextScreen( [ {
+			name : "Name.Daniel",
+			text : "TextScreen.Part1"
+		}, {
+			name : "Name.Peter",
+			text : "TextScreen.Part2"
+		}, {
+			name : undefined,
+			text : "TextScreen.Part3"
+		} ], function() {
+
+			self.controls.isActionInProgress = false;
+		} );
+	} );
+
 	// create interactive box
-	var interactiveBoxModal = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0xf3f4f6}));
+	var interactiveBoxModal = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+		color : 0xf3f4f6
+	} ) );
 	interactiveBoxModal.matrixAutoUpdate = false;
-	interactiveBoxModal.position.set(-20, 5, 0);
+	interactiveBoxModal.position.set( -20, 5, 0 );
 	interactiveBoxModal.castShadow = true;
 	interactiveBoxModal.updateMatrix();
-	this.scene.add(interactiveBoxModal);
-	
-	this.actionManager.createInteraction(
-			interactiveBoxModal, 
-			this.actionManager.COLLISIONTYPES.AABB, 
-			this.actionManager.RAYCASTPRECISION.FACE, 
-			"Label.Modal", 
-			function(){
-				self.userInterfaceManager.showModalDialog({
-					headline: "Modal.Headline",
-					button: "Modal.Button",
-					content: "Modal.Content"
-				});
-			}
-	);
-	
+	this.scene.add( interactiveBoxModal );
+
+	this.actionManager.createInteraction( interactiveBoxModal, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Modal", function() {
+
+		self.userInterfaceManager.showModalDialog( {
+			headline : "Modal.Headline",
+			button : "Modal.Button",
+			content : "Modal.Content"
+		} );
+	} );
+
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load("assets/models/sign.json",  function(geometry, materials) {
-		
-		self.settingsManager.adjustMaterials(materials, self.renderer);
-		
-		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
-		sign.position.set(0, 20, 75);
-		sign.rotation.set(0, Math.PI * -0.5, 0);
-		self.scene.add(sign);
-		
-		self.animationManager.createHoverAnimation({
-			object: sign.position,
-			property: "y",
-			duration: 5000,
-			start: sign.position.y,
-			end: sign.position.y + 5,
-			easing: Easing.Sinusoidal.InOut
-		}).play();
-	});
-	
+	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+
+		self.settingsManager.adjustMaterials( materials, self.renderer );
+
+		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		sign.position.set( 0, 20, 75 );
+		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		self.scene.add( sign );
+
+		self.animationManager.createHoverAnimation( {
+			object : sign.position,
+			property : "y",
+			duration : 5000,
+			start : sign.position.y,
+			end : sign.position.y + 5,
+			easing : Easing.Sinusoidal.InOut
+		} ).play();
+	} );
+
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
-		self._changeStage("005", true);
-	});
-	stageTrigger.position.set(0, 0, 75);
-	this.scene.add(stageTrigger);
-	
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+
+		self._changeStage( "005", true );
+	} );
+	stageTrigger.position.set( 0, 0, 75 );
+	this.scene.add( stageTrigger );
+
 	// light
-	var ambientLight = new THREE.AmbientLight(0x111111);
-	this.scene.add(ambientLight);
-	
-	var directionalLight = new THREE.DirectionalLight(0xffffff);
-	directionalLight.position.set(-100, 50, -100);
+	var ambientLight = new THREE.AmbientLight( 0x111111 );
+	this.scene.add( ambientLight );
+
+	var directionalLight = new THREE.DirectionalLight( 0xffffff );
+	directionalLight.position.set( -100, 50, -100 );
 	directionalLight.shadowCameraLeft = -40;
 	directionalLight.shadowCameraRight = 40;
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight(directionalLight);
-	this.scene.add(directionalLight);
+	this.settingsManager.adjustLight( directionalLight );
+	this.scene.add( directionalLight );
 
 	// start rendering
 	this._render();
-	
+
 };
 
-Stage.prototype.start = function(){
-	
-	StageBase.prototype.start.call(this);
-	
+Stage.prototype.start = function() {
+
+	StageBase.prototype.start.call( this );
+
 	// set information panel text
-	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
+	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
 };
 
-Stage.prototype.destroy = function(){
-	
-	StageBase.prototype.destroy.call(this);
+Stage.prototype.destroy = function() {
+
+	StageBase.prototype.destroy.call( this );
 };
 
-Stage.prototype._render = function(){
-	
-	StageBase.prototype._render.call(self);
+Stage.prototype._render = function() {
+
+	StageBase.prototype._render.call( self );
 };
 
 // custom functions
 
-function colorFaces(geometry){
-	
-	for (var i = 0; i < geometry.faces.length; i ++){
-		
-		if(i % 2 === 0){
-			geometry.faces[i].color = new THREE.Color(0x6083c2);
-		}else{
-			geometry.faces[i].color = new THREE.Color(0x455066);
+function colorFaces( geometry ) {
+
+	for ( var i = 0; i < geometry.faces.length; i++ )
+	{
+		if ( i % 2 === 0 )
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x6083c2 );
+		}
+		else
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x455066 );
 		}
 	}
 }
@@ -47429,119 +48040,125 @@ module.exports = Stage;
 },{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":30,"three":2}],64:[function(require,module,exports){
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
-var StageBase = require("../core/StageBase");
-var JSONLoader = require("../etc/JSONLoader");
-var Easing = require("../animation/Easing");
+var StageBase = require( "../core/StageBase" );
+var JSONLoader = require( "../etc/JSONLoader" );
+var Easing = require( "../animation/Easing" );
 
 var self;
 
-function Stage(){
-	
-	StageBase.call(this, "005");
-	
+function Stage() {
+
+	StageBase.call( this, "005" );
+
 	self = this;
 }
 
-Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype = Object.create( StageBase.prototype );
 Stage.prototype.constructor = Stage;
 
-Stage.prototype.setup = function(){
-	
-	StageBase.prototype.setup.call(this);
-	
+Stage.prototype.setup = function() {
+
+	StageBase.prototype.setup.call( this );
+
 	// setup controls
-	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
-	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
-	
+	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
+	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+
 	// load texts
-	this.textManager.load(this.stageId);
-	
+	this.textManager.load( this.stageId );
+
 	// add ground
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
-	var groundMaterial = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
-	
-	var ground = new THREE.Mesh(groundGeometry, groundMaterial);
+	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
+	var groundMaterial = new THREE.MeshBasicMaterial( {
+		vertexColors : THREE.FaceColors
+	} );
+
+	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
 	ground.rotation.x = -0.5 * Math.PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
-	this.world.addGround(ground);
-	this.scene.add(ground);
-	
+	this.world.addGround( ground );
+	this.scene.add( ground );
+
 	// color faces
-	colorFaces(groundGeometry);
-	
+	colorFaces( groundGeometry );
+
 	// add background music
-	this.audioManager.setBackgroundMusic("music", 0.5);
-	
+	this.audioManager.setBackgroundMusic( "music", 0.5 );
+
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load("assets/models/sign.json",  function(geometry, materials) {
-		
-		self.settingsManager.adjustMaterials(materials, self.renderer);
-		
-		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
-		sign.position.set(0, 20, 75);
-		sign.rotation.set(0, Math.PI * -0.5, 0);
-		self.scene.add(sign);
-		
-		self.animationManager.createHoverAnimation({
-			object: sign.position,
-			property: "y",
-			duration: 5000,
-			start: sign.position.y,
-			end: sign.position.y + 5,
-			easing: Easing.Sinusoidal.InOut
-		}).play();
-	});
-	
+	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+
+		self.settingsManager.adjustMaterials( materials, self.renderer );
+
+		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		sign.position.set( 0, 20, 75 );
+		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		self.scene.add( sign );
+
+		self.animationManager.createHoverAnimation( {
+			object : sign.position,
+			property : "y",
+			duration : 5000,
+			start : sign.position.y,
+			end : sign.position.y + 5,
+			easing : Easing.Sinusoidal.InOut
+		} ).play();
+	} );
+
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
-		self._changeStage("006", true);
-	});
-	stageTrigger.position.set(0, 0, 75);
-	this.scene.add(stageTrigger);
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+
+		self._changeStage( "006", true );
+	} );
+	stageTrigger.position.set( 0, 0, 75 );
+	this.scene.add( stageTrigger );
 
 	// start rendering
 	this._render();
 };
 
-Stage.prototype.start = function(){
-	
-	StageBase.prototype.start.call(this);
-	
+Stage.prototype.start = function() {
+
+	StageBase.prototype.start.call( this );
+
 	// start playing
 	this.audioManager.playBackgroundMusic();
-	
+
 	// set information panel text
-	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
+	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
 };
 
-Stage.prototype.destroy = function(){
-	
-	StageBase.prototype.destroy.call(this);
-	
+Stage.prototype.destroy = function() {
+
+	StageBase.prototype.destroy.call( this );
+
 	// stop playing
 	this.audioManager.stopBackgroundMusic();
 };
 
-Stage.prototype._render = function(){
-	
-	StageBase.prototype._render.call(self);
+Stage.prototype._render = function() {
+
+	StageBase.prototype._render.call( self );
 };
 
-//custom functions
+// custom functions
 
-function colorFaces(geometry){
-	
-	for (var i = 0; i < geometry.faces.length; i ++){
-		
-		if(i % 2 === 0){
-			geometry.faces[i].color = new THREE.Color(0x6083c2);
-		}else{
-			geometry.faces[i].color = new THREE.Color(0x455066);
+function colorFaces( geometry ) {
+
+	for ( var i = 0; i < geometry.faces.length; i++ )
+	{
+		if ( i % 2 === 0 )
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x6083c2 );
+		}
+		else
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x455066 );
 		}
 	}
 }
@@ -47550,176 +48167,188 @@ module.exports = Stage;
 },{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":30,"three":2}],65:[function(require,module,exports){
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
-var StageBase = require("../core/StageBase");
-var JSONLoader = require("../etc/JSONLoader");
-var Easing = require("../animation/Easing");
+var StageBase = require( "../core/StageBase" );
+var JSONLoader = require( "../etc/JSONLoader" );
+var Easing = require( "../animation/Easing" );
 
 var self;
 
 var audioFire, audioClock;
 
-function Stage(){
-	
-	StageBase.call(this, "006");
+function Stage() {
+
+	StageBase.call( this, "006" );
 
 	self = this;
 }
 
-Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype = Object.create( StageBase.prototype );
 Stage.prototype.constructor = Stage;
 
-Stage.prototype.setup = function(){
-	
-	StageBase.prototype.setup.call(this);
-	
+Stage.prototype.setup = function() {
+
+	StageBase.prototype.setup.call( this );
+
 	// setup controls
-	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
-	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
-	
+	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
+	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+
 	// load texts
-	this.textManager.load(this.stageId);
-	
+	this.textManager.load( this.stageId );
+
 	// add ground
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
-	var groundMaterial = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
-	
-	var ground = new THREE.Mesh(groundGeometry, groundMaterial);
+	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
+	var groundMaterial = new THREE.MeshBasicMaterial( {
+		vertexColors : THREE.FaceColors
+	} );
+
+	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
 	ground.rotation.x = -0.5 * Math.PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
-	this.world.addGround(ground);
-	this.scene.add(ground);
-	
+	this.world.addGround( ground );
+	this.scene.add( ground );
+
 	// color faces
-	colorFaces(groundGeometry);
-	
+	colorFaces( groundGeometry );
+
 	// add boxes
-	var staticBoxFire = new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0x6083c2}));
+	var staticBoxFire = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+		color : 0x6083c2
+	} ) );
 	staticBoxFire.matrixAutoUpdate = false;
-	staticBoxFire.position.set(40, 5, 0);
+	staticBoxFire.position.set( 40, 5, 0 );
 	staticBoxFire.castShadow = true;
 	staticBoxFire.updateMatrix();
-	this.scene.add(staticBoxFire);
-	this.actionManager.createStatic(staticBoxFire, this.actionManager.COLLISIONTYPES.AABB);
-	
-	var staticBoxClock = new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0xf3f4f6}));
+	this.scene.add( staticBoxFire );
+	this.actionManager.createStatic( staticBoxFire, this.actionManager.COLLISIONTYPES.AABB );
+
+	var staticBoxClock = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+		color : 0xf3f4f6
+	} ) );
 	staticBoxClock.matrixAutoUpdate = false;
-	staticBoxClock.position.set(-40, 5, 0);
+	staticBoxClock.position.set( -40, 5, 0 );
 	staticBoxClock.castShadow = true;
 	staticBoxClock.updateMatrix();
-	this.scene.add(staticBoxClock);
-	this.actionManager.createStatic(staticBoxClock, this.actionManager.COLLISIONTYPES.AABB);
-	
-	var staticBoxWall = new THREE.Mesh(new THREE.BoxGeometry(1, 20, 40) , new THREE.MeshBasicMaterial({wireframe: true}));
+	this.scene.add( staticBoxClock );
+	this.actionManager.createStatic( staticBoxClock, this.actionManager.COLLISIONTYPES.AABB );
+
+	var staticBoxWall = new THREE.Mesh( new THREE.BoxGeometry( 1, 20, 40 ), new THREE.MeshBasicMaterial( {
+		wireframe : true
+	} ) );
 	staticBoxWall.matrixAutoUpdate = false;
-	staticBoxWall.position.set(-5.5, 5, 0);
+	staticBoxWall.position.set( -5.5, 5, 0 );
 	staticBoxWall.updateMatrix();
-	staticBoxClock.add(staticBoxWall);
-	this.actionManager.createStatic(staticBoxWall, this.actionManager.COLLISIONTYPES.AABB);
-	
+	staticBoxClock.add( staticBoxWall );
+	this.actionManager.createStatic( staticBoxWall, this.actionManager.COLLISIONTYPES.AABB );
+
 	// add dynamic sounds
-	this.audioManager.createAudioBufferList(["fire", "clock"], function(bufferList){
-		
-		audioFire = self.audioManager.createDynamicSound("ambient.fire", bufferList[0], true);
-		audioFire.setRefDistance(20);
-		audioFire.setRolloffFactor(1);
-		audioFire.setMaxDistance(50);
-		
-		audioClock = self.audioManager.createDynamicSound("ambient.clock", bufferList[1], true);
-		audioClock.setRefDistance(20);
-		audioClock.setRolloffFactor(1);
-		audioClock.setMaxDistance(50);
-		audioClock.addDirection(180, 0, 0);
-		audioClock.position.set(-5, 0, 0);
-		
-		staticBoxFire.add(audioFire);
-		staticBoxClock.add(audioClock);
-	}).load();
-	
+	this.audioManager.createAudioBufferList( [ "fire", "clock" ], function( bufferList ) {
+
+		audioFire = self.audioManager.createDynamicSound( "ambient.fire", bufferList[ 0 ], true );
+		audioFire.setRefDistance( 20 );
+		audioFire.setRolloffFactor( 1 );
+		audioFire.setMaxDistance( 50 );
+
+		audioClock = self.audioManager.createDynamicSound( "ambient.clock", bufferList[ 1 ], true );
+		audioClock.setRefDistance( 20 );
+		audioClock.setRolloffFactor( 1 );
+		audioClock.setMaxDistance( 50 );
+		audioClock.addDirection( 180, 0, 0 );
+		audioClock.position.set( -5, 0, 0 );
+
+		staticBoxFire.add( audioFire );
+		staticBoxClock.add( audioClock );
+	} ).load();
+
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load("assets/models/sign.json", function(geometry, materials) {
-		
-		self.settingsManager.adjustMaterials(materials, self.renderer);
-		
-		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
-		sign.position.set(0, 20, 75);
-		sign.rotation.set(0, Math.PI * -0.5, 0);
-		self.scene.add(sign);
-		
-		self.animationManager.createHoverAnimation({
-			object: sign.position,
-			property: "y",
-			duration: 5000,
-			start: sign.position.y,
-			end: sign.position.y + 5,
-			easing: Easing.Sinusoidal.InOut
-		}).play();
-	});
-	
+	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+
+		self.settingsManager.adjustMaterials( materials, self.renderer );
+
+		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		sign.position.set( 0, 20, 75 );
+		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		self.scene.add( sign );
+
+		self.animationManager.createHoverAnimation( {
+			object : sign.position,
+			property : "y",
+			duration : 5000,
+			start : sign.position.y,
+			end : sign.position.y + 5,
+			easing : Easing.Sinusoidal.InOut
+		} ).play();
+	} );
+
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
-		self._changeStage("007", true);
-	});
-	stageTrigger.position.set(0, 0, 75);
-	this.scene.add(stageTrigger);
-	
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+
+		self._changeStage( "007", true );
+	} );
+	stageTrigger.position.set( 0, 0, 75 );
+	this.scene.add( stageTrigger );
+
 	// light
-	var ambientLight = new THREE.AmbientLight(0x111111);
-	this.scene.add(ambientLight);
-	
-	var directionalLight = new THREE.DirectionalLight(0xffffff);
-	directionalLight.position.set(-100, 50, -100);
+	var ambientLight = new THREE.AmbientLight( 0x111111 );
+	this.scene.add( ambientLight );
+
+	var directionalLight = new THREE.DirectionalLight( 0xffffff );
+	directionalLight.position.set( -100, 50, -100 );
 	directionalLight.shadowCameraLeft = -40;
 	directionalLight.shadowCameraRight = 40;
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight(directionalLight);
-	this.scene.add(directionalLight);
+	this.settingsManager.adjustLight( directionalLight );
+	this.scene.add( directionalLight );
 
 	// start rendering
 	this._render();
 };
 
-Stage.prototype.start = function(){
-	
-	StageBase.prototype.start.call(this);
-	
+Stage.prototype.start = function() {
+
+	StageBase.prototype.start.call( this );
+
 	// start playing
 	audioFire.play();
 	audioClock.play();
-	
+
 	// set information panel text
-	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
+	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
 };
 
-Stage.prototype.destroy = function(){
-	
-	StageBase.prototype.destroy.call(this);
-	
+Stage.prototype.destroy = function() {
+
+	StageBase.prototype.destroy.call( this );
+
 	// stop playing
 	audioFire.stop();
 	audioClock.stop();
 };
 
-Stage.prototype._render = function(){
-	
-	StageBase.prototype._render.call(self);
+Stage.prototype._render = function() {
+
+	StageBase.prototype._render.call( self );
 };
 
-//custom functions
+// custom functions
 
-function colorFaces(geometry){
-	
-	for (var i = 0; i < geometry.faces.length; i ++){
-		
-		if(i % 2 === 0){
-			geometry.faces[i].color = new THREE.Color(0x6083c2);
-		}else{
-			geometry.faces[i].color = new THREE.Color(0x455066);
+function colorFaces( geometry ) {
+
+	for ( var i = 0; i < geometry.faces.length; i++ )
+	{
+		if ( i % 2 === 0 )
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x6083c2 );
+		}
+		else
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x455066 );
 		}
 	}
 }
@@ -47728,166 +48357,172 @@ module.exports = Stage;
 },{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":30,"three":2}],66:[function(require,module,exports){
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
-var StageBase = require("../core/StageBase");
-var JSONLoader = require("../etc/JSONLoader");
-var Easing = require("../animation/Easing");
+var StageBase = require( "../core/StageBase" );
+var JSONLoader = require( "../etc/JSONLoader" );
+var Easing = require( "../animation/Easing" );
 
 var self;
 
-function Stage(){
-	
-	StageBase.call(this, "007");
+function Stage() {
+
+	StageBase.call( this, "007" );
 
 	self = this;
 }
 
-Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype = Object.create( StageBase.prototype );
 Stage.prototype.constructor = Stage;
 
-Stage.prototype.setup = function(){
-	
-	StageBase.prototype.setup.call(this);
-	
+Stage.prototype.setup = function() {
+
+	StageBase.prototype.setup.call( this );
+
 	// setup controls
-	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
-	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
-	
+	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
+	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+
 	// load texts
-	this.textManager.load(this.stageId);
-	
+	this.textManager.load( this.stageId );
+
 	// add ground
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
-	var groundMaterial = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
-	
-	var ground = new THREE.Mesh(groundGeometry, groundMaterial);
+	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
+	var groundMaterial = new THREE.MeshBasicMaterial( {
+		vertexColors : THREE.FaceColors
+	} );
+
+	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
 	ground.rotation.x = -0.5 * Math.PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
-	this.world.addGround(ground);
-	this.scene.add(ground);
-	
+	this.world.addGround( ground );
+	this.scene.add( ground );
+
 	// color faces
-	colorFaces(groundGeometry);
-	
+	colorFaces( groundGeometry );
+
 	// add objects
-	var interactiveBoxBasic = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0x6083c2}));
-	interactiveBoxBasic.position.set(20, 5, 0);
+	var interactiveBoxBasic = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+		color : 0x6083c2
+	} ) );
+	interactiveBoxBasic.position.set( 20, 5, 0 );
 	interactiveBoxBasic.castShadow = true;
-	this.scene.add(interactiveBoxBasic);
-	
-	var interactiveObject = this.actionManager.createInteraction(
-		     interactiveBoxBasic, 
-			 this.actionManager.COLLISIONTYPES.AABB, 
-			 this.actionManager.RAYCASTPRECISION.FACE, 
-			 "Label.BasicAnimation", 
-			 function(){
-				 interactiveObject.action.isActive = false;
-				
-				 // create a basic animation, which animates a single value
-				 self.animationManager.createBasicAnimation({
-					 object: interactiveBoxBasic.position,
-					 property: "x",
-					 duration: 5000,
-					 start:  interactiveBoxBasic.position.x,
-					 end: interactiveBoxBasic.position.x + 30,
-					 easing: Easing.Quartic.InOut
-				 }).play();
-			 });
-	
-	var staticBoxHover = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10) , new THREE.MeshLambertMaterial({color: 0xf3f4f6}));
-	staticBoxHover.position.set(-40, 8, 0);
+	this.scene.add( interactiveBoxBasic );
+
+	var interactiveObject = this.actionManager.createInteraction( interactiveBoxBasic, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.BasicAnimation", function() {
+
+		interactiveObject.action.isActive = false;
+
+		// create a basic animation, which animates a single value
+		self.animationManager.createBasicAnimation( {
+			object : interactiveBoxBasic.position,
+			property : "x",
+			duration : 5000,
+			start : interactiveBoxBasic.position.x,
+			end : interactiveBoxBasic.position.x + 30,
+			easing : Easing.Quartic.InOut
+		} ).play();
+	} );
+
+	var staticBoxHover = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+		color : 0xf3f4f6
+	} ) );
+	staticBoxHover.position.set( -40, 8, 0 );
 	staticBoxHover.castShadow = true;
-	this.scene.add(staticBoxHover);
-	this.actionManager.createStatic(staticBoxHover, this.actionManager.COLLISIONTYPES.AABB);
-	
-	// create a hover animation, which animates infinitely a property between start- and end-value
-	this.animationManager.createHoverAnimation({
-		object: staticBoxHover.position,
-		property: "y",
-		duration: 4000,
-		delayTime: 2000,
-		start: staticBoxHover.position.y,
-		end: staticBoxHover.position.y + 2,
-		easing: Easing.Sinusoidal.InOut
-	}).play();
+	this.scene.add( staticBoxHover );
+	this.actionManager.createStatic( staticBoxHover, this.actionManager.COLLISIONTYPES.AABB );
+
+	// create a hover animation, which animates infinitely a property between
+	// start- and end-value
+	this.animationManager.createHoverAnimation( {
+		object : staticBoxHover.position,
+		property : "y",
+		duration : 4000,
+		delayTime : 2000,
+		start : staticBoxHover.position.y,
+		end : staticBoxHover.position.y + 2,
+		easing : Easing.Sinusoidal.InOut
+	} ).play();
 
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load("assets/models/sign.json", function(geometry, materials) {
-		
-		self.settingsManager.adjustMaterials(materials, self.renderer);
-		
-		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
-		sign.position.set(0, 20, 75);
-		sign.rotation.set(0, Math.PI * -0.5, 0);
-		self.scene.add(sign);
-		
-		self.animationManager.createHoverAnimation({
-			object: sign.position,
-			property: "y",
-			duration: 5000,
-			start: sign.position.y,
-			end: sign.position.y + 5,
-			easing: Easing.Sinusoidal.InOut
-		}).play();
-	});
-	
+	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+
+		self.settingsManager.adjustMaterials( materials, self.renderer );
+
+		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		sign.position.set( 0, 20, 75 );
+		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		self.scene.add( sign );
+
+		self.animationManager.createHoverAnimation( {
+			object : sign.position,
+			property : "y",
+			duration : 5000,
+			start : sign.position.y,
+			end : sign.position.y + 5,
+			easing : Easing.Sinusoidal.InOut
+		} ).play();
+	} );
+
 	// add trigger for scene change
-	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
-		
-		self._changeStage("008", true);
-	});
-	stageTrigger.position.set(0, 0, 75);
-	this.scene.add(stageTrigger);
-	
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+
+		self._changeStage( "008", true );
+	} );
+	stageTrigger.position.set( 0, 0, 75 );
+	this.scene.add( stageTrigger );
+
 	// light
-	var ambientLight = new THREE.AmbientLight(0x111111);
-	this.scene.add(ambientLight);
-	
-	var directionalLight = new THREE.DirectionalLight(0xffffff);
-	directionalLight.position.set(-100, 50, -100);
+	var ambientLight = new THREE.AmbientLight( 0x111111 );
+	this.scene.add( ambientLight );
+
+	var directionalLight = new THREE.DirectionalLight( 0xffffff );
+	directionalLight.position.set( -100, 50, -100 );
 	directionalLight.shadowCameraLeft = -50;
 	directionalLight.shadowCameraRight = 50;
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight(directionalLight);
-	this.scene.add(directionalLight);
+	this.settingsManager.adjustLight( directionalLight );
+	this.scene.add( directionalLight );
 
 	// start rendering
 	this._render();
 };
 
-Stage.prototype.start = function(){
-	
-	StageBase.prototype.start.call(this);
-	
+Stage.prototype.start = function() {
+
+	StageBase.prototype.start.call( this );
+
 	// set information panel text
-	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
+	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
 };
 
-Stage.prototype.destroy = function(){
-	
-	StageBase.prototype.destroy.call(this);
+Stage.prototype.destroy = function() {
+
+	StageBase.prototype.destroy.call( this );
 };
 
-Stage.prototype._render = function(){
-	
-	StageBase.prototype._render.call(self);
+Stage.prototype._render = function() {
+
+	StageBase.prototype._render.call( self );
 };
 
-//custom functions
+// custom functions
 
-function colorFaces(geometry){
-	
-	for (var i = 0; i < geometry.faces.length; i ++){
-		
-		if(i % 2 === 0){
-			geometry.faces[i].color = new THREE.Color(0x6083c2);
-		}else{
-			geometry.faces[i].color = new THREE.Color(0x455066);
+function colorFaces( geometry ) {
+
+	for ( var i = 0; i < geometry.faces.length; i++ )
+	{
+		if ( i % 2 === 0 )
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x6083c2 );
+		}
+		else
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x455066 );
 		}
 	}
 }
@@ -47896,150 +48531,155 @@ module.exports = Stage;
 },{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":30,"three":2}],67:[function(require,module,exports){
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
-var StageBase = require("../core/StageBase");
-var JSONLoader = require("../etc/JSONLoader");
-var Easing = require("../animation/Easing");
+var StageBase = require( "../core/StageBase" );
+var JSONLoader = require( "../etc/JSONLoader" );
+var Easing = require( "../animation/Easing" );
 
 var self;
 
-function Stage(){
-	
-	StageBase.call(this, "008");
-	
+function Stage() {
+
+	StageBase.call( this, "008" );
+
 	self = this;
 }
 
-Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype = Object.create( StageBase.prototype );
 Stage.prototype.constructor = Stage;
 
-Stage.prototype.setup = function(){
-	
-	StageBase.prototype.setup.call(this);
-	
+Stage.prototype.setup = function() {
+
+	StageBase.prototype.setup.call( this );
+
 	// controls setup
-	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
-	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
-	
+	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
+	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+
 	// load texts
-	this.textManager.load(this.stageId);
-	
+	this.textManager.load( this.stageId );
+
 	// add materials and geometry
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 100, 20, 10));
-	var groundMaterial = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
-	
+	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 100, 20, 10 ) );
+	var groundMaterial = new THREE.MeshBasicMaterial( {
+		vertexColors : THREE.FaceColors
+	} );
+
 	// add ground down
-	var groundDown = new THREE.Mesh(groundGeometry, groundMaterial);
+	var groundDown = new THREE.Mesh( groundGeometry, groundMaterial );
 	groundDown.matrixAutoUpdate = false;
-	groundDown.position.set(0, 0, -50);
+	groundDown.position.set( 0, 0, -50 );
 	groundDown.rotation.x = -0.5 * Math.PI;
 	groundDown.updateMatrix();
 	groundDown.receiveShadow = true;
-	this.world.addGround(groundDown);
-	this.scene.add(groundDown);
-	
-	// add ground up	
-	var groundUp = new THREE.Mesh(groundGeometry, groundMaterial);
+	this.world.addGround( groundDown );
+	this.scene.add( groundDown );
+
+	// add ground up
+	var groundUp = new THREE.Mesh( groundGeometry, groundMaterial );
 	groundUp.matrixAutoUpdate = false;
-	groundUp.position.set(0, 7.5, 68);
+	groundUp.position.set( 0, 7.5, 68 );
 	groundUp.rotation.x = -0.5 * Math.PI;
 	groundUp.updateMatrix();
 	groundUp.receiveShadow = true;
-	this.world.addGround(groundUp);
-	this.scene.add(groundUp);
-	
+	this.world.addGround( groundUp );
+	this.scene.add( groundUp );
+
 	// color faces
-	colorFaces(groundGeometry);
-	
+	colorFaces( groundGeometry );
+
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load("assets/models/sign.json", function(geometry, materials) {
-		
-		self.settingsManager.adjustMaterials(materials, self.renderer);
-		
-		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
-		sign.position.set(0, 27.5, 75);
-		sign.rotation.set(0, Math.PI * -0.5, 0);
-		self.scene.add(sign);
-		
-		self.animationManager.createHoverAnimation({
-			object: sign.position,
-			property: "y",
-			duration: 5000,
-			start: sign.position.y,
-			end: sign.position.y + 5,
-			easing: Easing.Sinusoidal.InOut
-		}).play();
-	});
-	
+	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+
+		self.settingsManager.adjustMaterials( materials, self.renderer );
+
+		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		sign.position.set( 0, 27.5, 75 );
+		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		self.scene.add( sign );
+
+		self.animationManager.createHoverAnimation( {
+			object : sign.position,
+			property : "y",
+			duration : 5000,
+			start : sign.position.y,
+			end : sign.position.y + 5,
+			easing : Easing.Sinusoidal.InOut
+		} ).play();
+	} );
+
 	// add stairs
 	var stairsLoader = new JSONLoader();
-	stairsLoader.load("assets/models/stairs.json",  function(geometry, materials) {
-		
-		self.settingsManager.adjustMaterials(materials, self.renderer);
-		
-		materials[0].color = new THREE.Color(0x6083c2).convertGammaToLinear();
-		materials[1].color = new THREE.Color(0x455066).convertGammaToLinear();
-			
-		var stairs = new THREE.Mesh(geometry,  new THREE.MeshFaceMaterial(materials));
+	stairsLoader.load( "assets/models/stairs.json", function( geometry, materials ) {
+
+		self.settingsManager.adjustMaterials( materials, self.renderer );
+
+		materials[ 0 ].color = new THREE.Color( 0x6083c2 ).convertGammaToLinear();
+		materials[ 1 ].color = new THREE.Color( 0x455066 ).convertGammaToLinear();
+
+		var stairs = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		stairs.receiveShadow = true;
-		self.scene.add(stairs);
-	});
-	
+		self.scene.add( stairs );
+	} );
+
 	// add invisible ramp
-	var rampGeometry = new THREE.PlaneBufferGeometry(200, 25, 1, 1);
+	var rampGeometry = new THREE.PlaneBufferGeometry( 200, 25, 1, 1 );
 	var rampMaterial = new THREE.MeshBasicMaterial();
-	
-	var ramp = new THREE.Mesh(rampGeometry, rampMaterial);
+
+	var ramp = new THREE.Mesh( rampGeometry, rampMaterial );
 	ramp.matrixAutoUpdate = false;
-	ramp.position.set(0, 2.8, 6.4);
+	ramp.position.set( 0, 2.8, 6.4 );
 	ramp.rotation.x = 1.378 * Math.PI;
 	ramp.updateMatrix();
 	ramp.visible = false;
-	this.world.addGround(ramp);
-	this.scene.add(ramp);
-	
+	this.world.addGround( ramp );
+	this.scene.add( ramp );
+
 	// add trigger for scene change
-	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
-		
-		self._changeStage("009", true);
-	});
-	stageTrigger.position.set(0, 7.5, 75);
-	this.scene.add(stageTrigger);
-	
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+
+		self._changeStage( "009", true );
+	} );
+	stageTrigger.position.set( 0, 7.5, 75 );
+	this.scene.add( stageTrigger );
+
 	// start rendering
 	this._render();
 };
 
-Stage.prototype.start = function(){
-	
-	StageBase.prototype.start.call(this);
-	
+Stage.prototype.start = function() {
+
+	StageBase.prototype.start.call( this );
+
 	// set information panel text
-	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
+	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
 };
 
-Stage.prototype.destroy = function(){
-	
-	StageBase.prototype.destroy.call(this);
+Stage.prototype.destroy = function() {
+
+	StageBase.prototype.destroy.call( this );
 };
 
-Stage.prototype._render = function(){
-	
-	StageBase.prototype._render.call(self);
+Stage.prototype._render = function() {
+
+	StageBase.prototype._render.call( self );
 };
 
-//custom functions
+// custom functions
 
-function colorFaces(geometry){
-	
-	for (var i = 0; i < geometry.faces.length; i ++){
-		
-		if(i % 2 === 0){
-			geometry.faces[i].color = new THREE.Color(0x6083c2);
-		}else{
-			geometry.faces[i].color = new THREE.Color(0x455066);
+function colorFaces( geometry ) {
+
+	for ( var i = 0; i < geometry.faces.length; i++ )
+	{
+		if ( i % 2 === 0 )
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x6083c2 );
+		}
+		else
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x455066 );
 		}
 	}
 }
@@ -48048,167 +48688,182 @@ module.exports = Stage;
 },{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":30,"three":2}],68:[function(require,module,exports){
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
-var StageBase = require("../core/StageBase");
-var JSONLoader = require("../etc/JSONLoader");
-var Easing = require("../animation/Easing");
+var StageBase = require( "../core/StageBase" );
+var JSONLoader = require( "../etc/JSONLoader" );
+var Easing = require( "../animation/Easing" );
 
 var self;
 
-function Stage(){
-	
-	StageBase.call(this, "009");
-	
+function Stage() {
+
+	StageBase.call( this, "009" );
+
 	self = this;
 }
 
-Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype = Object.create( StageBase.prototype );
 Stage.prototype.constructor = Stage;
 
-Stage.prototype.setup = function(){
-	
-	StageBase.prototype.setup.call(this);
-	
+Stage.prototype.setup = function() {
+
+	StageBase.prototype.setup.call( this );
+
 	// controls setup
-	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
-	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
-	
+	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
+	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+
 	// load texts
-	this.textManager.load(this.stageId);
-	
+	this.textManager.load( this.stageId );
+
 	// add ground
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
-	var groundMaterial = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
-	
-	var ground = new THREE.Mesh(groundGeometry, groundMaterial);
+	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
+	var groundMaterial = new THREE.MeshBasicMaterial( {
+		vertexColors : THREE.FaceColors
+	} );
+
+	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
 	ground.rotation.x = -0.5 * Math.PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
-	this.world.addGround(ground);
-	this.scene.add(ground);
-	
+	this.world.addGround( ground );
+	this.scene.add( ground );
+
 	// color faces
-	colorFaces(groundGeometry);
-	
+	colorFaces( groundGeometry );
+
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load("assets/models/sign.json",  function(geometry, materials) {
-		
-		self.settingsManager.adjustMaterials(materials, self.renderer);
-		
-		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
-		sign.position.set(0, 20, 75);
-		sign.rotation.set(0, Math.PI * -0.5, 0);
-		self.scene.add(sign);
-		
-		self.animationManager.createHoverAnimation({
-			object: sign.position,
-			property: "y",
-			duration: 5000,
-			start: sign.position.y,
-			end: sign.position.y + 5,
-			easing: Easing.Sinusoidal.InOut
-		}).play();
-	});
-	
+	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+
+		self.settingsManager.adjustMaterials( materials, self.renderer );
+
+		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		sign.position.set( 0, 20, 75 );
+		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		self.scene.add( sign );
+
+		self.animationManager.createHoverAnimation( {
+			object : sign.position,
+			property : "y",
+			duration : 5000,
+			start : sign.position.y,
+			end : sign.position.y + 5,
+			easing : Easing.Sinusoidal.InOut
+		} ).play();
+	} );
+
 	// create spheres for LOD switching
-	var sphereOne = new THREE.Mesh(new THREE.SphereGeometry(10, 25, 25), new THREE.MeshLambertMaterial( { color: 0x6083c2} )); 
-	var sphereTwo = new THREE.Mesh(new THREE.SphereGeometry(10, 10, 10), new THREE.MeshLambertMaterial( { color: 0x6083c2} ));
-	var sphereThree = new THREE.Mesh(new THREE.SphereGeometry(10, 6, 6), new THREE.MeshLambertMaterial( { color: 0x6083c2} ));
-	
+	var sphereOne = new THREE.Mesh( new THREE.SphereGeometry( 10, 25, 25 ), new THREE.MeshLambertMaterial( {
+		color : 0x6083c2
+	} ) );
+	var sphereTwo = new THREE.Mesh( new THREE.SphereGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+		color : 0x6083c2
+	} ) );
+	var sphereThree = new THREE.Mesh( new THREE.SphereGeometry( 10, 6, 6 ), new THREE.MeshLambertMaterial( {
+		color : 0x6083c2
+	} ) );
+
 	sphereOne.matrixAutoUpdate = false;
 	sphereTwo.matrixAutoUpdate = false;
 	sphereThree.matrixAutoUpdate = false;
-	
+
 	sphereOne.castShadow = true;
 	sphereTwo.castShadow = true;
 	sphereThree.castShadow = true;
-	
+
 	// create LOD instance
-	var lod = this.performanceManager.createSmoothLOD("sphere", 10);
+	var lod = this.performanceManager.createSmoothLOD( "sphere", 10 );
 	lod.matrixAutoUpdate = false;
-	lod.position.set(0,10,0);
+	lod.position.set( 0, 10, 0 );
 	lod.updateMatrix();
-	
+
 	// add objects and distances
-	lod.addLevel(sphereOne, 0);
-	lod.addLevel(sphereTwo, 60);
-	lod.addLevel(sphereThree, 100);
-	
-	this.scene.add(lod);
-	
+	lod.addLevel( sphereOne, 0 );
+	lod.addLevel( sphereTwo, 60 );
+	lod.addLevel( sphereThree, 100 );
+
+	this.scene.add( lod );
+
 	// create circles to visualize the LOD distances
-	showLODCircles(this.scene);
-	
+	showLODCircles( this.scene );
+
 	// light
-	var ambientLight = new THREE.AmbientLight(0x111111);
-	this.scene.add(ambientLight);
-	
-	var directionalLight = new THREE.DirectionalLight(0xffffff);
-	directionalLight.position.set(-100, 50, -100);
+	var ambientLight = new THREE.AmbientLight( 0x111111 );
+	this.scene.add( ambientLight );
+
+	var directionalLight = new THREE.DirectionalLight( 0xffffff );
+	directionalLight.position.set( -100, 50, -100 );
 	directionalLight.shadowCameraLeft = -40;
 	directionalLight.shadowCameraRight = 40;
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight(directionalLight);
-	this.scene.add(directionalLight);
-	
-	// add trigger for ending
-	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
+	this.settingsManager.adjustLight( directionalLight );
+	this.scene.add( directionalLight );
 
-		self._changeStage("010", true);
-	});
-	stageTrigger.position.set(0, 0, 75);
-	this.scene.add(stageTrigger);
-	
+	// add trigger for ending
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+
+		self._changeStage( "010", true );
+	} );
+	stageTrigger.position.set( 0, 0, 75 );
+	this.scene.add( stageTrigger );
+
 	// start rendering
 	this._render();
 };
 
-Stage.prototype.start = function(){
-	
-	StageBase.prototype.start.call(this);
-	
+Stage.prototype.start = function() {
+
+	StageBase.prototype.start.call( this );
+
 	// set information panel text
-	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
+	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
 };
 
-Stage.prototype.destroy = function(){
-	
-	StageBase.prototype.destroy.call(this);
+Stage.prototype.destroy = function() {
+
+	StageBase.prototype.destroy.call( this );
 };
 
-Stage.prototype._render = function(){
-	
-	StageBase.prototype._render.call(self);
+Stage.prototype._render = function() {
+
+	StageBase.prototype._render.call( self );
 };
 
-//custom functions
+// custom functions
 
-function colorFaces(geometry){
-	
-	for (var i = 0; i < geometry.faces.length; i ++){
-		
-		if(i % 2 === 0){
-			geometry.faces[i].color = new THREE.Color(0x6083c2);
-		}else{
-			geometry.faces[i].color = new THREE.Color(0x455066);
+function colorFaces( geometry ) {
+
+	for ( var i = 0; i < geometry.faces.length; i++ )
+	{
+		if ( i % 2 === 0 )
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x6083c2 );
+		}
+		else
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x455066 );
 		}
 	}
 }
 
-function showLODCircles(scene){
-	
-	var circleOne =  new THREE.Mesh(new THREE.CircleGeometry(60, 25), new THREE.MeshBasicMaterial( { wireframe: true} ));
-	var circleTwo =  new THREE.Mesh(new THREE.CircleGeometry(100, 25), new THREE.MeshBasicMaterial( { wireframe: true} ));
-	
-	circleOne.rotation.set(Math.PI * 0.5, 0, 0);
-	circleTwo.rotation.set(Math.PI * 0.5, 0, 0);
-	
-	scene.add(circleOne);
-	scene.add(circleTwo);
+function showLODCircles( scene ) {
+
+	var circleOne = new THREE.Mesh( new THREE.CircleGeometry( 60, 25 ), new THREE.MeshBasicMaterial( {
+		wireframe : true
+	} ) );
+	var circleTwo = new THREE.Mesh( new THREE.CircleGeometry( 100, 25 ), new THREE.MeshBasicMaterial( {
+		wireframe : true
+	} ) );
+
+	circleOne.rotation.set( Math.PI * 0.5, 0, 0 );
+	circleTwo.rotation.set( Math.PI * 0.5, 0, 0 );
+
+	scene.add( circleOne );
+	scene.add( circleTwo );
 }
 
 module.exports = Stage;
@@ -48216,111 +48871,117 @@ module.exports = Stage;
 (function (global){
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
-var StageBase = require("../core/StageBase");
-var JSONLoader = require("../etc/JSONLoader");
-var Easing = require("../animation/Easing");
+var StageBase = require( "../core/StageBase" );
+var JSONLoader = require( "../etc/JSONLoader" );
+var Easing = require( "../animation/Easing" );
 
 var self, box, sphere;
 
-function Stage(){
-	
-	StageBase.call(this, "010");
-	
+function Stage() {
+
+	StageBase.call( this, "010" );
+
 	self = this;
 }
 
-Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype = Object.create( StageBase.prototype );
 Stage.prototype.constructor = Stage;
 
-Stage.prototype.setup = function(){
-	
-	StageBase.prototype.setup.call(this);
-	
+Stage.prototype.setup = function() {
+
+	StageBase.prototype.setup.call( this );
+
 	// controls setup
-	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
-	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
-	
+	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
+	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+
 	// load texts
-	this.textManager.load(this.stageId);
-	
+	this.textManager.load( this.stageId );
+
 	// add ground
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
-	var groundMaterial = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
-	
-	var ground = new THREE.Mesh(groundGeometry, groundMaterial);
+	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
+	var groundMaterial = new THREE.MeshBasicMaterial( {
+		vertexColors : THREE.FaceColors
+	} );
+
+	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
 	ground.rotation.x = -0.5 * Math.PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
-	this.world.addGround(ground);
-	this.scene.add(ground);
-	
+	this.world.addGround( ground );
+	this.scene.add( ground );
+
 	// color faces
-	colorFaces(groundGeometry);
-	
+	colorFaces( groundGeometry );
+
 	// create first mesh for impostor demo
-	sphere = new THREE.Mesh( new THREE.SphereGeometry(10, 25, 25), new THREE.MeshLambertMaterial( { color: 0x6083c2 } ));
+	sphere = new THREE.Mesh( new THREE.SphereGeometry( 10, 25, 25 ), new THREE.MeshLambertMaterial( {
+		color : 0x6083c2
+	} ) );
 	sphere.matrixAutoUpdate = false;
-	sphere.position.set(-20, 10, 0);
+	sphere.position.set( -20, 10, 0 );
 	sphere.updateMatrix();
 	sphere.visible = false;
 	this.scene.add( sphere );
-	
+
 	// create second mesh for impostor demo
-	box = new THREE.Mesh( new THREE.BoxGeometry(10, 10, 10), new THREE.MeshLambertMaterial( { color: 0x6083c2 } ));
+	box = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+		color : 0x6083c2
+	} ) );
 	box.matrixAutoUpdate = false;
-	box.position.set(20, 10, 0);
+	box.position.set( 20, 10, 0 );
 	box.updateMatrix();
 	box.visible = false;
 	this.scene.add( box );
-	
-	this.performanceManager.createImpostor("sphere", sphere, 512);
-	this.performanceManager.createImpostor("box", box, 512);
-	
+
+	this.performanceManager.createImpostor( "sphere", sphere, 512 );
+	this.performanceManager.createImpostor( "box", box, 512 );
+
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load("assets/models/sign.json",  function(geometry, materials) {
-		
-		self.settingsManager.adjustMaterials(materials, self.renderer);
-		
-		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
-		sign.position.set(0, 20, 75);
-		sign.rotation.set(0, Math.PI * -0.5, 0);
-		self.scene.add(sign);
-		
-		self.animationManager.createHoverAnimation({
-			object: sign.position,
-			property: "y",
-			duration: 5000,
-			start: sign.position.y,
-			end: sign.position.y + 5,
-			easing: Easing.Sinusoidal.InOut
-		}).play();
-	});
-	
+	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+
+		self.settingsManager.adjustMaterials( materials, self.renderer );
+
+		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		sign.position.set( 0, 20, 75 );
+		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		self.scene.add( sign );
+
+		self.animationManager.createHoverAnimation( {
+			object : sign.position,
+			property : "y",
+			duration : 5000,
+			start : sign.position.y,
+			end : sign.position.y + 5,
+			easing : Easing.Sinusoidal.InOut
+		} ).play();
+	} );
+
 	// light
-	var ambientLight = new THREE.AmbientLight(0x111111);
-	this.scene.add(ambientLight);
-	
-	var directionalLight = new THREE.DirectionalLight(0xffffff);
-	directionalLight.position.set(-100, 50, -100);
+	var ambientLight = new THREE.AmbientLight( 0x111111 );
+	this.scene.add( ambientLight );
+
+	var directionalLight = new THREE.DirectionalLight( 0xffffff );
+	directionalLight.position.set( -100, 50, -100 );
 	directionalLight.shadowCameraLeft = -40;
 	directionalLight.shadowCameraRight = 40;
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight(directionalLight);
-	this.scene.add(directionalLight);
-	
-	// add trigger for ending
-	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
+	this.settingsManager.adjustLight( directionalLight );
+	this.scene.add( directionalLight );
 
-		self._changeStage("011", true);
-	});
-	stageTrigger.position.set(0, 0, 75);
-	this.scene.add(stageTrigger);
-	
+	// add trigger for ending
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+
+		self._changeStage( "011", true );
+	} );
+	stageTrigger.position.set( 0, 0, 75 );
+	this.scene.add( stageTrigger );
+
 	// generate impostors
 	this.performanceManager.generateImpostors();
 
@@ -48328,47 +48989,51 @@ Stage.prototype.setup = function(){
 	this._render();
 };
 
-Stage.prototype.start = function(){
-	
-	StageBase.prototype.start.call(this);
-	
+Stage.prototype.start = function() {
+
+	StageBase.prototype.start.call( this );
+
 	// set information panel text
-	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
-	
+	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
+
 	// add special event handler for demo
-	global.document.addEventListener("keydown", onKeyDown);
+	global.document.addEventListener( "keydown", onKeyDown );
 };
 
-Stage.prototype.destroy = function(){
-	
-	StageBase.prototype.destroy.call(this);
-	
+Stage.prototype.destroy = function() {
+
+	StageBase.prototype.destroy.call( this );
+
 	// remove special event handler for demo
-	global.document.removeEventListener("keydown", onKeyDown);
+	global.document.removeEventListener( "keydown", onKeyDown );
 };
 
-Stage.prototype._render = function(){
-	
-	StageBase.prototype._render.call(self);
+Stage.prototype._render = function() {
+
+	StageBase.prototype._render.call( self );
 };
 
-//custom functions
+// custom functions
 
-function colorFaces(geometry){
-	
-	for (var i = 0; i < geometry.faces.length; i ++){
-		
-		if(i % 2 === 0){
-			geometry.faces[i].color = new THREE.Color(0x6083c2);
-		}else{
-			geometry.faces[i].color = new THREE.Color(0x455066);
+function colorFaces( geometry ) {
+
+	for ( var i = 0; i < geometry.faces.length; i++ )
+	{
+		if ( i % 2 === 0 )
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x6083c2 );
+		}
+		else
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x455066 );
 		}
 	}
 }
 
-function onKeyDown(event){
-	
-	switch (event.keyCode) {
+function onKeyDown( event ) {
+
+	switch ( event.keyCode )
+	{
 		case 73:
 			// i
 			sphere.visible = !sphere.visible;
@@ -48386,137 +49051,144 @@ module.exports = Stage;
 },{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":30,"three":2}],70:[function(require,module,exports){
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
-var StageBase = require("../core/StageBase");
-var JSONLoader = require("../etc/JSONLoader");
-var Easing = require("../animation/Easing");
+var StageBase = require( "../core/StageBase" );
+var JSONLoader = require( "../etc/JSONLoader" );
+var Easing = require( "../animation/Easing" );
 
 var self;
 
-function Stage(){
-	
-	StageBase.call(this, "011");
-	
+function Stage() {
+
+	StageBase.call( this, "011" );
+
 	self = this;
 }
 
-Stage.prototype = Object.create(StageBase.prototype);
+Stage.prototype = Object.create( StageBase.prototype );
 Stage.prototype.constructor = Stage;
 
-Stage.prototype.setup = function(){
-	
-	StageBase.prototype.setup.call(this);
-	
+Stage.prototype.setup = function() {
+
+	StageBase.prototype.setup.call( this );
+
 	// controls setup
-	this.controls.setPosition(new THREE.Vector3(0, 0, -75));
-	this.controls.setRotation(new THREE.Vector3(0, Math.PI, 0));
-	
+	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
+	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+
 	// load texts
-	this.textManager.load(this.stageId);
-	
+	this.textManager.load( this.stageId );
+
 	// add ground
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry(new THREE.PlaneBufferGeometry(200, 200, 20, 20));
-	var groundMaterial = new THREE.MeshBasicMaterial({vertexColors: THREE.FaceColors});
-	
-	var ground = new THREE.Mesh(groundGeometry, groundMaterial);
+	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
+	var groundMaterial = new THREE.MeshBasicMaterial( {
+		vertexColors : THREE.FaceColors
+	} );
+
+	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
 	ground.rotation.x = -0.5 * Math.PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
-	this.world.addGround(ground);
-	this.scene.add(ground);
-	
+	this.world.addGround( ground );
+	this.scene.add( ground );
+
 	// color faces
-	colorFaces(groundGeometry);
-	
+	colorFaces( groundGeometry );
+
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load("assets/models/sign.json",  function(geometry, materials) {
-		
-		self.settingsManager.adjustMaterials(materials, self.renderer);
-		
-		var sign = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
-		sign.position.set(0, 20, 75);
-		sign.rotation.set(0, Math.PI * -0.5, 0);
-		self.scene.add(sign);
-		
-		self.animationManager.createHoverAnimation({
-			object: sign.position,
-			property: "y",
-			duration: 5000,
-			start: sign.position.y,
-			end: sign.position.y + 5,
-			easing: Easing.Sinusoidal.InOut
-		}).play();
-	});
-	
+	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+
+		self.settingsManager.adjustMaterials( materials, self.renderer );
+
+		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		sign.position.set( 0, 20, 75 );
+		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		self.scene.add( sign );
+
+		self.animationManager.createHoverAnimation( {
+			object : sign.position,
+			property : "y",
+			duration : 5000,
+			start : sign.position.y,
+			end : sign.position.y + 5,
+			easing : Easing.Sinusoidal.InOut
+		} ).play();
+	} );
+
 	// light
-	var ambientLight = new THREE.AmbientLight(0x111111);
-	this.scene.add(ambientLight);
-	
-	var directionalLight = new THREE.DirectionalLight(0xffffff);
-	directionalLight.position.set(-100, 50, -100);
+	var ambientLight = new THREE.AmbientLight( 0x111111 );
+	this.scene.add( ambientLight );
+
+	var directionalLight = new THREE.DirectionalLight( 0xffffff );
+	directionalLight.position.set( -100, 50, -100 );
 	directionalLight.shadowCameraLeft = -40;
 	directionalLight.shadowCameraRight = 40;
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight(directionalLight);
-	this.scene.add(directionalLight);
-	
-	// add trigger for ending
-	var stageTrigger = this.actionManager.createTrigger("Change Stage", 15, function(){
+	this.settingsManager.adjustLight( directionalLight );
+	this.scene.add( directionalLight );
 
- 		self.userInterfaceManager.showModalDialog({
-			headline: "Modal.Headline",
-			button: "Modal.Button",
-			content: "Modal.Content"
-		});
-		
+	// add trigger for ending
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+
+		self.userInterfaceManager.showModalDialog( {
+			headline : "Modal.Headline",
+			button : "Modal.Button",
+			content : "Modal.Content"
+		} );
+
 		self.saveGameManager.remove();
-	});
-	stageTrigger.position.set(0, 0, 75);
-	this.scene.add(stageTrigger);
-	
+	} );
+	stageTrigger.position.set( 0, 0, 75 );
+	this.scene.add( stageTrigger );
+
 	// post processing
 	this.renderer.preparePostProcessing( this.scene, this.camera );
 	this.renderer.addGrayscaleEffect();
 	this.renderer.addHBlurEffect();
 	this.renderer.addVBlurEffect();
-	this.renderer.addVignetteEffect( { renderToScreen: true } );
+	this.renderer.addVignetteEffect( {
+		renderToScreen : true
+	} );
 
 	// start rendering
 	this._render();
 };
 
-Stage.prototype.start = function(){
-	
-	StageBase.prototype.start.call(this);
-	
+Stage.prototype.start = function() {
+
+	StageBase.prototype.start.call( this );
+
 	// set information panel text
-	this.userInterfaceManager.setInformationPanelText("InformationPanel.Text");
+	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
 };
 
-Stage.prototype.destroy = function(){
-	
-	StageBase.prototype.destroy.call(this);
+Stage.prototype.destroy = function() {
+
+	StageBase.prototype.destroy.call( this );
 };
 
-Stage.prototype._render = function(){
-	
-	StageBase.prototype._render.call(self);
+Stage.prototype._render = function() {
+
+	StageBase.prototype._render.call( self );
 };
 
-//custom functions
+// custom functions
 
-function colorFaces(geometry){
-	
-	for (var i = 0; i < geometry.faces.length; i ++){
-		
-		if(i % 2 === 0){
-			geometry.faces[i].color = new THREE.Color(0x6083c2);
-		}else{
-			geometry.faces[i].color = new THREE.Color(0x455066);
+function colorFaces( geometry ) {
+
+	for ( var i = 0; i < geometry.faces.length; i++ )
+	{
+		if ( i % 2 === 0 )
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x6083c2 );
+		}
+		else
+		{
+			geometry.faces[ i ].color = new THREE.Color( 0x455066 );
 		}
 	}
 }
@@ -48531,8 +49203,8 @@ module.exports = Stage;
  */
 "use strict";
 
-var PubSub = require("pubsub-js");
-var UiElement = require("./UiElement");
+var PubSub = require( "pubsub-js" );
+var UiElement = require( "./UiElement" );
 
 var self;
 
@@ -48543,88 +49215,92 @@ var self;
  * @augments UiElement
  */
 function Chat() {
-	
-	UiElement.call(this);
-	
-	Object.defineProperties(this, {	
-		_$chat: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+
+	UiElement.call( this );
+
+	Object.defineProperties( this, {
+		_$chat : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$input: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$input : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$messages: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$messages : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_timer: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_timer : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
-	
+	} );
+
 	self = this;
 }
 
-Chat.prototype = Object.create(UiElement.prototype);
+Chat.prototype = Object.create( UiElement.prototype );
 Chat.prototype.constructor = Chat;
 
 /**
  * Inits the control
  */
-Chat.prototype.init = function(){
-	
-	this._$chat = global.document.querySelector("#chat");
-	this._$messages = global.document.querySelector("#messages");
-	this._$input = this._$chat.querySelector(".form-control");
-	
-	PubSub.subscribe("multiplayer.message", this._onMessage);
+Chat.prototype.init = function() {
+
+	this._$chat = global.document.querySelector( "#chat" );
+	this._$messages = global.document.querySelector( "#messages" );
+	this._$input = this._$chat.querySelector( ".form-control" );
+
+	PubSub.subscribe( "multiplayer.message", this._onMessage );
 };
 
 /**
- * Toogles the chat-ui and sends the message. While the input
- * field for writing a chat message is visible, the controls
- * are disabled. That means typing wasd won't move the player.
+ * Toogles the chat-ui and sends the message. While the input field for writing
+ * a chat message is visible, the controls are disabled. That means typing wasd
+ * won't move the player.
  */
-Chat.prototype.toogle = function(){
-	
-	if(this._$chat.style.display === "block"){
-		
+Chat.prototype.toogle = function() {
+
+	if ( this._$chat.style.display === "block" )
+	{
 		// if the input field contains text,
 		// send it to the server and to the message box(ui)
 		this._checkAndSend();
-		
+
 		// hide input field
 		this.hide();
-		
+
 		// activate controls
-		PubSub.publish("controls.active", {isActive: true});
+		PubSub.publish( "controls.active", {
+			isActive : true
+		} );
 	}
 	else
 	{
 		// show input field
 		this.show();
-		
+
 		// deactivate controls
-		PubSub.publish("controls.active", {isActive: false});
+		PubSub.publish( "controls.active", {
+			isActive : false
+		} );
 	}
 };
 
 /**
  * Shows the chat-ui.
  */
-Chat.prototype.show = function(){
-	
+Chat.prototype.show = function() {
+
 	this._$chat.style.display = "block";
 	this._$input.focus();
 };
@@ -48632,8 +49308,8 @@ Chat.prototype.show = function(){
 /**
  * Hides the chat-ui.
  */
-Chat.prototype.hide = function(){
-	
+Chat.prototype.hide = function() {
+
 	this._$chat.style.display = "none";
 	this._$input.value = "";
 };
@@ -48643,42 +49319,43 @@ Chat.prototype.hide = function(){
  * 
  * @param {stirng} message - The message to post.
  */
-Chat.prototype._postMessage = function(message){
-	
+Chat.prototype._postMessage = function( message ) {
+
 	// clear timeout
-	clearTimeout(this._timer);
-	
+	clearTimeout( this._timer );
+
 	// create new DOM-entry for message
-	var node = global.document.createElement("div");
+	var node = global.document.createElement( "div" );
 	node.textContent = message;
-	this._$messages.appendChild(node);
-	
+	this._$messages.appendChild( node );
+
 	// show message box
 	this._$messages.style.display = "block";
-	
+
 	// scroll to bottom (to latest messages)
 	this._$messages.scrollTop = this._$messages.scrollHeight;
-	
+
 	// after some time, hide message box
-	this._timer = setTimeout(function(){
+	this._timer = setTimeout( function() {
+
 		self._$messages.style.display = "none";
-	}, 10000);
+	}, 10000 );
 };
 
 /**
  * Checks and sends the message.
  */
-Chat.prototype._checkAndSend = function(){
-	
+Chat.prototype._checkAndSend = function() {
+
 	var message = this._$input.value.trim();
-	
-	if(message !== ""){
-		
+
+	if ( message !== "" )
+	{
 		// post message
-		this._postMessage(message);
-		
+		this._postMessage( message );
+
 		// publish message for sending to server
-		PubSub.publish("message.chat", message);
+		PubSub.publish( "message.chat", message );
 	}
 };
 
@@ -48689,9 +49366,9 @@ Chat.prototype._checkAndSend = function(){
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-Chat.prototype._onMessage = function(message, data){
-	
-	self._postMessage(data.message);
+Chat.prototype._onMessage = function( message, data ) {
+
+	self._postMessage( data.message );
 };
 
 module.exports = new Chat();
@@ -48699,16 +49376,15 @@ module.exports = new Chat();
 },{"./UiElement":80,"pubsub-js":1}],72:[function(require,module,exports){
 (function (global){
 /**
- * @file Prototype for ui-element development panel.
- * Only if the development mode is active, this control
- * is part of the UI.
+ * @file Prototype for ui-element development panel. Only if the development
+ * mode is active, this control is part of the UI.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-var UiElement = require("./UiElement");
+var UiElement = require( "./UiElement" );
 
 /**
  * Creates the development panel.
@@ -48716,45 +49392,44 @@ var UiElement = require("./UiElement");
  * @constructor
  */
 function DevelopmentPanel() {
-	
-	UiElement.call(this);
-	
-	Object.defineProperties(this, {	
-		_$developmentPanel: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+
+	UiElement.call( this );
+
+	Object.defineProperties( this, {
+		_$developmentPanel : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$developmentPanelContent: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$developmentPanelContent : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
+	} );
 }
 
-DevelopmentPanel.prototype = Object.create(UiElement.prototype);
+DevelopmentPanel.prototype = Object.create( UiElement.prototype );
 DevelopmentPanel.prototype.constructor = DevelopmentPanel;
 
 /**
  * Initializes the control.
  */
-DevelopmentPanel.prototype.init = function(){
-	
-	this._$developmentPanel = global.document.querySelector("#development-panel");
-	this._$developmentPanelContent = this._$developmentPanel.querySelector(".text");
-};
+DevelopmentPanel.prototype.init = function() {
 
+	this._$developmentPanel = global.document.querySelector( "#development-panel" );
+	this._$developmentPanelContent = this._$developmentPanel.querySelector( ".text" );
+};
 
 /**
  * Sets the text of the development panel.
  * 
  * @param {string} text - The text-content of the development panel.
  */
-DevelopmentPanel.prototype.setText = function(text){
-	
+DevelopmentPanel.prototype.setText = function( text ) {
+
 	this._$developmentPanelContent.innerHTML = text;
 };
 
@@ -48770,7 +49445,7 @@ module.exports = new DevelopmentPanel();
 
 "use strict";
 
-var UiElement = require("./UiElement");
+var UiElement = require( "./UiElement" );
 
 /**
  * Creates the information panel.
@@ -48778,35 +49453,35 @@ var UiElement = require("./UiElement");
  * @constructor
  */
 function InformationPanel() {
-	
-	UiElement.call(this);
-	
-	Object.defineProperties(this, {	
-		_$informationPanel: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+
+	UiElement.call( this );
+
+	Object.defineProperties( this, {
+		_$informationPanel : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$informationPanelContent: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$informationPanelContent : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
+	} );
 }
 
-InformationPanel.prototype = Object.create(UiElement.prototype);
+InformationPanel.prototype = Object.create( UiElement.prototype );
 InformationPanel.prototype.constructor = InformationPanel;
 
 /**
  * Inits the control
  */
-InformationPanel.prototype.init = function(){
-	
-	this._$informationPanel = global.document.querySelector("#information-panel");
-	this._$informationPanelContent = this._$informationPanel.querySelector(".text");
+InformationPanel.prototype.init = function() {
+
+	this._$informationPanel = global.document.querySelector( "#information-panel" );
+	this._$informationPanelContent = this._$informationPanel.querySelector( ".text" );
 };
 
 /**
@@ -48814,9 +49489,9 @@ InformationPanel.prototype.init = function(){
  * 
  * @param {string} textKey - The text-content of the information panel.
  */
-InformationPanel.prototype.setText = function(textKey){
-	
-	this._$informationPanelContent.innerHTML = this.textManager.get(textKey);
+InformationPanel.prototype.setText = function( textKey ) {
+
+	this._$informationPanelContent.innerHTML = this.textManager.get( textKey );
 };
 
 module.exports = new InformationPanel();
@@ -48831,7 +49506,7 @@ module.exports = new InformationPanel();
 
 "use strict";
 
-var UiElement = require("./UiElement");
+var UiElement = require( "./UiElement" );
 
 /**
  * Creates the interaction label.
@@ -48839,34 +49514,34 @@ var UiElement = require("./UiElement");
  * @constructor
  */
 function InteractionLabel() {
-	
-	UiElement.call(this);
-	
-	Object.defineProperties(this, {	
-		_$interactionLabel: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+
+	UiElement.call( this );
+
+	Object.defineProperties( this, {
+		_$interactionLabel : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		isInteractionLabelActive: {
-			value: false,
-			configurable: false,
-			enumerable: true,
-			writable: true
+		isInteractionLabelActive : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
-	});
+	} );
 }
 
-InteractionLabel.prototype = Object.create(UiElement.prototype);
+InteractionLabel.prototype = Object.create( UiElement.prototype );
 InteractionLabel.prototype.constructor = InteractionLabel;
 
 /**
  * Inits the control
  */
-InteractionLabel.prototype.init = function(){
-	
-	this._$interactionLabel = global.document.querySelector("#interaction-label .label");
+InteractionLabel.prototype.init = function() {
+
+	this._$interactionLabel = global.document.querySelector( "#interaction-label .label" );
 };
 
 /**
@@ -48874,10 +49549,11 @@ InteractionLabel.prototype.init = function(){
  * 
  * @param {string} textKey - The label of the corresponding action.
  */
-InteractionLabel.prototype.show = function(textKey){
-	
-	if(this.isInteractionLabelActive === false){
-		this._$interactionLabel.textContent = this.textManager.get(textKey);
+InteractionLabel.prototype.show = function( textKey ) {
+
+	if ( this.isInteractionLabelActive === false )
+	{
+		this._$interactionLabel.textContent = this.textManager.get( textKey );
 		this._$interactionLabel.style.display = "block";
 		this.isInteractionLabelActive = true;
 	}
@@ -48886,9 +49562,10 @@ InteractionLabel.prototype.show = function(textKey){
 /**
  * Hides the interaction label.
  */
-InteractionLabel.prototype.hide = function(){
-	
-	if(this.isInteractionLabelActive === true){
+InteractionLabel.prototype.hide = function() {
+
+	if ( this.isInteractionLabelActive === true )
+	{
 		this._$interactionLabel.style.display = "none";
 		this.isInteractionLabelActive = false;
 	}
@@ -48905,8 +49582,8 @@ module.exports = new InteractionLabel();
  */
 "use strict";
 
-var PubSub = require("pubsub-js");
-var UiElement = require("./UiElement");
+var PubSub = require( "pubsub-js" );
+var UiElement = require( "./UiElement" );
 
 var self;
 
@@ -48917,103 +49594,105 @@ var self;
  * @augments UiElement
  */
 function LoadingScreen() {
-	
-	UiElement.call(this);
-	
-	Object.defineProperties(this, {	
-		_$loadingScreen: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+
+	UiElement.call( this );
+
+	Object.defineProperties( this, {
+		_$loadingScreen : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$progress: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$progress : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$progressBar: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$progressBar : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$text: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$text : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_transitionEndEvent: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_transitionEndEvent : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		isActive: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		isActive : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		isReady: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		isReady : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
-	
+	} );
+
 	self = this;
 }
 
-LoadingScreen.prototype = Object.create(UiElement.prototype);
+LoadingScreen.prototype = Object.create( UiElement.prototype );
 LoadingScreen.prototype.constructor = LoadingScreen;
 
 /**
  * Inits the control
  */
-LoadingScreen.prototype.init = function(){
-	
+LoadingScreen.prototype.init = function() {
+
 	this._transitionEndEvent = this._getTransitionEndEvent();
-	
-	this._$loadingScreen = global.document.querySelector("#loading-screen");
-	this._$progress = this._$loadingScreen.querySelector(".progress");
-	this._$progressBar = this._$loadingScreen.querySelector(".progress-bar");
-	this._$text = this._$loadingScreen.querySelector(".text");
-	
+
+	this._$loadingScreen = global.document.querySelector( "#loading-screen" );
+	this._$progress = this._$loadingScreen.querySelector( ".progress" );
+	this._$progressBar = this._$loadingScreen.querySelector( ".progress-bar" );
+	this._$text = this._$loadingScreen.querySelector( ".text" );
+
 	// subscriptions
-	PubSub.subscribe("ui.loading.progress", this._onUpdate);
-	PubSub.subscribe("ui.loading.ready", this._onReady);
+	PubSub.subscribe( "ui.loading.progress", this._onUpdate );
+	PubSub.subscribe( "ui.loading.ready", this._onReady );
 };
 
 /**
  * Shows the loading screen.
  * 
- * @param {function} callback - This function is executed, when the loading screen is shown.
+ * @param {function} callback - This function is executed, when the loading
+ * screen is shown.
  */
-LoadingScreen.prototype.show = function(callback){
-		
+LoadingScreen.prototype.show = function( callback ) {
+
 	// callback
-	function onTransitionEnd(event){
-		
-		if(event.target.id === self._$loadingScreen.id){
-			
+	function onTransitionEnd( event ) {
+
+		if ( event.target.id === self._$loadingScreen.id )
+		{
 			// remove event listener, so it runs only once
-			self._$loadingScreen.removeEventListener(self._transitionEndEvent, onTransitionEnd);
-			if(typeof callback === "function"){
+			self._$loadingScreen.removeEventListener( self._transitionEndEvent, onTransitionEnd );
+			if ( typeof callback === "function" )
+			{
 				callback();
 			}
 		}
 	}
-	
+
 	// add event-listener
-	this._$loadingScreen.addEventListener(this._transitionEndEvent, onTransitionEnd);
-	
+	this._$loadingScreen.addEventListener( this._transitionEndEvent, onTransitionEnd );
+
 	// show loading screen
-	this._$loadingScreen.classList.add("fadeIn");
-	
+	this._$loadingScreen.classList.add( "fadeIn" );
+
 	// set flags
 	this.isActive = true;
 	this.isReady = false;
@@ -49022,31 +49701,31 @@ LoadingScreen.prototype.show = function(callback){
 /**
  * Hides the loading screen.
  */
-LoadingScreen.prototype.hide = function(){
-	
+LoadingScreen.prototype.hide = function() {
+
 	// callback
-	function onTransitionEnd(event){
-		
-		if(event.target.id === self._$loadingScreen.id){
-			
+	function onTransitionEnd( event ) {
+
+		if ( event.target.id === self._$loadingScreen.id )
+		{
 			// remove event listener, so it runs only once
-			self._$loadingScreen.removeEventListener(self._transitionEndEvent, onTransitionEnd);
-			
+			self._$loadingScreen.removeEventListener( self._transitionEndEvent, onTransitionEnd );
+
 			// reset CSS classes
-			self._$text.classList.remove("fadeIn");
-			self._$progress.classList.remove("fadeOut");
-			
+			self._$text.classList.remove( "fadeIn" );
+			self._$progress.classList.remove( "fadeOut" );
+
 			// reset progress bar
 			self._$progressBar.style.width = "0%";
 		}
 	}
-	
+
 	// add event-listener
-	this._$loadingScreen.addEventListener(this._transitionEndEvent, onTransitionEnd);
-	
+	this._$loadingScreen.addEventListener( this._transitionEndEvent, onTransitionEnd );
+
 	// hide loading screen
-	this._$loadingScreen.classList.remove("fadeIn");
-	
+	this._$loadingScreen.classList.remove( "fadeIn" );
+
 	// set flags
 	this.isActive = false;
 };
@@ -49057,9 +49736,10 @@ LoadingScreen.prototype.hide = function(){
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-LoadingScreen.prototype._onUpdate = function(message, data){
-	
-	if(data.isApplicationStart === false){
+LoadingScreen.prototype._onUpdate = function( message, data ) {
+
+	if ( data.isApplicationStart === false )
+	{
 		self._$progressBar.style.width = data.loadingProgress + "%";
 	}
 };
@@ -49070,12 +49750,13 @@ LoadingScreen.prototype._onUpdate = function(message, data){
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-LoadingScreen.prototype._onReady = function(message, data){
-	
-	if(data.isApplicationStart === false){
+LoadingScreen.prototype._onReady = function( message, data ) {
+
+	if ( data.isApplicationStart === false )
+	{
 		self.isReady = true;
-		self._$progress.classList.add("fadeOut");
-		self._$text.classList.add("fadeIn");
+		self._$progress.classList.add( "fadeOut" );
+		self._$text.classList.add( "fadeIn" );
 	}
 };
 
@@ -49091,9 +49772,9 @@ module.exports = new LoadingScreen();
 
 "use strict";
 
-var PubSub = require("pubsub-js");
-var UiElement = require("./UiElement");
-var utils = require("../etc/Utils");
+var PubSub = require( "pubsub-js" );
+var UiElement = require( "./UiElement" );
+var utils = require( "../etc/Utils" );
 
 var self;
 /**
@@ -49102,71 +49783,71 @@ var self;
  * @constructor
  */
 function Menu() {
-	
-	UiElement.call(this);
-	
-	Object.defineProperties(this, {	
-		_$menu: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+
+	UiElement.call( this );
+
+	Object.defineProperties( this, {
+		_$menu : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$button: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$button : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$text: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$text : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$progress: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$progress : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$progressBar: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$progressBar : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-	});
-	
+	} );
+
 	self = this;
 }
 
-Menu.prototype = Object.create(UiElement.prototype);
+Menu.prototype = Object.create( UiElement.prototype );
 Menu.prototype.constructor = Menu;
 
 /**
  * Inits the control
  */
-Menu.prototype.init = function(){
-	
-	this._$menu = global.document.querySelector("#menu");
-	this._$button = this._$menu.querySelector(".btn");
-	this._$text = this._$menu.querySelector(".text");
-	this._$progress = this._$menu.querySelector(".progress");
-	this._$progressBar = this._$menu.querySelector(".progress-bar");
-	
+Menu.prototype.init = function() {
+
+	this._$menu = global.document.querySelector( "#menu" );
+	this._$button = this._$menu.querySelector( ".btn" );
+	this._$text = this._$menu.querySelector( ".text" );
+	this._$progress = this._$menu.querySelector( ".progress" );
+	this._$progressBar = this._$menu.querySelector( ".progress-bar" );
+
 	// subscriptions
-	PubSub.subscribe("ui.loading.progress", this._onUpdate);
-	PubSub.subscribe("ui.loading.ready", this._onReady);
-	
-	this._$button.addEventListener("click", this._onClick);
+	PubSub.subscribe( "ui.loading.progress", this._onUpdate );
+	PubSub.subscribe( "ui.loading.ready", this._onReady );
+
+	this._$button.addEventListener( "click", this._onClick );
 };
 
 /**
  * Shows the menu.
  * 
  */
-Menu.prototype.show = function(){
+Menu.prototype.show = function() {
 
 	this._$text.style.display = "none";
 	this._$menu.style.display = "block";
@@ -49176,18 +49857,20 @@ Menu.prototype.show = function(){
 /**
  * Hides the menu.
  */
-Menu.prototype.hide = function(){
+Menu.prototype.hide = function() {
+
 	this._$menu.style.display = "none";
 };
 
 /**
  * Click-Handler for Menu-Button
  */
-Menu.prototype._onClick = function(){
-	
-	global.document.dispatchEvent( new global.Event("lockPointer"));
-	
-	if(utils.isFirefox() === true){
+Menu.prototype._onClick = function() {
+
+	global.document.dispatchEvent( new global.Event( "lockPointer" ) );
+
+	if ( utils.isFirefox() === true )
+	{
 		self._$button.style.display = "none";
 		self._$text.style.display = "block";
 	}
@@ -49199,9 +49882,10 @@ Menu.prototype._onClick = function(){
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-Menu.prototype._onUpdate = function(message, data){
-	
-	if(data.isApplicationStart === true){
+Menu.prototype._onUpdate = function( message, data ) {
+
+	if ( data.isApplicationStart === true )
+	{
 		self._$progressBar.style.width = data.loadingProgress + "%";
 	}
 };
@@ -49212,22 +49896,23 @@ Menu.prototype._onUpdate = function(message, data){
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-Menu.prototype._onReady = function(message, data){
-	
-	if(data.isApplicationStart === true){
-		self._$button.addEventListener("click", self._publishFinishEvent);
-		self._$progress.classList.add("fadeOut");
-		self._$button.classList.add("fadeIn");
+Menu.prototype._onReady = function( message, data ) {
+
+	if ( data.isApplicationStart === true )
+	{
+		self._$button.addEventListener( "click", self._publishFinishEvent );
+		self._$progress.classList.add( "fadeOut" );
+		self._$button.classList.add( "fadeIn" );
 	}
 };
 
 /**
  * Publish a "stage.start" message
  */
-Menu.prototype._publishFinishEvent = function(message, data){
-	
-	PubSub.publish("stage.start", undefined);
-	self._$button.removeEventListener("click", self._publishFinishEvent);
+Menu.prototype._publishFinishEvent = function( message, data ) {
+
+	PubSub.publish( "stage.start", undefined );
+	self._$button.removeEventListener( "click", self._publishFinishEvent );
 };
 
 module.exports = new Menu();
@@ -49241,9 +49926,9 @@ module.exports = new Menu();
  */
 "use strict";
 
-var PubSub = require("pubsub-js");
-var UiElement = require("./UiElement");
-var utils = require("../etc/Utils");
+var PubSub = require( "pubsub-js" );
+var UiElement = require( "./UiElement" );
+var utils = require( "../etc/Utils" );
 
 var self;
 /**
@@ -49252,69 +49937,68 @@ var self;
  * @constructor
  */
 function ModalDialog() {
-	
-	UiElement.call(this);
-	
-	Object.defineProperties(this, {	
-		_$modal: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+
+	UiElement.call( this );
+
+	Object.defineProperties( this, {
+		_$modal : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$overlay: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$overlay : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$close: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$close : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$headline: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$headline : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$button: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$button : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$content: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$content : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
-	
+	} );
+
 	self = this;
 }
 
-ModalDialog.prototype = Object.create(UiElement.prototype);
+ModalDialog.prototype = Object.create( UiElement.prototype );
 ModalDialog.prototype.constructor = ModalDialog;
 
 /**
  * Inits the control
  */
-ModalDialog.prototype.init = function(){
-	
-	this._$modal = global.document.querySelector("#modal-dialog");
-	this._$overlay = global.document.querySelector(".md-overlay");
-	this._$close = this._$modal.querySelector(".md-close");
-	this._$headline = this._$modal.querySelector("h2");
-	this._$button = this._$modal.querySelector(".btn");
-	this._$content = this._$modal.querySelector(".md-text");
-	
-	
-	this._$close.addEventListener("click", this._onClose);
-	this._$overlay.addEventListener("click", this._onClose);
+ModalDialog.prototype.init = function() {
+
+	this._$modal = global.document.querySelector( "#modal-dialog" );
+	this._$overlay = global.document.querySelector( ".md-overlay" );
+	this._$close = this._$modal.querySelector( ".md-close" );
+	this._$headline = this._$modal.querySelector( "h2" );
+	this._$button = this._$modal.querySelector( ".btn" );
+	this._$content = this._$modal.querySelector( ".md-text" );
+
+	this._$close.addEventListener( "click", this._onClose );
+	this._$overlay.addEventListener( "click", this._onClose );
 };
 
 /**
@@ -49322,37 +50006,37 @@ ModalDialog.prototype.init = function(){
  * 
  * @param {object} textKeys - The texts to display.
  */
-ModalDialog.prototype.show = function(textKeys){
-	
+ModalDialog.prototype.show = function( textKeys ) {
+
 	// set texts
-	this._$headline.textContent = this.textManager.get(textKeys.headline);
-	this._$button.textContent = this.textManager.get(textKeys.button);
-	this._$content.innerHTML = this.textManager.get(textKeys.content);
-	
+	this._$headline.textContent = this.textManager.get( textKeys.headline );
+	this._$button.textContent = this.textManager.get( textKeys.button );
+	this._$content.innerHTML = this.textManager.get( textKeys.content );
+
 	// show modal
-	this._$modal.classList.add("md-show");
-	
+	this._$modal.classList.add( "md-show" );
+
 	// release pointer lock
-	global.document.dispatchEvent(new global.Event("releasePointer"));
+	global.document.dispatchEvent( new global.Event( "releasePointer" ) );
 };
 
 /**
  * Hides the modal dialog.
  */
-ModalDialog.prototype.hide = function(){
-	
+ModalDialog.prototype.hide = function() {
+
 	// hide modal
-	this._$modal.classList.remove("md-show");
-	
+	this._$modal.classList.remove( "md-show" );
+
 	// lock pointer
-	global.document.dispatchEvent( new global.Event("lockPointer"));
+	global.document.dispatchEvent( new global.Event( "lockPointer" ) );
 };
 
 /**
  * This method handles event for closing the element.
  */
-ModalDialog.prototype._onClose = function(event){
-	
+ModalDialog.prototype._onClose = function( event ) {
+
 	event.stopPropagation();
 	self.hide();
 };
@@ -49362,9 +50046,8 @@ module.exports = new ModalDialog();
 },{"../etc/Utils":41,"./UiElement":80,"pubsub-js":1}],78:[function(require,module,exports){
 (function (global){
 /**
- * @file Prototype for ui-element performance monitor.
- * Only if the development mode is active, this control
- * is part of the UI.
+ * @file Prototype for ui-element performance monitor. Only if the development
+ * mode is active, this control is part of the UI.
  * 
  * see https://github.com/mrdoob/stats.js/
  * 
@@ -49373,7 +50056,7 @@ module.exports = new ModalDialog();
 
 "use strict";
 
-var UiElement = require("./UiElement");
+var UiElement = require( "./UiElement" );
 
 var self;
 
@@ -49383,114 +50066,115 @@ var self;
  * @constructor
  */
 function PerformanceMonitor() {
-	
-	UiElement.call(this);
-	
-	Object.defineProperties(this, {	
-		_$performanceMonitor: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+
+	UiElement.call( this );
+
+	Object.defineProperties( this, {
+		_$performanceMonitor : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$fps: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$fps : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$fpsText: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$fpsText : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$fpsGraph: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$fpsGraph : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$ms: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$ms : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$msText: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$msText : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$msGraph: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$msGraph : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_mode: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_mode : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
-	
+	} );
+
 	self = this;
 }
 
-PerformanceMonitor.prototype = Object.create(UiElement.prototype);
+PerformanceMonitor.prototype = Object.create( UiElement.prototype );
 PerformanceMonitor.prototype.constructor = PerformanceMonitor;
 
 /**
  * Initializes the control.
  */
-PerformanceMonitor.prototype.init = function(){
-	
+PerformanceMonitor.prototype.init = function() {
+
 	// root element
-	this._$performanceMonitor = global.document.querySelector("#performance-monitor");
-	
+	this._$performanceMonitor = global.document.querySelector( "#performance-monitor" );
+
 	// frames per seconds
-	this._$fps = this._$performanceMonitor.querySelector(".fps");
-	this._$fpsText = this._$fps.querySelector(".text");
-	this._$fpsGraph = this._$fps.querySelector(".graph");
-	this._generateBarChart(this._$fpsGraph);
-	
+	this._$fps = this._$performanceMonitor.querySelector( ".fps" );
+	this._$fpsText = this._$fps.querySelector( ".text" );
+	this._$fpsGraph = this._$fps.querySelector( ".graph" );
+	this._generateBarChart( this._$fpsGraph );
+
 	// frametime
-	this._$ms = this._$performanceMonitor.querySelector(".ms");
-	this._$msText = this._$ms.querySelector(".text");
-	this._$msGraph = this._$ms.querySelector(".graph");
-	this._generateBarChart(this._$msGraph);
-	
+	this._$ms = this._$performanceMonitor.querySelector( ".ms" );
+	this._$msText = this._$ms.querySelector( ".text" );
+	this._$msGraph = this._$ms.querySelector( ".graph" );
+	this._generateBarChart( this._$msGraph );
+
 	// event handler
-	this._$performanceMonitor.addEventListener("click", this._onSwitchMode);
+	this._$performanceMonitor.addEventListener( "click", this._onSwitchMode );
 };
 
 /**
  * Updates the control.
  */
-PerformanceMonitor.prototype.update = (function(){
-	
+PerformanceMonitor.prototype.update = ( function() {
+
 	var startTime = global.performance.now(), currentTime = 0, previousTime = startTime;
 	var ms = 0, msMin = Infinity, msMax = 0;
 	var fps = 0, fpsMin = Infinity, fpsMax = 0;
 	var frames = 0;
-	
+
 	return function() {
-		
+
 		currentTime = global.performance.now();
 
 		ms = currentTime - startTime;
 		msMin = Math.min( msMin, ms );
 		msMax = Math.max( msMax, ms );
 
-		/*jslint bitwise: true */this._$msText.textContent = ( ms | 0 ) + " MS (" + ( msMin | 0 ) + "-" + ( msMax | 0 ) + ")";
+		/* jslint bitwise: true */this._$msText.textContent = ( ms | 0 ) + " MS (" + ( msMin | 0 ) + "-" + ( msMax | 0 ) + ")";
 		this._updateChart( this._$msGraph, Math.min( 30, 30 - ( ms / 200 ) * 30 ) );
 
-		frames ++;
+		frames++;
 
-		if ( currentTime > previousTime + 1000 ) {
+		if ( currentTime > previousTime + 1000 )
+		{
 
 			fps = Math.round( ( frames * 1000 ) / ( currentTime - previousTime ) );
 			fpsMin = Math.min( fpsMin, fps );
@@ -49507,17 +50191,20 @@ PerformanceMonitor.prototype.update = (function(){
 		startTime = currentTime;
 
 	};
-	
-}());
+
+}() );
 
 /**
  * Toggles the control.
  */
-PerformanceMonitor.prototype.toggle = function(){
-	
-	if(this._$performanceMonitor.style.display === "none"){
+PerformanceMonitor.prototype.toggle = function() {
+
+	if ( this._$performanceMonitor.style.display === "none" )
+	{
 		this._$performanceMonitor.style.display = "block";
-	}else{
+	}
+	else
+	{
 		this._$performanceMonitor.style.display = "none";
 	}
 };
@@ -49528,14 +50215,15 @@ PerformanceMonitor.prototype.toggle = function(){
  * @param {object} $graph - The target graph object.
  */
 PerformanceMonitor.prototype._generateBarChart = function( $graph ) {
-	
+
 	var element = null;
-	
-	while( $graph.children.length < 74 ) {
-		
+
+	while ( $graph.children.length < 74 )
+	{
+
 		element = global.document.createElement( "span" );
 		element.className = "bar";
-		$graph.appendChild(element);
+		$graph.appendChild( element );
 	}
 };
 
@@ -49545,31 +50233,31 @@ PerformanceMonitor.prototype._generateBarChart = function( $graph ) {
  * @param {object} $graph - The target graph object.
  */
 PerformanceMonitor.prototype._updateChart = ( function() {
-	
+
 	var child = null;
-	
+
 	return function( $graph, value ) {
-		
+
 		child = $graph.appendChild( $graph.firstChild );
 		child.style.height = value + "px";
 	};
-	
-}());
+
+}() );
 
 /**
  * Switches the mode of the performance monitor.
  */
 PerformanceMonitor.prototype._onSwitchMode = function() {
-	
-	self._mode = ++ self._mode % 2;
-	
-	switch ( self._mode ) {
 
+	self._mode = ++self._mode % 2;
+
+	switch ( self._mode )
+	{
 		case 0:
 			self._$fps.style.display = "block";
 			self._$ms.style.display = "none";
 			break;
-			
+
 		case 1:
 			self._$fps.style.display = "none";
 			self._$ms.style.display = "block";
@@ -49590,148 +50278,157 @@ module.exports = new PerformanceMonitor();
 
 var self;
 
-var UiElement = require("./UiElement");
+var UiElement = require( "./UiElement" );
 /**
  * Creates the text screen.
  * 
  * @constructor
  */
 function TextScreen() {
-	
-	UiElement.call(this);
-	
-	Object.defineProperties(this, {	
-		_$textScreen: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+
+	UiElement.call( this );
+
+	Object.defineProperties( this, {
+		_$textScreen : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_$textScreenContent: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_$textScreenContent : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_textKeys: {
-			value: {},
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_textKeys : {
+			value : {},
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_completeCallback: {
-			value: undefined,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_completeCallback : {
+			value : undefined,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_isDone: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_isDone : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_isPrint: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_isPrint : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		isActive: {
-			value: false,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		isActive : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_textIndex: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_textIndex : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
-		_printId: {
-			value: 0,
-			configurable: false,
-			enumerable: false,
-			writable: true
+		_printId : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
-	
+	} );
+
 	self = this;
 }
 
-TextScreen.prototype = Object.create(UiElement.prototype);
+TextScreen.prototype = Object.create( UiElement.prototype );
 TextScreen.prototype.constructor = TextScreen;
 
 /**
  * Inits the control
  */
-TextScreen.prototype.init = function(){
-	
-	this._$textScreen = global.document.querySelector("#text-screen");
-	this._$textScreenContent = this._$textScreen.querySelector(".text");
+TextScreen.prototype.init = function() {
+
+	this._$textScreen = global.document.querySelector( "#text-screen" );
+	this._$textScreenContent = this._$textScreen.querySelector( ".text" );
 };
 
 /**
  * Shows the text screen.
  * 
  * @param {object} textKeys - The conversation of the text screen.
- * @param {function} completeCallback - This function is executed, when all texts are shown
- * and the ui-element is going to hide.
+ * @param {function} completeCallback - This function is executed, when all
+ * texts are shown and the ui-element is going to hide.
  */
-TextScreen.prototype.show = function(textKeys, completeCallback){
-	
-	if(this.isActive === false){
+TextScreen.prototype.show = function( textKeys, completeCallback ) {
+
+	if ( this.isActive === false )
+	{
 		this._textKeys = textKeys;
 		this._completeCallback = completeCallback;
 		this._isDone = false;
-		
+
 		this.isActive = true;
 		this._isPrint = true;
-			
+
 		this._printName();
 		this._printText();
-		this._$textScreen.classList.add("slideEffect");
+		this._$textScreen.classList.add( "slideEffect" );
 	}
 };
 
 /**
  * Hides the text screen.
  */
-TextScreen.prototype.hide = function(){
-	
-	if(this.isActive === true){
+TextScreen.prototype.hide = function() {
+
+	if ( this.isActive === true )
+	{
 		this.isActive = false;
-		this._$textScreen.classList.remove("slideEffect");
+		this._$textScreen.classList.remove( "slideEffect" );
 		this._$textScreenContent.textContent = "";
 		this._textIndex = 0;
 	}
 };
 
 /**
- * Handles the "complete-order" of the player. This happens
- * when the player presses the space key.
+ * Handles the "complete-order" of the player. This happens when the player
+ * presses the space key.
  */
-TextScreen.prototype.complete = function(){
-	
+TextScreen.prototype.complete = function() {
+
 	// text completion
-	if(this._isPrint === true){	
+	if ( this._isPrint === true )
+	{
 		this._isPrint = false;
-		clearTimeout(this._printId);
+		clearTimeout( this._printId );
 		this._$textScreenContent.textContent = "";
 		this._printName();
-		this._$textScreenContent.textContent += self.textManager.get(this._textKeys[this._textIndex].text);
-	// switch to next text and start printing
-	}else if(this._textIndex < this._textKeys.length -1){
+		this._$textScreenContent.textContent += self.textManager.get( this._textKeys[ this._textIndex ].text );
+		// switch to next text and start printing
+	}
+	else if ( this._textIndex < this._textKeys.length - 1 )
+	{
 		this._isPrint = true;
 		this._textIndex++;
 		this._$textScreenContent.textContent = "";
 		this._printName();
 		this._printText();
-	// finish
-	}else{
-		if(this._isDone === false){
-			if(typeof this._completeCallback === "function"){
+		// finish
+	}
+	else
+	{
+		if ( this._isDone === false )
+		{
+			if ( typeof this._completeCallback === "function" )
+			{
 				this._completeCallback();
 			}
 			this._isDone = true;
@@ -49741,38 +50438,42 @@ TextScreen.prototype.complete = function(){
 };
 
 /**
- * Prints a single text of the conversation to the text screen.
- * The printing is done letter by letter.
+ * Prints a single text of the conversation to the text screen. The printing is
+ * done letter by letter.
  * 
  * @param {number} index - The array-index of the current text.
  */
-TextScreen.prototype._printText = (function(){
-	
+TextScreen.prototype._printText = ( function() {
+
 	var text;
-	
-	return function(index){
-		
+
+	return function( index ) {
+
 		index = index || 0;
-		text = self.textManager.get(self._textKeys[self._textIndex].text);
-		
-		if(index < text.length){
-			self._$textScreenContent.textContent += text[index];
-			self._printId = setTimeout(self._printText, 75, ++index);
-		}else{
+		text = self.textManager.get( self._textKeys[ self._textIndex ].text );
+
+		if ( index < text.length )
+		{
+			self._$textScreenContent.textContent += text[ index ];
+			self._printId = setTimeout( self._printText, 75, ++index );
+		}
+		else
+		{
 			self._isPrint = false;
-		}	
+		}
 	};
-	
-}());
+
+}() );
 
 /**
  * Prints entirely the name of the person, who is currently speaking.
  * 
  */
-TextScreen.prototype._printName = function(){
-	
-	if(this._textKeys[this._textIndex].name !== undefined){
-		var name = this.textManager.get( this._textKeys[this._textIndex].name );
+TextScreen.prototype._printName = function() {
+
+	if ( this._textKeys[ this._textIndex ].name !== undefined )
+	{
+		var name = this.textManager.get( this._textKeys[ this._textIndex ].name );
 		this._$textScreenContent.textContent += name + ": ";
 	}
 };
@@ -49789,7 +50490,7 @@ module.exports = new TextScreen();
 
 "use strict";
 
-var textManager = require("../etc/TextManager");
+var textManager = require( "../etc/TextManager" );
 
 /**
  * Creates an ui-element
@@ -49797,8 +50498,8 @@ var textManager = require("../etc/TextManager");
  * @constructor
  */
 function UiElement() {
-	
-	this.textManager = textManager; 
+
+	this.textManager = textManager;
 }
 
 /**
@@ -49809,20 +50510,22 @@ function UiElement() {
 UiElement.prototype._getTransitionEndEvent = function() {
 
 	var transition;
-	var element = global.document.querySelector("body");
-	
+	var element = global.document.querySelector( "body" );
+
 	var transitions = {
-	  'transition':'transitionend',
-	  'OTransition':'oTransitionEnd',
-	  'MozTransition':'transitionend',
-	  'WebkitTransition':'webkitTransitionEnd'
+		'transition' : 'transitionend',
+		'OTransition' : 'oTransitionEnd',
+		'MozTransition' : 'transitionend',
+		'WebkitTransition' : 'webkitTransitionEnd'
 	};
 
-    for(transition in transitions){
-        if( element.style[transition] !== undefined ){
-            return transitions[transition];
-        }
-    }
+	for ( transition in transitions )
+	{
+		if ( element.style[ transition ] !== undefined )
+		{
+			return transitions[ transition ];
+		}
+	}
 };
 
 module.exports = UiElement;
@@ -49830,53 +50533,53 @@ module.exports = UiElement;
 },{"../etc/TextManager":40}],81:[function(require,module,exports){
 (function (global){
 /**
- * @file Interface for entire ui-handling. This prototype is used in scenes
- * to access ui-based logic and to create ui-entities.
+ * @file Interface for entire ui-handling. This prototype is used in scenes to
+ * access ui-based logic and to create ui-entities.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-var PubSub = require("pubsub-js");
+var PubSub = require( "pubsub-js" );
 
-var developmentPanel = require("./DevelopmentPanel");
-var performanceMonitor = require("./PerformanceMonitor");
-var informationPanel = require("./InformationPanel");
-var interactionLabel = require("./InteractionLabel");
-var loadingScreen = require("./LoadingScreen");
-var menu = require("./Menu");
-var textScreen = require("./TextScreen");
-var modalDialog = require("./ModalDialog");
-var chat = require("./Chat");
+var developmentPanel = require( "./DevelopmentPanel" );
+var performanceMonitor = require( "./PerformanceMonitor" );
+var informationPanel = require( "./InformationPanel" );
+var interactionLabel = require( "./InteractionLabel" );
+var loadingScreen = require( "./LoadingScreen" );
+var menu = require( "./Menu" );
+var textScreen = require( "./TextScreen" );
+var modalDialog = require( "./ModalDialog" );
+var chat = require( "./Chat" );
 
-var utils = require("../etc/Utils");
+var utils = require( "../etc/Utils" );
 
 /**
  * Creates the user interface manager.
  * 
  * @constructor
  */
-function UserInterfaceManager(){
-	
-	Object.defineProperties(this, {	
-		_$uiContainer: {
-			value: null,
-			configurable: false,
-			enumerable: false,
-			writable: true
+function UserInterfaceManager() {
+
+	Object.defineProperties( this, {
+		_$uiContainer : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
-	});
+	} );
 }
 
 /**
  * Initializes the user interface manager.
  */
-UserInterfaceManager.prototype.init = function(){
-	
+UserInterfaceManager.prototype.init = function() {
+
 	// get reference to central ui-container
-	this._$uiContainer = global.document.querySelector("#ui-container");
-	
+	this._$uiContainer = global.document.querySelector( "#ui-container" );
+
 	// init controls
 	informationPanel.init();
 	interactionLabel.init();
@@ -49885,16 +50588,16 @@ UserInterfaceManager.prototype.init = function(){
 	textScreen.init();
 	modalDialog.init();
 	chat.init();
-	
+
 	// add development information
-	if(utils.isDevelopmentModeActive() === true){
-		
+	if ( utils.isDevelopmentModeActive() === true )
+	{
 		performanceMonitor.init();
-		
+
 		developmentPanel.init();
 		developmentPanel.setText( "Development Mode Active: " + utils.getAppInformation() );
 	}
-	
+
 	// eventing
 	this._mapGlobalEventsToTopics();
 	this._initGlobalEventHandler();
@@ -49903,9 +50606,10 @@ UserInterfaceManager.prototype.init = function(){
 /**
  * Updates the UserInterface-Logic, called from render-loop.
  */
-UserInterfaceManager.prototype.update = function(){
-	
-	if(utils.isDevelopmentModeActive() === true){
+UserInterfaceManager.prototype.update = function() {
+
+	if ( utils.isDevelopmentModeActive() === true )
+	{
 		performanceMonitor.update();
 	}
 };
@@ -49915,8 +50619,9 @@ UserInterfaceManager.prototype.update = function(){
  * 
  * @param {string} textKey - The text-content of the information panel.
  */
-UserInterfaceManager.prototype.setInformationPanelText = function(textKey){	
-	informationPanel.setText(textKey);
+UserInterfaceManager.prototype.setInformationPanelText = function( textKey ) {
+
+	informationPanel.setText( textKey );
 };
 
 /**
@@ -49924,14 +50629,16 @@ UserInterfaceManager.prototype.setInformationPanelText = function(textKey){
  * 
  * @param {string} textKey - The label of the corresponding action.
  */
-UserInterfaceManager.prototype.showInteractionLabel = function(textKey){	
-	interactionLabel.show(textKey);
+UserInterfaceManager.prototype.showInteractionLabel = function( textKey ) {
+
+	interactionLabel.show( textKey );
 };
 
 /**
  * Hides the interaction label.
  */
-UserInterfaceManager.prototype.hideInteractionLabel = function(){	
+UserInterfaceManager.prototype.hideInteractionLabel = function() {
+
 	interactionLabel.hide();
 };
 
@@ -49939,14 +50646,16 @@ UserInterfaceManager.prototype.hideInteractionLabel = function(){
  * Shows the menu.
  * 
  */
-UserInterfaceManager.prototype.showMenu = function(){
+UserInterfaceManager.prototype.showMenu = function() {
+
 	menu.show();
 };
 
 /**
  * Hides the menu.
  */
-UserInterfaceManager.prototype.hideMenu = function(){
+UserInterfaceManager.prototype.hideMenu = function() {
+
 	menu.hide();
 	chat.hide();
 };
@@ -49955,36 +50664,38 @@ UserInterfaceManager.prototype.hideMenu = function(){
  * Shows the text screen.
  * 
  * @param {object} textObject - The conversation of the text screen.
- * @param {function} completeCallback - This function is executed, when all texts are shown
- * and the ui-element is going to hide.
+ * @param {function} completeCallback - This function is executed, when all
+ * texts are shown and the ui-element is going to hide.
  */
-UserInterfaceManager.prototype.showTextScreen = function(textKeys, completeCallback){
-	
-	textScreen.show(textKeys, completeCallback);	
+UserInterfaceManager.prototype.showTextScreen = function( textKeys, completeCallback ) {
 
+	textScreen.show( textKeys, completeCallback );
 };
 
 /**
  * Hides the text screen.
  */
-UserInterfaceManager.prototype.hideTextScreen = function(){
-	
+UserInterfaceManager.prototype.hideTextScreen = function() {
+
 	textScreen.hide();
 };
 
 /**
  * Shows the loading screen.
  * 
- * @param {function} callback - This function is executed, when the loading screen is shown.
+ * @param {function} callback - This function is executed, when the loading
+ * screen is shown.
  */
-UserInterfaceManager.prototype.showLoadingScreen = function(callback){
-	loadingScreen.show(callback);	
+UserInterfaceManager.prototype.showLoadingScreen = function( callback ) {
+
+	loadingScreen.show( callback );
 };
 
 /**
  * Hides the loading screen.
  */
-UserInterfaceManager.prototype.hideLoadingScreen = function(){
+UserInterfaceManager.prototype.hideLoadingScreen = function() {
+
 	loadingScreen.hide();
 };
 
@@ -49993,14 +50704,16 @@ UserInterfaceManager.prototype.hideLoadingScreen = function(){
  * 
  * @param {object} textKeys - The texts to display.
  */
-UserInterfaceManager.prototype.showModalDialog = function(textKeys){
-	modalDialog.show(textKeys);	
+UserInterfaceManager.prototype.showModalDialog = function( textKeys ) {
+
+	modalDialog.show( textKeys );
 };
 
 /**
  * Hides the modal dialog.
  */
-UserInterfaceManager.prototype.hideModalDialog = function(){
+UserInterfaceManager.prototype.hideModalDialog = function() {
+
 	modalDialog.hide();
 };
 
@@ -50009,45 +50722,47 @@ UserInterfaceManager.prototype.hideModalDialog = function(){
  * 
  * @param {object} event - The event object.
  */
-UserInterfaceManager.prototype.handleUiInteraction = function(event){
-	
+UserInterfaceManager.prototype.handleUiInteraction = function( event ) {
+
 	event.preventDefault(); // prevent scrolling
-	
-	if(textScreen.isActive === true){		
-		textScreen.complete();		
+
+	if ( textScreen.isActive === true )
+	{
+		textScreen.complete();
 	}
-	else if(loadingScreen.isActive === true && loadingScreen.isReady === true){	
-		PubSub.publish("stage.start", undefined);
-		loadingScreen.hide();	
+	else if ( loadingScreen.isActive === true && loadingScreen.isReady === true )
+	{
+		PubSub.publish( "stage.start", undefined );
+		loadingScreen.hide();
 	}
 };
 
 /**
  * Toggles the visibility of the performance-monitor.
  */
-UserInterfaceManager.prototype.tooglePerformanceMonitor = function(){
-	
+UserInterfaceManager.prototype.tooglePerformanceMonitor = function() {
+
 	performanceMonitor.toggle();
 };
-
 
 /**
  * Maps global events to topics
  */
-UserInterfaceManager.prototype._mapGlobalEventsToTopics = function(){
-	
-	global.window.addEventListener("resize", function(){
-		PubSub.publish("ui.event.resize", undefined);
-	});
+UserInterfaceManager.prototype._mapGlobalEventsToTopics = function() {
+
+	global.window.addEventListener( "resize", function() {
+
+		PubSub.publish( "ui.event.resize", undefined );
+	} );
 };
 
 /**
  * Inits global event handlers
  */
-UserInterfaceManager.prototype._initGlobalEventHandler = function(){
-	
-	global.window.addEventListener("contextmenu", this._onContextMenu);
-	global.window.addEventListener("keydown", this._onKeyDown);
+UserInterfaceManager.prototype._initGlobalEventHandler = function() {
+
+	global.window.addEventListener( "contextmenu", this._onContextMenu );
+	global.window.addEventListener( "keydown", this._onKeyDown );
 };
 
 /**
@@ -50055,7 +50770,8 @@ UserInterfaceManager.prototype._initGlobalEventHandler = function(){
  * 
  * @param {object} event - The event object.
  */
-UserInterfaceManager.prototype._onContextMenu = function(event){
+UserInterfaceManager.prototype._onContextMenu = function( event ) {
+
 	// disable contextmenu
 	event.preventDefault();
 };
@@ -50065,16 +50781,16 @@ UserInterfaceManager.prototype._onContextMenu = function(event){
  * 
  * @param {object} event - Default event object.
  */
-UserInterfaceManager.prototype._onKeyDown = function(event){
-	
-	switch( event.keyCode ) {
-	
-	case 13:
-		// enter
-		chat.toogle();
-		break;
+UserInterfaceManager.prototype._onKeyDown = function( event ) {
+
+	switch ( event.keyCode )
+	{
+		case 13:
+			// enter
+			chat.toogle();
+			break;
 	}
-	
+
 };
 
 module.exports = new UserInterfaceManager();
