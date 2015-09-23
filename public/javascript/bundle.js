@@ -38195,11 +38195,11 @@ function FirstPersonControls(){
 	});
 
 	// build relationship
-	this._pitchObject.add(camera); // camera -> pitch
-	this._yawObject.add(this._pitchObject); // pitch -> yaw
+	this._pitchObject.add( camera ); // camera -> pitch
+	this._yawObject.add( this._pitchObject ); // pitch -> yaw
 	
 	// add to scene
-	scene.add(this._yawObject);
+	scene.add( this._yawObject );
 	
 	// type definition
 	this._yawObject.type = "Controls";
@@ -38213,7 +38213,7 @@ function FirstPersonControls(){
  * 
  * @param {THREE.Vector3} position - The position to set.
  */
-FirstPersonControls.prototype.setPosition = function(position) {
+FirstPersonControls.prototype.setPosition = function( position ) {
 	
 	this._yawObject.position.x = position.x;
 	this._yawObject.position.y = position.y + this._height;
@@ -38229,7 +38229,7 @@ FirstPersonControls.prototype.setPosition = function(position) {
  */
 FirstPersonControls.prototype.getPosition = function() {
 	
-	return new THREE.Vector3().copy(this._yawObject.position);
+	return new THREE.Vector3().copy( this._yawObject.position );
 };
 
 /**
@@ -38237,7 +38237,7 @@ FirstPersonControls.prototype.getPosition = function() {
  * 
  * @param {THREE.Euler} rotation - The rotation to set.
  */
-FirstPersonControls.prototype.setRotation = function(rotation) {
+FirstPersonControls.prototype.setRotation = function( rotation ) {
 	
 	this._pitchObject.rotation.x = rotation.x;
 	this._yawObject.rotation.y = rotation.y;
@@ -38252,7 +38252,7 @@ FirstPersonControls.prototype.setRotation = function(rotation) {
  */
 FirstPersonControls.prototype.getRotation = function() {
 	
-	return new THREE.Euler(this._pitchObject.rotation.x, this._yawObject.rotation.y, 0);
+	return new THREE.Euler( this._pitchObject.rotation.x, this._yawObject.rotation.y, 0 );
 };
 
 /**
@@ -38260,30 +38260,21 @@ FirstPersonControls.prototype.getRotation = function() {
  * 
  * @returns {THREE.Vector3} The direction vector.
  */
-FirstPersonControls.prototype.getDirection = (function() {
+FirstPersonControls.prototype.getDirection = ( function() {
 
-	var result = new THREE.Vector3(0, 0, 0);
-	var direction = new THREE.Vector3(0, 0, -1);
-	var rotation = new THREE.Euler(0, 0, 0, "YXZ");
+	var result = new THREE.Vector3();
+	var direction = new THREE.Vector3( 0, 0, -1 );
+	var rotation = new THREE.Euler( 0, 0, 0, "YXZ" );
 	
 	return function(){
 		
 		// calculate direction
-		rotation.set(this._pitchObject.rotation.x, this._yawObject.rotation.y, 0);
-		result.copy(direction).applyEuler(rotation);
+		rotation.set( this._pitchObject.rotation.x, this._yawObject.rotation.y, 0 );
+		result.copy( direction ).applyEuler( rotation );
 		return result;	
 	};
-}());
-
-/**
- * Gets the height of the current ground.
- * 
- * @returns {number} The height.
- */
-FirstPersonControls.prototype.getGroundHeight = function() {
 	
-	return this._yawObject.position.y - this._height;
-};
+} () );
 
 /**
  * Initializes the controls
@@ -38291,44 +38282,44 @@ FirstPersonControls.prototype.getGroundHeight = function() {
 FirstPersonControls.prototype.init = function() {
 	
 	// subscriptions
-	PubSub.subscribe("controls.active", this._onActive);
+	PubSub.subscribe( "controls.active", this._onActive );
 	
 	// events
-	global.document.addEventListener("lockPointer", this._onLockPointer);
-	global.document.addEventListener("releasePointer", this._onReleasePointer);
+	global.document.addEventListener( "lockPointer", this._onLockPointer );
+	global.document.addEventListener( "releasePointer", this._onReleasePointer );
 	
-	global.document.addEventListener("mousemove", this._onMouseMove);
-	global.document.addEventListener("keydown", this._onKeyDown);
-	global.document.addEventListener("keyup", this._onKeyUp);
+	global.document.addEventListener( "mousemove", this._onMouseMove );
+	global.document.addEventListener( "keydown", this._onKeyDown );
+	global.document.addEventListener( "keyup", this._onKeyUp );
 
-	global.document.addEventListener("pointerlockchange", this._onPointerlockchange);
-	global.document.addEventListener("mozpointerlockchange", this._onPointerlockchange);
-	global.document.addEventListener("webkitpointerlockchange", this._onPointerlockchange);
+	global.document.addEventListener( "pointerlockchange", this._onPointerlockchange );
+	global.document.addEventListener( "mozpointerlockchange", this._onPointerlockchange );
+	global.document.addEventListener( "webkitpointerlockchange", this._onPointerlockchange );
 	
-	global.document.addEventListener("pointerlockerror", this._onPointerlockerror);
-	global.document.addEventListener("mozpointerlockerror", this._onPointerlockerror);
-	global.document.addEventListener("webkitpointerlockerror", this._onPointerlockerror);
+	global.document.addEventListener( "pointerlockerror", this._onPointerlockerror );
+	global.document.addEventListener( "mozpointerlockerror", this._onPointerlockerror );
+	global.document.addEventListener( "webkitpointerlockerror", this._onPointerlockerror );
 	
 	// load and assign audio buffers for steps
-	audioManager.createAudioBufferList(["step1", "step2"], function(bufferList){
+	audioManager.createAudioBufferList( [ "step1", "step2" ], function( bufferList ){
 		
 		// create new audios
-		var audioStep1 = audioManager.createDynamicSound("controls.step1", bufferList[0], false, true);
-		var audioStep2 = audioManager.createDynamicSound("controls.step2", bufferList[1], false, 1, true);
+		var audioStep1 = audioManager.createDynamicSound( "controls.step1", bufferList[ 0 ], false, true );
+		var audioStep2 = audioManager.createDynamicSound( "controls.step2", bufferList[ 1 ], false, 1, true );
 		
 		// add variations
-		audioStep1.addPitchVariation(function(){
+		audioStep1.addPitchVariation( function(){
 			return 0.9 + Math.random() * 0.4;
-		});
-		audioStep2.addPitchVariation(function(){
+		} );
+		audioStep2.addPitchVariation( function(){
 			return 0.9 + Math.random() * 0.4;
-		});
+		} );
 		
 		// assign audios to camera
-		camera.add(audioStep1);
-		camera.add(audioStep2);
+		camera.add( audioStep1 );
+		camera.add( audioStep2 );
 
-	}).load();
+	} ).load();
 };
 
 /**
@@ -38336,11 +38327,11 @@ FirstPersonControls.prototype.init = function() {
  * 
  * @param {number} delta - Elapsed time between two frames.
  */
-FirstPersonControls.prototype.update = function(delta){
+FirstPersonControls.prototype.update = function( delta ){
 	
-	if (this._isControlsActive === true && this.isActionInProgress === false) {
+	if( this._isControlsActive === true && this.isActionInProgress === false ){
 		
-		this._translate(delta);
+		this._translate( delta );
 		
 		this._checkInteractiveObjects();
 		
@@ -38351,7 +38342,8 @@ FirstPersonControls.prototype.update = function(delta){
 		this._animateRun();
 		
 		this._publishPlayerStatus();
-	}else{
+	}
+	else{
 		// reset camera position
 		this._translateCameraToOrigin();
 	}
@@ -38362,24 +38354,24 @@ FirstPersonControls.prototype.update = function(delta){
  * 
  * @param {number} delta - Elapsed time between two frames.
  */
-FirstPersonControls.prototype._translate = (function() {
+FirstPersonControls.prototype._translate = ( function() {
 	
 	var velocity = new THREE.Vector3();
 	var normalizedMovement = new THREE.Vector3();
 	var lastPosition = new THREE.Vector3();
 	
-	return function(delta){
+	return function( delta ){
 		
 		// store last position
-		lastPosition.copy(this._yawObject.position);
+		lastPosition.copy( this._yawObject.position );
 		
 		// convert booleans to one number per axis (1, 0, -1)
-		this._move = Number(this._moveBackward) - Number(this._moveForward);	
-		this._strafe = Number(this._moveRight) - Number(this._moveLeft);
+		this._move = Number( this._moveBackward ) - Number( this._moveForward );	
+		this._strafe = Number( this._moveRight ) - Number( this._moveLeft );
 		
 		// calculate velocity
-		velocity.z = this._calculateMoveVelocity(delta);
-		velocity.x = this._calculateStrafeVelocity(delta);
+		velocity.z = this._calculateMoveVelocity( delta );
+		velocity.x = this._calculateStrafeVelocity( delta );
 		
 		// initialize movement vectors
 		normalizedMovement.z = this._move;
@@ -38387,26 +38379,28 @@ FirstPersonControls.prototype._translate = (function() {
 		
 		// this prevents, that the player moves to fast when
 		// e.g. forward and right are pressed simultaneously
-		normalizedMovement.normalize().multiply(velocity);
+		normalizedMovement.normalize().multiply( velocity );
 		
 		// actual translation of the controls position
-		this._yawObject.translateX(normalizedMovement.x);
-		this._yawObject.translateY(normalizedMovement.y);
-		this._yawObject.translateZ(normalizedMovement.z);
+		this._yawObject.translateX( normalizedMovement.x );
+		this._yawObject.translateY( normalizedMovement.y );
+		this._yawObject.translateZ( normalizedMovement.z );
 		
-		if(this._isCollisionHandlingRequired() === true){
+		if( this._isCollisionHandlingRequired() === true ){
 			
 			// restore last position
-			this._yawObject.position.copy(lastPosition);
+			this._yawObject.position.copy( lastPosition );
 			
 			// reset camera position
 			this._translateCameraToOrigin();
-		}else{
+		}
+		else{
 			// calculate camera motions
-			this._calculateCameraMotion(normalizedMovement, delta);
+			this._calculateCameraMotion( normalizedMovement, delta );
 		}
 	};
-}());
+	
+} () );
 
 /**
  * This method calculates the motions of the camera.
@@ -38414,22 +38408,24 @@ FirstPersonControls.prototype._translate = (function() {
  * @param {THREE.Vector3} normalizedMovement - This vector contains the translation of the current frame
  * @param {number} delta - Elapsed time between two frames.
  */
-FirstPersonControls.prototype._calculateCameraMotion = (function() {
+FirstPersonControls.prototype._calculateCameraMotion = ( function() {
 	
 	var motion = 0;
 	var audioStep1 = null;
 	var audioStep2 = null;
 	
-	return function(normalizedMovement, delta){
+	return function( normalizedMovement, delta ){
 		
-		if(audioStep1 === null){
-			audioStep1 = audioManager.getDynamicAudio("controls.step1");
+		if( audioStep1 === null ){
+			
+			audioStep1 = audioManager.getDynamicAudio( "controls.step1" );
 		}
-		if(audioStep2 === null){
-			audioStep2 = audioManager.getDynamicAudio("controls.step2");
+		if( audioStep2 === null ){
+			
+			audioStep2 = audioManager.getDynamicAudio( "controls.step2" );
 		}
 		
-		if(this._move !== 0 || this._strafe !== 0){
+		if( this._move !== 0 || this._strafe !== 0 ){
 			
 			// get motion factor from normalized movement
 			this._motionFactor += delta * normalizedMovement.length();
@@ -38438,19 +38434,22 @@ FirstPersonControls.prototype._calculateCameraMotion = (function() {
 			this._calculateFrequency();
 			
 			// calculate actual motion
-			motion = Math.sin( this._motionFactor * this._frequency + this._phase);
+			motion = Math.sin( this._motionFactor * this._frequency + this._phase );
 						
 			// play audio steps
-			if(motion < this._motionLastValue && this._motionCurveUp === true){			
+			if( motion < this._motionLastValue && this._motionCurveUp === true ){
+				
 				this._motionCurveUp = false;
-				audioStep1.play();
-			}else if(motion > this._motionLastValue && this._motionCurveUp === false){		
+				audioStep1.play();			
+			}
+			else if( motion > this._motionLastValue && this._motionCurveUp === false ){
+				
 				this._motionCurveUp = true;
 				audioStep2.play();
 			}
 			
 			// set values to camera
-			camera.position.y = Math.abs(motion) * this._deflection;
+			camera.position.y = Math.abs( motion ) * this._deflection;
 			camera.position.x = motion * this._deflection;
 			
 			// store current motion for next calculation
@@ -38462,27 +38461,29 @@ FirstPersonControls.prototype._calculateCameraMotion = (function() {
 		}
 	};
 	
-}());
+} () );
 
 /**
  * Calculates a new sine frequency for camera motion. It ensures, that
  * the new sine cuvre is in-sync to the old one.
  */
-FirstPersonControls.prototype._calculateFrequency = (function(){
+FirstPersonControls.prototype._calculateFrequency = ( function(){
 	
 	var current, next = 0;
 	var TWO_PI = 2 * Math.PI;
 	
 	return function(){
 			
-		if(this._frequency !== this._lastFrequency){
+		if( this._frequency !== this._lastFrequency ){
+			
 			current = ( this._motionFactor * this._lastFrequency + this._phase ) % TWO_PI;
 			next    = ( this._motionFactor * this._frequency)   % TWO_PI;
+			
 	        this._phase = current - next;
 	        this._lastFrequency = this._frequency;
 		}	
 	};
-}());
+} () );
 
 
 /**
@@ -38491,19 +38492,22 @@ FirstPersonControls.prototype._calculateFrequency = (function(){
 FirstPersonControls.prototype._translateCameraToOrigin = function(){
 	
 	// only translate if necessary
-	if(camera.position.x !== 0 || camera.position.y !== 0){
+	if( camera.position.x !== 0 || camera.position.y !== 0 ){
 		
 		// reset y value
 		camera.position.y -= FirstPersonControls.DEFAULT.CAMERA.RESETFACTOR;
-		camera.position.y = Math.max(camera.position.y, 0);
+		camera.position.y = Math.max( camera.position.y, 0 );
 		
 		// reset x value
-		if(camera.position.x < 0){
+		if( camera.position.x < 0 ){
+			
 			camera.position.x += FirstPersonControls.DEFAULT.CAMERA.RESETFACTOR;
-			camera.position.x = Math.min(camera.position.x, 0);
-		}else if(camera.position.x > 0){
+			camera.position.x = Math.min( camera.position.x, 0 );
+		}
+		else if( camera.position.x > 0 ){
+			
 			camera.position.x -= FirstPersonControls.DEFAULT.CAMERA.RESETFACTOR;
-			camera.position.x = Math.max(camera.position.x, 0);
+			camera.position.x = Math.max( camera.position.x, 0 );
 		}
 
 		// initialize motion values
@@ -38521,25 +38525,30 @@ FirstPersonControls.prototype._translateCameraToOrigin = function(){
  * 
  * @returns {number} The velocity in z-direction.
  */
-FirstPersonControls.prototype._calculateMoveVelocity = (function() {
+FirstPersonControls.prototype._calculateMoveVelocity = ( function() {
 	
 	var acceleration = 0;
 	
-	return function (delta){
+	return function( delta ){
 									
-		if(this._move !== 0){
+		if( this._move !== 0 ){
+			
 			acceleration += this._move * delta * FirstPersonControls.DEFAULT.SPEED.ACCELERATION.FACTOR;
 			
-			if(Math.abs(acceleration) > FirstPersonControls.DEFAULT.SPEED.ACCELERATION.MAX){
+			if( Math.abs( acceleration ) > FirstPersonControls.DEFAULT.SPEED.ACCELERATION.MAX ){
+				
 				acceleration = FirstPersonControls.DEFAULT.SPEED.ACCELERATION.MAX * this._move;
 			}
 			
-		}else{
+		}
+		else{
 			acceleration = 0;
 		}
-		return Math.abs( Math.tan(acceleration) * this._moveSpeed);
+		
+		return Math.abs( Math.tan( acceleration ) * this._moveSpeed );
 	};
-}());
+	
+} () );
 
 /**
  * This method calculates the movement velocity in x-direction.
@@ -38548,24 +38557,29 @@ FirstPersonControls.prototype._calculateMoveVelocity = (function() {
  * 
  * @returns {number} The velocity in x-direction.
  */
-FirstPersonControls.prototype._calculateStrafeVelocity = (function() {
+FirstPersonControls.prototype._calculateStrafeVelocity = ( function() {
 	
 	var acceleration = 0;
 	
-	return function (delta){
+	return function( delta ){
 		
-		if(this._strafe !== 0){
+		if( this._strafe !== 0 ){
+			
 			acceleration += this._strafe * delta * FirstPersonControls.DEFAULT.SPEED.ACCELERATION.FACTOR;
 			
-			if(Math.abs(acceleration) > FirstPersonControls.DEFAULT.SPEED.ACCELERATION.MAX){
+			if( Math.abs( acceleration ) > FirstPersonControls.DEFAULT.SPEED.ACCELERATION.MAX ){
+				
 				acceleration = FirstPersonControls.DEFAULT.SPEED.ACCELERATION.MAX * this._strafe;
 			}
-		}else{
+		}
+		else{
 			acceleration = 0;
 		}
-		return Math.abs( Math.tan(acceleration) * this._strafeSpeed);
+		
+		return Math.abs( Math.tan( acceleration ) * this._strafeSpeed );
 	};
-}());
+	
+} () );
 
 /**
  * This method calculates the height of the controls.
@@ -38582,33 +38596,37 @@ FirstPersonControls.prototype._calculateHeight = function( distance ) {
  * 
  * @returns {InteractiveObject|undefined} The interactive object if there is an intersection.
  */
-FirstPersonControls.prototype._getFirstInteractiveIntersection = (function() {
+FirstPersonControls.prototype._getFirstInteractiveIntersection = ( function() {
 	
 	var intersects = [];
 	var index;
 	
 	return function(){
 		
-		this._rayCaster.set(this._yawObject.position, this.getDirection());
+		this._rayCaster.set( this._yawObject.position, this.getDirection() );
 		this._rayCaster.far = 20;
 		
-		intersects = this._rayCaster.intersectObjects(actionManager.interactiveObjects);
+		intersects = this._rayCaster.intersectObjects( actionManager.interactiveObjects );
 
-		if (intersects.length > 0) {
-			for(index = 0; index < intersects.length; index++){
+		if( intersects.length > 0 ) {
+			
+			for( index = 0; index < intersects.length; index++ ){
+				
 				// return only an object, which is visible and has an active action
-				if(intersects[index].object.mesh.visible === true && intersects[index].object.action.isActive === true){
-					return intersects[index].object;
+				if( intersects[ index ].object.mesh.visible === true && intersects[ index ].object.action.isActive === true){
+					
+					return intersects[ index ].object;
 				}
 			}
 		} 
 	};
-}());
+	
+} () );
 
 /**
  * This method controls the visibility of the interaction label.
  */
-FirstPersonControls.prototype._checkInteractiveObjects = (function() {
+FirstPersonControls.prototype._checkInteractiveObjects = ( function() {
 	
 	var object;
 	
@@ -38616,23 +38634,33 @@ FirstPersonControls.prototype._checkInteractiveObjects = (function() {
 		
 		object = this._getFirstInteractiveIntersection();
 		
-		if(object !== undefined){
-			if(object.action !== undefined){
-				userInterfaceManager.showInteractionLabel(object.action.label);			
-			}else{
-				userInterfaceManager.hideInteractionLabel();
+		if( object !== undefined) {
+			
+			if( object.action !== undefined ){
+				
+				userInterfaceManager.showInteractionLabel( object.action.label );	
+				
 			}
-		}else{
+			else{
+				
+				userInterfaceManager.hideInteractionLabel();
+				
+			}
+		}
+		else{
+			
 			userInterfaceManager.hideInteractionLabel();
+			
 		}
 	};
-}());
+	
+} () );
 
 /**
  * When the player wants to interact with an object, this method
  * determines the interactive object and runs the respective action.
  */
-FirstPersonControls.prototype._interact = (function() {
+FirstPersonControls.prototype._interact = ( function() {
 	
 	var object;
 	
@@ -38640,43 +38668,45 @@ FirstPersonControls.prototype._interact = (function() {
 		
 		object = this._getFirstInteractiveIntersection();
 		
-		if(object !== undefined){
-			if(object.action !== undefined){
+		if( object !== undefined ){
+			
+			if( object.action !== undefined ){
+				
 				object.action.run();
 			}
 		}
 	};
 	
-}());
+} () );
 
 /**
  * This method checks the necessity of processing triggers and
  * running the respective action.
  */
-FirstPersonControls.prototype._checkAndProcessTrigger = (function() {
+FirstPersonControls.prototype._checkAndProcessTrigger = ( function() {
 	
 	var intersects = [];
-	var direction = new THREE.Vector3(0, -1, 0);
+	var direction = new THREE.Vector3( 0, -1, 0 );
 	var inRadius = false;
 	
 	return function(){
 		
-		this._rayCaster.set(this._yawObject.position, direction);
+		this._rayCaster.set( this._yawObject.position, direction );
 		this._rayCaster.far = this._height + 1;
 		
-		intersects = this._rayCaster.intersectObjects(actionManager.triggers);
+		intersects = this._rayCaster.intersectObjects( actionManager.triggers );
 
-		if (intersects.length > 0) {
+		if( intersects.length > 0 ){
 			
-			if(intersects[0].object.action !== undefined){
+			if( intersects[ 0 ].object.action !== undefined ){
 				
-				if(inRadius === false && intersects[0].object.action.isActive === true){
+				if( inRadius === false && intersects[ 0 ].object.action.isActive === true ){
 					
-					intersects[0].object.action.run();
+					intersects[ 0 ].object.action.run();
 					
 					inRadius = true;
 					
-					logger.log("INFO: FirstPersonControls: Trigger released and action \"%s\" executed.", intersects[0].object.action.label);
+					logger.log( "INFO: FirstPersonControls: Trigger released and action \"%s\" executed.", intersects[ 0 ].object.action.label );
 				}			
 			}
 			else{
@@ -38690,7 +38720,7 @@ FirstPersonControls.prototype._checkAndProcessTrigger = (function() {
 		}
 	};
 
-}());
+} () );
 
 /**
  * Does the actual collision detection and returns a boolean value, that
@@ -38792,7 +38822,7 @@ FirstPersonControls.prototype._toogleCrouch = function(){
 	this._isRun = false;
 	
 	// save current timestamp and values for animation
-	this._animationCrouchTime =  global.performance.now();
+	this._animationCrouchTime = global.performance.now();
 	this._animationHeight 	  = this._height;
 	this._animationMove  	  = this._moveSpeed;
 	this._animationStrafe 	  = this._strafeSpeed;
@@ -38815,7 +38845,7 @@ FirstPersonControls.prototype._setRun = function(isRun){
 	this._isCrouch = false;
 	
 	// save current timestamp and values for animation
-	this._animationRunTime    =  global.performance.now();
+	this._animationRunTime    = global.performance.now();
 	this._animationHeight 	  = this._height;
 	this._animationMove  	  = this._moveSpeed;
 	this._animationStrafe 	  = this._strafeSpeed;
@@ -38826,7 +38856,7 @@ FirstPersonControls.prototype._setRun = function(isRun){
 /**
  * Animates the transition between crouch and default position.
  */
-FirstPersonControls.prototype._animateCrouch = (function(){
+FirstPersonControls.prototype._animateCrouch = ( function(){
 	
 	var elapsed, factor, targetHeight, targetMove, targetStrafe, targetDeflection, targetFrequency, valueHeight, valueSpeed = 0;
 	
@@ -38862,12 +38892,12 @@ FirstPersonControls.prototype._animateCrouch = (function(){
 		}
 	};
 	
-})();
+} () );
 
 /**
  * Animates the transition between run and default movement.
  */
-FirstPersonControls.prototype._animateRun = (function(){
+FirstPersonControls.prototype._animateRun = ( function(){
 	
 	var elapsed, factor, targetHeight, targetMove, targetStrafe, targetDeflection, targetFrequency, valueHeight, valueSpeed = 0;
 	
@@ -38903,12 +38933,12 @@ FirstPersonControls.prototype._animateRun = (function(){
 		}
 	};
 	
-})();
+} () );
 
 /**
  * Publish the world information of the player for multiplayer.
  */
-FirstPersonControls.prototype._publishPlayerStatus = (function(){
+FirstPersonControls.prototype._publishPlayerStatus = ( function(){
 	
 	var position = new THREE.Vector3();
 	var quaternion = new THREE.Quaternion();
@@ -38918,12 +38948,12 @@ FirstPersonControls.prototype._publishPlayerStatus = (function(){
 		
 		// The pitch-object contains the entire position and  rotation
 		// values of the player
-		this._pitchObject.matrixWorld.decompose(position, quaternion, scale);
+		this._pitchObject.matrixWorld.decompose( position, quaternion, scale );
 		
-		PubSub.publish("message.game", {position: position, quaternion: quaternion});
+		PubSub.publish( "message.game", { position: position, quaternion: quaternion } );
 	};
 
-}());
+} () );
 
 /**
  * Resets the movement. This avoids problems with moving players,
@@ -38955,15 +38985,13 @@ FirstPersonControls.prototype._onActive = function(message, data) {
 
 /**
  * Locks the pointer for detecting mouse movements.
- * 
- * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
  */
-FirstPersonControls.prototype._onLockPointer = function(message, data) {
+FirstPersonControls.prototype._onLockPointer = function() {
 	
 	self._isUiElementActive = false; 
 		
 	var element = global.document.querySelector("canvas");
+	
 	// Ask the browser to lock the pointer
 	element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
 	element.requestPointerLock();	
@@ -38973,11 +39001,8 @@ FirstPersonControls.prototype._onLockPointer = function(message, data) {
  * Releases the locked pointer. This method is always called
  * by UI-Elements to release the pointer. It is not called, when
  * the Player goes via Esc to the Main Menu.
- * 
- * @param {string} message - The message topic of the subscription.
- * @param {string} data - The data of the topic message.
  */
-FirstPersonControls.prototype._onReleasePointer = function(message, data) {
+FirstPersonControls.prototype._onReleasePointer = function() {
 	
 	self._isUiElementActive = true;
 		
@@ -38994,16 +39019,24 @@ FirstPersonControls.prototype._onPointerlockchange = function() {
 	
 	var requestedElement = global.document.querySelector("canvas");
 	
-	if (global.document.pointerLockElement === requestedElement || global.document.mozPointerLockElement === requestedElement || global.document.webkitPointerLockElement === requestedElement) {
+	if ( global.document.pointerLockElement === requestedElement || 
+	     global.document.mozPointerLockElement === requestedElement || 
+	     global.document.webkitPointerLockElement === requestedElement ) {
 
 		self._isControlsActive = true;
-		if(self._isUiElementActive === false){
+		
+		if( self._isUiElementActive === false ){
+			
 			userInterfaceManager.hideMenu();
 		}
 
-	} else {
+	}
+	else{
+		
 		self._isControlsActive = false;
-		if(self._isUiElementActive === false){
+		
+		if( self._isUiElementActive === false ){
+			
 			userInterfaceManager.showMenu();
 		}	
 	}
@@ -39024,7 +39057,7 @@ FirstPersonControls.prototype._onPointerlockerror = function(event) {
  * 
  * @param {object} event - Default event object.
  */
-FirstPersonControls.prototype._onMouseMove = (function() {
+FirstPersonControls.prototype._onMouseMove = ( function() {
 	
 	var movementX, movementY = 0;
 	var HALF_PI = Math.PI * 0.5;
@@ -39038,7 +39071,7 @@ FirstPersonControls.prototype._onMouseMove = (function() {
 			movementY = event.movementY || event.mozMovementY || 0;
 
 			// manipulate rotation of yaw and pitch object
-			self._yawObject.rotation.y -= movementX * ( settingsManager.getMouseSensitivity() * 0.0001 );
+			self._yawObject.rotation.y   -= movementX * ( settingsManager.getMouseSensitivity() * 0.0001 );
 			self._pitchObject.rotation.x -= movementY * ( settingsManager.getMouseSensitivity() * 0.0001 );
 
 			// prevent "loop" of x-axis
@@ -39046,18 +39079,18 @@ FirstPersonControls.prototype._onMouseMove = (function() {
 		}
 	};
 	
-}());
+} () );
 
 /**
  * Executes, when a key is pressed down.
  * 
  * @param {object} event - Default event object.
  */
-FirstPersonControls.prototype._onKeyDown = function(event) {
-	
-	if(self._isControlsActive === true){
+FirstPersonControls.prototype._onKeyDown = function( event ){
 
-		switch (event.keyCode) {
+	if( self._isControlsActive === true ){
+
+		switch( event.keyCode ){
 	
 			case 87:
 				// w
@@ -39086,7 +39119,7 @@ FirstPersonControls.prototype._onKeyDown = function(event) {
 				
 			case 16:
 				// shift
-				self._setRun(true);
+				self._setRun( true );
 				break;
 				
 			case 69:
@@ -39101,7 +39134,7 @@ FirstPersonControls.prototype._onKeyDown = function(event) {
 				
 			case 32:
 				// space
-				userInterfaceManager.handleUiInteraction(event);		
+				userInterfaceManager.handleUiInteraction( event );		
 				break;
 		}
 	}
@@ -39112,10 +39145,11 @@ FirstPersonControls.prototype._onKeyDown = function(event) {
  * 
  * @param {object} event - Default event object.
  */
-FirstPersonControls.prototype._onKeyUp = function(event) {
+FirstPersonControls.prototype._onKeyUp = function( event ){
 	
-	if(self._isControlsActive === true){
-		switch(event.keyCode) {
+	if( self._isControlsActive === true ){
+		
+		switch( event.keyCode ) {
 	
 			case 87:
 				// w
@@ -39139,8 +39173,9 @@ FirstPersonControls.prototype._onKeyUp = function(event) {
 				
 			case 16:
 				// shift
-				if( self._isCrouch === false){
-					self._setRun(false);
+				if( self._isCrouch === false ){
+					
+					self._setRun( false );
 				}
 		}
 	}
