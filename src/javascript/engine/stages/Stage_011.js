@@ -41,7 +41,6 @@ Stage.prototype.setup = function() {
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
-	this.scene.add( ground );
 
 	// color faces
 	colorFaces( groundGeometry );
@@ -55,7 +54,7 @@ Stage.prototype.setup = function() {
 		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.scene.add( sign );
+		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
 			object : sign.position,
@@ -69,7 +68,7 @@ Stage.prototype.setup = function() {
 
 	// light
 	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.scene.add( ambientLight );
+	this.world.addObject3D( ambientLight );
 
 	var directionalLight = new THREE.DirectionalLight( 0xffffff );
 	directionalLight.position.set( -100, 50, -100 );
@@ -78,7 +77,7 @@ Stage.prototype.setup = function() {
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
 	this.settingsManager.adjustLight( directionalLight );
-	this.scene.add( directionalLight );
+	this.world.addObject3D( directionalLight );
 
 	// add trigger for ending
 	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
@@ -92,10 +91,10 @@ Stage.prototype.setup = function() {
 		self.saveGameManager.remove();
 	} );
 	stageTrigger.position.set( 0, 0, 75 );
-	this.scene.add( stageTrigger );
+	this.world.addObject3D( stageTrigger );
 
 	// post processing
-	this.renderer.preparePostProcessing( this.scene, this.camera );
+	this.renderer.preparePostProcessing( this.world, this.camera );
 	this.renderer.addGrayscaleEffect();
 	this.renderer.addHBlurEffect();
 	this.renderer.addVBlurEffect();

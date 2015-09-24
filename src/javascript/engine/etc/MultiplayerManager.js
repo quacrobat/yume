@@ -9,7 +9,7 @@ var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
 
 var Teammate = require( "./Teammate" );
-var scene = require( "../core/Scene" );
+var world = require( "../core/World" );
 var logger = require( "./Logger" );
 
 var self;
@@ -118,8 +118,8 @@ MultiplayerManager.prototype._addTeammate = function( teammate ) {
 	// add to internal array
 	this._teammates.push( teammate );
 
-	// add to scene
-	scene.add( teammate );
+	// add to world
+	world.addObject3D( teammate );
 };
 
 /**
@@ -133,8 +133,8 @@ MultiplayerManager.prototype._removeTeammate = function( teammate ) {
 	var index = this._teammates.indexOf( teammate );
 	this._teammates.splice( index, 1 );
 
-	// remove from scene
-	scene.remove( teammate );
+	// remove from world
+	world.removeObject3D( teammate );
 };
 
 /**

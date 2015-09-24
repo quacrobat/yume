@@ -41,7 +41,6 @@ Stage.prototype.setup = function() {
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
-	this.scene.add( ground );
 
 	// color faces
 	colorFaces( groundGeometry );
@@ -54,7 +53,7 @@ Stage.prototype.setup = function() {
 	sphere.position.set( -20, 10, 0 );
 	sphere.updateMatrix();
 	sphere.visible = false;
-	this.scene.add( sphere );
+	this.world.addObject3D( sphere );
 
 	// create second mesh for impostor demo
 	box = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
@@ -64,7 +63,7 @@ Stage.prototype.setup = function() {
 	box.position.set( 20, 10, 0 );
 	box.updateMatrix();
 	box.visible = false;
-	this.scene.add( box );
+	this.world.addObject3D( box );
 
 	this.performanceManager.createImpostor( "sphere", sphere, 512 );
 	this.performanceManager.createImpostor( "box", box, 512 );
@@ -78,7 +77,7 @@ Stage.prototype.setup = function() {
 		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.scene.add( sign );
+		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
 			object : sign.position,
@@ -92,7 +91,7 @@ Stage.prototype.setup = function() {
 
 	// light
 	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.scene.add( ambientLight );
+	this.world.addObject3D( ambientLight );
 
 	var directionalLight = new THREE.DirectionalLight( 0xffffff );
 	directionalLight.position.set( -100, 50, -100 );
@@ -101,15 +100,15 @@ Stage.prototype.setup = function() {
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
 	this.settingsManager.adjustLight( directionalLight );
-	this.scene.add( directionalLight );
+	this.world.addObject3D( directionalLight );
 
-	// add trigger for ending
+	// add trigger for stage change
 	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
 
 		self._changeStage( "011", true );
 	} );
 	stageTrigger.position.set( 0, 0, 75 );
-	this.scene.add( stageTrigger );
+	this.world.addObject3D( stageTrigger );
 
 	// generate impostors
 	this.performanceManager.generateImpostors();

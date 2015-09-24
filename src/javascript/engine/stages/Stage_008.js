@@ -43,7 +43,6 @@ Stage.prototype.setup = function() {
 	groundDown.updateMatrix();
 	groundDown.receiveShadow = true;
 	this.world.addGround( groundDown );
-	this.scene.add( groundDown );
 
 	// add ground up
 	var groundUp = new THREE.Mesh( groundGeometry, groundMaterial );
@@ -53,7 +52,6 @@ Stage.prototype.setup = function() {
 	groundUp.updateMatrix();
 	groundUp.receiveShadow = true;
 	this.world.addGround( groundUp );
-	this.scene.add( groundUp );
 
 	// color faces
 	colorFaces( groundGeometry );
@@ -67,7 +65,7 @@ Stage.prototype.setup = function() {
 		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		sign.position.set( 0, 27.5, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.scene.add( sign );
+		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
 			object : sign.position,
@@ -90,7 +88,7 @@ Stage.prototype.setup = function() {
 
 		var stairs = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		stairs.receiveShadow = true;
-		self.scene.add( stairs );
+		self.world.addObject3D( stairs );
 	} );
 
 	// add invisible ramp
@@ -104,15 +102,14 @@ Stage.prototype.setup = function() {
 	ramp.updateMatrix();
 	ramp.visible = false;
 	this.world.addGround( ramp );
-	this.scene.add( ramp );
 
-	// add trigger for scene change
+	// add trigger for stage change
 	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
 
 		self._changeStage( "009", true );
 	} );
 	stageTrigger.position.set( 0, 7.5, 75 );
-	this.scene.add( stageTrigger );
+	this.world.addObject3D( stageTrigger );
 
 	// start rendering
 	this._render();

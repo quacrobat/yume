@@ -41,7 +41,6 @@ Stage.prototype.setup = function() {
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
-	this.scene.add( ground );
 
 	// color faces
 	colorFaces( groundGeometry );
@@ -52,7 +51,7 @@ Stage.prototype.setup = function() {
 	} ) );
 	interactiveBoxBasic.position.set( 20, 5, 0 );
 	interactiveBoxBasic.castShadow = true;
-	this.scene.add( interactiveBoxBasic );
+	this.world.addObject3D( interactiveBoxBasic );
 
 	var interactiveObject = this.actionManager.createInteraction( interactiveBoxBasic, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.BasicAnimation", function() {
 
@@ -74,7 +73,7 @@ Stage.prototype.setup = function() {
 	} ) );
 	staticBoxHover.position.set( -40, 8, 0 );
 	staticBoxHover.castShadow = true;
-	this.scene.add( staticBoxHover );
+	this.world.addObject3D( staticBoxHover );
 	this.actionManager.createStatic( staticBoxHover, this.actionManager.COLLISIONTYPES.AABB );
 
 	// create a hover animation, which animates infinitely a property between
@@ -98,7 +97,7 @@ Stage.prototype.setup = function() {
 		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.scene.add( sign );
+		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
 			object : sign.position,
@@ -110,17 +109,17 @@ Stage.prototype.setup = function() {
 		} ).play();
 	} );
 
-	// add trigger for scene change
+	// add trigger for stage change
 	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
 
 		self._changeStage( "008", true );
 	} );
 	stageTrigger.position.set( 0, 0, 75 );
-	this.scene.add( stageTrigger );
+	this.world.addObject3D( stageTrigger );
 
 	// light
 	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.scene.add( ambientLight );
+	this.world.addObject3D( ambientLight );
 
 	var directionalLight = new THREE.DirectionalLight( 0xffffff );
 	directionalLight.position.set( -100, 50, -100 );
@@ -129,7 +128,7 @@ Stage.prototype.setup = function() {
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
 	this.settingsManager.adjustLight( directionalLight );
-	this.scene.add( directionalLight );
+	this.world.addObject3D( directionalLight );
 
 	// start rendering
 	this._render();

@@ -43,7 +43,6 @@ Stage.prototype.setup = function() {
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
-	this.scene.add( ground );
 
 	// color faces
 	colorFaces( groundGeometry );
@@ -56,7 +55,7 @@ Stage.prototype.setup = function() {
 	staticBoxFire.position.set( 40, 5, 0 );
 	staticBoxFire.castShadow = true;
 	staticBoxFire.updateMatrix();
-	this.scene.add( staticBoxFire );
+	this.world.addObject3D( staticBoxFire );
 	this.actionManager.createStatic( staticBoxFire, this.actionManager.COLLISIONTYPES.AABB );
 
 	var staticBoxClock = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
@@ -66,7 +65,7 @@ Stage.prototype.setup = function() {
 	staticBoxClock.position.set( -40, 5, 0 );
 	staticBoxClock.castShadow = true;
 	staticBoxClock.updateMatrix();
-	this.scene.add( staticBoxClock );
+	this.world.addObject3D( staticBoxClock );
 	this.actionManager.createStatic( staticBoxClock, this.actionManager.COLLISIONTYPES.AABB );
 
 	var staticBoxWall = new THREE.Mesh( new THREE.BoxGeometry( 1, 20, 40 ), new THREE.MeshBasicMaterial( {
@@ -106,7 +105,7 @@ Stage.prototype.setup = function() {
 		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.scene.add( sign );
+		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
 			object : sign.position,
@@ -124,11 +123,11 @@ Stage.prototype.setup = function() {
 		self._changeStage( "007", true );
 	} );
 	stageTrigger.position.set( 0, 0, 75 );
-	this.scene.add( stageTrigger );
+	this.world.addObject3D( stageTrigger );
 
 	// light
 	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.scene.add( ambientLight );
+	this.world.addObject3D( ambientLight );
 
 	var directionalLight = new THREE.DirectionalLight( 0xffffff );
 	directionalLight.position.set( -100, 50, -100 );
@@ -137,7 +136,7 @@ Stage.prototype.setup = function() {
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
 	this.settingsManager.adjustLight( directionalLight );
-	this.scene.add( directionalLight );
+	this.world.addObject3D( directionalLight );
 
 	// start rendering
 	this._render();

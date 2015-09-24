@@ -1,5 +1,5 @@
 /**
- * @file Interface for performance handling. This prototype is used in scenes to
+ * @file Interface for performance handling. This prototype is used in stages to
  * create e.g. LOD instances.
  * 
  * @author Human Interactive
@@ -13,7 +13,7 @@ var LOD = require( "./LOD" );
 var Impostor = require( "./Impostor" );
 
 var camera = require( "../core/Camera" );
-var scene = require( "../core/Scene" );
+var world = require( "../core/World" );
 var renderer = require( "../core/Renderer" );
 
 /**
@@ -217,7 +217,7 @@ PerformanceManager.prototype.update = function() {
 /**
  * Generates all impostors. Because the geometry of impostors changes over time,
  * it's necessary to create new (impostor) billboard. These billboard are
- * replaced with the old ones, via adding and removing to the scene object.
+ * replaced with the old ones, via adding and removing to the world object.
  */
 PerformanceManager.prototype.generateImpostors = function() {
 
@@ -228,14 +228,14 @@ PerformanceManager.prototype.generateImpostors = function() {
 	var cameraWorldPosition = camera.getWorldPosition();
 	impostorCamera.position.set( cameraWorldPosition.x, cameraWorldPosition.y, cameraWorldPosition.z );
 
-	// create an array with the entire lighting of the actual scene
+	// create an array with the entire lighting of the actual stage
 	var lights = [];
 
-	for ( var index = 0; index < scene.children.length; index++ )
+	for ( var index = 0; index < world.scene.children.length; index++ )
 	{
-		if ( scene.children[ index ] instanceof THREE.Light )
+		if ( world.scene.children[ index ] instanceof THREE.Light )
 		{
-			lights.push( scene.children[ index ] );
+			lights.push( world.scene.children[ index ] );
 		}
 	}
 
@@ -245,7 +245,7 @@ PerformanceManager.prototype.generateImpostors = function() {
 		// remove old impostor
 		if ( this._impostors[ index ].billboard !== null )
 		{
-			scene.remove( this._impostors[ index ].billboard );
+			world.removeObject3D( this._impostors[ index ].billboard );
 		}
 
 		// prepare the generation...
@@ -254,8 +254,8 @@ PerformanceManager.prototype.generateImpostors = function() {
 		// ...and run it
 		this._impostors[ index ].generate();
 
-		// add new mesh to scene
-		scene.add( this._impostors[ index ].billboard );
+		// add new mesh to world
+		world.addObject3D( this._impostors[ index ].billboard );
 	}
 };
 

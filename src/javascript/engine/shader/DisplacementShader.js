@@ -1,7 +1,7 @@
 /**
  * @file This shader can be used for vertex displacement to create
  * water or fabric materials. It implements an exemplary diffuse lighting
- * equation, which uses ambient and directional lights of the three.js scene. 
+ * equation, which uses ambient and directional lights. 
  * 
  * @author Human Interactive
  */
@@ -17,7 +17,7 @@ module.exports  = {
 	                                     { "fTime": { type: "f", value: 0 } }
 	                                     ] ),
 	
-	lights: true, // use lights of scene in this shader
+	lights: true, // use lights of stage in this shader
 
 	vertexShader: [
 	               

@@ -593,29 +593,29 @@ SteeringBehaviors.prototype._createFeelers = ( function() {
 		// if there are no feelers yet, create them
 		if ( this._feelers.length === 0 )
 		{
-			this._feelers.push( new THREE.Ray(), new THREE.Ray(), new THREE.Ray() );
+			this._feelers.push( new THREE.Raycaster(), new THREE.Raycaster(), new THREE.Raycaster() );
 		}
 
 		// first feeler pointing straight in front
-		this._feelers[ 0 ].origin.copy( this.vehicle.position );
-		this._feelers[ 0 ].distance = this.wallDetectionFeelerLength;
-		this._feelers[ 0 ].direction = this.vehicle.getDirection();
+		this._feelers[ 0 ].ray.origin.copy( this.vehicle.position );
+		this._feelers[ 0 ].ray.direction = this.vehicle.getDirection();
+		this._feelers[ 0 ].far = this.wallDetectionFeelerLength;
 
 		// second feeler to left
 		rotation.identity();
 		rotation.makeRotationY( Math.PI * 1.75 );
 
-		this._feelers[ 1 ].origin.copy( this.vehicle.position );
-		this._feelers[ 1 ].distance = this.wallDetectionFeelerLength * 0.5;
-		this._feelers[ 1 ].direction = this.vehicle.getDirection().transformDirection( rotation );
+		this._feelers[ 1 ].ray.origin.copy( this.vehicle.position );
+		this._feelers[ 1 ].ray.direction = this.vehicle.getDirection().transformDirection( rotation );
+		this._feelers[ 1 ].far = this.wallDetectionFeelerLength * 0.5;
 
 		// third feeler to right
 		rotation.identity();
 		rotation.makeRotationY( Math.PI * 0.25 );
 
-		this._feelers[ 2 ].origin.copy( this.vehicle.position );
-		this._feelers[ 2 ].distance = this.wallDetectionFeelerLength * 0.5;
-		this._feelers[ 2 ].direction = this.vehicle.getDirection().transformDirection( rotation );
+		this._feelers[ 2 ].ray.origin.copy( this.vehicle.position );
+		this._feelers[ 2 ].ray.direction = this.vehicle.getDirection().transformDirection( rotation );
+		this._feelers[ 2 ].far = this.wallDetectionFeelerLength * 0.5;
 	};
 
 }() );
@@ -1232,18 +1232,18 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
  */
 SteeringBehaviors.prototype._wallAvoidance = ( function() {
 
-	var intersectionPoint = new THREE.Vector3();
 	var overShoot = new THREE.Vector3();
+	var closestPoint = new THREE.Vector3();
+	var normal = new THREE.Vector3();
 
 	var indexFeeler;
 	var indexWall;
 
-	var feeler;
 	var closestWall;
-	var closestPoint;
+	var feeler;
 	var intersectionFeeler;
+	var intersects;
 	var distanceToClosestWall;
-	var distance;
 
 	return function() {
 
@@ -1251,9 +1251,15 @@ SteeringBehaviors.prototype._wallAvoidance = ( function() {
 
 		// this will be used to track the distance to the closest wall
 		distanceToClosestWall = Infinity;
-
+		
 		// this will keep track of the closest wall
 		closestWall = null;
+		
+		// this will keep track of the closes point
+		closestPoint.set( 0, 0, 0 );
+		
+		// this will keep track of the wall normal
+		normal.set( 0, 0, 0 );
 
 		// this will keep track of the feeler that caused an intersection
 		intersectionFeeler = null;
@@ -1270,40 +1276,41 @@ SteeringBehaviors.prototype._wallAvoidance = ( function() {
 				feeler = this._feelers[ indexFeeler ];
 
 				// do intersection test
-				feeler.intersectPlane( world.walls[ indexWall ], intersectionPoint );
-
-				// calculate distance from origin to intersection point
-				distance = feeler.origin.distanceTo( intersectionPoint );
-
-				// if intersection point is within the range of the ray and
-				// smaller than the current distanceToClosestWall, continue
-				if ( distance < feeler.distance && distance < distanceToClosestWall )
+				intersects = feeler.intersectObject( world.walls[ indexWall ] );
+				
+				if( intersects.length > 0 )
 				{
-					distanceToClosestWall = distance;
+					// if the distance of the intersection point is smaller 
+					// than the current distanceToClosestWall, continue
+					if ( intersects[ 0 ].distance < distanceToClosestWall )
+					{
+						distanceToClosestWall = intersects[ 0 ].distance;
+						
+						closestWall = world.walls[ indexWall ];
+						
+						closestPoint.copy( intersects[ 0 ].point );
+						
+						normal.copy( intersects[ 0 ].face.normal );
 
-					closestWall = world.walls[ indexWall ];
-
-					closestPoint = intersectionPoint;
-
-					intersectionFeeler = feeler;
+						intersectionFeeler = feeler;
+					}
 				}
 			}
-
 		}
 
-		// if an intersection point has been detected, calculate a force
-		// that will direct the agent away
+		// if a wall was found, calculate a force that will direct the agent away
 		if ( closestWall !== null )
 		{
-			// calculate by what distance the projected position of the agent
-			// will overshoot the wall
-			overShoot.copy( intersectionFeeler.direction ).multiplyScalar( intersectionFeeler.distance ).add( intersectionFeeler.origin );
+			// calculate by what distance the projected position of the agent will overshoot the wall
+			overShoot.copy( intersectionFeeler.ray.direction ).multiplyScalar( intersectionFeeler.far ).add( intersectionFeeler.ray.origin );
 			overShoot.sub( closestPoint );
 
-			// create a force in the direction of the wall normal, with a
-			// magnitude of the overshoot
-			force.copy( closestWall.normal ).multiplyScalar( overShoot.length() );
-
+			// transform the normal with the world matrix of the wall
+			// on this way you get the true orientation of the normal
+			 normal.transformDirection( closestWall.matrixWorld );
+			
+			// create a force in the direction of the wall normal, with a magnitude of the overshoot
+			force.copy( normal ).multiplyScalar( overShoot.length() );
 		}
 
 		return force;

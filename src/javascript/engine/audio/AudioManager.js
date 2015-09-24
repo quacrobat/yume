@@ -1,5 +1,5 @@
 /**
- * @file Interface for entire audio handling. This prototype is used in scenes
+ * @file Interface for entire audio handling. This prototype is used in stages
  * to access audio-based logic and to create audio entities.
  * 
  * @author Human Interactive

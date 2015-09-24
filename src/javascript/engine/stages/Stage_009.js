@@ -41,7 +41,6 @@ Stage.prototype.setup = function() {
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
-	this.scene.add( ground );
 
 	// color faces
 	colorFaces( groundGeometry );
@@ -55,7 +54,7 @@ Stage.prototype.setup = function() {
 		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.scene.add( sign );
+		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
 			object : sign.position,
@@ -97,14 +96,14 @@ Stage.prototype.setup = function() {
 	lod.addLevel( sphereTwo, 60 );
 	lod.addLevel( sphereThree, 100 );
 
-	this.scene.add( lod );
+	this.world.addObject3D( lod );
 
 	// create circles to visualize the LOD distances
-	showLODCircles( this.scene );
+	showLODCircles( this.world );
 
 	// light
 	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.scene.add( ambientLight );
+	this.world.addObject3D( ambientLight );
 
 	var directionalLight = new THREE.DirectionalLight( 0xffffff );
 	directionalLight.position.set( -100, 50, -100 );
@@ -113,15 +112,15 @@ Stage.prototype.setup = function() {
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
 	this.settingsManager.adjustLight( directionalLight );
-	this.scene.add( directionalLight );
+	this.world.addObject3D( directionalLight );
 
-	// add trigger for ending
+	// add trigger for stage change
 	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
 
 		self._changeStage( "010", true );
 	} );
 	stageTrigger.position.set( 0, 0, 75 );
-	this.scene.add( stageTrigger );
+	this.world.addObject3D( stageTrigger );
 
 	// start rendering
 	this._render();
@@ -162,7 +161,7 @@ function colorFaces( geometry ) {
 	}
 }
 
-function showLODCircles( scene ) {
+function showLODCircles( world ) {
 
 	var circleOne = new THREE.Mesh( new THREE.CircleGeometry( 60, 25 ), new THREE.MeshBasicMaterial( {
 		wireframe : true
@@ -174,8 +173,8 @@ function showLODCircles( scene ) {
 	circleOne.rotation.set( Math.PI * 0.5, 0, 0 );
 	circleTwo.rotation.set( Math.PI * 0.5, 0, 0 );
 
-	scene.add( circleOne );
-	scene.add( circleTwo );
+	world.addObject3D( circleOne );
+	world.addObject3D( circleTwo );
 }
 
 module.exports = Stage;

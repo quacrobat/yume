@@ -101,7 +101,7 @@ EffectComposer.prototype.removePasses = function() {
 };
 
 /**
- * Renders the scene with all effects.
+ * Does the actual post processing.
  */
 EffectComposer.prototype.render = ( function() {
 

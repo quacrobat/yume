@@ -114,12 +114,12 @@ Renderer.prototype.render = function( scene, camera, renderTarget, forceClear ) 
  * Prepares the renderer for post-processing. This method creates internally a
  * custom framebuffer (render target).
  * 
- * @param {Scene} scene - The scene object.
+ * @param {World} world - The world object.
  * @param {Camera} camera - The camera object.
  */
-Renderer.prototype.preparePostProcessing = function( scene, camera ) {
+Renderer.prototype.preparePostProcessing = function( world, camera ) {
 
-	this._composer.addPass( new RenderPass( scene, camera ) );
+	this._composer.addPass( new RenderPass( world.scene, camera ) );
 
 	logger.log( "INFO: Renderer: Init post-processing for stage." );
 };

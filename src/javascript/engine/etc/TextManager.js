@@ -1,5 +1,5 @@
 /**
- * @file Interface for entire text-handling. This prototype is used in scenes to
+ * @file Interface for entire text-handling. This prototype is used in stages to
  * access text-based logic and to load localized texts.
  * 
  * @author Human Interactive

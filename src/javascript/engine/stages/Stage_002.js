@@ -41,7 +41,6 @@ Stage.prototype.setup = function() {
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
-	this.scene.add( ground );
 
 	// color faces
 	colorFaces( groundGeometry );
@@ -54,7 +53,7 @@ Stage.prototype.setup = function() {
 	interactiveBox.position.set( 50, 5, 0 );
 	interactiveBox.castShadow = true;
 	interactiveBox.updateMatrix();
-	this.scene.add( interactiveBox );
+	this.world.addObject3D( interactiveBox );
 
 	this.actionManager.createInteraction( interactiveBox, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Action", function() {
 
@@ -69,7 +68,7 @@ Stage.prototype.setup = function() {
 	staticBoxHover.position.set( 17, 15, 0 );
 	staticBoxHover.castShadow = true;
 	staticBoxHover.updateMatrix();
-	this.scene.add( staticBoxHover );
+	this.world.addObject3D( staticBoxHover );
 
 	this.actionManager.createStatic( staticBoxHover, this.actionManager.COLLISIONTYPES.AABB );
 
@@ -82,7 +81,7 @@ Stage.prototype.setup = function() {
 	staticBox.rotation.set( 0, Math.PI * 0.2, 0 );
 	staticBox.castShadow = true;
 	staticBox.updateMatrix();
-	this.scene.add( staticBox );
+	this.world.addObject3D( staticBox );
 
 	this.actionManager.createStatic( staticBox, this.actionManager.COLLISIONTYPES.OBB );
 
@@ -94,7 +93,7 @@ Stage.prototype.setup = function() {
 	plainBox.position.set( -50, 5, 0 );
 	plainBox.castShadow = true;
 	plainBox.updateMatrix();
-	this.scene.add( plainBox );
+	this.world.addObject3D( plainBox );
 
 	// add sign
 	var signLoader = new JSONLoader();
@@ -105,7 +104,7 @@ Stage.prototype.setup = function() {
 		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.scene.add( sign );
+		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
 			object : sign.position,
@@ -123,11 +122,11 @@ Stage.prototype.setup = function() {
 		self._changeStage( "003", true );
 	} );
 	stageTrigger.position.set( 0, 0, 75 );
-	this.scene.add( stageTrigger );
+	this.world.addObject3D( stageTrigger );
 
 	// light
 	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.scene.add( ambientLight );
+	this.world.addObject3D( ambientLight );
 
 	var directionalLight = new THREE.DirectionalLight( 0xffffff );
 	directionalLight.position.set( -100, 50, -100 );
@@ -136,7 +135,7 @@ Stage.prototype.setup = function() {
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
 	this.settingsManager.adjustLight( directionalLight );
-	this.scene.add( directionalLight );
+	this.world.addObject3D( directionalLight );
 
 	// start rendering
 	this._render();

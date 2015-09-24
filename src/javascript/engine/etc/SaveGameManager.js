@@ -28,7 +28,7 @@ function SaveGameManager() {
  * Saves the progress to localStorage. The savegame object is transformed to
  * JSON and then encoded to BASE64.
  * 
- * @param {string} stageId - The ID of the scene.
+ * @param {string} stageId - The ID of the stage.
  * @param {boolean} isFinish - Is the game finished?
  */
 SaveGameManager.prototype.save = function( stageId, isFinish ) {

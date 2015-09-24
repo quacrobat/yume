@@ -6,6 +6,7 @@
 
 "use strict";
 
+var scene = require( "./Scene" );
 var actionManager = require( "../action/ActionManager" );
 
 /**
@@ -18,6 +19,12 @@ function World() {
 
 	Object.defineProperties( this, {
 
+		scene : {
+			value : scene,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
 		grounds : {
 			value : [],
 			configurable : false,
@@ -35,6 +42,37 @@ function World() {
 }
 
 /**
+ * Adds a 3D object to the internal scene.
+ * 
+ * @param {THREE.Mesh} ground - The ground to add.
+ * 
+ */
+World.prototype.addObject3D = function( object ) {
+
+	this.scene.add( object );
+};
+
+/**
+ * Removes a 3D object from the internal scene.
+ * 
+ * @param {THREE.Mesh} ground - The ground to add.
+ * 
+ */
+World.prototype.removeObject3D = function( object ) {
+
+	this.scene.remove( object );
+};
+
+/**
+ * Removes all 3D object from the internal scene.
+ * 
+ */
+World.prototype.removeObjects3D = function( object ) {
+
+	this.scene.clear();
+};
+
+/**
  * Adds a ground to the internal array.
  * 
  * @param {THREE.Mesh} ground - The ground to add.
@@ -43,6 +81,9 @@ function World() {
 World.prototype.addGround = function( ground ) {
 
 	this.grounds.push( ground );
+
+	// ground objects always needs to be added to the scene
+	this.addObject3D( ground );
 };
 
 /**
@@ -54,6 +95,9 @@ World.prototype.removeGround = function( ground ) {
 
 	var index = this.grounds.indexOf( ground );
 	this.grounds.splice( index, 1 );
+
+	// ground objects always needs to be removed from the scene
+	this.removeObject3D( ground );
 };
 
 /**
@@ -61,29 +105,38 @@ World.prototype.removeGround = function( ground ) {
  */
 World.prototype.removeGrounds = function() {
 
-	this.grounds.length = 0;
+	for ( var index = 0; index < this.grounds.length; index++ )
+	{
+		this.removeGround( this.grounds[ index ] );
+	}
 };
 
 /**
  * Adds a wall to the internal array.
  * 
- * @param {THREE.Plane} wall - The wall to add.
+ * @param {THREE.Mesh} wall - The wall to add.
  * 
  */
 World.prototype.addWall = function( wall ) {
 
 	this.walls.push( wall );
+	
+	// wall objects always needs to be added to the scene
+	this.addObject3D( wall );
 };
 
 /**
  * Removes a wall from the internal array.
  * 
- * @param {THREE.Plane} wall - The wall to remove.
+ * @param {THREE.Mesh} wall - The wall to remove.
  */
 World.prototype.removeWall = function( wall ) {
 
 	var index = this.walls.indexOf( wall );
 	this.walls.splice( index, 1 );
+	
+	// wall objects always needs to be removed from the scene
+	this.removeObject3D( wall );
 };
 
 /**
@@ -91,7 +144,10 @@ World.prototype.removeWall = function( wall ) {
  */
 World.prototype.removeWalls = function() {
 
-	this.walls.length = 0;
+	for ( var index = 0; index < this.walls.length; index++ )
+	{
+		this.removeWall( this.walls[ index ] );
+	}
 };
 
 /**
@@ -148,6 +204,7 @@ World.prototype.clear = function() {
 
 	this.removeWalls();
 	this.removeGrounds();
+	this.removeObjects3D();
 };
 
 module.exports = new World();

@@ -144,7 +144,7 @@ StageManager.prototype.load = function( stageId ) {
 			throw "ERROR: StageManager: Invalid Stage-ID: " + stageId;
 	}
 
-	logger.log( "INFO: StageManager: Start loading scene with ID: %s", stageId );
+	logger.log( "INFO: StageManager: Start loading stage with ID: %s", stageId );
 
 	this._stage.setup();
 };
@@ -162,7 +162,7 @@ StageManager.prototype.clear = function() {
 
 /**
  * Handles the "application.start" topic. This topic is used load the first
- * scene after application start.
+ * stage after application start.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
@@ -194,7 +194,7 @@ StageManager.prototype._onStageChange = function( message, data ) {
 
 	if ( data !== undefined )
 	{
-		// show loading screen. execute scene change, when animation ends
+		// show loading screen. execute stage change, when animation ends
 		userInterfaceManager.showLoadingScreen( function() {
 
 			// set flag
@@ -222,7 +222,7 @@ StageManager.prototype._onStageChange = function( message, data ) {
 
 /**
  * Handles the "stage.start" topic. This hierarchical topic is used to indicate
- * the finished setup process of the new scene.
+ * the finished setup process of the new stage.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
@@ -285,7 +285,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 			self._total = 0;
 
 			// log event
-			logger.log( "INFO: StageManager: Scene completely loaded and ready." );
+			logger.log( "INFO: StageManager: Stage loaded and ready." );
 
 		}
 	}

@@ -35517,7 +35517,7 @@ Action.TYPES = {
 module.exports = Action;
 },{}],6:[function(require,module,exports){
 /**
- * @file Interface for entire action-handling. This prototype is used in scenes
+ * @file Interface for entire action-handling. This prototype is used in stages
  * to access action-based logic and to create action-entities.
  * 
  * @author Human Interactive
@@ -37433,7 +37433,7 @@ module.exports = AudioListener;
 },{"three":2}],16:[function(require,module,exports){
 (function (global){
 /**
- * @file Interface for entire audio handling. This prototype is used in scenes
+ * @file Interface for entire audio handling. This prototype is used in stages
  * to access audio-based logic and to create audio entities.
  * 
  * @author Human Interactive
@@ -38086,7 +38086,6 @@ module.exports = DynamicAudio;
 var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
 
-var scene = require( "../core/Scene" );
 var camera = require( "../core/Camera" );
 var world = require( "../core/World" );
 var actionManager = require( "../action/ActionManager" );
@@ -38319,8 +38318,8 @@ function FirstPersonControls() {
 	this._pitchObject.add( camera ); // camera -> pitch
 	this._yawObject.add( this._pitchObject ); // pitch -> yaw
 
-	// add to scene
-	scene.add( this._yawObject );
+	// add to world
+	world.addObject3D( this._yawObject );
 
 	// type definition
 	this._yawObject.type = "Controls";
@@ -39368,7 +39367,7 @@ FirstPersonControls.RUN = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":6,"../animation/Easing":12,"../audio/AudioManager":16,"../core/Camera":20,"../core/Scene":23,"../core/World":28,"../etc/Logger":32,"../etc/SettingsManager":38,"../ui/UserInterfaceManager":81,"pubsub-js":1,"three":2}],19:[function(require,module,exports){
+},{"../action/ActionManager":6,"../animation/Easing":12,"../audio/AudioManager":16,"../core/Camera":20,"../core/World":28,"../etc/Logger":32,"../etc/SettingsManager":38,"../ui/UserInterfaceManager":81,"pubsub-js":1,"three":2}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -39852,12 +39851,12 @@ Renderer.prototype.render = function( scene, camera, renderTarget, forceClear ) 
  * Prepares the renderer for post-processing. This method creates internally a
  * custom framebuffer (render target).
  * 
- * @param {Scene} scene - The scene object.
+ * @param {World} world - The world object.
  * @param {Camera} camera - The camera object.
  */
-Renderer.prototype.preparePostProcessing = function( scene, camera ) {
+Renderer.prototype.preparePostProcessing = function( world, camera ) {
 
-	this._composer.addPass( new RenderPass( scene, camera ) );
+	this._composer.addPass( new RenderPass( world.scene, camera ) );
 
 	logger.log( "INFO: Renderer: Init post-processing for stage." );
 };
@@ -40098,7 +40097,6 @@ module.exports = new Scene();
 var THREE = require( "three" );
 var PubSub = require( "pubsub-js" );
 
-var scene = require( "./Scene" );
 var renderer = require( "./Renderer" );
 var camera = require( "./Camera" );
 var world = require( "./World" );
@@ -40130,12 +40128,6 @@ function StageBase( stageId ) {
 			configurable : false,
 			enumerable : true,
 			writable : true
-		},
-		scene : {
-			value : scene,
-			configurable : false,
-			enumerable : true,
-			writable : false
 		},
 		renderer : {
 			value : renderer,
@@ -40246,8 +40238,8 @@ StageBase.prototype.setup = function() {
 
 	if ( utils.isDevelopmentModeActive() === true )
 	{
-		this.scene.add( new THREE.AxisHelper( 30 ) );
-		this.scene.add( new THREE.GridHelper( 200, 10 ) );
+		this.world.addObject3D( new THREE.AxisHelper( 30 ) );
+		this.world.addObject3D( new THREE.GridHelper( 200, 10 ) );
 	}
 };
 
@@ -40260,8 +40252,7 @@ StageBase.prototype.start = function() {
 };
 
 /**
- * This method is called, when the stage is destroyed. It removes all
- * scene-related data.
+ * This method is called, when the stage is destroyed.
  */
 StageBase.prototype.destroy = function() {
 
@@ -40288,9 +40279,6 @@ StageBase.prototype.destroy = function() {
 
 	// clear world
 	this.world.clear();
-
-	// clear scene
-	this.scene.clear();
 
 	// clear renderer
 	this.renderer.clear();
@@ -40320,21 +40308,24 @@ StageBase.prototype._render = function() {
 	this.controls.update( this._delta );
 
 	// render frame
-	this.renderer.render( this.scene, this.camera );
+	this.renderer.render( this.world.scene, this.camera );
 
 	// save render ID
 	this._renderId = global.requestAnimationFrame( this._render );
 };
 
 /**
- * Changes the stage
+ * Changes the stage.
  * 
  * @param {string} stageId - The new stageId
  * @param {boolean} isSaveGame - Should the progress be saved?
  */
 StageBase.prototype._changeStage = function( stageId, isSaveGame ) {
 
+	// lock controls
 	self.controls.isActionInProgress = true;
+	
+	// publish message to trigger the change
 	PubSub.publish( "stage.change", {
 		stageId : stageId,
 		isSaveGame : isSaveGame
@@ -40343,7 +40334,7 @@ StageBase.prototype._changeStage = function( stageId, isSaveGame ) {
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":16,"../controls/FirstPersonControls":18,"../etc/PerformanceManager":36,"../etc/SaveGameManager":37,"../etc/SettingsManager":38,"../etc/TextManager":40,"../etc/Utils":41,"../game/entity/EntityManager":42,"../ui/UserInterfaceManager":81,"./Camera":20,"./Renderer":22,"./Scene":23,"./World":28,"pubsub-js":1,"three":2}],25:[function(require,module,exports){
+},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":16,"../controls/FirstPersonControls":18,"../etc/PerformanceManager":36,"../etc/SaveGameManager":37,"../etc/SettingsManager":38,"../etc/TextManager":40,"../etc/Utils":41,"../game/entity/EntityManager":42,"../ui/UserInterfaceManager":81,"./Camera":20,"./Renderer":22,"./World":28,"pubsub-js":1,"three":2}],25:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -40490,7 +40481,7 @@ StageManager.prototype.load = function( stageId ) {
 			throw "ERROR: StageManager: Invalid Stage-ID: " + stageId;
 	}
 
-	logger.log( "INFO: StageManager: Start loading scene with ID: %s", stageId );
+	logger.log( "INFO: StageManager: Start loading stage with ID: %s", stageId );
 
 	this._stage.setup();
 };
@@ -40508,7 +40499,7 @@ StageManager.prototype.clear = function() {
 
 /**
  * Handles the "application.start" topic. This topic is used load the first
- * scene after application start.
+ * stage after application start.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
@@ -40540,7 +40531,7 @@ StageManager.prototype._onStageChange = function( message, data ) {
 
 	if ( data !== undefined )
 	{
-		// show loading screen. execute scene change, when animation ends
+		// show loading screen. execute stage change, when animation ends
 		userInterfaceManager.showLoadingScreen( function() {
 
 			// set flag
@@ -40568,7 +40559,7 @@ StageManager.prototype._onStageChange = function( message, data ) {
 
 /**
  * Handles the "stage.start" topic. This hierarchical topic is used to indicate
- * the finished setup process of the new scene.
+ * the finished setup process of the new stage.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
@@ -40631,7 +40622,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 			self._total = 0;
 
 			// log event
-			logger.log( "INFO: StageManager: Scene completely loaded and ready." );
+			logger.log( "INFO: StageManager: Stage loaded and ready." );
 
 		}
 	}
@@ -40873,6 +40864,7 @@ module.exports = new ThreadManager();
 
 "use strict";
 
+var scene = require( "./Scene" );
 var actionManager = require( "../action/ActionManager" );
 
 /**
@@ -40885,6 +40877,12 @@ function World() {
 
 	Object.defineProperties( this, {
 
+		scene : {
+			value : scene,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
 		grounds : {
 			value : [],
 			configurable : false,
@@ -40902,6 +40900,37 @@ function World() {
 }
 
 /**
+ * Adds a 3D object to the internal scene.
+ * 
+ * @param {THREE.Mesh} ground - The ground to add.
+ * 
+ */
+World.prototype.addObject3D = function( object ) {
+
+	this.scene.add( object );
+};
+
+/**
+ * Removes a 3D object from the internal scene.
+ * 
+ * @param {THREE.Mesh} ground - The ground to add.
+ * 
+ */
+World.prototype.removeObject3D = function( object ) {
+
+	this.scene.remove( object );
+};
+
+/**
+ * Removes all 3D object from the internal scene.
+ * 
+ */
+World.prototype.removeObjects3D = function( object ) {
+
+	this.scene.clear();
+};
+
+/**
  * Adds a ground to the internal array.
  * 
  * @param {THREE.Mesh} ground - The ground to add.
@@ -40910,6 +40939,9 @@ function World() {
 World.prototype.addGround = function( ground ) {
 
 	this.grounds.push( ground );
+
+	// ground objects always needs to be added to the scene
+	this.addObject3D( ground );
 };
 
 /**
@@ -40921,6 +40953,9 @@ World.prototype.removeGround = function( ground ) {
 
 	var index = this.grounds.indexOf( ground );
 	this.grounds.splice( index, 1 );
+
+	// ground objects always needs to be removed from the scene
+	this.removeObject3D( ground );
 };
 
 /**
@@ -40928,29 +40963,38 @@ World.prototype.removeGround = function( ground ) {
  */
 World.prototype.removeGrounds = function() {
 
-	this.grounds.length = 0;
+	for ( var index = 0; index < this.grounds.length; index++ )
+	{
+		this.removeGround( this.grounds[ index ] );
+	}
 };
 
 /**
  * Adds a wall to the internal array.
  * 
- * @param {THREE.Plane} wall - The wall to add.
+ * @param {THREE.Mesh} wall - The wall to add.
  * 
  */
 World.prototype.addWall = function( wall ) {
 
 	this.walls.push( wall );
+	
+	// ground objects always needs to be added to the scene
+	this.addObject3D( wall );
 };
 
 /**
  * Removes a wall from the internal array.
  * 
- * @param {THREE.Plane} wall - The wall to remove.
+ * @param {THREE.Mesh} wall - The wall to remove.
  */
 World.prototype.removeWall = function( wall ) {
 
 	var index = this.walls.indexOf( wall );
 	this.walls.splice( index, 1 );
+	
+	// wall objects always needs to be removed from the scene
+	this.removeObject3D( wall );
 };
 
 /**
@@ -40958,7 +41002,10 @@ World.prototype.removeWall = function( wall ) {
  */
 World.prototype.removeWalls = function() {
 
-	this.walls.length = 0;
+	for ( var index = 0; index < this.walls.length; index++ )
+	{
+		this.removeWall( this.walls[ index ] );
+	}
 };
 
 /**
@@ -41015,10 +41062,11 @@ World.prototype.clear = function() {
 
 	this.removeWalls();
 	this.removeGrounds();
+	this.removeObjects3D();
 };
 
 module.exports = new World();
-},{"../action/ActionManager":6}],29:[function(require,module,exports){
+},{"../action/ActionManager":6,"./Scene":23}],29:[function(require,module,exports){
 /**
  * @file This prototype handles all stuff for impostors. An impostor is a
  * billboard that is created on the fly by rendering a complex object from the
@@ -41882,7 +41930,7 @@ var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
 
 var Teammate = require( "./Teammate" );
-var scene = require( "../core/Scene" );
+var world = require( "../core/World" );
 var logger = require( "./Logger" );
 
 var self;
@@ -41991,8 +42039,8 @@ MultiplayerManager.prototype._addTeammate = function( teammate ) {
 	// add to internal array
 	this._teammates.push( teammate );
 
-	// add to scene
-	scene.add( teammate );
+	// add to world
+	world.addObject3D( teammate );
 };
 
 /**
@@ -42006,8 +42054,8 @@ MultiplayerManager.prototype._removeTeammate = function( teammate ) {
 	var index = this._teammates.indexOf( teammate );
 	this._teammates.splice( index, 1 );
 
-	// remove from scene
-	scene.remove( teammate );
+	// remove from world
+	world.removeObject3D( teammate );
 };
 
 /**
@@ -42042,7 +42090,7 @@ MultiplayerManager.prototype._getTeammate = function( id ) {
 };
 
 module.exports = new MultiplayerManager();
-},{"../core/Scene":23,"./Logger":32,"./Teammate":39,"pubsub-js":1,"three":2}],34:[function(require,module,exports){
+},{"../core/World":28,"./Logger":32,"./Teammate":39,"pubsub-js":1,"three":2}],34:[function(require,module,exports){
 /**
  * @file A 3D arbitrarily oriented bounding box.
  * 
@@ -42834,7 +42882,7 @@ module.exports = ObjectLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./Utils":41,"pubsub-js":1,"three":2}],36:[function(require,module,exports){
 /**
- * @file Interface for performance handling. This prototype is used in scenes to
+ * @file Interface for performance handling. This prototype is used in stages to
  * create e.g. LOD instances.
  * 
  * @author Human Interactive
@@ -42848,7 +42896,7 @@ var LOD = require( "./LOD" );
 var Impostor = require( "./Impostor" );
 
 var camera = require( "../core/Camera" );
-var scene = require( "../core/Scene" );
+var world = require( "../core/World" );
 var renderer = require( "../core/Renderer" );
 
 /**
@@ -43052,7 +43100,7 @@ PerformanceManager.prototype.update = function() {
 /**
  * Generates all impostors. Because the geometry of impostors changes over time,
  * it's necessary to create new (impostor) billboard. These billboard are
- * replaced with the old ones, via adding and removing to the scene object.
+ * replaced with the old ones, via adding and removing to the world object.
  */
 PerformanceManager.prototype.generateImpostors = function() {
 
@@ -43063,14 +43111,14 @@ PerformanceManager.prototype.generateImpostors = function() {
 	var cameraWorldPosition = camera.getWorldPosition();
 	impostorCamera.position.set( cameraWorldPosition.x, cameraWorldPosition.y, cameraWorldPosition.z );
 
-	// create an array with the entire lighting of the actual scene
+	// create an array with the entire lighting of the actual stage
 	var lights = [];
 
-	for ( var index = 0; index < scene.children.length; index++ )
+	for ( var index = 0; index < world.scene.children.length; index++ )
 	{
-		if ( scene.children[ index ] instanceof THREE.Light )
+		if ( world.scene.children[ index ] instanceof THREE.Light )
 		{
-			lights.push( scene.children[ index ] );
+			lights.push( world.scene.children[ index ] );
 		}
 	}
 
@@ -43080,7 +43128,7 @@ PerformanceManager.prototype.generateImpostors = function() {
 		// remove old impostor
 		if ( this._impostors[ index ].billboard !== null )
 		{
-			scene.remove( this._impostors[ index ].billboard );
+			world.removeObject3D( this._impostors[ index ].billboard );
 		}
 
 		// prepare the generation...
@@ -43089,8 +43137,8 @@ PerformanceManager.prototype.generateImpostors = function() {
 		// ...and run it
 		this._impostors[ index ].generate();
 
-		// add new mesh to scene
-		scene.add( this._impostors[ index ].billboard );
+		// add new mesh to world
+		world.addObject3D( this._impostors[ index ].billboard );
 	}
 };
 
@@ -43133,7 +43181,7 @@ PerformanceManager.prototype._updateImpostors = ( function() {
 }() );
 
 module.exports = new PerformanceManager();
-},{"../core/Camera":20,"../core/Renderer":22,"../core/Scene":23,"./Impostor":29,"./LOD":31,"three":2}],37:[function(require,module,exports){
+},{"../core/Camera":20,"../core/Renderer":22,"../core/World":28,"./Impostor":29,"./LOD":31,"three":2}],37:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire savegame-handling. This prototype is using HTML
@@ -43165,7 +43213,7 @@ function SaveGameManager() {
  * Saves the progress to localStorage. The savegame object is transformed to
  * JSON and then encoded to BASE64.
  * 
- * @param {string} stageId - The ID of the scene.
+ * @param {string} stageId - The ID of the stage.
  * @param {boolean} isFinish - Is the game finished?
  */
 SaveGameManager.prototype.save = function( stageId, isFinish ) {
@@ -43471,7 +43519,7 @@ module.exports = Teammate;
 },{"../game/entity/GameEntity":43,"three":2}],40:[function(require,module,exports){
 (function (global){
 /**
- * @file Interface for entire text-handling. This prototype is used in scenes to
+ * @file Interface for entire text-handling. This prototype is used in stages to
  * access text-based logic and to load localized texts.
  * 
  * @author Human Interactive
@@ -45327,29 +45375,29 @@ SteeringBehaviors.prototype._createFeelers = ( function() {
 		// if there are no feelers yet, create them
 		if ( this._feelers.length === 0 )
 		{
-			this._feelers.push( new THREE.Ray(), new THREE.Ray(), new THREE.Ray() );
+			this._feelers.push( new THREE.Raycaster(), new THREE.Raycaster(), new THREE.Raycaster() );
 		}
 
 		// first feeler pointing straight in front
-		this._feelers[ 0 ].origin.copy( this.vehicle.position );
-		this._feelers[ 0 ].distance = this.wallDetectionFeelerLength;
-		this._feelers[ 0 ].direction = this.vehicle.getDirection();
+		this._feelers[ 0 ].ray.origin.copy( this.vehicle.position );
+		this._feelers[ 0 ].ray.direction = this.vehicle.getDirection();
+		this._feelers[ 0 ].far = this.wallDetectionFeelerLength;
 
 		// second feeler to left
 		rotation.identity();
 		rotation.makeRotationY( Math.PI * 1.75 );
 
-		this._feelers[ 1 ].origin.copy( this.vehicle.position );
-		this._feelers[ 1 ].distance = this.wallDetectionFeelerLength * 0.5;
-		this._feelers[ 1 ].direction = this.vehicle.getDirection().transformDirection( rotation );
+		this._feelers[ 1 ].ray.origin.copy( this.vehicle.position );
+		this._feelers[ 1 ].ray.direction = this.vehicle.getDirection().transformDirection( rotation );
+		this._feelers[ 1 ].far = this.wallDetectionFeelerLength * 0.5;
 
 		// third feeler to right
 		rotation.identity();
 		rotation.makeRotationY( Math.PI * 0.25 );
 
-		this._feelers[ 2 ].origin.copy( this.vehicle.position );
-		this._feelers[ 2 ].distance = this.wallDetectionFeelerLength * 0.5;
-		this._feelers[ 2 ].direction = this.vehicle.getDirection().transformDirection( rotation );
+		this._feelers[ 2 ].ray.origin.copy( this.vehicle.position );
+		this._feelers[ 2 ].ray.direction = this.vehicle.getDirection().transformDirection( rotation );
+		this._feelers[ 2 ].far = this.wallDetectionFeelerLength * 0.5;
 	};
 
 }() );
@@ -45966,18 +46014,18 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
  */
 SteeringBehaviors.prototype._wallAvoidance = ( function() {
 
-	var intersectionPoint = new THREE.Vector3();
 	var overShoot = new THREE.Vector3();
+	var closestPoint = new THREE.Vector3();
+	var normal = new THREE.Vector3();
 
 	var indexFeeler;
 	var indexWall;
 
-	var feeler;
 	var closestWall;
-	var closestPoint;
+	var feeler;
 	var intersectionFeeler;
+	var intersects;
 	var distanceToClosestWall;
-	var distance;
 
 	return function() {
 
@@ -45985,9 +46033,15 @@ SteeringBehaviors.prototype._wallAvoidance = ( function() {
 
 		// this will be used to track the distance to the closest wall
 		distanceToClosestWall = Infinity;
-
+		
 		// this will keep track of the closest wall
 		closestWall = null;
+		
+		// this will keep track of the closes point
+		closestPoint.set( 0, 0, 0 );
+		
+		// this will keep track of the wall normal
+		normal.set( 0, 0, 0 );
 
 		// this will keep track of the feeler that caused an intersection
 		intersectionFeeler = null;
@@ -46004,40 +46058,41 @@ SteeringBehaviors.prototype._wallAvoidance = ( function() {
 				feeler = this._feelers[ indexFeeler ];
 
 				// do intersection test
-				feeler.intersectPlane( world.walls[ indexWall ], intersectionPoint );
-
-				// calculate distance from origin to intersection point
-				distance = feeler.origin.distanceTo( intersectionPoint );
-
-				// if intersection point is within the range of the ray and
-				// smaller than the current distanceToClosestWall, continue
-				if ( distance < feeler.distance && distance < distanceToClosestWall )
+				intersects = feeler.intersectObject( world.walls[ indexWall ] );
+				
+				if( intersects.length > 0 )
 				{
-					distanceToClosestWall = distance;
+					// if the distance of the intersection point is smaller 
+					// than the current distanceToClosestWall, continue
+					if ( intersects[ 0 ].distance < distanceToClosestWall )
+					{
+						distanceToClosestWall = intersects[ 0 ].distance;
+						
+						closestWall = world.walls[ indexWall ];
+						
+						closestPoint.copy( intersects[ 0 ].point );
+						
+						normal.copy( intersects[ 0 ].face.normal );
 
-					closestWall = world.walls[ indexWall ];
-
-					closestPoint = intersectionPoint;
-
-					intersectionFeeler = feeler;
+						intersectionFeeler = feeler;
+					}
 				}
 			}
-
 		}
 
-		// if an intersection point has been detected, calculate a force
-		// that will direct the agent away
+		// if a wall was found, calculate a force that will direct the agent away
 		if ( closestWall !== null )
 		{
-			// calculate by what distance the projected position of the agent
-			// will overshoot the wall
-			overShoot.copy( intersectionFeeler.direction ).multiplyScalar( intersectionFeeler.distance ).add( intersectionFeeler.origin );
+			// calculate by what distance the projected position of the agent will overshoot the wall
+			overShoot.copy( intersectionFeeler.ray.direction ).multiplyScalar( intersectionFeeler.far ).add( intersectionFeeler.ray.origin );
 			overShoot.sub( closestPoint );
 
-			// create a force in the direction of the wall normal, with a
-			// magnitude of the overshoot
-			force.copy( closestWall.normal ).multiplyScalar( overShoot.length() );
-
+			// transform the normal with the world matrix of the wall
+			// on this way you get the true orientation of the normal
+			 normal.transformDirection( closestWall.matrixWorld );
+			
+			// create a force in the direction of the wall normal, with a magnitude of the overshoot
+			force.copy( normal ).multiplyScalar( overShoot.length() );
 		}
 
 		return force;
@@ -46841,7 +46896,7 @@ EffectComposer.prototype.removePasses = function() {
 };
 
 /**
- * Renders the scene with all effects.
+ * Does the actual post processing.
  */
 EffectComposer.prototype.render = ( function() {
 
@@ -47095,7 +47150,7 @@ module.exports = ShaderPass;
 /**
  * @file This shader can be used for vertex displacement to create
  * water or fabric materials. It implements an exemplary diffuse lighting
- * equation, which uses ambient and directional lights of the three.js scene. 
+ * equation, which uses ambient and directional lights. 
  * 
  * @author Human Interactive
  */
@@ -47111,7 +47166,7 @@ module.exports  = {
 	                                     { "fTime": { type: "f", value: 0 } }
 	                                     ] ),
 	
-	lights: true, // use lights of scene in this shader
+	lights: true, // use lights of stage in this shader
 
 	vertexShader: [
 	               
@@ -47414,7 +47469,6 @@ Stage.prototype.setup = function() {
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
-	this.scene.add( ground );
 
 	// color faces
 	colorFaces( groundGeometry );
@@ -47428,7 +47482,7 @@ Stage.prototype.setup = function() {
 		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.scene.add( sign );
+		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
 			object : sign.position,
@@ -47446,8 +47500,8 @@ Stage.prototype.setup = function() {
 		self._changeStage( "002", true );
 	} );
 	stageTrigger.position.set( 0, 0, 75 );
-	this.scene.add( stageTrigger );
-
+	this.world.addObject3D( stageTrigger );
+	
 	// start rendering
 	this._render();
 };
@@ -47532,7 +47586,6 @@ Stage.prototype.setup = function() {
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
-	this.scene.add( ground );
 
 	// color faces
 	colorFaces( groundGeometry );
@@ -47545,7 +47598,7 @@ Stage.prototype.setup = function() {
 	interactiveBox.position.set( 50, 5, 0 );
 	interactiveBox.castShadow = true;
 	interactiveBox.updateMatrix();
-	this.scene.add( interactiveBox );
+	this.world.addObject3D( interactiveBox );
 
 	this.actionManager.createInteraction( interactiveBox, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Action", function() {
 
@@ -47560,7 +47613,7 @@ Stage.prototype.setup = function() {
 	staticBoxHover.position.set( 17, 15, 0 );
 	staticBoxHover.castShadow = true;
 	staticBoxHover.updateMatrix();
-	this.scene.add( staticBoxHover );
+	this.world.addObject3D( staticBoxHover );
 
 	this.actionManager.createStatic( staticBoxHover, this.actionManager.COLLISIONTYPES.AABB );
 
@@ -47573,7 +47626,7 @@ Stage.prototype.setup = function() {
 	staticBox.rotation.set( 0, Math.PI * 0.2, 0 );
 	staticBox.castShadow = true;
 	staticBox.updateMatrix();
-	this.scene.add( staticBox );
+	this.world.addObject3D( staticBox );
 
 	this.actionManager.createStatic( staticBox, this.actionManager.COLLISIONTYPES.OBB );
 
@@ -47585,7 +47638,7 @@ Stage.prototype.setup = function() {
 	plainBox.position.set( -50, 5, 0 );
 	plainBox.castShadow = true;
 	plainBox.updateMatrix();
-	this.scene.add( plainBox );
+	this.world.addObject3D( plainBox );
 
 	// add sign
 	var signLoader = new JSONLoader();
@@ -47596,7 +47649,7 @@ Stage.prototype.setup = function() {
 		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.scene.add( sign );
+		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
 			object : sign.position,
@@ -47614,11 +47667,11 @@ Stage.prototype.setup = function() {
 		self._changeStage( "003", true );
 	} );
 	stageTrigger.position.set( 0, 0, 75 );
-	this.scene.add( stageTrigger );
+	this.world.addObject3D( stageTrigger );
 
 	// light
 	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.scene.add( ambientLight );
+	this.world.addObject3D( ambientLight );
 
 	var directionalLight = new THREE.DirectionalLight( 0xffffff );
 	directionalLight.position.set( -100, 50, -100 );
@@ -47627,7 +47680,7 @@ Stage.prototype.setup = function() {
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
 	this.settingsManager.adjustLight( directionalLight );
-	this.scene.add( directionalLight );
+	this.world.addObject3D( directionalLight );
 
 	// start rendering
 	this._render();
@@ -47714,7 +47767,6 @@ Stage.prototype.setup = function() {
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
-	this.scene.add( ground );
 
 	// color faces
 	colorFaces( groundGeometry );
@@ -47727,7 +47779,7 @@ Stage.prototype.setup = function() {
 	interactiveBox.position.set( 20, 5, 0 );
 	interactiveBox.castShadow = true;
 	interactiveBox.updateMatrix();
-	this.scene.add( interactiveBox );
+	this.world.addObject3D( interactiveBox );
 
 	this.actionManager.createInteraction( interactiveBox, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Color", function() {
 
@@ -47740,7 +47792,7 @@ Stage.prototype.setup = function() {
 		colorMesh( interactiveBox );
 	} );
 	colorTrigger.position.set( -20, 0, 0 );
-	this.scene.add( colorTrigger );
+	this.world.addObject3D( colorTrigger );
 
 	// visualize trigger with circle
 	var triggerCircle = new THREE.Mesh( new THREE.CircleGeometry( 10 ), new THREE.MeshBasicMaterial( {
@@ -47757,7 +47809,7 @@ Stage.prototype.setup = function() {
 		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.scene.add( sign );
+		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
 			object : sign.position,
@@ -47775,11 +47827,11 @@ Stage.prototype.setup = function() {
 		self._changeStage( "004", true );
 	} );
 	stageTrigger.position.set( 0, 0, 75 );
-	this.scene.add( stageTrigger );
+	this.world.addObject3D( stageTrigger );
 
 	// light
 	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.scene.add( ambientLight );
+	this.world.addObject3D( ambientLight );
 
 	var directionalLight = new THREE.DirectionalLight( 0xffffff );
 	directionalLight.position.set( -100, 50, -100 );
@@ -47788,7 +47840,7 @@ Stage.prototype.setup = function() {
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
 	this.settingsManager.adjustLight( directionalLight );
-	this.scene.add( directionalLight );
+	this.world.addObject3D( directionalLight );
 
 	// start rendering
 	this._render();
@@ -47887,7 +47939,6 @@ Stage.prototype.setup = function() {
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
-	this.scene.add( ground );
 
 	// color faces
 	colorFaces( groundGeometry );
@@ -47900,7 +47951,7 @@ Stage.prototype.setup = function() {
 	interactiveBoxTextScreen.position.set( 20, 5, 0 );
 	interactiveBoxTextScreen.castShadow = true;
 	interactiveBoxTextScreen.updateMatrix();
-	this.scene.add( interactiveBoxTextScreen );
+	this.world.addObject3D( interactiveBoxTextScreen );
 
 	this.actionManager.createInteraction( interactiveBoxTextScreen, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.TextScreen", function() {
 
@@ -47928,7 +47979,7 @@ Stage.prototype.setup = function() {
 	interactiveBoxModal.position.set( -20, 5, 0 );
 	interactiveBoxModal.castShadow = true;
 	interactiveBoxModal.updateMatrix();
-	this.scene.add( interactiveBoxModal );
+	this.world.addObject3D( interactiveBoxModal );
 
 	this.actionManager.createInteraction( interactiveBoxModal, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Modal", function() {
 
@@ -47948,7 +47999,7 @@ Stage.prototype.setup = function() {
 		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.scene.add( sign );
+		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
 			object : sign.position,
@@ -47966,11 +48017,11 @@ Stage.prototype.setup = function() {
 		self._changeStage( "005", true );
 	} );
 	stageTrigger.position.set( 0, 0, 75 );
-	this.scene.add( stageTrigger );
+	this.world.addObject3D( stageTrigger );
 
 	// light
 	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.scene.add( ambientLight );
+	this.world.addObject3D( ambientLight );
 
 	var directionalLight = new THREE.DirectionalLight( 0xffffff );
 	directionalLight.position.set( -100, 50, -100 );
@@ -47979,7 +48030,7 @@ Stage.prototype.setup = function() {
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
 	this.settingsManager.adjustLight( directionalLight );
-	this.scene.add( directionalLight );
+	this.world.addObject3D( directionalLight );
 
 	// start rendering
 	this._render();
@@ -48066,7 +48117,6 @@ Stage.prototype.setup = function() {
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
-	this.scene.add( ground );
 
 	// color faces
 	colorFaces( groundGeometry );
@@ -48083,7 +48133,7 @@ Stage.prototype.setup = function() {
 		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.scene.add( sign );
+		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
 			object : sign.position,
@@ -48101,7 +48151,7 @@ Stage.prototype.setup = function() {
 		self._changeStage( "006", true );
 	} );
 	stageTrigger.position.set( 0, 0, 75 );
-	this.scene.add( stageTrigger );
+	this.world.addObject3D( stageTrigger );
 
 	// start rendering
 	this._render();
@@ -48195,7 +48245,6 @@ Stage.prototype.setup = function() {
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
-	this.scene.add( ground );
 
 	// color faces
 	colorFaces( groundGeometry );
@@ -48208,7 +48257,7 @@ Stage.prototype.setup = function() {
 	staticBoxFire.position.set( 40, 5, 0 );
 	staticBoxFire.castShadow = true;
 	staticBoxFire.updateMatrix();
-	this.scene.add( staticBoxFire );
+	this.world.addObject3D( staticBoxFire );
 	this.actionManager.createStatic( staticBoxFire, this.actionManager.COLLISIONTYPES.AABB );
 
 	var staticBoxClock = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
@@ -48218,7 +48267,7 @@ Stage.prototype.setup = function() {
 	staticBoxClock.position.set( -40, 5, 0 );
 	staticBoxClock.castShadow = true;
 	staticBoxClock.updateMatrix();
-	this.scene.add( staticBoxClock );
+	this.world.addObject3D( staticBoxClock );
 	this.actionManager.createStatic( staticBoxClock, this.actionManager.COLLISIONTYPES.AABB );
 
 	var staticBoxWall = new THREE.Mesh( new THREE.BoxGeometry( 1, 20, 40 ), new THREE.MeshBasicMaterial( {
@@ -48258,7 +48307,7 @@ Stage.prototype.setup = function() {
 		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.scene.add( sign );
+		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
 			object : sign.position,
@@ -48276,11 +48325,11 @@ Stage.prototype.setup = function() {
 		self._changeStage( "007", true );
 	} );
 	stageTrigger.position.set( 0, 0, 75 );
-	this.scene.add( stageTrigger );
+	this.world.addObject3D( stageTrigger );
 
 	// light
 	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.scene.add( ambientLight );
+	this.world.addObject3D( ambientLight );
 
 	var directionalLight = new THREE.DirectionalLight( 0xffffff );
 	directionalLight.position.set( -100, 50, -100 );
@@ -48289,7 +48338,7 @@ Stage.prototype.setup = function() {
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
 	this.settingsManager.adjustLight( directionalLight );
-	this.scene.add( directionalLight );
+	this.world.addObject3D( directionalLight );
 
 	// start rendering
 	this._render();
@@ -48383,7 +48432,6 @@ Stage.prototype.setup = function() {
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
-	this.scene.add( ground );
 
 	// color faces
 	colorFaces( groundGeometry );
@@ -48394,7 +48442,7 @@ Stage.prototype.setup = function() {
 	} ) );
 	interactiveBoxBasic.position.set( 20, 5, 0 );
 	interactiveBoxBasic.castShadow = true;
-	this.scene.add( interactiveBoxBasic );
+	this.world.addObject3D( interactiveBoxBasic );
 
 	var interactiveObject = this.actionManager.createInteraction( interactiveBoxBasic, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.BasicAnimation", function() {
 
@@ -48416,7 +48464,7 @@ Stage.prototype.setup = function() {
 	} ) );
 	staticBoxHover.position.set( -40, 8, 0 );
 	staticBoxHover.castShadow = true;
-	this.scene.add( staticBoxHover );
+	this.world.addObject3D( staticBoxHover );
 	this.actionManager.createStatic( staticBoxHover, this.actionManager.COLLISIONTYPES.AABB );
 
 	// create a hover animation, which animates infinitely a property between
@@ -48440,7 +48488,7 @@ Stage.prototype.setup = function() {
 		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.scene.add( sign );
+		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
 			object : sign.position,
@@ -48452,17 +48500,17 @@ Stage.prototype.setup = function() {
 		} ).play();
 	} );
 
-	// add trigger for scene change
+	// add trigger for stage change
 	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
 
 		self._changeStage( "008", true );
 	} );
 	stageTrigger.position.set( 0, 0, 75 );
-	this.scene.add( stageTrigger );
+	this.world.addObject3D( stageTrigger );
 
 	// light
 	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.scene.add( ambientLight );
+	this.world.addObject3D( ambientLight );
 
 	var directionalLight = new THREE.DirectionalLight( 0xffffff );
 	directionalLight.position.set( -100, 50, -100 );
@@ -48471,7 +48519,7 @@ Stage.prototype.setup = function() {
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
 	this.settingsManager.adjustLight( directionalLight );
-	this.scene.add( directionalLight );
+	this.world.addObject3D( directionalLight );
 
 	// start rendering
 	this._render();
@@ -48559,7 +48607,6 @@ Stage.prototype.setup = function() {
 	groundDown.updateMatrix();
 	groundDown.receiveShadow = true;
 	this.world.addGround( groundDown );
-	this.scene.add( groundDown );
 
 	// add ground up
 	var groundUp = new THREE.Mesh( groundGeometry, groundMaterial );
@@ -48569,7 +48616,6 @@ Stage.prototype.setup = function() {
 	groundUp.updateMatrix();
 	groundUp.receiveShadow = true;
 	this.world.addGround( groundUp );
-	this.scene.add( groundUp );
 
 	// color faces
 	colorFaces( groundGeometry );
@@ -48583,7 +48629,7 @@ Stage.prototype.setup = function() {
 		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		sign.position.set( 0, 27.5, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.scene.add( sign );
+		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
 			object : sign.position,
@@ -48606,7 +48652,7 @@ Stage.prototype.setup = function() {
 
 		var stairs = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		stairs.receiveShadow = true;
-		self.scene.add( stairs );
+		self.world.addObject3D( stairs );
 	} );
 
 	// add invisible ramp
@@ -48620,15 +48666,14 @@ Stage.prototype.setup = function() {
 	ramp.updateMatrix();
 	ramp.visible = false;
 	this.world.addGround( ramp );
-	this.scene.add( ramp );
 
-	// add trigger for scene change
+	// add trigger for stage change
 	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
 
 		self._changeStage( "009", true );
 	} );
 	stageTrigger.position.set( 0, 7.5, 75 );
-	this.scene.add( stageTrigger );
+	this.world.addObject3D( stageTrigger );
 
 	// start rendering
 	this._render();
@@ -48714,7 +48759,6 @@ Stage.prototype.setup = function() {
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
-	this.scene.add( ground );
 
 	// color faces
 	colorFaces( groundGeometry );
@@ -48728,7 +48772,7 @@ Stage.prototype.setup = function() {
 		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.scene.add( sign );
+		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
 			object : sign.position,
@@ -48770,14 +48814,14 @@ Stage.prototype.setup = function() {
 	lod.addLevel( sphereTwo, 60 );
 	lod.addLevel( sphereThree, 100 );
 
-	this.scene.add( lod );
+	this.world.addObject3D( lod );
 
 	// create circles to visualize the LOD distances
-	showLODCircles( this.scene );
+	showLODCircles( this.world );
 
 	// light
 	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.scene.add( ambientLight );
+	this.world.addObject3D( ambientLight );
 
 	var directionalLight = new THREE.DirectionalLight( 0xffffff );
 	directionalLight.position.set( -100, 50, -100 );
@@ -48786,15 +48830,15 @@ Stage.prototype.setup = function() {
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
 	this.settingsManager.adjustLight( directionalLight );
-	this.scene.add( directionalLight );
+	this.world.addObject3D( directionalLight );
 
-	// add trigger for ending
+	// add trigger for stage change
 	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
 
 		self._changeStage( "010", true );
 	} );
 	stageTrigger.position.set( 0, 0, 75 );
-	this.scene.add( stageTrigger );
+	this.world.addObject3D( stageTrigger );
 
 	// start rendering
 	this._render();
@@ -48835,7 +48879,7 @@ function colorFaces( geometry ) {
 	}
 }
 
-function showLODCircles( scene ) {
+function showLODCircles( world ) {
 
 	var circleOne = new THREE.Mesh( new THREE.CircleGeometry( 60, 25 ), new THREE.MeshBasicMaterial( {
 		wireframe : true
@@ -48847,8 +48891,8 @@ function showLODCircles( scene ) {
 	circleOne.rotation.set( Math.PI * 0.5, 0, 0 );
 	circleTwo.rotation.set( Math.PI * 0.5, 0, 0 );
 
-	scene.add( circleOne );
-	scene.add( circleTwo );
+	world.addObject3D( circleOne );
+	world.addObject3D( circleTwo );
 }
 
 module.exports = Stage;
@@ -48897,7 +48941,6 @@ Stage.prototype.setup = function() {
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
-	this.scene.add( ground );
 
 	// color faces
 	colorFaces( groundGeometry );
@@ -48910,7 +48953,7 @@ Stage.prototype.setup = function() {
 	sphere.position.set( -20, 10, 0 );
 	sphere.updateMatrix();
 	sphere.visible = false;
-	this.scene.add( sphere );
+	this.world.addObject3D( sphere );
 
 	// create second mesh for impostor demo
 	box = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
@@ -48920,7 +48963,7 @@ Stage.prototype.setup = function() {
 	box.position.set( 20, 10, 0 );
 	box.updateMatrix();
 	box.visible = false;
-	this.scene.add( box );
+	this.world.addObject3D( box );
 
 	this.performanceManager.createImpostor( "sphere", sphere, 512 );
 	this.performanceManager.createImpostor( "box", box, 512 );
@@ -48934,7 +48977,7 @@ Stage.prototype.setup = function() {
 		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.scene.add( sign );
+		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
 			object : sign.position,
@@ -48948,7 +48991,7 @@ Stage.prototype.setup = function() {
 
 	// light
 	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.scene.add( ambientLight );
+	this.world.addObject3D( ambientLight );
 
 	var directionalLight = new THREE.DirectionalLight( 0xffffff );
 	directionalLight.position.set( -100, 50, -100 );
@@ -48957,15 +49000,15 @@ Stage.prototype.setup = function() {
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
 	this.settingsManager.adjustLight( directionalLight );
-	this.scene.add( directionalLight );
+	this.world.addObject3D( directionalLight );
 
-	// add trigger for ending
+	// add trigger for stage change
 	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
 
 		self._changeStage( "011", true );
 	} );
 	stageTrigger.position.set( 0, 0, 75 );
-	this.scene.add( stageTrigger );
+	this.world.addObject3D( stageTrigger );
 
 	// generate impostors
 	this.performanceManager.generateImpostors();
@@ -49077,7 +49120,6 @@ Stage.prototype.setup = function() {
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
-	this.scene.add( ground );
 
 	// color faces
 	colorFaces( groundGeometry );
@@ -49091,7 +49133,7 @@ Stage.prototype.setup = function() {
 		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.scene.add( sign );
+		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
 			object : sign.position,
@@ -49105,7 +49147,7 @@ Stage.prototype.setup = function() {
 
 	// light
 	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.scene.add( ambientLight );
+	this.world.addObject3D( ambientLight );
 
 	var directionalLight = new THREE.DirectionalLight( 0xffffff );
 	directionalLight.position.set( -100, 50, -100 );
@@ -49114,7 +49156,7 @@ Stage.prototype.setup = function() {
 	directionalLight.shadowCameraTop = 40;
 	directionalLight.shadowCameraBottom = -40;
 	this.settingsManager.adjustLight( directionalLight );
-	this.scene.add( directionalLight );
+	this.world.addObject3D( directionalLight );
 
 	// add trigger for ending
 	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
@@ -49128,10 +49170,10 @@ Stage.prototype.setup = function() {
 		self.saveGameManager.remove();
 	} );
 	stageTrigger.position.set( 0, 0, 75 );
-	this.scene.add( stageTrigger );
+	this.world.addObject3D( stageTrigger );
 
 	// post processing
-	this.renderer.preparePostProcessing( this.scene, this.camera );
+	this.renderer.preparePostProcessing( this.world, this.camera );
 	this.renderer.addGrayscaleEffect();
 	this.renderer.addHBlurEffect();
 	this.renderer.addVBlurEffect();
@@ -50518,7 +50560,7 @@ module.exports = UiElement;
 },{"../etc/TextManager":40}],81:[function(require,module,exports){
 (function (global){
 /**
- * @file Interface for entire ui-handling. This prototype is used in scenes to
+ * @file Interface for entire ui-handling. This prototype is used in stages to
  * access ui-based logic and to create ui-entities.
  * 
  * @author Human Interactive

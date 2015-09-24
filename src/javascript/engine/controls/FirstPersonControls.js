@@ -11,7 +11,6 @@
 var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
 
-var scene = require( "../core/Scene" );
 var camera = require( "../core/Camera" );
 var world = require( "../core/World" );
 var actionManager = require( "../action/ActionManager" );
@@ -244,8 +243,8 @@ function FirstPersonControls() {
 	this._pitchObject.add( camera ); // camera -> pitch
 	this._yawObject.add( this._pitchObject ); // pitch -> yaw
 
-	// add to scene
-	scene.add( this._yawObject );
+	// add to world
+	world.addObject3D( this._yawObject );
 
 	// type definition
 	this._yawObject.type = "Controls";

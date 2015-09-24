@@ -1,5 +1,5 @@
 /**
- * @file Interface for entire action-handling. This prototype is used in scenes
+ * @file Interface for entire action-handling. This prototype is used in stages
  * to access action-based logic and to create action-entities.
  * 
  * @author Human Interactive

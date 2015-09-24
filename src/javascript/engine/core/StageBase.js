@@ -10,7 +10,6 @@
 var THREE = require( "three" );
 var PubSub = require( "pubsub-js" );
 
-var scene = require( "./Scene" );
 var renderer = require( "./Renderer" );
 var camera = require( "./Camera" );
 var world = require( "./World" );
@@ -42,12 +41,6 @@ function StageBase( stageId ) {
 			configurable : false,
 			enumerable : true,
 			writable : true
-		},
-		scene : {
-			value : scene,
-			configurable : false,
-			enumerable : true,
-			writable : false
 		},
 		renderer : {
 			value : renderer,
@@ -158,8 +151,8 @@ StageBase.prototype.setup = function() {
 
 	if ( utils.isDevelopmentModeActive() === true )
 	{
-		this.scene.add( new THREE.AxisHelper( 30 ) );
-		this.scene.add( new THREE.GridHelper( 200, 10 ) );
+		this.world.addObject3D( new THREE.AxisHelper( 30 ) );
+		this.world.addObject3D( new THREE.GridHelper( 200, 10 ) );
 	}
 };
 
@@ -172,8 +165,7 @@ StageBase.prototype.start = function() {
 };
 
 /**
- * This method is called, when the stage is destroyed. It removes all
- * scene-related data.
+ * This method is called, when the stage is destroyed.
  */
 StageBase.prototype.destroy = function() {
 
@@ -200,9 +192,6 @@ StageBase.prototype.destroy = function() {
 
 	// clear world
 	this.world.clear();
-
-	// clear scene
-	this.scene.clear();
 
 	// clear renderer
 	this.renderer.clear();
@@ -232,21 +221,24 @@ StageBase.prototype._render = function() {
 	this.controls.update( this._delta );
 
 	// render frame
-	this.renderer.render( this.scene, this.camera );
+	this.renderer.render( this.world.scene, this.camera );
 
 	// save render ID
 	this._renderId = global.requestAnimationFrame( this._render );
 };
 
 /**
- * Changes the stage
+ * Changes the stage.
  * 
  * @param {string} stageId - The new stageId
  * @param {boolean} isSaveGame - Should the progress be saved?
  */
 StageBase.prototype._changeStage = function( stageId, isSaveGame ) {
 
+	// lock controls
 	self.controls.isActionInProgress = true;
+	
+	// publish message to trigger the change
 	PubSub.publish( "stage.change", {
 		stageId : stageId,
 		isSaveGame : isSaveGame

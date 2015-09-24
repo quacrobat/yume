@@ -1,5 +1,5 @@
 /**
- * @file Interface for entire ui-handling. This prototype is used in scenes to
+ * @file Interface for entire ui-handling. This prototype is used in stages to
  * access ui-based logic and to create ui-entities.
  * 
  * @author Human Interactive
