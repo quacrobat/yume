@@ -29,10 +29,10 @@ UiElement.prototype._getTransitionEndEvent = function() {
 	var element = global.document.querySelector( "body" );
 
 	var transitions = {
-		'transition' : 'transitionend',
-		'OTransition' : 'oTransitionEnd',
-		'MozTransition' : 'transitionend',
-		'WebkitTransition' : 'webkitTransitionEnd'
+		"transition" : "transitionend",
+		"OTransition" : "oTransitionEnd",
+		"MozTransition" : "transitionend",
+		"WebkitTransition" : "webkitTransitionEnd"
 	};
 
 	for ( transition in transitions )

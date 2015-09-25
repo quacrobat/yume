@@ -37637,7 +37637,6 @@ AudioManager.prototype.playBackgroundMusic = function( isFadeIn, duration ) {
 		// fade in
 		this._backgroundMusicGain.gain.linearRampToValueAtTime( 0, this._backgroundMusic.currentTime );
 		this._backgroundMusicGain.gain.linearRampToValueAtTime( 1, this._backgroundMusic.currentTime + duration || 2 );
-
 	}
 	else
 	{
@@ -37678,7 +37677,6 @@ AudioManager.prototype.pauseBackgroundMusic = function( isFadeOut, duration, onP
 			}
 
 		}, ( duration || 2 ) * 1000 );
-
 	}
 	else
 	{
@@ -37906,10 +37904,10 @@ DynamicAudio.prototype.play = function( time ) {
 		this._source.disconnect();
 	}
 
-	// build new source node
-	this._source = this._context.createBufferSource(); // sources can just
-														// played once, see
-														// https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode
+	// build new source node because sources can just played once
+	// see https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode
+	this._source = this._context.createBufferSource();
+
 	this._source.buffer = this.buffer;
 	this._source.loop = this.isLoop;
 	this._source.connect( this._panner );
@@ -40979,7 +40977,7 @@ World.prototype.addWall = function( wall ) {
 
 	this.walls.push( wall );
 	
-	// ground objects always needs to be added to the scene
+	// wall objects always needs to be added to the scene
 	this.addObject3D( wall );
 };
 
@@ -42148,9 +42146,9 @@ function OBB( position, halfSizes, basis ) {
 			enumerable : true,
 			writable : true
 		},
-		// The OBB-OBB test utilizes a SAT test to detect the intersection. A
-		// robust implementation requires
-		// an epsilon threshold to test that the used axes are not degenerate.
+		// The OBB-OBB test utilizes a SAT test to detect the intersection.
+		// A robust implementation requires an epsilon threshold to test that
+		// the used axes are not degenerate.
 		_EPSILON : {
 			value : 1e-3,
 			configurable : false,
@@ -42323,7 +42321,9 @@ OBB.prototype.isPointContained = ( function() {
 
 		// project the calculated displacement vector to each axis and
 		// compare the result with the respective half size.
-		return Math.abs( displacement.dot( xAxis ) ) <= this.halfSizes.x && Math.abs( displacement.dot( yAxis ) ) <= this.halfSizes.y && Math.abs( displacement.dot( zAxis ) ) <= this.halfSizes.z;
+		return Math.abs( displacement.dot( xAxis ) ) <= this.halfSizes.x && 
+			   Math.abs( displacement.dot( yAxis ) ) <= this.halfSizes.y && 
+			   Math.abs( displacement.dot( zAxis ) ) <= this.halfSizes.z;
 	};
 
 }() );
@@ -42337,7 +42337,14 @@ OBB.prototype.isPointContained = ( function() {
  */
 OBB.prototype.isAABBContained = ( function() {
 
-	var points = [ new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3() ];
+	var points = [ new THREE.Vector3(), 
+	               new THREE.Vector3(), 
+	               new THREE.Vector3(), 
+	               new THREE.Vector3(), 
+	               new THREE.Vector3(), 
+	               new THREE.Vector3(), 
+	               new THREE.Vector3(), 
+	               new THREE.Vector3() ];
 
 	return function( aabb ) {
 
@@ -42375,7 +42382,8 @@ OBB.prototype.isAABBContained = ( function() {
  */
 OBB.prototype.isLineContained = function( line ) {
 
-	return this.isPointContained( line.start ) && this.isPointContained( line.end );
+	return this.isPointContained( line.start ) && 
+		   this.isPointContained( line.end );
 };
 
 /**
@@ -42387,7 +42395,9 @@ OBB.prototype.isLineContained = function( line ) {
  */
 OBB.prototype.isTriangleContained = function( triangle ) {
 
-	return this.isPointContained( triangle.a ) && this.isPointContained( triangle.b ) && this.isPointContained( triangle.c );
+	return this.isPointContained( triangle.a ) && 
+		   this.isPointContained( triangle.b ) && 
+		   this.isPointContained( triangle.c );
 };
 
 /**
@@ -42639,7 +42649,9 @@ OBB.prototype.isIntersectionPlane = ( function() {
 
 		// compute the projection interval radius of this OBB onto L(t) =
 		// this->pos + x * p.normal;
-		t = this.halfSizes.x * Math.abs( plane.normal.dot( xAxis ) ) + this.halfSizes.y * Math.abs( plane.normal.dot( yAxis ) ) + this.halfSizes.z * Math.abs( plane.normal.dot( zAxis ) );
+		t = this.halfSizes.x * Math.abs( plane.normal.dot( xAxis ) ) + 
+			this.halfSizes.y * Math.abs( plane.normal.dot( yAxis ) ) + 
+			this.halfSizes.z * Math.abs( plane.normal.dot( zAxis ) );
 
 		// compute the distance of this OBB center from the plane
 		s = plane.normal.dot( this.position ) - plane.constant;
@@ -50540,10 +50552,10 @@ UiElement.prototype._getTransitionEndEvent = function() {
 	var element = global.document.querySelector( "body" );
 
 	var transitions = {
-		'transition' : 'transitionend',
-		'OTransition' : 'oTransitionEnd',
-		'MozTransition' : 'transitionend',
-		'WebkitTransition' : 'webkitTransitionEnd'
+		"transition" : "transitionend",
+		"OTransition" : "oTransitionEnd",
+		"MozTransition" : "transitionend",
+		"WebkitTransition" : "webkitTransitionEnd"
 	};
 
 	for ( transition in transitions )

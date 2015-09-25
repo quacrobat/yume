@@ -117,10 +117,10 @@ DynamicAudio.prototype.play = function( time ) {
 		this._source.disconnect();
 	}
 
-	// build new source node
-	this._source = this._context.createBufferSource(); // sources can just
-														// played once, see
-														// https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode
+	// build new source node because sources can just played once
+	// see https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode
+	this._source = this._context.createBufferSource();
+
 	this._source.buffer = this.buffer;
 	this._source.loop = this.isLoop;
 	this._source.connect( this._panner );

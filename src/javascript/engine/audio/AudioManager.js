@@ -203,7 +203,6 @@ AudioManager.prototype.playBackgroundMusic = function( isFadeIn, duration ) {
 		// fade in
 		this._backgroundMusicGain.gain.linearRampToValueAtTime( 0, this._backgroundMusic.currentTime );
 		this._backgroundMusicGain.gain.linearRampToValueAtTime( 1, this._backgroundMusic.currentTime + duration || 2 );
-
 	}
 	else
 	{
@@ -244,7 +243,6 @@ AudioManager.prototype.pauseBackgroundMusic = function( isFadeOut, duration, onP
 			}
 
 		}, ( duration || 2 ) * 1000 );
-
 	}
 	else
 	{

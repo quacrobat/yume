@@ -55,9 +55,9 @@ function OBB( position, halfSizes, basis ) {
 			enumerable : true,
 			writable : true
 		},
-		// The OBB-OBB test utilizes a SAT test to detect the intersection. A
-		// robust implementation requires
-		// an epsilon threshold to test that the used axes are not degenerate.
+		// The OBB-OBB test utilizes a SAT test to detect the intersection.
+		// A robust implementation requires an epsilon threshold to test that
+		// the used axes are not degenerate.
 		_EPSILON : {
 			value : 1e-3,
 			configurable : false,
@@ -230,7 +230,9 @@ OBB.prototype.isPointContained = ( function() {
 
 		// project the calculated displacement vector to each axis and
 		// compare the result with the respective half size.
-		return Math.abs( displacement.dot( xAxis ) ) <= this.halfSizes.x && Math.abs( displacement.dot( yAxis ) ) <= this.halfSizes.y && Math.abs( displacement.dot( zAxis ) ) <= this.halfSizes.z;
+		return Math.abs( displacement.dot( xAxis ) ) <= this.halfSizes.x && 
+			   Math.abs( displacement.dot( yAxis ) ) <= this.halfSizes.y && 
+			   Math.abs( displacement.dot( zAxis ) ) <= this.halfSizes.z;
 	};
 
 }() );
@@ -244,7 +246,14 @@ OBB.prototype.isPointContained = ( function() {
  */
 OBB.prototype.isAABBContained = ( function() {
 
-	var points = [ new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3() ];
+	var points = [ new THREE.Vector3(), 
+	               new THREE.Vector3(), 
+	               new THREE.Vector3(), 
+	               new THREE.Vector3(), 
+	               new THREE.Vector3(), 
+	               new THREE.Vector3(), 
+	               new THREE.Vector3(), 
+	               new THREE.Vector3() ];
 
 	return function( aabb ) {
 
@@ -282,7 +291,8 @@ OBB.prototype.isAABBContained = ( function() {
  */
 OBB.prototype.isLineContained = function( line ) {
 
-	return this.isPointContained( line.start ) && this.isPointContained( line.end );
+	return this.isPointContained( line.start ) && 
+		   this.isPointContained( line.end );
 };
 
 /**
@@ -294,7 +304,9 @@ OBB.prototype.isLineContained = function( line ) {
  */
 OBB.prototype.isTriangleContained = function( triangle ) {
 
-	return this.isPointContained( triangle.a ) && this.isPointContained( triangle.b ) && this.isPointContained( triangle.c );
+	return this.isPointContained( triangle.a ) && 
+		   this.isPointContained( triangle.b ) && 
+		   this.isPointContained( triangle.c );
 };
 
 /**
@@ -546,7 +558,9 @@ OBB.prototype.isIntersectionPlane = ( function() {
 
 		// compute the projection interval radius of this OBB onto L(t) =
 		// this->pos + x * p.normal;
-		t = this.halfSizes.x * Math.abs( plane.normal.dot( xAxis ) ) + this.halfSizes.y * Math.abs( plane.normal.dot( yAxis ) ) + this.halfSizes.z * Math.abs( plane.normal.dot( zAxis ) );
+		t = this.halfSizes.x * Math.abs( plane.normal.dot( xAxis ) ) + 
+			this.halfSizes.y * Math.abs( plane.normal.dot( yAxis ) ) + 
+			this.halfSizes.z * Math.abs( plane.normal.dot( zAxis ) );
 
 		// compute the distance of this OBB center from the plane
 		s = plane.normal.dot( this.position ) - plane.constant;
