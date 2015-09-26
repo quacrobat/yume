@@ -13,11 +13,9 @@ var THREE = require( "three" );
 
 var camera = require( "../core/Camera" );
 var world = require( "../core/World" );
-var actionManager = require( "../action/ActionManager" );
 var audioManager = require( "../audio/AudioManager" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var settingsManager = require( "../etc/SettingsManager" );
-var logger = require( "../etc/Logger" );
 var Easing = require( "../animation/Easing" );
 
 var self;
@@ -378,11 +376,7 @@ FirstPersonControls.prototype.update = function( delta ) {
 	if ( this._isControlsActive === true && this.isActionInProgress === false )
 	{
 		this._translate( delta );
-
-		this._checkInteractiveObjects();
-
-		this._checkAndProcessTrigger();
-
+		
 		this._animateCrouch();
 
 		this._animateRun();
@@ -643,136 +637,6 @@ FirstPersonControls.prototype._calculateHeight = function( distance ) {
 
 	this._yawObject.position.y += ( this._height - distance );
 };
-
-/**
- * Gets the first intersection of the controls with an interactive object.
- * 
- * @returns {InteractiveObject|undefined} The interactive object if there is an
- * intersection.
- */
-FirstPersonControls.prototype._getFirstInteractiveIntersection = ( function() {
-
-	var intersects = [];
-	var index;
-
-	return function() {
-
-		this._rayCaster.set( this._yawObject.position, this.getDirection() );
-		this._rayCaster.far = 20;
-
-		intersects = this._rayCaster.intersectObjects( actionManager.interactiveObjects );
-
-		if ( intersects.length > 0 )
-		{
-			for ( index = 0; index < intersects.length; index++ )
-			{
-				// return only an object, which is visible and has an active
-				// action
-				if ( intersects[ index ].object.mesh.visible === true && intersects[ index ].object.action.isActive === true )
-				{
-					return intersects[ index ].object;
-				}
-			}
-		}
-	};
-
-}() );
-
-/**
- * This method controls the visibility of the interaction label.
- */
-FirstPersonControls.prototype._checkInteractiveObjects = ( function() {
-
-	var object;
-
-	return function() {
-
-		object = this._getFirstInteractiveIntersection();
-
-		if ( object !== undefined )
-		{
-			if ( object.action !== undefined )
-			{
-				userInterfaceManager.showInteractionLabel( object.action.label );
-			}
-			else
-			{
-				userInterfaceManager.hideInteractionLabel();
-			}
-		}
-		else
-		{
-			userInterfaceManager.hideInteractionLabel();
-		}
-	};
-
-}() );
-
-/**
- * When the player wants to interact with an object, this method determines the
- * interactive object and runs the respective action.
- */
-FirstPersonControls.prototype._interact = ( function() {
-
-	var object;
-
-	return function() {
-
-		object = this._getFirstInteractiveIntersection();
-
-		if ( object !== undefined )
-		{
-			if ( object.action !== undefined )
-			{
-				object.action.run();
-			}
-		}
-	};
-
-}() );
-
-/**
- * This method checks the necessity of processing triggers and running the
- * respective action.
- */
-FirstPersonControls.prototype._checkAndProcessTrigger = ( function() {
-
-	var intersects = [];
-	var direction = new THREE.Vector3( 0, -1, 0 );
-	var inRadius = false;
-
-	return function() {
-
-		this._rayCaster.set( this._yawObject.position, direction );
-		this._rayCaster.far = this._height + 1;
-
-		intersects = this._rayCaster.intersectObjects( actionManager.triggers );
-
-		if ( intersects.length > 0 )
-		{
-			if ( intersects[ 0 ].object.action !== undefined )
-			{
-				if ( inRadius === false && intersects[ 0 ].object.action.isActive === true )
-				{
-					intersects[ 0 ].object.action.run();
-
-					inRadius = true;
-
-					logger.log( "INFO: FirstPersonControls: Trigger released and action \"%s\" executed.", intersects[ 0 ].object.action.label );
-				}
-			}
-			else
-			{
-				throw "ERROR: FirstPersonControls: No action defined for trigger object.";
-			}
-		}
-		else
-		{
-			inRadius = false;
-		}
-	};
-
-}() );
 
 /**
  * Does the actual collision detection and returns a boolean value, that
@@ -1176,7 +1040,10 @@ FirstPersonControls.prototype._onKeyDown = function( event ) {
 
 			case 69:
 				// e
-				self._interact();
+				PubSub.publish( "action.interaction", {
+					position : self.getPosition(),
+					direction : self.getDirection()
+				} );
 				break;
 
 			case 70:

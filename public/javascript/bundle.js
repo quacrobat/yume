@@ -35525,10 +35525,18 @@ module.exports = Action;
 
 "use strict";
 
+var PubSub = require( "pubsub-js" );
+var THREE = require( "three" );
+
 var Action = require( "./Action" );
 var InteractiveObject = require( "./InteractiveObject" );
 var StaticObject = require( "./StaticObject" );
 var ActionTrigger = require( "./ActionTrigger" );
+
+var userInterfaceManager = require( "../ui/UserInterfaceManager" );
+var logger = require( "../etc/Logger" );
+
+var self;
 
 /**
  * Creates the action manager.
@@ -35556,6 +35564,12 @@ function ActionManager() {
 			enumerable : false,
 			writable : false
 		},
+		_raycaster : {
+			value : new THREE.Raycaster(),
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
 		COLLISIONTYPES : {
 			value : {
 				AABB : 0,
@@ -35576,16 +35590,24 @@ function ActionManager() {
 			writable : false
 		}
 	} );
+
+	// subscriptions
+	PubSub.subscribe( "action.interaction", this._onInteraction );
+
+	self = this;
 }
 
 /**
  * Updates the action manager and all action objects.
+ * 
+ * @param {THREE.Vector3} position - The position of the player.
+ * @param {THREE.Vector3} direction - The direction the player is looking at.
  */
 ActionManager.prototype.update = ( function() {
 
 	var index;
 
-	return function() {
+	return function( position, direction ) {
 
 		// update interactive objects
 		for ( index = 0; index < this.interactiveObjects.length; index++ )
@@ -35598,6 +35620,12 @@ ActionManager.prototype.update = ( function() {
 		{
 			this.staticObjects[ index ].update();
 		}
+
+		// check interaction objects
+		this._checkInteraction( position, direction );
+
+		// check trigger objects
+		this._checkTrigger( position );
 	};
 
 }() );
@@ -35741,8 +35769,154 @@ ActionManager.prototype.removeStaticObjects = function() {
 	this.staticObjects.length = 0;
 };
 
+/**
+ * Calculates the first intersection with an interactive object.
+ */
+ActionManager.prototype._calculateFirstIntersection = ( function() {
+
+	var intersects = [];
+	var interactiveObject;
+	var index;
+
+	return function( position, direction ) {
+
+		// prepare raycaster
+		this._raycaster.set( position, direction );
+		this._raycaster.far = 20;
+
+		// intersection test
+		intersects = this._raycaster.intersectObjects( this.interactiveObjects );
+
+		if ( intersects.length > 0 )
+		{
+			for ( index = 0; index < intersects.length; index++ )
+			{
+				interactiveObject = intersects[ index ].object;
+
+				// return the closest object which is visible and has an active action
+				if ( interactiveObject.mesh.visible === true && interactiveObject.action.isActive === true )
+				{
+					return interactiveObject;
+				}
+			}
+		}
+	};
+
+}() );
+
+/**
+ * This method checks if the user interface should indicate, that the player can
+ * interact with an object.
+ * 
+ * @param {THREE.Vector3} position - The position of the player.
+ * @param {THREE.Vector3} direction - The direction the player is looking at.
+ */
+ActionManager.prototype._checkInteraction = ( function() {
+
+	var interactiveObject;
+
+	return function( position, direction ) {
+
+		// calculate the intersection with the first visible and active interactive object
+		interactiveObject = this._calculateFirstIntersection( position, direction );
+
+		if ( interactiveObject !== undefined )
+		{
+			if ( interactiveObject.action !== undefined )
+			{
+				// show the interaction label if there is an active action
+				userInterfaceManager.showInteractionLabel( interactiveObject.action.label );
+			}
+			else
+			{
+				userInterfaceManager.hideInteractionLabel();
+			}
+		}
+		else
+		{
+			userInterfaceManager.hideInteractionLabel();
+		}
+	};
+
+}() );
+
+/**
+ * This method checks the execution of triggers. If the player's position is above a trigger,
+ * the logic runs the corresponding action callback.
+ * 
+ * @param {THREE.Vector3} position - The position of the player.
+ */
+ActionManager.prototype._checkTrigger = ( function() {
+
+	var intersects = [];
+	var trigger;
+	var direction = new THREE.Vector3( 0, -1, 0 );
+	var isInRadius = false;
+
+	return function( position ) {
+
+		// prepare raycaster
+		this._raycaster.set( position, direction );
+		this._raycaster.far = Infinity;
+
+		// intersection test
+		intersects = this._raycaster.intersectObjects( this.triggers );
+
+		if ( intersects.length > 0 )
+		{
+			// get the closest trigger
+			trigger = intersects[ 0 ].object;
+			
+			if ( trigger.action !== undefined )
+			{
+				if ( isInRadius === false && trigger.action.isActive === true )
+				{
+					trigger.action.run();
+
+					isInRadius = true;
+
+					logger.log( "INFO: ActionManager: Interaction with trigger object. Action executed." );
+				}
+			}
+			else
+			{
+				throw "ERROR: ActionManager: No action defined for trigger.";
+			}
+		}
+		else
+		{
+			isInRadius = false;
+		}
+	};
+
+}() );
+
+/**
+ * Handles the "action.interaction" topic. This topic is used to handle the
+ * interaction command of the player.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ */
+ActionManager.prototype._onInteraction = function( message, data ) {
+
+	// calculate the intersection with the first visible and active interactive object
+	var interactiveObject = self._calculateFirstIntersection( data.position, data.direction );
+
+	if ( interactiveObject !== undefined )
+	{
+		if ( interactiveObject.action !== undefined )
+		{
+			// execute the assigned action
+			interactiveObject.action.run();
+			
+			logger.log( "INFO: ActionManager: Interaction with interactive object. Action executed." );
+		}
+	}
+};
+
 module.exports = new ActionManager();
-},{"./Action":5,"./ActionTrigger":7,"./InteractiveObject":8,"./StaticObject":9}],7:[function(require,module,exports){
+},{"../etc/Logger":32,"../ui/UserInterfaceManager":81,"./Action":5,"./ActionTrigger":7,"./InteractiveObject":8,"./StaticObject":9,"pubsub-js":1,"three":2}],7:[function(require,module,exports){
 /**
  * @file The ActionTrigger is a static trigger for actions.
  * 
@@ -38086,11 +38260,9 @@ var THREE = require( "three" );
 
 var camera = require( "../core/Camera" );
 var world = require( "../core/World" );
-var actionManager = require( "../action/ActionManager" );
 var audioManager = require( "../audio/AudioManager" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var settingsManager = require( "../etc/SettingsManager" );
-var logger = require( "../etc/Logger" );
 var Easing = require( "../animation/Easing" );
 
 var self;
@@ -38451,11 +38623,7 @@ FirstPersonControls.prototype.update = function( delta ) {
 	if ( this._isControlsActive === true && this.isActionInProgress === false )
 	{
 		this._translate( delta );
-
-		this._checkInteractiveObjects();
-
-		this._checkAndProcessTrigger();
-
+		
 		this._animateCrouch();
 
 		this._animateRun();
@@ -38716,136 +38884,6 @@ FirstPersonControls.prototype._calculateHeight = function( distance ) {
 
 	this._yawObject.position.y += ( this._height - distance );
 };
-
-/**
- * Gets the first intersection of the controls with an interactive object.
- * 
- * @returns {InteractiveObject|undefined} The interactive object if there is an
- * intersection.
- */
-FirstPersonControls.prototype._getFirstInteractiveIntersection = ( function() {
-
-	var intersects = [];
-	var index;
-
-	return function() {
-
-		this._rayCaster.set( this._yawObject.position, this.getDirection() );
-		this._rayCaster.far = 20;
-
-		intersects = this._rayCaster.intersectObjects( actionManager.interactiveObjects );
-
-		if ( intersects.length > 0 )
-		{
-			for ( index = 0; index < intersects.length; index++ )
-			{
-				// return only an object, which is visible and has an active
-				// action
-				if ( intersects[ index ].object.mesh.visible === true && intersects[ index ].object.action.isActive === true )
-				{
-					return intersects[ index ].object;
-				}
-			}
-		}
-	};
-
-}() );
-
-/**
- * This method controls the visibility of the interaction label.
- */
-FirstPersonControls.prototype._checkInteractiveObjects = ( function() {
-
-	var object;
-
-	return function() {
-
-		object = this._getFirstInteractiveIntersection();
-
-		if ( object !== undefined )
-		{
-			if ( object.action !== undefined )
-			{
-				userInterfaceManager.showInteractionLabel( object.action.label );
-			}
-			else
-			{
-				userInterfaceManager.hideInteractionLabel();
-			}
-		}
-		else
-		{
-			userInterfaceManager.hideInteractionLabel();
-		}
-	};
-
-}() );
-
-/**
- * When the player wants to interact with an object, this method determines the
- * interactive object and runs the respective action.
- */
-FirstPersonControls.prototype._interact = ( function() {
-
-	var object;
-
-	return function() {
-
-		object = this._getFirstInteractiveIntersection();
-
-		if ( object !== undefined )
-		{
-			if ( object.action !== undefined )
-			{
-				object.action.run();
-			}
-		}
-	};
-
-}() );
-
-/**
- * This method checks the necessity of processing triggers and running the
- * respective action.
- */
-FirstPersonControls.prototype._checkAndProcessTrigger = ( function() {
-
-	var intersects = [];
-	var direction = new THREE.Vector3( 0, -1, 0 );
-	var inRadius = false;
-
-	return function() {
-
-		this._rayCaster.set( this._yawObject.position, direction );
-		this._rayCaster.far = this._height + 1;
-
-		intersects = this._rayCaster.intersectObjects( actionManager.triggers );
-
-		if ( intersects.length > 0 )
-		{
-			if ( intersects[ 0 ].object.action !== undefined )
-			{
-				if ( inRadius === false && intersects[ 0 ].object.action.isActive === true )
-				{
-					intersects[ 0 ].object.action.run();
-
-					inRadius = true;
-
-					logger.log( "INFO: FirstPersonControls: Trigger released and action \"%s\" executed.", intersects[ 0 ].object.action.label );
-				}
-			}
-			else
-			{
-				throw "ERROR: FirstPersonControls: No action defined for trigger object.";
-			}
-		}
-		else
-		{
-			inRadius = false;
-		}
-	};
-
-}() );
 
 /**
  * Does the actual collision detection and returns a boolean value, that
@@ -39249,7 +39287,10 @@ FirstPersonControls.prototype._onKeyDown = function( event ) {
 
 			case 69:
 				// e
-				self._interact();
+				PubSub.publish( "action.interaction", {
+					position : self.getPosition(),
+					direction : self.getDirection()
+				} );
 				break;
 
 			case 70:
@@ -39365,7 +39406,7 @@ FirstPersonControls.RUN = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":6,"../animation/Easing":12,"../audio/AudioManager":16,"../core/Camera":20,"../core/World":28,"../etc/Logger":32,"../etc/SettingsManager":38,"../ui/UserInterfaceManager":81,"pubsub-js":1,"three":2}],19:[function(require,module,exports){
+},{"../animation/Easing":12,"../audio/AudioManager":16,"../core/Camera":20,"../core/World":28,"../etc/SettingsManager":38,"../ui/UserInterfaceManager":81,"pubsub-js":1,"three":2}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -40292,18 +40333,18 @@ StageBase.prototype._render = function() {
 
 	// get delta time value
 	this._delta = this.timeManager.getDelta();
+	
+	// update controls
+	this.controls.update( this._delta );
 
 	// update managers
-	this.actionManager.update();
+	this.actionManager.update( controls.getPosition(), controls.getDirection() );
 	this.animationManager.update( this._delta );
 	this.performanceManager.update();
 	this.userInterfaceManager.update();
 
 	// finally update entity manager
 	this.entityManager.update( this._delta );
-
-	// update controls
-	this.controls.update( this._delta );
 
 	// render frame
 	this.renderer.render( this.world.scene, this.camera );

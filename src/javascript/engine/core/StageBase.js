@@ -207,18 +207,18 @@ StageBase.prototype._render = function() {
 
 	// get delta time value
 	this._delta = this.timeManager.getDelta();
+	
+	// update controls
+	this.controls.update( this._delta );
 
 	// update managers
-	this.actionManager.update();
+	this.actionManager.update( controls.getPosition(), controls.getDirection() );
 	this.animationManager.update( this._delta );
 	this.performanceManager.update();
 	this.userInterfaceManager.update();
 
 	// finally update entity manager
 	this.entityManager.update( this._delta );
-
-	// update controls
-	this.controls.update( this._delta );
 
 	// render frame
 	this.renderer.render( this.world.scene, this.camera );
