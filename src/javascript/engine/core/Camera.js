@@ -9,6 +9,8 @@
 var THREE = require( "three" );
 var PubSub = require( "pubsub-js" );
 
+var TOPIC = require( "./Topic" );
+
 var self;
 
 /**
@@ -46,7 +48,7 @@ Camera.prototype.init = function( fov, aspect, near, far ) {
 	this.updateProjectionMatrix();
 
 	// set subscriptions
-	PubSub.subscribe( "ui.event.resize", this._onResize );
+	PubSub.subscribe( TOPIC.APPLICATION.RESIZE, this._onResize );
 };
 
 /**

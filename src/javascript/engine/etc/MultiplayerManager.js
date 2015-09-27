@@ -8,6 +8,8 @@
 var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
 
+var TOPIC = require( "../core/Topic" );
+
 var Teammate = require( "./Teammate" );
 var world = require( "../core/World" );
 var logger = require( "./Logger" );
@@ -38,13 +40,12 @@ function MultiplayerManager() {
  */
 MultiplayerManager.prototype.init = function() {
 
-	PubSub.subscribe( "multiplayer.update", this._onUpdate );
-	PubSub.subscribe( "multiplayer.status", this._onStatus );
+	PubSub.subscribe( TOPIC.MULTIPLAYER.UPDATE, this._onUpdate );
+	PubSub.subscribe( TOPIC.MULTIPLAYER.STATUS, this._onStatus );
 };
 
 /**
- * Handles the "multiplayer.update" topic. This topic is used update the world
- * information of other teammates.
+ * This method is used update the world information of other teammates.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
@@ -72,8 +73,7 @@ MultiplayerManager.prototype._onUpdate = ( function() {
 } )();
 
 /**
- * Handles the "multiplayer.status" topic. This topic is used update the status
- * of other teammates.
+ * This method is used to update the status of other teammates.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.

@@ -9,6 +9,8 @@
 var PubSub = require( "pubsub-js" );
 var utils = require( "../etc/Utils" );
 
+var TOPIC = require( "../core/Topic" );
+
 /**
  * Creates an audiobuffer-list.
  * 
@@ -108,7 +110,7 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 					self.bufferList[ index ] = buffer;
 
 					// publish message to inform about status
-					PubSub.publish( "loading.complete.audio", {
+					PubSub.publish( TOPIC.STAGE.LOADING.COMPLETE.AUDIO, {
 						url : url
 					} );
 
@@ -138,7 +140,7 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 	xhr.send();
 
 	// publish message to inform about status
-	PubSub.publish( "loading.start.audio", {
+	PubSub.publish( TOPIC.STAGE.LOADING.START.AUDIO, {
 		url : url
 	} );
 };

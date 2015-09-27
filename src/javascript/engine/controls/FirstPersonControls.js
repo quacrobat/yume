@@ -11,6 +11,8 @@
 var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
 
+var TOPIC = require( "../core/Topic" );
+
 var camera = require( "../core/Camera" );
 var world = require( "../core/World" );
 var audioManager = require( "../audio/AudioManager" );
@@ -324,7 +326,7 @@ FirstPersonControls.prototype.getDirection = ( function() {
 FirstPersonControls.prototype.init = function() {
 
 	// subscriptions
-	PubSub.subscribe( "controls.active", this._onActive );
+	PubSub.subscribe( TOPIC.CONTROLS.ACTIVE, this._onActive );
 
 	// events
 	global.document.addEventListener( "lockPointer", this._onLockPointer );
@@ -865,7 +867,7 @@ FirstPersonControls.prototype._publishPlayerStatus = ( function() {
 		// values of the player
 		this._pitchObject.matrixWorld.decompose( position, quaternion, scale );
 
-		PubSub.publish( "message.game", {
+		PubSub.publish( TOPIC.MULTIPLAYER.PLAYER, {
 			position : position,
 			quaternion : quaternion
 		} );
@@ -1040,7 +1042,7 @@ FirstPersonControls.prototype._onKeyDown = function( event ) {
 
 			case 69:
 				// e
-				PubSub.publish( "action.interaction", {
+				PubSub.publish( TOPIC.ACTION.INTERACTION, {
 					position : self.getPosition(),
 					direction : self.getDirection()
 				} );

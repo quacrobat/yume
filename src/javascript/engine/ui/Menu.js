@@ -10,6 +10,8 @@ var PubSub = require( "pubsub-js" );
 var UiElement = require( "./UiElement" );
 var utils = require( "../etc/Utils" );
 
+var TOPIC = require( "../core/Topic" );
+
 var self;
 /**
  * Creates the menu.
@@ -71,8 +73,8 @@ Menu.prototype.init = function() {
 	this._$progressBar = this._$menu.querySelector( ".progress-bar" );
 
 	// subscriptions
-	PubSub.subscribe( "ui.loading.progress", this._onUpdate );
-	PubSub.subscribe( "ui.loading.ready", this._onReady );
+	PubSub.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
+	PubSub.subscribe( TOPIC.STAGE.READY, this._onReady );
 
 	this._$button.addEventListener( "click", this._onClick );
 };
@@ -141,11 +143,11 @@ Menu.prototype._onReady = function( message, data ) {
 };
 
 /**
- * Publish a "stage.start" message
+ * This method is used to inform the system, that the player has started to play the stage.
  */
 Menu.prototype._publishFinishEvent = function( message, data ) {
 
-	PubSub.publish( "stage.start", undefined );
+	PubSub.publish( TOPIC.STAGE.START, undefined );
 	self._$button.removeEventListener( "click", self._publishFinishEvent );
 };
 

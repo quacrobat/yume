@@ -10,6 +10,7 @@ var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
 var utils = require( "./Utils" );
 
+var TOPIC = require( "../core/Topic" );
 /**
  * Creates a ObjectLoader.
  * 
@@ -68,7 +69,7 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 					self.parse( JSON.parse( xhr.responseText ), onLoad );
 
 					// publish message
-					PubSub.publish( "loading.complete.object", {
+					PubSub.publish( TOPIC.STAGE.LOADING.COMPLETE.OBJECT, {
 						url : url
 					} );
 
@@ -91,7 +92,7 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 	xhr.send();
 
 	// publish message to inform about status
-	PubSub.publish( "loading.start.object", {
+	PubSub.publish( TOPIC.STAGE.LOADING.START.OBJECT, {
 		url : url
 	} );
 };

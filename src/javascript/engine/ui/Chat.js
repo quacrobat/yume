@@ -8,6 +8,8 @@
 var PubSub = require( "pubsub-js" );
 var UiElement = require( "./UiElement" );
 
+var TOPIC = require( "../core/Topic" );
+
 var self;
 
 /**
@@ -62,7 +64,7 @@ Chat.prototype.init = function() {
 	this._$messages = global.document.querySelector( "#messages" );
 	this._$input = this._$chat.querySelector( ".form-control" );
 
-	PubSub.subscribe( "multiplayer.message", this._onMessage );
+	PubSub.subscribe( TOPIC.MULTIPLAYER.MESSAGE, this._onMessage );
 };
 
 /**
@@ -82,7 +84,7 @@ Chat.prototype.toogle = function() {
 		this.hide();
 
 		// activate controls
-		PubSub.publish( "controls.active", {
+		PubSub.publish( TOPIC.CONTROLS.ACTIVE, {
 			isActive : true
 		} );
 	}
@@ -92,7 +94,7 @@ Chat.prototype.toogle = function() {
 		this.show();
 
 		// deactivate controls
-		PubSub.publish( "controls.active", {
+		PubSub.publish( TOPIC.CONTROLS.ACTIVE, {
 			isActive : false
 		} );
 	}
@@ -156,14 +158,13 @@ Chat.prototype._checkAndSend = function() {
 		// post message
 		this._postMessage( message );
 
-		// publish message for sending to server
-		PubSub.publish( "message.chat", message );
+		// publish chat message for sending to server
+		PubSub.publish( TOPIC.MULTIPLAYER.CHAT, message );
 	}
 };
 
 /**
- * Handles the "multiplayer.message" topic. Posts a message from other players
- * to a chat-box on the ui.
+ * Posts a message from other players to a chat-box.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.

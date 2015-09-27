@@ -10,6 +10,8 @@
 var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
 
+var TOPIC = require( "../core/Topic" );
+
 var Action = require( "./Action" );
 var InteractiveObject = require( "./InteractiveObject" );
 var StaticObject = require( "./StaticObject" );
@@ -74,7 +76,7 @@ function ActionManager() {
 	} );
 
 	// subscriptions
-	PubSub.subscribe( "action.interaction", this._onInteraction );
+	PubSub.subscribe( TOPIC.ACTION.INTERACTION, this._onInteraction );
 
 	self = this;
 }
@@ -252,9 +254,9 @@ ActionManager.prototype.removeStaticObjects = function() {
 };
 
 /**
- * Calculates the first intersection with an interactive object.
+ * Calculates the closest intersection with an interactive object.
  */
-ActionManager.prototype._calculateFirstIntersection = ( function() {
+ActionManager.prototype._calculateClosestIntersection = ( function() {
 
 	var intersects = [];
 	var interactiveObject;
@@ -266,7 +268,7 @@ ActionManager.prototype._calculateFirstIntersection = ( function() {
 		this._raycaster.set( position, direction );
 		this._raycaster.far = 20;
 
-		// intersection test
+		// intersection test. the result is already sorted by distance
 		intersects = this._raycaster.intersectObjects( this.interactiveObjects );
 
 		if ( intersects.length > 0 )
@@ -274,12 +276,21 @@ ActionManager.prototype._calculateFirstIntersection = ( function() {
 			for ( index = 0; index < intersects.length; index++ )
 			{
 				interactiveObject = intersects[ index ].object;
-
-				// return the closest object which is visible and has an active action
-				if ( interactiveObject.mesh.visible === true && interactiveObject.action.isActive === true )
+				
+				// the action property must always set
+				if(  interactiveObject.action !== undefined )
 				{
-					return interactiveObject;
+					// return the object if it is visible and has an active action. if not, continue with the next object
+					if ( interactiveObject.mesh.visible === true && interactiveObject.action.isActive === true )
+					{
+						return interactiveObject;
+					}
 				}
+				else
+				{
+					throw "ERROR: ActionManager: No action defined for interactive object.";
+				}
+				
 			}
 		}
 	};
@@ -299,20 +310,13 @@ ActionManager.prototype._checkInteraction = ( function() {
 
 	return function( position, direction ) {
 
-		// calculate the intersection with the first visible and active interactive object
-		interactiveObject = this._calculateFirstIntersection( position, direction );
+		// calculate the intersection with the closest visible and active interactive object
+		interactiveObject = this._calculateClosestIntersection( position, direction );
 
+		// show the interaction label if there is an intersection
 		if ( interactiveObject !== undefined )
 		{
-			if ( interactiveObject.action !== undefined )
-			{
-				// show the interaction label if there is an active action
-				userInterfaceManager.showInteractionLabel( interactiveObject.action.label );
-			}
-			else
-			{
-				userInterfaceManager.hideInteractionLabel();
-			}
+			userInterfaceManager.showInteractionLabel( interactiveObject.action.label );
 		}
 		else
 		{
@@ -349,8 +353,10 @@ ActionManager.prototype._checkTrigger = ( function() {
 			// get the closest trigger
 			trigger = intersects[ 0 ].object;
 			
+			// the action property must always set
 			if ( trigger.action !== undefined )
 			{
+				// if the player enters the trigger and the corresponding action is active, run it
 				if ( isInRadius === false && trigger.action.isActive === true )
 				{
 					trigger.action.run();
@@ -374,26 +380,23 @@ ActionManager.prototype._checkTrigger = ( function() {
 }() );
 
 /**
- * Handles the "action.interaction" topic. This topic is used to handle the
- * interaction command of the player.
+ * This method is used to handle the interaction command of the player.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
 ActionManager.prototype._onInteraction = function( message, data ) {
 
-	// calculate the intersection with the first visible and active interactive object
-	var interactiveObject = self._calculateFirstIntersection( data.position, data.direction );
+	// calculate the intersection with the closest visible and active interactive object
+	var interactiveObject = self._calculateClosestIntersection( data.position, data.direction );
 
 	if ( interactiveObject !== undefined )
 	{
-		if ( interactiveObject.action !== undefined )
-		{
-			// execute the assigned action
-			interactiveObject.action.run();
-			
-			logger.log( "INFO: ActionManager: Interaction with interactive object. Action executed." );
-		}
+		// execute the assigned action
+		interactiveObject.action.run();
+		
+		logger.log( "INFO: ActionManager: Interaction with interactive object. Action executed." );
+		
 	}
 };
 

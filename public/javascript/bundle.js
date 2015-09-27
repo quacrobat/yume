@@ -35528,6 +35528,8 @@ module.exports = Action;
 var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
 
+var TOPIC = require( "../core/Topic" );
+
 var Action = require( "./Action" );
 var InteractiveObject = require( "./InteractiveObject" );
 var StaticObject = require( "./StaticObject" );
@@ -35592,7 +35594,7 @@ function ActionManager() {
 	} );
 
 	// subscriptions
-	PubSub.subscribe( "action.interaction", this._onInteraction );
+	PubSub.subscribe( TOPIC.ACTION.INTERACTION, this._onInteraction );
 
 	self = this;
 }
@@ -35770,9 +35772,9 @@ ActionManager.prototype.removeStaticObjects = function() {
 };
 
 /**
- * Calculates the first intersection with an interactive object.
+ * Calculates the closest intersection with an interactive object.
  */
-ActionManager.prototype._calculateFirstIntersection = ( function() {
+ActionManager.prototype._calculateClosestIntersection = ( function() {
 
 	var intersects = [];
 	var interactiveObject;
@@ -35784,7 +35786,7 @@ ActionManager.prototype._calculateFirstIntersection = ( function() {
 		this._raycaster.set( position, direction );
 		this._raycaster.far = 20;
 
-		// intersection test
+		// intersection test. the result is already sorted by distance
 		intersects = this._raycaster.intersectObjects( this.interactiveObjects );
 
 		if ( intersects.length > 0 )
@@ -35792,12 +35794,21 @@ ActionManager.prototype._calculateFirstIntersection = ( function() {
 			for ( index = 0; index < intersects.length; index++ )
 			{
 				interactiveObject = intersects[ index ].object;
-
-				// return the closest object which is visible and has an active action
-				if ( interactiveObject.mesh.visible === true && interactiveObject.action.isActive === true )
+				
+				// the action property must always set
+				if(  interactiveObject.action !== undefined )
 				{
-					return interactiveObject;
+					// return the object if it is visible and has an active action. if not, continue with the next object
+					if ( interactiveObject.mesh.visible === true && interactiveObject.action.isActive === true )
+					{
+						return interactiveObject;
+					}
 				}
+				else
+				{
+					throw "ERROR: ActionManager: No action defined for interactive object.";
+				}
+				
 			}
 		}
 	};
@@ -35817,20 +35828,13 @@ ActionManager.prototype._checkInteraction = ( function() {
 
 	return function( position, direction ) {
 
-		// calculate the intersection with the first visible and active interactive object
-		interactiveObject = this._calculateFirstIntersection( position, direction );
+		// calculate the intersection with the closest visible and active interactive object
+		interactiveObject = this._calculateClosestIntersection( position, direction );
 
+		// show the interaction label if there is an intersection
 		if ( interactiveObject !== undefined )
 		{
-			if ( interactiveObject.action !== undefined )
-			{
-				// show the interaction label if there is an active action
-				userInterfaceManager.showInteractionLabel( interactiveObject.action.label );
-			}
-			else
-			{
-				userInterfaceManager.hideInteractionLabel();
-			}
+			userInterfaceManager.showInteractionLabel( interactiveObject.action.label );
 		}
 		else
 		{
@@ -35867,8 +35871,10 @@ ActionManager.prototype._checkTrigger = ( function() {
 			// get the closest trigger
 			trigger = intersects[ 0 ].object;
 			
+			// the action property must always set
 			if ( trigger.action !== undefined )
 			{
+				// if the player enters the trigger and the corresponding action is active, run it
 				if ( isInRadius === false && trigger.action.isActive === true )
 				{
 					trigger.action.run();
@@ -35892,31 +35898,28 @@ ActionManager.prototype._checkTrigger = ( function() {
 }() );
 
 /**
- * Handles the "action.interaction" topic. This topic is used to handle the
- * interaction command of the player.
+ * This method is used to handle the interaction command of the player.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
 ActionManager.prototype._onInteraction = function( message, data ) {
 
-	// calculate the intersection with the first visible and active interactive object
-	var interactiveObject = self._calculateFirstIntersection( data.position, data.direction );
+	// calculate the intersection with the closest visible and active interactive object
+	var interactiveObject = self._calculateClosestIntersection( data.position, data.direction );
 
 	if ( interactiveObject !== undefined )
 	{
-		if ( interactiveObject.action !== undefined )
-		{
-			// execute the assigned action
-			interactiveObject.action.run();
-			
-			logger.log( "INFO: ActionManager: Interaction with interactive object. Action executed." );
-		}
+		// execute the assigned action
+		interactiveObject.action.run();
+		
+		logger.log( "INFO: ActionManager: Interaction with interactive object. Action executed." );
+		
 	}
 };
 
 module.exports = new ActionManager();
-},{"../etc/Logger":32,"../ui/UserInterfaceManager":81,"./Action":5,"./ActionTrigger":7,"./InteractiveObject":8,"./StaticObject":9,"pubsub-js":1,"three":2}],7:[function(require,module,exports){
+},{"../core/Topic":28,"../etc/Logger":33,"../ui/UserInterfaceManager":82,"./Action":5,"./ActionTrigger":7,"./InteractiveObject":8,"./StaticObject":9,"pubsub-js":1,"three":2}],7:[function(require,module,exports){
 /**
  * @file The ActionTrigger is a static trigger for actions.
  * 
@@ -35986,7 +35989,7 @@ ActionTrigger.prototype = Object.create( THREE.Mesh.prototype );
 ActionTrigger.prototype.constructor = ActionTrigger;
 
 module.exports = ActionTrigger;
-},{"../etc/Utils":41,"three":2}],8:[function(require,module,exports){
+},{"../etc/Utils":42,"three":2}],8:[function(require,module,exports){
 /**
  * @file The prototype InteractiveObject enables ordinary 3D-Objects to be
  * interactive. Any interactive object is part of the collision-detection logic
@@ -36241,7 +36244,7 @@ InteractiveObject.RAYCASTPRECISION = {
 };
 
 module.exports = InteractiveObject;
-},{"../etc/OBB":34,"three":2}],9:[function(require,module,exports){
+},{"../etc/OBB":35,"three":2}],9:[function(require,module,exports){
 /**
  * @file The prototype StaticObject enables ordinary 3D-Objects to be static.
  * Any interactive object is part of the collision-detection logic.
@@ -36375,7 +36378,7 @@ StaticObject.COLLISIONTYPES = {
 };
 
 module.exports = StaticObject;
-},{"../etc/OBB":34,"three":2}],10:[function(require,module,exports){
+},{"../etc/OBB":35,"three":2}],10:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for defining an animation for a single property.
@@ -36641,7 +36644,7 @@ Animation.prototype.setHover = function( isHover ) {
 
 module.exports = Animation;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Logger":32}],11:[function(require,module,exports){
+},{"../etc/Logger":33}],11:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire animation-handling. This prototype is used in
@@ -37367,6 +37370,8 @@ module.exports = SpriteAnimation;
 var PubSub = require( "pubsub-js" );
 var utils = require( "../etc/Utils" );
 
+var TOPIC = require( "../core/Topic" );
+
 /**
  * Creates an audiobuffer-list.
  * 
@@ -37466,7 +37471,7 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 					self.bufferList[ index ] = buffer;
 
 					// publish message to inform about status
-					PubSub.publish( "loading.complete.audio", {
+					PubSub.publish( TOPIC.STAGE.LOADING.COMPLETE.AUDIO, {
 						url : url
 					} );
 
@@ -37496,14 +37501,14 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 	xhr.send();
 
 	// publish message to inform about status
-	PubSub.publish( "loading.start.audio", {
+	PubSub.publish( TOPIC.STAGE.LOADING.START.AUDIO, {
 		url : url
 	} );
 };
 
 module.exports = AudioBufferList;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":41,"pubsub-js":1}],15:[function(require,module,exports){
+},{"../core/Topic":28,"../etc/Utils":42,"pubsub-js":1}],15:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype holds the central Web Audio context and manages the
@@ -37616,6 +37621,8 @@ module.exports = AudioListener;
 "use strict";
 
 var PubSub = require( "pubsub-js" );
+
+var TOPIC = require( "../core/Topic" );
 
 var AudioListener = require( "./AudioListener" );
 var DynamicAudio = require( "./DynamicAudio" );
@@ -37778,7 +37785,7 @@ AudioManager.prototype.setBackgroundMusic = function( file, volume, isLoop ) {
 	this._backgroundMusic.oncanplay = function( event ) {
 
 		// publish message to inform about status
-		PubSub.publish( "loading.complete.music", {
+		PubSub.publish( TOPIC.STAGE.LOADING.COMPLETE.MUSIC, {
 			url : url
 		} );
 
@@ -37789,7 +37796,7 @@ AudioManager.prototype.setBackgroundMusic = function( file, volume, isLoop ) {
 	logger.log( "INFO: AudioManager: Set new background music. URL: %s", url );
 
 	// publish message to inform about status
-	PubSub.publish( "loading.start.music", {
+	PubSub.publish( TOPIC.STAGE.LOADING.START.MUSIC, {
 		url : url
 	} );
 };
@@ -37947,18 +37954,18 @@ AudioManager.prototype.setBackgroundMusicVolume = function( volume ) {
 
 /**
  * This method handles error-situations when playing the background music. It
- * triggers a custom event, which can processed of e.g. the
+ * triggers a special topic, which can processed of e.g. the
  * UserInterfaceManager.
  */
 AudioManager.prototype._onErrorBackgroundMusic = function() {
 
 	logger.error( "ERROR: AudioManager: Media resource could not be processed." );
-	PubSub.publish( "audio.backgroundmusic.error", "Media resource could not be processed" );
+	PubSub.publish( TOPIC.APPLICATION.ERROR.MUSIC, "Media resource could not be processed" );
 };
 
 module.exports = new AudioManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Camera":20,"../etc/Logger":32,"./AudioBufferList":14,"./AudioListener":15,"./DynamicAudio":17,"pubsub-js":1}],17:[function(require,module,exports){
+},{"../core/Camera":20,"../core/Topic":28,"../etc/Logger":33,"./AudioBufferList":14,"./AudioListener":15,"./DynamicAudio":17,"pubsub-js":1}],17:[function(require,module,exports){
 /**
  * @file Prototype for creating dynamic, full-buffered audio objects.
  * 
@@ -38257,6 +38264,8 @@ module.exports = DynamicAudio;
 
 var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
+
+var TOPIC = require( "../core/Topic" );
 
 var camera = require( "../core/Camera" );
 var world = require( "../core/World" );
@@ -38571,7 +38580,7 @@ FirstPersonControls.prototype.getDirection = ( function() {
 FirstPersonControls.prototype.init = function() {
 
 	// subscriptions
-	PubSub.subscribe( "controls.active", this._onActive );
+	PubSub.subscribe( TOPIC.CONTROLS.ACTIVE, this._onActive );
 
 	// events
 	global.document.addEventListener( "lockPointer", this._onLockPointer );
@@ -39112,7 +39121,7 @@ FirstPersonControls.prototype._publishPlayerStatus = ( function() {
 		// values of the player
 		this._pitchObject.matrixWorld.decompose( position, quaternion, scale );
 
-		PubSub.publish( "message.game", {
+		PubSub.publish( TOPIC.MULTIPLAYER.PLAYER, {
 			position : position,
 			quaternion : quaternion
 		} );
@@ -39287,7 +39296,7 @@ FirstPersonControls.prototype._onKeyDown = function( event ) {
 
 			case 69:
 				// e
-				PubSub.publish( "action.interaction", {
+				PubSub.publish( TOPIC.ACTION.INTERACTION, {
 					position : self.getPosition(),
 					direction : self.getDirection()
 				} );
@@ -39406,7 +39415,7 @@ FirstPersonControls.RUN = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":12,"../audio/AudioManager":16,"../core/Camera":20,"../core/World":28,"../etc/SettingsManager":38,"../ui/UserInterfaceManager":81,"pubsub-js":1,"three":2}],19:[function(require,module,exports){
+},{"../animation/Easing":12,"../audio/AudioManager":16,"../core/Camera":20,"../core/Topic":28,"../core/World":29,"../etc/SettingsManager":39,"../ui/UserInterfaceManager":82,"pubsub-js":1,"three":2}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -39417,6 +39426,8 @@ module.exports = new FirstPersonControls();
 "use strict";
 
 var PubSub = require( "pubsub-js" );
+
+var TOPIC = require( "./Topic" );
 
 var environment = require( "./Environment" );
 var renderer = require( "./Renderer" );
@@ -39501,14 +39512,14 @@ Bootstrap.prototype._loadStage = function() {
 		stageId = saveGame.stageId;
 	}
 
-	PubSub.publish( "application.start", {
+	PubSub.publish( TOPIC.APPLICATION.START, {
 		stageId : stageId
 	} );
 };
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":18,"../etc/Logger":32,"../etc/MultiplayerManager":33,"../etc/SaveGameManager":37,"../etc/Utils":41,"../network/NetworkManager":52,"../ui/UserInterfaceManager":81,"./Camera":20,"./Environment":21,"./Renderer":22,"pubsub-js":1}],20:[function(require,module,exports){
+},{"../controls/FirstPersonControls":18,"../etc/Logger":33,"../etc/MultiplayerManager":34,"../etc/SaveGameManager":38,"../etc/Utils":42,"../network/NetworkManager":53,"../ui/UserInterfaceManager":82,"./Camera":20,"./Environment":21,"./Renderer":22,"./Topic":28,"pubsub-js":1}],20:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for camera-based
@@ -39520,6 +39531,8 @@ module.exports = Bootstrap;
 
 var THREE = require( "three" );
 var PubSub = require( "pubsub-js" );
+
+var TOPIC = require( "./Topic" );
 
 var self;
 
@@ -39558,7 +39571,7 @@ Camera.prototype.init = function( fov, aspect, near, far ) {
 	this.updateProjectionMatrix();
 
 	// set subscriptions
-	PubSub.subscribe( "ui.event.resize", this._onResize );
+	PubSub.subscribe( TOPIC.APPLICATION.RESIZE, this._onResize );
 };
 
 /**
@@ -39576,7 +39589,7 @@ Camera.prototype._onResize = function( message, data ) {
 
 module.exports = new Camera();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"pubsub-js":1,"three":2}],21:[function(require,module,exports){
+},{"./Topic":28,"pubsub-js":1,"three":2}],21:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype is used to detect all necessary browser-features.
@@ -39787,6 +39800,8 @@ module.exports = new Environment();
 var THREE = require( "three" );
 var PubSub = require( "pubsub-js" );
 
+var TOPIC = require( "./Topic" );
+
 var EffectComposer = require( "../postprocessing/EffectComposer" );
 var RenderPass = require( "../postprocessing/RenderPass" );
 var ShaderPass = require( "../postprocessing/ShaderPass" );
@@ -39862,7 +39877,7 @@ Renderer.prototype.init = function() {
 	this._composer = new EffectComposer( this._renderer );
 
 	// set subscriptions
-	PubSub.subscribe( "ui.event.resize", this._onResize );
+	PubSub.subscribe( TOPIC.APPLICATION.RESIZE, this._onResize );
 };
 
 /**
@@ -40080,7 +40095,7 @@ Renderer.prototype._onResize = function( message, data ) {
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Logger":32,"../postprocessing/EffectComposer":53,"../postprocessing/RenderPass":54,"../postprocessing/ShaderPass":55,"../shader/GaussianBlurShader":57,"../shader/GrayscaleShader":58,"../shader/VignetteShader":59,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
+},{"../etc/Logger":33,"../postprocessing/EffectComposer":54,"../postprocessing/RenderPass":55,"../postprocessing/ShaderPass":56,"../shader/GaussianBlurShader":58,"../shader/GrayscaleShader":59,"../shader/VignetteShader":60,"./Topic":28,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic for scene-based functionality.
  * 
@@ -40136,6 +40151,8 @@ module.exports = new Scene();
 var THREE = require( "three" );
 var PubSub = require( "pubsub-js" );
 
+var TOPIC = require( "./Topic" );
+
 var renderer = require( "./Renderer" );
 var camera = require( "./Camera" );
 var world = require( "./World" );
@@ -40151,7 +40168,6 @@ var settingsManager = require( "../etc/SettingsManager" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var utils = require( "../etc/Utils" );
 
-var self;
 /**
  * Creates a stage.
  * 
@@ -40265,8 +40281,6 @@ function StageBase( stageId ) {
 			writable : true
 		}
 	} );
-
-	self = this;
 }
 
 /**
@@ -40362,10 +40376,10 @@ StageBase.prototype._render = function() {
 StageBase.prototype._changeStage = function( stageId, isSaveGame ) {
 
 	// lock controls
-	self.controls.isActionInProgress = true;
+	this.controls.isActionInProgress = true;
 	
 	// publish message to trigger the change
-	PubSub.publish( "stage.change", {
+	PubSub.publish( TOPIC.STAGE.CHANGE, {
 		stageId : stageId,
 		isSaveGame : isSaveGame
 	} );
@@ -40373,7 +40387,7 @@ StageBase.prototype._changeStage = function( stageId, isSaveGame ) {
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":16,"../controls/FirstPersonControls":18,"../etc/PerformanceManager":36,"../etc/SaveGameManager":37,"../etc/SettingsManager":38,"../etc/TextManager":40,"../etc/Utils":41,"../game/entity/EntityManager":42,"../ui/UserInterfaceManager":81,"./Camera":20,"./Renderer":22,"./World":28,"pubsub-js":1,"three":2}],25:[function(require,module,exports){
+},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":16,"../controls/FirstPersonControls":18,"../etc/PerformanceManager":37,"../etc/SaveGameManager":38,"../etc/SettingsManager":39,"../etc/TextManager":41,"../etc/Utils":42,"../game/entity/EntityManager":43,"../ui/UserInterfaceManager":82,"./Camera":20,"./Renderer":22,"./Topic":28,"./World":29,"pubsub-js":1,"three":2}],25:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -40384,6 +40398,8 @@ module.exports = StageBase;
 var self;
 
 var PubSub = require( "pubsub-js" );
+
+var TOPIC = require( "./Topic" );
 
 var saveGameManager = require( "../etc/SaveGameManager" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
@@ -40443,11 +40459,11 @@ function StageManager() {
 	} );
 
 	// subscriptions
-	PubSub.subscribe( "application.start", this._onApplicationStart );
-	PubSub.subscribe( "stage.start", this._onStageStart );
-	PubSub.subscribe( "stage.change", this._onStageChange );
-	PubSub.subscribe( "loading.start", this._onLoadStart );
-	PubSub.subscribe( "loading.complete", this._onLoadComplete );
+	PubSub.subscribe( TOPIC.APPLICATION.START, this._onApplicationStart );
+	PubSub.subscribe( TOPIC.STAGE.START, this._onStageStart );
+	PubSub.subscribe( TOPIC.STAGE.CHANGE, this._onStageChange );
+	PubSub.subscribe( TOPIC.STAGE.LOADING.START.ALL, this._onLoadStart );
+	PubSub.subscribe( TOPIC.STAGE.LOADING.COMPLETE.ALL, this._onLoadComplete );
 
 	self = this;
 }
@@ -40520,9 +40536,9 @@ StageManager.prototype.load = function( stageId ) {
 			throw "ERROR: StageManager: Invalid Stage-ID: " + stageId;
 	}
 
-	logger.log( "INFO: StageManager: Start loading stage with ID: %s", stageId );
-
 	this._stage.setup();
+	
+	logger.log( "INFO: StageManager: Start loading stage with ID: %s", stageId );
 };
 
 /**
@@ -40537,8 +40553,7 @@ StageManager.prototype.clear = function() {
 };
 
 /**
- * Handles the "application.start" topic. This topic is used load the first
- * stage after application start.
+ * This method is used load the first stage after application start.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
@@ -40560,8 +40575,7 @@ StageManager.prototype._onApplicationStart = function( message, data ) {
 };
 
 /**
- * Handles the "stage.change" topic. This topic is used to change from one stage
- * to an other.
+ * This method is used to change from one stage to an other.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
@@ -40597,8 +40611,8 @@ StageManager.prototype._onStageChange = function( message, data ) {
 };
 
 /**
- * Handles the "stage.start" topic. This hierarchical topic is used to indicate
- * the finished setup process of the new stage.
+ * This method is used to execute the start method of a stage. This happens when all assets
+ * are loaded and the player jumps into the stage (from loading screen or menu).
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
@@ -40609,8 +40623,7 @@ StageManager.prototype._onStageStart = function( message, data ) {
 };
 
 /**
- * Handles the "loading.start" topic. This hierarchical topic is used to count
- * the loads per stage.
+ * This method is used to count the loading processes per stage.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
@@ -40623,8 +40636,7 @@ StageManager.prototype._onLoadStart = function( message, data ) {
 };
 
 /**
- * Handles the "loading.complete" topic. This method subscribes to all topics in
- * the "loading.complete" hierarchy.
+ * This method is checks, if all assets for the current stage are loaded.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
@@ -40640,17 +40652,17 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 		// calculate progress
 		var loadingProgress = Math.round( self._loaded * 100 / self._total );
 
-		// inform ui-element about progress
-		PubSub.publish( "ui.loading.progress", {
+		// inform system about progress
+		PubSub.publish( TOPIC.STAGE.LOADING.PROGRESS, {
 			loadingProgress : loadingProgress,
 			isApplicationStart : self._isApplicationStartActive
 		} );
 
-		// check message limit
+		// check message count
 		if ( self._loaded === self._total )
 		{
 			// publish message
-			PubSub.publish( "ui.loading.ready", {
+			PubSub.publish( TOPIC.STAGE.READY, {
 				isApplicationStart : self._isApplicationStartActive
 			} );
 
@@ -40662,13 +40674,12 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 
 			// log event
 			logger.log( "INFO: StageManager: Stage loaded and ready." );
-
 		}
 	}
 };
 
 module.exports = new StageManager();
-},{"../etc/Logger":32,"../etc/SaveGameManager":37,"../stages/Stage_001":60,"../stages/Stage_002":61,"../stages/Stage_003":62,"../stages/Stage_004":63,"../stages/Stage_005":64,"../stages/Stage_006":65,"../stages/Stage_007":66,"../stages/Stage_008":67,"../stages/Stage_009":68,"../stages/Stage_010":69,"../stages/Stage_011":70,"../ui/UserInterfaceManager":81,"pubsub-js":1}],26:[function(require,module,exports){
+},{"../etc/Logger":33,"../etc/SaveGameManager":38,"../stages/Stage_001":61,"../stages/Stage_002":62,"../stages/Stage_003":63,"../stages/Stage_004":64,"../stages/Stage_005":65,"../stages/Stage_006":66,"../stages/Stage_007":67,"../stages/Stage_008":68,"../stages/Stage_009":69,"../stages/Stage_010":70,"../stages/Stage_011":71,"../ui/UserInterfaceManager":82,"./Topic":28,"pubsub-js":1}],26:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It uses the HTML5-API Web
@@ -40896,6 +40907,60 @@ module.exports = new ThreadManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./Thread":26}],28:[function(require,module,exports){
 /**
+ * @file This file contains all topics for publish & subscribe.
+ * 
+ * @author Human Interactive
+ */
+"use strict";
+
+var Topic = {
+	ACTION : {
+		INTERACTION : "action.interaction"
+	},
+	APPLICATION : {
+		START : "application.start",
+		ERROR : {
+			MUSIC : "application.error.music"
+		},
+		RESIZE : "application.resize"
+	},
+	CONTROLS : {
+		ACTIVE : "controls.active"
+	},
+	MULTIPLAYER : {
+		CHAT : "multiplayer.chat",
+		PLAYER : "multiplayer.player",
+		MESSAGE : "multiplayer.message",
+		STATUS : "multiplayer.status",
+		UPDATE : "multiplayer.update"
+	},
+	STAGE : {
+		CHANGE : "stage.change",
+		LOADING : {
+			PROGRESS : "stage.loading.progress",
+			START : {
+				ALL : "stage.loading.start",
+				AUDIO : "stage.loading.start.audio",
+				MUSIC : "stage.loading.start.music",
+				OBJECT : "stage.loading.start.object",
+				TEXT : "stage.loading.start.text"
+			},
+			COMPLETE : {
+				ALL : "stage.loading.complete",
+				AUDIO : "stage.loading.complete.audio",
+				MUSIC : "stage.loading.complete.music",
+				OBJECT : "stage.loading.complete.object",
+				TEXT : "stage.loading.complete.text"
+			}
+		},
+		READY : "stage.ready",
+		START : "stage.start"
+	}
+};
+
+module.exports = Topic;
+},{}],29:[function(require,module,exports){
+/**
  * @file This prototype contains all important environment data of a stage.
  * 
  * @author Human Interactive
@@ -41002,7 +41067,7 @@ World.prototype.removeGround = function( ground ) {
  */
 World.prototype.removeGrounds = function() {
 
-	for ( var index = 0; index < this.grounds.length; index++ )
+	for ( var index = this.grounds.length - 1; index >= 0; index-- )
 	{
 		this.removeGround( this.grounds[ index ] );
 	}
@@ -41017,7 +41082,7 @@ World.prototype.removeGrounds = function() {
 World.prototype.addWall = function( wall ) {
 
 	this.walls.push( wall );
-	
+
 	// wall objects always needs to be added to the scene
 	this.addObject3D( wall );
 };
@@ -41031,7 +41096,7 @@ World.prototype.removeWall = function( wall ) {
 
 	var index = this.walls.indexOf( wall );
 	this.walls.splice( index, 1 );
-	
+
 	// wall objects always needs to be removed from the scene
 	this.removeObject3D( wall );
 };
@@ -41041,7 +41106,7 @@ World.prototype.removeWall = function( wall ) {
  */
 World.prototype.removeWalls = function() {
 
-	for ( var index = 0; index < this.walls.length; index++ )
+	for ( var index = this.walls.length - 1; index >= 0; index-- )
 	{
 		this.removeWall( this.walls[ index ] );
 	}
@@ -41105,7 +41170,7 @@ World.prototype.clear = function() {
 };
 
 module.exports = new World();
-},{"../action/ActionManager":6,"./Scene":23}],29:[function(require,module,exports){
+},{"../action/ActionManager":6,"./Scene":23}],30:[function(require,module,exports){
 /**
  * @file This prototype handles all stuff for impostors. An impostor is a
  * billboard that is created on the fly by rendering a complex object from the
@@ -41574,7 +41639,7 @@ Impostor.prototype._render = function() {
 };
 
 module.exports = Impostor;
-},{"three":2}],30:[function(require,module,exports){
+},{"three":2}],31:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading 3D objects in JSON-format from the server. The
@@ -41587,6 +41652,8 @@ module.exports = Impostor;
 var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
 var utils = require( "./Utils" );
+
+var TOPIC = require( "../core/Topic" );
 /**
  * Creates a JSONLoader.
  * 
@@ -41649,7 +41716,7 @@ JSONLoader.prototype.load = function( url, onLoad ) {
 					onLoad( result.geometry, result.materials );
 
 					// publish message
-					PubSub.publish( "loading.complete.object", {
+					PubSub.publish( TOPIC.STAGE.LOADING.COMPLETE.OBJECT, {
 						url : url
 					} );
 					
@@ -41673,14 +41740,14 @@ JSONLoader.prototype.load = function( url, onLoad ) {
 	xhr.send();
 
 	// publish message to inform about status
-	PubSub.publish( "loading.start.object", {
+	PubSub.publish( TOPIC.STAGE.LOADING.START.OBJECT, {
 		url : url
 	} );
 };
 
 module.exports = JSONLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":41,"pubsub-js":1,"three":2}],31:[function(require,module,exports){
+},{"../core/Topic":28,"./Utils":42,"pubsub-js":1,"three":2}],32:[function(require,module,exports){
 /**
  * @file This prototype is used for LOD handling. It is an enhancement of the
  * LOD functionality of three.js. Instead of switching directly between LOD
@@ -41859,7 +41926,7 @@ LOD.MODE = {
 };
 
 module.exports = LOD;
-},{"three":2}],32:[function(require,module,exports){
+},{"three":2}],33:[function(require,module,exports){
 /**
  * @file This prototype provides logging functionality. It's a wrapper for the
  * browser console API.
@@ -41957,7 +42024,7 @@ Logger.prototype.logSystemInfo = function( renderer ) {
 };
 
 module.exports = new Logger();
-},{"./Utils":41}],33:[function(require,module,exports){
+},{"./Utils":42}],34:[function(require,module,exports){
 /**
  * @file This prototype manages the characters of the other teammates.
  * 
@@ -41967,6 +42034,8 @@ module.exports = new Logger();
 
 var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
+
+var TOPIC = require( "../core/Topic" );
 
 var Teammate = require( "./Teammate" );
 var world = require( "../core/World" );
@@ -41998,13 +42067,12 @@ function MultiplayerManager() {
  */
 MultiplayerManager.prototype.init = function() {
 
-	PubSub.subscribe( "multiplayer.update", this._onUpdate );
-	PubSub.subscribe( "multiplayer.status", this._onStatus );
+	PubSub.subscribe( TOPIC.MULTIPLAYER.UPDATE, this._onUpdate );
+	PubSub.subscribe( TOPIC.MULTIPLAYER.STATUS, this._onStatus );
 };
 
 /**
- * Handles the "multiplayer.update" topic. This topic is used update the world
- * information of other teammates.
+ * This method is used update the world information of other teammates.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
@@ -42032,8 +42100,7 @@ MultiplayerManager.prototype._onUpdate = ( function() {
 } )();
 
 /**
- * Handles the "multiplayer.status" topic. This topic is used update the status
- * of other teammates.
+ * This method is used to update the status of other teammates.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
@@ -42129,7 +42196,7 @@ MultiplayerManager.prototype._getTeammate = function( id ) {
 };
 
 module.exports = new MultiplayerManager();
-},{"../core/World":28,"./Logger":32,"./Teammate":39,"pubsub-js":1,"three":2}],34:[function(require,module,exports){
+},{"../core/Topic":28,"../core/World":29,"./Logger":33,"./Teammate":40,"pubsub-js":1,"three":2}],35:[function(require,module,exports){
 /**
  * @file A 3D arbitrarily oriented bounding box.
  * 
@@ -42831,7 +42898,7 @@ OBB.prototype.clone = function() {
 };
 
 module.exports = OBB;
-},{"three":2}],35:[function(require,module,exports){
+},{"three":2}],36:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading 3D objects in object-format from the server. The
@@ -42845,6 +42912,7 @@ var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
 var utils = require( "./Utils" );
 
+var TOPIC = require( "../core/Topic" );
 /**
  * Creates a ObjectLoader.
  * 
@@ -42903,7 +42971,7 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 					self.parse( JSON.parse( xhr.responseText ), onLoad );
 
 					// publish message
-					PubSub.publish( "loading.complete.object", {
+					PubSub.publish( TOPIC.STAGE.LOADING.COMPLETE.OBJECT, {
 						url : url
 					} );
 
@@ -42926,14 +42994,14 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 	xhr.send();
 
 	// publish message to inform about status
-	PubSub.publish( "loading.start.object", {
+	PubSub.publish( TOPIC.STAGE.LOADING.START.OBJECT, {
 		url : url
 	} );
 };
 
 module.exports = ObjectLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":41,"pubsub-js":1,"three":2}],36:[function(require,module,exports){
+},{"../core/Topic":28,"./Utils":42,"pubsub-js":1,"three":2}],37:[function(require,module,exports){
 /**
  * @file Interface for performance handling. This prototype is used in stages to
  * create e.g. LOD instances.
@@ -43234,7 +43302,7 @@ PerformanceManager.prototype._updateImpostors = ( function() {
 }() );
 
 module.exports = new PerformanceManager();
-},{"../core/Camera":20,"../core/Renderer":22,"../core/World":28,"./Impostor":29,"./LOD":31,"three":2}],37:[function(require,module,exports){
+},{"../core/Camera":20,"../core/Renderer":22,"../core/World":29,"./Impostor":30,"./LOD":32,"three":2}],38:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire savegame-handling. This prototype is using HTML
@@ -43313,7 +43381,7 @@ SaveGameManager.prototype.remove = function() {
 
 module.exports = new SaveGameManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire settings-handling. This prototype is used to
@@ -43506,7 +43574,7 @@ SettingsManager.MOUSE = {
 
 module.exports = new SettingsManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":41,"three":2}],39:[function(require,module,exports){
+},{"./Utils":42,"three":2}],40:[function(require,module,exports){
 /**
  * @file This prototype represents the character of a teammate.
  * 
@@ -43569,7 +43637,7 @@ Teammate.prototype.update = function( position, quaternion ) {
 };
 
 module.exports = Teammate;
-},{"../game/entity/GameEntity":43,"three":2}],40:[function(require,module,exports){
+},{"../game/entity/GameEntity":44,"three":2}],41:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire text-handling. This prototype is used in stages to
@@ -43579,9 +43647,10 @@ module.exports = Teammate;
  */
 "use strict";
 
+var PubSub = require( "pubsub-js" );
 var utils = require( "./Utils" );
 
-var PubSub = require( "pubsub-js" );
+var TOPIC = require( "../core/Topic" );
 /**
  * Creates the text manager.
  * 
@@ -43636,7 +43705,7 @@ TextManager.prototype.load = function( stageId, callback ) {
 					self._searchAndRepalce();
 
 					// publish message to inform about status
-					PubSub.publish( "loading.complete.text", {
+					PubSub.publish( TOPIC.STAGE.LOADING.COMPLETE.TEXT, {
 						url : url
 					} );
 
@@ -43664,7 +43733,7 @@ TextManager.prototype.load = function( stageId, callback ) {
 	xhr.send();
 
 	// publish message to inform about status
-	PubSub.publish( "loading.start.text", {
+	PubSub.publish( TOPIC.STAGE.LOADING.START.TEXT, {
 		url : url
 	} );
 };
@@ -43743,7 +43812,7 @@ TextManager.prototype._searchAndRepalce = function() {
 
 module.exports = new TextManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":41,"pubsub-js":1}],41:[function(require,module,exports){
+},{"../core/Topic":28,"./Utils":42,"pubsub-js":1}],42:[function(require,module,exports){
 (function (global){
 /**
  * @file All helper and util functions are organized in this module.
@@ -43922,7 +43991,7 @@ Utils.CDN = {
 
 module.exports = new Utils();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 /**
  * @file This prototype manages all game entities.
  * 
@@ -44020,7 +44089,7 @@ EntityManager.prototype.removeEntities = function() {
 };
 
 module.exports = new EntityManager();
-},{"./Vehicle":45}],43:[function(require,module,exports){
+},{"./Vehicle":46}],44:[function(require,module,exports){
 /**
  * @file All entities that are part of the game logic inherit from this
  * prototype.
@@ -44066,7 +44135,7 @@ GameEntity.prototype.update = function() {
 };
 
 module.exports = GameEntity;
-},{"three":2}],44:[function(require,module,exports){
+},{"three":2}],45:[function(require,module,exports){
 /**
  * @file Base prototype from which all moving game agents are derived.
  * 
@@ -44211,7 +44280,7 @@ MovingEntity.prototype.getDirection = function() {
 };
 
 module.exports = MovingEntity;
-},{"./GameEntity":43,"three":2}],45:[function(require,module,exports){
+},{"./GameEntity":44,"three":2}],46:[function(require,module,exports){
 /**
  * @file A simple vehicle that uses steering behaviors.
  * 
@@ -44386,7 +44455,7 @@ Vehicle.prototype._updateOrientation = ( function() {
 }() );
 
 module.exports = Vehicle;
-},{"../steering/Smoother":49,"../steering/SteeringBehaviors":50,"./MovingEntity":44,"three":2}],46:[function(require,module,exports){
+},{"../steering/Smoother":50,"../steering/SteeringBehaviors":51,"./MovingEntity":45,"three":2}],47:[function(require,module,exports){
 /**
  * @file Super prototype for states used by FSMs.
  * 
@@ -44438,7 +44507,7 @@ State.prototype.exit = function( entity ) { };
 State.prototype.onMessage = function( entity, message, data ) { return false; };
 
 module.exports = State;
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 /**
  * @file This prototype is a basic finite state machine used for AI logic.
  * 
@@ -44580,7 +44649,7 @@ StateMachine.prototype.isInState = function( state ) {
 };
 
 module.exports = StateMachine;
-},{"../../etc/Logger":32,"./State":46}],48:[function(require,module,exports){
+},{"../../etc/Logger":33,"./State":47}],49:[function(require,module,exports){
 /**
  * @file Prototype to define, manage, and traverse a path defined by a series of
  * 3D vectors.
@@ -44742,7 +44811,7 @@ Path.prototype.createRandomPath = function( numberOfWaypoints, boundingBox ) {
 };
 
 module.exports = Path;
-},{"../../etc/Logger":32,"three":2}],49:[function(require,module,exports){
+},{"../../etc/Logger":33,"three":2}],50:[function(require,module,exports){
 /**
  * @file Prototype to help calculate the average value of a history of vector
  * values.
@@ -44832,7 +44901,7 @@ Smoother.prototype.update = ( function() {
 }() );
 
 module.exports = Smoother;
-},{"three":2}],50:[function(require,module,exports){
+},{"three":2}],51:[function(require,module,exports){
 /**
  * @file Prototype to encapsulate steering behaviors for a vehicle.
  * 
@@ -46541,7 +46610,7 @@ SteeringBehaviors.DECELERATION = {
 };
 
 module.exports = SteeringBehaviors;
-},{"../../core/World":28,"../../etc/Logger":32,"./Path":48,"three":2}],51:[function(require,module,exports){
+},{"../../core/World":29,"../../etc/Logger":33,"./Path":49,"three":2}],52:[function(require,module,exports){
 /**
  * @file Prototype for network-messages.
  * 
@@ -46591,7 +46660,7 @@ Message.TYPES = {
 };
 
 module.exports = Message;
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for network-based
@@ -46607,6 +46676,8 @@ var WebSocket = require( "ws" );
 var Message = require( "./Message" );
 var threadMananger = require( "../core/ThreadManager" );
 var logger = require( "../etc/Logger" );
+
+var TOPIC = require( "../core/Topic" );
 
 var script;
 var self;
@@ -46646,8 +46717,8 @@ NetworkManager.prototype.init = function() {
 	this._startUp();
 
 	// subscriptions
-	PubSub.subscribe( "message.chat", this._onMessageChat );
-	PubSub.subscribe( "message.game", this._onMessageGame );
+	PubSub.subscribe( TOPIC.MULTIPLAYER.CHAT, this._onMessageChat );
+	PubSub.subscribe( TOPIC.MULTIPLAYER.PLAYER, this._onMessagePlayer );
 };
 
 /**
@@ -46664,7 +46735,7 @@ NetworkManager.prototype._startUp = function( event ) {
 };
 
 /**
- * Handles the "message.chat" topic. Sends a chat-message to the server.
+ * Sends a chat-message to the server.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
@@ -46677,12 +46748,12 @@ NetworkManager.prototype._onMessageChat = function( message, data ) {
 };
 
 /**
- * Handles the "message.game" topic. Sends a game-message to the server.
+ * Sends a game-message to the server.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-NetworkManager.prototype._onMessageGame = function( message, data ) {
+NetworkManager.prototype._onMessagePlayer = function( message, data ) {
 
 	self._thread.postMessage( new Message( Message.TYPES.GAME, {
 		player : data
@@ -46699,16 +46770,15 @@ NetworkManager.prototype._onMessageThread = function( event ) {
 
 	if ( event.data.type === Message.TYPES.CHAT )
 	{
-		PubSub.publish( "multiplayer.message", event.data.content );
-
+		PubSub.publish( TOPIC.MULTIPLAYER.MESSAGE, event.data.content );
 	}
 	else if ( event.data.type === Message.TYPES.GAME )
 	{
-		PubSub.publish( "multiplayer.update", event.data.content );
+		PubSub.publish( TOPIC.MULTIPLAYER.UPDATE, event.data.content );
 	}
 	else if ( event.data.type === Message.TYPES.STATUS )
 	{
-		PubSub.publish( "multiplayer.status", event.data.content );
+		PubSub.publish( TOPIC.MULTIPLAYER.STATUS, event.data.content );
 	}
 	else if ( event.data.type === Message.TYPES.INFO )
 	{
@@ -46845,7 +46915,7 @@ NetworkManager.SERVER = {
 
 module.exports = new NetworkManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/ThreadManager":27,"../etc/Logger":32,"./Message":51,"pubsub-js":1,"ws":3}],53:[function(require,module,exports){
+},{"../core/ThreadManager":27,"../core/Topic":28,"../etc/Logger":33,"./Message":52,"pubsub-js":1,"ws":3}],54:[function(require,module,exports){
 /**
  * @file This prototype manages effects for post-processing.
  * 
@@ -47031,7 +47101,7 @@ EffectComposer.prototype._reset = function( renderTarget ) {
 };
 
 module.exports = EffectComposer;
-},{"three":2}],54:[function(require,module,exports){
+},{"three":2}],55:[function(require,module,exports){
 /**
  * @file This prototype provides a render pass for post-processing.
  * 
@@ -47093,7 +47163,7 @@ RenderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = RenderPass;
-},{"three":2}],55:[function(require,module,exports){
+},{"three":2}],56:[function(require,module,exports){
 /**
  * @file This prototype provides a shader pass for post-processing.
  * 
@@ -47199,7 +47269,7 @@ ShaderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = ShaderPass;
-},{"three":2}],56:[function(require,module,exports){
+},{"three":2}],57:[function(require,module,exports){
 /**
  * @file This shader can be used for vertex displacement to create
  * water or fabric materials. It implements an exemplary diffuse lighting
@@ -47301,7 +47371,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":2}],57:[function(require,module,exports){
+},{"three":2}],58:[function(require,module,exports){
 /**
  * @file This shader applies a gaussian blur effect.
  * It can be used for both x and y direction.
@@ -47368,7 +47438,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":2}],58:[function(require,module,exports){
+},{"three":2}],59:[function(require,module,exports){
 /**
  * @file This shader transforms all colors to grayscale.
  * 
@@ -47417,7 +47487,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],59:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 /**
  * @file This shader creates a vignette effect.
  * 
@@ -47478,7 +47548,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],60:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -47595,7 +47665,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":30,"three":2}],61:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],62:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -47776,7 +47846,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":30,"three":2}],62:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],63:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -47948,7 +48018,7 @@ function colorMesh( mesh ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":30,"three":2}],63:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],64:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -48126,7 +48196,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":30,"three":2}],64:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],65:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -48252,7 +48322,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":30,"three":2}],65:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],66:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -48441,7 +48511,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":30,"three":2}],66:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],67:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -48614,7 +48684,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":30,"three":2}],67:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],68:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -48768,7 +48838,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":30,"three":2}],68:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],69:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -48949,7 +49019,7 @@ function showLODCircles( world ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":30,"three":2}],69:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],70:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -49129,7 +49199,7 @@ function onKeyDown( event ) {
 
 module.exports = Stage;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":30,"three":2}],70:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],71:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -49274,7 +49344,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":30,"three":2}],71:[function(require,module,exports){
+},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],72:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -49285,6 +49355,8 @@ module.exports = Stage;
 
 var PubSub = require( "pubsub-js" );
 var UiElement = require( "./UiElement" );
+
+var TOPIC = require( "../core/Topic" );
 
 var self;
 
@@ -49340,7 +49412,7 @@ Chat.prototype.init = function() {
 	this._$messages = global.document.querySelector( "#messages" );
 	this._$input = this._$chat.querySelector( ".form-control" );
 
-	PubSub.subscribe( "multiplayer.message", this._onMessage );
+	PubSub.subscribe( TOPIC.MULTIPLAYER.MESSAGE, this._onMessage );
 };
 
 /**
@@ -49360,7 +49432,7 @@ Chat.prototype.toogle = function() {
 		this.hide();
 
 		// activate controls
-		PubSub.publish( "controls.active", {
+		PubSub.publish( TOPIC.CONTROLS.ACTIVE, {
 			isActive : true
 		} );
 	}
@@ -49370,7 +49442,7 @@ Chat.prototype.toogle = function() {
 		this.show();
 
 		// deactivate controls
-		PubSub.publish( "controls.active", {
+		PubSub.publish( TOPIC.CONTROLS.ACTIVE, {
 			isActive : false
 		} );
 	}
@@ -49434,14 +49506,13 @@ Chat.prototype._checkAndSend = function() {
 		// post message
 		this._postMessage( message );
 
-		// publish message for sending to server
-		PubSub.publish( "message.chat", message );
+		// publish chat message for sending to server
+		PubSub.publish( TOPIC.MULTIPLAYER.CHAT, message );
 	}
 };
 
 /**
- * Handles the "multiplayer.message" topic. Posts a message from other players
- * to a chat-box on the ui.
+ * Posts a message from other players to a chat-box.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
@@ -49453,7 +49524,7 @@ Chat.prototype._onMessage = function( message, data ) {
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":80,"pubsub-js":1}],72:[function(require,module,exports){
+},{"../core/Topic":28,"./UiElement":81,"pubsub-js":1}],73:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel. Only if the development
@@ -49515,7 +49586,7 @@ DevelopmentPanel.prototype.setText = function( text ) {
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":80}],73:[function(require,module,exports){
+},{"./UiElement":81}],74:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -49576,7 +49647,7 @@ InformationPanel.prototype.setText = function( textKey ) {
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":80}],74:[function(require,module,exports){
+},{"./UiElement":81}],75:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -49653,7 +49724,7 @@ InteractionLabel.prototype.hide = function() {
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":80}],75:[function(require,module,exports){
+},{"./UiElement":81}],76:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -49664,6 +49735,8 @@ module.exports = new InteractionLabel();
 
 var PubSub = require( "pubsub-js" );
 var UiElement = require( "./UiElement" );
+
+var TOPIC = require( "../core/Topic" );
 
 var self;
 
@@ -49741,8 +49814,8 @@ LoadingScreen.prototype.init = function() {
 	this._$text = this._$loadingScreen.querySelector( ".text" );
 
 	// subscriptions
-	PubSub.subscribe( "ui.loading.progress", this._onUpdate );
-	PubSub.subscribe( "ui.loading.ready", this._onReady );
+	PubSub.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
+	PubSub.subscribe(  TOPIC.STAGE.READY, this._onReady );
 };
 
 /**
@@ -49842,7 +49915,7 @@ LoadingScreen.prototype._onReady = function( message, data ) {
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":80,"pubsub-js":1}],76:[function(require,module,exports){
+},{"../core/Topic":28,"./UiElement":81,"pubsub-js":1}],77:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -49855,6 +49928,8 @@ module.exports = new LoadingScreen();
 var PubSub = require( "pubsub-js" );
 var UiElement = require( "./UiElement" );
 var utils = require( "../etc/Utils" );
+
+var TOPIC = require( "../core/Topic" );
 
 var self;
 /**
@@ -49917,8 +49992,8 @@ Menu.prototype.init = function() {
 	this._$progressBar = this._$menu.querySelector( ".progress-bar" );
 
 	// subscriptions
-	PubSub.subscribe( "ui.loading.progress", this._onUpdate );
-	PubSub.subscribe( "ui.loading.ready", this._onReady );
+	PubSub.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
+	PubSub.subscribe( TOPIC.STAGE.READY, this._onReady );
 
 	this._$button.addEventListener( "click", this._onClick );
 };
@@ -49987,17 +50062,17 @@ Menu.prototype._onReady = function( message, data ) {
 };
 
 /**
- * Publish a "stage.start" message
+ * This method is used to inform the system, that the player has started to play the stage.
  */
 Menu.prototype._publishFinishEvent = function( message, data ) {
 
-	PubSub.publish( "stage.start", undefined );
+	PubSub.publish( TOPIC.STAGE.START, undefined );
 	self._$button.removeEventListener( "click", self._publishFinishEvent );
 };
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":41,"./UiElement":80,"pubsub-js":1}],77:[function(require,module,exports){
+},{"../core/Topic":28,"../etc/Utils":42,"./UiElement":81,"pubsub-js":1}],78:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -50123,7 +50198,7 @@ ModalDialog.prototype._onClose = function( event ) {
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":41,"./UiElement":80,"pubsub-js":1}],78:[function(require,module,exports){
+},{"../etc/Utils":42,"./UiElement":81,"pubsub-js":1}],79:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor. Only if the development
@@ -50347,7 +50422,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":80}],79:[function(require,module,exports){
+},{"./UiElement":81}],80:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -50560,7 +50635,7 @@ TextScreen.prototype._printName = function() {
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":80}],80:[function(require,module,exports){
+},{"./UiElement":81}],81:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -50610,7 +50685,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":40}],81:[function(require,module,exports){
+},{"../etc/TextManager":41}],82:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in stages to
@@ -50622,6 +50697,8 @@ module.exports = UiElement;
 "use strict";
 
 var PubSub = require( "pubsub-js" );
+
+var TOPIC = require( "../core/Topic" );
 
 var developmentPanel = require( "./DevelopmentPanel" );
 var performanceMonitor = require( "./PerformanceMonitor" );
@@ -50812,7 +50889,7 @@ UserInterfaceManager.prototype.handleUiInteraction = function( event ) {
 	}
 	else if ( loadingScreen.isActive === true && loadingScreen.isReady === true )
 	{
-		PubSub.publish( "stage.start", undefined );
+		PubSub.publish( TOPIC.STAGE.START, undefined );
 		loadingScreen.hide();
 	}
 };
@@ -50832,7 +50909,7 @@ UserInterfaceManager.prototype._mapGlobalEventsToTopics = function() {
 
 	global.window.addEventListener( "resize", function() {
 
-		PubSub.publish( "ui.event.resize", undefined );
+		PubSub.publish( TOPIC.APPLICATION.RESIZE, undefined );
 	} );
 };
 
@@ -50875,4 +50952,4 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":41,"./Chat":71,"./DevelopmentPanel":72,"./InformationPanel":73,"./InteractionLabel":74,"./LoadingScreen":75,"./Menu":76,"./ModalDialog":77,"./PerformanceMonitor":78,"./TextScreen":79,"pubsub-js":1}]},{},[4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81]);
+},{"../core/Topic":28,"../etc/Utils":42,"./Chat":72,"./DevelopmentPanel":73,"./InformationPanel":74,"./InteractionLabel":75,"./LoadingScreen":76,"./Menu":77,"./ModalDialog":78,"./PerformanceMonitor":79,"./TextScreen":80,"pubsub-js":1}]},{},[4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82]);

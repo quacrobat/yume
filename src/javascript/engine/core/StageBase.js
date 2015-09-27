@@ -10,6 +10,8 @@
 var THREE = require( "three" );
 var PubSub = require( "pubsub-js" );
 
+var TOPIC = require( "./Topic" );
+
 var renderer = require( "./Renderer" );
 var camera = require( "./Camera" );
 var world = require( "./World" );
@@ -25,7 +27,6 @@ var settingsManager = require( "../etc/SettingsManager" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var utils = require( "../etc/Utils" );
 
-var self;
 /**
  * Creates a stage.
  * 
@@ -139,8 +140,6 @@ function StageBase( stageId ) {
 			writable : true
 		}
 	} );
-
-	self = this;
 }
 
 /**
@@ -236,10 +235,10 @@ StageBase.prototype._render = function() {
 StageBase.prototype._changeStage = function( stageId, isSaveGame ) {
 
 	// lock controls
-	self.controls.isActionInProgress = true;
+	this.controls.isActionInProgress = true;
 	
 	// publish message to trigger the change
-	PubSub.publish( "stage.change", {
+	PubSub.publish( TOPIC.STAGE.CHANGE, {
 		stageId : stageId,
 		isSaveGame : isSaveGame
 	} );

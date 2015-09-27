@@ -105,7 +105,7 @@ World.prototype.removeGround = function( ground ) {
  */
 World.prototype.removeGrounds = function() {
 
-	for ( var index = 0; index < this.grounds.length; index++ )
+	for ( var index = this.grounds.length - 1; index >= 0; index-- )
 	{
 		this.removeGround( this.grounds[ index ] );
 	}
@@ -120,7 +120,7 @@ World.prototype.removeGrounds = function() {
 World.prototype.addWall = function( wall ) {
 
 	this.walls.push( wall );
-	
+
 	// wall objects always needs to be added to the scene
 	this.addObject3D( wall );
 };
@@ -134,7 +134,7 @@ World.prototype.removeWall = function( wall ) {
 
 	var index = this.walls.indexOf( wall );
 	this.walls.splice( index, 1 );
-	
+
 	// wall objects always needs to be removed from the scene
 	this.removeObject3D( wall );
 };
@@ -144,7 +144,7 @@ World.prototype.removeWall = function( wall ) {
  */
 World.prototype.removeWalls = function() {
 
-	for ( var index = 0; index < this.walls.length; index++ )
+	for ( var index = this.walls.length - 1; index >= 0; index-- )
 	{
 		this.removeWall( this.walls[ index ] );
 	}

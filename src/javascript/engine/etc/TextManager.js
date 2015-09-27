@@ -6,9 +6,10 @@
  */
 "use strict";
 
+var PubSub = require( "pubsub-js" );
 var utils = require( "./Utils" );
 
-var PubSub = require( "pubsub-js" );
+var TOPIC = require( "../core/Topic" );
 /**
  * Creates the text manager.
  * 
@@ -63,7 +64,7 @@ TextManager.prototype.load = function( stageId, callback ) {
 					self._searchAndRepalce();
 
 					// publish message to inform about status
-					PubSub.publish( "loading.complete.text", {
+					PubSub.publish( TOPIC.STAGE.LOADING.COMPLETE.TEXT, {
 						url : url
 					} );
 
@@ -91,7 +92,7 @@ TextManager.prototype.load = function( stageId, callback ) {
 	xhr.send();
 
 	// publish message to inform about status
-	PubSub.publish( "loading.start.text", {
+	PubSub.publish( TOPIC.STAGE.LOADING.START.TEXT, {
 		url : url
 	} );
 };

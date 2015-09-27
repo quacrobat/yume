@@ -9,6 +9,8 @@
 
 var PubSub = require( "pubsub-js" );
 
+var TOPIC = require( "../core/Topic" );
+
 var AudioListener = require( "./AudioListener" );
 var DynamicAudio = require( "./DynamicAudio" );
 var AudioBufferList = require( "./AudioBufferList" );
@@ -170,7 +172,7 @@ AudioManager.prototype.setBackgroundMusic = function( file, volume, isLoop ) {
 	this._backgroundMusic.oncanplay = function( event ) {
 
 		// publish message to inform about status
-		PubSub.publish( "loading.complete.music", {
+		PubSub.publish( TOPIC.STAGE.LOADING.COMPLETE.MUSIC, {
 			url : url
 		} );
 
@@ -181,7 +183,7 @@ AudioManager.prototype.setBackgroundMusic = function( file, volume, isLoop ) {
 	logger.log( "INFO: AudioManager: Set new background music. URL: %s", url );
 
 	// publish message to inform about status
-	PubSub.publish( "loading.start.music", {
+	PubSub.publish( TOPIC.STAGE.LOADING.START.MUSIC, {
 		url : url
 	} );
 };
@@ -339,13 +341,13 @@ AudioManager.prototype.setBackgroundMusicVolume = function( volume ) {
 
 /**
  * This method handles error-situations when playing the background music. It
- * triggers a custom event, which can processed of e.g. the
+ * triggers a special topic, which can processed of e.g. the
  * UserInterfaceManager.
  */
 AudioManager.prototype._onErrorBackgroundMusic = function() {
 
 	logger.error( "ERROR: AudioManager: Media resource could not be processed." );
-	PubSub.publish( "audio.backgroundmusic.error", "Media resource could not be processed" );
+	PubSub.publish( TOPIC.APPLICATION.ERROR.MUSIC, "Media resource could not be processed" );
 };
 
 module.exports = new AudioManager();

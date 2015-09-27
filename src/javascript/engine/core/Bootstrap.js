@@ -8,6 +8,8 @@
 
 var PubSub = require( "pubsub-js" );
 
+var TOPIC = require( "./Topic" );
+
 var environment = require( "./Environment" );
 var renderer = require( "./Renderer" );
 var camera = require( "./Camera" );
@@ -91,7 +93,7 @@ Bootstrap.prototype._loadStage = function() {
 		stageId = saveGame.stageId;
 	}
 
-	PubSub.publish( "application.start", {
+	PubSub.publish( TOPIC.APPLICATION.START, {
 		stageId : stageId
 	} );
 };

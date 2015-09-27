@@ -9,6 +9,8 @@ var self;
 
 var PubSub = require( "pubsub-js" );
 
+var TOPIC = require( "./Topic" );
+
 var saveGameManager = require( "../etc/SaveGameManager" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var logger = require( "../etc/Logger" );
@@ -67,11 +69,11 @@ function StageManager() {
 	} );
 
 	// subscriptions
-	PubSub.subscribe( "application.start", this._onApplicationStart );
-	PubSub.subscribe( "stage.start", this._onStageStart );
-	PubSub.subscribe( "stage.change", this._onStageChange );
-	PubSub.subscribe( "loading.start", this._onLoadStart );
-	PubSub.subscribe( "loading.complete", this._onLoadComplete );
+	PubSub.subscribe( TOPIC.APPLICATION.START, this._onApplicationStart );
+	PubSub.subscribe( TOPIC.STAGE.START, this._onStageStart );
+	PubSub.subscribe( TOPIC.STAGE.CHANGE, this._onStageChange );
+	PubSub.subscribe( TOPIC.STAGE.LOADING.START.ALL, this._onLoadStart );
+	PubSub.subscribe( TOPIC.STAGE.LOADING.COMPLETE.ALL, this._onLoadComplete );
 
 	self = this;
 }
@@ -144,9 +146,9 @@ StageManager.prototype.load = function( stageId ) {
 			throw "ERROR: StageManager: Invalid Stage-ID: " + stageId;
 	}
 
-	logger.log( "INFO: StageManager: Start loading stage with ID: %s", stageId );
-
 	this._stage.setup();
+	
+	logger.log( "INFO: StageManager: Start loading stage with ID: %s", stageId );
 };
 
 /**
@@ -161,8 +163,7 @@ StageManager.prototype.clear = function() {
 };
 
 /**
- * Handles the "application.start" topic. This topic is used load the first
- * stage after application start.
+ * This method is used load the first stage after application start.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
@@ -184,8 +185,7 @@ StageManager.prototype._onApplicationStart = function( message, data ) {
 };
 
 /**
- * Handles the "stage.change" topic. This topic is used to change from one stage
- * to an other.
+ * This method is used to change from one stage to an other.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
@@ -221,8 +221,8 @@ StageManager.prototype._onStageChange = function( message, data ) {
 };
 
 /**
- * Handles the "stage.start" topic. This hierarchical topic is used to indicate
- * the finished setup process of the new stage.
+ * This method is used to execute the start method of a stage. This happens when all assets
+ * are loaded and the player jumps into the stage (from loading screen or menu).
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
@@ -233,8 +233,7 @@ StageManager.prototype._onStageStart = function( message, data ) {
 };
 
 /**
- * Handles the "loading.start" topic. This hierarchical topic is used to count
- * the loads per stage.
+ * This method is used to count the loading processes per stage.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
@@ -247,8 +246,7 @@ StageManager.prototype._onLoadStart = function( message, data ) {
 };
 
 /**
- * Handles the "loading.complete" topic. This method subscribes to all topics in
- * the "loading.complete" hierarchy.
+ * This method is checks, if all assets for the current stage are loaded.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
@@ -264,17 +262,17 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 		// calculate progress
 		var loadingProgress = Math.round( self._loaded * 100 / self._total );
 
-		// inform ui-element about progress
-		PubSub.publish( "ui.loading.progress", {
+		// inform system about progress
+		PubSub.publish( TOPIC.STAGE.LOADING.PROGRESS, {
 			loadingProgress : loadingProgress,
 			isApplicationStart : self._isApplicationStartActive
 		} );
 
-		// check message limit
+		// check message count
 		if ( self._loaded === self._total )
 		{
 			// publish message
-			PubSub.publish( "ui.loading.ready", {
+			PubSub.publish( TOPIC.STAGE.READY, {
 				isApplicationStart : self._isApplicationStartActive
 			} );
 
@@ -286,7 +284,6 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 
 			// log event
 			logger.log( "INFO: StageManager: Stage loaded and ready." );
-
 		}
 	}
 };

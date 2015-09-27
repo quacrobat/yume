@@ -8,6 +8,8 @@
 var PubSub = require( "pubsub-js" );
 var UiElement = require( "./UiElement" );
 
+var TOPIC = require( "../core/Topic" );
+
 var self;
 
 /**
@@ -84,8 +86,8 @@ LoadingScreen.prototype.init = function() {
 	this._$text = this._$loadingScreen.querySelector( ".text" );
 
 	// subscriptions
-	PubSub.subscribe( "ui.loading.progress", this._onUpdate );
-	PubSub.subscribe( "ui.loading.ready", this._onReady );
+	PubSub.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
+	PubSub.subscribe(  TOPIC.STAGE.READY, this._onReady );
 };
 
 /**

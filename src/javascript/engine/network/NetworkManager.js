@@ -13,6 +13,8 @@ var Message = require( "./Message" );
 var threadMananger = require( "../core/ThreadManager" );
 var logger = require( "../etc/Logger" );
 
+var TOPIC = require( "../core/Topic" );
+
 var script;
 var self;
 /**
@@ -51,8 +53,8 @@ NetworkManager.prototype.init = function() {
 	this._startUp();
 
 	// subscriptions
-	PubSub.subscribe( "message.chat", this._onMessageChat );
-	PubSub.subscribe( "message.game", this._onMessageGame );
+	PubSub.subscribe( TOPIC.MULTIPLAYER.CHAT, this._onMessageChat );
+	PubSub.subscribe( TOPIC.MULTIPLAYER.PLAYER, this._onMessagePlayer );
 };
 
 /**
@@ -69,7 +71,7 @@ NetworkManager.prototype._startUp = function( event ) {
 };
 
 /**
- * Handles the "message.chat" topic. Sends a chat-message to the server.
+ * Sends a chat-message to the server.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
@@ -82,12 +84,12 @@ NetworkManager.prototype._onMessageChat = function( message, data ) {
 };
 
 /**
- * Handles the "message.game" topic. Sends a game-message to the server.
+ * Sends a game-message to the server.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-NetworkManager.prototype._onMessageGame = function( message, data ) {
+NetworkManager.prototype._onMessagePlayer = function( message, data ) {
 
 	self._thread.postMessage( new Message( Message.TYPES.GAME, {
 		player : data
@@ -104,16 +106,15 @@ NetworkManager.prototype._onMessageThread = function( event ) {
 
 	if ( event.data.type === Message.TYPES.CHAT )
 	{
-		PubSub.publish( "multiplayer.message", event.data.content );
-
+		PubSub.publish( TOPIC.MULTIPLAYER.MESSAGE, event.data.content );
 	}
 	else if ( event.data.type === Message.TYPES.GAME )
 	{
-		PubSub.publish( "multiplayer.update", event.data.content );
+		PubSub.publish( TOPIC.MULTIPLAYER.UPDATE, event.data.content );
 	}
 	else if ( event.data.type === Message.TYPES.STATUS )
 	{
-		PubSub.publish( "multiplayer.status", event.data.content );
+		PubSub.publish( TOPIC.MULTIPLAYER.STATUS, event.data.content );
 	}
 	else if ( event.data.type === Message.TYPES.INFO )
 	{

@@ -11,6 +11,8 @@
 var THREE = require( "three" );
 var PubSub = require( "pubsub-js" );
 
+var TOPIC = require( "./Topic" );
+
 var EffectComposer = require( "../postprocessing/EffectComposer" );
 var RenderPass = require( "../postprocessing/RenderPass" );
 var ShaderPass = require( "../postprocessing/ShaderPass" );
@@ -86,7 +88,7 @@ Renderer.prototype.init = function() {
 	this._composer = new EffectComposer( this._renderer );
 
 	// set subscriptions
-	PubSub.subscribe( "ui.event.resize", this._onResize );
+	PubSub.subscribe( TOPIC.APPLICATION.RESIZE, this._onResize );
 };
 
 /**
