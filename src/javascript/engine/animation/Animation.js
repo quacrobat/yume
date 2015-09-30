@@ -141,7 +141,6 @@ Animation.prototype.update = ( function() {
 		if ( time < this._startTime )
 		{
 			return isFinished;
-
 		}
 
 		// calculate elapsed time. the final value of "elapsed"
@@ -153,11 +152,9 @@ Animation.prototype.update = ( function() {
 		if ( typeof this.easing === "function" )
 		{
 			value = this.easing( elapsed );
-
 		}
 		else
 		{
-
 			throw "ERROR: Animation: No easing function assigned.";
 		}
 
@@ -181,29 +178,24 @@ Animation.prototype.update = ( function() {
 			// will be played in an endless loop.
 			if ( this._isHover === true )
 			{
-				// swtich start and end values
+				// switch start and end values
 				temp = this.start;
 				this.start = this.end;
 				this.end = temp;
 
 				// set new start time
 				this._startTime = time + this.delayTime;
-
 			}
 			else
 			{
-				// exectue callback
+				// execute callback
 				if ( typeof this.onCompleteCallback === "function" )
 				{
-
 					this.onCompleteCallback();
-
 				}
 
 				isFinished = true;
-
 			}
-
 		}
 
 		return isFinished;
@@ -226,7 +218,6 @@ Animation.prototype.play = function( time ) {
 	// execute callback
 	if ( typeof this.onStartCallback === "function" )
 	{
-
 		this.onStartCallback();
 	}
 };
@@ -238,14 +229,12 @@ Animation.prototype.stop = function() {
 
 	if ( this.isPlaying === true )
 	{
-
 		this.isPlaying = false;
 	}
 
 	// execute callback
 	if ( typeof this.onStopCallback === "function" )
 	{
-
 		this.onStopCallback();
 	}
 };

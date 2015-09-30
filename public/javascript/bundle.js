@@ -36523,7 +36523,6 @@ Animation.prototype.update = ( function() {
 		if ( time < this._startTime )
 		{
 			return isFinished;
-
 		}
 
 		// calculate elapsed time. the final value of "elapsed"
@@ -36535,11 +36534,9 @@ Animation.prototype.update = ( function() {
 		if ( typeof this.easing === "function" )
 		{
 			value = this.easing( elapsed );
-
 		}
 		else
 		{
-
 			throw "ERROR: Animation: No easing function assigned.";
 		}
 
@@ -36563,29 +36560,24 @@ Animation.prototype.update = ( function() {
 			// will be played in an endless loop.
 			if ( this._isHover === true )
 			{
-				// swtich start and end values
+				// switch start and end values
 				temp = this.start;
 				this.start = this.end;
 				this.end = temp;
 
 				// set new start time
 				this._startTime = time + this.delayTime;
-
 			}
 			else
 			{
-				// exectue callback
+				// execute callback
 				if ( typeof this.onCompleteCallback === "function" )
 				{
-
 					this.onCompleteCallback();
-
 				}
 
 				isFinished = true;
-
 			}
-
 		}
 
 		return isFinished;
@@ -36608,7 +36600,6 @@ Animation.prototype.play = function( time ) {
 	// execute callback
 	if ( typeof this.onStartCallback === "function" )
 	{
-
 		this.onStartCallback();
 	}
 };
@@ -36620,14 +36611,12 @@ Animation.prototype.stop = function() {
 
 	if ( this.isPlaying === true )
 	{
-
 		this.isPlaying = false;
 	}
 
 	// execute callback
 	if ( typeof this.onStopCallback === "function" )
 	{
-
 		this.onStopCallback();
 	}
 };
@@ -39470,7 +39459,7 @@ Bootstrap.prototype._getStartupParameter = function() {
 Bootstrap.prototype._initEngine = function() {
 
 	// check capabilities of the runtime environment/ browser
-	if ( environment.check() === true )
+	if ( environment.isCompatible() === true )
 	{
 		logger.init();
 		renderer.init();
@@ -39592,17 +39581,17 @@ module.exports = new Camera();
 },{"./Topic":28,"pubsub-js":1,"three":2}],21:[function(require,module,exports){
 (function (global){
 /**
- * @file This prototype is used to detect all necessary browser-features.
+ * @file This prototype is used to ensure that all necessary browser features
+ * are available.
  * 
  * @author Human Interactive
  */
 "use strict";
 
 /**
- * Creates a new instance
+ * Creates a new environment instance.
  * 
  * @constructor
- * 
  */
 function Environment() {
 
@@ -39623,11 +39612,11 @@ function Environment() {
 }
 
 /**
- * Perform all tests.
+ * This method performs tests to ensure the browser supports all APIs.
  * 
- * @returns {boolean} Indicates the support of all features.
+ * @returns {boolean} Does the browser support all APIs?
  */
-Environment.prototype.check = function() {
+Environment.prototype.isCompatible = function() {
 
 	// clear message array
 	this.unsupportedAPIs.length = 0;
@@ -39643,7 +39632,7 @@ Environment.prototype.check = function() {
 	}
 	else if ( this._testWebWorkers === false )
 	{
-		this.unsupportedAPIs.push( "WebWorkers" );
+		this.unsupportedAPIs.push( "Web Workers" );
 	}
 	else if ( this._testPointerLock() === false )
 	{
@@ -39651,19 +39640,23 @@ Environment.prototype.check = function() {
 	}
 	else if ( this._testLocalStorage() === false )
 	{
-		this.unsupportedAPIs.push( "LocalStorage" );
+		this.unsupportedAPIs.push( "Local Storage" );
 	}
 	else if ( this._testSessionStorage() === false )
 	{
-		this.unsupportedAPIs.push( "SessionStorage" );
+		this.unsupportedAPIs.push( "Session Storage" );
 	}
 	else if ( this._testHTML5Audio() === false )
 	{
-		this.unsupportedAPIs.push( "HTML5 Audio Element" );
+		this.unsupportedAPIs.push( "Audio Element" );
 	}
 	else if ( this._testWebAudio() === false )
 	{
-		this.unsupportedAPIs.push( "WebAudio" );
+		this.unsupportedAPIs.push( "Web Audio" );
+	}
+	else if ( this._testWebPerformance() === false )
+	{
+		this.unsupportedAPIs.push( "Web Performance" );
 	}
 
 	// return result
@@ -39679,6 +39672,8 @@ Environment.prototype.check = function() {
 
 /**
  * Tests the WebGL API.
+ * 
+ * @returns {boolean} Does the browser support the API?
  */
 Environment.prototype._testWebGL = function() {
 
@@ -39695,6 +39690,8 @@ Environment.prototype._testWebGL = function() {
 
 /**
  * Tests the WebSockets API.
+ * 
+ * @returns {boolean} Does the browser support the API?
  */
 Environment.prototype._testWebSockets = function() {
 
@@ -39703,6 +39700,8 @@ Environment.prototype._testWebSockets = function() {
 
 /**
  * Tests the WebWorkers API.
+ * 
+ * @returns {boolean} Does the browser support the API?
  */
 Environment.prototype._testWebWorkers = function() {
 
@@ -39711,6 +39710,8 @@ Environment.prototype._testWebWorkers = function() {
 
 /**
  * Tests the PointerLock API.
+ * 
+ * @returns {boolean} Does the browser support the API?
  */
 Environment.prototype._testPointerLock = function() {
 
@@ -39720,6 +39721,8 @@ Environment.prototype._testPointerLock = function() {
 
 /**
  * Tests the LocalStorage API.
+ * 
+ * @returns {boolean} Does the browser support the API?
  */
 Environment.prototype._testLocalStorage = function() {
 
@@ -39737,6 +39740,8 @@ Environment.prototype._testLocalStorage = function() {
 
 /**
  * Tests the SessionStorage API.
+ * 
+ * @returns {boolean} Does the browser support the API?
  */
 Environment.prototype._testSessionStorage = function() {
 
@@ -39754,6 +39759,8 @@ Environment.prototype._testSessionStorage = function() {
 
 /**
  * Tests the HTML5 Audio Element and MP3-Support.
+ * 
+ * @returns {boolean} Does the browser support the API?
  */
 Environment.prototype._testHTML5Audio = function() {
 
@@ -39776,11 +39783,21 @@ Environment.prototype._testHTML5Audio = function() {
 };
 
 /**
- * Tests the WebAudio-API.
+ * Tests the WebAudio API.
  */
 Environment.prototype._testWebAudio = function() {
 
 	return !!( global.window.AudioContext || global.window.webkitAudioContext );
+};
+
+/**
+ * Tests the Web Performance API.
+ * 
+ * @returns {boolean} Does the browser support the API?
+ */
+Environment.prototype._testWebPerformance = function() {
+
+	return !!global.window.performance;
 };
 
 module.exports = new Environment();

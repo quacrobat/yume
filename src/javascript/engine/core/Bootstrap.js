@@ -51,7 +51,7 @@ Bootstrap.prototype._getStartupParameter = function() {
 Bootstrap.prototype._initEngine = function() {
 
 	// check capabilities of the runtime environment/ browser
-	if ( environment.check() === true )
+	if ( environment.isCompatible() === true )
 	{
 		logger.init();
 		renderer.init();
