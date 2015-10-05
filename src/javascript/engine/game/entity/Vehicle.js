@@ -149,13 +149,13 @@ Vehicle.prototype._updateOrientation = ( function() {
 		}
 
 		// compute right vector
-		xAxis.crossVectors( zAxis, upTemp );
+		xAxis.crossVectors( upTemp, zAxis );
 
 		// avoid zero-length axis
 		if ( xAxis.length() === 0 )
 		{
 			zAxis.x += 0.0001;
-			xAxis.crossVectors( zAxis, upTemp ).normalize();
+			xAxis.crossVectors( upTemp, zAxis ).normalize();
 		}
 
 		// compute up vector
