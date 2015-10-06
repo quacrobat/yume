@@ -44384,10 +44384,9 @@ Vehicle.prototype.update = ( function() {
 		// update velocity
 		this.velocity.add( acceleration.multiplyScalar( delta ) );
 
-		// make sure vehicle does not exceed maximum velocity
-		if ( this.velocity.length() > this.maxSpeed )
+		// make sure vehicle does not exceed maximum speed
+		if ( this.getSpeedSq() > ( this.maxSpeed * this.maxSpeed ) )
 		{
-
 			this.velocity.normalize();
 
 			this.velocity.multiplyScalar( this.maxSpeed );
@@ -44399,8 +44398,8 @@ Vehicle.prototype.update = ( function() {
 		// update the position
 		this.position.add( displacement );
 
-		// update the orientation if the vehicle has a non zero velocity
-		if ( this.velocity.lengthSq() > 0.00000001 )
+		// update the orientation if the vehicle has non zero speed
+		if ( this.getSpeedSq() > 0.00000001 )
 		{
 			// check smoothing
 			if ( this.isSmoothingOn === true )
@@ -44443,7 +44442,7 @@ Vehicle.prototype._updateOrientation = ( function() {
 		zAxis.copy( direction ).normalize();
 
 		// avoid zero-length axis
-		if ( zAxis.length() === 0 )
+		if ( zAxis.lengthSq() === 0 )
 		{
 			zAxis.z = 1;
 		}
@@ -44452,7 +44451,7 @@ Vehicle.prototype._updateOrientation = ( function() {
 		xAxis.crossVectors( upTemp, zAxis );
 
 		// avoid zero-length axis
-		if ( xAxis.length() === 0 )
+		if ( xAxis.lengthSq() === 0 )
 		{
 			zAxis.x += 0.0001;
 			xAxis.crossVectors( upTemp, zAxis ).normalize();
