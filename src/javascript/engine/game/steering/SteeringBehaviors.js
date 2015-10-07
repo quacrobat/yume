@@ -521,17 +521,17 @@ SteeringBehaviors.prototype._prepareCalculation = ( function() {
 		// reset steering force
 		this._steeringForce.set( 0, 0, 0 );
 
-		// update model matrices
-		this.vehicle.updateMatrixWorld();
+		// update model matrices of 3D object
+		this.vehicle.object3D.updateMatrixWorld();
 
 		if ( this.targetAgent1 !== null )
 		{
-			this.targetAgent1.updateMatrixWorld();
+			this.targetAgent1.object3D.updateMatrixWorld();
 		}
 
 		if ( this.targetAgent2 !== null )
 		{
-			this.targetAgent2.updateMatrixWorld();
+			this.targetAgent2.object3D.updateMatrixWorld();
 		}
 
 		// calculate neighbors if one of the following group behaviors is active
@@ -565,7 +565,7 @@ SteeringBehaviors.prototype._calculateNeighbors = ( function() {
 			if ( entity !== this.vehicle )
 			{
 				// calculate displacement vector
-				toEntity.subVectors( entity.position, this.vehicle.position );
+				toEntity.subVectors( entity.position, this.vehicle.object3D.position );
 
 				// if entity within range, push into neighbors array for further
 				// consideration.
@@ -597,7 +597,7 @@ SteeringBehaviors.prototype._createFeelers = ( function() {
 		}
 
 		// first feeler pointing straight in front
-		this._feelers[ 0 ].ray.origin.copy( this.vehicle.position );
+		this._feelers[ 0 ].ray.origin.copy( this.vehicle.object3D.position );
 		this._feelers[ 0 ].ray.direction = this.vehicle.getDirection();
 		this._feelers[ 0 ].far = this.wallDetectionFeelerLength;
 
@@ -605,7 +605,7 @@ SteeringBehaviors.prototype._createFeelers = ( function() {
 		rotation.identity();
 		rotation.makeRotationY( Math.PI * 1.75 );
 
-		this._feelers[ 1 ].ray.origin.copy( this.vehicle.position );
+		this._feelers[ 1 ].ray.origin.copy( this.vehicle.object3D.position );
 		this._feelers[ 1 ].ray.direction = this.vehicle.getDirection().transformDirection( rotation );
 		this._feelers[ 1 ].far = this.wallDetectionFeelerLength * 0.5;
 
@@ -613,7 +613,7 @@ SteeringBehaviors.prototype._createFeelers = ( function() {
 		rotation.identity();
 		rotation.makeRotationY( Math.PI * 0.25 );
 
-		this._feelers[ 2 ].ray.origin.copy( this.vehicle.position );
+		this._feelers[ 2 ].ray.origin.copy( this.vehicle.object3D.position );
 		this._feelers[ 2 ].ray.direction = this.vehicle.getDirection().transformDirection( rotation );
 		this._feelers[ 2 ].far = this.wallDetectionFeelerLength * 0.5;
 	};
@@ -690,7 +690,7 @@ SteeringBehaviors.prototype._seek = ( function() {
 		// position in an ideal world.
 		// It represents the vector from the agent to the target,
 		// scaled to be the length of the maximum possible speed of the agent.
-		desiredVelocity.subVectors( targetPosition, this.vehicle.position ).normalize();
+		desiredVelocity.subVectors( targetPosition, this.vehicle.object3D.position ).normalize();
 
 		desiredVelocity.multiplyScalar( this.vehicle.maxSpeed );
 
@@ -723,12 +723,12 @@ SteeringBehaviors.prototype._flee = ( function() {
 		var force = new THREE.Vector3();
 
 		// only flee if the target is within panic distance
-		if ( this.vehicle.position.distanceToSquared( targetPosition ) < ( this.panicDistance * this.panicDistance ) )
+		if ( this.vehicle.object3D.position.distanceToSquared( targetPosition ) < ( this.panicDistance * this.panicDistance ) )
 		{
 			// from here, the only difference compared to seek is that the
-			// desired velocity
-			// is calculated using a vector pointing in the opposite direction
-			desiredVelocity.subVectors( this.vehicle.position, targetPosition ).normalize();
+			// desired velocity is calculated using a vector pointing in the
+			// opposite direction
+			desiredVelocity.subVectors( this.vehicle.object3D.position, targetPosition ).normalize();
 
 			desiredVelocity.multiplyScalar( this.vehicle.maxSpeed );
 
@@ -756,15 +756,14 @@ SteeringBehaviors.prototype._arrive = ( function() {
 	var desiredVelocity = new THREE.Vector3();
 	var toTarget = new THREE.Vector3();
 
-	var distance = 0;
-	var speed = 0;
+	var distance, speed;
 
 	return function( targetPosition, deceleration ) {
 
 		var force = new THREE.Vector3();
 
 		// calculate displacement vector
-		toTarget.subVectors( targetPosition, this.vehicle.position );
+		toTarget.subVectors( targetPosition, this.vehicle.object3D.position );
 
 		// calculate the distance to the target
 		distance = toTarget.length();
@@ -805,12 +804,7 @@ SteeringBehaviors.prototype._pursuit = ( function() {
 	var newEvaderVelocity = new THREE.Vector3();
 	var predcitedPosition = new THREE.Vector3();
 
-	var isFacing = false;
-	var isEvaderAhead = false;
-
-	var vehicleDirection = null;
-
-	var lookAheadTime = 0;
+	var isFacing, isEvaderAhead, vehicleDirection, lookAheadTime;
 
 	return function( evader ) {
 
@@ -818,7 +812,7 @@ SteeringBehaviors.prototype._pursuit = ( function() {
 		// for the evader's current position
 
 		// calculate displacement vector
-		toEvader.subVectors( evader.position, this.vehicle.position );
+		toEvader.subVectors( evader.object3D.position, this.vehicle.object3D.position );
 
 		// buffer vehicle direction
 		vehicleDirection = this.vehicle.getDirection();
@@ -831,7 +825,7 @@ SteeringBehaviors.prototype._pursuit = ( function() {
 
 		if ( isEvaderAhead && isFacing )
 		{
-			return this._seek( evader.position );
+			return this._seek( evader.object3D.position );
 		}
 
 		// 2. not considered ahead so we predict where the evader will be
@@ -844,7 +838,7 @@ SteeringBehaviors.prototype._pursuit = ( function() {
 		// calculate new velocity and predicted future position
 		newEvaderVelocity.copy( evader.velocity ).multiplyScalar( lookAheadTime );
 
-		predcitedPosition.addVectors( evader.position, newEvaderVelocity );
+		predcitedPosition.addVectors( evader.object3D.position, newEvaderVelocity );
 
 		// now seek to the predicted future position of the evader
 		return this._seek( predcitedPosition );
@@ -865,18 +859,18 @@ SteeringBehaviors.prototype._offsetPursuit = ( function() {
 
 	var offsetWorld = new THREE.Vector3();
 	var toOffset = new THREE.Vector3();
-
-	var lookAheadTime = 0;
-
+	
 	var newLeaderVelocity = new THREE.Vector3();
 	var predcitedPosition = new THREE.Vector3();
+
+	var lookAheadTime;
 
 	return function( leader, offset ) {
 
 		// calculate the offset's position in world space
-		offsetWorld.copy( offset ).applyMatrix4( leader.matrixWorld );
+		offsetWorld.copy( offset ).applyMatrix4( leader.object3D.matrixWorld );
 
-		toOffset.subVectors( offsetWorld, this.vehicle.position );
+		toOffset.subVectors( offsetWorld, this.vehicle.object3D.position );
 
 		// the lookahead time is proportional to the distance between the leader
 		// and the pursuer; and is inversely proportional to the sum of both
@@ -906,15 +900,16 @@ SteeringBehaviors.prototype._offsetPursuit = ( function() {
 SteeringBehaviors.prototype._evade = ( function() {
 
 	var toPursuer = new THREE.Vector3();
+	
 	var newPursuerVelocity = new THREE.Vector3();
 	var predcitedPosition = new THREE.Vector3();
 
-	var lookAheadTime = 0;
+	var lookAheadTime;
 
 	return function( pursuer ) {
 
 		// calculate displacement vector
-		toPursuer.subVectors( pursuer.position, this.vehicle.position );
+		toPursuer.subVectors( pursuer.object3D.position, this.vehicle.object3D.position );
 
 		// evade only when pursuers are inside a threat range
 		if ( toPursuer.lengthSq() > ( this.panicDistance * this.panicDistance ) )
@@ -930,7 +925,7 @@ SteeringBehaviors.prototype._evade = ( function() {
 		// calculate new velocity and predicted future position
 		newPursuerVelocity.copy( pursuer.velocity ).multiplyScalar( lookAheadTime );
 
-		predcitedPosition.addVectors( pursuer.position, newPursuerVelocity );
+		predcitedPosition.addVectors( pursuer.object3D.position, newPursuerVelocity );
 
 		// now flee away from predicted future position of the pursuer
 		return this._flee( predcitedPosition );
@@ -957,25 +952,25 @@ SteeringBehaviors.prototype._interpose = ( function() {
 	var predcitedPositionAgentA = new THREE.Vector3();
 	var predcitedPositionAgentB = new THREE.Vector3();
 
-	var time = 0;
+	var time;
 
 	return function( agentA, agentB ) {
 
 		// first we need to figure out where the two agents are going to be
 		// in the future. This is approximated by determining the time
 		// taken to reach the mid way point at the current time at at max speed
-		midPoint.addVectors( agentA.position, agentB.position ).multiplyScalar( 0.5 );
+		midPoint.addVectors( agentA.object3D.position, agentB.object3D.position ).multiplyScalar( 0.5 );
 
-		time = this.vehicle.position.distanceTo( midPoint ) / this.vehicle.maxSpeed;
+		time = this.vehicle.object3D.position.distanceTo( midPoint ) / this.vehicle.maxSpeed;
 
 		// now we have the time, we assume that agent A and agent B will
 		// continue on a
 		// straight trajectory and extrapolate to get their future positions
 		newVelocityAgentA.copy( agentA.velocity ).multiplyScalar( time );
-		predcitedPositionAgentA.addVectors( agentA.position, newVelocityAgentA );
+		predcitedPositionAgentA.addVectors( agentA.object3D.position, newVelocityAgentA );
 
 		newVelocityAgentB.copy( agentB.velocity ).multiplyScalar( time );
-		predcitedPositionAgentB.addVectors( agentB.position, newVelocityAgentB );
+		predcitedPositionAgentB.addVectors( agentB.object3D.position, newVelocityAgentB );
 
 		// calculate the mid point of these predicted positions
 		midPoint.addVectors( predcitedPositionAgentA, predcitedPositionAgentB ).multiplyScalar( 0.5 );
@@ -999,11 +994,7 @@ SteeringBehaviors.prototype._hide = ( function() {
 	var hidingSpot = new THREE.Vector3();
 	var bestHidingSpot = new THREE.Vector3();
 
-	var distanceSq;
-	var closestDistanceSq;
-	var numberOfObstacle;
-	var obstacle;
-	var index;
+	var distanceSq, closestDistanceSq, numberOfObstacle, obstacle, index;
 
 	return function( hunter ) {
 
@@ -1019,11 +1010,11 @@ SteeringBehaviors.prototype._hide = ( function() {
 			obstacle = world.getObstacle( index );
 
 			// calculate the position of the hiding spot for this obstacle
-			this._getHidingPosition( obstacle.boundingSphere.center, obstacle.boundingSphere.radius, hunter.position, hidingSpot );
+			this._getHidingPosition( obstacle.boundingSphere.center, obstacle.boundingSphere.radius, hunter.object3D.position, hidingSpot );
 
 			// work in distance-squared space to find the closest hiding spot to
 			// the agent
-			distanceSq = hidingSpot.distanceToSquared( this.vehicle.position );
+			distanceSq = hidingSpot.distanceToSquared( this.vehicle.object3D.position );
 
 			if ( distanceSq < closestDistanceSq )
 			{
@@ -1091,10 +1082,10 @@ SteeringBehaviors.prototype._wander = ( function() {
 		target.addVectors( this._wanderTarget, distanceVector );
 
 		// project the target into world space
-		target.applyMatrix4( this.vehicle.matrixWorld );
+		target.applyMatrix4( this.vehicle.object3D.matrixWorld );
 
 		// and steer towards it
-		force.subVectors( target, this.vehicle.position );
+		force.subVectors( target, this.vehicle.object3D.position );
 
 		return force;
 	};
@@ -1137,7 +1128,7 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
 		var force = new THREE.Vector3();
 
 		// calculate bounding box of vehicle
-		boundingBox.setFromObject( this.vehicle );
+		boundingBox.setFromObject( this.vehicle.object3D );
 
 		// get size of bounding box
 		boundingBox.size( vehicleSize );
@@ -1152,7 +1143,7 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
 		distanceToClosestObstacle = Infinity;
 
 		// this matrix will transform points to the local space of the vehicle
-		inverseMatrix.getInverse( this.vehicle.matrixWorld );
+		inverseMatrix.getInverse( this.vehicle.object3D.matrixWorld );
 
 		// get number of obstacles in the world
 		numberOfObstacle = world.getNumberOfObstacles();
@@ -1216,7 +1207,7 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
 			force.z = ( closestObstacle.boundingSphere.radius - localPositionOfClosestObstacle.z ) * brakingWeight;
 
 			// finally, convert the steering vector from local to world space
-			force.transformDirection( this.vehicle.matrixWorld );
+			force.transformDirection( this.vehicle.object3D.matrixWorld );
 		}
 
 		return force;
@@ -1327,12 +1318,12 @@ SteeringBehaviors.prototype._wallAvoidance = ( function() {
  */
 SteeringBehaviors.prototype._followPath = ( function() {
 
-	var distanceSq = 0;
+	var distanceSq;
 
 	return function() {
 
 		// calculate distance in square space from current waypoint to vehicle
-		distanceSq = this.path.getCurrentWaypoint().distanceToSquared( this.vehicle.position );
+		distanceSq = this.path.getCurrentWaypoint().distanceToSquared( this.vehicle.object3D.position );
 
 		// move to next waypoint if close enough to current target
 		if ( distanceSq < ( this.waypointSeekDist * this.waypointSeekDist ) )
@@ -1361,9 +1352,7 @@ SteeringBehaviors.prototype._separation = ( function() {
 
 	var toAgent = new THREE.Vector3();
 
-	var index;
-	var neighbor;
-	var length;
+	var index, neighbor, length;
 
 	return function() {
 
@@ -1378,7 +1367,7 @@ SteeringBehaviors.prototype._separation = ( function() {
 			if ( neighbor !== this.vehicle && neighbor !== this.targetAgent1 )
 			{
 				// calculate displacement vector
-				toAgent.subVectors( this.vehicle.position, neighbor.position );
+				toAgent.subVectors( this.vehicle.object3D.position, neighbor.object3D.position );
 
 				// get length
 				length = toAgent.length();
@@ -1396,7 +1385,6 @@ SteeringBehaviors.prototype._separation = ( function() {
 
 				// add force
 				force.add( toAgent );
-
 			}
 		}
 
@@ -1413,13 +1401,13 @@ SteeringBehaviors.prototype._separation = ( function() {
  */
 SteeringBehaviors.prototype._alignment = ( function() {
 
-	var averageHeading = new THREE.Vector3(); // used to record the average
-												// heading of the neighbors
+	// used to record the average heading of the neighbors
+	var averageHeading = new THREE.Vector3();
 
-	var neighborCount; // used to count the number of vehicles in the
-						// neighborhood
-	var index;
-	var neighbor;
+	// used to count the number of vehicles in the neighborhood
+	var neighborCount;
+
+	var index, neighbor;
 
 	return function() {
 
@@ -1468,11 +1456,13 @@ SteeringBehaviors.prototype._cohesion = ( function() {
 
 	var averageHeading = new THREE.Vector3();
 
-	var centerOfMass = new THREE.Vector3(); // center of mass of all the agents
+	// center of mass of all the agents
+	var centerOfMass = new THREE.Vector3(); 
 
-	var neighborCount; // used to count the number of vehicles in the neighborhood
-	var index;
-	var neighbor;
+	// used to count the number of vehicles in the neighborhood
+	var neighborCount; 
+	
+	var index, neighbor;
 
 	return function() {
 
@@ -1490,7 +1480,7 @@ SteeringBehaviors.prototype._cohesion = ( function() {
 			// also make sure it doesn't include the evade target
 			if ( neighbor !== this.vehicle && neighbor !== this.targetAgent1 )
 			{
-				centerOfMass.add( neighbor.position );
+				centerOfMass.add( neighbor.object3D.position );
 
 				neighborCount++;
 			}

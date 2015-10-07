@@ -119,7 +119,7 @@ MultiplayerManager.prototype._addTeammate = function( teammate ) {
 	this._teammates.push( teammate );
 
 	// add to world
-	world.addObject3D( teammate );
+	world.addObject3D( teammate.object3D );
 };
 
 /**
@@ -134,7 +134,7 @@ MultiplayerManager.prototype._removeTeammate = function( teammate ) {
 	this._teammates.splice( index, 1 );
 
 	// remove from world
-	world.removeObject3D( teammate );
+	world.removeObject3D( teammate.object3D );
 };
 
 /**
@@ -150,7 +150,7 @@ MultiplayerManager.prototype._getTeammate = function( id ) {
 
 	for ( var index = 0; index < this._teammates.length; index++ )
 	{
-		if ( this._teammates[ index ].teammateId === id )
+		if ( this._teammates[ index ].multiplayerId === id )
 		{
 			teammate = this._teammates[ index ];
 

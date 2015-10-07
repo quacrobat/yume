@@ -42163,7 +42163,7 @@ MultiplayerManager.prototype._addTeammate = function( teammate ) {
 	this._teammates.push( teammate );
 
 	// add to world
-	world.addObject3D( teammate );
+	world.addObject3D( teammate.object3D );
 };
 
 /**
@@ -42178,7 +42178,7 @@ MultiplayerManager.prototype._removeTeammate = function( teammate ) {
 	this._teammates.splice( index, 1 );
 
 	// remove from world
-	world.removeObject3D( teammate );
+	world.removeObject3D( teammate.object3D );
 };
 
 /**
@@ -42194,7 +42194,7 @@ MultiplayerManager.prototype._getTeammate = function( id ) {
 
 	for ( var index = 0; index < this._teammates.length; index++ )
 	{
-		if ( this._teammates[ index ].teammateId === id )
+		if ( this._teammates[ index ].multiplayerId === id )
 		{
 			teammate = this._teammates[ index ];
 
@@ -43608,20 +43608,14 @@ var GameEntity = require( "../game/entity/GameEntity" );
  * @constructor
  * @augments GameEntity
  * 
- * @param {number} id - The id of the teammate.
+ * @param {number} id - The multiplayer id of the teammate entity.
  */
 function Teammate( id ) {
 
 	GameEntity.call( this );
 
 	Object.defineProperties( this, {
-		type : {
-			value : "Teammate",
-			configurable : false,
-			enumerable : true,
-			writable : false
-		},
-		teammateId : {
+		multiplayerId : {
 			value : id,
 			configurable : false,
 			enumerable : true,
@@ -43629,13 +43623,8 @@ function Teammate( id ) {
 		}
 	} );
 
-	// apply exemplary geometry
-	this.geometry = new THREE.BoxGeometry( 4, 4, 4 );
-
-	// apply exemplary material
-	this.material = new THREE.MeshBasicMaterial( {
-		color : "#ff0000"
-	} );
+	// apply exemplary mesh object
+	this.object3D = new THREE.Mesh( new THREE.BoxGeometry( 4, 4, 4 ),  new THREE.MeshBasicMaterial( {color : "#ff0000"} ) );
 }
 
 Teammate.prototype = Object.create( GameEntity.prototype );
@@ -43649,8 +43638,8 @@ Teammate.prototype.constructor = Teammate;
  */
 Teammate.prototype.update = function( position, quaternion ) {
 
-	this.position.copy( position );
-	this.quaternion.copy( quaternion );
+	this.object3D.position.copy( position );
+	this.object3D.quaternion.copy( quaternion );
 };
 
 module.exports = Teammate;
@@ -44038,21 +44027,22 @@ function EntityManager() {
 }
 
 /**
- * Creates a vehicle, a special kind of moving entity.
+ * Creates a vehicle, a moving entity that uses steering behaviors.
  * 
+ * @param {THREE.Object3D} object3D - The 3D object of the entity.
+ * @param {number} boundingRadius - The bounding radius of the entity.
  * @param {THREE.Vector3} velocity - The velocity of the agent.
  * @param {number} mass - The mass of the agent.
  * @param {number} maxSpeed - The maximum speed at which this entity may travel.
  * @param {number} maxForce - The maximum force this entity can produce to power itself (think rockets and thrust).
  * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
- * @param {number} numSamplesForSmoothing - How many samples the smoother will
- * use to average the velocity.
+ * @param {number} numSamplesForSmoothing - How many samples the smoother will use to average the velocity.
  * 
  * @returns {Vehicle} The new vehicle.
  */
-EntityManager.prototype.createVehicle = function( velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ) {
+EntityManager.prototype.createVehicle = function( object3D, boundingRadius, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ) {
 
-	var vehicle = new Vehicle( this, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing );
+	var vehicle = new Vehicle( this, object3D, boundingRadius, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing );
 	this.addEntity( vehicle );
 	return vehicle;
 };
@@ -44075,6 +44065,37 @@ EntityManager.prototype.update = ( function() {
 	};
 
 }() );
+
+/**
+ * Gets an entity by its ID.
+ * 
+ * @param {number} id - The ID of the entity.
+ * 
+ * @returns {GameEntity} The entity.
+ */
+EntityManager.prototype.getEntity = function( id ) {
+
+	var entity = null;
+
+	for ( var index = 0; index < this.entities.length; index++ )
+	{
+		if ( this.entities[ index ].id === id )
+		{
+			entity = this.entities[ index ];
+
+			break;
+		}
+	}
+
+	if ( entity === null )
+	{
+		throw "ERROR: EntityManager: Entity with ID " + id + " not existing.";
+	}
+	else
+	{
+		return entity;
+	}
+};
 
 /**
  * Adds a single entity to the internal array.
@@ -44116,33 +44137,46 @@ module.exports = new EntityManager();
 
 "use strict";
 
-var THREE = require( "three" );
+var nextId = 0;
 
 /**
  * Creates a game entity.
  * 
  * @constructor
- * @augments THREE.Mesh
  * 
  * @param {EntityManager} entityManager - The reference to the entity manager.
- * 
+ * @param {THREE.Object3D} object3D - The 3D object of the entity.
+ * @param {number} boundingRadius - The bounding radius of the entity.
  */
-function GameEntity( entityManager ) {
-
-	THREE.Mesh.call( this );
+function GameEntity( entityManager, object3D, boundingRadius ) {
 
 	Object.defineProperties( this, {
+		id : {
+			value : nextId++,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
 		entityManager : {
 			value : entityManager,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		object3D : {
+			value : object3D,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		boundingRadius : {
+			value : boundingRadius || 0,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		}
 	} );
 }
-
-GameEntity.prototype = Object.create( THREE.Mesh.prototype );
-GameEntity.prototype.constructor = GameEntity;
 
 /**
  * All entities must implement an update function.
@@ -44152,7 +44186,7 @@ GameEntity.prototype.update = function() {
 };
 
 module.exports = GameEntity;
-},{"three":2}],45:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 /**
  * @file Base prototype from which all moving game agents are derived.
  * 
@@ -44165,21 +44199,23 @@ var THREE = require( "three" );
 var GameEntity = require( "./GameEntity" );
 
 /**
- * Creates a new moving entity.
+ * Creates a moving entity.
  * 
  * @constructor
  * @augments GameEntity
  * 
  * @param {EntityManager} entityManager - The reference to the entity manager.
+ * @param {THREE.Object3D} object3D - The 3D object of the entity.
+ * @param {number} boundingRadius - The bounding radius of the entity.
  * @param {THREE.Vector3} velocity - The velocity of the agent.
  * @param {number} mass - The mass of the agent.
  * @param {number} maxSpeed - The maximum speed at which this entity may travel.
  * @param {number} maxForce - The maximum force this entity can produce to power itself (think rockets and thrust).
  * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
  */
-function MovingEntity( entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate ) {
+function MovingEntity( entityManager, object3D, boundingRadius, velocity, mass, maxSpeed, maxForce, maxTurnRate ) {
 
-	GameEntity.call( this, entityManager );
+	GameEntity.call( this, entityManager, object3D, boundingRadius );
 
 	Object.defineProperties( this, {
 		velocity : {
@@ -44219,28 +44255,72 @@ MovingEntity.prototype = Object.create( GameEntity.prototype );
 MovingEntity.prototype.constructor = MovingEntity;
 
 /**
- * Given a target object, this method rotates the entity by an amount not
+ * This method rotates the entity to the given direction.
+ * 
+ * @param {THREE.Vector3} direction - The direction to rotate.
+ */
+MovingEntity.prototype.rotateToDirection = ( function() {
+
+	var xAxis = new THREE.Vector3(); // right
+	var yAxis = new THREE.Vector3(); // up
+	var zAxis = new THREE.Vector3(); // front
+
+	var upTemp = new THREE.Vector3( 0, 1, 0 );
+
+	var rotationMatrix = new THREE.Matrix4();
+
+	return function( direction ) {
+
+		// the front vector always points to the direction vector
+		zAxis.copy( direction ).normalize();
+
+		// avoid zero-length axis
+		if ( zAxis.lengthSq() === 0 )
+		{
+			zAxis.z = 1;
+		}
+
+		// compute right vector
+		xAxis.crossVectors( upTemp, zAxis );
+
+		// avoid zero-length axis
+		if ( xAxis.lengthSq() === 0 )
+		{
+			zAxis.x += 0.0001;
+			xAxis.crossVectors( upTemp, zAxis ).normalize();
+		}
+
+		// compute up vector
+		yAxis.crossVectors( zAxis, xAxis );
+
+		// setup a rotation matrix of the basis
+		rotationMatrix.makeBasis( xAxis, yAxis, zAxis );
+
+		// apply rotation
+		this.object3D.quaternion.setFromRotationMatrix( rotationMatrix );
+	};
+
+}() );
+
+/**
+ * Given a target position, this method rotates the entity by an amount not
  * greater than maxTurnRate until it directly faces the target.
  * 
- * @param {THREE.Object3D} - The target object to face.
+ * @param {THREE.Vector3} targetPosition - The target position to face.
  * 
- * @returns {boolean} Is the entity facing in the desired direction?
+ * @returns {boolean} Is the entity facing the target?
  */
 MovingEntity.prototype.isRotateToTarget = ( function() {
-
-	var look = new THREE.Vector3();
 
 	var rotationToTarget = new THREE.Matrix4();
 	var quaternionToTarget = new THREE.Quaternion();
 
-	var angle = 0, t = 0;
+	var angle, t;
 
-	return function( targetObject ) {
+	return function( targetPosition ) {
 
 		// first determine the angle between the look vector and the target
-		look.set( 0, 0, -1 );
-		look.applyQuaternion( this.quaternion );
-		angle = look.angleTo( targetObject.position );
+		angle = targetPosition.angleTo( this.getDirection() );
 
 		// return true if the player is facing the target
 		if ( angle < 0.00001 )
@@ -44252,14 +44332,14 @@ MovingEntity.prototype.isRotateToTarget = ( function() {
 		t = ( angle > this.maxTurnRate ) ? ( this.maxTurnRate / angle ) : 1;
 
 		// get target rotation
-		rotationToTarget.lookAt( targetObject.position, this.position, this.up );
+		rotationToTarget.lookAt( targetPosition, this.object3D.position, this.object3D.up );
 		quaternionToTarget.setFromRotationMatrix( rotationToTarget );
 
 		// interpolate rotation
-		this.quaternion.slerp( quaternionToTarget, t );
+		this.object3D.quaternion.slerp( quaternionToTarget, t );
 
 		// adjust velocity
-		this.velocity.applyQuaternion( this.quaternion );
+		this.velocity.applyQuaternion( this.object3D.quaternion );
 
 		return false;
 	};
@@ -44293,7 +44373,7 @@ MovingEntity.prototype.getSpeedSq = function() {
  */
 MovingEntity.prototype.getDirection = function() {
 
-	return new THREE.Vector3( 0, 0, 1 ).applyQuaternion( this.quaternion ).normalize();
+	return new THREE.Vector3( 0, 0, 1 ).applyQuaternion( this.object3D.quaternion ).normalize();
 };
 
 module.exports = MovingEntity;
@@ -44312,12 +44392,14 @@ var SteeringBehaviors = require( "../steering/SteeringBehaviors" );
 var Smoother = require( "../steering/Smoother" );
 
 /**
- * Creates a new vehicle.
+ * Creates a vehicle.
  * 
  * @constructor
  * @augments MovingEntity
  * 
  * @param {EntityManager} entityManager - The reference to the entity manager.
+ * @param {THREE.Object3D} object3D - The 3D object of the entity.
+ * @param {number} boundingRadius - The bounding radius of the entity.
  * @param {THREE.Vector3} velocity - The velocity of the agent.
  * @param {number} mass - The mass of the agent.
  * @param {number} maxSpeed - The maximum speed at which this entity may travel.
@@ -44325,9 +44407,9 @@ var Smoother = require( "../steering/Smoother" );
  * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
  * @param {number} numSamplesForSmoothing - How many samples the smoother will use to average the velocity.
  */
-function Vehicle( entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ) {
+function Vehicle( entityManager, object3D, boundingRadius, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ) {
 
-	MovingEntity.call( this, entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate );
+	MovingEntity.call( this, entityManager, object3D, boundingRadius, velocity, mass, maxSpeed, maxForce, maxTurnRate );
 
 	Object.defineProperties( this, {
 		steering : {
@@ -44396,7 +44478,7 @@ Vehicle.prototype.update = ( function() {
 		displacement.copy( this.velocity ).multiplyScalar( delta );
 
 		// update the position
-		this.position.add( displacement );
+		this.object3D.position.add( displacement );
 
 		// update the orientation if the vehicle has non zero speed
 		if ( this.getSpeedSq() > 0.00000001 )
@@ -44408,63 +44490,14 @@ Vehicle.prototype.update = ( function() {
 				// with an averaged velocity to avoid oscillations/judder.
 				this._smoother.update( this.velocity, this._smoothedVelocity );
 
-				this._updateOrientation( this._smoothedVelocity );
+				this.rotateToDirection( this._smoothedVelocity );
 			}
 			else
 			{
 				// couple velocity and orientation
-				this._updateOrientation( this.velocity );
+				this.rotateToDirection( this.velocity );
 			}
 		}
-
-	};
-
-}() );
-
-/**
- * This method rotates the vehicle to the given direction.
- * 
- * @param {THREE.Vector3} - The direction to rotate.
- */
-Vehicle.prototype._updateOrientation = ( function() {
-
-	var xAxis = new THREE.Vector3(); // right
-	var yAxis = new THREE.Vector3(); // up
-	var zAxis = new THREE.Vector3(); // front
-
-	var upTemp = new THREE.Vector3( 0, 1, 0 );
-
-	var rotationMatrix = new THREE.Matrix4();
-
-	return function( direction ) {
-
-		// the front vector always points to the direction vector
-		zAxis.copy( direction ).normalize();
-
-		// avoid zero-length axis
-		if ( zAxis.lengthSq() === 0 )
-		{
-			zAxis.z = 1;
-		}
-
-		// compute right vector
-		xAxis.crossVectors( upTemp, zAxis );
-
-		// avoid zero-length axis
-		if ( xAxis.lengthSq() === 0 )
-		{
-			zAxis.x += 0.0001;
-			xAxis.crossVectors( upTemp, zAxis ).normalize();
-		}
-
-		// compute up vector
-		yAxis.crossVectors( zAxis, xAxis );
-
-		// setup a rotation matrix of the basis
-		rotationMatrix.makeBasis( xAxis, yAxis, zAxis );
-
-		// apply rotation
-		this.quaternion.setFromRotationMatrix( rotationMatrix );
 
 	};
 
@@ -45441,17 +45474,17 @@ SteeringBehaviors.prototype._prepareCalculation = ( function() {
 		// reset steering force
 		this._steeringForce.set( 0, 0, 0 );
 
-		// update model matrices
-		this.vehicle.updateMatrixWorld();
+		// update model matrices of 3D object
+		this.vehicle.object3D.updateMatrixWorld();
 
 		if ( this.targetAgent1 !== null )
 		{
-			this.targetAgent1.updateMatrixWorld();
+			this.targetAgent1.object3D.updateMatrixWorld();
 		}
 
 		if ( this.targetAgent2 !== null )
 		{
-			this.targetAgent2.updateMatrixWorld();
+			this.targetAgent2.object3D.updateMatrixWorld();
 		}
 
 		// calculate neighbors if one of the following group behaviors is active
@@ -45485,7 +45518,7 @@ SteeringBehaviors.prototype._calculateNeighbors = ( function() {
 			if ( entity !== this.vehicle )
 			{
 				// calculate displacement vector
-				toEntity.subVectors( entity.position, this.vehicle.position );
+				toEntity.subVectors( entity.position, this.vehicle.object3D.position );
 
 				// if entity within range, push into neighbors array for further
 				// consideration.
@@ -45517,7 +45550,7 @@ SteeringBehaviors.prototype._createFeelers = ( function() {
 		}
 
 		// first feeler pointing straight in front
-		this._feelers[ 0 ].ray.origin.copy( this.vehicle.position );
+		this._feelers[ 0 ].ray.origin.copy( this.vehicle.object3D.position );
 		this._feelers[ 0 ].ray.direction = this.vehicle.getDirection();
 		this._feelers[ 0 ].far = this.wallDetectionFeelerLength;
 
@@ -45525,7 +45558,7 @@ SteeringBehaviors.prototype._createFeelers = ( function() {
 		rotation.identity();
 		rotation.makeRotationY( Math.PI * 1.75 );
 
-		this._feelers[ 1 ].ray.origin.copy( this.vehicle.position );
+		this._feelers[ 1 ].ray.origin.copy( this.vehicle.object3D.position );
 		this._feelers[ 1 ].ray.direction = this.vehicle.getDirection().transformDirection( rotation );
 		this._feelers[ 1 ].far = this.wallDetectionFeelerLength * 0.5;
 
@@ -45533,7 +45566,7 @@ SteeringBehaviors.prototype._createFeelers = ( function() {
 		rotation.identity();
 		rotation.makeRotationY( Math.PI * 0.25 );
 
-		this._feelers[ 2 ].ray.origin.copy( this.vehicle.position );
+		this._feelers[ 2 ].ray.origin.copy( this.vehicle.object3D.position );
 		this._feelers[ 2 ].ray.direction = this.vehicle.getDirection().transformDirection( rotation );
 		this._feelers[ 2 ].far = this.wallDetectionFeelerLength * 0.5;
 	};
@@ -45610,7 +45643,7 @@ SteeringBehaviors.prototype._seek = ( function() {
 		// position in an ideal world.
 		// It represents the vector from the agent to the target,
 		// scaled to be the length of the maximum possible speed of the agent.
-		desiredVelocity.subVectors( targetPosition, this.vehicle.position ).normalize();
+		desiredVelocity.subVectors( targetPosition, this.vehicle.object3D.position ).normalize();
 
 		desiredVelocity.multiplyScalar( this.vehicle.maxSpeed );
 
@@ -45643,12 +45676,12 @@ SteeringBehaviors.prototype._flee = ( function() {
 		var force = new THREE.Vector3();
 
 		// only flee if the target is within panic distance
-		if ( this.vehicle.position.distanceToSquared( targetPosition ) < ( this.panicDistance * this.panicDistance ) )
+		if ( this.vehicle.object3D.position.distanceToSquared( targetPosition ) < ( this.panicDistance * this.panicDistance ) )
 		{
 			// from here, the only difference compared to seek is that the
-			// desired velocity
-			// is calculated using a vector pointing in the opposite direction
-			desiredVelocity.subVectors( this.vehicle.position, targetPosition ).normalize();
+			// desired velocity is calculated using a vector pointing in the
+			// opposite direction
+			desiredVelocity.subVectors( this.vehicle.object3D.position, targetPosition ).normalize();
 
 			desiredVelocity.multiplyScalar( this.vehicle.maxSpeed );
 
@@ -45676,15 +45709,14 @@ SteeringBehaviors.prototype._arrive = ( function() {
 	var desiredVelocity = new THREE.Vector3();
 	var toTarget = new THREE.Vector3();
 
-	var distance = 0;
-	var speed = 0;
+	var distance, speed;
 
 	return function( targetPosition, deceleration ) {
 
 		var force = new THREE.Vector3();
 
 		// calculate displacement vector
-		toTarget.subVectors( targetPosition, this.vehicle.position );
+		toTarget.subVectors( targetPosition, this.vehicle.object3D.position );
 
 		// calculate the distance to the target
 		distance = toTarget.length();
@@ -45725,12 +45757,7 @@ SteeringBehaviors.prototype._pursuit = ( function() {
 	var newEvaderVelocity = new THREE.Vector3();
 	var predcitedPosition = new THREE.Vector3();
 
-	var isFacing = false;
-	var isEvaderAhead = false;
-
-	var vehicleDirection = null;
-
-	var lookAheadTime = 0;
+	var isFacing, isEvaderAhead, vehicleDirection, lookAheadTime;
 
 	return function( evader ) {
 
@@ -45738,7 +45765,7 @@ SteeringBehaviors.prototype._pursuit = ( function() {
 		// for the evader's current position
 
 		// calculate displacement vector
-		toEvader.subVectors( evader.position, this.vehicle.position );
+		toEvader.subVectors( evader.object3D.position, this.vehicle.object3D.position );
 
 		// buffer vehicle direction
 		vehicleDirection = this.vehicle.getDirection();
@@ -45751,7 +45778,7 @@ SteeringBehaviors.prototype._pursuit = ( function() {
 
 		if ( isEvaderAhead && isFacing )
 		{
-			return this._seek( evader.position );
+			return this._seek( evader.object3D.position );
 		}
 
 		// 2. not considered ahead so we predict where the evader will be
@@ -45764,7 +45791,7 @@ SteeringBehaviors.prototype._pursuit = ( function() {
 		// calculate new velocity and predicted future position
 		newEvaderVelocity.copy( evader.velocity ).multiplyScalar( lookAheadTime );
 
-		predcitedPosition.addVectors( evader.position, newEvaderVelocity );
+		predcitedPosition.addVectors( evader.object3D.position, newEvaderVelocity );
 
 		// now seek to the predicted future position of the evader
 		return this._seek( predcitedPosition );
@@ -45785,18 +45812,18 @@ SteeringBehaviors.prototype._offsetPursuit = ( function() {
 
 	var offsetWorld = new THREE.Vector3();
 	var toOffset = new THREE.Vector3();
-
-	var lookAheadTime = 0;
-
+	
 	var newLeaderVelocity = new THREE.Vector3();
 	var predcitedPosition = new THREE.Vector3();
+
+	var lookAheadTime;
 
 	return function( leader, offset ) {
 
 		// calculate the offset's position in world space
-		offsetWorld.copy( offset ).applyMatrix4( leader.matrixWorld );
+		offsetWorld.copy( offset ).applyMatrix4( leader.object3D.matrixWorld );
 
-		toOffset.subVectors( offsetWorld, this.vehicle.position );
+		toOffset.subVectors( offsetWorld, this.vehicle.object3D.position );
 
 		// the lookahead time is proportional to the distance between the leader
 		// and the pursuer; and is inversely proportional to the sum of both
@@ -45826,15 +45853,16 @@ SteeringBehaviors.prototype._offsetPursuit = ( function() {
 SteeringBehaviors.prototype._evade = ( function() {
 
 	var toPursuer = new THREE.Vector3();
+	
 	var newPursuerVelocity = new THREE.Vector3();
 	var predcitedPosition = new THREE.Vector3();
 
-	var lookAheadTime = 0;
+	var lookAheadTime;
 
 	return function( pursuer ) {
 
 		// calculate displacement vector
-		toPursuer.subVectors( pursuer.position, this.vehicle.position );
+		toPursuer.subVectors( pursuer.object3D.position, this.vehicle.object3D.position );
 
 		// evade only when pursuers are inside a threat range
 		if ( toPursuer.lengthSq() > ( this.panicDistance * this.panicDistance ) )
@@ -45850,7 +45878,7 @@ SteeringBehaviors.prototype._evade = ( function() {
 		// calculate new velocity and predicted future position
 		newPursuerVelocity.copy( pursuer.velocity ).multiplyScalar( lookAheadTime );
 
-		predcitedPosition.addVectors( pursuer.position, newPursuerVelocity );
+		predcitedPosition.addVectors( pursuer.object3D.position, newPursuerVelocity );
 
 		// now flee away from predicted future position of the pursuer
 		return this._flee( predcitedPosition );
@@ -45877,25 +45905,25 @@ SteeringBehaviors.prototype._interpose = ( function() {
 	var predcitedPositionAgentA = new THREE.Vector3();
 	var predcitedPositionAgentB = new THREE.Vector3();
 
-	var time = 0;
+	var time;
 
 	return function( agentA, agentB ) {
 
 		// first we need to figure out where the two agents are going to be
 		// in the future. This is approximated by determining the time
 		// taken to reach the mid way point at the current time at at max speed
-		midPoint.addVectors( agentA.position, agentB.position ).multiplyScalar( 0.5 );
+		midPoint.addVectors( agentA.object3D.position, agentB.object3D.position ).multiplyScalar( 0.5 );
 
-		time = this.vehicle.position.distanceTo( midPoint ) / this.vehicle.maxSpeed;
+		time = this.vehicle.object3D.position.distanceTo( midPoint ) / this.vehicle.maxSpeed;
 
 		// now we have the time, we assume that agent A and agent B will
 		// continue on a
 		// straight trajectory and extrapolate to get their future positions
 		newVelocityAgentA.copy( agentA.velocity ).multiplyScalar( time );
-		predcitedPositionAgentA.addVectors( agentA.position, newVelocityAgentA );
+		predcitedPositionAgentA.addVectors( agentA.object3D.position, newVelocityAgentA );
 
 		newVelocityAgentB.copy( agentB.velocity ).multiplyScalar( time );
-		predcitedPositionAgentB.addVectors( agentB.position, newVelocityAgentB );
+		predcitedPositionAgentB.addVectors( agentB.object3D.position, newVelocityAgentB );
 
 		// calculate the mid point of these predicted positions
 		midPoint.addVectors( predcitedPositionAgentA, predcitedPositionAgentB ).multiplyScalar( 0.5 );
@@ -45919,11 +45947,7 @@ SteeringBehaviors.prototype._hide = ( function() {
 	var hidingSpot = new THREE.Vector3();
 	var bestHidingSpot = new THREE.Vector3();
 
-	var distanceSq;
-	var closestDistanceSq;
-	var numberOfObstacle;
-	var obstacle;
-	var index;
+	var distanceSq, closestDistanceSq, numberOfObstacle, obstacle, index;
 
 	return function( hunter ) {
 
@@ -45939,11 +45963,11 @@ SteeringBehaviors.prototype._hide = ( function() {
 			obstacle = world.getObstacle( index );
 
 			// calculate the position of the hiding spot for this obstacle
-			this._getHidingPosition( obstacle.boundingSphere.center, obstacle.boundingSphere.radius, hunter.position, hidingSpot );
+			this._getHidingPosition( obstacle.boundingSphere.center, obstacle.boundingSphere.radius, hunter.object3D.position, hidingSpot );
 
 			// work in distance-squared space to find the closest hiding spot to
 			// the agent
-			distanceSq = hidingSpot.distanceToSquared( this.vehicle.position );
+			distanceSq = hidingSpot.distanceToSquared( this.vehicle.object3D.position );
 
 			if ( distanceSq < closestDistanceSq )
 			{
@@ -46011,10 +46035,10 @@ SteeringBehaviors.prototype._wander = ( function() {
 		target.addVectors( this._wanderTarget, distanceVector );
 
 		// project the target into world space
-		target.applyMatrix4( this.vehicle.matrixWorld );
+		target.applyMatrix4( this.vehicle.object3D.matrixWorld );
 
 		// and steer towards it
-		force.subVectors( target, this.vehicle.position );
+		force.subVectors( target, this.vehicle.object3D.position );
 
 		return force;
 	};
@@ -46057,7 +46081,7 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
 		var force = new THREE.Vector3();
 
 		// calculate bounding box of vehicle
-		boundingBox.setFromObject( this.vehicle );
+		boundingBox.setFromObject( this.vehicle.object3D );
 
 		// get size of bounding box
 		boundingBox.size( vehicleSize );
@@ -46072,7 +46096,7 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
 		distanceToClosestObstacle = Infinity;
 
 		// this matrix will transform points to the local space of the vehicle
-		inverseMatrix.getInverse( this.vehicle.matrixWorld );
+		inverseMatrix.getInverse( this.vehicle.object3D.matrixWorld );
 
 		// get number of obstacles in the world
 		numberOfObstacle = world.getNumberOfObstacles();
@@ -46136,7 +46160,7 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
 			force.z = ( closestObstacle.boundingSphere.radius - localPositionOfClosestObstacle.z ) * brakingWeight;
 
 			// finally, convert the steering vector from local to world space
-			force.transformDirection( this.vehicle.matrixWorld );
+			force.transformDirection( this.vehicle.object3D.matrixWorld );
 		}
 
 		return force;
@@ -46247,12 +46271,12 @@ SteeringBehaviors.prototype._wallAvoidance = ( function() {
  */
 SteeringBehaviors.prototype._followPath = ( function() {
 
-	var distanceSq = 0;
+	var distanceSq;
 
 	return function() {
 
 		// calculate distance in square space from current waypoint to vehicle
-		distanceSq = this.path.getCurrentWaypoint().distanceToSquared( this.vehicle.position );
+		distanceSq = this.path.getCurrentWaypoint().distanceToSquared( this.vehicle.object3D.position );
 
 		// move to next waypoint if close enough to current target
 		if ( distanceSq < ( this.waypointSeekDist * this.waypointSeekDist ) )
@@ -46281,9 +46305,7 @@ SteeringBehaviors.prototype._separation = ( function() {
 
 	var toAgent = new THREE.Vector3();
 
-	var index;
-	var neighbor;
-	var length;
+	var index, neighbor, length;
 
 	return function() {
 
@@ -46298,7 +46320,7 @@ SteeringBehaviors.prototype._separation = ( function() {
 			if ( neighbor !== this.vehicle && neighbor !== this.targetAgent1 )
 			{
 				// calculate displacement vector
-				toAgent.subVectors( this.vehicle.position, neighbor.position );
+				toAgent.subVectors( this.vehicle.object3D.position, neighbor.object3D.position );
 
 				// get length
 				length = toAgent.length();
@@ -46316,7 +46338,6 @@ SteeringBehaviors.prototype._separation = ( function() {
 
 				// add force
 				force.add( toAgent );
-
 			}
 		}
 
@@ -46333,13 +46354,13 @@ SteeringBehaviors.prototype._separation = ( function() {
  */
 SteeringBehaviors.prototype._alignment = ( function() {
 
-	var averageHeading = new THREE.Vector3(); // used to record the average
-												// heading of the neighbors
+	// used to record the average heading of the neighbors
+	var averageHeading = new THREE.Vector3();
 
-	var neighborCount; // used to count the number of vehicles in the
-						// neighborhood
-	var index;
-	var neighbor;
+	// used to count the number of vehicles in the neighborhood
+	var neighborCount;
+
+	var index, neighbor;
 
 	return function() {
 
@@ -46388,11 +46409,13 @@ SteeringBehaviors.prototype._cohesion = ( function() {
 
 	var averageHeading = new THREE.Vector3();
 
-	var centerOfMass = new THREE.Vector3(); // center of mass of all the agents
+	// center of mass of all the agents
+	var centerOfMass = new THREE.Vector3(); 
 
-	var neighborCount; // used to count the number of vehicles in the neighborhood
-	var index;
-	var neighbor;
+	// used to count the number of vehicles in the neighborhood
+	var neighborCount; 
+	
+	var index, neighbor;
 
 	return function() {
 
@@ -46410,7 +46433,7 @@ SteeringBehaviors.prototype._cohesion = ( function() {
 			// also make sure it doesn't include the evade target
 			if ( neighbor !== this.vehicle && neighbor !== this.targetAgent1 )
 			{
-				centerOfMass.add( neighbor.position );
+				centerOfMass.add( neighbor.object3D.position );
 
 				neighborCount++;
 			}

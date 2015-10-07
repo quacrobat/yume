@@ -14,20 +14,14 @@ var GameEntity = require( "../game/entity/GameEntity" );
  * @constructor
  * @augments GameEntity
  * 
- * @param {number} id - The id of the teammate.
+ * @param {number} id - The multiplayer id of the teammate entity.
  */
 function Teammate( id ) {
 
 	GameEntity.call( this );
 
 	Object.defineProperties( this, {
-		type : {
-			value : "Teammate",
-			configurable : false,
-			enumerable : true,
-			writable : false
-		},
-		teammateId : {
+		multiplayerId : {
 			value : id,
 			configurable : false,
 			enumerable : true,
@@ -35,13 +29,8 @@ function Teammate( id ) {
 		}
 	} );
 
-	// apply exemplary geometry
-	this.geometry = new THREE.BoxGeometry( 4, 4, 4 );
-
-	// apply exemplary material
-	this.material = new THREE.MeshBasicMaterial( {
-		color : "#ff0000"
-	} );
+	// apply exemplary mesh object
+	this.object3D = new THREE.Mesh( new THREE.BoxGeometry( 4, 4, 4 ),  new THREE.MeshBasicMaterial( {color : "#ff0000"} ) );
 }
 
 Teammate.prototype = Object.create( GameEntity.prototype );
@@ -55,8 +44,8 @@ Teammate.prototype.constructor = Teammate;
  */
 Teammate.prototype.update = function( position, quaternion ) {
 
-	this.position.copy( position );
-	this.quaternion.copy( quaternion );
+	this.object3D.position.copy( position );
+	this.object3D.quaternion.copy( quaternion );
 };
 
 module.exports = Teammate;

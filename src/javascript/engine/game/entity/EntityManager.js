@@ -27,21 +27,22 @@ function EntityManager() {
 }
 
 /**
- * Creates a vehicle, a special kind of moving entity.
+ * Creates a vehicle, a moving entity that uses steering behaviors.
  * 
+ * @param {THREE.Object3D} object3D - The 3D object of the entity.
+ * @param {number} boundingRadius - The bounding radius of the entity.
  * @param {THREE.Vector3} velocity - The velocity of the agent.
  * @param {number} mass - The mass of the agent.
  * @param {number} maxSpeed - The maximum speed at which this entity may travel.
  * @param {number} maxForce - The maximum force this entity can produce to power itself (think rockets and thrust).
  * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
- * @param {number} numSamplesForSmoothing - How many samples the smoother will
- * use to average the velocity.
+ * @param {number} numSamplesForSmoothing - How many samples the smoother will use to average the velocity.
  * 
  * @returns {Vehicle} The new vehicle.
  */
-EntityManager.prototype.createVehicle = function( velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ) {
+EntityManager.prototype.createVehicle = function( object3D, boundingRadius, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ) {
 
-	var vehicle = new Vehicle( this, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing );
+	var vehicle = new Vehicle( this, object3D, boundingRadius, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing );
 	this.addEntity( vehicle );
 	return vehicle;
 };
@@ -64,6 +65,37 @@ EntityManager.prototype.update = ( function() {
 	};
 
 }() );
+
+/**
+ * Gets an entity by its ID.
+ * 
+ * @param {number} id - The ID of the entity.
+ * 
+ * @returns {GameEntity} The entity.
+ */
+EntityManager.prototype.getEntity = function( id ) {
+
+	var entity = null;
+
+	for ( var index = 0; index < this.entities.length; index++ )
+	{
+		if ( this.entities[ index ].id === id )
+		{
+			entity = this.entities[ index ];
+
+			break;
+		}
+	}
+
+	if ( entity === null )
+	{
+		throw "ERROR: EntityManager: Entity with ID " + id + " not existing.";
+	}
+	else
+	{
+		return entity;
+	}
+};
 
 /**
  * Adds a single entity to the internal array.

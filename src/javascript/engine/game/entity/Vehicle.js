@@ -12,12 +12,14 @@ var SteeringBehaviors = require( "../steering/SteeringBehaviors" );
 var Smoother = require( "../steering/Smoother" );
 
 /**
- * Creates a new vehicle.
+ * Creates a vehicle.
  * 
  * @constructor
  * @augments MovingEntity
  * 
  * @param {EntityManager} entityManager - The reference to the entity manager.
+ * @param {THREE.Object3D} object3D - The 3D object of the entity.
+ * @param {number} boundingRadius - The bounding radius of the entity.
  * @param {THREE.Vector3} velocity - The velocity of the agent.
  * @param {number} mass - The mass of the agent.
  * @param {number} maxSpeed - The maximum speed at which this entity may travel.
@@ -25,9 +27,9 @@ var Smoother = require( "../steering/Smoother" );
  * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
  * @param {number} numSamplesForSmoothing - How many samples the smoother will use to average the velocity.
  */
-function Vehicle( entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ) {
+function Vehicle( entityManager, object3D, boundingRadius, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ) {
 
-	MovingEntity.call( this, entityManager, velocity, mass, maxSpeed, maxForce, maxTurnRate );
+	MovingEntity.call( this, entityManager, object3D, boundingRadius, velocity, mass, maxSpeed, maxForce, maxTurnRate );
 
 	Object.defineProperties( this, {
 		steering : {
@@ -96,7 +98,7 @@ Vehicle.prototype.update = ( function() {
 		displacement.copy( this.velocity ).multiplyScalar( delta );
 
 		// update the position
-		this.position.add( displacement );
+		this.object3D.position.add( displacement );
 
 		// update the orientation if the vehicle has non zero speed
 		if ( this.getSpeedSq() > 0.00000001 )
@@ -108,63 +110,14 @@ Vehicle.prototype.update = ( function() {
 				// with an averaged velocity to avoid oscillations/judder.
 				this._smoother.update( this.velocity, this._smoothedVelocity );
 
-				this._updateOrientation( this._smoothedVelocity );
+				this.rotateToDirection( this._smoothedVelocity );
 			}
 			else
 			{
 				// couple velocity and orientation
-				this._updateOrientation( this.velocity );
+				this.rotateToDirection( this.velocity );
 			}
 		}
-
-	};
-
-}() );
-
-/**
- * This method rotates the vehicle to the given direction.
- * 
- * @param {THREE.Vector3} - The direction to rotate.
- */
-Vehicle.prototype._updateOrientation = ( function() {
-
-	var xAxis = new THREE.Vector3(); // right
-	var yAxis = new THREE.Vector3(); // up
-	var zAxis = new THREE.Vector3(); // front
-
-	var upTemp = new THREE.Vector3( 0, 1, 0 );
-
-	var rotationMatrix = new THREE.Matrix4();
-
-	return function( direction ) {
-
-		// the front vector always points to the direction vector
-		zAxis.copy( direction ).normalize();
-
-		// avoid zero-length axis
-		if ( zAxis.lengthSq() === 0 )
-		{
-			zAxis.z = 1;
-		}
-
-		// compute right vector
-		xAxis.crossVectors( upTemp, zAxis );
-
-		// avoid zero-length axis
-		if ( xAxis.lengthSq() === 0 )
-		{
-			zAxis.x += 0.0001;
-			xAxis.crossVectors( upTemp, zAxis ).normalize();
-		}
-
-		// compute up vector
-		yAxis.crossVectors( zAxis, xAxis );
-
-		// setup a rotation matrix of the basis
-		rotationMatrix.makeBasis( xAxis, yAxis, zAxis );
-
-		// apply rotation
-		this.quaternion.setFromRotationMatrix( rotationMatrix );
 
 	};
 
