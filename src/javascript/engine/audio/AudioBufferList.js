@@ -6,10 +6,10 @@
  */
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var utils = require( "../etc/Utils" );
 
-var TOPIC = require( "../core/Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 /**
  * Creates an audiobuffer-list.
@@ -110,7 +110,7 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 					self.bufferList[ index ] = buffer;
 
 					// publish message to inform about status
-					PubSub.publish( TOPIC.STAGE.LOADING.COMPLETE.AUDIO, {
+					EventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.AUDIO, {
 						url : url
 					} );
 
@@ -140,7 +140,7 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 	xhr.send();
 
 	// publish message to inform about status
-	PubSub.publish( TOPIC.STAGE.LOADING.START.AUDIO, {
+	EventManager.publish( TOPIC.STAGE.LOADING.START.AUDIO, {
 		url : url
 	} );
 };

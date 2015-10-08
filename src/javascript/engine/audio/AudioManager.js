@@ -7,9 +7,8 @@
 
 "use strict";
 
-var PubSub = require( "pubsub-js" );
-
-var TOPIC = require( "../core/Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var AudioListener = require( "./AudioListener" );
 var DynamicAudio = require( "./DynamicAudio" );
@@ -172,7 +171,7 @@ AudioManager.prototype.setBackgroundMusic = function( file, volume, isLoop ) {
 	this._backgroundMusic.oncanplay = function( event ) {
 
 		// publish message to inform about status
-		PubSub.publish( TOPIC.STAGE.LOADING.COMPLETE.MUSIC, {
+		EventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.MUSIC, {
 			url : url
 		} );
 
@@ -183,7 +182,7 @@ AudioManager.prototype.setBackgroundMusic = function( file, volume, isLoop ) {
 	logger.log( "INFO: AudioManager: Set new background music. URL: %s", url );
 
 	// publish message to inform about status
-	PubSub.publish( TOPIC.STAGE.LOADING.START.MUSIC, {
+	EventManager.publish( TOPIC.STAGE.LOADING.START.MUSIC, {
 		url : url
 	} );
 };
@@ -347,7 +346,7 @@ AudioManager.prototype.setBackgroundMusicVolume = function( volume ) {
 AudioManager.prototype._onErrorBackgroundMusic = function() {
 
 	logger.error( "ERROR: AudioManager: Media resource could not be processed." );
-	PubSub.publish( TOPIC.APPLICATION.ERROR.MUSIC, "Media resource could not be processed" );
+	EventManager.publish( TOPIC.APPLICATION.ERROR.MUSIC, "Media resource could not be processed" );
 };
 
 module.exports = new AudioManager();

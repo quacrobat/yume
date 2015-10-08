@@ -6,11 +6,12 @@
  */
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
-var utils = require( "./Utils" );
 
-var TOPIC = require( "../core/Topic" );
+var utils = require( "./Utils" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
+
 /**
  * Creates a ObjectLoader.
  * 
@@ -69,7 +70,7 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 					self.parse( JSON.parse( xhr.responseText ), onLoad );
 
 					// publish message
-					PubSub.publish( TOPIC.STAGE.LOADING.COMPLETE.OBJECT, {
+					EventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.OBJECT, {
 						url : url
 					} );
 
@@ -92,7 +93,7 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 	xhr.send();
 
 	// publish message to inform about status
-	PubSub.publish( TOPIC.STAGE.LOADING.START.OBJECT, {
+	EventManager.publish( TOPIC.STAGE.LOADING.START.OBJECT, {
 		url : url
 	} );
 };

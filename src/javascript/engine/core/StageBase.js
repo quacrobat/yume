@@ -8,9 +8,9 @@
 "use strict";
 
 var THREE = require( "three" );
-var PubSub = require( "pubsub-js" );
 
-var TOPIC = require( "./Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var renderer = require( "./Renderer" );
 var camera = require( "./Camera" );
@@ -238,7 +238,7 @@ StageBase.prototype._changeStage = function( stageId, isSaveGame ) {
 	this.controls.isActionInProgress = true;
 	
 	// publish message to trigger the change
-	PubSub.publish( TOPIC.STAGE.CHANGE, {
+	EventManager.publish( TOPIC.STAGE.CHANGE, {
 		stageId : stageId,
 		isSaveGame : isSaveGame
 	} );

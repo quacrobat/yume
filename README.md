@@ -13,7 +13,6 @@ Developing a complex 3D application is a hard challenge. If you want to create a
 - Node.js and its modules provide server side features to meet multiplayer or storage requirements (accounts, highscores).
 - Express provides features for creating server side web applications. Games can benefit of templating, sessions, authentication, compression, caching and more.
 - Three.js is a great library for developing WebGL based 3D content.
-- PubSubJS provides a topic-based publish/subscribe mechanism, so YUME can handle even complex communication within the application.
 - Browserify guarantees modular programming style and robust dependency management.
 - Grunt is our internal task runner and build tool.
 - Bootstrap provides a basic HTML/CSS template.
@@ -29,6 +28,7 @@ The demo-application shows different features of YUME.
 - i18n (text files for each local)
 - elementary audio system based on WebAudio
 - savegame and settings managers
+- topic-based publish/subscribe
 
 ## Documentation
 

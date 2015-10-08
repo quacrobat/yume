@@ -5,7 +5,6 @@
  */
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var UiElement = require( "./UiElement" );
 var utils = require( "../etc/Utils" );
 

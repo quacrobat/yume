@@ -6,14 +6,14 @@
  */
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var WebSocket = require( "ws" );
 
 var Message = require( "./Message" );
 var threadMananger = require( "../core/ThreadManager" );
 var logger = require( "../etc/Logger" );
 
-var TOPIC = require( "../core/Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var script;
 var self;
@@ -53,8 +53,8 @@ NetworkManager.prototype.init = function() {
 	this._startUp();
 
 	// subscriptions
-	PubSub.subscribe( TOPIC.MULTIPLAYER.CHAT, this._onMessageChat );
-	PubSub.subscribe( TOPIC.MULTIPLAYER.PLAYER, this._onMessagePlayer );
+	EventManager.subscribe( TOPIC.MULTIPLAYER.CHAT, this._onMessageChat );
+	EventManager.subscribe( TOPIC.MULTIPLAYER.PLAYER, this._onMessagePlayer );
 };
 
 /**
@@ -106,15 +106,15 @@ NetworkManager.prototype._onMessageThread = function( event ) {
 
 	if ( event.data.type === Message.TYPES.CHAT )
 	{
-		PubSub.publish( TOPIC.MULTIPLAYER.MESSAGE, event.data.content );
+		EventManager.publish( TOPIC.MULTIPLAYER.MESSAGE, event.data.content );
 	}
 	else if ( event.data.type === Message.TYPES.GAME )
 	{
-		PubSub.publish( TOPIC.MULTIPLAYER.UPDATE, event.data.content );
+		EventManager.publish( TOPIC.MULTIPLAYER.UPDATE, event.data.content );
 	}
 	else if ( event.data.type === Message.TYPES.STATUS )
 	{
-		PubSub.publish( TOPIC.MULTIPLAYER.STATUS, event.data.content );
+		EventManager.publish( TOPIC.MULTIPLAYER.STATUS, event.data.content );
 	}
 	else if ( event.data.type === Message.TYPES.INFO )
 	{

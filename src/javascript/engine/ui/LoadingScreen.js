@@ -5,10 +5,9 @@
  */
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var UiElement = require( "./UiElement" );
-
-var TOPIC = require( "../core/Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var self;
 
@@ -86,8 +85,8 @@ LoadingScreen.prototype.init = function() {
 	this._$text = this._$loadingScreen.querySelector( ".text" );
 
 	// subscriptions
-	PubSub.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
-	PubSub.subscribe(  TOPIC.STAGE.READY, this._onReady );
+	EventManager.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
+	EventManager.subscribe(  TOPIC.STAGE.READY, this._onReady );
 };
 
 /**

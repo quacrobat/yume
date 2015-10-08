@@ -7,9 +7,8 @@
 
 "use strict";
 
-var PubSub = require( "pubsub-js" );
-
-var TOPIC = require( "../core/Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var developmentPanel = require( "./DevelopmentPanel" );
 var performanceMonitor = require( "./PerformanceMonitor" );
@@ -200,7 +199,7 @@ UserInterfaceManager.prototype.handleUiInteraction = function( event ) {
 	}
 	else if ( loadingScreen.isActive === true && loadingScreen.isReady === true )
 	{
-		PubSub.publish( TOPIC.STAGE.START, undefined );
+		EventManager.publish( TOPIC.STAGE.START, undefined );
 		loadingScreen.hide();
 	}
 };
@@ -220,7 +219,7 @@ UserInterfaceManager.prototype._mapGlobalEventsToTopics = function() {
 
 	global.window.addEventListener( "resize", function() {
 
-		PubSub.publish( TOPIC.APPLICATION.RESIZE, undefined );
+		EventManager.publish( TOPIC.APPLICATION.RESIZE, undefined );
 	} );
 };
 

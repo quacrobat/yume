@@ -5,10 +5,9 @@
  */
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var UiElement = require( "./UiElement" );
-
-var TOPIC = require( "../core/Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var self;
 
@@ -64,7 +63,7 @@ Chat.prototype.init = function() {
 	this._$messages = global.document.querySelector( "#messages" );
 	this._$input = this._$chat.querySelector( ".form-control" );
 
-	PubSub.subscribe( TOPIC.MULTIPLAYER.MESSAGE, this._onMessage );
+	EventManager.subscribe( TOPIC.MULTIPLAYER.MESSAGE, this._onMessage );
 };
 
 /**
@@ -84,7 +83,7 @@ Chat.prototype.toogle = function() {
 		this.hide();
 
 		// activate controls
-		PubSub.publish( TOPIC.CONTROLS.ACTIVE, {
+		EventManager.publish( TOPIC.CONTROLS.ACTIVE, {
 			isActive : true
 		} );
 	}
@@ -94,7 +93,7 @@ Chat.prototype.toogle = function() {
 		this.show();
 
 		// deactivate controls
-		PubSub.publish( TOPIC.CONTROLS.ACTIVE, {
+		EventManager.publish( TOPIC.CONTROLS.ACTIVE, {
 			isActive : false
 		} );
 	}
@@ -159,7 +158,7 @@ Chat.prototype._checkAndSend = function() {
 		this._postMessage( message );
 
 		// publish chat message for sending to server
-		PubSub.publish( TOPIC.MULTIPLAYER.CHAT, message );
+		EventManager.publish( TOPIC.MULTIPLAYER.CHAT, message );
 	}
 };
 

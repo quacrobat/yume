@@ -6,11 +6,11 @@
  */
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
-var utils = require( "./Utils" );
 
-var TOPIC = require( "../core/Topic" );
+var utils = require( "./Utils" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 /**
  * Creates a JSONLoader.
  * 
@@ -73,7 +73,7 @@ JSONLoader.prototype.load = function( url, onLoad ) {
 					onLoad( result.geometry, result.materials );
 
 					// publish message
-					PubSub.publish( TOPIC.STAGE.LOADING.COMPLETE.OBJECT, {
+					EventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.OBJECT, {
 						url : url
 					} );
 					
@@ -97,7 +97,7 @@ JSONLoader.prototype.load = function( url, onLoad ) {
 	xhr.send();
 
 	// publish message to inform about status
-	PubSub.publish( TOPIC.STAGE.LOADING.START.OBJECT, {
+	EventManager.publish( TOPIC.STAGE.LOADING.START.OBJECT, {
 		url : url
 	} );
 };

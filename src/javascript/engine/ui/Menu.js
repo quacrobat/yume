@@ -6,11 +6,10 @@
 
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var UiElement = require( "./UiElement" );
 var utils = require( "../etc/Utils" );
-
-var TOPIC = require( "../core/Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var self;
 /**
@@ -73,8 +72,8 @@ Menu.prototype.init = function() {
 	this._$progressBar = this._$menu.querySelector( ".progress-bar" );
 
 	// subscriptions
-	PubSub.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
-	PubSub.subscribe( TOPIC.STAGE.READY, this._onReady );
+	EventManager.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
+	EventManager.subscribe( TOPIC.STAGE.READY, this._onReady );
 
 	this._$button.addEventListener( "click", this._onClick );
 };
@@ -147,7 +146,7 @@ Menu.prototype._onReady = function( message, data ) {
  */
 Menu.prototype._publishFinishEvent = function( message, data ) {
 
-	PubSub.publish( TOPIC.STAGE.START, undefined );
+	EventManager.publish( TOPIC.STAGE.START, undefined );
 	self._$button.removeEventListener( "click", self._publishFinishEvent );
 };
 

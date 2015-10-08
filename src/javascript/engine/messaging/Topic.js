@@ -5,7 +5,7 @@
  */
 "use strict";
 
-var Topic = {
+var TOPIC = {
 	ACTION : {
 		INTERACTION : "action.interaction"
 	},
@@ -50,4 +50,4 @@ var Topic = {
 	}
 };
 
-module.exports = Topic;
+module.exports = TOPIC;

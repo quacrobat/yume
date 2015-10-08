@@ -7,10 +7,10 @@
 
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
 
-var TOPIC = require( "../core/Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var Action = require( "./Action" );
 var InteractiveObject = require( "./InteractiveObject" );
@@ -76,7 +76,7 @@ function ActionManager() {
 	} );
 
 	// subscriptions
-	PubSub.subscribe( TOPIC.ACTION.INTERACTION, this._onInteraction );
+	EventManager.subscribe( TOPIC.ACTION.INTERACTION, this._onInteraction );
 
 	self = this;
 }

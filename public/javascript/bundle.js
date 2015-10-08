@@ -1,250 +1,4 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-/*
-Copyright (c) 2010,2011,2012,2013,2014 Morgan Roderick http://roderick.dk
-License: MIT - http://mrgnrdrck.mit-license.org
-
-https://github.com/mroderick/PubSubJS
-*/
-(function (root, factory){
-	'use strict';
-
-    if (typeof define === 'function' && define.amd){
-        // AMD. Register as an anonymous module.
-        define(['exports'], factory);
-
-    } else if (typeof exports === 'object'){
-        // CommonJS
-        factory(exports);
-
-    } else {
-        // Browser globals
-        var PubSub = {};
-        root.PubSub = PubSub;
-        factory(PubSub);
-    }
-}(( typeof window === 'object' && window ) || this, function (PubSub){
-	'use strict';
-
-	var messages = {},
-		lastUid = -1;
-
-	function hasKeys(obj){
-		var key;
-
-		for (key in obj){
-			if ( obj.hasOwnProperty(key) ){
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 *	Returns a function that throws the passed exception, for use as argument for setTimeout
-	 *	@param { Object } ex An Error object
-	 */
-	function throwException( ex ){
-		return function reThrowException(){
-			throw ex;
-		};
-	}
-
-	function callSubscriberWithDelayedExceptions( subscriber, message, data ){
-		try {
-			subscriber( message, data );
-		} catch( ex ){
-			setTimeout( throwException( ex ), 0);
-		}
-	}
-
-	function callSubscriberWithImmediateExceptions( subscriber, message, data ){
-		subscriber( message, data );
-	}
-
-	function deliverMessage( originalMessage, matchedMessage, data, immediateExceptions ){
-		var subscribers = messages[matchedMessage],
-			callSubscriber = immediateExceptions ? callSubscriberWithImmediateExceptions : callSubscriberWithDelayedExceptions,
-			s;
-
-		if ( !messages.hasOwnProperty( matchedMessage ) ) {
-			return;
-		}
-
-		for (s in subscribers){
-			if ( subscribers.hasOwnProperty(s)){
-				callSubscriber( subscribers[s], originalMessage, data );
-			}
-		}
-	}
-
-	function createDeliveryFunction( message, data, immediateExceptions ){
-		return function deliverNamespaced(){
-			var topic = String( message ),
-				position = topic.lastIndexOf( '.' );
-
-			// deliver the message as it is now
-			deliverMessage(message, message, data, immediateExceptions);
-
-			// trim the hierarchy and deliver message to each level
-			while( position !== -1 ){
-				topic = topic.substr( 0, position );
-				position = topic.lastIndexOf('.');
-				deliverMessage( message, topic, data, immediateExceptions );
-			}
-		};
-	}
-
-	function messageHasSubscribers( message ){
-		var topic = String( message ),
-			found = Boolean(messages.hasOwnProperty( topic ) && hasKeys(messages[topic])),
-			position = topic.lastIndexOf( '.' );
-
-		while ( !found && position !== -1 ){
-			topic = topic.substr( 0, position );
-			position = topic.lastIndexOf( '.' );
-			found = Boolean(messages.hasOwnProperty( topic ) && hasKeys(messages[topic]));
-		}
-
-		return found;
-	}
-
-	function publish( message, data, sync, immediateExceptions ){
-		var deliver = createDeliveryFunction( message, data, immediateExceptions ),
-			hasSubscribers = messageHasSubscribers( message );
-
-		if ( !hasSubscribers ){
-			return false;
-		}
-
-		if ( sync === true ){
-			deliver();
-		} else {
-			setTimeout( deliver, 0 );
-		}
-		return true;
-	}
-
-	/**
-	 *	PubSub.publish( message[, data] ) -> Boolean
-	 *	- message (String): The message to publish
-	 *	- data: The data to pass to subscribers
-	 *	Publishes the the message, passing the data to it's subscribers
-	**/
-	PubSub.publish = function( message, data ){
-		return publish( message, data, false, PubSub.immediateExceptions );
-	};
-
-	/**
-	 *	PubSub.publishSync( message[, data] ) -> Boolean
-	 *	- message (String): The message to publish
-	 *	- data: The data to pass to subscribers
-	 *	Publishes the the message synchronously, passing the data to it's subscribers
-	**/
-	PubSub.publishSync = function( message, data ){
-		return publish( message, data, true, PubSub.immediateExceptions );
-	};
-
-	/**
-	 *	PubSub.subscribe( message, func ) -> String
-	 *	- message (String): The message to subscribe to
-	 *	- func (Function): The function to call when a new message is published
-	 *	Subscribes the passed function to the passed message. Every returned token is unique and should be stored if
-	 *	you need to unsubscribe
-	**/
-	PubSub.subscribe = function( message, func ){
-		if ( typeof func !== 'function'){
-			return false;
-		}
-
-		// message is not registered yet
-		if ( !messages.hasOwnProperty( message ) ){
-			messages[message] = {};
-		}
-
-		// forcing token as String, to allow for future expansions without breaking usage
-		// and allow for easy use as key names for the 'messages' object
-		var token = 'uid_' + String(++lastUid);
-		messages[message][token] = func;
-
-		// return token for unsubscribing
-		return token;
-	};
-
-	/* Public: Clears all subscriptions
-	 */
-	PubSub.clearAllSubscriptions = function clearAllSubscriptions(){
-		messages = {};
-	};
-
-	/*Public: Clear subscriptions by the topic
-	*/
-	PubSub.clearSubscriptions = function clearSubscriptions(topic){
-		var m; 
-		for (m in messages){
-			if (messages.hasOwnProperty(m) && m.indexOf(topic) === 0){
-				delete messages[m];
-			}
-		}
-	};
-
-	/* Public: removes subscriptions.
-	 * When passed a token, removes a specific subscription.
-	 * When passed a function, removes all subscriptions for that function
-	 * When passed a topic, removes all subscriptions for that topic (hierarchy)
-	 *
-	 * value - A token, function or topic to unsubscribe.
-	 *
-	 * Examples
-	 *
-	 *		// Example 1 - unsubscribing with a token
-	 *		var token = PubSub.subscribe('mytopic', myFunc);
-	 *		PubSub.unsubscribe(token);
-	 *
-	 *		// Example 2 - unsubscribing with a function
-	 *		PubSub.unsubscribe(myFunc);
-	 *
-	 *		// Example 3 - unsubscribing a topic
-	 *		PubSub.unsubscribe('mytopic');
-	 */
-	PubSub.unsubscribe = function(value){
-		var isTopic    = typeof value === 'string' && messages.hasOwnProperty(value),
-			isToken    = !isTopic && typeof value === 'string',
-			isFunction = typeof value === 'function',
-			result = false,
-			m, message, t;
-
-		if (isTopic){
-			delete messages[value];
-			return;
-		}
-
-		for ( m in messages ){
-			if ( messages.hasOwnProperty( m ) ){
-				message = messages[m];
-
-				if ( isToken && message[value] ){
-					delete message[value];
-					result = value;
-					// tokens are unique, so we can just stop here
-					break;
-				}
-
-				if (isFunction) {
-					for ( t in message ){
-						if (message.hasOwnProperty(t) && message[t] === value){
-							delete message[t];
-							result = true;
-						}
-					}
-				}
-			}
-		}
-
-		return result;
-	};
-}));
-
-},{}],2:[function(require,module,exports){
 var self = self || {};// File:src/Three.js
 
 /**
@@ -35390,7 +35144,7 @@ if (typeof exports !== 'undefined') {
   this['THREE'] = THREE;
 }
 
-},{}],3:[function(require,module,exports){
+},{}],2:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -35435,7 +35189,7 @@ function ws(uri, protocols, opts) {
 
 if (WebSocket) ws.prototype = WebSocket.prototype;
 
-},{}],4:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -35447,7 +35201,7 @@ global.window.onload = function() {
 	var bootstrap = new Bootstrap();
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./core/Bootstrap":19}],5:[function(require,module,exports){
+},{"./core/Bootstrap":18}],4:[function(require,module,exports){
 /**
  * @file Prototype for defining script-based actions.
  * 
@@ -35515,7 +35269,7 @@ Action.TYPES = {
 };
 
 module.exports = Action;
-},{}],6:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 /**
  * @file Interface for entire action-handling. This prototype is used in stages
  * to access action-based logic and to create action-entities.
@@ -35525,10 +35279,10 @@ module.exports = Action;
 
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
 
-var TOPIC = require( "../core/Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var Action = require( "./Action" );
 var InteractiveObject = require( "./InteractiveObject" );
@@ -35594,7 +35348,7 @@ function ActionManager() {
 	} );
 
 	// subscriptions
-	PubSub.subscribe( TOPIC.ACTION.INTERACTION, this._onInteraction );
+	EventManager.subscribe( TOPIC.ACTION.INTERACTION, this._onInteraction );
 
 	self = this;
 }
@@ -35919,7 +35673,7 @@ ActionManager.prototype._onInteraction = function( message, data ) {
 };
 
 module.exports = new ActionManager();
-},{"../core/Topic":28,"../etc/Logger":33,"../ui/UserInterfaceManager":82,"./Action":5,"./ActionTrigger":7,"./InteractiveObject":8,"./StaticObject":9,"pubsub-js":1,"three":2}],7:[function(require,module,exports){
+},{"../etc/Logger":31,"../messaging/EventManager":50,"../messaging/Topic":52,"../ui/UserInterfaceManager":83,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
 /**
  * @file The ActionTrigger is a static trigger for actions.
  * 
@@ -35989,7 +35743,7 @@ ActionTrigger.prototype = Object.create( THREE.Mesh.prototype );
 ActionTrigger.prototype.constructor = ActionTrigger;
 
 module.exports = ActionTrigger;
-},{"../etc/Utils":42,"three":2}],8:[function(require,module,exports){
+},{"../etc/Utils":40,"three":1}],7:[function(require,module,exports){
 /**
  * @file The prototype InteractiveObject enables ordinary 3D-Objects to be
  * interactive. Any interactive object is part of the collision-detection logic
@@ -36244,7 +35998,7 @@ InteractiveObject.RAYCASTPRECISION = {
 };
 
 module.exports = InteractiveObject;
-},{"../etc/OBB":35,"three":2}],9:[function(require,module,exports){
+},{"../etc/OBB":33,"three":1}],8:[function(require,module,exports){
 /**
  * @file The prototype StaticObject enables ordinary 3D-Objects to be static.
  * Any interactive object is part of the collision-detection logic.
@@ -36378,7 +36132,7 @@ StaticObject.COLLISIONTYPES = {
 };
 
 module.exports = StaticObject;
-},{"../etc/OBB":35,"three":2}],10:[function(require,module,exports){
+},{"../etc/OBB":33,"three":1}],9:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for defining an animation for a single property.
@@ -36633,7 +36387,7 @@ Animation.prototype.setHover = function( isHover ) {
 
 module.exports = Animation;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Logger":33}],11:[function(require,module,exports){
+},{"../etc/Logger":31}],10:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire animation-handling. This prototype is used in
@@ -36850,7 +36604,7 @@ AnimationManager.prototype.removeSprites = function() {
 
 module.exports = new AnimationManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Animation":10,"../animation/SpriteAnimation":13}],12:[function(require,module,exports){
+},{"../animation/Animation":9,"../animation/SpriteAnimation":12}],11:[function(require,module,exports){
 /**
  * @file This file contains easing functions for animations.
  * 
@@ -37226,7 +36980,7 @@ var Easing = {
 };
 
 module.exports = Easing;
-},{}],13:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 /**
  * @file Prototype for defining an animation based on sprites.
  * 
@@ -37346,7 +37100,7 @@ SpriteAnimation.prototype.update = ( function() {
 }() );
 
 module.exports = SpriteAnimation;
-},{"three":2}],14:[function(require,module,exports){
+},{"three":1}],13:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading and decoding audio-files. The resulting buffers
@@ -37356,10 +37110,10 @@ module.exports = SpriteAnimation;
  */
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var utils = require( "../etc/Utils" );
 
-var TOPIC = require( "../core/Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 /**
  * Creates an audiobuffer-list.
@@ -37460,7 +37214,7 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 					self.bufferList[ index ] = buffer;
 
 					// publish message to inform about status
-					PubSub.publish( TOPIC.STAGE.LOADING.COMPLETE.AUDIO, {
+					EventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.AUDIO, {
 						url : url
 					} );
 
@@ -37490,14 +37244,14 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 	xhr.send();
 
 	// publish message to inform about status
-	PubSub.publish( TOPIC.STAGE.LOADING.START.AUDIO, {
+	EventManager.publish( TOPIC.STAGE.LOADING.START.AUDIO, {
 		url : url
 	} );
 };
 
 module.exports = AudioBufferList;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Topic":28,"../etc/Utils":42,"pubsub-js":1}],15:[function(require,module,exports){
+},{"../etc/Utils":40,"../messaging/EventManager":50,"../messaging/Topic":52}],14:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype holds the central Web Audio context and manages the
@@ -37598,7 +37352,7 @@ AudioListener.prototype.updateMatrixWorld = ( function() {
 
 module.exports = AudioListener;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"three":2}],16:[function(require,module,exports){
+},{"three":1}],15:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire audio handling. This prototype is used in stages
@@ -37609,9 +37363,8 @@ module.exports = AudioListener;
 
 "use strict";
 
-var PubSub = require( "pubsub-js" );
-
-var TOPIC = require( "../core/Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var AudioListener = require( "./AudioListener" );
 var DynamicAudio = require( "./DynamicAudio" );
@@ -37774,7 +37527,7 @@ AudioManager.prototype.setBackgroundMusic = function( file, volume, isLoop ) {
 	this._backgroundMusic.oncanplay = function( event ) {
 
 		// publish message to inform about status
-		PubSub.publish( TOPIC.STAGE.LOADING.COMPLETE.MUSIC, {
+		EventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.MUSIC, {
 			url : url
 		} );
 
@@ -37785,7 +37538,7 @@ AudioManager.prototype.setBackgroundMusic = function( file, volume, isLoop ) {
 	logger.log( "INFO: AudioManager: Set new background music. URL: %s", url );
 
 	// publish message to inform about status
-	PubSub.publish( TOPIC.STAGE.LOADING.START.MUSIC, {
+	EventManager.publish( TOPIC.STAGE.LOADING.START.MUSIC, {
 		url : url
 	} );
 };
@@ -37949,12 +37702,12 @@ AudioManager.prototype.setBackgroundMusicVolume = function( volume ) {
 AudioManager.prototype._onErrorBackgroundMusic = function() {
 
 	logger.error( "ERROR: AudioManager: Media resource could not be processed." );
-	PubSub.publish( TOPIC.APPLICATION.ERROR.MUSIC, "Media resource could not be processed" );
+	EventManager.publish( TOPIC.APPLICATION.ERROR.MUSIC, "Media resource could not be processed" );
 };
 
 module.exports = new AudioManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Camera":20,"../core/Topic":28,"../etc/Logger":33,"./AudioBufferList":14,"./AudioListener":15,"./DynamicAudio":17,"pubsub-js":1}],17:[function(require,module,exports){
+},{"../core/Camera":19,"../etc/Logger":31,"../messaging/EventManager":50,"../messaging/Topic":52,"./AudioBufferList":13,"./AudioListener":14,"./DynamicAudio":16}],16:[function(require,module,exports){
 /**
  * @file Prototype for creating dynamic, full-buffered audio objects.
  * 
@@ -38239,7 +37992,7 @@ DynamicAudio.prototype.updateMatrixWorld = ( function() {
 } )();
 
 module.exports = DynamicAudio;
-},{"three":2}],18:[function(require,module,exports){
+},{"three":1}],17:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for first person controls. The logic uses HTML5 Pointer Lock
@@ -38251,10 +38004,10 @@ module.exports = DynamicAudio;
 
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
 
-var TOPIC = require( "../core/Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var camera = require( "../core/Camera" );
 var world = require( "../core/World" );
@@ -38569,7 +38322,7 @@ FirstPersonControls.prototype.getDirection = ( function() {
 FirstPersonControls.prototype.init = function() {
 
 	// subscriptions
-	PubSub.subscribe( TOPIC.CONTROLS.ACTIVE, this._onActive );
+	EventManager.subscribe( TOPIC.CONTROLS.ACTIVE, this._onActive );
 
 	// events
 	global.document.addEventListener( "lockPointer", this._onLockPointer );
@@ -39110,7 +38863,7 @@ FirstPersonControls.prototype._publishPlayerStatus = ( function() {
 		// values of the player
 		this._pitchObject.matrixWorld.decompose( position, quaternion, scale );
 
-		PubSub.publish( TOPIC.MULTIPLAYER.PLAYER, {
+		EventManager.publish( TOPIC.MULTIPLAYER.PLAYER, {
 			position : position,
 			quaternion : quaternion
 		} );
@@ -39285,7 +39038,7 @@ FirstPersonControls.prototype._onKeyDown = function( event ) {
 
 			case 69:
 				// e
-				PubSub.publish( TOPIC.ACTION.INTERACTION, {
+				EventManager.publish( TOPIC.ACTION.INTERACTION, {
 					position : self.getPosition(),
 					direction : self.getDirection()
 				} );
@@ -39404,7 +39157,7 @@ FirstPersonControls.RUN = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":12,"../audio/AudioManager":16,"../core/Camera":20,"../core/Topic":28,"../core/World":29,"../etc/SettingsManager":39,"../ui/UserInterfaceManager":82,"pubsub-js":1,"three":2}],19:[function(require,module,exports){
+},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/World":27,"../etc/SettingsManager":37,"../messaging/EventManager":50,"../messaging/Topic":52,"../ui/UserInterfaceManager":83,"three":1}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -39414,9 +39167,8 @@ module.exports = new FirstPersonControls();
 
 "use strict";
 
-var PubSub = require( "pubsub-js" );
-
-var TOPIC = require( "./Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var environment = require( "./Environment" );
 var renderer = require( "./Renderer" );
@@ -39501,14 +39253,14 @@ Bootstrap.prototype._loadStage = function() {
 		stageId = saveGame.stageId;
 	}
 
-	PubSub.publish( TOPIC.APPLICATION.START, {
+	EventManager.publish( TOPIC.APPLICATION.START, {
 		stageId : stageId
 	} );
 };
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":18,"../etc/Logger":33,"../etc/MultiplayerManager":34,"../etc/SaveGameManager":38,"../etc/Utils":42,"../network/NetworkManager":53,"../ui/UserInterfaceManager":82,"./Camera":20,"./Environment":21,"./Renderer":22,"./Topic":28,"pubsub-js":1}],20:[function(require,module,exports){
+},{"../controls/FirstPersonControls":17,"../etc/Logger":31,"../etc/MultiplayerManager":32,"../etc/SaveGameManager":36,"../etc/Utils":40,"../messaging/EventManager":50,"../messaging/Topic":52,"../network/NetworkManager":54,"../ui/UserInterfaceManager":83,"./Camera":19,"./Environment":20,"./Renderer":21}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for camera-based
@@ -39519,9 +39271,9 @@ module.exports = Bootstrap;
 "use strict";
 
 var THREE = require( "three" );
-var PubSub = require( "pubsub-js" );
 
-var TOPIC = require( "./Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var self;
 
@@ -39560,7 +39312,7 @@ Camera.prototype.init = function( fov, aspect, near, far ) {
 	this.updateProjectionMatrix();
 
 	// set subscriptions
-	PubSub.subscribe( TOPIC.APPLICATION.RESIZE, this._onResize );
+	EventManager.subscribe( TOPIC.APPLICATION.RESIZE, this._onResize );
 };
 
 /**
@@ -39578,7 +39330,7 @@ Camera.prototype._onResize = function( message, data ) {
 
 module.exports = new Camera();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Topic":28,"pubsub-js":1,"three":2}],21:[function(require,module,exports){
+},{"../messaging/EventManager":50,"../messaging/Topic":52,"three":1}],20:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype is used to ensure that all necessary browser features
@@ -39802,7 +39554,7 @@ Environment.prototype._testWebPerformance = function() {
 
 module.exports = new Environment();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],22:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for rendering-based
@@ -39815,9 +39567,9 @@ module.exports = new Environment();
 "use strict";
 
 var THREE = require( "three" );
-var PubSub = require( "pubsub-js" );
 
-var TOPIC = require( "./Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var EffectComposer = require( "../postprocessing/EffectComposer" );
 var RenderPass = require( "../postprocessing/RenderPass" );
@@ -39894,7 +39646,7 @@ Renderer.prototype.init = function() {
 	this._composer = new EffectComposer( this._renderer );
 
 	// set subscriptions
-	PubSub.subscribe( TOPIC.APPLICATION.RESIZE, this._onResize );
+	EventManager.subscribe( TOPIC.APPLICATION.RESIZE, this._onResize );
 };
 
 /**
@@ -40112,7 +39864,7 @@ Renderer.prototype._onResize = function( message, data ) {
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Logger":33,"../postprocessing/EffectComposer":54,"../postprocessing/RenderPass":55,"../postprocessing/ShaderPass":56,"../shader/GaussianBlurShader":58,"../shader/GrayscaleShader":59,"../shader/VignetteShader":60,"./Topic":28,"pubsub-js":1,"three":2}],23:[function(require,module,exports){
+},{"../etc/Logger":31,"../messaging/EventManager":50,"../messaging/Topic":52,"../postprocessing/EffectComposer":55,"../postprocessing/RenderPass":56,"../postprocessing/ShaderPass":57,"../shader/GaussianBlurShader":59,"../shader/GrayscaleShader":60,"../shader/VignetteShader":61,"three":1}],22:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic for scene-based functionality.
  * 
@@ -40154,7 +39906,7 @@ Scene.prototype.clear = function() {
 };
 
 module.exports = new Scene();
-},{"three":2}],24:[function(require,module,exports){
+},{"three":1}],23:[function(require,module,exports){
 (function (global){
 /**
  * @file Basis prototype for all stages. It is used to provide specific stages a
@@ -40166,9 +39918,9 @@ module.exports = new Scene();
 "use strict";
 
 var THREE = require( "three" );
-var PubSub = require( "pubsub-js" );
 
-var TOPIC = require( "./Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var renderer = require( "./Renderer" );
 var camera = require( "./Camera" );
@@ -40396,7 +40148,7 @@ StageBase.prototype._changeStage = function( stageId, isSaveGame ) {
 	this.controls.isActionInProgress = true;
 	
 	// publish message to trigger the change
-	PubSub.publish( TOPIC.STAGE.CHANGE, {
+	EventManager.publish( TOPIC.STAGE.CHANGE, {
 		stageId : stageId,
 		isSaveGame : isSaveGame
 	} );
@@ -40404,7 +40156,7 @@ StageBase.prototype._changeStage = function( stageId, isSaveGame ) {
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":6,"../animation/AnimationManager":11,"../audio/AudioManager":16,"../controls/FirstPersonControls":18,"../etc/PerformanceManager":37,"../etc/SaveGameManager":38,"../etc/SettingsManager":39,"../etc/TextManager":41,"../etc/Utils":42,"../game/entity/EntityManager":43,"../ui/UserInterfaceManager":82,"./Camera":20,"./Renderer":22,"./Topic":28,"./World":29,"pubsub-js":1,"three":2}],25:[function(require,module,exports){
+},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../controls/FirstPersonControls":17,"../etc/PerformanceManager":35,"../etc/SaveGameManager":36,"../etc/SettingsManager":37,"../etc/TextManager":39,"../etc/Utils":40,"../game/entity/EntityManager":41,"../messaging/EventManager":50,"../messaging/Topic":52,"../ui/UserInterfaceManager":83,"./Camera":19,"./Renderer":21,"./World":27,"three":1}],24:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -40414,9 +40166,8 @@ module.exports = StageBase;
 
 var self;
 
-var PubSub = require( "pubsub-js" );
-
-var TOPIC = require( "./Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var saveGameManager = require( "../etc/SaveGameManager" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
@@ -40476,11 +40227,11 @@ function StageManager() {
 	} );
 
 	// subscriptions
-	PubSub.subscribe( TOPIC.APPLICATION.START, this._onApplicationStart );
-	PubSub.subscribe( TOPIC.STAGE.START, this._onStageStart );
-	PubSub.subscribe( TOPIC.STAGE.CHANGE, this._onStageChange );
-	PubSub.subscribe( TOPIC.STAGE.LOADING.START.ALL, this._onLoadStart );
-	PubSub.subscribe( TOPIC.STAGE.LOADING.COMPLETE.ALL, this._onLoadComplete );
+	EventManager.subscribe( TOPIC.APPLICATION.START, this._onApplicationStart );
+	EventManager.subscribe( TOPIC.STAGE.START, this._onStageStart );
+	EventManager.subscribe( TOPIC.STAGE.CHANGE, this._onStageChange );
+	EventManager.subscribe( TOPIC.STAGE.LOADING.START.ALL, this._onLoadStart );
+	EventManager.subscribe( TOPIC.STAGE.LOADING.COMPLETE.ALL, this._onLoadComplete );
 
 	self = this;
 }
@@ -40670,7 +40421,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 		var loadingProgress = Math.round( self._loaded * 100 / self._total );
 
 		// inform system about progress
-		PubSub.publish( TOPIC.STAGE.LOADING.PROGRESS, {
+		EventManager.publish( TOPIC.STAGE.LOADING.PROGRESS, {
 			loadingProgress : loadingProgress,
 			isApplicationStart : self._isApplicationStartActive
 		} );
@@ -40679,7 +40430,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 		if ( self._loaded === self._total )
 		{
 			// publish message
-			PubSub.publish( TOPIC.STAGE.READY, {
+			EventManager.publish( TOPIC.STAGE.READY, {
 				isApplicationStart : self._isApplicationStartActive
 			} );
 
@@ -40696,7 +40447,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 };
 
 module.exports = new StageManager();
-},{"../etc/Logger":33,"../etc/SaveGameManager":38,"../stages/Stage_001":61,"../stages/Stage_002":62,"../stages/Stage_003":63,"../stages/Stage_004":64,"../stages/Stage_005":65,"../stages/Stage_006":66,"../stages/Stage_007":67,"../stages/Stage_008":68,"../stages/Stage_009":69,"../stages/Stage_010":70,"../stages/Stage_011":71,"../ui/UserInterfaceManager":82,"./Topic":28,"pubsub-js":1}],26:[function(require,module,exports){
+},{"../etc/Logger":31,"../etc/SaveGameManager":36,"../messaging/EventManager":50,"../messaging/Topic":52,"../stages/Stage_001":62,"../stages/Stage_002":63,"../stages/Stage_003":64,"../stages/Stage_004":65,"../stages/Stage_005":66,"../stages/Stage_006":67,"../stages/Stage_007":68,"../stages/Stage_008":69,"../stages/Stage_009":70,"../stages/Stage_010":71,"../stages/Stage_011":72,"../ui/UserInterfaceManager":83}],25:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It uses the HTML5-API Web
@@ -40779,7 +40530,7 @@ Thread.prototype.onError = function( listener ) {
 
 module.exports = Thread;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],27:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for thread-based
@@ -40922,61 +40673,7 @@ ThreadManager.prototype._getScriptURL = function( script ) {
 
 module.exports = new ThreadManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Thread":26}],28:[function(require,module,exports){
-/**
- * @file This file contains all topics for publish & subscribe.
- * 
- * @author Human Interactive
- */
-"use strict";
-
-var Topic = {
-	ACTION : {
-		INTERACTION : "action.interaction"
-	},
-	APPLICATION : {
-		START : "application.start",
-		ERROR : {
-			MUSIC : "application.error.music"
-		},
-		RESIZE : "application.resize"
-	},
-	CONTROLS : {
-		ACTIVE : "controls.active"
-	},
-	MULTIPLAYER : {
-		CHAT : "multiplayer.chat",
-		PLAYER : "multiplayer.player",
-		MESSAGE : "multiplayer.message",
-		STATUS : "multiplayer.status",
-		UPDATE : "multiplayer.update"
-	},
-	STAGE : {
-		CHANGE : "stage.change",
-		LOADING : {
-			PROGRESS : "stage.loading.progress",
-			START : {
-				ALL : "stage.loading.start",
-				AUDIO : "stage.loading.start.audio",
-				MUSIC : "stage.loading.start.music",
-				OBJECT : "stage.loading.start.object",
-				TEXT : "stage.loading.start.text"
-			},
-			COMPLETE : {
-				ALL : "stage.loading.complete",
-				AUDIO : "stage.loading.complete.audio",
-				MUSIC : "stage.loading.complete.music",
-				OBJECT : "stage.loading.complete.object",
-				TEXT : "stage.loading.complete.text"
-			}
-		},
-		READY : "stage.ready",
-		START : "stage.start"
-	}
-};
-
-module.exports = Topic;
-},{}],29:[function(require,module,exports){
+},{"./Thread":25}],27:[function(require,module,exports){
 /**
  * @file This prototype contains all important environment data of a stage.
  * 
@@ -41187,7 +40884,7 @@ World.prototype.clear = function() {
 };
 
 module.exports = new World();
-},{"../action/ActionManager":6,"./Scene":23}],30:[function(require,module,exports){
+},{"../action/ActionManager":5,"./Scene":22}],28:[function(require,module,exports){
 /**
  * @file This prototype handles all stuff for impostors. An impostor is a
  * billboard that is created on the fly by rendering a complex object from the
@@ -41656,7 +41353,7 @@ Impostor.prototype._render = function() {
 };
 
 module.exports = Impostor;
-},{"three":2}],31:[function(require,module,exports){
+},{"three":1}],29:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading 3D objects in JSON-format from the server. The
@@ -41666,11 +41363,11 @@ module.exports = Impostor;
  */
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
-var utils = require( "./Utils" );
 
-var TOPIC = require( "../core/Topic" );
+var utils = require( "./Utils" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 /**
  * Creates a JSONLoader.
  * 
@@ -41733,7 +41430,7 @@ JSONLoader.prototype.load = function( url, onLoad ) {
 					onLoad( result.geometry, result.materials );
 
 					// publish message
-					PubSub.publish( TOPIC.STAGE.LOADING.COMPLETE.OBJECT, {
+					EventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.OBJECT, {
 						url : url
 					} );
 					
@@ -41757,14 +41454,14 @@ JSONLoader.prototype.load = function( url, onLoad ) {
 	xhr.send();
 
 	// publish message to inform about status
-	PubSub.publish( TOPIC.STAGE.LOADING.START.OBJECT, {
+	EventManager.publish( TOPIC.STAGE.LOADING.START.OBJECT, {
 		url : url
 	} );
 };
 
 module.exports = JSONLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Topic":28,"./Utils":42,"pubsub-js":1,"three":2}],32:[function(require,module,exports){
+},{"../messaging/EventManager":50,"../messaging/Topic":52,"./Utils":40,"three":1}],30:[function(require,module,exports){
 /**
  * @file This prototype is used for LOD handling. It is an enhancement of the
  * LOD functionality of three.js. Instead of switching directly between LOD
@@ -41943,7 +41640,7 @@ LOD.MODE = {
 };
 
 module.exports = LOD;
-},{"three":2}],33:[function(require,module,exports){
+},{"three":1}],31:[function(require,module,exports){
 /**
  * @file This prototype provides logging functionality. It's a wrapper for the
  * browser console API.
@@ -42041,7 +41738,7 @@ Logger.prototype.logSystemInfo = function( renderer ) {
 };
 
 module.exports = new Logger();
-},{"./Utils":42}],34:[function(require,module,exports){
+},{"./Utils":40}],32:[function(require,module,exports){
 /**
  * @file This prototype manages the characters of the other teammates.
  * 
@@ -42049,10 +41746,10 @@ module.exports = new Logger();
  */
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
 
-var TOPIC = require( "../core/Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var Teammate = require( "./Teammate" );
 var world = require( "../core/World" );
@@ -42084,8 +41781,8 @@ function MultiplayerManager() {
  */
 MultiplayerManager.prototype.init = function() {
 
-	PubSub.subscribe( TOPIC.MULTIPLAYER.UPDATE, this._onUpdate );
-	PubSub.subscribe( TOPIC.MULTIPLAYER.STATUS, this._onStatus );
+	EventManager.subscribe( TOPIC.MULTIPLAYER.UPDATE, this._onUpdate );
+	EventManager.subscribe( TOPIC.MULTIPLAYER.STATUS, this._onStatus );
 };
 
 /**
@@ -42213,7 +41910,7 @@ MultiplayerManager.prototype._getTeammate = function( id ) {
 };
 
 module.exports = new MultiplayerManager();
-},{"../core/Topic":28,"../core/World":29,"./Logger":33,"./Teammate":40,"pubsub-js":1,"three":2}],35:[function(require,module,exports){
+},{"../core/World":27,"../messaging/EventManager":50,"../messaging/Topic":52,"./Logger":31,"./Teammate":38,"three":1}],33:[function(require,module,exports){
 /**
  * @file A 3D arbitrarily oriented bounding box.
  * 
@@ -42915,7 +42612,7 @@ OBB.prototype.clone = function() {
 };
 
 module.exports = OBB;
-},{"three":2}],36:[function(require,module,exports){
+},{"three":1}],34:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading 3D objects in object-format from the server. The
@@ -42925,11 +42622,12 @@ module.exports = OBB;
  */
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
-var utils = require( "./Utils" );
 
-var TOPIC = require( "../core/Topic" );
+var utils = require( "./Utils" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
+
 /**
  * Creates a ObjectLoader.
  * 
@@ -42988,7 +42686,7 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 					self.parse( JSON.parse( xhr.responseText ), onLoad );
 
 					// publish message
-					PubSub.publish( TOPIC.STAGE.LOADING.COMPLETE.OBJECT, {
+					EventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.OBJECT, {
 						url : url
 					} );
 
@@ -43011,14 +42709,14 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 	xhr.send();
 
 	// publish message to inform about status
-	PubSub.publish( TOPIC.STAGE.LOADING.START.OBJECT, {
+	EventManager.publish( TOPIC.STAGE.LOADING.START.OBJECT, {
 		url : url
 	} );
 };
 
 module.exports = ObjectLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Topic":28,"./Utils":42,"pubsub-js":1,"three":2}],37:[function(require,module,exports){
+},{"../messaging/EventManager":50,"../messaging/Topic":52,"./Utils":40,"three":1}],35:[function(require,module,exports){
 /**
  * @file Interface for performance handling. This prototype is used in stages to
  * create e.g. LOD instances.
@@ -43319,7 +43017,7 @@ PerformanceManager.prototype._updateImpostors = ( function() {
 }() );
 
 module.exports = new PerformanceManager();
-},{"../core/Camera":20,"../core/Renderer":22,"../core/World":29,"./Impostor":30,"./LOD":32,"three":2}],38:[function(require,module,exports){
+},{"../core/Camera":19,"../core/Renderer":21,"../core/World":27,"./Impostor":28,"./LOD":30,"three":1}],36:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire savegame-handling. This prototype is using HTML
@@ -43398,7 +43096,7 @@ SaveGameManager.prototype.remove = function() {
 
 module.exports = new SaveGameManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],39:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire settings-handling. This prototype is used to
@@ -43591,7 +43289,7 @@ SettingsManager.MOUSE = {
 
 module.exports = new SettingsManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":42,"three":2}],40:[function(require,module,exports){
+},{"./Utils":40,"three":1}],38:[function(require,module,exports){
 /**
  * @file This prototype represents the character of a teammate.
  * 
@@ -43643,7 +43341,7 @@ Teammate.prototype.update = function( position, quaternion ) {
 };
 
 module.exports = Teammate;
-},{"../game/entity/GameEntity":44,"three":2}],41:[function(require,module,exports){
+},{"../game/entity/GameEntity":42,"three":1}],39:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire text-handling. This prototype is used in stages to
@@ -43653,10 +43351,11 @@ module.exports = Teammate;
  */
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var utils = require( "./Utils" );
 
-var TOPIC = require( "../core/Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
+
 /**
  * Creates the text manager.
  * 
@@ -43711,7 +43410,7 @@ TextManager.prototype.load = function( stageId, callback ) {
 					self._searchAndRepalce();
 
 					// publish message to inform about status
-					PubSub.publish( TOPIC.STAGE.LOADING.COMPLETE.TEXT, {
+					EventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.TEXT, {
 						url : url
 					} );
 
@@ -43739,7 +43438,7 @@ TextManager.prototype.load = function( stageId, callback ) {
 	xhr.send();
 
 	// publish message to inform about status
-	PubSub.publish( TOPIC.STAGE.LOADING.START.TEXT, {
+	EventManager.publish( TOPIC.STAGE.LOADING.START.TEXT, {
 		url : url
 	} );
 };
@@ -43818,7 +43517,7 @@ TextManager.prototype._searchAndRepalce = function() {
 
 module.exports = new TextManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Topic":28,"./Utils":42,"pubsub-js":1}],42:[function(require,module,exports){
+},{"../messaging/EventManager":50,"../messaging/Topic":52,"./Utils":40}],40:[function(require,module,exports){
 (function (global){
 /**
  * @file All helper and util functions are organized in this module.
@@ -43997,7 +43696,7 @@ Utils.CDN = {
 
 module.exports = new Utils();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],43:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 /**
  * @file This prototype manages all game entities.
  * 
@@ -44127,7 +43826,7 @@ EntityManager.prototype.removeEntities = function() {
 };
 
 module.exports = new EntityManager();
-},{"./Vehicle":46}],44:[function(require,module,exports){
+},{"./Vehicle":44}],42:[function(require,module,exports){
 /**
  * @file All entities that are part of the game logic inherit from this
  * prototype.
@@ -44185,8 +43884,21 @@ GameEntity.prototype.update = function() {
 
 };
 
+/**
+ * If an entity wants to communicate with other entities, it must implement this
+ * method. Besides, the entity needs to register itself at the event manager.
+ * 
+ * @param {Telegram} telegram - The telegram of the message.
+ * 
+ * @returns {boolean} Is the message handled successfully?
+ */
+GameEntity.prototype.handleMessage = function( telegram ) {
+
+	return false;
+};
+
 module.exports = GameEntity;
-},{}],45:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 /**
  * @file Base prototype from which all moving game agents are derived.
  * 
@@ -44377,7 +44089,7 @@ MovingEntity.prototype.getDirection = function() {
 };
 
 module.exports = MovingEntity;
-},{"./GameEntity":44,"three":2}],46:[function(require,module,exports){
+},{"./GameEntity":42,"three":1}],44:[function(require,module,exports){
 /**
  * @file A simple vehicle that uses steering behaviors.
  * 
@@ -44504,7 +44216,7 @@ Vehicle.prototype.update = ( function() {
 }() );
 
 module.exports = Vehicle;
-},{"../steering/Smoother":50,"../steering/SteeringBehaviors":51,"./MovingEntity":45,"three":2}],47:[function(require,module,exports){
+},{"../steering/Smoother":48,"../steering/SteeringBehaviors":49,"./MovingEntity":43,"three":1}],45:[function(require,module,exports){
 /**
  * @file Super prototype for states used by FSMs.
  * 
@@ -44556,7 +44268,7 @@ State.prototype.exit = function( entity ) { };
 State.prototype.onMessage = function( entity, message, data ) { return false; };
 
 module.exports = State;
-},{}],48:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 /**
  * @file This prototype is a basic finite state machine used for AI logic.
  * 
@@ -44698,7 +44410,7 @@ StateMachine.prototype.isInState = function( state ) {
 };
 
 module.exports = StateMachine;
-},{"../../etc/Logger":33,"./State":47}],49:[function(require,module,exports){
+},{"../../etc/Logger":31,"./State":45}],47:[function(require,module,exports){
 /**
  * @file Prototype to define, manage, and traverse a path defined by a series of
  * 3D vectors.
@@ -44860,7 +44572,7 @@ Path.prototype.createRandomPath = function( numberOfWaypoints, boundingBox ) {
 };
 
 module.exports = Path;
-},{"../../etc/Logger":33,"three":2}],50:[function(require,module,exports){
+},{"../../etc/Logger":31,"three":1}],48:[function(require,module,exports){
 /**
  * @file Prototype to help calculate the average value of a history of vector
  * values.
@@ -44950,7 +44662,7 @@ Smoother.prototype.update = ( function() {
 }() );
 
 module.exports = Smoother;
-},{"three":2}],51:[function(require,module,exports){
+},{"three":1}],49:[function(require,module,exports){
 /**
  * @file Prototype to encapsulate steering behaviors for a vehicle.
  * 
@@ -46649,7 +46361,671 @@ SteeringBehaviors.DECELERATION = {
 };
 
 module.exports = SteeringBehaviors;
-},{"../../core/World":29,"../../etc/Logger":33,"./Path":49,"three":2}],52:[function(require,module,exports){
+},{"../../core/World":27,"../../etc/Logger":31,"./Path":47,"three":1}],50:[function(require,module,exports){
+/**
+ * @file This prototype provides topic-based publish/subscribe messaging and
+ * enables communication between game entities.
+ * 
+ * see: https://github.com/mroderick/PubSubJS
+ * see: Programming Game AI by Example by Mat Buckland: Messaging in State-Driven Agent Design
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var Telegram = require( "./Telegram" );
+var logger = require( "../etc/Logger" );
+var GameEntity = require( "../game/entity/GameEntity" );
+
+/**
+ * Creates the event manager.
+ * 
+ * @constructor
+ */
+function EventManager() {
+
+	Object.defineProperties( this, {
+
+		isImmediateExceptions : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		}
+
+	} );
+}
+
+/**
+ * Publishes the the message, passing the data to it's subscribers.
+ * 
+ * @param {string} message - The message to publish.
+ * @param {object} data - The data to pass to subscribers.
+ * 
+ * @returns {boolean} Is the message published successfully?
+ */
+EventManager.prototype.publish = function( message, data ) {
+
+	return publish( message, data, false, this.isImmediateExceptions );
+};
+
+/**
+ * Publishes the the message synchronously, passing the data to it's subscribers
+ * 
+ * @param {string} message - The message to publish.
+ * @param {object} data - The data to pass to subscribers.
+ * 
+ * @returns {boolean} Is the message published successfully?
+ */
+EventManager.prototype.publishSync = function( message, data ) {
+
+	return publish( message, data, true, this.isImmediateExceptions );
+};
+
+/**
+ * Subscribes the passed function to the passed message. Every returned token is
+ * unique and should be stored if you need to unsubscribe.
+ * 
+ * @param {string} message - The message to subscribe to.
+ * @param {function} callback - The function to call when a new message is published.
+ * 
+ * @returns {string} Token for unsubscribing.
+ */
+EventManager.prototype.subscribe = ( function() {
+
+	var token;
+
+	return function( message, callback ) {
+
+		// ensure, the callback parameter is a function
+		if ( typeof callback !== "function" )
+		{
+			throw "ERROR: EventManager: No callback function for subscription assigned.";
+		}
+
+		// register message if necessary
+		if ( messages.hasOwnProperty( message ) === false )
+		{
+			messages[ message ] = {};
+		}
+
+		// forcing token as string, to allow for future expansions without
+		// breaking
+		// usage and allow for easy use as key names for the "messages" object
+		token = "uid_" + String( ++lastUid );
+		messages[ message ][ token ] = callback;
+
+		return token;
+
+	};
+
+}() );
+
+/**
+ * Clears all subscriptions
+ */
+EventManager.prototype.clearAllSubscriptions = function() {
+
+	messages = {};
+};
+
+/**
+ * Clears subscriptions by the topic.
+ * 
+ * @param {string} topic - The corresponding topic of the subscriptions to clear.
+ */
+EventManager.prototype.clearSubscriptions = ( function() {
+
+	var m;
+
+	return function( topic ) {
+
+		for ( m in messages ) // jshint ignore:line
+		{
+			if ( messages.hasOwnProperty( m ) === true && m.indexOf( topic ) === 0 )
+			{
+				delete messages[ m ];
+			}
+		}
+	};
+
+}() );
+
+/**
+ * Removes subscriptions.
+ * 
+ * When passed a token, removes a specific subscription. When passed a function,
+ * removes all subscriptions for that function. When passed a topic, removes all
+ * subscriptions for that topic (hierarchy).
+ * 
+ * @param {any} value - A token, function or topic to unsubscribe.
+ * 
+ * @returns {any} The return value depends on the type of parameter "value".
+ */
+EventManager.prototype.unsubscribe = ( function() {
+
+	var isTopic, isToken, isFunction;
+
+	var result = false, message, m, t;
+
+	return function( value ) {
+
+		isTopic = ( typeof value === "string" ) && ( messages.hasOwnProperty( value ) === true );
+		isToken = ( isTopic === false ) && ( typeof value === "string" );
+		isFunction = typeof value === "function";
+
+		// this handles the case if "value" is a topic
+		if ( isTopic === true )
+		{
+			delete messages[ value ];
+			return;
+		}
+
+		// iterate over all messages/topics
+		for ( m in messages ) // jshint ignore:line
+		{
+			if ( messages.hasOwnProperty( m ) === true )
+			{
+				// buffer message
+				message = messages[ m ];
+
+				// this handles the case if "value" is a token
+				if ( isToken === true && message[ value ] )
+				{
+					// delete the token of the corresponding topic
+					delete message[ value ];
+
+					// return the token to the caller
+					result = value;
+
+					// because tokens are unique, we can just stop here
+					break;
+				}
+
+				// this handles the case if "value" is a function
+				if ( isFunction === true )
+				{
+					// iterate over all subscriptions of a topic
+					for ( t in message ) // jshint ignore:line
+					{
+						// check the value (callback) of the token
+						if ( message.hasOwnProperty( t ) === true && message[ t ] === value )
+						{
+							// delete the token
+							delete message[ t ];
+
+							result = true;
+						}
+					}// next token
+				}
+			}
+		}// next topic
+
+		return result;
+	};
+	
+}() );
+
+/**
+ * Sends a message to an entity.
+ * 
+ * @param {number} sender - The ID of the sender of the message.
+ * @param {number} receiver - The ID of the receiver of the message.
+ * @param {string} message - The message to send.
+ * @param {object} data - The data to pass to receiver.
+ * @param {number} delay - The delay of the message.
+ */
+EventManager.prototype.sendMessageToEntity = function( sender, receiver, message, data, delay ) {
+
+	sendMessageToEntity( sender, receiver, message, data, false, delay );
+};
+
+/**
+ * Sends a message synchronously to an entity.
+ * 
+ * @param {number} sender - The ID of the sender of the message.
+ * @param {number} receiver - The ID of the receiver of the message.
+ * @param {string} message - The message to send.
+ * @param {object} data - The data to pass to receiver.
+ */
+EventManager.prototype.sendMessageToEntitySync = function( sender, receiver, message, data ) {
+
+	sendMessageToEntity( sender, receiver, message, data, true, 0 );
+};
+
+/**
+ * Registers an entity for messaging.
+ * 
+ * @param {GameEntity} entity - The entity to register.
+ */
+EventManager.prototype.registerEntity = function( entity ) {
+
+	if ( entity instanceof GameEntity )
+	{
+		// register entity if necessary
+		if ( entities.hasOwnProperty( entity.id ) === false )
+		{
+			entities[ entity.id ] = entity;
+		}
+	}
+	else
+	{
+		throw "ERROR: EventManager: Entity no instance of \"GameEntity\".";
+	}
+
+};
+
+/**
+ * Removes an entity.
+ * 
+ * @param {GameEntity} entity - The entity to remove.
+ */
+EventManager.prototype.removeEntity = function( entity ) {
+
+	if ( entity instanceof GameEntity )
+	{
+		// remove entity if necessary
+		if ( entities.hasOwnProperty( entity.id ) === true )
+		{
+			delete entities[ entity.id ];
+		}
+	}
+	else
+	{
+		throw "ERROR: EventManager: Entity no instance of \"GameEntity\".";
+	}
+};
+
+/**
+ * Clears the entity list for messaging.
+ */
+EventManager.prototype.clearEntites = function( entity ) {
+
+	entities = {};
+};
+
+// private functions and attributes
+var messages = {};
+var entities = {};
+var lastUid = -1;
+
+/**
+ * Checks if the given object has keys.
+ * 
+ * @param {object} function - The function to test.
+ * 
+ * @returns {boolean} Does the object has keys?
+ */
+function hasKeys( object ) {
+
+	for ( var key in object )
+	{
+		if ( object.hasOwnProperty( key ) === true )
+		{
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+/**
+ * This returns a functions that just throws the given exception. Used for
+ * delayed exception handling.
+ * 
+ * @param {object} exception - The exception to throw.
+ */
+function throwException( exception ) {
+
+	return function reThrowException() {
+
+		throw exception;
+	};
+}
+
+/**
+ * This function calls the subscriber function with delayed exceptions. This
+ * ensures, that the logic delivers messages to all subscribers, even when some
+ * fail.
+ * 
+ * @param {function} subscriber - The callback function of the subscriber.
+ * @param {string} message - The message to publish.
+ * @param {object} data - The data to pass to subscribers.
+ */
+function callSubscriberWithDelayedExceptions( subscriber, message, data ) {
+
+	try
+	{
+		// we call the function within try/catch
+		subscriber( message, data );
+	}
+	catch ( exception )
+	{
+		// catch the exception an throw it via an asynchronous wrapper function
+		setTimeout( throwException( exception ), 0 );
+	}
+}
+
+/**
+ * This function calls the subscriber function with immediate exceptions. If an
+ * exception is thrown, the delivery of message will automatically stop.
+ * 
+ * @param {function} subscriber - The callback function of the subscriber.
+ * @param {string} message - The message to publish.
+ * @param {object} data - The data to pass to subscribers.
+ */
+function callSubscriberWithImmediateExceptions( subscriber, message, data ) {
+
+	// we call the function without try/catch
+	subscriber( message, data );
+}
+
+/**
+ * This function delivers the message to the subscribers.
+ * 
+ * @param {string} originalMessage - The original message of publish e.g.
+ * "a.b.c".
+ * @param {string} matchedMessage - The current message to publish e.g. "a.b".
+ * @param {object} data - The data to pass to subscribers.
+ * @param {object} isImmediateExceptions - Force immediate exceptions?
+ */
+function deliverMessage( originalMessage, matchedMessage, data, immediateExceptions ) {
+
+	// get the subscribers of the topic.
+	// thats a object with the structure token -> callback.
+	var subscribers = messages[ matchedMessage ];
+
+	// determine the type of function call
+	var callSubscriber = immediateExceptions ? callSubscriberWithImmediateExceptions : callSubscriberWithDelayedExceptions;
+
+	// ensure the matchedMessage is an existing topic
+	if ( messages.hasOwnProperty( matchedMessage ) === false )
+	{
+		return;
+	}
+	
+	// call for each subscriber the callback function
+	for ( var s in subscribers )
+	{
+		if ( subscribers.hasOwnProperty( s ) === true )
+		{
+			callSubscriber( subscribers[ s ], originalMessage, data );
+		}
+	}
+}
+
+/**
+ * This function creates a delivery function for the publish of a message.
+ * 
+ * @param {string} message - The message to publish.
+ * @param {object} data - The data to pass to subscribers.
+ * @param {object} isImmediateExceptions - Force immediate exceptions?
+ * 
+ * @returns {function} The delivery function.
+ */
+function createDeliveryFunction( message, data, immediateExceptions ) {
+
+	return function deliverNamespaced() {
+
+		// ensure, we have a string object
+		var topic = String( message );
+
+		// index to the last appearance of a dot char
+		// used for hierarchical addressing e.g. "a.b.c"
+		var position = topic.lastIndexOf( '.' );
+
+		// deliver the message as it is now
+		deliverMessage( message, message, data, immediateExceptions );
+
+		// trim the hierarchy and deliver message to each level
+		while ( position !== -1 )
+		{
+			// update topic e.b. "a.b.c" => "a.b"
+			topic = topic.substr( 0, position );
+
+			// update the position index of the next "dot" char
+			position = topic.lastIndexOf( '.' );
+
+			// deliver message
+			deliverMessage( message, topic, data, immediateExceptions );
+		}
+	};
+}
+
+/**
+ * Checks, if a message has subscribers.
+ * 
+ * @param {string} message - The message to check.
+ * 
+ * @returns {boolean} Does the message has subscribers?
+ */
+function hasMessageSubscribers( message ) {
+
+	// ensure, we have a string object
+	var topic = String( message );
+
+	// check, if the message exists AND if the message has subscriptions
+	var isFound = Boolean( messages.hasOwnProperty( topic ) === true && hasKeys( messages[ topic ] ) === true );
+
+	// index to the last appearance of a dot char. used for hierarchical
+	// addressing e.g. "a.b.c"
+	var position = topic.lastIndexOf( "." );
+
+	// if no subscribers were found in the current level of the hierarchy AND the
+	// message contains at least a "dot", check the next level e.g. "a.b"
+	while ( isFound === false && position !== -1 )
+	{
+		// update topic e.b. "a.b.c" => "a.b"
+		topic = topic.substr( 0, position );
+
+		// update the position index of the next "dot" char
+		position = topic.lastIndexOf( "." );
+
+		// repeat check
+		isFound = Boolean( messages.hasOwnProperty( topic ) === true && hasKeys( messages[ topic ] ) === true );
+	}
+
+	return isFound;
+}
+
+/**
+ * Does the publish of a message.
+ * 
+ * @param {string} message - The message to publish.
+ * @param {object} data - The data to pass to subscribers.
+ * @param {boolean} isSync - Should the message be published synchronously?
+ * @param {object} isImmediateExceptions - Force immediate exceptions?
+ * 
+ * @returns {boolean} Is the message published successfully?
+ */
+function publish( message, data, isSync, isImmediateExceptions ) {
+
+	// first, check if the topic has subscribers
+	if ( hasMessageSubscribers( message ) === false )
+	{
+		return false;
+	}
+
+	// wrap the data into a function
+	var deliver = createDeliveryFunction( message, data, isImmediateExceptions );
+
+	// if we have a sync publish, call it immediately
+	if ( isSync === true )
+	{
+		deliver();
+	}
+	// if not, call it asynchronously
+	else
+	{
+		setTimeout( deliver, 0 );
+	}
+
+	return true;
+}
+
+/**
+ * Sends a message to an entity.
+ * 
+ * @param {number} sender - The ID of the sender of the message.
+ * @param {number} receiver - The ID of the receiver of the message.
+ * @param {string} message - The message to send.
+ * @param {object} data - The data to pass to receiver.
+ * @param {boolean} isSync - Should the message be send synchronously?
+ * @param {number} delay - The delay of the message.
+ */
+function sendMessageToEntity( sender, receiver, message, data, isSync, delay ) {
+
+	var telegram;
+
+	// first, check if the sender AND receiver are registered
+	if ( entities.hasOwnProperty( sender ) === false || entities.hasOwnProperty( receiver ) === false )
+	{
+		logger.warn( "WARN: EventManager: Message not sent. Entities not correctly registered." );
+		
+		return;
+	}
+
+	// create telegram
+	telegram = new Telegram( sender, receiver, message, data, delay );
+
+	// check the type of message delivery
+	if ( isSync === true )
+	{
+		// call the "handleMessage" of the game entity
+		if ( entities[ receiver ].handleMessage( telegram ) === false )
+		{
+			logger.warn( "WARN: EventManager: Message not handled by receiver with ID: %i.", receiver );
+		}
+	}
+	else
+	{
+		setTimeout( function() {
+
+			// call the "handleMessage" of the game entity with a delay
+			if ( entities[ receiver ].handleMessage( telegram ) === false )
+			{
+				logger.warn( "WARN: EventManager: Message not handled by receiver with ID: %i.", receiver );
+			}
+
+		}, delay );
+	}
+}
+
+module.exports = new EventManager();
+},{"../etc/Logger":31,"../game/entity/GameEntity":42,"./Telegram":51}],51:[function(require,module,exports){
+/**
+ * @file This defines a telegram. A telegram is a data structure that records
+ * information required to dispatch game messages. These messages are used by
+ * game entities to communicate with each other.
+ * 
+ * @author Human Interactive
+ */
+"use strict";
+
+/**
+ * Creates a telegram.
+ * 
+ * @constructor
+ * 
+ * @param {number} sender - The entity that sent this telegram
+ * @param {number} receiver - The entity that is to receive this telegram
+ * @param {string} message - The message itself.
+ * @param {object} data - Additional information that may accompany the message.
+ * @param {number} delay - Messages can be dispatched immediately or delayed for a specified amount of time.
+ */
+function Telegram( sender, receiver, message, data, delay ) {
+
+	Object.defineProperties( this, {
+		sender : {
+			value : sender,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		receiver : {
+			value : receiver,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		message : {
+			value : message,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		data : {
+			value : data,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		delay : {
+			value : delay,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		}
+	} );
+}
+
+module.exports = Telegram;
+},{}],52:[function(require,module,exports){
+/**
+ * @file This file contains all topics for publish & subscribe.
+ * 
+ * @author Human Interactive
+ */
+"use strict";
+
+var TOPIC = {
+	ACTION : {
+		INTERACTION : "action.interaction"
+	},
+	APPLICATION : {
+		START : "application.start",
+		ERROR : {
+			MUSIC : "application.error.music"
+		},
+		RESIZE : "application.resize"
+	},
+	CONTROLS : {
+		ACTIVE : "controls.active"
+	},
+	MULTIPLAYER : {
+		CHAT : "multiplayer.chat",
+		PLAYER : "multiplayer.player",
+		MESSAGE : "multiplayer.message",
+		STATUS : "multiplayer.status",
+		UPDATE : "multiplayer.update"
+	},
+	STAGE : {
+		CHANGE : "stage.change",
+		LOADING : {
+			PROGRESS : "stage.loading.progress",
+			START : {
+				ALL : "stage.loading.start",
+				AUDIO : "stage.loading.start.audio",
+				MUSIC : "stage.loading.start.music",
+				OBJECT : "stage.loading.start.object",
+				TEXT : "stage.loading.start.text"
+			},
+			COMPLETE : {
+				ALL : "stage.loading.complete",
+				AUDIO : "stage.loading.complete.audio",
+				MUSIC : "stage.loading.complete.music",
+				OBJECT : "stage.loading.complete.object",
+				TEXT : "stage.loading.complete.text"
+			}
+		},
+		READY : "stage.ready",
+		START : "stage.start"
+	}
+};
+
+module.exports = TOPIC;
+},{}],53:[function(require,module,exports){
 /**
  * @file Prototype for network-messages.
  * 
@@ -46699,7 +47075,7 @@ Message.TYPES = {
 };
 
 module.exports = Message;
-},{}],53:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for network-based
@@ -46709,14 +47085,14 @@ module.exports = Message;
  */
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var WebSocket = require( "ws" );
 
 var Message = require( "./Message" );
 var threadMananger = require( "../core/ThreadManager" );
 var logger = require( "../etc/Logger" );
 
-var TOPIC = require( "../core/Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var script;
 var self;
@@ -46756,8 +47132,8 @@ NetworkManager.prototype.init = function() {
 	this._startUp();
 
 	// subscriptions
-	PubSub.subscribe( TOPIC.MULTIPLAYER.CHAT, this._onMessageChat );
-	PubSub.subscribe( TOPIC.MULTIPLAYER.PLAYER, this._onMessagePlayer );
+	EventManager.subscribe( TOPIC.MULTIPLAYER.CHAT, this._onMessageChat );
+	EventManager.subscribe( TOPIC.MULTIPLAYER.PLAYER, this._onMessagePlayer );
 };
 
 /**
@@ -46809,15 +47185,15 @@ NetworkManager.prototype._onMessageThread = function( event ) {
 
 	if ( event.data.type === Message.TYPES.CHAT )
 	{
-		PubSub.publish( TOPIC.MULTIPLAYER.MESSAGE, event.data.content );
+		EventManager.publish( TOPIC.MULTIPLAYER.MESSAGE, event.data.content );
 	}
 	else if ( event.data.type === Message.TYPES.GAME )
 	{
-		PubSub.publish( TOPIC.MULTIPLAYER.UPDATE, event.data.content );
+		EventManager.publish( TOPIC.MULTIPLAYER.UPDATE, event.data.content );
 	}
 	else if ( event.data.type === Message.TYPES.STATUS )
 	{
-		PubSub.publish( TOPIC.MULTIPLAYER.STATUS, event.data.content );
+		EventManager.publish( TOPIC.MULTIPLAYER.STATUS, event.data.content );
 	}
 	else if ( event.data.type === Message.TYPES.INFO )
 	{
@@ -46954,7 +47330,7 @@ NetworkManager.SERVER = {
 
 module.exports = new NetworkManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/ThreadManager":27,"../core/Topic":28,"../etc/Logger":33,"./Message":52,"pubsub-js":1,"ws":3}],54:[function(require,module,exports){
+},{"../core/ThreadManager":26,"../etc/Logger":31,"../messaging/EventManager":50,"../messaging/Topic":52,"./Message":53,"ws":2}],55:[function(require,module,exports){
 /**
  * @file This prototype manages effects for post-processing.
  * 
@@ -47140,7 +47516,7 @@ EffectComposer.prototype._reset = function( renderTarget ) {
 };
 
 module.exports = EffectComposer;
-},{"three":2}],55:[function(require,module,exports){
+},{"three":1}],56:[function(require,module,exports){
 /**
  * @file This prototype provides a render pass for post-processing.
  * 
@@ -47202,7 +47578,7 @@ RenderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = RenderPass;
-},{"three":2}],56:[function(require,module,exports){
+},{"three":1}],57:[function(require,module,exports){
 /**
  * @file This prototype provides a shader pass for post-processing.
  * 
@@ -47308,7 +47684,7 @@ ShaderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = ShaderPass;
-},{"three":2}],57:[function(require,module,exports){
+},{"three":1}],58:[function(require,module,exports){
 /**
  * @file This shader can be used for vertex displacement to create
  * water or fabric materials. It implements an exemplary diffuse lighting
@@ -47410,7 +47786,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":2}],58:[function(require,module,exports){
+},{"three":1}],59:[function(require,module,exports){
 /**
  * @file This shader applies a gaussian blur effect.
  * It can be used for both x and y direction.
@@ -47477,7 +47853,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":2}],59:[function(require,module,exports){
+},{"three":1}],60:[function(require,module,exports){
 /**
  * @file This shader transforms all colors to grayscale.
  * 
@@ -47526,7 +47902,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],60:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 /**
  * @file This shader creates a vignette effect.
  * 
@@ -47587,7 +47963,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],61:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -47704,7 +48080,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],62:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],63:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -47885,7 +48261,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],63:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],64:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -48057,7 +48433,7 @@ function colorMesh( mesh ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],64:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],65:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -48235,7 +48611,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],65:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],66:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -48361,7 +48737,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],66:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],67:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -48550,7 +48926,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],67:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],68:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -48723,7 +49099,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],68:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],69:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -48877,7 +49253,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],69:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],70:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -49058,7 +49434,7 @@ function showLODCircles( world ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],70:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],71:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -49238,7 +49614,7 @@ function onKeyDown( event ) {
 
 module.exports = Stage;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],71:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],72:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -49383,7 +49759,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":12,"../core/StageBase":24,"../etc/JSONLoader":31,"three":2}],72:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],73:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -49392,10 +49768,9 @@ module.exports = Stage;
  */
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var UiElement = require( "./UiElement" );
-
-var TOPIC = require( "../core/Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var self;
 
@@ -49451,7 +49826,7 @@ Chat.prototype.init = function() {
 	this._$messages = global.document.querySelector( "#messages" );
 	this._$input = this._$chat.querySelector( ".form-control" );
 
-	PubSub.subscribe( TOPIC.MULTIPLAYER.MESSAGE, this._onMessage );
+	EventManager.subscribe( TOPIC.MULTIPLAYER.MESSAGE, this._onMessage );
 };
 
 /**
@@ -49471,7 +49846,7 @@ Chat.prototype.toogle = function() {
 		this.hide();
 
 		// activate controls
-		PubSub.publish( TOPIC.CONTROLS.ACTIVE, {
+		EventManager.publish( TOPIC.CONTROLS.ACTIVE, {
 			isActive : true
 		} );
 	}
@@ -49481,7 +49856,7 @@ Chat.prototype.toogle = function() {
 		this.show();
 
 		// deactivate controls
-		PubSub.publish( TOPIC.CONTROLS.ACTIVE, {
+		EventManager.publish( TOPIC.CONTROLS.ACTIVE, {
 			isActive : false
 		} );
 	}
@@ -49546,7 +49921,7 @@ Chat.prototype._checkAndSend = function() {
 		this._postMessage( message );
 
 		// publish chat message for sending to server
-		PubSub.publish( TOPIC.MULTIPLAYER.CHAT, message );
+		EventManager.publish( TOPIC.MULTIPLAYER.CHAT, message );
 	}
 };
 
@@ -49563,7 +49938,7 @@ Chat.prototype._onMessage = function( message, data ) {
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Topic":28,"./UiElement":81,"pubsub-js":1}],73:[function(require,module,exports){
+},{"../messaging/EventManager":50,"../messaging/Topic":52,"./UiElement":82}],74:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel. Only if the development
@@ -49625,7 +50000,7 @@ DevelopmentPanel.prototype.setText = function( text ) {
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":81}],74:[function(require,module,exports){
+},{"./UiElement":82}],75:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -49686,7 +50061,7 @@ InformationPanel.prototype.setText = function( textKey ) {
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":81}],75:[function(require,module,exports){
+},{"./UiElement":82}],76:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -49763,7 +50138,7 @@ InteractionLabel.prototype.hide = function() {
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":81}],76:[function(require,module,exports){
+},{"./UiElement":82}],77:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -49772,10 +50147,9 @@ module.exports = new InteractionLabel();
  */
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var UiElement = require( "./UiElement" );
-
-var TOPIC = require( "../core/Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var self;
 
@@ -49853,8 +50227,8 @@ LoadingScreen.prototype.init = function() {
 	this._$text = this._$loadingScreen.querySelector( ".text" );
 
 	// subscriptions
-	PubSub.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
-	PubSub.subscribe(  TOPIC.STAGE.READY, this._onReady );
+	EventManager.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
+	EventManager.subscribe(  TOPIC.STAGE.READY, this._onReady );
 };
 
 /**
@@ -49954,7 +50328,7 @@ LoadingScreen.prototype._onReady = function( message, data ) {
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Topic":28,"./UiElement":81,"pubsub-js":1}],77:[function(require,module,exports){
+},{"../messaging/EventManager":50,"../messaging/Topic":52,"./UiElement":82}],78:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -49964,11 +50338,10 @@ module.exports = new LoadingScreen();
 
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var UiElement = require( "./UiElement" );
 var utils = require( "../etc/Utils" );
-
-var TOPIC = require( "../core/Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var self;
 /**
@@ -50031,8 +50404,8 @@ Menu.prototype.init = function() {
 	this._$progressBar = this._$menu.querySelector( ".progress-bar" );
 
 	// subscriptions
-	PubSub.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
-	PubSub.subscribe( TOPIC.STAGE.READY, this._onReady );
+	EventManager.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
+	EventManager.subscribe( TOPIC.STAGE.READY, this._onReady );
 
 	this._$button.addEventListener( "click", this._onClick );
 };
@@ -50105,13 +50478,13 @@ Menu.prototype._onReady = function( message, data ) {
  */
 Menu.prototype._publishFinishEvent = function( message, data ) {
 
-	PubSub.publish( TOPIC.STAGE.START, undefined );
+	EventManager.publish( TOPIC.STAGE.START, undefined );
 	self._$button.removeEventListener( "click", self._publishFinishEvent );
 };
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Topic":28,"../etc/Utils":42,"./UiElement":81,"pubsub-js":1}],78:[function(require,module,exports){
+},{"../etc/Utils":40,"../messaging/EventManager":50,"../messaging/Topic":52,"./UiElement":82}],79:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -50120,7 +50493,6 @@ module.exports = new Menu();
  */
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var UiElement = require( "./UiElement" );
 var utils = require( "../etc/Utils" );
 
@@ -50237,7 +50609,7 @@ ModalDialog.prototype._onClose = function( event ) {
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":42,"./UiElement":81,"pubsub-js":1}],79:[function(require,module,exports){
+},{"../etc/Utils":40,"./UiElement":82}],80:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor. Only if the development
@@ -50461,7 +50833,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":81}],80:[function(require,module,exports){
+},{"./UiElement":82}],81:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -50674,7 +51046,7 @@ TextScreen.prototype._printName = function() {
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":81}],81:[function(require,module,exports){
+},{"./UiElement":82}],82:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -50724,7 +51096,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":41}],82:[function(require,module,exports){
+},{"../etc/TextManager":39}],83:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in stages to
@@ -50735,9 +51107,8 @@ module.exports = UiElement;
 
 "use strict";
 
-var PubSub = require( "pubsub-js" );
-
-var TOPIC = require( "../core/Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var developmentPanel = require( "./DevelopmentPanel" );
 var performanceMonitor = require( "./PerformanceMonitor" );
@@ -50928,7 +51299,7 @@ UserInterfaceManager.prototype.handleUiInteraction = function( event ) {
 	}
 	else if ( loadingScreen.isActive === true && loadingScreen.isReady === true )
 	{
-		PubSub.publish( TOPIC.STAGE.START, undefined );
+		EventManager.publish( TOPIC.STAGE.START, undefined );
 		loadingScreen.hide();
 	}
 };
@@ -50948,7 +51319,7 @@ UserInterfaceManager.prototype._mapGlobalEventsToTopics = function() {
 
 	global.window.addEventListener( "resize", function() {
 
-		PubSub.publish( TOPIC.APPLICATION.RESIZE, undefined );
+		EventManager.publish( TOPIC.APPLICATION.RESIZE, undefined );
 	} );
 };
 
@@ -50991,4 +51362,4 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Topic":28,"../etc/Utils":42,"./Chat":72,"./DevelopmentPanel":73,"./InformationPanel":74,"./InteractionLabel":75,"./LoadingScreen":76,"./Menu":77,"./ModalDialog":78,"./PerformanceMonitor":79,"./TextScreen":80,"pubsub-js":1}]},{},[4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82]);
+},{"../etc/Utils":40,"../messaging/EventManager":50,"../messaging/Topic":52,"./Chat":73,"./DevelopmentPanel":74,"./InformationPanel":75,"./InteractionLabel":76,"./LoadingScreen":77,"./Menu":78,"./ModalDialog":79,"./PerformanceMonitor":80,"./TextScreen":81}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83]);

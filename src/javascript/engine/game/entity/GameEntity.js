@@ -55,4 +55,17 @@ GameEntity.prototype.update = function() {
 
 };
 
+/**
+ * If an entity wants to communicate with other entities, it must implement this
+ * method. Besides, the entity needs to register itself at the event manager.
+ * 
+ * @param {Telegram} telegram - The telegram of the message.
+ * 
+ * @returns {boolean} Is the message handled successfully?
+ */
+GameEntity.prototype.handleMessage = function( telegram ) {
+
+	return false;
+};
+
 module.exports = GameEntity;

@@ -7,9 +7,8 @@
 
 var self;
 
-var PubSub = require( "pubsub-js" );
-
-var TOPIC = require( "./Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var saveGameManager = require( "../etc/SaveGameManager" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
@@ -69,11 +68,11 @@ function StageManager() {
 	} );
 
 	// subscriptions
-	PubSub.subscribe( TOPIC.APPLICATION.START, this._onApplicationStart );
-	PubSub.subscribe( TOPIC.STAGE.START, this._onStageStart );
-	PubSub.subscribe( TOPIC.STAGE.CHANGE, this._onStageChange );
-	PubSub.subscribe( TOPIC.STAGE.LOADING.START.ALL, this._onLoadStart );
-	PubSub.subscribe( TOPIC.STAGE.LOADING.COMPLETE.ALL, this._onLoadComplete );
+	EventManager.subscribe( TOPIC.APPLICATION.START, this._onApplicationStart );
+	EventManager.subscribe( TOPIC.STAGE.START, this._onStageStart );
+	EventManager.subscribe( TOPIC.STAGE.CHANGE, this._onStageChange );
+	EventManager.subscribe( TOPIC.STAGE.LOADING.START.ALL, this._onLoadStart );
+	EventManager.subscribe( TOPIC.STAGE.LOADING.COMPLETE.ALL, this._onLoadComplete );
 
 	self = this;
 }
@@ -263,7 +262,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 		var loadingProgress = Math.round( self._loaded * 100 / self._total );
 
 		// inform system about progress
-		PubSub.publish( TOPIC.STAGE.LOADING.PROGRESS, {
+		EventManager.publish( TOPIC.STAGE.LOADING.PROGRESS, {
 			loadingProgress : loadingProgress,
 			isApplicationStart : self._isApplicationStartActive
 		} );
@@ -272,7 +271,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 		if ( self._loaded === self._total )
 		{
 			// publish message
-			PubSub.publish( TOPIC.STAGE.READY, {
+			EventManager.publish( TOPIC.STAGE.READY, {
 				isApplicationStart : self._isApplicationStartActive
 			} );
 

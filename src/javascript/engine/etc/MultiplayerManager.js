@@ -5,10 +5,10 @@
  */
 "use strict";
 
-var PubSub = require( "pubsub-js" );
 var THREE = require( "three" );
 
-var TOPIC = require( "../core/Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var Teammate = require( "./Teammate" );
 var world = require( "../core/World" );
@@ -40,8 +40,8 @@ function MultiplayerManager() {
  */
 MultiplayerManager.prototype.init = function() {
 
-	PubSub.subscribe( TOPIC.MULTIPLAYER.UPDATE, this._onUpdate );
-	PubSub.subscribe( TOPIC.MULTIPLAYER.STATUS, this._onStatus );
+	EventManager.subscribe( TOPIC.MULTIPLAYER.UPDATE, this._onUpdate );
+	EventManager.subscribe( TOPIC.MULTIPLAYER.STATUS, this._onStatus );
 };
 
 /**

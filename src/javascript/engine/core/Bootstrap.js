@@ -6,9 +6,8 @@
 
 "use strict";
 
-var PubSub = require( "pubsub-js" );
-
-var TOPIC = require( "./Topic" );
+var EventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
 
 var environment = require( "./Environment" );
 var renderer = require( "./Renderer" );
@@ -93,7 +92,7 @@ Bootstrap.prototype._loadStage = function() {
 		stageId = saveGame.stageId;
 	}
 
-	PubSub.publish( TOPIC.APPLICATION.START, {
+	EventManager.publish( TOPIC.APPLICATION.START, {
 		stageId : stageId
 	} );
 };
