@@ -49,9 +49,20 @@ Bootstrap.prototype._getStartupParameter = function() {
  */
 Bootstrap.prototype._initEngine = function() {
 
+	var message;
+
 	// check capabilities of the runtime environment/ browser
 	if ( environment.isCompatible() === true )
 	{
+		// if the browser supports a touch-based user interface, show info
+		// message
+		if ( environment.isTouchDevice() === true )
+		{
+			message = "Please note: This demo works only with keyboard and mouse.";
+			global.alert( message );
+		}
+
+		// initialize basic components
 		logger.init();
 		renderer.init();
 		camera.init();
@@ -67,7 +78,7 @@ Bootstrap.prototype._initEngine = function() {
 	}
 	else
 	{
-		var message = "ERROR: Bootstrap: The browser does not support all required APIs. Missing APIs: " + environment.unsupportedAPIs;
+		message = "ERROR: Bootstrap: The browser does not support all required APIs. Missing APIs: " + environment.unsupportedAPIs;
 		global.alert( message );
 		throw message;
 	}

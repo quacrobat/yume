@@ -39206,9 +39206,20 @@ Bootstrap.prototype._getStartupParameter = function() {
  */
 Bootstrap.prototype._initEngine = function() {
 
+	var message;
+
 	// check capabilities of the runtime environment/ browser
 	if ( environment.isCompatible() === true )
 	{
+		// if the browser supports a touch-based user interface, show info
+		// message
+		if ( environment.isTouchDevice() === true )
+		{
+			message = "Please note: This demo works only with keyboard and mouse.";
+			global.alert( message );
+		}
+
+		// initialize basic components
 		logger.init();
 		renderer.init();
 		camera.init();
@@ -39224,7 +39235,7 @@ Bootstrap.prototype._initEngine = function() {
 	}
 	else
 	{
-		var message = "ERROR: Bootstrap: The browser does not support all required APIs. Missing APIs: " + environment.unsupportedAPIs;
+		message = "ERROR: Bootstrap: The browser does not support all required APIs. Missing APIs: " + environment.unsupportedAPIs;
 		global.alert( message );
 		throw message;
 	}
@@ -39416,6 +39427,20 @@ Environment.prototype.isCompatible = function() {
 	{
 		return false;
 	}
+};
+
+/**
+ * Checks, if the supports a touch-based user interface. Technically, the method
+ * indicates if the browser supports the W3C Touch Events API. For various reasons,
+ * the test works not always correct in all environments.
+ * 
+ * see: http://www.stucox.com/blog/you-cant-detect-a-touchscreen/
+ * 
+ * @returns {boolean} Does the browser has a touch-sensitive surface?
+ */
+Environment.prototype.isTouchDevice = function() {
+
+	return !!( "ontouchstart" in global.window  );
 };
 
 /**

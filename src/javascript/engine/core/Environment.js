@@ -89,6 +89,20 @@ Environment.prototype.isCompatible = function() {
 };
 
 /**
+ * Checks, if the supports a touch-based user interface. Technically, the method
+ * indicates if the browser supports the W3C Touch Events API. For various reasons,
+ * the test works not always correct in all environments.
+ * 
+ * see: http://www.stucox.com/blog/you-cant-detect-a-touchscreen/
+ * 
+ * @returns {boolean} Does the browser has a touch-sensitive surface?
+ */
+Environment.prototype.isTouchDevice = function() {
+
+	return !!( "ontouchstart" in global.window  );
+};
+
+/**
  * Tests the WebGL API.
  * 
  * @returns {boolean} Does the browser support the API?
