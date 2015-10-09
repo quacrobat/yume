@@ -796,8 +796,6 @@ FirstPersonControls.prototype._animateCrouch = ( function() {
 			targetDeflection = this._isCrouch === true ? FirstPersonControls.CROUCH.CAMERA.DEFLECTION : FirstPersonControls.DEFAULT.CAMERA.DEFLECTION;
 			targetFrequency = this._isCrouch === true ? FirstPersonControls.CROUCH.CAMERA.FREQUENCY : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY;
 
-			console.log(this._height, this._animationHeight, targetHeight);
-			
 			// do transition
 			this._height = this._animationHeight + ( targetHeight - this._animationHeight ) * valueHeight;
 			this._moveSpeed = this._animationMove + ( targetMove - this._animationMove ) * valueSpeed;
