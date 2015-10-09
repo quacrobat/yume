@@ -1,5 +1,7 @@
 /**
- * @file This file contains all topics for publish & subscribe.
+ * @file This file contains all topics for publish & subscribe. YUME supports a
+ * publish/subscribe messaging system with hierarchical addressing, so topics
+ * can be organized in a hierarchy.
  * 
  * @author Human Interactive
  */

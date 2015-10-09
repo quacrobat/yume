@@ -204,7 +204,7 @@ EventManager.prototype.unsubscribe = ( function() {
 }() );
 
 /**
- * Sends a message to an entity.
+ * Sends a message to a game entity.
  * 
  * @param {number} sender - The ID of the sender of the message.
  * @param {number} receiver - The ID of the receiver of the message.
@@ -218,7 +218,7 @@ EventManager.prototype.sendMessageToEntity = function( sender, receiver, message
 };
 
 /**
- * Sends a message synchronously to an entity.
+ * Sends a message synchronously to a game entity.
  * 
  * @param {number} sender - The ID of the sender of the message.
  * @param {number} receiver - The ID of the receiver of the message.
@@ -231,15 +231,15 @@ EventManager.prototype.sendMessageToEntitySync = function( sender, receiver, mes
 };
 
 /**
- * Registers an entity for messaging.
+ * Registers a game entity for messaging.
  * 
- * @param {GameEntity} entity - The entity to register.
+ * @param {GameEntity} entity - The game entity to register.
  */
 EventManager.prototype.registerEntity = function( entity ) {
 
 	if ( entity instanceof GameEntity )
 	{
-		// register entity if necessary
+		// register game entity if necessary
 		if ( entities.hasOwnProperty( entity.id ) === false )
 		{
 			entities[ entity.id ] = entity;
@@ -253,15 +253,15 @@ EventManager.prototype.registerEntity = function( entity ) {
 };
 
 /**
- * Removes an entity.
+ * Removes a game entity.
  * 
- * @param {GameEntity} entity - The entity to remove.
+ * @param {GameEntity} entity - The game entity to remove.
  */
 EventManager.prototype.removeEntity = function( entity ) {
 
 	if ( entity instanceof GameEntity )
 	{
-		// remove entity if necessary
+		// remove game entity if necessary
 		if ( entities.hasOwnProperty( entity.id ) === true )
 		{
 			delete entities[ entity.id ];
@@ -528,7 +528,7 @@ function sendMessageToEntity( sender, receiver, message, data, isSync, delay ) {
 	// check the type of message delivery
 	if ( isSync === true )
 	{
-		// call the "handleMessage" of the game entity
+		// call the "handleMessage" method of the game entity
 		if ( entities[ receiver ].handleMessage( telegram ) === false )
 		{
 			logger.warn( "WARN: EventManager: Message not handled by receiver with ID: %i.", receiver );
@@ -538,7 +538,7 @@ function sendMessageToEntity( sender, receiver, message, data, isSync, delay ) {
 	{
 		setTimeout( function() {
 
-			// call the "handleMessage" of the game entity with a delay
+			// call the "handleMessage" method of the game entity with a delay
 			if ( entities[ receiver ].handleMessage( telegram ) === false )
 			{
 				logger.warn( "WARN: EventManager: Message not handled by receiver with ID: %i.", receiver );

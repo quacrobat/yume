@@ -105,19 +105,13 @@ function FirstPersonControls() {
 
 	// used for animations
 	Object.defineProperties( this, {
-		_animationCrouchTime : {
+		_animationStartTime : {
 			value : 0,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
 		_animationHeight : {
-			value : 0,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
-		_animationRunTime : {
 			value : 0,
 			configurable : false,
 			enumerable : false,
@@ -733,7 +727,7 @@ FirstPersonControls.prototype._isCollisionHandlingRequired = ( function() {
  * Handles the "crouch" command. Crouching decreases the height and movement
  * speed of the player. These values are changed via animations.
  */
-FirstPersonControls.prototype._toogleCrouch = function() {
+FirstPersonControls.prototype._handleCrouch = function() {
 
 	// toogle boolean value
 	this._isCrouch = !this._isCrouch;
@@ -742,7 +736,7 @@ FirstPersonControls.prototype._toogleCrouch = function() {
 	this._isRun = false;
 
 	// save current timestamp and values for animation
-	this._animationCrouchTime = global.performance.now();
+	this._animationStartTime = global.performance.now();
 	this._animationHeight = this._height;
 	this._animationMove = this._moveSpeed;
 	this._animationStrafe = this._strafeSpeed;
@@ -754,9 +748,9 @@ FirstPersonControls.prototype._toogleCrouch = function() {
  * Handles the "run" command. Running increases the movement speed and the
  * camera shaking of the player. These values are changed via animations.
  * 
- * @param {boolean} isActive - Should the player run.
+ * @param {boolean} isRun - Should the player run?
  */
-FirstPersonControls.prototype._setRun = function( isRun ) {
+FirstPersonControls.prototype._handleRun = function( isRun ) {
 
 	this._isRun = isRun;
 
@@ -764,7 +758,7 @@ FirstPersonControls.prototype._setRun = function( isRun ) {
 	this._isCrouch = false;
 
 	// save current timestamp and values for animation
-	this._animationRunTime = global.performance.now();
+	this._animationStartTime = global.performance.now();
 	this._animationHeight = this._height;
 	this._animationMove = this._moveSpeed;
 	this._animationStrafe = this._strafeSpeed;
@@ -777,30 +771,33 @@ FirstPersonControls.prototype._setRun = function( isRun ) {
  */
 FirstPersonControls.prototype._animateCrouch = ( function() {
 
-	var elapsed, factor, targetHeight, targetMove, targetStrafe, targetDeflection, targetFrequency, valueHeight, valueSpeed = 0;
+	var elapsed, factor, targetHeight, targetMove, targetStrafe, targetDeflection, targetFrequency, valueHeight, valueSpeed;
 
 	return function() {
 
 		// animate only if necessary
-		if ( this._isCrouch === true && this._height > FirstPersonControls.CROUCH.HEIGHT || this._isCrouch === false && this._isRun === false && this._height < FirstPersonControls.DEFAULT.HEIGHT )
+		if ( ( this._isCrouch === true && this._height > FirstPersonControls.CROUCH.HEIGHT ) || 
+			 ( this._isCrouch === false && this._isRun === false && this._height < FirstPersonControls.DEFAULT.HEIGHT ) )
 		{
 			// calculate elapsed time
-			elapsed = ( global.performance.now() - this._animationCrouchTime ) * FirstPersonControls.CROUCH.ANIMATION.DURATION;
+			elapsed = ( global.performance.now() - this._animationStartTime ) * FirstPersonControls.CROUCH.ANIMATION.DURATION;
 
 			// calculate factor for easing formula
 			factor = elapsed > 1 ? 1 : elapsed;
 
 			// calculate easing value
-			valueSpeed = Easing.Quartic.In( factor );
-			valueHeight = Easing.Quartic.Out( factor );
+			valueSpeed = Easing.Cubic.In( factor );
+			valueHeight = Easing.Cubic.Out( factor );
 
 			// determine target values
 			targetHeight = this._isCrouch === true ? FirstPersonControls.CROUCH.HEIGHT : FirstPersonControls.DEFAULT.HEIGHT;
 			targetMove = this._isCrouch === true ? FirstPersonControls.CROUCH.SPEED.MOVE : FirstPersonControls.DEFAULT.SPEED.MOVE;
 			targetStrafe = this._isCrouch === true ? FirstPersonControls.CROUCH.SPEED.STRAFE : FirstPersonControls.DEFAULT.SPEED.STRAFE;
-			targetDeflection = this._isRun === true ? FirstPersonControls.CROUCH.CAMERA.DEFLECTION : FirstPersonControls.DEFAULT.CAMERA.DEFLECTION;
-			targetFrequency = this._isRun === true ? FirstPersonControls.CROUCH.CAMERA.FREQUENCY : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY;
+			targetDeflection = this._isCrouch === true ? FirstPersonControls.CROUCH.CAMERA.DEFLECTION : FirstPersonControls.DEFAULT.CAMERA.DEFLECTION;
+			targetFrequency = this._isCrouch === true ? FirstPersonControls.CROUCH.CAMERA.FREQUENCY : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY;
 
+			console.log(this._height, this._animationHeight, targetHeight);
+			
 			// do transition
 			this._height = this._animationHeight + ( targetHeight - this._animationHeight ) * valueHeight;
 			this._moveSpeed = this._animationMove + ( targetMove - this._animationMove ) * valueSpeed;
@@ -817,22 +814,23 @@ FirstPersonControls.prototype._animateCrouch = ( function() {
  */
 FirstPersonControls.prototype._animateRun = ( function() {
 
-	var elapsed, factor, targetHeight, targetMove, targetStrafe, targetDeflection, targetFrequency, valueHeight, valueSpeed = 0;
+	var elapsed, factor, targetHeight, targetMove, targetStrafe, targetDeflection, targetFrequency, valueHeight, valueSpeed;
 
 	return function() {
-
+		
 		// animate only if necessary
-		if ( this._isRun === true && this._moveSpeed < FirstPersonControls.RUN.SPEED.MOVE || this._isRun === false && this._isCrouch === false && this._moveSpeed > FirstPersonControls.DEFAULT.SPEED.MOVE )
+		if ( ( this._isRun === true && this._moveSpeed < FirstPersonControls.RUN.SPEED.MOVE ) ||
+			 ( this._isRun === false && this._isCrouch === false && this._moveSpeed > FirstPersonControls.DEFAULT.SPEED.MOVE ) )
 		{
 			// calculate elapsed time
-			elapsed = ( global.performance.now() - this._animationRunTime ) * FirstPersonControls.RUN.ANIMATION.DURATION;
+			elapsed = ( global.performance.now() - this._animationStartTime ) * FirstPersonControls.RUN.ANIMATION.DURATION;
 
 			// calculate factor for easing formula
 			factor = elapsed > 1 ? 1 : elapsed;
 
 			// calculate easing value
-			valueSpeed = Easing.Quartic.In( factor );
-			valueHeight = Easing.Quartic.Out( factor );
+			valueSpeed = Easing.Cubic.In( factor );
+			valueHeight = Easing.Cubic.Out( factor );
 
 			// determine target values
 			targetHeight = this._isRun === true ? FirstPersonControls.RUN.HEIGHT : FirstPersonControls.DEFAULT.HEIGHT;
@@ -1032,12 +1030,12 @@ FirstPersonControls.prototype._onKeyDown = function( event ) {
 
 			case 67:
 				// c
-				self._toogleCrouch();
+				self._handleCrouch();
 				break;
 
 			case 16:
 				// shift
-				self._setRun( true );
+				self._handleRun( true );
 				break;
 
 			case 69:
@@ -1096,7 +1094,7 @@ FirstPersonControls.prototype._onKeyUp = function( event ) {
 				// shift
 				if ( self._isCrouch === false )
 				{
-					self._setRun( false );
+					self._handleRun( false );
 				}
 		}
 	}
@@ -1130,7 +1128,7 @@ FirstPersonControls.CROUCH = {
 		}
 	},
 	CAMERA : {
-		DEFLECTION : 0.3,
+		DEFLECTION : 0.4,
 		FREQUENCY : 15,
 		RESETFACTOR : 0.02
 	},
@@ -1155,7 +1153,7 @@ FirstPersonControls.RUN = {
 		RESETFACTOR : 0.02
 	},
 	ANIMATION : {
-		DURATION : 0.002
+		DURATION : 0.0015
 	}
 };
 
