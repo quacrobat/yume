@@ -47,7 +47,7 @@ Stage.prototype.setup = function() {
 
 	// create first mesh for impostor demo
 	sphere = new THREE.Mesh( new THREE.SphereGeometry( 10, 25, 25 ), new THREE.MeshLambertMaterial( {
-		color : 0x6083c2
+		color : StageBase.COLORS.PRIMARY
 	} ) );
 	sphere.matrixAutoUpdate = false;
 	sphere.position.set( -20, 10, 0 );
@@ -57,7 +57,7 @@ Stage.prototype.setup = function() {
 
 	// create second mesh for impostor demo
 	box = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
-		color : 0x6083c2
+		color : StageBase.COLORS.PRIMARY
 	} ) );
 	box.matrixAutoUpdate = false;
 	box.position.set( 20, 10, 0 );
@@ -149,11 +149,11 @@ function colorFaces( geometry ) {
 	{
 		if ( i % 2 === 0 )
 		{
-			geometry.faces[ i ].color = new THREE.Color( 0x6083c2 );
+			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
 		}
 		else
 		{
-			geometry.faces[ i ].color = new THREE.Color( 0x455066 );
+			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
 		}
 	}
 }

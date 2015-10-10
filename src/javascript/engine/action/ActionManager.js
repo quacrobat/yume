@@ -280,8 +280,8 @@ ActionManager.prototype._calculateClosestIntersection = ( function() {
 				// the action property must always set
 				if(  interactiveObject.action !== undefined )
 				{
-					// return the object if it is visible and has an active action. if not, continue with the next object
-					if ( interactiveObject.mesh.visible === true && interactiveObject.action.isActive === true )
+					// return the object if it has an active action. if not, continue with the next object
+					if ( interactiveObject.action.isActive === true )
 					{
 						return interactiveObject;
 					}

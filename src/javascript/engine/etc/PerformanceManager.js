@@ -35,6 +35,18 @@ function PerformanceManager() {
 			configurable : false,
 			enumerable : false,
 			writable : false
+		},
+		_impostorCamera : {
+			value : new THREE.PerspectiveCamera(),
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		_impostorLights : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
 		}
 	} );
 }
@@ -221,21 +233,30 @@ PerformanceManager.prototype.update = function() {
  */
 PerformanceManager.prototype.generateImpostors = function() {
 
-	// clone camera object
-	var impostorCamera = camera.clone();
+	// copy camera properties to impostor camera.
+	
+	// we can't use the copy method of the camera object, because it does
+	// automatically a deep copy. since the actual camera has child objects
+	// (dynamic audio), we only want to copy the most necessary data.
+	this._impostorCamera.matrixWorldInverse.copy( camera.matrixWorldInverse );
+	this._impostorCamera.projectionMatrix.copy( camera.projectionMatrix );
+
+	this._impostorCamera.fov = camera.fov;
+	this._impostorCamera.aspect = camera.aspect;
+	this._impostorCamera.near = camera.near;
+	this._impostorCamera.far = camera.far;
+	this._impostorCamera.zoom = camera.zoom;
 
 	// ensure the position of the camera is in world coordinates
 	var cameraWorldPosition = camera.getWorldPosition();
-	impostorCamera.position.set( cameraWorldPosition.x, cameraWorldPosition.y, cameraWorldPosition.z );
+	this._impostorCamera.position.set( cameraWorldPosition.x, cameraWorldPosition.y, cameraWorldPosition.z );
 
-	// create an array with the entire lighting of the actual stage
-	var lights = [];
-
+	// update the internal array with the entire lighting of the actual stage
 	for ( var index = 0; index < world.scene.children.length; index++ )
 	{
 		if ( world.scene.children[ index ] instanceof THREE.Light )
 		{
-			lights.push( world.scene.children[ index ] );
+			this._impostorLights.push( world.scene.children[ index ] );
 		}
 	}
 
@@ -249,7 +270,7 @@ PerformanceManager.prototype.generateImpostors = function() {
 		}
 
 		// prepare the generation...
-		this._impostors[ index ].prepareGeneration( renderer, impostorCamera, lights );
+		this._impostors[ index ].prepareGeneration( renderer, this._impostorCamera, this._impostorLights );
 
 		// ...and run it
 		this._impostors[ index ].generate();
@@ -257,6 +278,9 @@ PerformanceManager.prototype.generateImpostors = function() {
 		// add new mesh to world
 		world.addObject3D( this._impostors[ index ].billboard );
 	}
+
+	// clean up
+	this._impostorLights.length = 0;
 };
 
 /**

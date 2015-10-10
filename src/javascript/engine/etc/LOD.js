@@ -86,7 +86,7 @@ LOD.prototype.update = ( function() {
 		else if ( this.mode === LOD.MODE.SMOOTH )
 		{
 			// process LOD selection only if there are at least two objects
-			if ( this.objects.length > 1 )
+			if ( this.levels.length > 1 )
 			{
 				// get position of the camera and the LOD instance
 				positionCamera.setFromMatrixPosition( this.camera.matrixWorld );
@@ -96,16 +96,16 @@ LOD.prototype.update = ( function() {
 				distance = positionCamera.distanceTo( positionObject );
 
 				// set first LOD object always visible and opaque
-				this.objects[ 0 ].object.visible = true;
-				this.objects[ 0 ].object.material.transparent = false;
-				this.objects[ 0 ].object.material.opacity = 1;
+				this.levels[ 0 ].object.visible = true;
+				this.levels[ 0 ].object.material.transparent = false;
+				this.levels[ 0 ].object.material.opacity = 1;
 
 				// start the iteration with the second object in the array
-				for ( index = 1; index < this.objects.length; index++ )
+				for ( index = 1; index < this.levels.length; index++ )
 				{
 					// save current object
-					currentObject = this.objects[ index ];
-					previousObject = this.objects[ index - 1 ];
+					currentObject = this.levels[ index ];
+					previousObject = this.levels[ index - 1 ];
 
 					// if the calculated distance is smaller than the
 					// LOD-distance but greater than the threshold,
@@ -157,13 +157,13 @@ LOD.prototype.update = ( function() {
 
 				}
 
-				// hide all subsequent objects and reset values
+				// hide all subsequent levels and reset values
 				// we use the index of the previous loop
-				for ( ; index < this.objects.length; index++ )
+				for ( ; index < this.levels.length; index++ )
 				{
-					this.objects[ index ].object.visible = false;
-					this.objects[ index ].object.material.transparent = false;
-					this.objects[ index ].object.material.opacity = 1;
+					this.levels[ index ].object.visible = false;
+					this.levels[ index ].object.material.transparent = false;
+					this.levels[ index ].object.material.opacity = 1;
 				}
 			}
 		}

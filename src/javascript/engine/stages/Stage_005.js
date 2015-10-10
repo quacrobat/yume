@@ -113,11 +113,11 @@ function colorFaces( geometry ) {
 	{
 		if ( i % 2 === 0 )
 		{
-			geometry.faces[ i ].color = new THREE.Color( 0x6083c2 );
+			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
 		}
 		else
 		{
-			geometry.faces[ i ].color = new THREE.Color( 0x455066 );
+			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
 		}
 	}
 }

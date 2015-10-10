@@ -130,13 +130,13 @@ function StageBase( stageId ) {
 		_delta : {
 			value : 0,
 			configurable : false,
-			enumerable : true,
+			enumerable : false,
 			writable : true
 		},
 		_renderId : {
 			value : 0,
 			configurable : false,
-			enumerable : true,
+			enumerable : false,
 			writable : true
 		}
 	} );
@@ -242,6 +242,14 @@ StageBase.prototype._changeStage = function( stageId, isSaveGame ) {
 		stageId : stageId,
 		isSaveGame : isSaveGame
 	} );
+};
+
+// frequently used colors
+StageBase.COLORS = {
+	PRIMARY    : new THREE.Color( 0x6083c2 ).convertGammaToLinear(),
+	SECONDARY  : new THREE.Color( 0x20252f ).convertGammaToLinear(),
+	BLUE_DARK  : new THREE.Color( 0x455066 ).convertGammaToLinear(),
+	BLUE_WHITE : new THREE.Color( 0xf3f4f6 ).convertGammaToLinear()
 };
 
 module.exports = StageBase;

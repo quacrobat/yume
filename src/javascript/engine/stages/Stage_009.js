@@ -68,13 +68,13 @@ Stage.prototype.setup = function() {
 
 	// create spheres for LOD switching
 	var sphereOne = new THREE.Mesh( new THREE.SphereGeometry( 10, 25, 25 ), new THREE.MeshLambertMaterial( {
-		color : 0x6083c2
+		color : StageBase.COLORS.PRIMARY
 	} ) );
 	var sphereTwo = new THREE.Mesh( new THREE.SphereGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
-		color : 0x6083c2
+		color : StageBase.COLORS.PRIMARY
 	} ) );
 	var sphereThree = new THREE.Mesh( new THREE.SphereGeometry( 10, 6, 6 ), new THREE.MeshLambertMaterial( {
-		color : 0x6083c2
+		color : StageBase.COLORS.PRIMARY
 	} ) );
 
 	sphereOne.matrixAutoUpdate = false;
@@ -152,11 +152,11 @@ function colorFaces( geometry ) {
 	{
 		if ( i % 2 === 0 )
 		{
-			geometry.faces[ i ].color = new THREE.Color( 0x6083c2 );
+			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
 		}
 		else
 		{
-			geometry.faces[ i ].color = new THREE.Color( 0x455066 );
+			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
 		}
 	}
 }

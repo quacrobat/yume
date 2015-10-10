@@ -47,7 +47,7 @@ Stage.prototype.setup = function() {
 
 	// create interactive box
 	var interactiveBox = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
-		color : 0x455066
+		color : StageBase.COLORS.BLUE_DARK
 	} ) );
 	interactiveBox.matrixAutoUpdate = false;
 	interactiveBox.position.set( 50, 5, 0 );
@@ -62,7 +62,7 @@ Stage.prototype.setup = function() {
 
 	// create first static box with AABB collision detection
 	var staticBoxHover = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
-		color : 0x6083c2
+		color : StageBase.COLORS.PRIMARY
 	} ) );
 	staticBoxHover.matrixAutoUpdate = false;
 	staticBoxHover.position.set( 17, 15, 0 );
@@ -74,7 +74,7 @@ Stage.prototype.setup = function() {
 
 	// create second static box with OBB collision detection
 	var staticBox = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 20 ), new THREE.MeshLambertMaterial( {
-		color : 0x6083c2
+		color : StageBase.COLORS.PRIMARY
 	} ) );
 	staticBox.matrixAutoUpdate = false;
 	staticBox.position.set( -17, 5, 0 );
@@ -87,7 +87,7 @@ Stage.prototype.setup = function() {
 
 	// create plain object
 	var plainBox = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
-		color : 0xf3f4f6
+		color : StageBase.COLORS.BLUE_WHITE
 	} ) );
 	plainBox.matrixAutoUpdate = false;
 	plainBox.position.set( -50, 5, 0 );
@@ -161,18 +161,17 @@ Stage.prototype._render = function() {
 };
 
 // custom functions
-
 function colorFaces( geometry ) {
 
 	for ( var i = 0; i < geometry.faces.length; i++ )
 	{
 		if ( i % 2 === 0 )
 		{
-			geometry.faces[ i ].color = new THREE.Color( 0x6083c2 );
+			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
 		}
 		else
 		{
-			geometry.faces[ i ].color = new THREE.Color( 0x455066 );
+			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
 		}
 	}
 }

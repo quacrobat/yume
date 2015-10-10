@@ -79,7 +79,7 @@ Renderer.prototype.init = function() {
 	this._renderer.setClearColor( 0x000000 );
 	this._renderer.gammaInput = true;
 	this._renderer.gammaOutput = true;
-	this._renderer.shadowMapEnabled = true;
+	this._renderer.shadowMap.enabled = true;
 
 	// append renderer to DOM
 	global.document.querySelector( "#canvas-container" ).appendChild( this._renderer.domElement );

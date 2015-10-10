@@ -49,7 +49,7 @@ Stage.prototype.setup = function() {
 
 	// add boxes
 	var staticBoxFire = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
-		color : 0x6083c2
+		color :StageBase.COLORS.PRIMARY
 	} ) );
 	staticBoxFire.matrixAutoUpdate = false;
 	staticBoxFire.position.set( 40, 5, 0 );
@@ -59,7 +59,7 @@ Stage.prototype.setup = function() {
 	this.actionManager.createStatic( staticBoxFire, this.actionManager.COLLISIONTYPES.AABB );
 
 	var staticBoxClock = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
-		color : 0xf3f4f6
+		color : StageBase.COLORS.BLUE_WHITE
 	} ) );
 	staticBoxClock.matrixAutoUpdate = false;
 	staticBoxClock.position.set( -40, 5, 0 );
@@ -176,11 +176,11 @@ function colorFaces( geometry ) {
 	{
 		if ( i % 2 === 0 )
 		{
-			geometry.faces[ i ].color = new THREE.Color( 0x6083c2 );
+			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
 		}
 		else
 		{
-			geometry.faces[ i ].color = new THREE.Color( 0x455066 );
+			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
 		}
 	}
 }

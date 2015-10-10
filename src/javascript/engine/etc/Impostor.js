@@ -380,10 +380,10 @@ Impostor.prototype._computeGeometry = ( function() {
 			vertices[ index * 3 + 2 ] = points[ index ].z;
 		}
 
-		// add vertices, indices and uvs to geometry
+		// add vertices, uvs and  indices to geometry
 		geometry.addAttribute( "position", new THREE.BufferAttribute( vertices, 3 ) );
-		geometry.addAttribute( "index", new THREE.BufferAttribute( indices, 1 ) );
 		geometry.addAttribute( "uv", new THREE.BufferAttribute( uvs, 2 ) );
+		geometry.setIndex( new THREE.BufferAttribute( indices, 1 ) );
 
 		// prepare matrices
 		translationMatrix.identity();

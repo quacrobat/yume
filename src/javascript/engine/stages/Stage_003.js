@@ -47,7 +47,7 @@ Stage.prototype.setup = function() {
 
 	// create interactive box
 	var interactiveBox = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
-		color : 0x455066
+		color : StageBase.COLORS.PRIMARY
 	} ) );
 	interactiveBox.matrixAutoUpdate = false;
 	interactiveBox.position.set( 20, 5, 0 );
@@ -147,11 +147,11 @@ function colorFaces( geometry ) {
 	{
 		if ( i % 2 === 0 )
 		{
-			geometry.faces[ i ].color = new THREE.Color( 0x6083c2 );
+			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
 		}
 		else
 		{
-			geometry.faces[ i ].color = new THREE.Color( 0x455066 );
+			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
 		}
 	}
 }
@@ -160,11 +160,11 @@ function colorMesh( mesh ) {
 
 	if ( ++index % 2 === 0 )
 	{
-		mesh.material.color = new THREE.Color( 0x455066 );
+		mesh.material.color = StageBase.COLORS.PRIMARY;
 	}
 	else
 	{
-		mesh.material.color = new THREE.Color( 0xffffff );
+		mesh.material.color = StageBase.COLORS.BLUE_WHITE;
 	}
 }
 

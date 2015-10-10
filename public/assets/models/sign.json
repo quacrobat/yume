@@ -17,7 +17,6 @@
     "materials": [{
         "DbgIndex": 0,
         "DbgColor": 15658734,
-        "colorEmissive": [0,0,0],
         "transparent": false,
         "depthWrite": true,
         "visible": true,
@@ -34,7 +33,6 @@
         "DbgIndex": 1,
         "DbgColor": 15597568,
         "mapDiffuseWrap": ["RepeatWrapping","RepeatWrapping"],
-        "colorEmissive": [0,0,0],
         "transparent": false,
         "depthWrite": true,
         "mapDiffuseAnisotropy": 1,

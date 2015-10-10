@@ -83,8 +83,8 @@ Stage.prototype.setup = function() {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
-		materials[ 0 ].color = new THREE.Color( 0x6083c2 ).convertGammaToLinear();
-		materials[ 1 ].color = new THREE.Color( 0x455066 ).convertGammaToLinear();
+		materials[ 0 ].color = StageBase.COLORS.PRIMARY;
+		materials[ 1 ].color = StageBase.COLORS.BLUE_DARK;
 
 		var stairs = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
 		stairs.receiveShadow = true;
@@ -93,14 +93,13 @@ Stage.prototype.setup = function() {
 
 	// add invisible ramp
 	var rampGeometry = new THREE.PlaneBufferGeometry( 200, 25, 1, 1 );
-	var rampMaterial = new THREE.MeshBasicMaterial();
+	var rampMaterial = new THREE.MeshBasicMaterial( { visible:false } );
 
 	var ramp = new THREE.Mesh( rampGeometry, rampMaterial );
 	ramp.matrixAutoUpdate = false;
 	ramp.position.set( 0, 2.8, 6.4 );
 	ramp.rotation.x = 1.378 * Math.PI;
 	ramp.updateMatrix();
-	ramp.visible = false;
 	this.world.addGround( ramp );
 
 	// add trigger for stage change
@@ -141,11 +140,11 @@ function colorFaces( geometry ) {
 	{
 		if ( i % 2 === 0 )
 		{
-			geometry.faces[ i ].color = new THREE.Color( 0x6083c2 );
+			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
 		}
 		else
 		{
-			geometry.faces[ i ].color = new THREE.Color( 0x455066 );
+			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
 		}
 	}
 }
