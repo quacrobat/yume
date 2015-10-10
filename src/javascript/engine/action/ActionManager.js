@@ -9,7 +9,7 @@
 
 var THREE = require( "three" );
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var Action = require( "./Action" );
@@ -76,7 +76,7 @@ function ActionManager() {
 	} );
 
 	// subscriptions
-	EventManager.subscribe( TOPIC.ACTION.INTERACTION, this._onInteraction );
+	eventManager.subscribe( TOPIC.ACTION.INTERACTION, this._onInteraction );
 
 	self = this;
 }

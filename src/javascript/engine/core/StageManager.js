@@ -7,7 +7,7 @@
 
 var self;
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var saveGameManager = require( "../etc/SaveGameManager" );
@@ -68,11 +68,11 @@ function StageManager() {
 	} );
 
 	// subscriptions
-	EventManager.subscribe( TOPIC.APPLICATION.START, this._onApplicationStart );
-	EventManager.subscribe( TOPIC.STAGE.START, this._onStageStart );
-	EventManager.subscribe( TOPIC.STAGE.CHANGE, this._onStageChange );
-	EventManager.subscribe( TOPIC.STAGE.LOADING.START.ALL, this._onLoadStart );
-	EventManager.subscribe( TOPIC.STAGE.LOADING.COMPLETE.ALL, this._onLoadComplete );
+	eventManager.subscribe( TOPIC.APPLICATION.START, this._onApplicationStart );
+	eventManager.subscribe( TOPIC.STAGE.START, this._onStageStart );
+	eventManager.subscribe( TOPIC.STAGE.CHANGE, this._onStageChange );
+	eventManager.subscribe( TOPIC.STAGE.LOADING.START.ALL, this._onLoadStart );
+	eventManager.subscribe( TOPIC.STAGE.LOADING.COMPLETE.ALL, this._onLoadComplete );
 
 	self = this;
 }
@@ -262,7 +262,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 		var loadingProgress = Math.round( self._loaded * 100 / self._total );
 
 		// inform system about progress
-		EventManager.publish( TOPIC.STAGE.LOADING.PROGRESS, {
+		eventManager.publish( TOPIC.STAGE.LOADING.PROGRESS, {
 			loadingProgress : loadingProgress,
 			isApplicationStart : self._isApplicationStartActive
 		} );
@@ -270,8 +270,9 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 		// check message count
 		if ( self._loaded === self._total )
 		{
-			// publish message
-			EventManager.publish( TOPIC.STAGE.READY, {
+			// publish message to inform the system that all assets are loaded
+			// and the stage is ready to enter
+			eventManager.publish( TOPIC.STAGE.READY, {
 				isApplicationStart : self._isApplicationStartActive
 			} );
 

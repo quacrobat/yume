@@ -6,7 +6,7 @@
 "use strict";
 
 var UiElement = require( "./UiElement" );
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var self;
@@ -85,8 +85,8 @@ LoadingScreen.prototype.init = function() {
 	this._$text = this._$loadingScreen.querySelector( ".text" );
 
 	// subscriptions
-	EventManager.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
-	EventManager.subscribe(  TOPIC.STAGE.READY, this._onReady );
+	eventManager.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
+	eventManager.subscribe(  TOPIC.STAGE.READY, this._onReady );
 };
 
 /**

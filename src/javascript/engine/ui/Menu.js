@@ -8,7 +8,7 @@
 
 var UiElement = require( "./UiElement" );
 var utils = require( "../etc/Utils" );
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var self;
@@ -72,8 +72,8 @@ Menu.prototype.init = function() {
 	this._$progressBar = this._$menu.querySelector( ".progress-bar" );
 
 	// subscriptions
-	EventManager.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
-	EventManager.subscribe( TOPIC.STAGE.READY, this._onReady );
+	eventManager.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
+	eventManager.subscribe( TOPIC.STAGE.READY, this._onReady );
 
 	this._$button.addEventListener( "click", this._onClick );
 };
@@ -146,7 +146,7 @@ Menu.prototype._onReady = function( message, data ) {
  */
 Menu.prototype._publishFinishEvent = function( message, data ) {
 
-	EventManager.publish( TOPIC.STAGE.START, undefined );
+	eventManager.publish( TOPIC.STAGE.START, undefined );
 	self._$button.removeEventListener( "click", self._publishFinishEvent );
 };
 

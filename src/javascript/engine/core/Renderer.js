@@ -10,7 +10,7 @@
 
 var THREE = require( "three" );
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var EffectComposer = require( "../postprocessing/EffectComposer" );
@@ -88,7 +88,7 @@ Renderer.prototype.init = function() {
 	this._composer = new EffectComposer( this._renderer );
 
 	// set subscriptions
-	EventManager.subscribe( TOPIC.APPLICATION.RESIZE, this._onResize );
+	eventManager.subscribe( TOPIC.APPLICATION.RESIZE, this._onResize );
 };
 
 /**

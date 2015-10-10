@@ -41,11 +41,10 @@ State.prototype.exit = function( entity ) { };
  * This executes if the agent receives a message from the messaging system.
  * 
  * @param {GameEntity} entity - A reference to the entity.
- * @param {string} message - The message topic of the subscription.
- * @param {object} data - The data of the message.
+ * @param {Telegram} telegram - The telegram of the message.
  * 
  * @returns {boolean} Is the message handled successfully by a state?
  */
-State.prototype.onMessage = function( entity, message, data ) { return false; };
+State.prototype.onMessage = function( entity, telegram ) { return false; };
 
 module.exports = State;

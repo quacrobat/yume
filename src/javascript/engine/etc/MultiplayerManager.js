@@ -7,7 +7,7 @@
 
 var THREE = require( "three" );
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var Teammate = require( "./Teammate" );
@@ -40,8 +40,8 @@ function MultiplayerManager() {
  */
 MultiplayerManager.prototype.init = function() {
 
-	EventManager.subscribe( TOPIC.MULTIPLAYER.UPDATE, this._onUpdate );
-	EventManager.subscribe( TOPIC.MULTIPLAYER.STATUS, this._onStatus );
+	eventManager.subscribe( TOPIC.MULTIPLAYER.UPDATE, this._onUpdate );
+	eventManager.subscribe( TOPIC.MULTIPLAYER.STATUS, this._onStatus );
 };
 
 /**

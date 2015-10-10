@@ -12,7 +12,7 @@ var Message = require( "./Message" );
 var threadMananger = require( "../core/ThreadManager" );
 var logger = require( "../etc/Logger" );
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var script;
@@ -53,8 +53,8 @@ NetworkManager.prototype.init = function() {
 	this._startUp();
 
 	// subscriptions
-	EventManager.subscribe( TOPIC.MULTIPLAYER.CHAT, this._onMessageChat );
-	EventManager.subscribe( TOPIC.MULTIPLAYER.PLAYER, this._onMessagePlayer );
+	eventManager.subscribe( TOPIC.MULTIPLAYER.CHAT, this._onMessageChat );
+	eventManager.subscribe( TOPIC.MULTIPLAYER.PLAYER, this._onMessagePlayer );
 };
 
 /**
@@ -106,15 +106,15 @@ NetworkManager.prototype._onMessageThread = function( event ) {
 
 	if ( event.data.type === Message.TYPES.CHAT )
 	{
-		EventManager.publish( TOPIC.MULTIPLAYER.MESSAGE, event.data.content );
+		eventManager.publish( TOPIC.MULTIPLAYER.MESSAGE, event.data.content );
 	}
 	else if ( event.data.type === Message.TYPES.GAME )
 	{
-		EventManager.publish( TOPIC.MULTIPLAYER.UPDATE, event.data.content );
+		eventManager.publish( TOPIC.MULTIPLAYER.UPDATE, event.data.content );
 	}
 	else if ( event.data.type === Message.TYPES.STATUS )
 	{
-		EventManager.publish( TOPIC.MULTIPLAYER.STATUS, event.data.content );
+		eventManager.publish( TOPIC.MULTIPLAYER.STATUS, event.data.content );
 	}
 	else if ( event.data.type === Message.TYPES.INFO )
 	{

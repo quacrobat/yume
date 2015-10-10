@@ -10,7 +10,7 @@
 
 var THREE = require( "three" );
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var camera = require( "../core/Camera" );
@@ -320,7 +320,7 @@ FirstPersonControls.prototype.getDirection = ( function() {
 FirstPersonControls.prototype.init = function() {
 
 	// subscriptions
-	EventManager.subscribe( TOPIC.CONTROLS.ACTIVE, this._onActive );
+	eventManager.subscribe( TOPIC.CONTROLS.ACTIVE, this._onActive );
 
 	// events
 	global.document.addEventListener( "lockPointer", this._onLockPointer );
@@ -863,7 +863,7 @@ FirstPersonControls.prototype._publishPlayerStatus = ( function() {
 		// values of the player
 		this._pitchObject.matrixWorld.decompose( position, quaternion, scale );
 
-		EventManager.publish( TOPIC.MULTIPLAYER.PLAYER, {
+		eventManager.publish( TOPIC.MULTIPLAYER.PLAYER, {
 			position : position,
 			quaternion : quaternion
 		} );
@@ -1038,7 +1038,7 @@ FirstPersonControls.prototype._onKeyDown = function( event ) {
 
 			case 69:
 				// e
-				EventManager.publish( TOPIC.ACTION.INTERACTION, {
+				eventManager.publish( TOPIC.ACTION.INTERACTION, {
 					position : self.getPosition(),
 					direction : self.getDirection()
 				} );

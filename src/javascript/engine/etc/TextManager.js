@@ -8,7 +8,7 @@
 
 var utils = require( "./Utils" );
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 /**
@@ -65,7 +65,7 @@ TextManager.prototype.load = function( stageId, callback ) {
 					self._searchAndRepalce();
 
 					// publish message to inform about status
-					EventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.TEXT, {
+					eventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.TEXT, {
 						url : url
 					} );
 
@@ -93,7 +93,7 @@ TextManager.prototype.load = function( stageId, callback ) {
 	xhr.send();
 
 	// publish message to inform about status
-	EventManager.publish( TOPIC.STAGE.LOADING.START.TEXT, {
+	eventManager.publish( TOPIC.STAGE.LOADING.START.TEXT, {
 		url : url
 	} );
 };

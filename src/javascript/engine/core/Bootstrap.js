@@ -6,7 +6,7 @@
 
 "use strict";
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var environment = require( "./Environment" );
@@ -103,7 +103,7 @@ Bootstrap.prototype._loadStage = function() {
 		stageId = saveGame.stageId;
 	}
 
-	EventManager.publish( TOPIC.APPLICATION.START, {
+	eventManager.publish( TOPIC.APPLICATION.START, {
 		stageId : stageId
 	} );
 };

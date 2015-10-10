@@ -8,7 +8,7 @@
 
 var utils = require( "../etc/Utils" );
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 /**
@@ -110,7 +110,7 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 					self.bufferList[ index ] = buffer;
 
 					// publish message to inform about status
-					EventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.AUDIO, {
+					eventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.AUDIO, {
 						url : url
 					} );
 
@@ -140,7 +140,7 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 	xhr.send();
 
 	// publish message to inform about status
-	EventManager.publish( TOPIC.STAGE.LOADING.START.AUDIO, {
+	eventManager.publish( TOPIC.STAGE.LOADING.START.AUDIO, {
 		url : url
 	} );
 };

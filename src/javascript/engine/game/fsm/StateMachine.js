@@ -95,23 +95,22 @@ StateMachine.prototype.changeState = function( newState ) {
 /**
  * Handles the messages of an agent.
  * 
- * @param {string} message - The message topic of the subscription.
- * @param {object} data - The data of the message.
+ * @param {Telegram} telegram - The telegram of the message.
  * 
  * @returns {boolean} Is the message handled successfully by a state?
  */
-StateMachine.prototype.handleMessage = function( message, data ) {
+StateMachine.prototype.handleMessage = function( telegram ) {
 
 	// first see, if the current state is valid and that it can handle the
 	// message
-	if ( this.currentState !== null && this.currentState.onMessage( this._owner, message, data ) === true )
+	if ( this.currentState !== null && this.currentState.onMessage( this._owner, telegram ) === true )
 	{
 		return true;
 	}
 
 	// if not, and if a global state has been implemented, send the message to
 	// the global state
-	if ( this.globalState !== null && this.globalState.onMessage( this._owner, message, data ) === true )
+	if ( this.globalState !== null && this.globalState.onMessage( this._owner, telegram ) === true )
 	{
 		return true;
 	}

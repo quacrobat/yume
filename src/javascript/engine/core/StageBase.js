@@ -9,7 +9,7 @@
 
 var THREE = require( "three" );
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var renderer = require( "./Renderer" );
@@ -238,7 +238,7 @@ StageBase.prototype._changeStage = function( stageId, isSaveGame ) {
 	this.controls.isActionInProgress = true;
 	
 	// publish message to trigger the change
-	EventManager.publish( TOPIC.STAGE.CHANGE, {
+	eventManager.publish( TOPIC.STAGE.CHANGE, {
 		stageId : stageId,
 		isSaveGame : isSaveGame
 	} );

@@ -7,7 +7,7 @@
 
 "use strict";
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var developmentPanel = require( "./DevelopmentPanel" );
@@ -199,7 +199,7 @@ UserInterfaceManager.prototype.handleUiInteraction = function( event ) {
 	}
 	else if ( loadingScreen.isActive === true && loadingScreen.isReady === true )
 	{
-		EventManager.publish( TOPIC.STAGE.START, undefined );
+		eventManager.publish( TOPIC.STAGE.START, undefined );
 		loadingScreen.hide();
 	}
 };
@@ -219,7 +219,7 @@ UserInterfaceManager.prototype._mapGlobalEventsToTopics = function() {
 
 	global.window.addEventListener( "resize", function() {
 
-		EventManager.publish( TOPIC.APPLICATION.RESIZE, undefined );
+		eventManager.publish( TOPIC.APPLICATION.RESIZE, undefined );
 	} );
 };
 

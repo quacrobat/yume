@@ -9,7 +9,7 @@
 var THREE = require( "three" );
 
 var utils = require( "./Utils" );
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 /**
  * Creates a JSONLoader.
@@ -73,7 +73,7 @@ JSONLoader.prototype.load = function( url, onLoad ) {
 					onLoad( result.geometry, result.materials );
 
 					// publish message
-					EventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.OBJECT, {
+					eventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.OBJECT, {
 						url : url
 					} );
 					
@@ -97,7 +97,7 @@ JSONLoader.prototype.load = function( url, onLoad ) {
 	xhr.send();
 
 	// publish message to inform about status
-	EventManager.publish( TOPIC.STAGE.LOADING.START.OBJECT, {
+	eventManager.publish( TOPIC.STAGE.LOADING.START.OBJECT, {
 		url : url
 	} );
 };

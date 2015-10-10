@@ -36118,7 +36118,7 @@ module.exports = Action;
 
 var THREE = require( "three" );
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var Action = require( "./Action" );
@@ -36185,7 +36185,7 @@ function ActionManager() {
 	} );
 
 	// subscriptions
-	EventManager.subscribe( TOPIC.ACTION.INTERACTION, this._onInteraction );
+	eventManager.subscribe( TOPIC.ACTION.INTERACTION, this._onInteraction );
 
 	self = this;
 }
@@ -37949,7 +37949,7 @@ module.exports = SpriteAnimation;
 
 var utils = require( "../etc/Utils" );
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 /**
@@ -38051,7 +38051,7 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 					self.bufferList[ index ] = buffer;
 
 					// publish message to inform about status
-					EventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.AUDIO, {
+					eventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.AUDIO, {
 						url : url
 					} );
 
@@ -38081,7 +38081,7 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 	xhr.send();
 
 	// publish message to inform about status
-	EventManager.publish( TOPIC.STAGE.LOADING.START.AUDIO, {
+	eventManager.publish( TOPIC.STAGE.LOADING.START.AUDIO, {
 		url : url
 	} );
 };
@@ -38200,7 +38200,7 @@ module.exports = AudioListener;
 
 "use strict";
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var AudioListener = require( "./AudioListener" );
@@ -38364,7 +38364,7 @@ AudioManager.prototype.setBackgroundMusic = function( file, volume, isLoop ) {
 	this._backgroundMusic.oncanplay = function( event ) {
 
 		// publish message to inform about status
-		EventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.MUSIC, {
+		eventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.MUSIC, {
 			url : url
 		} );
 
@@ -38375,7 +38375,7 @@ AudioManager.prototype.setBackgroundMusic = function( file, volume, isLoop ) {
 	logger.log( "INFO: AudioManager: Set new background music. URL: %s", url );
 
 	// publish message to inform about status
-	EventManager.publish( TOPIC.STAGE.LOADING.START.MUSIC, {
+	eventManager.publish( TOPIC.STAGE.LOADING.START.MUSIC, {
 		url : url
 	} );
 };
@@ -38539,7 +38539,7 @@ AudioManager.prototype.setBackgroundMusicVolume = function( volume ) {
 AudioManager.prototype._onErrorBackgroundMusic = function() {
 
 	logger.error( "ERROR: AudioManager: Media resource could not be processed." );
-	EventManager.publish( TOPIC.APPLICATION.ERROR.MUSIC, "Media resource could not be processed" );
+	eventManager.publish( TOPIC.APPLICATION.ERROR.MUSIC, "Media resource could not be processed" );
 };
 
 module.exports = new AudioManager();
@@ -38843,7 +38843,7 @@ module.exports = DynamicAudio;
 
 var THREE = require( "three" );
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var camera = require( "../core/Camera" );
@@ -39153,7 +39153,7 @@ FirstPersonControls.prototype.getDirection = ( function() {
 FirstPersonControls.prototype.init = function() {
 
 	// subscriptions
-	EventManager.subscribe( TOPIC.CONTROLS.ACTIVE, this._onActive );
+	eventManager.subscribe( TOPIC.CONTROLS.ACTIVE, this._onActive );
 
 	// events
 	global.document.addEventListener( "lockPointer", this._onLockPointer );
@@ -39696,7 +39696,7 @@ FirstPersonControls.prototype._publishPlayerStatus = ( function() {
 		// values of the player
 		this._pitchObject.matrixWorld.decompose( position, quaternion, scale );
 
-		EventManager.publish( TOPIC.MULTIPLAYER.PLAYER, {
+		eventManager.publish( TOPIC.MULTIPLAYER.PLAYER, {
 			position : position,
 			quaternion : quaternion
 		} );
@@ -39871,7 +39871,7 @@ FirstPersonControls.prototype._onKeyDown = function( event ) {
 
 			case 69:
 				// e
-				EventManager.publish( TOPIC.ACTION.INTERACTION, {
+				eventManager.publish( TOPIC.ACTION.INTERACTION, {
 					position : self.getPosition(),
 					direction : self.getDirection()
 				} );
@@ -40000,7 +40000,7 @@ module.exports = new FirstPersonControls();
 
 "use strict";
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var environment = require( "./Environment" );
@@ -40097,7 +40097,7 @@ Bootstrap.prototype._loadStage = function() {
 		stageId = saveGame.stageId;
 	}
 
-	EventManager.publish( TOPIC.APPLICATION.START, {
+	eventManager.publish( TOPIC.APPLICATION.START, {
 		stageId : stageId
 	} );
 };
@@ -40116,7 +40116,7 @@ module.exports = Bootstrap;
 
 var THREE = require( "three" );
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var self;
@@ -40156,7 +40156,7 @@ Camera.prototype.init = function( fov, aspect, near, far ) {
 	this.updateProjectionMatrix();
 
 	// set subscriptions
-	EventManager.subscribe( TOPIC.APPLICATION.RESIZE, this._onResize );
+	eventManager.subscribe( TOPIC.APPLICATION.RESIZE, this._onResize );
 };
 
 /**
@@ -40426,7 +40426,7 @@ module.exports = new Environment();
 
 var THREE = require( "three" );
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var EffectComposer = require( "../postprocessing/EffectComposer" );
@@ -40504,7 +40504,7 @@ Renderer.prototype.init = function() {
 	this._composer = new EffectComposer( this._renderer );
 
 	// set subscriptions
-	EventManager.subscribe( TOPIC.APPLICATION.RESIZE, this._onResize );
+	eventManager.subscribe( TOPIC.APPLICATION.RESIZE, this._onResize );
 };
 
 /**
@@ -40777,7 +40777,7 @@ module.exports = new Scene();
 
 var THREE = require( "three" );
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var renderer = require( "./Renderer" );
@@ -41006,7 +41006,7 @@ StageBase.prototype._changeStage = function( stageId, isSaveGame ) {
 	this.controls.isActionInProgress = true;
 	
 	// publish message to trigger the change
-	EventManager.publish( TOPIC.STAGE.CHANGE, {
+	eventManager.publish( TOPIC.STAGE.CHANGE, {
 		stageId : stageId,
 		isSaveGame : isSaveGame
 	} );
@@ -41032,7 +41032,7 @@ module.exports = StageBase;
 
 var self;
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var saveGameManager = require( "../etc/SaveGameManager" );
@@ -41093,11 +41093,11 @@ function StageManager() {
 	} );
 
 	// subscriptions
-	EventManager.subscribe( TOPIC.APPLICATION.START, this._onApplicationStart );
-	EventManager.subscribe( TOPIC.STAGE.START, this._onStageStart );
-	EventManager.subscribe( TOPIC.STAGE.CHANGE, this._onStageChange );
-	EventManager.subscribe( TOPIC.STAGE.LOADING.START.ALL, this._onLoadStart );
-	EventManager.subscribe( TOPIC.STAGE.LOADING.COMPLETE.ALL, this._onLoadComplete );
+	eventManager.subscribe( TOPIC.APPLICATION.START, this._onApplicationStart );
+	eventManager.subscribe( TOPIC.STAGE.START, this._onStageStart );
+	eventManager.subscribe( TOPIC.STAGE.CHANGE, this._onStageChange );
+	eventManager.subscribe( TOPIC.STAGE.LOADING.START.ALL, this._onLoadStart );
+	eventManager.subscribe( TOPIC.STAGE.LOADING.COMPLETE.ALL, this._onLoadComplete );
 
 	self = this;
 }
@@ -41287,7 +41287,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 		var loadingProgress = Math.round( self._loaded * 100 / self._total );
 
 		// inform system about progress
-		EventManager.publish( TOPIC.STAGE.LOADING.PROGRESS, {
+		eventManager.publish( TOPIC.STAGE.LOADING.PROGRESS, {
 			loadingProgress : loadingProgress,
 			isApplicationStart : self._isApplicationStartActive
 		} );
@@ -41295,8 +41295,9 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 		// check message count
 		if ( self._loaded === self._total )
 		{
-			// publish message
-			EventManager.publish( TOPIC.STAGE.READY, {
+			// publish message to inform the system that all assets are loaded
+			// and the stage is ready to enter
+			eventManager.publish( TOPIC.STAGE.READY, {
 				isApplicationStart : self._isApplicationStartActive
 			} );
 
@@ -42232,7 +42233,7 @@ module.exports = Impostor;
 var THREE = require( "three" );
 
 var utils = require( "./Utils" );
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 /**
  * Creates a JSONLoader.
@@ -42296,7 +42297,7 @@ JSONLoader.prototype.load = function( url, onLoad ) {
 					onLoad( result.geometry, result.materials );
 
 					// publish message
-					EventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.OBJECT, {
+					eventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.OBJECT, {
 						url : url
 					} );
 					
@@ -42320,7 +42321,7 @@ JSONLoader.prototype.load = function( url, onLoad ) {
 	xhr.send();
 
 	// publish message to inform about status
-	EventManager.publish( TOPIC.STAGE.LOADING.START.OBJECT, {
+	eventManager.publish( TOPIC.STAGE.LOADING.START.OBJECT, {
 		url : url
 	} );
 };
@@ -42614,7 +42615,7 @@ module.exports = new Logger();
 
 var THREE = require( "three" );
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var Teammate = require( "./Teammate" );
@@ -42647,8 +42648,8 @@ function MultiplayerManager() {
  */
 MultiplayerManager.prototype.init = function() {
 
-	EventManager.subscribe( TOPIC.MULTIPLAYER.UPDATE, this._onUpdate );
-	EventManager.subscribe( TOPIC.MULTIPLAYER.STATUS, this._onStatus );
+	eventManager.subscribe( TOPIC.MULTIPLAYER.UPDATE, this._onUpdate );
+	eventManager.subscribe( TOPIC.MULTIPLAYER.STATUS, this._onStatus );
 };
 
 /**
@@ -43491,7 +43492,7 @@ module.exports = OBB;
 var THREE = require( "three" );
 
 var utils = require( "./Utils" );
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 /**
@@ -43552,7 +43553,7 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 					self.parse( JSON.parse( xhr.responseText ), onLoad );
 
 					// publish message
-					EventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.OBJECT, {
+					eventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.OBJECT, {
 						url : url
 					} );
 
@@ -43575,7 +43576,7 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 	xhr.send();
 
 	// publish message to inform about status
-	EventManager.publish( TOPIC.STAGE.LOADING.START.OBJECT, {
+	eventManager.publish( TOPIC.STAGE.LOADING.START.OBJECT, {
 		url : url
 	} );
 };
@@ -44243,7 +44244,7 @@ module.exports = Teammate;
 
 var utils = require( "./Utils" );
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 /**
@@ -44300,7 +44301,7 @@ TextManager.prototype.load = function( stageId, callback ) {
 					self._searchAndRepalce();
 
 					// publish message to inform about status
-					EventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.TEXT, {
+					eventManager.publish( TOPIC.STAGE.LOADING.COMPLETE.TEXT, {
 						url : url
 					} );
 
@@ -44328,7 +44329,7 @@ TextManager.prototype.load = function( stageId, callback ) {
 	xhr.send();
 
 	// publish message to inform about status
-	EventManager.publish( TOPIC.STAGE.LOADING.START.TEXT, {
+	eventManager.publish( TOPIC.STAGE.LOADING.START.TEXT, {
 		url : url
 	} );
 };
@@ -45150,12 +45151,11 @@ State.prototype.exit = function( entity ) { };
  * This executes if the agent receives a message from the messaging system.
  * 
  * @param {GameEntity} entity - A reference to the entity.
- * @param {string} message - The message topic of the subscription.
- * @param {object} data - The data of the message.
+ * @param {Telegram} telegram - The telegram of the message.
  * 
  * @returns {boolean} Is the message handled successfully by a state?
  */
-State.prototype.onMessage = function( entity, message, data ) { return false; };
+State.prototype.onMessage = function( entity, telegram ) { return false; };
 
 module.exports = State;
 },{}],46:[function(require,module,exports){
@@ -45256,23 +45256,22 @@ StateMachine.prototype.changeState = function( newState ) {
 /**
  * Handles the messages of an agent.
  * 
- * @param {string} message - The message topic of the subscription.
- * @param {object} data - The data of the message.
+ * @param {Telegram} telegram - The telegram of the message.
  * 
  * @returns {boolean} Is the message handled successfully by a state?
  */
-StateMachine.prototype.handleMessage = function( message, data ) {
+StateMachine.prototype.handleMessage = function( telegram ) {
 
 	// first see, if the current state is valid and that it can handle the
 	// message
-	if ( this.currentState !== null && this.currentState.onMessage( this._owner, message, data ) === true )
+	if ( this.currentState !== null && this.currentState.onMessage( this._owner, telegram ) === true )
 	{
 		return true;
 	}
 
 	// if not, and if a global state has been implemented, send the message to
 	// the global state
-	if ( this.globalState !== null && this.globalState.onMessage( this._owner, message, data ) === true )
+	if ( this.globalState !== null && this.globalState.onMessage( this._owner, telegram ) === true )
 	{
 		return true;
 	}
@@ -47983,7 +47982,7 @@ var Message = require( "./Message" );
 var threadMananger = require( "../core/ThreadManager" );
 var logger = require( "../etc/Logger" );
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var script;
@@ -48024,8 +48023,8 @@ NetworkManager.prototype.init = function() {
 	this._startUp();
 
 	// subscriptions
-	EventManager.subscribe( TOPIC.MULTIPLAYER.CHAT, this._onMessageChat );
-	EventManager.subscribe( TOPIC.MULTIPLAYER.PLAYER, this._onMessagePlayer );
+	eventManager.subscribe( TOPIC.MULTIPLAYER.CHAT, this._onMessageChat );
+	eventManager.subscribe( TOPIC.MULTIPLAYER.PLAYER, this._onMessagePlayer );
 };
 
 /**
@@ -48077,15 +48076,15 @@ NetworkManager.prototype._onMessageThread = function( event ) {
 
 	if ( event.data.type === Message.TYPES.CHAT )
 	{
-		EventManager.publish( TOPIC.MULTIPLAYER.MESSAGE, event.data.content );
+		eventManager.publish( TOPIC.MULTIPLAYER.MESSAGE, event.data.content );
 	}
 	else if ( event.data.type === Message.TYPES.GAME )
 	{
-		EventManager.publish( TOPIC.MULTIPLAYER.UPDATE, event.data.content );
+		eventManager.publish( TOPIC.MULTIPLAYER.UPDATE, event.data.content );
 	}
 	else if ( event.data.type === Message.TYPES.STATUS )
 	{
-		EventManager.publish( TOPIC.MULTIPLAYER.STATUS, event.data.content );
+		eventManager.publish( TOPIC.MULTIPLAYER.STATUS, event.data.content );
 	}
 	else if ( event.data.type === Message.TYPES.INFO )
 	{
@@ -50659,7 +50658,7 @@ module.exports = Stage;
 "use strict";
 
 var UiElement = require( "./UiElement" );
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var self;
@@ -50716,7 +50715,7 @@ Chat.prototype.init = function() {
 	this._$messages = global.document.querySelector( "#messages" );
 	this._$input = this._$chat.querySelector( ".form-control" );
 
-	EventManager.subscribe( TOPIC.MULTIPLAYER.MESSAGE, this._onMessage );
+	eventManager.subscribe( TOPIC.MULTIPLAYER.MESSAGE, this._onMessage );
 };
 
 /**
@@ -50736,7 +50735,7 @@ Chat.prototype.toogle = function() {
 		this.hide();
 
 		// activate controls
-		EventManager.publish( TOPIC.CONTROLS.ACTIVE, {
+		eventManager.publish( TOPIC.CONTROLS.ACTIVE, {
 			isActive : true
 		} );
 	}
@@ -50746,7 +50745,7 @@ Chat.prototype.toogle = function() {
 		this.show();
 
 		// deactivate controls
-		EventManager.publish( TOPIC.CONTROLS.ACTIVE, {
+		eventManager.publish( TOPIC.CONTROLS.ACTIVE, {
 			isActive : false
 		} );
 	}
@@ -50811,7 +50810,7 @@ Chat.prototype._checkAndSend = function() {
 		this._postMessage( message );
 
 		// publish chat message for sending to server
-		EventManager.publish( TOPIC.MULTIPLAYER.CHAT, message );
+		eventManager.publish( TOPIC.MULTIPLAYER.CHAT, message );
 	}
 };
 
@@ -51038,7 +51037,7 @@ module.exports = new InteractionLabel();
 "use strict";
 
 var UiElement = require( "./UiElement" );
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var self;
@@ -51117,8 +51116,8 @@ LoadingScreen.prototype.init = function() {
 	this._$text = this._$loadingScreen.querySelector( ".text" );
 
 	// subscriptions
-	EventManager.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
-	EventManager.subscribe(  TOPIC.STAGE.READY, this._onReady );
+	eventManager.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
+	eventManager.subscribe(  TOPIC.STAGE.READY, this._onReady );
 };
 
 /**
@@ -51230,7 +51229,7 @@ module.exports = new LoadingScreen();
 
 var UiElement = require( "./UiElement" );
 var utils = require( "../etc/Utils" );
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var self;
@@ -51294,8 +51293,8 @@ Menu.prototype.init = function() {
 	this._$progressBar = this._$menu.querySelector( ".progress-bar" );
 
 	// subscriptions
-	EventManager.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
-	EventManager.subscribe( TOPIC.STAGE.READY, this._onReady );
+	eventManager.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
+	eventManager.subscribe( TOPIC.STAGE.READY, this._onReady );
 
 	this._$button.addEventListener( "click", this._onClick );
 };
@@ -51368,7 +51367,7 @@ Menu.prototype._onReady = function( message, data ) {
  */
 Menu.prototype._publishFinishEvent = function( message, data ) {
 
-	EventManager.publish( TOPIC.STAGE.START, undefined );
+	eventManager.publish( TOPIC.STAGE.START, undefined );
 	self._$button.removeEventListener( "click", self._publishFinishEvent );
 };
 
@@ -51997,7 +51996,7 @@ module.exports = UiElement;
 
 "use strict";
 
-var EventManager = require( "../messaging/EventManager" );
+var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var developmentPanel = require( "./DevelopmentPanel" );
@@ -52189,7 +52188,7 @@ UserInterfaceManager.prototype.handleUiInteraction = function( event ) {
 	}
 	else if ( loadingScreen.isActive === true && loadingScreen.isReady === true )
 	{
-		EventManager.publish( TOPIC.STAGE.START, undefined );
+		eventManager.publish( TOPIC.STAGE.START, undefined );
 		loadingScreen.hide();
 	}
 };
@@ -52209,7 +52208,7 @@ UserInterfaceManager.prototype._mapGlobalEventsToTopics = function() {
 
 	global.window.addEventListener( "resize", function() {
 
-		EventManager.publish( TOPIC.APPLICATION.RESIZE, undefined );
+		eventManager.publish( TOPIC.APPLICATION.RESIZE, undefined );
 	} );
 };
 
