@@ -36510,7 +36510,7 @@ ActionManager.prototype._onInteraction = function( message, data ) {
 };
 
 module.exports = new ActionManager();
-},{"../etc/Logger":31,"../messaging/EventManager":50,"../messaging/Topic":52,"../ui/UserInterfaceManager":83,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
+},{"../etc/Logger":31,"../messaging/EventManager":55,"../messaging/Topic":57,"../ui/UserInterfaceManager":88,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
 /**
  * @file The ActionTrigger is a static trigger for actions.
  * 
@@ -38088,7 +38088,7 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 
 module.exports = AudioBufferList;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"../messaging/EventManager":50,"../messaging/Topic":52}],14:[function(require,module,exports){
+},{"../etc/Utils":40,"../messaging/EventManager":55,"../messaging/Topic":57}],14:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype holds the central Web Audio context and manages the
@@ -38544,7 +38544,7 @@ AudioManager.prototype._onErrorBackgroundMusic = function() {
 
 module.exports = new AudioManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Camera":19,"../etc/Logger":31,"../messaging/EventManager":50,"../messaging/Topic":52,"./AudioBufferList":13,"./AudioListener":14,"./DynamicAudio":16}],16:[function(require,module,exports){
+},{"../core/Camera":19,"../etc/Logger":31,"../messaging/EventManager":55,"../messaging/Topic":57,"./AudioBufferList":13,"./AudioListener":14,"./DynamicAudio":16}],16:[function(require,module,exports){
 /**
  * @file Prototype for creating dynamic, full-buffered audio objects.
  * 
@@ -39990,7 +39990,7 @@ FirstPersonControls.RUN = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/World":27,"../etc/SettingsManager":37,"../messaging/EventManager":50,"../messaging/Topic":52,"../ui/UserInterfaceManager":83,"three":1}],18:[function(require,module,exports){
+},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/World":27,"../etc/SettingsManager":37,"../messaging/EventManager":55,"../messaging/Topic":57,"../ui/UserInterfaceManager":88,"three":1}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -40104,7 +40104,7 @@ Bootstrap.prototype._loadStage = function() {
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":17,"../etc/Logger":31,"../etc/MultiplayerManager":32,"../etc/SaveGameManager":36,"../etc/Utils":40,"../messaging/EventManager":50,"../messaging/Topic":52,"../network/NetworkManager":54,"../ui/UserInterfaceManager":83,"./Camera":19,"./Environment":20,"./Renderer":21}],19:[function(require,module,exports){
+},{"../controls/FirstPersonControls":17,"../etc/Logger":31,"../etc/MultiplayerManager":32,"../etc/SaveGameManager":36,"../etc/Utils":40,"../messaging/EventManager":55,"../messaging/Topic":57,"../network/NetworkManager":59,"../ui/UserInterfaceManager":88,"./Camera":19,"./Environment":20,"./Renderer":21}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for camera-based
@@ -40174,7 +40174,7 @@ Camera.prototype._onResize = function( message, data ) {
 
 module.exports = new Camera();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":50,"../messaging/Topic":52,"three":1}],20:[function(require,module,exports){
+},{"../messaging/EventManager":55,"../messaging/Topic":57,"three":1}],20:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype is used to ensure that all necessary browser features
@@ -40722,7 +40722,7 @@ Renderer.prototype._onResize = function( message, data ) {
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Logger":31,"../messaging/EventManager":50,"../messaging/Topic":52,"../postprocessing/EffectComposer":55,"../postprocessing/RenderPass":56,"../postprocessing/ShaderPass":57,"../shader/GaussianBlurShader":59,"../shader/GrayscaleShader":60,"../shader/VignetteShader":61,"three":1}],22:[function(require,module,exports){
+},{"../etc/Logger":31,"../messaging/EventManager":55,"../messaging/Topic":57,"../postprocessing/EffectComposer":60,"../postprocessing/RenderPass":61,"../postprocessing/ShaderPass":62,"../shader/GaussianBlurShader":64,"../shader/GrayscaleShader":65,"../shader/VignetteShader":66,"three":1}],22:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic for scene-based functionality.
  * 
@@ -41022,7 +41022,7 @@ StageBase.COLORS = {
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../controls/FirstPersonControls":17,"../etc/PerformanceManager":35,"../etc/SaveGameManager":36,"../etc/SettingsManager":37,"../etc/TextManager":39,"../etc/Utils":40,"../game/entity/EntityManager":41,"../messaging/EventManager":50,"../messaging/Topic":52,"../ui/UserInterfaceManager":83,"./Camera":19,"./Renderer":21,"./World":27,"three":1}],24:[function(require,module,exports){
+},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../controls/FirstPersonControls":17,"../etc/PerformanceManager":35,"../etc/SaveGameManager":36,"../etc/SettingsManager":37,"../etc/TextManager":39,"../etc/Utils":40,"../game/entity/EntityManager":41,"../messaging/EventManager":55,"../messaging/Topic":57,"../ui/UserInterfaceManager":88,"./Camera":19,"./Renderer":21,"./World":27,"three":1}],24:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -41314,7 +41314,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 };
 
 module.exports = new StageManager();
-},{"../etc/Logger":31,"../etc/SaveGameManager":36,"../messaging/EventManager":50,"../messaging/Topic":52,"../stages/Stage_001":62,"../stages/Stage_002":63,"../stages/Stage_003":64,"../stages/Stage_004":65,"../stages/Stage_005":66,"../stages/Stage_006":67,"../stages/Stage_007":68,"../stages/Stage_008":69,"../stages/Stage_009":70,"../stages/Stage_010":71,"../stages/Stage_011":72,"../ui/UserInterfaceManager":83}],25:[function(require,module,exports){
+},{"../etc/Logger":31,"../etc/SaveGameManager":36,"../messaging/EventManager":55,"../messaging/Topic":57,"../stages/Stage_001":67,"../stages/Stage_002":68,"../stages/Stage_003":69,"../stages/Stage_004":70,"../stages/Stage_005":71,"../stages/Stage_006":72,"../stages/Stage_007":73,"../stages/Stage_008":74,"../stages/Stage_009":75,"../stages/Stage_010":76,"../stages/Stage_011":77,"../ui/UserInterfaceManager":88}],25:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It uses the HTML5-API Web
@@ -42328,7 +42328,7 @@ JSONLoader.prototype.load = function( url, onLoad ) {
 
 module.exports = JSONLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":50,"../messaging/Topic":52,"./Utils":40,"three":1}],30:[function(require,module,exports){
+},{"../messaging/EventManager":55,"../messaging/Topic":57,"./Utils":40,"three":1}],30:[function(require,module,exports){
 /**
  * @file This prototype is used for LOD handling. It is an enhancement of the
  * LOD functionality of three.js. Instead of switching directly between LOD
@@ -42777,7 +42777,7 @@ MultiplayerManager.prototype._getTeammate = function( id ) {
 };
 
 module.exports = new MultiplayerManager();
-},{"../core/World":27,"../messaging/EventManager":50,"../messaging/Topic":52,"./Logger":31,"./Teammate":38,"three":1}],33:[function(require,module,exports){
+},{"../core/World":27,"../messaging/EventManager":55,"../messaging/Topic":57,"./Logger":31,"./Teammate":38,"three":1}],33:[function(require,module,exports){
 /**
  * @file A 3D arbitrarily oriented bounding box.
  * 
@@ -43583,7 +43583,7 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 
 module.exports = ObjectLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":50,"../messaging/Topic":52,"./Utils":40,"three":1}],35:[function(require,module,exports){
+},{"../messaging/EventManager":55,"../messaging/Topic":57,"./Utils":40,"three":1}],35:[function(require,module,exports){
 /**
  * @file Interface for performance handling. This prototype is used in stages to
  * create e.g. LOD instances.
@@ -44408,7 +44408,7 @@ TextManager.prototype._searchAndRepalce = function() {
 
 module.exports = new TextManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":50,"../messaging/Topic":52,"./Utils":40}],40:[function(require,module,exports){
+},{"../messaging/EventManager":55,"../messaging/Topic":57,"./Utils":40}],40:[function(require,module,exports){
 (function (global){
 /**
  * @file All helper and util functions are organized in this module.
@@ -45107,7 +45107,7 @@ Vehicle.prototype.update = ( function() {
 }() );
 
 module.exports = Vehicle;
-},{"../steering/Smoother":48,"../steering/SteeringBehaviors":49,"./MovingEntity":43,"three":1}],45:[function(require,module,exports){
+},{"../steering/Smoother":53,"../steering/SteeringBehaviors":54,"./MovingEntity":43,"three":1}],45:[function(require,module,exports){
 /**
  * @file Super prototype for states used by FSMs.
  * 
@@ -45301,6 +45301,761 @@ StateMachine.prototype.isInState = function( state ) {
 module.exports = StateMachine;
 },{"../../etc/Logger":31,"./State":45}],47:[function(require,module,exports){
 /**
+ * @file Prototype to define an edge connecting two nodes. An edge has an
+ * associated cost.
+ * 
+ * see: "Programming Game AI by Example", Chapter: "The Secret Life of Graphs",
+ * by Mat Buckland
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+/**
+ * Creates a graph edge.
+ * 
+ * @constructor
+ * 
+ * @param {number} from - An edge connects two nodes. Valid node indices are always positive.
+ * @param {number} to - An edge connects two nodes. Valid node indices are always positive.
+ * @param {number} cost - The cost of traversing the edge
+ */
+function GraphEdge( from, to, cost ) {
+
+	Object.defineProperties( this, {
+		from : {
+			value : from,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		to : {
+			value : to,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		cost : {
+			value : cost,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		}
+	} );
+}
+
+/**
+ * Tests, if two edges are equal.
+ * 
+ * @param {GraphEdge} edgeToCompare - The edge to compare.
+ * 
+ * @returns {boolean} Are both edges equal?
+ */
+GraphEdge.prototype.isEqual = function( edgeToCompare ) {
+
+	return this.from === edgeToCompare.from && 
+		   this.to === edgeToCompare.to && 
+		   this.cost === edgeToCompare.cost;
+};
+
+/**
+ * Clones the edge. Used by digraphes.
+ * 
+ * @returns {GraphEdge} The cloned edge.
+ */
+GraphEdge.prototype.clone = function(){
+	
+	return new this.constructor().copy( this );
+};
+
+/**
+ * Copies all values from one edge to an other.
+ * 
+ * @returns {GraphEdge} The reference to the current edge.
+ */
+GraphEdge.prototype.copy = function( source ){
+	
+	this.from = source.from;
+	this.to = source.to;
+	this.cost = source.cost;
+	
+	return this;
+};
+
+module.exports = GraphEdge;
+},{}],48:[function(require,module,exports){
+/**
+ * @file Node prototype to be used with graphs.
+ * 
+ * see: "Programming Game AI by Example", Chapter: "The Secret Life of Graphs",
+ * by Mat Buckland
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+/**
+ * Creates a graph node.
+ * 
+ * @constructor
+ * 
+ * @param {number} index - Every node has an index. A valid index is >= 0.
+ */
+function GraphNode( index ) {
+
+	Object.defineProperties( this, {
+		index : {
+			value : ( index >= 0 ) ? index : GraphNode.INVALID_NODE_INDEX,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		}
+	} );
+}
+
+GraphNode.INVALID_NODE_INDEX = -1;
+
+module.exports = GraphNode;
+},{}],49:[function(require,module,exports){
+/**
+ * @file Prototype to define an edge connecting two navigation nodes.
+ * 
+ * see: "Programming Game AI by Example", Chapter: "The Secret Life of Graphs",
+ * by Mat Buckland
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var GraphEdge = require( "./GraphEdge" );
+
+/**
+ * Creates a navigation graph edge.
+ * 
+ * @constructor
+ * 
+ * @param {number} from - An edge connects two nodes. Valid node indices are always positive.
+ * @param {number} to - An edge connects two nodes. Valid node indices are always positive.
+ * @param {number} cost - The cost of traversing the edge
+ * @param {number} flags - The type of action the player needs to do to solve this edge.
+ * @param {number} id - If this edge intersects with an object (such as a door or lift), then this is that object's ID. 
+ */
+function NavGraphEdge( from, to, cost, flags, id ) {
+	
+	GraphEdge.call( this, from, to, cost );
+
+	Object.defineProperties( this, {
+		flags : {
+			value : flags || NavGraphEdge.FLAGS.NORMAL,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		IDofIntersectingEntity : {
+			value : id || -1,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		}
+	} );
+}
+
+NavGraphEdge.prototype = Object.create( GraphEdge.prototype );
+NavGraphEdge.prototype.constructor = NavGraphEdge;
+
+NavGraphEdge.FLAGS = {
+	NORMAL : 0,
+	SWIM : 1,
+	CRAWL : 2,
+	CREEP : 3,
+	JUMP : 4,
+	FLY : 5,
+	GRAPPLE : 6,
+	GOES_THROUGH_DOOR : 7,
+};
+
+module.exports = NavGraphEdge;
+},{"./GraphEdge":47}],50:[function(require,module,exports){
+/**
+ * @file Graph node for use in creating a navigation graph. This node contains
+ * the position of the node and a pointer to a GameEntity... useful if you want
+ * your nodes to represent health packs, gold mines and the like.
+ * 
+ * see: "Programming Game AI by Example", Chapter: "The Secret Life of Graphs",
+ * by Mat Buckland
+ * 
+ * @author Human Interactive
+ */
+"use strict";
+
+var THREE = require( "three" );
+
+var GraphNode = require( "./GraphNode" );
+/**
+ * Creates a graph node.
+ * 
+ * @constructor
+ * 
+ * @param {number} index - Every node has an index. A valid index is >= 0.
+ * @param {THREE.Vector3} position - The node's position
+ * @param {object} extraInfo - Often you will require a navgraph node to contain
+ * additional information. For example a node might represent a pickup such as
+ * armor in which case "extraInfo" could be an enumerated value denoting the
+ * pickup type, thereby enabling a search algorithm to search a graph for
+ * specific items. Going one step further, "extraInfo" could be a pointer to the
+ * instance of the item type the node is twinned with. This would allow a search
+ * algorithm to test the status of the pickup during the search.
+ */
+function NavGraphNode( index, position, extraInfo ) {
+
+	GraphNode.call( this, index );
+
+	Object.defineProperties( this, {
+		position : {
+			value : position || new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		extraInfo : {
+			value : extraInfo || null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		}
+	} );
+}
+
+NavGraphNode.prototype = Object.create( GraphNode.prototype );
+NavGraphNode.prototype.constructor = NavGraphNode;
+
+/**
+ * Clones the navigation edge. Used by digraphes.
+ * 
+ * @returns {NavGraphNode} The cloned edge.
+ */
+NavGraphNode.prototype.clone = function(){
+	
+	return new this.constructor().copy( this );
+};
+
+/**
+ * Copies all values from one edge to an other.
+ * 
+ * @returns {NavGraphNode} The reference to the current edge.
+ */
+NavGraphNode.prototype.copy = function( source ){
+	
+	this.position.copy( source.position );
+	this.extraInfo = source.extraInfo;
+	
+	return this;
+};
+
+
+module.exports = NavGraphNode;
+},{"./GraphNode":48,"three":1}],51:[function(require,module,exports){
+/**
+ * @file Graph prototype using the adjacency list representation.
+ * 
+ * see: "Programming Game AI by Example", Chapter: "The Secret Life of Graphs",
+ * by Mat Buckland
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+/**
+ * Creates a sparse graph.
+ * 
+ * @constructor
+ * 
+ * @param {boolean} isDigraph - Is this a directed graph?
+ */
+function SparseGraph( isDigraph ) {
+
+	Object.defineProperties( this, {
+		// is this a directed graph?
+		isDigraph : {
+			value : isDigraph || false,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the nodes that comprise this graph, organized in an associative array
+		_nodes : {
+			value : {},
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
+		// an associative array of adjacency edge list. (each node index keys
+		// into the list of edges associated with that node)
+		_edges : {
+			value : {},
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
+		// the index of the next node to be added
+		_nextNodeIndex : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		}
+	} );
+
+}
+
+/**
+ * Given a node this method first checks to see if the node has been added
+ * previously but is now innactive. If it is, it is reactivated.
+ * 
+ * If the node has not been added previously, it is checked to make sure its
+ * index matches the next node index before being added to the graph
+ * 
+ * @param {GraphNode} node - The node to add.
+ * 
+ * @returns {number} The index of the node.
+ */
+SparseGraph.prototype.addNode = function( node ) {
+
+	if ( !this.isNodePresent( node.index ) )
+	{
+		// make sure the new node has been indexed correctly
+		if ( node.index === this._nextNodeIndex )
+		{
+			this._nodes[ node.index ] = node;
+			this._edges[ node.index ] = [];
+
+			return this._nextNodeIndex++;
+		}
+		else
+		{
+			throw "ERROR: SparseGraph: Invalid node index. Unable to add node.";
+		}
+
+	}
+	else
+	{
+		throw "ERROR: SparseGraph: Attempting to add a node with a duplicate index.";
+	}
+};
+
+/**
+ * Use this to add an edge to the graph. The method will ensure that the edge
+ * passed as a parameter is valid before adding it to the graph. If the graph is
+ * a digraph then a similar edge connecting the nodes in the opposite direction
+ * will be automatically added.
+ * 
+ * @param {GraphEdge} edge - The edge to add.
+ */
+SparseGraph.prototype.addEdge = function( edge ) {
+
+	var newEdge;
+
+	// first make sure the from and to nodes exist within the graph and
+	// both nodes are active before adding the edge
+	if ( this.isNodePresent( edge.from ) && this.isNodePresent( edge.to ) )
+	{
+		// add the edge, first making sure it is unique
+		if ( this._isEdgeUnique( edge.from, edge.to ) )
+		{
+			this._edges[ edge.from ].push( edge );
+		}
+
+		// if the graph is undirected we must add another connection in the
+		// opposite direction
+		if ( this.isDigraph === false )
+		{
+			// check to make sure the edge is unique before adding
+			if ( this._isEdgeUnique( edge.to, edge.from ) )
+			{
+				// clone the edge
+				newEdge = edge.clone();
+
+				// change direction
+				newEdge.from = edge.to;
+				newEdge.to = edge.from;
+
+				// add second edge
+				this._edges[ edge.to ].push( newEdge );
+			}
+		}
+	}
+	else
+	{
+		throw "ERROR: SparseGraph: Invalid node indices of edge. Unable to add edge.";
+	}
+
+};
+
+/**
+ * Returns the reference to a specific node.
+ * 
+ * @param {number} index - The index of the node.
+ * 
+ * @returns {GraphNode} The reference to the node.
+ */
+SparseGraph.prototype.getNode = function( index ) {
+
+	if ( this.isNodePresent( index ) )
+	{
+		return this._nodes[ index ];
+	}
+	else
+	{
+		throw "ERROR: SparseGraph: Invalid node index.";
+	}
+
+};
+
+/**
+ * Returns the reference to a specific edge.
+ * 
+ * @param {number} from - The index of the first node.
+ * @param {number} to -The index of the second node.
+ * 
+ * @returns {GraphEdge} The reference to the edge.
+ */
+SparseGraph.prototype.getEdge = function( from, to ) {
+	
+	var index, edge;
+
+	// first, test if both node indices are present in the graph
+	if ( this.isNodePresent( from ) && this.isNodePresent( to ) )
+	{
+		// then iterate over all edges of the "from" node and test, if "from/to"
+		// is present in one single edge
+		for ( index = 0; index <  this._edges[from].length; index++ )
+		{
+			edge = this._edges[from][index];
+				
+			if ( edge.to === to )
+			{
+				return edge;
+			}
+		}
+
+		throw "ERROR: SparseGraph: From/to nodes are not connected to an edege.";
+	}
+	else
+	{
+		throw "ERROR: SparseGraph: Invalid from/to indices.";
+	}
+};
+
+/**
+ * Returns the number of nodes present in the graph.
+ * 
+ * @returns {number} The total number of nodes.
+ */
+SparseGraph.prototype.getNumberOfNodes = function() {
+	
+	return Object.keys( this._nodes ).length;
+};
+
+/**
+ * Returns the total number of edges present in the graph.
+ * 
+ * @returns {number} The total number of edges.
+ */
+SparseGraph.prototype.getNumberOfEdges = function() {
+
+	var list, numberOfEdges = 0;
+
+	// iterate over all edgeLists
+	for ( list in this._edges )
+	{
+		if ( this._edges.hasOwnProperty( list ) )
+		{
+			// sum up the amount of edges
+			numberOfEdges += this._edges[ list ].length;
+		}
+	}
+
+	return numberOfEdges;
+};
+
+/**
+ * Sets the cost of a specific edge.
+ * 
+ * @param {number} from - The index of the first node.
+ * @param {number} to -The index of the second node.
+ * @param {number} cost - The new cost to set.
+ */
+SparseGraph.prototype.setEdgeCost = function( from, to, cost ){
+	
+	var index, edge;
+	
+	// first, test if both node indices are present in the graph
+	if ( this.isNodePresent( from ) && this.isNodePresent( to ) )
+	{
+		// determine the correct edge of the node's edge list
+		for ( index = 0; index < this._edges[ from ].length; index++ )
+		{
+			edge = this._edges[ from ][ index ];
+
+			if ( edge.to === to )
+			{
+				// assign the new cost
+				edge.cost  = cost;
+			}
+		}
+	}
+	else
+	{
+		throw "ERROR: SparseGraph: Invalid from/to indices.";
+	}
+};
+
+/**
+ * Removes a node from the graph and removes any links to neighbouring nodes.
+ * 
+ * @param {number} index - The index of the node to remove.
+ */
+SparseGraph.prototype.removeNode = function( index ) {
+
+	var i, j, edgeToNeighbor, edgeFromNeigbor;
+
+	// if the node is present, delete it
+	if ( this.isNodePresent( index ) )
+	{
+		delete this._nodes[ index ];
+
+		// if the graph is not directed remove all edges leading to this node
+		// and then clear the edges leading from the node
+		if ( this.isDigraph === false )
+		{
+			// visit each neighbor and erase any edges leading to this node
+			for ( i = 0; i < this._edges[ index ].length; i++ )
+			{
+				// this is a edge to a neighbor
+				edgeToNeighbor = this._edges[ index ][ i ];
+
+				// now iterate over all edges of the neighbor
+				for ( j = 0; j < this._edges[ edgeToNeighbor.to ].length; j++ )
+				{
+					edgeFromNeigbor = this._edges[ edgeToNeighbor.to ][ j ];
+
+					// if one of the edge leads to the specific node, remove the
+					// edge from the list of the neighbor
+					if ( edgeFromNeigbor.to === index )
+					{
+						this._edges[ edgeToNeighbor.to ].splice( j, 1 );
+
+						break;
+					}
+				}
+			}
+		}
+		else
+		{
+			// if a digraph remove the edges the slow way
+			this._cullInvalidEdges();
+		}
+		
+		// finally, clear this node's edges
+		delete this._edges[ index ];
+	}
+	else
+	{
+		throw "ERROR: SparseGraph: Invalid node index. Unable to remove node.";
+	}
+
+};
+
+/**
+ * Removes the edge connecting "from" and "to" from the graph (if present). If a
+ * digraph then the edge connecting the nodes in the opposite direction will
+ * also be removed.
+ * 
+ * @param {number} from - The index of the first node.
+ * @param {number} to -The index of the second node.
+ */
+SparseGraph.prototype.removeEdge = function( from, to ) {
+
+	var index, currentEdge;
+
+	// first, test if both node indices are present in the graph
+	if ( this.isNodePresent( from ) && this.isNodePresent( to ) )
+	{
+		if ( this.isDigraph === false )
+		{
+			// delete the edge connecting the nodes in the opposite direction
+			for ( index = 0; index < this._edges[ to ].length; index++ )
+			{
+				currentEdge = this._edges[ to ][ index ];
+
+				if ( currentEdge.to === from )
+				{
+					this._edges[ to ].splice( index, 1 );
+				}
+			}
+		}
+
+		// delete the edge from the node's edge list
+		for ( index = 0; index < this._edges[ from ].length; index++ )
+		{
+			currentEdge = this._edges[ from ][ index ];
+
+			if ( currentEdge.to === to )
+			{
+				this._edges[ from ].splice( index, 1 );
+			}
+		}
+
+	}
+	else
+	{
+		throw "ERROR: SparseGraph: Invalid from/to indices.";
+	}
+
+};
+
+/**
+ * Removes all edges from the edge lists.
+ */
+SparseGraph.prototype.removeEdges = function() {
+	
+	var list;
+	
+	// iterate over all edgeLists
+	for ( list in this._edges )
+	{
+		if ( this._edges.hasOwnProperty( list ) )
+		{
+			this._edges[list].length = 0;
+		}
+	}
+};
+
+/**
+ * Clears the graph ready for new node insertions.
+ */
+SparseGraph.prototype.clear = function() {
+	
+	this._nodes = {};
+	this._edges = {};
+	this._nextNodeIndex = 0;
+};
+
+/**
+ * Returns true if a node with the given index is present in the graph.
+ * 
+ * @param {number} index - The index of the node to check.
+ * 
+ * @returns {boolean} Is the node with the given index present in the graph?
+ */
+SparseGraph.prototype.isNodePresent = function( index ) {
+
+	return this._nodes.hasOwnProperty( index );
+
+};
+
+/**
+ * Returns true if an edge with the given "from/to" is present in the graph.
+ * 
+ * @param {number} from - The index of the first node.
+ * @param {number} to -The index of the second node.
+ * 
+ * @returns {boolean} Is the edge with the given from/to present in the graph?
+ */
+SparseGraph.prototype.isEdgePresent = function( from, to ) {
+
+	var index, edge;
+
+	// first, test if both node indices are present in the graph
+	if ( this.isNodePresent( from ) && this.isNodePresent( to ) )
+	{
+		// then iterate over all edges of the "from" node and test, if "from/to"
+		// is present in one single edge
+		for ( index = 0; index < this._edges[ from ].length; index++ )
+		{
+			edge = this._edges[ from ][ index ];
+
+			if ( edge.to === to )
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+	else
+	{
+		return false;
+	}
+
+};
+
+/**
+ * Returns true if the edge is not present in the graph. Used when adding edges
+ * to prevent duplication.
+ * 
+ * @param {number} from - The index of the first node.
+ * @param {number} to -The index of the second node.
+ * 
+ * @returns {boolean} Is the edge unique?
+ */
+SparseGraph.prototype._isEdgeUnique = function( from, to ) {
+
+	var index, edge;
+
+	// iterate over all edges of the "from" node and test, if "from/to"
+	// is present in one single edge
+	for ( index = 0; index < this._edges[ from ].length; index++ )
+	{
+		edge = this._edges[ from ][ index ];
+
+		if ( edge.to === to )
+		{
+			return false;
+		}
+	}
+
+	return true;
+};
+
+/**
+ * Iterates through all the edges in the graph and removes any that point to an
+ * invalidated node.
+ */
+SparseGraph.prototype._cullInvalidEdges = function() {
+
+	var list, index, edge;
+
+	// iterate over all edge lists( edges per node )
+	for ( list in this._edges )
+	{
+		if ( this._edges.hasOwnProperty( list ) )
+		{
+			// for each list, iterate over all edges
+			for ( index = 0; index <  this._edges[list].length; index++ )
+			{
+				edge = this._edges[list][ index ];
+
+				// if the from OR to index is invalid, delete the edge from
+				// the list
+				if ( !this._nodes.hasOwnProperty( edge.from ) || !this._nodes.hasOwnProperty( edge.to ) )
+				{
+					this._edges[list].splice( index, 1 );
+				}
+
+			}
+		}
+	}
+
+};
+
+module.exports = SparseGraph;
+},{}],52:[function(require,module,exports){
+/**
  * @file Prototype to define, manage, and traverse a path defined by a series of
  * 3D vectors.
  * 
@@ -45461,7 +46216,7 @@ Path.prototype.createRandomPath = function( numberOfWaypoints, boundingBox ) {
 };
 
 module.exports = Path;
-},{"../../etc/Logger":31,"three":1}],48:[function(require,module,exports){
+},{"../../etc/Logger":31,"three":1}],53:[function(require,module,exports){
 /**
  * @file Prototype to help calculate the average value of a history of vector
  * values.
@@ -45551,7 +46306,7 @@ Smoother.prototype.update = ( function() {
 }() );
 
 module.exports = Smoother;
-},{"three":1}],49:[function(require,module,exports){
+},{"three":1}],54:[function(require,module,exports){
 /**
  * @file Prototype to encapsulate steering behaviors for a vehicle.
  * 
@@ -47250,7 +48005,7 @@ SteeringBehaviors.DECELERATION = {
 };
 
 module.exports = SteeringBehaviors;
-},{"../../core/World":27,"../../etc/Logger":31,"./Path":47,"three":1}],50:[function(require,module,exports){
+},{"../../core/World":27,"../../etc/Logger":31,"./Path":52,"three":1}],55:[function(require,module,exports){
 /**
  * @file This prototype provides topic-based publish/subscribe messaging and
  * enables communication between game entities.
@@ -47802,7 +48557,7 @@ function sendMessageToEntity( sender, receiver, message, data, isSync, delay ) {
 }
 
 module.exports = new EventManager();
-},{"../etc/Logger":31,"../game/entity/GameEntity":42,"./Telegram":51}],51:[function(require,module,exports){
+},{"../etc/Logger":31,"../game/entity/GameEntity":42,"./Telegram":56}],56:[function(require,module,exports){
 /**
  * @file This defines a telegram. A telegram is a data structure that records
  * information required to dispatch game messages. These messages are used by
@@ -47860,7 +48615,7 @@ function Telegram( sender, receiver, message, data, delay ) {
 }
 
 module.exports = Telegram;
-},{}],52:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 /**
  * @file This file contains all topics for publish & subscribe. YUME supports a
  * publish/subscribe messaging system with hierarchical addressing, so topics
@@ -47916,7 +48671,7 @@ var TOPIC = {
 };
 
 module.exports = TOPIC;
-},{}],53:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 /**
  * @file Prototype for network-messages.
  * 
@@ -47966,7 +48721,7 @@ Message.TYPES = {
 };
 
 module.exports = Message;
-},{}],54:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for network-based
@@ -48221,7 +48976,7 @@ NetworkManager.SERVER = {
 
 module.exports = new NetworkManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/ThreadManager":26,"../etc/Logger":31,"../messaging/EventManager":50,"../messaging/Topic":52,"./Message":53,"ws":2}],55:[function(require,module,exports){
+},{"../core/ThreadManager":26,"../etc/Logger":31,"../messaging/EventManager":55,"../messaging/Topic":57,"./Message":58,"ws":2}],60:[function(require,module,exports){
 /**
  * @file This prototype manages effects for post-processing.
  * 
@@ -48407,7 +49162,7 @@ EffectComposer.prototype._reset = function( renderTarget ) {
 };
 
 module.exports = EffectComposer;
-},{"three":1}],56:[function(require,module,exports){
+},{"three":1}],61:[function(require,module,exports){
 /**
  * @file This prototype provides a render pass for post-processing.
  * 
@@ -48469,7 +49224,7 @@ RenderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = RenderPass;
-},{"three":1}],57:[function(require,module,exports){
+},{"three":1}],62:[function(require,module,exports){
 /**
  * @file This prototype provides a shader pass for post-processing.
  * 
@@ -48575,7 +49330,7 @@ ShaderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = ShaderPass;
-},{"three":1}],58:[function(require,module,exports){
+},{"three":1}],63:[function(require,module,exports){
 /**
  * @file This shader can be used for vertex displacement to create
  * water or fabric materials. It implements an exemplary diffuse lighting
@@ -48677,7 +49432,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":1}],59:[function(require,module,exports){
+},{"three":1}],64:[function(require,module,exports){
 /**
  * @file This shader applies a gaussian blur effect.
  * It can be used for both x and y direction.
@@ -48744,7 +49499,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":1}],60:[function(require,module,exports){
+},{"three":1}],65:[function(require,module,exports){
 /**
  * @file This shader transforms all colors to grayscale.
  * 
@@ -48793,7 +49548,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],61:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 /**
  * @file This shader creates a vignette effect.
  * 
@@ -48854,7 +49609,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],62:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -48971,7 +49726,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],63:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],68:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -49151,7 +49906,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],64:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],69:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -49323,7 +50078,7 @@ function colorMesh( mesh ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],65:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],70:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -49501,7 +50256,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],66:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],71:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -49627,7 +50382,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],67:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],72:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -49816,7 +50571,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],68:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],73:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -49989,7 +50744,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],69:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],74:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -50142,7 +50897,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],70:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],75:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -50323,7 +51078,7 @@ function showLODCircles( world ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],71:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],76:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -50503,7 +51258,7 @@ function onKeyDown( event ) {
 
 module.exports = Stage;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],72:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],77:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -50648,7 +51403,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],73:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],78:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -50827,7 +51582,7 @@ Chat.prototype._onMessage = function( message, data ) {
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":50,"../messaging/Topic":52,"./UiElement":82}],74:[function(require,module,exports){
+},{"../messaging/EventManager":55,"../messaging/Topic":57,"./UiElement":87}],79:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel. Only if the development
@@ -50889,7 +51644,7 @@ DevelopmentPanel.prototype.setText = function( text ) {
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":82}],75:[function(require,module,exports){
+},{"./UiElement":87}],80:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -50950,7 +51705,7 @@ InformationPanel.prototype.setText = function( textKey ) {
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":82}],76:[function(require,module,exports){
+},{"./UiElement":87}],81:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -51027,7 +51782,7 @@ InteractionLabel.prototype.hide = function() {
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":82}],77:[function(require,module,exports){
+},{"./UiElement":87}],82:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -51217,7 +51972,7 @@ LoadingScreen.prototype._onReady = function( message, data ) {
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":50,"../messaging/Topic":52,"./UiElement":82}],78:[function(require,module,exports){
+},{"../messaging/EventManager":55,"../messaging/Topic":57,"./UiElement":87}],83:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -51373,7 +52128,7 @@ Menu.prototype._publishFinishEvent = function( message, data ) {
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"../messaging/EventManager":50,"../messaging/Topic":52,"./UiElement":82}],79:[function(require,module,exports){
+},{"../etc/Utils":40,"../messaging/EventManager":55,"../messaging/Topic":57,"./UiElement":87}],84:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -51498,7 +52253,7 @@ ModalDialog.prototype._onClose = function( event ) {
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"./UiElement":82}],80:[function(require,module,exports){
+},{"../etc/Utils":40,"./UiElement":87}],85:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor. Only if the development
@@ -51722,7 +52477,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":82}],81:[function(require,module,exports){
+},{"./UiElement":87}],86:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -51935,7 +52690,7 @@ TextScreen.prototype._printName = function() {
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":82}],82:[function(require,module,exports){
+},{"./UiElement":87}],87:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -51985,7 +52740,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":39}],83:[function(require,module,exports){
+},{"../etc/TextManager":39}],88:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in stages to
@@ -52251,4 +53006,4 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"../messaging/EventManager":50,"../messaging/Topic":52,"./Chat":73,"./DevelopmentPanel":74,"./InformationPanel":75,"./InteractionLabel":76,"./LoadingScreen":77,"./Menu":78,"./ModalDialog":79,"./PerformanceMonitor":80,"./TextScreen":81}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83]);
+},{"../etc/Utils":40,"../messaging/EventManager":55,"../messaging/Topic":57,"./Chat":78,"./DevelopmentPanel":79,"./InformationPanel":80,"./InteractionLabel":81,"./LoadingScreen":82,"./Menu":83,"./ModalDialog":84,"./PerformanceMonitor":85,"./TextScreen":86}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88]);
