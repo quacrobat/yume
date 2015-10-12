@@ -33,7 +33,7 @@ function NavGraphEdge( from, to, cost, flags, id ) {
 			enumerable : true,
 			writable : true
 		},
-		IDofIntersectingEntity : {
+		iDofIntersectingEntity : {
 			value : id || -1,
 			configurable : false,
 			enumerable : true,
@@ -44,6 +44,29 @@ function NavGraphEdge( from, to, cost, flags, id ) {
 
 NavGraphEdge.prototype = Object.create( GraphEdge.prototype );
 NavGraphEdge.prototype.constructor = NavGraphEdge;
+
+/**
+ * Clones the navigation edge. Used by digraphes.
+ * 
+ * @returns {NavGraphEdge} The cloned edge.
+ */
+NavGraphEdge.prototype.clone = function(){
+	
+	return new this.constructor().copy( this );
+};
+
+/**
+ * Copies all values from one edge to an other.
+ * 
+ * @returns {NavGraphEdge} The reference to the current edge.
+ */
+NavGraphEdge.prototype.copy = function( source ){
+	
+	this.flags = source.flags;
+	this.iDofIntersectingEntity = source.iDofIntersectingEntity;
+	
+	return this;
+};
 
 NavGraphEdge.FLAGS = {
 	NORMAL : 0,

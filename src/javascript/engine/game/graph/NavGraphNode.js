@@ -51,28 +51,4 @@ function NavGraphNode( index, position, extraInfo ) {
 NavGraphNode.prototype = Object.create( GraphNode.prototype );
 NavGraphNode.prototype.constructor = NavGraphNode;
 
-/**
- * Clones the navigation edge. Used by digraphes.
- * 
- * @returns {NavGraphNode} The cloned edge.
- */
-NavGraphNode.prototype.clone = function(){
-	
-	return new this.constructor().copy( this );
-};
-
-/**
- * Copies all values from one edge to an other.
- * 
- * @returns {NavGraphNode} The reference to the current edge.
- */
-NavGraphNode.prototype.copy = function( source ){
-	
-	this.position.copy( source.position );
-	this.extraInfo = source.extraInfo;
-	
-	return this;
-};
-
-
 module.exports = NavGraphNode;
