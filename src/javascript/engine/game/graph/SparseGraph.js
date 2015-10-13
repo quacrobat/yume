@@ -150,7 +150,7 @@ SparseGraph.prototype.getNode = function( index ) {
 	}
 	else
 	{
-		throw "ERROR: SparseGraph: Invalid node index.";
+		throw "ERROR: SparseGraph: Invalid node index. Unable to get node.";
 	}
 
 };
@@ -172,9 +172,9 @@ SparseGraph.prototype.getEdge = function( from, to ) {
 	{
 		// then iterate over all edges of the "from" node and test, if "from/to"
 		// is present in one single edge
-		for ( index = 0; index <  this._edges[from].length; index++ )
+		for ( index = 0; index <  this._edges[ from ].length; index++ )
 		{
-			edge = this._edges[from][index];
+			edge = this._edges[ from ][ index ];
 				
 			if ( edge.to === to )
 			{
@@ -188,6 +188,26 @@ SparseGraph.prototype.getEdge = function( from, to ) {
 	{
 		throw "ERROR: SparseGraph: Invalid from/to indices.";
 	}
+};
+
+/**
+ * Returns the edges outgoing of a node.
+ * 
+ * @param {number} from - The index the node.
+ * 
+ * @returns {object} An array of edges.
+ */
+SparseGraph.prototype.getEdgesOfNode = function( index ) {
+
+	if ( this.isNodePresent( index ) )
+	{
+		return this._edges[ index ];
+	}
+	else
+	{
+		throw "ERROR: SparseGraph: Invalid node index. Unable to get edges of node.";
+	}
+
 };
 
 /**
