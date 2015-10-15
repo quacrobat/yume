@@ -9,8 +9,8 @@
 
 "use strict";
 
-var GraphNode = require( "./GraphNode" );
-var GraphEdge = require( "./GraphEdge" );
+var GraphNode = require( "../GraphNode" );
+var GraphEdge = require( "../GraphEdge" );
 
 /**
  * Creates a instance of the depth first search.

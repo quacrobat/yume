@@ -62,6 +62,8 @@ NavGraphEdge.prototype.clone = function(){
  */
 NavGraphEdge.prototype.copy = function( source ){
 	
+	GraphEdge.prototype.copy.call( this, source );
+	
 	this.flags = source.flags;
 	this.iDofIntersectingEntity = source.iDofIntersectingEntity;
 	

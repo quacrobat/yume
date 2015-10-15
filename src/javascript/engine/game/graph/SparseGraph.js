@@ -243,6 +243,16 @@ SparseGraph.prototype.getNumberOfEdges = function() {
 };
 
 /**
+ * Retrieves the next free node index.
+ * 
+ * @returns {number} The next valid node index.
+ */
+SparseGraph.prototype.getNextFreeNodeIndex = function() {
+
+	return this._nextNodeIndex;
+};
+
+/**
  * Sets the cost of a specific edge.
  * 
  * @param {number} from - The index of the first node.
