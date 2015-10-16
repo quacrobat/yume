@@ -43,7 +43,7 @@ GraphHelper.prototype.generateGridLayout = function( graph, dimension, offset ) 
 };
 
 /**
- * Creates a helper object to visualize the grid. 
+ * Creates a helper mesh to visualize the grid. 
  * 
  * @param {THREE.Vector2} dimension - The dimension of the grid.
  * @param {number} offset - The offset between nodes.
@@ -87,7 +87,7 @@ GraphHelper.prototype.createGridHelper = function( dimension, offset, color ) {
 };
 
 /**
- * Creates helper objects to visualize the nodes. 
+ * Creates helper meshes to visualize the nodes. 
  * 
  * @param {SparseGraph} graph - The graph object.
  * @param {THREE.Color} color - The color of the edges.
@@ -124,7 +124,7 @@ GraphHelper.prototype.createNodeHelper = function( graph, color, size ) {
 };
 
 /**
- * Creates a helper object to visualize the edges. 
+ * Creates a helper mesh to visualize the edges. 
  * 
  * @param {SparseGraph} graph - The graph object.
  * @param {THREE.Color} color - The color of the edges.
@@ -159,6 +159,94 @@ GraphHelper.prototype.createEdgeHelper = function( graph, color ) {
 			// store the vertices in the geometry
 			geometry.vertices.push( start, end );
 		}
+	}
+
+	// create the lines
+	lines = new THREE.LineSegments( geometry, material );
+
+	// prevent auto update
+	lines.matrixAutoUpdate = false;
+	lines.updateMatrix();
+
+	world.addObject3D( lines );
+};
+
+/**
+ * Creates a helper mesh to visualize a path. The path object
+ * is an array, that holds all node indices from a start to a
+ * destination node.
+ * 
+ * @param {SparseGraph} graph - The graph object.
+ * @param {object} path - The path as an array with node indices.
+ * @param {THREE.Color} color - The color of the path.
+ */
+GraphHelper.prototype.createPathHelper = function( graph, path, color ) {
+
+	var start, end, lines, i;
+
+	// mesh properties
+	var geometry = new THREE.Geometry();
+	var material = new THREE.LineBasicMaterial( {
+		color : color || new THREE.Color( 0xff0000 )
+	} );
+
+	for ( i = 0; i < path.length - 1; i++ )
+	{
+		start = graph.getNode( path[ i ] ).position.clone();
+		end = graph.getNode( path[ i + 1 ] ).position.clone();
+
+		// lift the lines a bit
+		start.y += 0.03;
+		end.y += 0.03;
+		
+		// store the vertices in the geometry
+		geometry.vertices.push( start, end );
+	}
+
+	// create the lines
+	lines = new THREE.LineSegments( geometry, material );
+
+	// prevent auto update
+	lines.matrixAutoUpdate = false;
+	lines.updateMatrix();
+
+	world.addObject3D( lines );
+};
+
+/**
+ * Creates a helper mesh to visualize a path. The path object
+ * is an array, that holds all node indices from a start to a
+ * destination node.
+ * 
+ * @param {SparseGraph} graph - The graph object.
+ * @param {object} tree - An array with edges the search has examined
+ * @param {THREE.Color} color - The color of the path.
+ */
+GraphHelper.prototype.createSearchTreeHelper = function( graph, tree, color ) {
+
+	var start, end, edges, lines, i, j;
+
+	// mesh properties
+	var geometry = new THREE.Geometry();
+	var material = new THREE.LineBasicMaterial( {
+		color : color || new THREE.Color( 0x00ff00 )
+	} );
+
+	// iterate over all edges
+	for ( i = 0; i < tree.length; i++ )
+	{
+		// extract the position of from/to and store them into the geometry for
+		// the linesegements
+		start = graph.getNode( tree[ i ].from ).position.clone();
+		end = graph.getNode( tree[ i ].to ).position.clone();
+
+		// lift the lines a bit
+		start.y += 0.02;
+		end.y += 0.02;
+
+		// store the vertices in the geometry
+		geometry.vertices.push( start, end );
+
 	}
 
 	// create the lines

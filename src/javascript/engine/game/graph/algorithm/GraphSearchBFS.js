@@ -1,5 +1,5 @@
 /**
- * @file Prototype to implement a depth first search.
+ * @file Prototype to implement a breadth first search.
  * 
  * see: "Programming Game AI by Example", Chapter: "The Secret Life of Graphs",
  * by Mat Buckland
@@ -13,7 +13,7 @@ var GraphNode = require( "../GraphNode" );
 var GraphEdge = require( "../GraphEdge" );
 
 /**
- * Creates a instance of the depth first search.
+ * Creates a instance of the breadth first search.
  * 
  * @constructor
  * 
@@ -21,7 +21,7 @@ var GraphEdge = require( "../GraphEdge" );
  * @param {number} source - The source node index.
  * @param {number} target - The target node index.
  */
-function GraphSearchDFS( graph, source, target ) {
+function GraphSearchBFS( graph, source, target ) {
 
 	Object.defineProperties( this, {
 		_graph : {
@@ -58,6 +58,15 @@ function GraphSearchDFS( graph, source, target ) {
 			enumerable : false,
 			writable : true
 		},
+		// As the search progresses, this will hold all the edges the algorithm
+		// has examined. THIS IS NOT NECESSARY FOR THE SEARCH, IT IS HERE PURELY
+		// TO PROVIDE THE USER WITH SOME VISUAL FEEDBACK
+		_spanningTree : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
 		// true if a path to the target has been found
 		isFound : {
 			value : false,
@@ -77,7 +86,7 @@ function GraphSearchDFS( graph, source, target ) {
  * 
  * @returns {object} The path as an array with node indices.
  */
-GraphSearchDFS.prototype.getPathToTarget = function() {
+GraphSearchBFS.prototype.getPathToTarget = function() {
 
 	var currentNode, path = [];
 
@@ -105,38 +114,52 @@ GraphSearchDFS.prototype.getPathToTarget = function() {
 };
 
 /**
- * This method performs the DFS search.
+ * Returns an array containing references to all the edges the search has examined.
+ * 
+ * @returns {object} An array with edges the search has examined.
+ */
+GraphSearchBFS.prototype.getSearchTree = function() {
+
+	return this._spanningTree;
+};
+
+/**
+ * This method performs the BFS search.
  * 
  * @returns {boolean} Is a path found to the target?
  */
-GraphSearchDFS.prototype._search = function() {
+GraphSearchBFS.prototype._search = function() {
 
 	var index, nextEdge, outgoingEdges;
 
-	// create a stack(LIFO) of edges, in JavaScript done via an array
-	var stack = [];
+	// create a queue(FIFO) of edges, in JavaScript done via an array
+	var queue = [];
 
-	// create a dummy edge and put on the stack
-	stack.push( new GraphEdge( this._source, this._source, 0 ) );
+	// create a dummy edge and put on the queue
+	var dummy = new GraphEdge( this._source, this._source, 0 );
+	queue.push( dummy );
 
-	// while there are edges in the stack keep searching
-	while ( stack.length > 0 )
+	// while there are edges in the queue keep searching
+	while ( queue.length > 0 )
 	{
-		// grab the next edge and remove it from the stack
-		nextEdge = stack.pop();
+		// grab the first edge and remove it from the queue
+		nextEdge = queue.shift();
 
 		// make a note of the parent of the node this edge points to
 		this._route[ nextEdge.to ] = nextEdge.from;
-
-		// and mark it visited
-		this._visited[ nextEdge.to ] = true;
+		
+		// put it on the tree. (making sure the dummy edge is not placed on the tree)
+		if ( !nextEdge.isEqual( dummy ) )
+		{
+			this._spanningTree.unshift( nextEdge );
+		}
 
 		// if the target has been found the method can return success
 		if ( nextEdge.to === this._target )
 		{
 			return true;
 		}
-		
+
 		// determine outgoing edges
 		outgoingEdges = this._graph.getEdgesOfNode( nextEdge.to );
 
@@ -144,15 +167,20 @@ GraphSearchDFS.prototype._search = function() {
 		// stack (provided the edge does not point to a previously visited node)
 		for ( index = 0; index < outgoingEdges.length; index++ )
 		{
+			// if the node hasn't already been visited we can push the
+			// edge onto the queue
 			if ( this._visited[ outgoingEdges[ index ].to ] !== true )
 			{
-				stack.push( outgoingEdges[ index ] );
+				queue.push( outgoingEdges[ index ] );
+
+				// and mark it visited
+				this._visited[ outgoingEdges[ index ].to ] = true;
 			}
 		}
 	}
-	
+
 	// no path to target
 	return false;
 };
 
-module.exports = GraphSearchDFS;
+module.exports = GraphSearchBFS;
