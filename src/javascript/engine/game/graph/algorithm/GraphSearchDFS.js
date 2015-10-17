@@ -148,7 +148,8 @@ GraphSearchDFS.prototype._search = function() {
 			{
 				stack.push( outgoingEdges[ index ] );
 			}
-		}
+			
+		} // next edge
 	}
 	
 	// no path to target

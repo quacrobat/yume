@@ -65,7 +65,7 @@ function GraphSearchBFS( graph, source, target ) {
 			value : [],
 			configurable : false,
 			enumerable : false,
-			writable : true
+			writable : false
 		},
 		// true if a path to the target has been found
 		isFound : {
@@ -176,7 +176,8 @@ GraphSearchBFS.prototype._search = function() {
 				// and mark it visited
 				this._visited[ outgoingEdges[ index ].to ] = true;
 			}
-		}
+			
+		} // next edge
 	}
 
 	// no path to target
