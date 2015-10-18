@@ -36510,7 +36510,7 @@ ActionManager.prototype._onInteraction = function( message, data ) {
 };
 
 module.exports = new ActionManager();
-},{"../etc/Logger":31,"../messaging/EventManager":59,"../messaging/Topic":61,"../ui/UserInterfaceManager":92,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
+},{"../etc/Logger":31,"../messaging/EventManager":62,"../messaging/Topic":64,"../ui/UserInterfaceManager":95,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
 /**
  * @file The ActionTrigger is a static trigger for actions.
  * 
@@ -38088,7 +38088,7 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 
 module.exports = AudioBufferList;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"../messaging/EventManager":59,"../messaging/Topic":61}],14:[function(require,module,exports){
+},{"../etc/Utils":40,"../messaging/EventManager":62,"../messaging/Topic":64}],14:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype holds the central Web Audio context and manages the
@@ -38544,7 +38544,7 @@ AudioManager.prototype._onErrorBackgroundMusic = function() {
 
 module.exports = new AudioManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Camera":19,"../etc/Logger":31,"../messaging/EventManager":59,"../messaging/Topic":61,"./AudioBufferList":13,"./AudioListener":14,"./DynamicAudio":16}],16:[function(require,module,exports){
+},{"../core/Camera":19,"../etc/Logger":31,"../messaging/EventManager":62,"../messaging/Topic":64,"./AudioBufferList":13,"./AudioListener":14,"./DynamicAudio":16}],16:[function(require,module,exports){
 /**
  * @file Prototype for creating dynamic, full-buffered audio objects.
  * 
@@ -39990,7 +39990,7 @@ FirstPersonControls.RUN = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/World":27,"../etc/SettingsManager":37,"../messaging/EventManager":59,"../messaging/Topic":61,"../ui/UserInterfaceManager":92,"three":1}],18:[function(require,module,exports){
+},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/World":27,"../etc/SettingsManager":37,"../messaging/EventManager":62,"../messaging/Topic":64,"../ui/UserInterfaceManager":95,"three":1}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -40104,7 +40104,7 @@ Bootstrap.prototype._loadStage = function() {
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":17,"../etc/Logger":31,"../etc/MultiplayerManager":32,"../etc/SaveGameManager":36,"../etc/Utils":40,"../messaging/EventManager":59,"../messaging/Topic":61,"../network/NetworkManager":63,"../ui/UserInterfaceManager":92,"./Camera":19,"./Environment":20,"./Renderer":21}],19:[function(require,module,exports){
+},{"../controls/FirstPersonControls":17,"../etc/Logger":31,"../etc/MultiplayerManager":32,"../etc/SaveGameManager":36,"../etc/Utils":40,"../messaging/EventManager":62,"../messaging/Topic":64,"../network/NetworkManager":66,"../ui/UserInterfaceManager":95,"./Camera":19,"./Environment":20,"./Renderer":21}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for camera-based
@@ -40174,7 +40174,7 @@ Camera.prototype._onResize = function( message, data ) {
 
 module.exports = new Camera();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":59,"../messaging/Topic":61,"three":1}],20:[function(require,module,exports){
+},{"../messaging/EventManager":62,"../messaging/Topic":64,"three":1}],20:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype is used to ensure that all necessary browser features
@@ -40722,7 +40722,7 @@ Renderer.prototype._onResize = function( message, data ) {
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Logger":31,"../messaging/EventManager":59,"../messaging/Topic":61,"../postprocessing/EffectComposer":64,"../postprocessing/RenderPass":65,"../postprocessing/ShaderPass":66,"../shader/GaussianBlurShader":68,"../shader/GrayscaleShader":69,"../shader/VignetteShader":70,"three":1}],22:[function(require,module,exports){
+},{"../etc/Logger":31,"../messaging/EventManager":62,"../messaging/Topic":64,"../postprocessing/EffectComposer":67,"../postprocessing/RenderPass":68,"../postprocessing/ShaderPass":69,"../shader/GaussianBlurShader":71,"../shader/GrayscaleShader":72,"../shader/VignetteShader":73,"three":1}],22:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic for scene-based functionality.
  * 
@@ -41022,7 +41022,7 @@ StageBase.COLORS = {
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../controls/FirstPersonControls":17,"../etc/PerformanceManager":35,"../etc/SaveGameManager":36,"../etc/SettingsManager":37,"../etc/TextManager":39,"../etc/Utils":40,"../game/entity/EntityManager":41,"../messaging/EventManager":59,"../messaging/Topic":61,"../ui/UserInterfaceManager":92,"./Camera":19,"./Renderer":21,"./World":27,"three":1}],24:[function(require,module,exports){
+},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../controls/FirstPersonControls":17,"../etc/PerformanceManager":35,"../etc/SaveGameManager":36,"../etc/SettingsManager":37,"../etc/TextManager":39,"../etc/Utils":40,"../game/entity/EntityManager":41,"../messaging/EventManager":62,"../messaging/Topic":64,"../ui/UserInterfaceManager":95,"./Camera":19,"./Renderer":21,"./World":27,"three":1}],24:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -41314,7 +41314,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 };
 
 module.exports = new StageManager();
-},{"../etc/Logger":31,"../etc/SaveGameManager":36,"../messaging/EventManager":59,"../messaging/Topic":61,"../stages/Stage_001":71,"../stages/Stage_002":72,"../stages/Stage_003":73,"../stages/Stage_004":74,"../stages/Stage_005":75,"../stages/Stage_006":76,"../stages/Stage_007":77,"../stages/Stage_008":78,"../stages/Stage_009":79,"../stages/Stage_010":80,"../stages/Stage_011":81,"../ui/UserInterfaceManager":92}],25:[function(require,module,exports){
+},{"../etc/Logger":31,"../etc/SaveGameManager":36,"../messaging/EventManager":62,"../messaging/Topic":64,"../stages/Stage_001":74,"../stages/Stage_002":75,"../stages/Stage_003":76,"../stages/Stage_004":77,"../stages/Stage_005":78,"../stages/Stage_006":79,"../stages/Stage_007":80,"../stages/Stage_008":81,"../stages/Stage_009":82,"../stages/Stage_010":83,"../stages/Stage_011":84,"../ui/UserInterfaceManager":95}],25:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It uses the HTML5-API Web
@@ -42328,7 +42328,7 @@ JSONLoader.prototype.load = function( url, onLoad ) {
 
 module.exports = JSONLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":59,"../messaging/Topic":61,"./Utils":40,"three":1}],30:[function(require,module,exports){
+},{"../messaging/EventManager":62,"../messaging/Topic":64,"./Utils":40,"three":1}],30:[function(require,module,exports){
 /**
  * @file This prototype is used for LOD handling. It is an enhancement of the
  * LOD functionality of three.js. Instead of switching directly between LOD
@@ -42777,7 +42777,7 @@ MultiplayerManager.prototype._getTeammate = function( id ) {
 };
 
 module.exports = new MultiplayerManager();
-},{"../core/World":27,"../messaging/EventManager":59,"../messaging/Topic":61,"./Logger":31,"./Teammate":38,"three":1}],33:[function(require,module,exports){
+},{"../core/World":27,"../messaging/EventManager":62,"../messaging/Topic":64,"./Logger":31,"./Teammate":38,"three":1}],33:[function(require,module,exports){
 /**
  * @file A 3D arbitrarily oriented bounding box.
  * 
@@ -43583,7 +43583,7 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 
 module.exports = ObjectLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":59,"../messaging/Topic":61,"./Utils":40,"three":1}],35:[function(require,module,exports){
+},{"../messaging/EventManager":62,"../messaging/Topic":64,"./Utils":40,"three":1}],35:[function(require,module,exports){
 /**
  * @file Interface for performance handling. This prototype is used in stages to
  * create e.g. LOD instances.
@@ -44408,7 +44408,7 @@ TextManager.prototype._searchAndRepalce = function() {
 
 module.exports = new TextManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":59,"../messaging/Topic":61,"./Utils":40}],40:[function(require,module,exports){
+},{"../messaging/EventManager":62,"../messaging/Topic":64,"./Utils":40}],40:[function(require,module,exports){
 (function (global){
 /**
  * @file All helper and util functions are organized in this module.
@@ -45107,7 +45107,7 @@ Vehicle.prototype.update = ( function() {
 }() );
 
 module.exports = Vehicle;
-},{"../steering/Smoother":57,"../steering/SteeringBehaviors":58,"./MovingEntity":43,"three":1}],45:[function(require,module,exports){
+},{"../steering/Smoother":60,"../steering/SteeringBehaviors":61,"./MovingEntity":43,"three":1}],45:[function(require,module,exports){
 /**
  * @file Super prototype for states used by FSMs.
  * 
@@ -46420,6 +46420,345 @@ SparseGraph.prototype._cullInvalidEdges = function() {
 module.exports = SparseGraph;
 },{}],53:[function(require,module,exports){
 /**
+ * @file Some useful functions you can use with algorithms.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+/**
+ * Creates a algorithm helper.
+ * 
+ * @constructor
+ */
+function AlgorithmHelper() {
+
+}
+
+/**
+ * Updates an entry in the queue.
+ * 
+ * @param {object} queue - The queue object.
+ * @param {number} index - The index of the node to update.
+ * @param {number} cost - The new cost value.
+ */
+AlgorithmHelper.prototype.updateEntryInQueue = function( queue, index, cost ) {
+
+	for ( var i = 0; i < queue.length; i++ )
+	{
+		if ( queue[ i ].nodeIndex === index )
+		{
+			// update entry
+			queue[ i ].cost = cost;
+
+			// because the cost is less than it was previously, the queue
+			// must be re-sorted to account for this
+			queue.sort( this.sortQueueByCost );
+
+			return;
+		}
+	}
+};
+
+/**
+ * Compare function for queue.
+ * 
+ * @param {object} a - The first object to compare.
+ * @param {object} b - The second object to compare.
+ * 
+ * @returns {number} Indicates, if the objects are greater, smaller or equal.
+ */
+AlgorithmHelper.prototype.sortQueueByCost = function( a, b ) {
+	
+	if ( a.cost > b.cost )
+	{
+		return 1;
+	}
+	
+	if ( a.cost < b.cost )
+	{
+		return -1;
+	}
+	
+	// a must be equal to b
+	return 0;
+};
+
+module.exports = new AlgorithmHelper();
+},{}],54:[function(require,module,exports){
+/**
+ * @file Prototype to implement the A* search algorithm.
+ * 
+ * see: "Programming Game AI by Example", Chapter: "The Secret Life of Graphs",
+ * by Mat Buckland
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var algorithmHelper = require( "./AlgorithmHelper" );
+
+var GraphNode = require( "../GraphNode" );
+var GraphEdge = require( "../GraphEdge" );
+
+/**
+ * Creates a instance of the A* search algorithm.
+ * 
+ * @constructor
+ * 
+ * @param {SparseGraph} graph - A reference to the graph to be searched.
+ * @param {number} source - The source node index.
+ * @param {number} target - The target node index.
+ * @param {AStarHeuristicPolicy} heuristic - A heuristic policy for use with the A* algorithm.
+ */
+function GraphSearchAStar( graph, source, target, heuristic ) {
+
+	Object.defineProperties( this, {
+		_graph : {
+			value : graph,
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		_heuristic : {
+			value : heuristic,
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		_source : {
+			value : ( source >= 0 ) ? source : GraphNode.INVALID_NODE_INDEX,
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		_target : {
+			value : ( target >= 0 ) ? target : GraphNode.INVALID_NODE_INDEX,
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		// this array contains the edges that comprise the shortest path tree -
+		// a directed sub-tree of the graph that encapsulates the best paths
+		// from every node on the SPT to the source node
+		_shortestPathTree : {
+			value : {},
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
+		// contains the "real" accumulative cost to a node
+		_GCosts : {
+			value : {},
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
+		// contains the cost from adding this._GCosts[n] to the heuristic cost
+		// from n to the target node.
+		_FCosts : {
+			value : {},
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
+		// this is an indexed (by node) object of "parent" edges leading to
+		// nodes connected to the SPT but that have not been added to the SPT
+		// yet. This is a little like the stack or queue used in BST and DST
+		// searches.
+		_searchFrontier : {
+			value : {},
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
+		// true if a path to the target has been found
+		isFound : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		}
+	} );
+	
+	// execute search
+	this.isFound = this._search();
+}
+
+/**
+ * Returns an array of node indices that comprise the shortest path from the
+ * source to the target.
+ * 
+ * @returns {object} The path as an array with node indices.
+ */
+GraphSearchAStar.prototype.getPathToTarget = function() {
+
+	var currentNode, path = [];
+
+	// just return an empty path if no path to target found or if no target has
+	// been specified
+	if ( this.isFound === false || this._target < 0 )
+	{
+		return path;
+	}
+
+	// start with the target of the path
+	path.unshift( currentNode = this._target );
+
+	// while the current node is not the source node keep processing
+	while ( ( currentNode !== this._source ) )
+	{
+		// determine the parent of the current node
+		currentNode = this._shortestPathTree[ currentNode ].from;
+
+		// push the new current node at the beginning of the array
+		path.unshift( currentNode );
+	}
+
+	return path;
+};
+
+/**
+ * Returns the array of edges that defines the SPT. If a target was given in the
+ * constructor then this will be an SPT comprising of all the nodes examined
+ * before the target was found, else it will contain all the nodes in the graph.
+ * 
+ * @returns {object} An array with edges the search has examined.
+ */
+GraphSearchAStar.prototype.getSearchTree = function() {
+	
+	var object = this._shortestPathTree;
+
+	// this will return an array, converted from an object
+	return Object.keys( object ).map( function( key ) {
+
+		return object[ key ];
+	} );
+};
+
+/**
+ * Returns the total cost to the target.
+ * 
+ * @returns {number} The total cost to the target.
+ */
+GraphSearchAStar.prototype.getCostToTarget = function() {
+
+	return this._GCosts[ this._target ];
+};
+
+/**
+ * Returns the total cost to the given node
+ * 
+ * @param {number} index - The index of the node.
+ * 
+ * @returns {number} The total cost to the given node.
+ */
+GraphSearchAStar.prototype.getCostToNode = function( index ) {
+
+	return this._GCosts[ index ];
+};
+
+/**
+ * This method performs the A* algorithm.
+ * 
+ * @returns {boolean} Is a path found to the target?
+ */
+GraphSearchAStar.prototype._search = function() {
+
+	var i, j, nextClosestNode, outgoingEdges, edge, HCost, GCost, FCost;
+
+	// create a queue(FIFO) of objects, in JavaScript done via an array.
+	// the objects in this queue will be sorted smallest to largest cost.
+	var queue = [];
+
+	// put the source node on the queue
+	queue.push( {
+		cost : 0,
+		nodeIndex : this._source
+	} );
+
+	// while the queue is not empty
+	while ( queue.length > 0 )
+	{
+		// get lowest cost node from the queue. Don't forget, the return value
+		// is a node index, not the node itself. This node is the node not
+		// already on the SPT that is the closest to the source node
+		nextClosestNode = queue.shift().nodeIndex;
+
+		// move this edge from the frontier to the shortest path tree
+		if ( this._searchFrontier.hasOwnProperty( nextClosestNode ) === true )
+		{
+			this._shortestPathTree[ nextClosestNode ] = this._searchFrontier[ nextClosestNode ];
+		}
+
+		// if the target has been found exit
+		if ( nextClosestNode === this._target )
+		{
+			return true;
+		}
+
+		// now relax the edges
+		outgoingEdges = this._graph.getEdgesOfNode( nextClosestNode );
+
+		for ( i = 0; i < outgoingEdges.length; i++ )
+		{
+			edge = outgoingEdges[ i ];
+			
+			// A* cost formula : F = G + H
+			
+			// H is the heuristic estimate of the distance to the target
+			HCost = this._heuristic.calculate( this._graph, this._target, edge.to );
+
+			// G is the cumulative cost to reach a node
+			GCost = ( this._GCosts[ nextClosestNode ] || 0 ) + edge.cost;
+			
+			// F is the sum of G and H
+			FCost = GCost + HCost;
+
+			// if the node has not been added to the frontier, add it and update
+			// the G and F costs
+			if ( this._searchFrontier.hasOwnProperty( edge.to ) === false )
+			{
+				this._FCosts[ edge.to ] = FCost;
+				this._GCosts[ edge.to ] = GCost;
+
+				this._searchFrontier[ edge.to ] = edge;
+
+				queue.push( {
+					cost : FCost,
+					nodeIndex : edge.to
+				} );
+
+				queue.sort( algorithmHelper.sortQueueByCost );
+			}
+
+			// else test to see if the cost to reach the destination node via
+			// the current node is cheaper than the cheapest cost found so far.
+			// If this path is cheaper, update its entry in the queue to reflect
+			// the change, update the cost of the destination node and add the
+			// edge to the frontier
+			else if ( ( GCost < this._GCosts[ edge.to ] ) && ( this._shortestPathTree.hasOwnProperty( edge.to ) === false ) )
+			{
+				this._FCosts[ edge.to ] = FCost;
+				this._GCosts[ edge.to ] = GCost;
+
+				this._searchFrontier[ edge.to ] = edge;
+				
+				algorithmHelper.updateEntryInQueue( queue, edge.to, FCost );
+			}
+			
+		} // next edge
+	}
+	
+	// no path to target
+	return false;
+};
+
+module.exports = GraphSearchAStar;
+},{"../GraphEdge":47,"../GraphNode":49,"./AlgorithmHelper":53}],55:[function(require,module,exports){
+/**
  * @file Prototype to implement a breadth first search.
  * 
  * see: "Programming Game AI by Example", Chapter: "The Secret Life of Graphs",
@@ -46606,7 +46945,7 @@ GraphSearchBFS.prototype._search = function() {
 };
 
 module.exports = GraphSearchBFS;
-},{"../GraphEdge":47,"../GraphNode":49}],54:[function(require,module,exports){
+},{"../GraphEdge":47,"../GraphNode":49}],56:[function(require,module,exports){
 /**
  * @file Prototype to implement a depth first search.
  * 
@@ -46766,7 +47105,7 @@ GraphSearchDFS.prototype._search = function() {
 };
 
 module.exports = GraphSearchDFS;
-},{"../GraphEdge":47,"../GraphNode":49}],55:[function(require,module,exports){
+},{"../GraphEdge":47,"../GraphNode":49}],57:[function(require,module,exports){
 /**
  * @file Prototype to implement dijkstra’s shortest path algorithm.
  * 
@@ -46777,6 +47116,8 @@ module.exports = GraphSearchDFS;
  */
 
 "use strict";
+
+var algorithmHelper = require( "./AlgorithmHelper" );
 
 var GraphNode = require( "../GraphNode" );
 var GraphEdge = require( "../GraphEdge" );
@@ -46823,9 +47164,8 @@ function GraphSearchDijkstra( graph, source, target ) {
 		// this is indexed into by node index and holds the total cost of the
 		// best path found so far to the given node. For example,
 		// this._costToThisNode[5] will hold the total cost of all the edges
-		// that
-		// comprise the best path to node 5 found so far in the search (if node
-		// 5 is present and has been visited of course).
+		// that comprise the best path to node 5 found so far in the search (if
+		// node 5 is present and has been visited of course).
 		_costToThisNode : {
 			value : {},
 			configurable : false,
@@ -46992,7 +47332,7 @@ GraphSearchDijkstra.prototype._search = function() {
 					nodeIndex : edge.to
 				} );
 
-				queue.sort( sortByCost );
+				queue.sort( algorithmHelper.sortQueueByCost );
 			}
 
 			// else test to see if the cost to reach the destination node via
@@ -47000,13 +47340,13 @@ GraphSearchDijkstra.prototype._search = function() {
 			// If this path is cheaper, update its entry in the queue to reflect
 			// the change, update the cost of the destination node and add the
 			// edge to the frontier
-			else if ( newCost < this._costToThisNode[ edge.to ] )
+			else if ( ( newCost < this._costToThisNode[ edge.to ] ) && ( this._shortestPathTree.hasOwnProperty( edge.to ) === false ) )
 			{
 				this._costToThisNode[ edge.to ] = newCost;
 
 				this._searchFrontier[ edge.to ] = edge;
 				
-				updateEntryInQueue( queue, edge.to, newCost );
+				algorithmHelper.updateEntryInQueue( queue, edge.to, newCost );
 			}
 			
 		} // next edge
@@ -47017,57 +47357,144 @@ GraphSearchDijkstra.prototype._search = function() {
 };
 
 module.exports = GraphSearchDijkstra;
+},{"../GraphEdge":47,"../GraphNode":49,"./AlgorithmHelper":53}],58:[function(require,module,exports){
+/**
+ * @file This prototype defines heuristic policies for use with the A* search
+ * algorithm.
+ * 
+ * see: "Programming Game AI by Example", Chapter: "The Secret Life of Graphs",
+ * by Mat Buckland
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
 
 /**
- * Updates an entry in the queue.
+ * Creates the interface of a heuristic policy.
  * 
- * @param {object} queue - The queue object.
- * @param {number} index - The index of the node to update.
- * @param {number} cost - The new cost value.
+ * @constructor
  */
-function updateEntryInQueue( queue, index, cost ) {
-
-	for ( var i = 0; i < queue.length; i++ )
-	{
-		if ( queue[ i ].nodeIndex === index )
-		{
-			// update entry
-			queue[ i ].cost = cost;
-
-			// because the cost is less than it was previously, the queue
-			// must be re-sorted to account for this
-			queue.sort( sortByCost );
-
-			return;
-		}
-	}
-
+function HeuristicPolicy() {
 }
 
 /**
- * Compare function for queue.
+ * Calculates a heuristic estimate.
  * 
- * @param {object} a - The first object to compare.
- * @param {object} b - The second object to compare.
+ * @param {number} node1 - The index of the first node.
+ * @param {number} node2 - The index of the second node.
  * 
- * @returns {number} Indicates, if the objects are greater, smaller or equal.
+ * @returns {number} The heuristic estimate.
  */
-function sortByCost( a, b ) {
+HeuristicPolicy.prototype.calculate = function( node1, node2 ) {
 
-	if ( a.cost > b.cost )
-	{
-		return 1;
-	}
-	
-	if ( a.cost < b.cost )
-	{
-		return -1;
-	}
-	
-	// a must be equal to b
+	throw "ERROR: HeuristicPolicy: Policy needs to be implemented by inheriting prototype";
+};
+
+/**
+ * Heuristic policy "Euclid"
+ * -------------------------------------------------------------------------
+ */
+
+/**
+ * Creates a euclidean heuristic (straight-line distance).
+ * 
+ * @constructor
+ */
+function HeuristicPolicyEuclid() {
+
+	HeuristicPolicy.call( this );
+}
+
+HeuristicPolicyEuclid.prototype = Object.create( HeuristicPolicy.prototype );
+HeuristicPolicyEuclid.prototype.constructor = HeuristicPolicyEuclid;
+
+/**
+ * Calculates the straight line distance from node1 to node2.
+ * 
+ * @param {SparseGraph} graph - A reference to the graph.
+ * @param {number} node1 - The index of the first node.
+ * @param {number} node2 - The index of the second node.
+ * 
+ * @returns {number} The heuristic estimate.
+ */
+HeuristicPolicyEuclid.prototype.calculate = function( graph, node1, node2 ) {
+
+	return graph.getNode( node1 ).position.distanceTo( graph.getNode( node2 ).position );
+};
+
+/**
+ * Heuristic policy "EuclidSq"
+ * -------------------------------------------------------------------------
+ */
+
+/**
+ * Creates a euclidean heuristic (straight-line distance in squared space).
+ * 
+ * @constructor
+ */
+function HeuristicPolicyEuclidSq() {
+
+	HeuristicPolicy.call( this );
+}
+
+HeuristicPolicyEuclidSq.prototype = Object.create( HeuristicPolicy.prototype );
+HeuristicPolicyEuclidSq.prototype.constructor = HeuristicPolicyEuclidSq;
+
+/**
+ * Calculates the straight line distance in squared space from node1 to node2.
+ * 
+ * @param {SparseGraph} graph - A reference to the graph.
+ * @param {number} node1 - The index of the first node.
+ * @param {number} node2 - The index of the second node.
+ * 
+ * @returns {number} The heuristic estimate.
+ */
+HeuristicPolicyEuclidSq.prototype.calculate = function( graph, node1, node2 ) {
+
+	return graph.getNode( node1 ).position.distanceToSquared( graph.getNode( node2 ).position );
+};
+
+/**
+ * Heuristic policy "Dijkstra"
+ * -------------------------------------------------------------------------
+ */
+
+/**
+ * You can use this class to turn the A* algorithm into Dijkstra's search. This
+ * is because Dijkstra's is equivalent to an A* search using a heuristic value
+ * that is always equal to zero.
+ * 
+ * @constructor
+ */
+function HeuristicPolicyDijkstra() {
+
+	HeuristicPolicy.call( this );
+}
+
+HeuristicPolicyDijkstra.prototype = Object.create( HeuristicPolicy.prototype );
+HeuristicPolicyDijkstra.prototype.constructor = HeuristicPolicyDijkstra;
+
+/**
+ * Returns always a zero value.
+ * 
+ * @param {SparseGraph} graph - A reference to the graph.
+ * @param {number} node1 - The index of the first node.
+ * @param {number} node2 - The index of the second node.
+ * 
+ * @returns {number} The heuristic estimate.
+ */
+HeuristicPolicyDijkstra.prototype.calculate = function( graph, node1, node2 ) {
+
 	return 0;
-}
-},{"../GraphEdge":47,"../GraphNode":49}],56:[function(require,module,exports){
+};
+
+module.exports = {
+	Euclidean : new HeuristicPolicyEuclid(),
+	EuclideanSq : new HeuristicPolicyEuclidSq(),
+	Dijkstra : new HeuristicPolicyDijkstra()
+};
+},{}],59:[function(require,module,exports){
 /**
  * @file Prototype to define, manage, and traverse a path defined by a series of
  * 3D vectors.
@@ -47229,7 +47656,7 @@ Path.prototype.createRandomPath = function( numberOfWaypoints, boundingBox ) {
 };
 
 module.exports = Path;
-},{"../../etc/Logger":31,"three":1}],57:[function(require,module,exports){
+},{"../../etc/Logger":31,"three":1}],60:[function(require,module,exports){
 /**
  * @file Prototype to help calculate the average value of a history of vector
  * values.
@@ -47319,7 +47746,7 @@ Smoother.prototype.update = ( function() {
 }() );
 
 module.exports = Smoother;
-},{"three":1}],58:[function(require,module,exports){
+},{"three":1}],61:[function(require,module,exports){
 /**
  * @file Prototype to encapsulate steering behaviors for a vehicle.
  * 
@@ -49018,7 +49445,7 @@ SteeringBehaviors.DECELERATION = {
 };
 
 module.exports = SteeringBehaviors;
-},{"../../core/World":27,"../../etc/Logger":31,"./Path":56,"three":1}],59:[function(require,module,exports){
+},{"../../core/World":27,"../../etc/Logger":31,"./Path":59,"three":1}],62:[function(require,module,exports){
 /**
  * @file This prototype provides topic-based publish/subscribe messaging and
  * enables communication between game entities.
@@ -49570,7 +49997,7 @@ function sendMessageToEntity( sender, receiver, message, data, isSync, delay ) {
 }
 
 module.exports = new EventManager();
-},{"../etc/Logger":31,"../game/entity/GameEntity":42,"./Telegram":60}],60:[function(require,module,exports){
+},{"../etc/Logger":31,"../game/entity/GameEntity":42,"./Telegram":63}],63:[function(require,module,exports){
 /**
  * @file This defines a telegram. A telegram is a data structure that records
  * information required to dispatch game messages. These messages are used by
@@ -49628,7 +50055,7 @@ function Telegram( sender, receiver, message, data, delay ) {
 }
 
 module.exports = Telegram;
-},{}],61:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 /**
  * @file This file contains all topics for publish & subscribe. YUME supports a
  * publish/subscribe messaging system with hierarchical addressing, so topics
@@ -49684,7 +50111,7 @@ var TOPIC = {
 };
 
 module.exports = TOPIC;
-},{}],62:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 /**
  * @file Prototype for network-messages.
  * 
@@ -49734,7 +50161,7 @@ Message.TYPES = {
 };
 
 module.exports = Message;
-},{}],63:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for network-based
@@ -49989,7 +50416,7 @@ NetworkManager.SERVER = {
 
 module.exports = new NetworkManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/ThreadManager":26,"../etc/Logger":31,"../messaging/EventManager":59,"../messaging/Topic":61,"./Message":62,"ws":2}],64:[function(require,module,exports){
+},{"../core/ThreadManager":26,"../etc/Logger":31,"../messaging/EventManager":62,"../messaging/Topic":64,"./Message":65,"ws":2}],67:[function(require,module,exports){
 /**
  * @file This prototype manages effects for post-processing.
  * 
@@ -50175,7 +50602,7 @@ EffectComposer.prototype._reset = function( renderTarget ) {
 };
 
 module.exports = EffectComposer;
-},{"three":1}],65:[function(require,module,exports){
+},{"three":1}],68:[function(require,module,exports){
 /**
  * @file This prototype provides a render pass for post-processing.
  * 
@@ -50237,7 +50664,7 @@ RenderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = RenderPass;
-},{"three":1}],66:[function(require,module,exports){
+},{"three":1}],69:[function(require,module,exports){
 /**
  * @file This prototype provides a shader pass for post-processing.
  * 
@@ -50343,7 +50770,7 @@ ShaderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = ShaderPass;
-},{"three":1}],67:[function(require,module,exports){
+},{"three":1}],70:[function(require,module,exports){
 /**
  * @file This shader can be used for vertex displacement to create
  * water or fabric materials. It implements an exemplary diffuse lighting
@@ -50445,7 +50872,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":1}],68:[function(require,module,exports){
+},{"three":1}],71:[function(require,module,exports){
 /**
  * @file This shader applies a gaussian blur effect.
  * It can be used for both x and y direction.
@@ -50512,7 +50939,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":1}],69:[function(require,module,exports){
+},{"three":1}],72:[function(require,module,exports){
 /**
  * @file This shader transforms all colors to grayscale.
  * 
@@ -50561,7 +50988,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],70:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 /**
  * @file This shader creates a vignette effect.
  * 
@@ -50622,7 +51049,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],71:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -50739,7 +51166,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],72:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],75:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -50919,7 +51346,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],73:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],76:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51091,7 +51518,7 @@ function colorMesh( mesh ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],74:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],77:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51269,7 +51696,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],75:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],78:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51395,7 +51822,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],76:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],79:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51584,7 +52011,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],77:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],80:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51757,7 +52184,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],78:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],81:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51910,7 +52337,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],79:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],82:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52091,7 +52518,7 @@ function showLODCircles( world ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],80:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],83:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -52271,7 +52698,7 @@ function onKeyDown( event ) {
 
 module.exports = Stage;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],81:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],84:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52416,7 +52843,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],82:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],85:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -52595,7 +53022,7 @@ Chat.prototype._onMessage = function( message, data ) {
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":59,"../messaging/Topic":61,"./UiElement":91}],83:[function(require,module,exports){
+},{"../messaging/EventManager":62,"../messaging/Topic":64,"./UiElement":94}],86:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel. Only if the development
@@ -52657,7 +53084,7 @@ DevelopmentPanel.prototype.setText = function( text ) {
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":91}],84:[function(require,module,exports){
+},{"./UiElement":94}],87:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -52718,7 +53145,7 @@ InformationPanel.prototype.setText = function( textKey ) {
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":91}],85:[function(require,module,exports){
+},{"./UiElement":94}],88:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -52795,7 +53222,7 @@ InteractionLabel.prototype.hide = function() {
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":91}],86:[function(require,module,exports){
+},{"./UiElement":94}],89:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -52985,7 +53412,7 @@ LoadingScreen.prototype._onReady = function( message, data ) {
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":59,"../messaging/Topic":61,"./UiElement":91}],87:[function(require,module,exports){
+},{"../messaging/EventManager":62,"../messaging/Topic":64,"./UiElement":94}],90:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -53141,7 +53568,7 @@ Menu.prototype._publishFinishEvent = function( message, data ) {
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"../messaging/EventManager":59,"../messaging/Topic":61,"./UiElement":91}],88:[function(require,module,exports){
+},{"../etc/Utils":40,"../messaging/EventManager":62,"../messaging/Topic":64,"./UiElement":94}],91:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -53266,7 +53693,7 @@ ModalDialog.prototype._onClose = function( event ) {
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"./UiElement":91}],89:[function(require,module,exports){
+},{"../etc/Utils":40,"./UiElement":94}],92:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor. Only if the development
@@ -53490,7 +53917,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":91}],90:[function(require,module,exports){
+},{"./UiElement":94}],93:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -53703,7 +54130,7 @@ TextScreen.prototype._printName = function() {
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":91}],91:[function(require,module,exports){
+},{"./UiElement":94}],94:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -53753,7 +54180,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":39}],92:[function(require,module,exports){
+},{"../etc/TextManager":39}],95:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in stages to
@@ -54019,4 +54446,4 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"../messaging/EventManager":59,"../messaging/Topic":61,"./Chat":82,"./DevelopmentPanel":83,"./InformationPanel":84,"./InteractionLabel":85,"./LoadingScreen":86,"./Menu":87,"./ModalDialog":88,"./PerformanceMonitor":89,"./TextScreen":90}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92]);
+},{"../etc/Utils":40,"../messaging/EventManager":62,"../messaging/Topic":64,"./Chat":85,"./DevelopmentPanel":86,"./InformationPanel":87,"./InteractionLabel":88,"./LoadingScreen":89,"./Menu":90,"./ModalDialog":91,"./PerformanceMonitor":92,"./TextScreen":93}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95]);

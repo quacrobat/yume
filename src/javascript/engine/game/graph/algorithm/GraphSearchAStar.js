@@ -1,5 +1,5 @@
 /**
- * @file Prototype to implement dijkstra’s shortest path algorithm.
+ * @file Prototype to implement the A* search algorithm.
  * 
  * see: "Programming Game AI by Example", Chapter: "The Secret Life of Graphs",
  * by Mat Buckland
@@ -15,19 +15,26 @@ var GraphNode = require( "../GraphNode" );
 var GraphEdge = require( "../GraphEdge" );
 
 /**
- * Creates a instance of dijkstra’s shortest path algorithm.
+ * Creates a instance of the A* search algorithm.
  * 
  * @constructor
  * 
  * @param {SparseGraph} graph - A reference to the graph to be searched.
  * @param {number} source - The source node index.
  * @param {number} target - The target node index.
+ * @param {AStarHeuristicPolicy} heuristic - A heuristic policy for use with the A* algorithm.
  */
-function GraphSearchDijkstra( graph, source, target ) {
+function GraphSearchAStar( graph, source, target, heuristic ) {
 
 	Object.defineProperties( this, {
 		_graph : {
 			value : graph,
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		_heuristic : {
+			value : heuristic,
 			configurable : false,
 			enumerable : false,
 			writable : false
@@ -53,12 +60,16 @@ function GraphSearchDijkstra( graph, source, target ) {
 			enumerable : false,
 			writable : true
 		},
-		// this is indexed into by node index and holds the total cost of the
-		// best path found so far to the given node. For example,
-		// this._costToThisNode[5] will hold the total cost of all the edges
-		// that comprise the best path to node 5 found so far in the search (if
-		// node 5 is present and has been visited of course).
-		_costToThisNode : {
+		// contains the "real" accumulative cost to a node
+		_GCosts : {
+			value : {},
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
+		// contains the cost from adding this._GCosts[n] to the heuristic cost
+		// from n to the target node.
+		_FCosts : {
 			value : {},
 			configurable : false,
 			enumerable : false,
@@ -82,7 +93,7 @@ function GraphSearchDijkstra( graph, source, target ) {
 			writable : true
 		}
 	} );
-
+	
 	// execute search
 	this.isFound = this._search();
 }
@@ -93,7 +104,7 @@ function GraphSearchDijkstra( graph, source, target ) {
  * 
  * @returns {object} The path as an array with node indices.
  */
-GraphSearchDijkstra.prototype.getPathToTarget = function() {
+GraphSearchAStar.prototype.getPathToTarget = function() {
 
 	var currentNode, path = [];
 
@@ -127,7 +138,7 @@ GraphSearchDijkstra.prototype.getPathToTarget = function() {
  * 
  * @returns {object} An array with edges the search has examined.
  */
-GraphSearchDijkstra.prototype.getSearchTree = function() {
+GraphSearchAStar.prototype.getSearchTree = function() {
 	
 	var object = this._shortestPathTree;
 
@@ -143,9 +154,9 @@ GraphSearchDijkstra.prototype.getSearchTree = function() {
  * 
  * @returns {number} The total cost to the target.
  */
-GraphSearchDijkstra.prototype.getCostToTarget = function() {
+GraphSearchAStar.prototype.getCostToTarget = function() {
 
-	return this._costToThisNode[ this._target ];
+	return this._GCosts[ this._target ];
 };
 
 /**
@@ -155,19 +166,19 @@ GraphSearchDijkstra.prototype.getCostToTarget = function() {
  * 
  * @returns {number} The total cost to the given node.
  */
-GraphSearchDijkstra.prototype.getCostToNode = function( index ) {
+GraphSearchAStar.prototype.getCostToNode = function( index ) {
 
-	return this._costToThisNode[ index ];
+	return this._GCosts[ index ];
 };
 
 /**
- * This method performs the dijkstra’s shortest path algorithm.
+ * This method performs the A* algorithm.
  * 
  * @returns {boolean} Is a path found to the target?
  */
-GraphSearchDijkstra.prototype._search = function() {
+GraphSearchAStar.prototype._search = function() {
 
-	var i, j, nextClosestNode, outgoingEdges, edge, newCost;
+	var i, j, nextClosestNode, outgoingEdges, edge, HCost, GCost, FCost;
 
 	// create a queue(FIFO) of objects, in JavaScript done via an array.
 	// the objects in this queue will be sorted smallest to largest cost.
@@ -205,22 +216,29 @@ GraphSearchDijkstra.prototype._search = function() {
 		for ( i = 0; i < outgoingEdges.length; i++ )
 		{
 			edge = outgoingEdges[ i ];
+			
+			// A* cost formula : F = G + H
+			
+			// H is the heuristic estimate of the distance to the target
+			HCost = this._heuristic.calculate( this._graph, this._target, edge.to );
 
-			// the total cost to the node this edge points to is the cost to the
-			// current node plus the cost of the edge connecting them.
-			newCost = ( this._costToThisNode[ nextClosestNode ] || 0 ) + edge.cost;
+			// G is the cumulative cost to reach a node
+			GCost = ( this._GCosts[ nextClosestNode ] || 0 ) + edge.cost;
+			
+			// F is the sum of G and H
+			FCost = GCost + HCost;
 
-			// if this edge has never been on the frontier make a note of the
-			// cost to get to the node it points to, then add the edge to the
-			// frontier and the destination node to the queue
+			// if the node has not been added to the frontier, add it and update
+			// the G and F costs
 			if ( this._searchFrontier.hasOwnProperty( edge.to ) === false )
 			{
-				this._costToThisNode[ edge.to ] = newCost;
+				this._FCosts[ edge.to ] = FCost;
+				this._GCosts[ edge.to ] = GCost;
 
 				this._searchFrontier[ edge.to ] = edge;
 
 				queue.push( {
-					cost : newCost,
+					cost : FCost,
 					nodeIndex : edge.to
 				} );
 
@@ -232,13 +250,14 @@ GraphSearchDijkstra.prototype._search = function() {
 			// If this path is cheaper, update its entry in the queue to reflect
 			// the change, update the cost of the destination node and add the
 			// edge to the frontier
-			else if ( ( newCost < this._costToThisNode[ edge.to ] ) && ( this._shortestPathTree.hasOwnProperty( edge.to ) === false ) )
+			else if ( ( GCost < this._GCosts[ edge.to ] ) && ( this._shortestPathTree.hasOwnProperty( edge.to ) === false ) )
 			{
-				this._costToThisNode[ edge.to ] = newCost;
+				this._FCosts[ edge.to ] = FCost;
+				this._GCosts[ edge.to ] = GCost;
 
 				this._searchFrontier[ edge.to ] = edge;
 				
-				algorithmHelper.updateEntryInQueue( queue, edge.to, newCost );
+				algorithmHelper.updateEntryInQueue( queue, edge.to, FCost );
 			}
 			
 		} // next edge
@@ -248,4 +267,4 @@ GraphSearchDijkstra.prototype._search = function() {
 	return false;
 };
 
-module.exports = GraphSearchDijkstra;
+module.exports = GraphSearchAStar;
