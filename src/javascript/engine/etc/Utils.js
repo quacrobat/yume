@@ -7,7 +7,7 @@
 "use strict";
 
 /**
- * Creates a Utils instance.
+ * Creates an instance of utils.
  * 
  * @constructor
  */

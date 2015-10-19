@@ -40027,7 +40027,7 @@ function Bootstrap() {
 
 /**
  * Gets startup parameter from session context. The data were stored in the
- * session context by the index.html.
+ * session context by the index.ejs.
  */
 Bootstrap.prototype._getStartupParameter = function() {
 
@@ -41471,14 +41471,22 @@ function System() {
  * @param {object} parameter - Startup parameters of the system.
  */
 System.prototype.init = function( parameter ) {
-	
-	this.name = parameter.name;
-	this.version = parameter.version;
-	this.locale = parameter.locale;
-	this.cdn = parameter.cdn;
-	
-	this.isMultiplayerActive = !!parameter.isMultiplayerActive;
-	this.isDevModeActive = !!parameter.isDevModeActive;
+
+	if ( parameter !== undefined && parameter !== null )
+	{
+		this.name = parameter.name;
+		this.version = parameter.version;
+		this.locale = parameter.locale;
+		this.cdn = parameter.cdn;
+
+		this.isMultiplayerActive = !!parameter.isMultiplayerActive;
+		this.isDevModeActive = !!parameter.isDevModeActive;
+	}
+	else
+	{
+		throw "ERROR: System: Unable to initialize system. Empty parameter object";
+	}
+
 };
 
 module.exports = new System();
@@ -44568,7 +44576,7 @@ module.exports = new TextManager();
 "use strict";
 
 /**
- * Creates a Utils instance.
+ * Creates an instance of utils.
  * 
  * @constructor
  */

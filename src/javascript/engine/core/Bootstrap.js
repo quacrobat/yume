@@ -36,7 +36,7 @@ function Bootstrap() {
 
 /**
  * Gets startup parameter from session context. The data were stored in the
- * session context by the index.html.
+ * session context by the index.ejs.
  */
 Bootstrap.prototype._getStartupParameter = function() {
 
