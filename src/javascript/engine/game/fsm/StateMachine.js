@@ -8,7 +8,7 @@
 
 "use strict";
 
-var logger = require( "../../etc/Logger" );
+var logger = require( "../../core/Logger" );
 var State = require( "./State" );
 
 /**

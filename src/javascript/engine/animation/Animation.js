@@ -6,7 +6,7 @@
 
 "use strict";
 
-var logger = require( "../etc/Logger" );
+var logger = require( "../core/Logger" );
 
 /**
  * Creates an animation.

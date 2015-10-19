@@ -10,6 +10,8 @@
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
+var system = require( "../core/System" );
+
 var developmentPanel = require( "./DevelopmentPanel" );
 var performanceMonitor = require( "./PerformanceMonitor" );
 var informationPanel = require( "./InformationPanel" );
@@ -19,8 +21,6 @@ var menu = require( "./Menu" );
 var textScreen = require( "./TextScreen" );
 var modalDialog = require( "./ModalDialog" );
 var chat = require( "./Chat" );
-
-var utils = require( "../etc/Utils" );
 
 /**
  * Creates the user interface manager.
@@ -57,12 +57,12 @@ UserInterfaceManager.prototype.init = function() {
 	chat.init();
 
 	// add development information
-	if ( utils.isDevelopmentModeActive() === true )
+	if ( system.isDevModeActive === true )
 	{
 		performanceMonitor.init();
 
 		developmentPanel.init();
-		developmentPanel.setText( "Development Mode Active: " + utils.getAppInformation() );
+		developmentPanel.setText( "Development Mode Active: " + system.name + " Version: " + system.version );
 	}
 
 	// eventing
@@ -75,7 +75,7 @@ UserInterfaceManager.prototype.init = function() {
  */
 UserInterfaceManager.prototype.update = function() {
 
-	if ( utils.isDevelopmentModeActive() === true )
+	if ( system.isDevModeActive === true )
 	{
 		performanceMonitor.update();
 	}

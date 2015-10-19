@@ -11,7 +11,7 @@
 "use strict";
 
 var Telegram = require( "./Telegram" );
-var logger = require( "../etc/Logger" );
+var logger = require( "../core/Logger" );
 var GameEntity = require( "../game/entity/GameEntity" );
 
 /**

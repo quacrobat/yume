@@ -9,12 +9,11 @@
 
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
-
 var AudioListener = require( "./AudioListener" );
 var DynamicAudio = require( "./DynamicAudio" );
 var AudioBufferList = require( "./AudioBufferList" );
 var camera = require( "../core/Camera" );
-var logger = require( "../etc/Logger" );
+var logger = require( "../core/Logger" );
 
 /**
  * Creates the audio manager.

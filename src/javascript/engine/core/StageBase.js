@@ -15,6 +15,7 @@ var TOPIC = require( "../messaging/Topic" );
 var renderer = require( "./Renderer" );
 var camera = require( "./Camera" );
 var world = require( "./World" );
+var system = require( "./System" );
 var controls = require( "../controls/FirstPersonControls" );
 var actionManager = require( "../action/ActionManager" );
 var audioManager = require( "../audio/AudioManager" );
@@ -25,7 +26,6 @@ var textManager = require( "../etc/TextManager" );
 var saveGameManager = require( "../etc/SaveGameManager" );
 var settingsManager = require( "../etc/SettingsManager" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
-var utils = require( "../etc/Utils" );
 
 /**
  * Creates a stage.
@@ -148,7 +148,7 @@ function StageBase( stageId ) {
  */
 StageBase.prototype.setup = function() {
 
-	if ( utils.isDevelopmentModeActive() === true )
+	if ( system.isDevModeActive === true )
 	{
 		this.world.addObject3D( new THREE.AxisHelper( 30 ) );
 		this.world.addObject3D( new THREE.GridHelper( 200, 10 ) );

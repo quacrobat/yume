@@ -7,7 +7,8 @@
 "use strict";
 
 var THREE = require( "three" );
-var utils = require( "../etc/Utils" );
+
+var system = require( "../core/System" );
 
 /**
  * The constructor creates an internal mesh, which represents the trigger in
@@ -55,7 +56,7 @@ function ActionTrigger( radius, action ) {
 	this.material.visible = false;
 
 	// show wireframe only in dev mode
-	if ( utils.isDevelopmentModeActive() === true )
+	if ( system.isDevModeActive === true )
 	{
 		this.material.visible = true;
 		this.material.wireframe = true;

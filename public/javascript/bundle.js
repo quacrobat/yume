@@ -36120,14 +36120,12 @@ var THREE = require( "three" );
 
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
-
 var Action = require( "./Action" );
 var InteractiveObject = require( "./InteractiveObject" );
 var StaticObject = require( "./StaticObject" );
 var ActionTrigger = require( "./ActionTrigger" );
-
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
-var logger = require( "../etc/Logger" );
+var logger = require( "../core/Logger" );
 
 var self;
 
@@ -36510,7 +36508,7 @@ ActionManager.prototype._onInteraction = function( message, data ) {
 };
 
 module.exports = new ActionManager();
-},{"../etc/Logger":31,"../messaging/EventManager":62,"../messaging/Topic":64,"../ui/UserInterfaceManager":95,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
+},{"../core/Logger":21,"../messaging/EventManager":64,"../messaging/Topic":66,"../ui/UserInterfaceManager":97,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
 /**
  * @file The ActionTrigger is a static trigger for actions.
  * 
@@ -36520,7 +36518,8 @@ module.exports = new ActionManager();
 "use strict";
 
 var THREE = require( "three" );
-var utils = require( "../etc/Utils" );
+
+var system = require( "../core/System" );
 
 /**
  * The constructor creates an internal mesh, which represents the trigger in
@@ -36568,7 +36567,7 @@ function ActionTrigger( radius, action ) {
 	this.material.visible = false;
 
 	// show wireframe only in dev mode
-	if ( utils.isDevelopmentModeActive() === true )
+	if ( system.isDevModeActive === true )
 	{
 		this.material.visible = true;
 		this.material.wireframe = true;
@@ -36580,7 +36579,7 @@ ActionTrigger.prototype = Object.create( THREE.Mesh.prototype );
 ActionTrigger.prototype.constructor = ActionTrigger;
 
 module.exports = ActionTrigger;
-},{"../etc/Utils":40,"three":1}],7:[function(require,module,exports){
+},{"../core/System":26,"three":1}],7:[function(require,module,exports){
 /**
  * @file The prototype InteractiveObject enables ordinary 3D-Objects to be
  * interactive. Any interactive object is part of the collision-detection logic
@@ -36835,7 +36834,7 @@ InteractiveObject.RAYCASTPRECISION = {
 };
 
 module.exports = InteractiveObject;
-},{"../etc/OBB":33,"three":1}],8:[function(require,module,exports){
+},{"../etc/OBB":35,"three":1}],8:[function(require,module,exports){
 /**
  * @file The prototype StaticObject enables ordinary 3D-Objects to be static.
  * Any interactive object is part of the collision-detection logic.
@@ -36969,7 +36968,7 @@ StaticObject.COLLISIONTYPES = {
 };
 
 module.exports = StaticObject;
-},{"../etc/OBB":33,"three":1}],9:[function(require,module,exports){
+},{"../etc/OBB":35,"three":1}],9:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for defining an animation for a single property.
@@ -36979,7 +36978,7 @@ module.exports = StaticObject;
 
 "use strict";
 
-var logger = require( "../etc/Logger" );
+var logger = require( "../core/Logger" );
 
 /**
  * Creates an animation.
@@ -37224,7 +37223,7 @@ Animation.prototype.setHover = function( isHover ) {
 
 module.exports = Animation;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Logger":31}],10:[function(require,module,exports){
+},{"../core/Logger":21}],10:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire animation-handling. This prototype is used in
@@ -37947,8 +37946,7 @@ module.exports = SpriteAnimation;
  */
 "use strict";
 
-var utils = require( "../etc/Utils" );
-
+var system = require( "../core/System" );
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
@@ -38023,10 +38021,10 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 	var self = this;
 
 	// build url
-	var url = utils.getCDNHost() + "assets/audio/dynamic/" + file + ".mp3";
+	var url = system.cdn + "assets/audio/dynamic/" + file + ".mp3";
 
 	// add nocache, if necessary
-	if ( utils.isDevelopmentModeActive() === true )
+	if ( system.isDevModeActive === true )
 	{
 		url = url + "?" + new Date().getTime();
 	}
@@ -38088,7 +38086,7 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 
 module.exports = AudioBufferList;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"../messaging/EventManager":62,"../messaging/Topic":64}],14:[function(require,module,exports){
+},{"../core/System":26,"../messaging/EventManager":64,"../messaging/Topic":66}],14:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype holds the central Web Audio context and manages the
@@ -38202,12 +38200,11 @@ module.exports = AudioListener;
 
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
-
 var AudioListener = require( "./AudioListener" );
 var DynamicAudio = require( "./DynamicAudio" );
 var AudioBufferList = require( "./AudioBufferList" );
 var camera = require( "../core/Camera" );
-var logger = require( "../etc/Logger" );
+var logger = require( "../core/Logger" );
 
 /**
  * Creates the audio manager.
@@ -38544,7 +38541,7 @@ AudioManager.prototype._onErrorBackgroundMusic = function() {
 
 module.exports = new AudioManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Camera":19,"../etc/Logger":31,"../messaging/EventManager":62,"../messaging/Topic":64,"./AudioBufferList":13,"./AudioListener":14,"./DynamicAudio":16}],16:[function(require,module,exports){
+},{"../core/Camera":19,"../core/Logger":21,"../messaging/EventManager":64,"../messaging/Topic":66,"./AudioBufferList":13,"./AudioListener":14,"./DynamicAudio":16}],16:[function(require,module,exports){
 /**
  * @file Prototype for creating dynamic, full-buffered audio objects.
  * 
@@ -39990,7 +39987,7 @@ FirstPersonControls.RUN = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/World":27,"../etc/SettingsManager":37,"../messaging/EventManager":62,"../messaging/Topic":64,"../ui/UserInterfaceManager":95,"three":1}],18:[function(require,module,exports){
+},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/World":30,"../etc/SettingsManager":39,"../messaging/EventManager":64,"../messaging/Topic":66,"../ui/UserInterfaceManager":97,"three":1}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -40006,13 +40003,13 @@ var TOPIC = require( "../messaging/Topic" );
 var environment = require( "./Environment" );
 var renderer = require( "./Renderer" );
 var camera = require( "./Camera" );
+var system = require( "./System" );
 var controls = require( "../controls/FirstPersonControls" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var saveGameManager = require( "../etc/SaveGameManager" );
 var multiplayerManager = require( "../etc/MultiplayerManager" );
 var networkManager = require( "../network/NetworkManager" );
-var utils = require( "../etc/Utils" );
-var logger = require( "../etc/Logger" );
+
 
 /**
  * Creates a Bootstrap instance, which initializes the entire application.
@@ -40034,8 +40031,7 @@ function Bootstrap() {
  */
 Bootstrap.prototype._getStartupParameter = function() {
 
-	var parameters = JSON.parse( global.sessionStorage.getItem( "parameters" ) );
-	utils.setRuntimeInformation( parameters );
+	system.init( JSON.parse( global.sessionStorage.getItem( "parameters" ) ) );
 };
 
 /**
@@ -40057,14 +40053,13 @@ Bootstrap.prototype._initEngine = function() {
 		}
 
 		// initialize basic components
-		logger.init();
 		renderer.init();
 		camera.init();
 		controls.init();
 		userInterfaceManager.init();
 
 		// initialize network and multiplayer manager only if necessary
-		if ( utils.isMultiplayerActive() === true )
+		if ( system.isMultiplayerActive === true )
 		{
 			networkManager.init();
 			multiplayerManager.init();
@@ -40104,7 +40099,7 @@ Bootstrap.prototype._loadStage = function() {
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":17,"../etc/Logger":31,"../etc/MultiplayerManager":32,"../etc/SaveGameManager":36,"../etc/Utils":40,"../messaging/EventManager":62,"../messaging/Topic":64,"../network/NetworkManager":66,"../ui/UserInterfaceManager":95,"./Camera":19,"./Environment":20,"./Renderer":21}],19:[function(require,module,exports){
+},{"../controls/FirstPersonControls":17,"../etc/MultiplayerManager":34,"../etc/SaveGameManager":38,"../messaging/EventManager":64,"../messaging/Topic":66,"../network/NetworkManager":68,"../ui/UserInterfaceManager":97,"./Camera":19,"./Environment":20,"./Renderer":22,"./System":26}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for camera-based
@@ -40174,7 +40169,7 @@ Camera.prototype._onResize = function( message, data ) {
 
 module.exports = new Camera();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":62,"../messaging/Topic":64,"three":1}],20:[function(require,module,exports){
+},{"../messaging/EventManager":64,"../messaging/Topic":66,"three":1}],20:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype is used to ensure that all necessary browser features
@@ -40278,6 +40273,16 @@ Environment.prototype.isCompatible = function() {
 Environment.prototype.isTouchDevice = function() {
 
 	return !!( "ontouchstart" in global.window  );
+};
+
+/**
+ * Checks, if the browser is a Firefox.
+ * 
+ * @returns {boolean} Is the current user-agent a Firefox?
+ */
+Environment.prototype.isFirefox = function() {
+
+	return global.navigator.userAgent.toLowerCase().indexOf( "firefox" ) > -1;
 };
 
 /**
@@ -40413,6 +40418,88 @@ Environment.prototype._testWebPerformance = function() {
 module.exports = new Environment();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],21:[function(require,module,exports){
+/**
+ * @file This prototype provides logging functionality. It's a wrapper for the
+ * browser console API.
+ * 
+ * @author Human Interactive
+ */
+"use strict";
+
+var system = require( "./System" );
+
+/**
+ * Creates a logger instance.
+ * 
+ * @constructor
+ */
+function Logger() {
+
+}
+
+/**
+ * Logs standard/info messages.
+ */
+Logger.prototype.log = function() {
+
+	// log messages only in dev mode
+	if ( system.isDevModeActive === true )
+	{
+		console.log.apply( console, arguments );
+	}
+};
+
+/**
+ * Logs warnings.
+ */
+Logger.prototype.warn = function() {
+
+	console.warn.apply( console, arguments );
+};
+
+/**
+ * Logs errors.
+ */
+Logger.prototype.error = function() {
+
+	console.error.apply( console, arguments );
+};
+
+/**
+ * Handles assertions.
+ */
+Logger.prototype.assert = function() {
+
+	console.assert.apply( console, arguments );
+};
+
+/**
+ * Logs information about the memory and render status to console.
+ * 
+ * @param {Renderer} renderer - The renderer object.
+ */
+Logger.prototype.logSystemInfo = function( renderer ) {
+
+	console.group( "INFO: Logger: World Information, %s", new Date().toTimeString() );
+
+	console.group( "Memory" );
+	console.log( "%i Geometries", renderer.info.memory.geometries );
+	console.log( "%i Programs", renderer.info.memory.programs );
+	console.log( "%i Textures", renderer.info.memory.textures );
+	console.groupEnd();
+
+	console.group( "Render" );
+	console.log( "%i Calls", renderer.info.render.calls );
+	console.log( "%i Faces", renderer.info.render.faces );
+	console.log( "%i Points", renderer.info.render.points );
+	console.log( "%i Vertices", renderer.info.render.vertices );
+	console.groupEnd();
+
+	console.groupEnd();
+};
+
+module.exports = new Logger();
+},{"./System":26}],22:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for rendering-based
@@ -40426,6 +40513,7 @@ module.exports = new Environment();
 
 var THREE = require( "three" );
 
+var logger = require( "./Logger" );
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
@@ -40436,8 +40524,6 @@ var ShaderPass = require( "../postprocessing/ShaderPass" );
 var GrayscaleShader = require( "../shader/GrayscaleShader" );
 var VignetteShader = require( "../shader/VignetteShader" );
 var GaussianBlurShader = require( "../shader/GaussianBlurShader" );
-
-var logger = require( "../etc/Logger" );
 
 var self;
 
@@ -40722,7 +40808,7 @@ Renderer.prototype._onResize = function( message, data ) {
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Logger":31,"../messaging/EventManager":62,"../messaging/Topic":64,"../postprocessing/EffectComposer":67,"../postprocessing/RenderPass":68,"../postprocessing/ShaderPass":69,"../shader/GaussianBlurShader":71,"../shader/GrayscaleShader":72,"../shader/VignetteShader":73,"three":1}],22:[function(require,module,exports){
+},{"../messaging/EventManager":64,"../messaging/Topic":66,"../postprocessing/EffectComposer":69,"../postprocessing/RenderPass":70,"../postprocessing/ShaderPass":71,"../shader/GaussianBlurShader":73,"../shader/GrayscaleShader":74,"../shader/VignetteShader":75,"./Logger":21,"three":1}],23:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic for scene-based functionality.
  * 
@@ -40764,7 +40850,7 @@ Scene.prototype.clear = function() {
 };
 
 module.exports = new Scene();
-},{"three":1}],23:[function(require,module,exports){
+},{"three":1}],24:[function(require,module,exports){
 (function (global){
 /**
  * @file Basis prototype for all stages. It is used to provide specific stages a
@@ -40783,6 +40869,7 @@ var TOPIC = require( "../messaging/Topic" );
 var renderer = require( "./Renderer" );
 var camera = require( "./Camera" );
 var world = require( "./World" );
+var system = require( "./System" );
 var controls = require( "../controls/FirstPersonControls" );
 var actionManager = require( "../action/ActionManager" );
 var audioManager = require( "../audio/AudioManager" );
@@ -40793,7 +40880,6 @@ var textManager = require( "../etc/TextManager" );
 var saveGameManager = require( "../etc/SaveGameManager" );
 var settingsManager = require( "../etc/SettingsManager" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
-var utils = require( "../etc/Utils" );
 
 /**
  * Creates a stage.
@@ -40916,7 +41002,7 @@ function StageBase( stageId ) {
  */
 StageBase.prototype.setup = function() {
 
-	if ( utils.isDevelopmentModeActive() === true )
+	if ( system.isDevModeActive === true )
 	{
 		this.world.addObject3D( new THREE.AxisHelper( 30 ) );
 		this.world.addObject3D( new THREE.GridHelper( 200, 10 ) );
@@ -41022,7 +41108,7 @@ StageBase.COLORS = {
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../controls/FirstPersonControls":17,"../etc/PerformanceManager":35,"../etc/SaveGameManager":36,"../etc/SettingsManager":37,"../etc/TextManager":39,"../etc/Utils":40,"../game/entity/EntityManager":41,"../messaging/EventManager":62,"../messaging/Topic":64,"../ui/UserInterfaceManager":95,"./Camera":19,"./Renderer":21,"./World":27,"three":1}],24:[function(require,module,exports){
+},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../controls/FirstPersonControls":17,"../etc/PerformanceManager":37,"../etc/SaveGameManager":38,"../etc/SettingsManager":39,"../etc/TextManager":41,"../game/entity/EntityManager":43,"../messaging/EventManager":64,"../messaging/Topic":66,"../ui/UserInterfaceManager":97,"./Camera":19,"./Renderer":22,"./System":26,"./World":30,"three":1}],25:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -41032,12 +41118,12 @@ module.exports = StageBase;
 
 var self;
 
+var logger = require( "./Logger" );
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var saveGameManager = require( "../etc/SaveGameManager" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
-var logger = require( "../etc/Logger" );
 
 // stages
 var Stage_001 = require( "../stages/Stage_001" );
@@ -41314,7 +41400,89 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 };
 
 module.exports = new StageManager();
-},{"../etc/Logger":31,"../etc/SaveGameManager":36,"../messaging/EventManager":62,"../messaging/Topic":64,"../stages/Stage_001":74,"../stages/Stage_002":75,"../stages/Stage_003":76,"../stages/Stage_004":77,"../stages/Stage_005":78,"../stages/Stage_006":79,"../stages/Stage_007":80,"../stages/Stage_008":81,"../stages/Stage_009":82,"../stages/Stage_010":83,"../stages/Stage_011":84,"../ui/UserInterfaceManager":95}],25:[function(require,module,exports){
+},{"../etc/SaveGameManager":38,"../messaging/EventManager":64,"../messaging/Topic":66,"../stages/Stage_001":76,"../stages/Stage_002":77,"../stages/Stage_003":78,"../stages/Stage_004":79,"../stages/Stage_005":80,"../stages/Stage_006":81,"../stages/Stage_007":82,"../stages/Stage_008":83,"../stages/Stage_009":84,"../stages/Stage_010":85,"../stages/Stage_011":86,"../ui/UserInterfaceManager":97,"./Logger":21}],26:[function(require,module,exports){
+/**
+ * @file This prototype holds core information about the engine. The runtime
+ * behavior of the application depends crucially of this prototype.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+/**
+ * Creates the system instance.
+ * 
+ * @constructor
+ */
+function System() {
+
+	Object.defineProperties( this, {
+		// the name of the application
+		name : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the version of the application
+		version : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the locale (i18n) of the application
+		locale : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the URL to a content delivery network.
+		// assets can be loaded from a different server than the application
+		cdn : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// indicates, if multiplayer components should be active
+		isMultiplayerActive : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// indicates, if the development mode is active.
+		// in production, this value should always be false to disable logging
+		isDevModeActive : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		}
+	} );
+}
+
+/**
+ * Initialized the system with parameters from the back-end.
+ * 
+ * @param {object} parameter - Startup parameters of the system.
+ */
+System.prototype.init = function( parameter ) {
+	
+	this.name = parameter.name;
+	this.version = parameter.version;
+	this.locale = parameter.locale;
+	this.cdn = parameter.cdn;
+	
+	this.isMultiplayerActive = !!parameter.isMultiplayerActive;
+	this.isDevModeActive = !!parameter.isDevModeActive;
+};
+
+module.exports = new System();
+},{}],27:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It uses the HTML5-API Web
@@ -41397,7 +41565,7 @@ Thread.prototype.onError = function( listener ) {
 
 module.exports = Thread;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],26:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for thread-based
@@ -41540,7 +41708,85 @@ ThreadManager.prototype._getScriptURL = function( script ) {
 
 module.exports = new ThreadManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Thread":25}],27:[function(require,module,exports){
+},{"./Thread":27}],29:[function(require,module,exports){
+(function (global){
+/**
+ * @file This prototype is a wrapper for the HTML5 User Timing API. It provides
+ * a mechanism for accurate time measurement.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var system = require( "./System" );
+var logger = require( "./Logger" );
+
+/**
+ * Creates a timing instance.
+ * 
+ * @constructor
+ */
+function Timing() {
+
+}
+
+/**
+ * Stores a high resolution timestamp with the associated name.
+ * 
+ * @param {string} name - The name of the mark.
+ */
+Timing.prototype.mark = function( name ) {
+
+	if ( system.isDevModeActive === true )
+	{
+		global.performance.mark( name );
+	}
+
+};
+
+/**
+ * Stores the time elapsed between two marks with the provided name.
+ * 
+ * @param {string} name - The name of the measurement.
+ * @param {string} mark1 - The name of first mark.
+ * @param {string} mark2 - The name of second mark.
+ */
+Timing.prototype.measure = function( name, mark1, mark2 ) {
+
+	if ( system.isDevModeActive === true )
+	{
+		global.performance.measure( name, mark1, mark2 );
+
+		// clear timestamps after measurement
+		global.performance.clearMarks( mark1 );
+		global.performance.clearMarks( mark2 );
+	}
+
+};
+
+/**
+ * Prints the given measurement to console.
+ * 
+ * @param {string} name - The name of the measurement.
+ */
+Timing.prototype.print = function( name ) {
+
+	if ( system.isDevModeActive === true )
+	{
+		var entires = global.performance.getEntriesByName( name );
+
+		logger.log( "INFO: Timing: Duration of %s: %f ms", entires[ 0 ].name, entires[ 0 ].duration );
+
+		// clear measurement after logging
+		global.performance.clearMeasures( name );
+	}
+
+};
+
+module.exports = new Timing();
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./Logger":21,"./System":26}],30:[function(require,module,exports){
 /**
  * @file This prototype contains all important environment data of a stage.
  * 
@@ -41751,7 +41997,7 @@ World.prototype.clear = function() {
 };
 
 module.exports = new World();
-},{"../action/ActionManager":5,"./Scene":22}],28:[function(require,module,exports){
+},{"../action/ActionManager":5,"./Scene":23}],31:[function(require,module,exports){
 /**
  * @file This prototype handles all stuff for impostors. An impostor is a
  * billboard that is created on the fly by rendering a complex object from the
@@ -42220,7 +42466,7 @@ Impostor.prototype._render = function() {
 };
 
 module.exports = Impostor;
-},{"three":1}],29:[function(require,module,exports){
+},{"three":1}],32:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading 3D objects in JSON-format from the server. The
@@ -42232,7 +42478,7 @@ module.exports = Impostor;
 
 var THREE = require( "three" );
 
-var utils = require( "./Utils" );
+var system = require( "../core/System" );
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 /**
@@ -42265,7 +42511,7 @@ JSONLoader.prototype.load = function( url, onLoad ) {
 	var self = this;
 
 	// build url
-	url = utils.getCDNHost() + url;
+	url = system.cdn + url;
 
 	// build texturePath
 	if ( this.texturePath === "" )
@@ -42274,7 +42520,7 @@ JSONLoader.prototype.load = function( url, onLoad ) {
 	}
 
 	// add nocache, if necessary
-	if ( utils.isDevelopmentModeActive() === true )
+	if ( system.isDevModeActive === true )
 	{
 		url = url + "?" + new Date().getTime();
 	}
@@ -42328,7 +42574,7 @@ JSONLoader.prototype.load = function( url, onLoad ) {
 
 module.exports = JSONLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":62,"../messaging/Topic":64,"./Utils":40,"three":1}],30:[function(require,module,exports){
+},{"../core/System":26,"../messaging/EventManager":64,"../messaging/Topic":66,"three":1}],33:[function(require,module,exports){
 /**
  * @file This prototype is used for LOD handling. It is an enhancement of the
  * LOD functionality of three.js. Instead of switching directly between LOD
@@ -42507,105 +42753,7 @@ LOD.MODE = {
 };
 
 module.exports = LOD;
-},{"three":1}],31:[function(require,module,exports){
-/**
- * @file This prototype provides logging functionality. It's a wrapper for the
- * browser console API.
- * 
- * @author Human Interactive
- */
-"use strict";
-
-var utils = require( "./Utils" );
-
-/**
- * Creates a logger instance.
- * 
- * @constructor
- */
-function Logger() {
-
-	Object.defineProperties( this, {
-		_isDevModeActive : {
-			value : false,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		}
-	} );
-}
-
-/**
- * Initializes the logger.
- */
-Logger.prototype.init = function() {
-
-	this._isDevModeActive = utils.isDevelopmentModeActive();
-};
-
-/**
- * Logs standard/info messages.
- */
-Logger.prototype.log = function() {
-
-	// log messages only in dev mode
-	if ( this._isDevModeActive === true )
-	{
-		console.log.apply( console, arguments );
-	}
-};
-
-/**
- * Logs warnings.
- */
-Logger.prototype.warn = function() {
-
-	console.warn.apply( console, arguments );
-};
-
-/**
- * Logs errors.
- */
-Logger.prototype.error = function() {
-
-	console.error.apply( console, arguments );
-};
-
-/**
- * Handles assertions.
- */
-Logger.prototype.assert = function() {
-
-	console.assert.apply( console, arguments );
-};
-
-/**
- * Logs information about the memory and render status to console.
- * 
- * @param {Renderer} renderer - The renderer object.
- */
-Logger.prototype.logSystemInfo = function( renderer ) {
-
-	console.group( "INFO: Logger: World Information, %s", new Date().toTimeString() );
-
-	console.group( "Memory" );
-	console.log( "%i Geometries", renderer.info.memory.geometries );
-	console.log( "%i Programs", renderer.info.memory.programs );
-	console.log( "%i Textures", renderer.info.memory.textures );
-	console.groupEnd();
-
-	console.group( "Render" );
-	console.log( "%i Calls", renderer.info.render.calls );
-	console.log( "%i Faces", renderer.info.render.faces );
-	console.log( "%i Points", renderer.info.render.points );
-	console.log( "%i Vertices", renderer.info.render.vertices );
-	console.groupEnd();
-
-	console.groupEnd();
-};
-
-module.exports = new Logger();
-},{"./Utils":40}],32:[function(require,module,exports){
+},{"three":1}],34:[function(require,module,exports){
 /**
  * @file This prototype manages the characters of the other teammates.
  * 
@@ -42620,7 +42768,7 @@ var TOPIC = require( "../messaging/Topic" );
 
 var Teammate = require( "./Teammate" );
 var world = require( "../core/World" );
-var logger = require( "./Logger" );
+var logger = require( "../core/Logger" );
 
 var self;
 /**
@@ -42777,7 +42925,7 @@ MultiplayerManager.prototype._getTeammate = function( id ) {
 };
 
 module.exports = new MultiplayerManager();
-},{"../core/World":27,"../messaging/EventManager":62,"../messaging/Topic":64,"./Logger":31,"./Teammate":38,"three":1}],33:[function(require,module,exports){
+},{"../core/Logger":21,"../core/World":30,"../messaging/EventManager":64,"../messaging/Topic":66,"./Teammate":40,"three":1}],35:[function(require,module,exports){
 /**
  * @file A 3D arbitrarily oriented bounding box.
  * 
@@ -43479,7 +43627,7 @@ OBB.prototype.clone = function() {
 };
 
 module.exports = OBB;
-},{"three":1}],34:[function(require,module,exports){
+},{"three":1}],36:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading 3D objects in object-format from the server. The
@@ -43491,7 +43639,7 @@ module.exports = OBB;
 
 var THREE = require( "three" );
 
-var utils = require( "./Utils" );
+var system = require( "../core/System" );
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
@@ -43524,7 +43672,7 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 	var self = this;
 
 	// build url
-	url = utils.getCDNHost() + url;
+	url = system.cdn + url;
 
 	// build texturePath
 	if ( this.texturePath === "" )
@@ -43533,7 +43681,7 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 	}
 
 	// add nocache, if necessary
-	if ( utils.isDevelopmentModeActive() === true )
+	if ( system.isDevModeActive === true )
 	{
 		url = url + "?" + new Date().getTime();
 	}
@@ -43583,7 +43731,7 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 
 module.exports = ObjectLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":62,"../messaging/Topic":64,"./Utils":40,"three":1}],35:[function(require,module,exports){
+},{"../core/System":26,"../messaging/EventManager":64,"../messaging/Topic":66,"three":1}],37:[function(require,module,exports){
 /**
  * @file Interface for performance handling. This prototype is used in stages to
  * create e.g. LOD instances.
@@ -43908,7 +44056,7 @@ PerformanceManager.prototype._updateImpostors = ( function() {
 }() );
 
 module.exports = new PerformanceManager();
-},{"../core/Camera":19,"../core/Renderer":21,"../core/World":27,"./Impostor":28,"./LOD":30,"three":1}],36:[function(require,module,exports){
+},{"../core/Camera":19,"../core/Renderer":22,"../core/World":30,"./Impostor":31,"./LOD":33,"three":1}],38:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire savegame-handling. This prototype is using HTML
@@ -43987,7 +44135,7 @@ SaveGameManager.prototype.remove = function() {
 
 module.exports = new SaveGameManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],37:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire settings-handling. This prototype is used to
@@ -43998,7 +44146,9 @@ module.exports = new SaveGameManager();
 "use strict";
 
 var THREE = require( "three" );
-var utils = require( "./Utils" );
+
+var system = require( "../core/System" );
+
 /**
  * Creates the settings manager and loads the current settings.
  * 
@@ -44146,7 +44296,7 @@ SettingsManager.prototype.adjustLight = function( light ) {
 		light.castShadow = false;
 	}
 
-	if ( utils.isDevelopmentModeActive() === true )
+	if ( system.isDevModeActive === true )
 	{
 		if ( light instanceof THREE.SpotLight || light instanceof THREE.DirectionalLight )
 		{
@@ -44180,7 +44330,7 @@ SettingsManager.MOUSE = {
 
 module.exports = new SettingsManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Utils":40,"three":1}],38:[function(require,module,exports){
+},{"../core/System":26,"three":1}],40:[function(require,module,exports){
 /**
  * @file This prototype represents the character of a teammate.
  * 
@@ -44232,7 +44382,7 @@ Teammate.prototype.update = function( position, quaternion ) {
 };
 
 module.exports = Teammate;
-},{"../game/entity/GameEntity":42,"three":1}],39:[function(require,module,exports){
+},{"../game/entity/GameEntity":44,"three":1}],41:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire text-handling. This prototype is used in stages to
@@ -44242,8 +44392,7 @@ module.exports = Teammate;
  */
 "use strict";
 
-var utils = require( "./Utils" );
-
+var system = require( "../core/System" );
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
@@ -44275,10 +44424,10 @@ TextManager.prototype.load = function( stageId, callback ) {
 	var self = this;
 
 	// build url
-	var url = utils.getCDNHost() + "assets/locales/" + utils.getLocale() + "/stage_" + stageId + ".js";
+	var url = system.cdn + "assets/locales/" + system.locale + "/stage_" + stageId + ".js";
 
 	// add nocache, if necessary
-	if ( utils.isDevelopmentModeActive() === true )
+	if ( system.isDevModeActive === true )
 	{
 		url = url + "?" + new Date().getTime();
 	}
@@ -44408,7 +44557,7 @@ TextManager.prototype._searchAndRepalce = function() {
 
 module.exports = new TextManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":62,"../messaging/Topic":64,"./Utils":40}],40:[function(require,module,exports){
+},{"../core/System":26,"../messaging/EventManager":64,"../messaging/Topic":66}],42:[function(require,module,exports){
 (function (global){
 /**
  * @file All helper and util functions are organized in this module.
@@ -44425,101 +44574,13 @@ module.exports = new TextManager();
  */
 function Utils() {
 
-	Object.defineProperties( this, {
-		_runtimeInformation : {
-			value : {},
-			configurable : false,
-			enumerable : false,
-			writable : true
-		}
-	} );
 }
-
-/**
- * Sets runtime-information
- * 
- * @param {object} params - Startup parameters of the engine.
- */
-Utils.prototype.setRuntimeInformation = function( params ) {
-
-	this._runtimeInformation.appName = params.name;
-	this._runtimeInformation.version = params.version;
-
-	if ( params.mode === "development" )
-	{
-		this._runtimeInformation.mode = Utils.MODES.DEVELOPMENT;
-		this._runtimeInformation.CDN = Utils.CDN.LOCAL;
-	}
-	else
-	{
-		this._runtimeInformation.mode = Utils.MODES.PRODUCTION;
-		this._runtimeInformation.CDN = Utils.CDN.CLOUD;
-	}
-
-	if ( params.locale === "de" )
-	{
-		this._runtimeInformation.locale = Utils.LOCALES.DE;
-	}
-	else
-	{
-		this._runtimeInformation.locale = Utils.LOCALES.EN;
-	}
-
-	if ( params.isMultiplayerActive === true )
-	{
-		this._runtimeInformation.isMultiplayerActive = true;
-	}
-	else
-	{
-		this._runtimeInformation.isMultiplayerActive = false;
-	}
-};
-
-/**
- * Gets the CDN-Host.
- * 
- * @returns {string} The CDN-Host.
- */
-Utils.prototype.getCDNHost = function() {
-
-	return this._runtimeInformation.CDN;
-};
-
-/**
- * Gets the Locale (i18n).
- * 
- * @returns {string} The local.
- */
-Utils.prototype.getLocale = function() {
-
-	return this._runtimeInformation.locale;
-};
-
-/**
- * Get name and bersion of the Application.
- * 
- * @returns {string} The name and bersion of Application.
- */
-Utils.prototype.getAppInformation = function() {
-
-	return this._runtimeInformation.appName + ", Version: " + this._runtimeInformation.version;
-};
-
-/**
- * Is the multiplayer component active or not?
- * 
- * @returns {boolean} Is the multiplayer active?
- */
-Utils.prototype.isMultiplayerActive = function() {
-
-	return this._runtimeInformation.isMultiplayerActive;
-};
 
 /**
  * Preloads images and executes a callback, when all work is done.
  * 
- * @param{object} images - An array with URLs of images.
- * @param{function} callback - This function is executed, when all images are
+ * @param {object} images - An array with URLs of images.
+ * @param {function} callback - This function is executed, when all images are
  * loaded.
  */
 Utils.prototype.preloadImages = function( images, callback ) {
@@ -44541,7 +44602,6 @@ Utils.prototype.preloadImages = function( images, callback ) {
 
 	for ( var i = 0; i < images.length; i++ )
 	{
-
 		var image = new global.Image();
 		image.src = images[ i ];
 
@@ -44550,44 +44610,9 @@ Utils.prototype.preloadImages = function( images, callback ) {
 	}
 };
 
-/**
- * Checks, if the engine runs in development or production mode
- * 
- * @returns {boolean} Is development mode activ?
- */
-Utils.prototype.isDevelopmentModeActive = function() {
-
-	return this._runtimeInformation.mode === Utils.MODES.DEVELOPMENT;
-};
-
-/**
- * Checks, if the browser is a Firefox
- * 
- * @returns {boolean} Is the current user-agent a firefox?
- */
-Utils.prototype.isFirefox = function() {
-
-	return global.navigator.userAgent.toLowerCase().indexOf( 'firefox' ) > -1;
-};
-
-Utils.MODES = {
-	DEVELOPMENT : 0,
-	PRODUCTION : 1
-};
-
-Utils.LOCALES = {
-	EN : "en",
-	DE : "de"
-};
-
-Utils.CDN = {
-	LOCAL : "",
-	CLOUD : ""
-};
-
 module.exports = new Utils();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],41:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 /**
  * @file This prototype manages all game entities.
  * 
@@ -44717,7 +44742,7 @@ EntityManager.prototype.removeEntities = function() {
 };
 
 module.exports = new EntityManager();
-},{"./Vehicle":44}],42:[function(require,module,exports){
+},{"./Vehicle":46}],44:[function(require,module,exports){
 /**
  * @file All entities that are part of the game logic inherit from this
  * prototype.
@@ -44789,7 +44814,7 @@ GameEntity.prototype.handleMessage = function( telegram ) {
 };
 
 module.exports = GameEntity;
-},{}],43:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 /**
  * @file Base prototype from which all moving game agents are derived.
  * 
@@ -44980,7 +45005,7 @@ MovingEntity.prototype.getDirection = function() {
 };
 
 module.exports = MovingEntity;
-},{"./GameEntity":42,"three":1}],44:[function(require,module,exports){
+},{"./GameEntity":44,"three":1}],46:[function(require,module,exports){
 /**
  * @file A simple vehicle that uses steering behaviors.
  * 
@@ -45107,7 +45132,7 @@ Vehicle.prototype.update = ( function() {
 }() );
 
 module.exports = Vehicle;
-},{"../steering/Smoother":60,"../steering/SteeringBehaviors":61,"./MovingEntity":43,"three":1}],45:[function(require,module,exports){
+},{"../steering/Smoother":62,"../steering/SteeringBehaviors":63,"./MovingEntity":45,"three":1}],47:[function(require,module,exports){
 /**
  * @file Super prototype for states used by FSMs.
  * 
@@ -45158,7 +45183,7 @@ State.prototype.exit = function( entity ) { };
 State.prototype.onMessage = function( entity, telegram ) { return false; };
 
 module.exports = State;
-},{}],46:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 /**
  * @file This prototype is a basic finite state machine used for AI logic.
  * 
@@ -45169,7 +45194,7 @@ module.exports = State;
 
 "use strict";
 
-var logger = require( "../../etc/Logger" );
+var logger = require( "../../core/Logger" );
 var State = require( "./State" );
 
 /**
@@ -45299,7 +45324,7 @@ StateMachine.prototype.isInState = function( state ) {
 };
 
 module.exports = StateMachine;
-},{"../../etc/Logger":31,"./State":45}],47:[function(require,module,exports){
+},{"../../core/Logger":21,"./State":47}],49:[function(require,module,exports){
 /**
  * @file Prototype to define an edge connecting two nodes. An edge has an
  * associated cost.
@@ -45384,7 +45409,7 @@ GraphEdge.prototype.copy = function( source ){
 };
 
 module.exports = GraphEdge;
-},{}],48:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 /**
  * @file Some useful functions you can use with graphs.
  * 
@@ -45717,7 +45742,7 @@ function generateEdges( graph, offset ) {
 	}// next node
 
 }
-},{"../../core/World":27,"./NavGraphEdge":50,"./NavGraphNode":51,"three":1}],49:[function(require,module,exports){
+},{"../../core/World":30,"./NavGraphEdge":52,"./NavGraphNode":53,"three":1}],51:[function(require,module,exports){
 /**
  * @file Node prototype to be used with graphs.
  * 
@@ -45751,7 +45776,7 @@ function GraphNode( index ) {
 GraphNode.INVALID_NODE_INDEX = -1;
 
 module.exports = GraphNode;
-},{}],50:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 /**
  * @file Prototype to define an edge connecting two navigation nodes.
  * 
@@ -45836,7 +45861,7 @@ NavGraphEdge.FLAGS = {
 };
 
 module.exports = NavGraphEdge;
-},{"./GraphEdge":47}],51:[function(require,module,exports){
+},{"./GraphEdge":49}],53:[function(require,module,exports){
 /**
  * @file Graph node for use in creating a navigation graph. This node contains
  * the position of the node and a pointer to a GameEntity... useful if you want
@@ -45891,7 +45916,7 @@ NavGraphNode.prototype = Object.create( GraphNode.prototype );
 NavGraphNode.prototype.constructor = NavGraphNode;
 
 module.exports = NavGraphNode;
-},{"./GraphNode":49,"three":1}],52:[function(require,module,exports){
+},{"./GraphNode":51,"three":1}],54:[function(require,module,exports){
 /**
  * @file Graph prototype using the adjacency list representation.
  * 
@@ -46418,7 +46443,7 @@ SparseGraph.prototype._cullInvalidEdges = function() {
 };
 
 module.exports = SparseGraph;
-},{}],53:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 /**
  * @file Some useful functions you can use with algorithms.
  * 
@@ -46486,7 +46511,7 @@ AlgorithmHelper.prototype.sortQueueByCost = function( a, b ) {
 };
 
 module.exports = new AlgorithmHelper();
-},{}],54:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 /**
  * @file Prototype to implement the A* search algorithm.
  * 
@@ -46757,7 +46782,7 @@ GraphSearchAStar.prototype._search = function() {
 };
 
 module.exports = GraphSearchAStar;
-},{"../GraphEdge":47,"../GraphNode":49,"./AlgorithmHelper":53}],55:[function(require,module,exports){
+},{"../GraphEdge":49,"../GraphNode":51,"./AlgorithmHelper":55}],57:[function(require,module,exports){
 /**
  * @file Prototype to implement a breadth first search.
  * 
@@ -46945,7 +46970,7 @@ GraphSearchBFS.prototype._search = function() {
 };
 
 module.exports = GraphSearchBFS;
-},{"../GraphEdge":47,"../GraphNode":49}],56:[function(require,module,exports){
+},{"../GraphEdge":49,"../GraphNode":51}],58:[function(require,module,exports){
 /**
  * @file Prototype to implement a depth first search.
  * 
@@ -47105,7 +47130,7 @@ GraphSearchDFS.prototype._search = function() {
 };
 
 module.exports = GraphSearchDFS;
-},{"../GraphEdge":47,"../GraphNode":49}],57:[function(require,module,exports){
+},{"../GraphEdge":49,"../GraphNode":51}],59:[function(require,module,exports){
 /**
  * @file Prototype to implement dijkstra’s shortest path algorithm.
  * 
@@ -47357,7 +47382,7 @@ GraphSearchDijkstra.prototype._search = function() {
 };
 
 module.exports = GraphSearchDijkstra;
-},{"../GraphEdge":47,"../GraphNode":49,"./AlgorithmHelper":53}],58:[function(require,module,exports){
+},{"../GraphEdge":49,"../GraphNode":51,"./AlgorithmHelper":55}],60:[function(require,module,exports){
 /**
  * @file This prototype defines heuristic policies for use with the A* search
  * algorithm.
@@ -47494,7 +47519,7 @@ module.exports = {
 	EuclideanSq : new HeuristicPolicyEuclidSq(),
 	Dijkstra : new HeuristicPolicyDijkstra()
 };
-},{}],59:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 /**
  * @file Prototype to define, manage, and traverse a path defined by a series of
  * 3D vectors.
@@ -47505,7 +47530,7 @@ module.exports = {
 
 var THREE = require( "three" );
 
-var logger = require( "../../etc/Logger" );
+var logger = require( "../../core/Logger" );
 
 /**
  * Creates a new path.
@@ -47656,7 +47681,7 @@ Path.prototype.createRandomPath = function( numberOfWaypoints, boundingBox ) {
 };
 
 module.exports = Path;
-},{"../../etc/Logger":31,"three":1}],60:[function(require,module,exports){
+},{"../../core/Logger":21,"three":1}],62:[function(require,module,exports){
 /**
  * @file Prototype to help calculate the average value of a history of vector
  * values.
@@ -47746,7 +47771,7 @@ Smoother.prototype.update = ( function() {
 }() );
 
 module.exports = Smoother;
-},{"three":1}],61:[function(require,module,exports){
+},{"three":1}],63:[function(require,module,exports){
 /**
  * @file Prototype to encapsulate steering behaviors for a vehicle.
  * 
@@ -47759,8 +47784,8 @@ module.exports = Smoother;
 var THREE = require( "three" );
 
 var world = require( "../../core/World" );
+var logger = require( "../../core/Logger" );
 var Path = require( "./Path" );
-var logger = require( "../../etc/Logger" );
 
 /**
  * Creates a steering behaviors instance.
@@ -49445,7 +49470,7 @@ SteeringBehaviors.DECELERATION = {
 };
 
 module.exports = SteeringBehaviors;
-},{"../../core/World":27,"../../etc/Logger":31,"./Path":59,"three":1}],62:[function(require,module,exports){
+},{"../../core/Logger":21,"../../core/World":30,"./Path":61,"three":1}],64:[function(require,module,exports){
 /**
  * @file This prototype provides topic-based publish/subscribe messaging and
  * enables communication between game entities.
@@ -49459,7 +49484,7 @@ module.exports = SteeringBehaviors;
 "use strict";
 
 var Telegram = require( "./Telegram" );
-var logger = require( "../etc/Logger" );
+var logger = require( "../core/Logger" );
 var GameEntity = require( "../game/entity/GameEntity" );
 
 /**
@@ -49997,7 +50022,7 @@ function sendMessageToEntity( sender, receiver, message, data, isSync, delay ) {
 }
 
 module.exports = new EventManager();
-},{"../etc/Logger":31,"../game/entity/GameEntity":42,"./Telegram":63}],63:[function(require,module,exports){
+},{"../core/Logger":21,"../game/entity/GameEntity":44,"./Telegram":65}],65:[function(require,module,exports){
 /**
  * @file This defines a telegram. A telegram is a data structure that records
  * information required to dispatch game messages. These messages are used by
@@ -50055,7 +50080,7 @@ function Telegram( sender, receiver, message, data, delay ) {
 }
 
 module.exports = Telegram;
-},{}],64:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 /**
  * @file This file contains all topics for publish & subscribe. YUME supports a
  * publish/subscribe messaging system with hierarchical addressing, so topics
@@ -50111,7 +50136,7 @@ var TOPIC = {
 };
 
 module.exports = TOPIC;
-},{}],65:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 /**
  * @file Prototype for network-messages.
  * 
@@ -50161,7 +50186,7 @@ Message.TYPES = {
 };
 
 module.exports = Message;
-},{}],66:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for network-based
@@ -50175,7 +50200,7 @@ var WebSocket = require( "ws" );
 
 var Message = require( "./Message" );
 var threadMananger = require( "../core/ThreadManager" );
-var logger = require( "../etc/Logger" );
+var logger = require( "../core/Logger" );
 
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
@@ -50416,7 +50441,7 @@ NetworkManager.SERVER = {
 
 module.exports = new NetworkManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/ThreadManager":26,"../etc/Logger":31,"../messaging/EventManager":62,"../messaging/Topic":64,"./Message":65,"ws":2}],67:[function(require,module,exports){
+},{"../core/Logger":21,"../core/ThreadManager":28,"../messaging/EventManager":64,"../messaging/Topic":66,"./Message":67,"ws":2}],69:[function(require,module,exports){
 /**
  * @file This prototype manages effects for post-processing.
  * 
@@ -50602,7 +50627,7 @@ EffectComposer.prototype._reset = function( renderTarget ) {
 };
 
 module.exports = EffectComposer;
-},{"three":1}],68:[function(require,module,exports){
+},{"three":1}],70:[function(require,module,exports){
 /**
  * @file This prototype provides a render pass for post-processing.
  * 
@@ -50664,7 +50689,7 @@ RenderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = RenderPass;
-},{"three":1}],69:[function(require,module,exports){
+},{"three":1}],71:[function(require,module,exports){
 /**
  * @file This prototype provides a shader pass for post-processing.
  * 
@@ -50770,7 +50795,7 @@ ShaderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = ShaderPass;
-},{"three":1}],70:[function(require,module,exports){
+},{"three":1}],72:[function(require,module,exports){
 /**
  * @file This shader can be used for vertex displacement to create
  * water or fabric materials. It implements an exemplary diffuse lighting
@@ -50872,7 +50897,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":1}],71:[function(require,module,exports){
+},{"three":1}],73:[function(require,module,exports){
 /**
  * @file This shader applies a gaussian blur effect.
  * It can be used for both x and y direction.
@@ -50939,7 +50964,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":1}],72:[function(require,module,exports){
+},{"three":1}],74:[function(require,module,exports){
 /**
  * @file This shader transforms all colors to grayscale.
  * 
@@ -50988,7 +51013,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],73:[function(require,module,exports){
+},{}],75:[function(require,module,exports){
 /**
  * @file This shader creates a vignette effect.
  * 
@@ -51049,7 +51074,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],74:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51166,7 +51191,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],75:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],77:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51346,7 +51371,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],76:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],78:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51518,7 +51543,7 @@ function colorMesh( mesh ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],77:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],79:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51696,7 +51721,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],78:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],80:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51822,7 +51847,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],79:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],81:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52011,7 +52036,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],80:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],82:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52184,7 +52209,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],81:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],83:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52337,7 +52362,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],82:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],84:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52518,7 +52543,7 @@ function showLODCircles( world ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],83:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],85:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -52698,7 +52723,7 @@ function onKeyDown( event ) {
 
 module.exports = Stage;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],84:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],86:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52843,7 +52868,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":23,"../etc/JSONLoader":29,"three":1}],85:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],87:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -53022,7 +53047,7 @@ Chat.prototype._onMessage = function( message, data ) {
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":62,"../messaging/Topic":64,"./UiElement":94}],86:[function(require,module,exports){
+},{"../messaging/EventManager":64,"../messaging/Topic":66,"./UiElement":96}],88:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel. Only if the development
@@ -53084,7 +53109,7 @@ DevelopmentPanel.prototype.setText = function( text ) {
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":94}],87:[function(require,module,exports){
+},{"./UiElement":96}],89:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -53145,7 +53170,7 @@ InformationPanel.prototype.setText = function( textKey ) {
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":94}],88:[function(require,module,exports){
+},{"./UiElement":96}],90:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -53222,7 +53247,7 @@ InteractionLabel.prototype.hide = function() {
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":94}],89:[function(require,module,exports){
+},{"./UiElement":96}],91:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -53412,7 +53437,7 @@ LoadingScreen.prototype._onReady = function( message, data ) {
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":62,"../messaging/Topic":64,"./UiElement":94}],90:[function(require,module,exports){
+},{"../messaging/EventManager":64,"../messaging/Topic":66,"./UiElement":96}],92:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -53423,7 +53448,7 @@ module.exports = new LoadingScreen();
 "use strict";
 
 var UiElement = require( "./UiElement" );
-var utils = require( "../etc/Utils" );
+var environment = require( "../core/Environment" );
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
@@ -53520,7 +53545,7 @@ Menu.prototype._onClick = function() {
 
 	global.document.dispatchEvent( new global.Event( "lockPointer" ) );
 
-	if ( utils.isFirefox() === true )
+	if ( environment.isFirefox() === true )
 	{
 		self._$button.style.display = "none";
 		self._$text.style.display = "block";
@@ -53568,7 +53593,7 @@ Menu.prototype._publishFinishEvent = function( message, data ) {
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"../messaging/EventManager":62,"../messaging/Topic":64,"./UiElement":94}],91:[function(require,module,exports){
+},{"../core/Environment":20,"../messaging/EventManager":64,"../messaging/Topic":66,"./UiElement":96}],93:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -53578,7 +53603,6 @@ module.exports = new Menu();
 "use strict";
 
 var UiElement = require( "./UiElement" );
-var utils = require( "../etc/Utils" );
 
 var self;
 /**
@@ -53693,7 +53717,7 @@ ModalDialog.prototype._onClose = function( event ) {
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"./UiElement":94}],92:[function(require,module,exports){
+},{"./UiElement":96}],94:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor. Only if the development
@@ -53917,7 +53941,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":94}],93:[function(require,module,exports){
+},{"./UiElement":96}],95:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -54130,7 +54154,7 @@ TextScreen.prototype._printName = function() {
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":94}],94:[function(require,module,exports){
+},{"./UiElement":96}],96:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -54180,7 +54204,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":39}],95:[function(require,module,exports){
+},{"../etc/TextManager":41}],97:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in stages to
@@ -54194,6 +54218,8 @@ module.exports = UiElement;
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
+var system = require( "../core/System" );
+
 var developmentPanel = require( "./DevelopmentPanel" );
 var performanceMonitor = require( "./PerformanceMonitor" );
 var informationPanel = require( "./InformationPanel" );
@@ -54203,8 +54229,6 @@ var menu = require( "./Menu" );
 var textScreen = require( "./TextScreen" );
 var modalDialog = require( "./ModalDialog" );
 var chat = require( "./Chat" );
-
-var utils = require( "../etc/Utils" );
 
 /**
  * Creates the user interface manager.
@@ -54241,12 +54265,12 @@ UserInterfaceManager.prototype.init = function() {
 	chat.init();
 
 	// add development information
-	if ( utils.isDevelopmentModeActive() === true )
+	if ( system.isDevModeActive === true )
 	{
 		performanceMonitor.init();
 
 		developmentPanel.init();
-		developmentPanel.setText( "Development Mode Active: " + utils.getAppInformation() );
+		developmentPanel.setText( "Development Mode Active: " + system.name + " Version: " + system.version );
 	}
 
 	// eventing
@@ -54259,7 +54283,7 @@ UserInterfaceManager.prototype.init = function() {
  */
 UserInterfaceManager.prototype.update = function() {
 
-	if ( utils.isDevelopmentModeActive() === true )
+	if ( system.isDevModeActive === true )
 	{
 		performanceMonitor.update();
 	}
@@ -54446,4 +54470,4 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/Utils":40,"../messaging/EventManager":62,"../messaging/Topic":64,"./Chat":85,"./DevelopmentPanel":86,"./InformationPanel":87,"./InteractionLabel":88,"./LoadingScreen":89,"./Menu":90,"./ModalDialog":91,"./PerformanceMonitor":92,"./TextScreen":93}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95]);
+},{"../core/System":26,"../messaging/EventManager":64,"../messaging/Topic":66,"./Chat":87,"./DevelopmentPanel":88,"./InformationPanel":89,"./InteractionLabel":90,"./LoadingScreen":91,"./Menu":92,"./ModalDialog":93,"./PerformanceMonitor":94,"./TextScreen":95}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97]);

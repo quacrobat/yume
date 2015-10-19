@@ -10,8 +10,8 @@
 var THREE = require( "three" );
 
 var world = require( "../../core/World" );
+var logger = require( "../../core/Logger" );
 var Path = require( "./Path" );
-var logger = require( "../../etc/Logger" );
 
 /**
  * Creates a steering behaviors instance.

@@ -12,13 +12,13 @@ var TOPIC = require( "../messaging/Topic" );
 var environment = require( "./Environment" );
 var renderer = require( "./Renderer" );
 var camera = require( "./Camera" );
+var system = require( "./System" );
 var controls = require( "../controls/FirstPersonControls" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var saveGameManager = require( "../etc/SaveGameManager" );
 var multiplayerManager = require( "../etc/MultiplayerManager" );
 var networkManager = require( "../network/NetworkManager" );
-var utils = require( "../etc/Utils" );
-var logger = require( "../etc/Logger" );
+
 
 /**
  * Creates a Bootstrap instance, which initializes the entire application.
@@ -40,8 +40,7 @@ function Bootstrap() {
  */
 Bootstrap.prototype._getStartupParameter = function() {
 
-	var parameters = JSON.parse( global.sessionStorage.getItem( "parameters" ) );
-	utils.setRuntimeInformation( parameters );
+	system.init( JSON.parse( global.sessionStorage.getItem( "parameters" ) ) );
 };
 
 /**
@@ -63,14 +62,13 @@ Bootstrap.prototype._initEngine = function() {
 		}
 
 		// initialize basic components
-		logger.init();
 		renderer.init();
 		camera.init();
 		controls.init();
 		userInterfaceManager.init();
 
 		// initialize network and multiplayer manager only if necessary
-		if ( utils.isMultiplayerActive() === true )
+		if ( system.isMultiplayerActive === true )
 		{
 			networkManager.init();
 			multiplayerManager.init();

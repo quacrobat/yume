@@ -10,6 +10,7 @@
 
 var THREE = require( "three" );
 
+var logger = require( "./Logger" );
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
@@ -20,8 +21,6 @@ var ShaderPass = require( "../postprocessing/ShaderPass" );
 var GrayscaleShader = require( "../shader/GrayscaleShader" );
 var VignetteShader = require( "../shader/VignetteShader" );
 var GaussianBlurShader = require( "../shader/GaussianBlurShader" );
-
-var logger = require( "../etc/Logger" );
 
 var self;
 

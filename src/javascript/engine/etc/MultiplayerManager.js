@@ -12,7 +12,7 @@ var TOPIC = require( "../messaging/Topic" );
 
 var Teammate = require( "./Teammate" );
 var world = require( "../core/World" );
-var logger = require( "./Logger" );
+var logger = require( "../core/Logger" );
 
 var self;
 /**

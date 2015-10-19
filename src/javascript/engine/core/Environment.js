@@ -103,6 +103,16 @@ Environment.prototype.isTouchDevice = function() {
 };
 
 /**
+ * Checks, if the browser is a Firefox.
+ * 
+ * @returns {boolean} Is the current user-agent a Firefox?
+ */
+Environment.prototype.isFirefox = function() {
+
+	return global.navigator.userAgent.toLowerCase().indexOf( "firefox" ) > -1;
+};
+
+/**
  * Tests the WebGL API.
  * 
  * @returns {boolean} Does the browser support the API?

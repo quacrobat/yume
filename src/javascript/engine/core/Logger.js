@@ -6,7 +6,7 @@
  */
 "use strict";
 
-var utils = require( "./Utils" );
+var system = require( "./System" );
 
 /**
  * Creates a logger instance.
@@ -15,23 +15,7 @@ var utils = require( "./Utils" );
  */
 function Logger() {
 
-	Object.defineProperties( this, {
-		_isDevModeActive : {
-			value : false,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		}
-	} );
 }
-
-/**
- * Initializes the logger.
- */
-Logger.prototype.init = function() {
-
-	this._isDevModeActive = utils.isDevelopmentModeActive();
-};
 
 /**
  * Logs standard/info messages.
@@ -39,7 +23,7 @@ Logger.prototype.init = function() {
 Logger.prototype.log = function() {
 
 	// log messages only in dev mode
-	if ( this._isDevModeActive === true )
+	if ( system.isDevModeActive === true )
 	{
 		console.log.apply( console, arguments );
 	}

@@ -10,7 +10,7 @@ var WebSocket = require( "ws" );
 
 var Message = require( "./Message" );
 var threadMananger = require( "../core/ThreadManager" );
-var logger = require( "../etc/Logger" );
+var logger = require( "../core/Logger" );
 
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );

@@ -8,7 +8,7 @@
 
 var THREE = require( "three" );
 
-var utils = require( "./Utils" );
+var system = require( "../core/System" );
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
@@ -41,7 +41,7 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 	var self = this;
 
 	// build url
-	url = utils.getCDNHost() + url;
+	url = system.cdn + url;
 
 	// build texturePath
 	if ( this.texturePath === "" )
@@ -50,7 +50,7 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 	}
 
 	// add nocache, if necessary
-	if ( utils.isDevelopmentModeActive() === true )
+	if ( system.isDevModeActive === true )
 	{
 		url = url + "?" + new Date().getTime();
 	}

@@ -11,14 +11,12 @@ var THREE = require( "three" );
 
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
-
 var Action = require( "./Action" );
 var InteractiveObject = require( "./InteractiveObject" );
 var StaticObject = require( "./StaticObject" );
 var ActionTrigger = require( "./ActionTrigger" );
-
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
-var logger = require( "../etc/Logger" );
+var logger = require( "../core/Logger" );
 
 var self;
 

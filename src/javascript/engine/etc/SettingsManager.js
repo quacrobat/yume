@@ -7,7 +7,9 @@
 "use strict";
 
 var THREE = require( "three" );
-var utils = require( "./Utils" );
+
+var system = require( "../core/System" );
+
 /**
  * Creates the settings manager and loads the current settings.
  * 
@@ -155,7 +157,7 @@ SettingsManager.prototype.adjustLight = function( light ) {
 		light.castShadow = false;
 	}
 
-	if ( utils.isDevelopmentModeActive() === true )
+	if ( system.isDevModeActive === true )
 	{
 		if ( light instanceof THREE.SpotLight || light instanceof THREE.DirectionalLight )
 		{

@@ -6,7 +6,6 @@
 "use strict";
 
 var UiElement = require( "./UiElement" );
-var utils = require( "../etc/Utils" );
 
 var self;
 /**

@@ -6,8 +6,7 @@
  */
 "use strict";
 
-var utils = require( "../etc/Utils" );
-
+var system = require( "../core/System" );
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
@@ -82,10 +81,10 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 	var self = this;
 
 	// build url
-	var url = utils.getCDNHost() + "assets/audio/dynamic/" + file + ".mp3";
+	var url = system.cdn + "assets/audio/dynamic/" + file + ".mp3";
 
 	// add nocache, if necessary
-	if ( utils.isDevelopmentModeActive() === true )
+	if ( system.isDevModeActive === true )
 	{
 		url = url + "?" + new Date().getTime();
 	}

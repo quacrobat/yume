@@ -7,12 +7,12 @@
 
 var self;
 
+var logger = require( "./Logger" );
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var saveGameManager = require( "../etc/SaveGameManager" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
-var logger = require( "../etc/Logger" );
 
 // stages
 var Stage_001 = require( "../stages/Stage_001" );

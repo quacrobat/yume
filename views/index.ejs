@@ -7,27 +7,31 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 	<meta name="author" content="Human Interactive">
 	
-    <title><%= metadata.name %> <%= metadata.version %></title>
+    <title><%= name %> <%= version %></title>
     
     <!-- Stylesheet -->
     <link rel="stylesheet" href="/stylesheets/bundle.min.css" />
     
     <!-- JavaScript -->
-    <% if(mode === "development"){ %>
+    <% if( isDevModeActive === true ){ %>
     	<script type="text/javascript" src="javascript/bundle.js"></script>
     <% }else{ %>
     	<script type="text/javascript" src="javascript/bundle.min.js"></script>
     <% } %>
     
     <script type="text/javascript">
+
 		var parameters = {};
-		parameters.mode = "<%= mode %>";
+		
+		parameters.name =  "<%= name %>";
+		parameters.version = "<%= version %>";
 		parameters.locale = "<%= locale %>";
-		parameters.name =  "<%= metadata.name %>";
-		parameters.version = "<%= metadata.version %>";
-		parameters.isMultiplayerActive = <%= metadata.config.multiplayer.active %>;
+		parameters.cdn = "<%= cdn %>";
+		parameters.isDevModeActive = <%= isDevModeActive %>;
+		parameters.isMultiplayerActive = <%= isMultiplayerActive %>;
 		
 		sessionStorage.setItem("parameters", JSON.stringify(parameters));
+		
 	</script>
   </head>
   <body>
@@ -40,7 +44,7 @@
 			<div class="row">
 				<div class="col-md-12">
 					<header>
-						<img alt="<%= metadata.name %>" src="assets/images/logo.png" width="250" height="77"></img>
+						<img alt="<%= name %>" src="assets/images/logo.png" width="250" height="77"></img>
 						<h2><%= __("Game.Menu.Headline") %></h2>
 						<p>
 							<%= __("Game.Menu.Description") %>
@@ -144,7 +148,7 @@
 		<div class="text"></div>
 	</section>
 	
-	<% if(mode === "development"){ %>
+	 <% if( isDevModeActive === true ){ %>
 	
 		<!-- Development-Panel
 	    ================================================== -->

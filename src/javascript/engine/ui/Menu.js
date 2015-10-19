@@ -7,7 +7,7 @@
 "use strict";
 
 var UiElement = require( "./UiElement" );
-var utils = require( "../etc/Utils" );
+var environment = require( "../core/Environment" );
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
@@ -104,7 +104,7 @@ Menu.prototype._onClick = function() {
 
 	global.document.dispatchEvent( new global.Event( "lockPointer" ) );
 
-	if ( utils.isFirefox() === true )
+	if ( environment.isFirefox() === true )
 	{
 		self._$button.style.display = "none";
 		self._$text.style.display = "block";

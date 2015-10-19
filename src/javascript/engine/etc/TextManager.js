@@ -6,8 +6,7 @@
  */
 "use strict";
 
-var utils = require( "./Utils" );
-
+var system = require( "../core/System" );
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
@@ -39,10 +38,10 @@ TextManager.prototype.load = function( stageId, callback ) {
 	var self = this;
 
 	// build url
-	var url = utils.getCDNHost() + "assets/locales/" + utils.getLocale() + "/stage_" + stageId + ".js";
+	var url = system.cdn + "assets/locales/" + system.locale + "/stage_" + stageId + ".js";
 
 	// add nocache, if necessary
-	if ( utils.isDevelopmentModeActive() === true )
+	if ( system.isDevModeActive === true )
 	{
 		url = url + "?" + new Date().getTime();
 	}

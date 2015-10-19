@@ -13,6 +13,10 @@
     "multiplayer": {
       "active": true,
       "clients_per_session": 4
+    },
+    "cdn": {
+    	"development": "",
+    	"production": ""
     }
   },
   "dependencies": {

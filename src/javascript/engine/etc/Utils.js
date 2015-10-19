@@ -13,101 +13,13 @@
  */
 function Utils() {
 
-	Object.defineProperties( this, {
-		_runtimeInformation : {
-			value : {},
-			configurable : false,
-			enumerable : false,
-			writable : true
-		}
-	} );
 }
-
-/**
- * Sets runtime-information
- * 
- * @param {object} params - Startup parameters of the engine.
- */
-Utils.prototype.setRuntimeInformation = function( params ) {
-
-	this._runtimeInformation.appName = params.name;
-	this._runtimeInformation.version = params.version;
-
-	if ( params.mode === "development" )
-	{
-		this._runtimeInformation.mode = Utils.MODES.DEVELOPMENT;
-		this._runtimeInformation.CDN = Utils.CDN.LOCAL;
-	}
-	else
-	{
-		this._runtimeInformation.mode = Utils.MODES.PRODUCTION;
-		this._runtimeInformation.CDN = Utils.CDN.CLOUD;
-	}
-
-	if ( params.locale === "de" )
-	{
-		this._runtimeInformation.locale = Utils.LOCALES.DE;
-	}
-	else
-	{
-		this._runtimeInformation.locale = Utils.LOCALES.EN;
-	}
-
-	if ( params.isMultiplayerActive === true )
-	{
-		this._runtimeInformation.isMultiplayerActive = true;
-	}
-	else
-	{
-		this._runtimeInformation.isMultiplayerActive = false;
-	}
-};
-
-/**
- * Gets the CDN-Host.
- * 
- * @returns {string} The CDN-Host.
- */
-Utils.prototype.getCDNHost = function() {
-
-	return this._runtimeInformation.CDN;
-};
-
-/**
- * Gets the Locale (i18n).
- * 
- * @returns {string} The local.
- */
-Utils.prototype.getLocale = function() {
-
-	return this._runtimeInformation.locale;
-};
-
-/**
- * Get name and bersion of the Application.
- * 
- * @returns {string} The name and bersion of Application.
- */
-Utils.prototype.getAppInformation = function() {
-
-	return this._runtimeInformation.appName + ", Version: " + this._runtimeInformation.version;
-};
-
-/**
- * Is the multiplayer component active or not?
- * 
- * @returns {boolean} Is the multiplayer active?
- */
-Utils.prototype.isMultiplayerActive = function() {
-
-	return this._runtimeInformation.isMultiplayerActive;
-};
 
 /**
  * Preloads images and executes a callback, when all work is done.
  * 
- * @param{object} images - An array with URLs of images.
- * @param{function} callback - This function is executed, when all images are
+ * @param {object} images - An array with URLs of images.
+ * @param {function} callback - This function is executed, when all images are
  * loaded.
  */
 Utils.prototype.preloadImages = function( images, callback ) {
@@ -129,48 +41,12 @@ Utils.prototype.preloadImages = function( images, callback ) {
 
 	for ( var i = 0; i < images.length; i++ )
 	{
-
 		var image = new global.Image();
 		image.src = images[ i ];
 
 		image.onload = onLoad;
 		image.onerror = onError;
 	}
-};
-
-/**
- * Checks, if the engine runs in development or production mode
- * 
- * @returns {boolean} Is development mode activ?
- */
-Utils.prototype.isDevelopmentModeActive = function() {
-
-	return this._runtimeInformation.mode === Utils.MODES.DEVELOPMENT;
-};
-
-/**
- * Checks, if the browser is a Firefox
- * 
- * @returns {boolean} Is the current user-agent a firefox?
- */
-Utils.prototype.isFirefox = function() {
-
-	return global.navigator.userAgent.toLowerCase().indexOf( 'firefox' ) > -1;
-};
-
-Utils.MODES = {
-	DEVELOPMENT : 0,
-	PRODUCTION : 1
-};
-
-Utils.LOCALES = {
-	EN : "en",
-	DE : "de"
-};
-
-Utils.CDN = {
-	LOCAL : "",
-	CLOUD : ""
 };
 
 module.exports = new Utils();
