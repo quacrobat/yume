@@ -21,16 +21,16 @@
     
     <script type="text/javascript">
 
-		var parameters = {};
+		var parameter = {};
 		
-		parameters.name =  "<%= name %>";
-		parameters.version = "<%= version %>";
-		parameters.locale = "<%= locale %>";
-		parameters.cdn = "<%= cdn %>";
-		parameters.isDevModeActive = <%= isDevModeActive %>;
-		parameters.isMultiplayerActive = <%= isMultiplayerActive %>;
+		parameter.name =  "<%= name %>";
+		parameter.version = "<%= version %>";
+		parameter.locale = "<%= locale %>";
+		parameter.cdn = "<%= cdn %>";
+		parameter.isDevModeActive = <%= isDevModeActive %>;
+		parameter.isMultiplayerActive = <%= isMultiplayerActive %>;
 		
-		sessionStorage.setItem("parameters", JSON.stringify(parameters));
+		sessionStorage.setItem( "parameter", JSON.stringify( parameter ) );
 		
 	</script>
   </head>

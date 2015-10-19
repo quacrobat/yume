@@ -40031,7 +40031,7 @@ function Bootstrap() {
  */
 Bootstrap.prototype._getStartupParameter = function() {
 
-	system.init( JSON.parse( global.sessionStorage.getItem( "parameters" ) ) );
+	system.init( JSON.parse( global.sessionStorage.getItem( "parameter" ) ) );
 };
 
 /**
