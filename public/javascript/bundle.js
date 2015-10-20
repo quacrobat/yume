@@ -37067,7 +37067,7 @@ function Animation( options ) {
  */
 Animation.prototype.update = function( time ) {
 
-	var index, elapsed, value, temp = 0;
+	var index, elapsed, value, temp;
 	var isFinished = false;
 
 	// if the startTime is greater than the current time,
@@ -38794,6 +38794,7 @@ var audioManager = require( "../audio/AudioManager" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var settingsManager = require( "../etc/SettingsManager" );
 var Easing = require( "../animation/Easing" );
+var utils = require( "../etc/Utils" );
 
 var self;
 
@@ -39272,24 +39273,20 @@ FirstPersonControls.prototype._calculateCameraMotion = function( normalizedMovem
  * Calculates a new sine frequency for camera motion. It ensures, that the new
  * sine cuvre is in-sync to the old one.
  */
-FirstPersonControls.prototype._calculateFrequency = ( function() {
+FirstPersonControls.prototype._calculateFrequency = function() {
 
-	var TWO_PI = 2 * Math.PI;
+	var current, next;
 
-	return function() {
-		
-		var current, next;
+	if ( this._frequency !== this._lastFrequency )
+	{
+		current = ( this._motionFactor * this._lastFrequency + this._phase ) % utils.TWO_PI;
+		next = ( this._motionFactor * this._frequency ) % utils.TWO_PI;
 
-		if ( this._frequency !== this._lastFrequency )
-		{
-			current = ( this._motionFactor * this._lastFrequency + this._phase ) % TWO_PI;
-			next = ( this._motionFactor * this._frequency ) % TWO_PI;
-
-			this._phase = current - next;
-			this._lastFrequency = this._frequency;
-		}
-	};
-}() );
+		this._phase = current - next;
+		this._lastFrequency = this._frequency;
+	}
+	
+};
 
 /**
  * This method resets the camera to its origin. The reset is done with a simple
@@ -39729,30 +39726,25 @@ FirstPersonControls.prototype._onPointerlockerror = function( event ) {
  * 
  * @param {object} event - Default event object.
  */
-FirstPersonControls.prototype._onMouseMove = ( function() {
+FirstPersonControls.prototype._onMouseMove = function( event ) {
 
-	var HALF_PI = Math.PI * 0.5;
+	var movementX, movementY;
 
-	return function( event ) {
-		
-		var movementX, movementY;
+	if ( self._isControlsActive === true && self.isActionInProgress === false )
+	{
+		// capture mouse movement
+		movementX = event.movementX || event.mozMovementX || 0;
+		movementY = event.movementY || event.mozMovementY || 0;
 
-		if ( self._isControlsActive === true && self.isActionInProgress === false )
-		{
-			// capture mouse movement
-			movementX = event.movementX || event.mozMovementX || 0;
-			movementY = event.movementY || event.mozMovementY || 0;
+		// manipulate rotation of yaw and pitch object
+		self._yawObject.rotation.y -= movementX * ( settingsManager.getMouseSensitivity() * 0.0001 );
+		self._pitchObject.rotation.x -= movementY * ( settingsManager.getMouseSensitivity() * 0.0001 );
 
-			// manipulate rotation of yaw and pitch object
-			self._yawObject.rotation.y -= movementX * ( settingsManager.getMouseSensitivity() * 0.0001 );
-			self._pitchObject.rotation.x -= movementY * ( settingsManager.getMouseSensitivity() * 0.0001 );
+		// prevent "loop" of x-axis
+		self._pitchObject.rotation.x = Math.max( - utils.HALF_PI, Math.min( utils.HALF_PI, self._pitchObject.rotation.x ) );
+	}
 
-			// prevent "loop" of x-axis
-			self._pitchObject.rotation.x = Math.max( -HALF_PI, Math.min( HALF_PI, self._pitchObject.rotation.x ) );
-		}
-	};
-
-}() );
+};
 
 /**
  * Executes, when a key is pressed down.
@@ -39916,7 +39908,7 @@ FirstPersonControls.RUN = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/World":30,"../etc/SettingsManager":39,"../messaging/EventManager":64,"../messaging/Topic":66,"../ui/UserInterfaceManager":97,"three":1}],18:[function(require,module,exports){
+},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/World":30,"../etc/SettingsManager":39,"../etc/Utils":42,"../messaging/EventManager":64,"../messaging/Topic":66,"../ui/UserInterfaceManager":97,"three":1}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -44482,6 +44474,20 @@ module.exports = new TextManager();
  */
 function Utils() {
 
+	Object.defineProperties( this, {
+		TWO_PI : {
+			value : Math.PI * 2,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		HALF_PI : {
+			value : Math.PI * 0.5,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		}
+	} );
 }
 
 /**

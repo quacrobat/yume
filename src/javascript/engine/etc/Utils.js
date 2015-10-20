@@ -13,6 +13,20 @@
  */
 function Utils() {
 
+	Object.defineProperties( this, {
+		TWO_PI : {
+			value : Math.PI * 2,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		HALF_PI : {
+			value : Math.PI * 0.5,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		}
+	} );
 }
 
 /**

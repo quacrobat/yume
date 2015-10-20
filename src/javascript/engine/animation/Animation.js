@@ -127,7 +127,7 @@ function Animation( options ) {
  */
 Animation.prototype.update = function( time ) {
 
-	var index, elapsed, value, temp = 0;
+	var index, elapsed, value, temp;
 	var isFinished = false;
 
 	// if the startTime is greater than the current time,
