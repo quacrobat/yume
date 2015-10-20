@@ -36496,7 +36496,7 @@ ActionManager.prototype._onInteraction = function( message, data ) {
 };
 
 module.exports = new ActionManager();
-},{"../core/Logger":21,"../messaging/EventManager":65,"../messaging/Topic":67,"../ui/UserInterfaceManager":98,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
+},{"../core/Logger":21,"../messaging/EventManager":77,"../messaging/Topic":80,"../ui/UserInterfaceManager":101,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
 /**
  * @file The ActionTrigger is a static trigger for actions.
  * 
@@ -38030,7 +38030,7 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 
 module.exports = AudioBufferList;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":65,"../messaging/Topic":67}],14:[function(require,module,exports){
+},{"../core/System":27,"../messaging/EventManager":77,"../messaging/Topic":80}],14:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype holds the central Web Audio context and manages the
@@ -38485,7 +38485,7 @@ AudioManager.prototype._onErrorBackgroundMusic = function() {
 
 module.exports = new AudioManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Camera":19,"../core/Logger":21,"../messaging/EventManager":65,"../messaging/Topic":67,"./AudioBufferList":13,"./AudioListener":14,"./DynamicAudio":16}],16:[function(require,module,exports){
+},{"../core/Camera":19,"../core/Logger":21,"../messaging/EventManager":77,"../messaging/Topic":80,"./AudioBufferList":13,"./AudioListener":14,"./DynamicAudio":16}],16:[function(require,module,exports){
 /**
  * @file Prototype for creating dynamic, full-buffered audio objects.
  * 
@@ -39908,7 +39908,7 @@ FirstPersonControls.RUN = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/World":31,"../etc/SettingsManager":40,"../etc/Utils":43,"../messaging/EventManager":65,"../messaging/Topic":67,"../ui/UserInterfaceManager":98,"three":1}],18:[function(require,module,exports){
+},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/World":31,"../etc/SettingsManager":40,"../etc/Utils":43,"../messaging/EventManager":77,"../messaging/Topic":80,"../ui/UserInterfaceManager":101,"three":1}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -39925,7 +39925,6 @@ var environment = require( "./Environment" );
 var renderer = require( "./Renderer" );
 var camera = require( "./Camera" );
 var system = require( "./System" );
-var controls = require( "../controls/FirstPersonControls" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var saveGameManager = require( "../etc/SaveGameManager" );
 var multiplayerManager = require( "../etc/MultiplayerManager" );
@@ -39976,7 +39975,6 @@ Bootstrap.prototype._initEngine = function() {
 		// initialize basic components
 		renderer.init();
 		camera.init();
-		controls.init();
 		userInterfaceManager.init();
 
 		// initialize network and multiplayer manager only if necessary
@@ -40000,27 +39998,14 @@ Bootstrap.prototype._initEngine = function() {
  */
 Bootstrap.prototype._loadStage = function() {
 
-	var stageId = null;
-	var saveGame = saveGameManager.load();
-
-	if ( saveGame === null )
-	{
-		stageId = "001";
-		saveGameManager.save( stageId );
-	}
-	else
-	{
-		stageId = saveGame.stageId;
-	}
-
 	eventManager.publish( TOPIC.APPLICATION.START, {
-		stageId : stageId
+		stageId : "001"
 	} );
 };
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":17,"../etc/MultiplayerManager":35,"../etc/SaveGameManager":39,"../messaging/EventManager":65,"../messaging/Topic":67,"../network/NetworkManager":69,"../ui/UserInterfaceManager":98,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27}],19:[function(require,module,exports){
+},{"../etc/MultiplayerManager":35,"../etc/SaveGameManager":39,"../messaging/EventManager":77,"../messaging/Topic":80,"../network/NetworkManager":82,"../ui/UserInterfaceManager":101,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for camera-based
@@ -40090,7 +40075,7 @@ Camera.prototype._onResize = function( message, data ) {
 
 module.exports = new Camera();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":65,"../messaging/Topic":67,"three":1}],20:[function(require,module,exports){
+},{"../messaging/EventManager":77,"../messaging/Topic":80,"three":1}],20:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype is used to ensure that all necessary browser features
@@ -40838,7 +40823,7 @@ Renderer.prototype._onResize = function( message, data ) {
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":65,"../messaging/Topic":67,"../postprocessing/EffectComposer":70,"../postprocessing/RenderPass":71,"../postprocessing/ShaderPass":72,"../shader/GaussianBlurShader":74,"../shader/GrayscaleShader":75,"../shader/VignetteShader":76,"./Logger":21,"three":1}],24:[function(require,module,exports){
+},{"../messaging/EventManager":77,"../messaging/Topic":80,"../postprocessing/EffectComposer":83,"../postprocessing/RenderPass":84,"../postprocessing/ShaderPass":85,"../shader/GaussianBlurShader":87,"../shader/GrayscaleShader":88,"../shader/VignetteShader":89,"./Logger":21,"three":1}],24:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic for scene-based functionality.
  * 
@@ -40900,7 +40885,6 @@ var renderer = require( "./Renderer" );
 var camera = require( "./Camera" );
 var world = require( "./World" );
 var system = require( "./System" );
-var controls = require( "../controls/FirstPersonControls" );
 var actionManager = require( "../action/ActionManager" );
 var audioManager = require( "../audio/AudioManager" );
 var animationManager = require( "../animation/AnimationManager" );
@@ -40941,12 +40925,6 @@ function StageBase( stageId ) {
 		},
 		world : {
 			value : world,
-			configurable : false,
-			enumerable : true,
-			writable : false
-		},
-		controls : {
-			value : controls,
 			configurable : false,
 			enumerable : true,
 			writable : false
@@ -41044,7 +41022,6 @@ StageBase.prototype.setup = function() {
  */
 StageBase.prototype.start = function() {
 
-	this.controls.isActionInProgress = false;
 };
 
 /**
@@ -41090,15 +41067,6 @@ StageBase.prototype._render = function() {
 
 	// get delta time value
 	this._delta = this.timeManager.getDelta();
-	
-	// update controls
-	this.controls.update( this._delta );
-
-	// update managers
-	this.actionManager.update( controls.getPosition(), controls.getDirection() );
-	this.animationManager.update( this._delta );
-	this.performanceManager.update();
-	this.userInterfaceManager.update();
 
 	// finally update entity manager
 	this.entityManager.update( this._delta );
@@ -41117,9 +41085,6 @@ StageBase.prototype._render = function() {
  * @param {boolean} isSaveGame - Should the progress be saved?
  */
 StageBase.prototype._changeStage = function( stageId, isSaveGame ) {
-
-	// lock controls
-	this.controls.isActionInProgress = true;
 	
 	// publish message to trigger the change
 	eventManager.publish( TOPIC.STAGE.CHANGE, {
@@ -41138,7 +41103,7 @@ StageBase.COLORS = {
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../controls/FirstPersonControls":17,"../etc/PerformanceManager":38,"../etc/SaveGameManager":39,"../etc/SettingsManager":40,"../etc/TextManager":42,"../game/entity/EntityManager":44,"../messaging/EventManager":65,"../messaging/Topic":67,"../ui/UserInterfaceManager":98,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
+},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../etc/PerformanceManager":38,"../etc/SaveGameManager":39,"../etc/SettingsManager":40,"../etc/TextManager":42,"../game/entity/EntityManager":45,"../messaging/EventManager":77,"../messaging/Topic":80,"../ui/UserInterfaceManager":101,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -41157,17 +41122,6 @@ var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 
 // stages
 var Stage_001 = require( "../stages/Stage_001" );
-var Stage_002 = require( "../stages/Stage_002" );
-var Stage_003 = require( "../stages/Stage_003" );
-var Stage_004 = require( "../stages/Stage_004" );
-var Stage_005 = require( "../stages/Stage_005" );
-var Stage_006 = require( "../stages/Stage_006" );
-var Stage_007 = require( "../stages/Stage_007" );
-var Stage_008 = require( "../stages/Stage_008" );
-var Stage_009 = require( "../stages/Stage_009" );
-var Stage_010 = require( "../stages/Stage_010" );
-var Stage_011 = require( "../stages/Stage_011" );
-
 /**
  * Creates the stage manager.
  * 
@@ -41230,56 +41184,6 @@ StageManager.prototype.load = function( stageId ) {
 		case "001":
 
 			this._stage = new Stage_001();
-			break;
-
-		case "002":
-
-			this._stage = new Stage_002();
-			break;
-
-		case "003":
-
-			this._stage = new Stage_003();
-			break;
-
-		case "004":
-
-			this._stage = new Stage_004();
-			break;
-
-		case "005":
-
-			this._stage = new Stage_005();
-			break;
-
-		case "006":
-
-			this._stage = new Stage_006();
-			break;
-
-		case "007":
-
-			this._stage = new Stage_007();
-			break;
-
-		case "008":
-
-			this._stage = new Stage_008();
-			break;
-
-		case "009":
-
-			this._stage = new Stage_009();
-			break;
-
-		case "010":
-
-			this._stage = new Stage_010();
-			break;
-
-		case "011":
-
-			this._stage = new Stage_011();
 			break;
 
 		default:
@@ -41430,7 +41334,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":39,"../messaging/EventManager":65,"../messaging/Topic":67,"../stages/Stage_001":77,"../stages/Stage_002":78,"../stages/Stage_003":79,"../stages/Stage_004":80,"../stages/Stage_005":81,"../stages/Stage_006":82,"../stages/Stage_007":83,"../stages/Stage_008":84,"../stages/Stage_009":85,"../stages/Stage_010":86,"../stages/Stage_011":87,"../ui/UserInterfaceManager":98,"./Logger":21}],27:[function(require,module,exports){
+},{"../etc/SaveGameManager":39,"../messaging/EventManager":77,"../messaging/Topic":80,"../stages/Stage_001":90,"../ui/UserInterfaceManager":101,"./Logger":21}],27:[function(require,module,exports){
 /**
  * @file This prototype holds core information about the engine. The runtime
  * behavior of the application depends crucially of this prototype.
@@ -42602,7 +42506,7 @@ JSONLoader.prototype.load = function( url, onLoad ) {
 
 module.exports = JSONLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":65,"../messaging/Topic":67,"three":1}],34:[function(require,module,exports){
+},{"../core/System":27,"../messaging/EventManager":77,"../messaging/Topic":80,"three":1}],34:[function(require,module,exports){
 /**
  * @file This prototype is used for LOD handling. It is an enhancement of the
  * LOD functionality of three.js. Instead of switching directly between LOD
@@ -42952,7 +42856,7 @@ MultiplayerManager.prototype._getTeammate = function( id ) {
 };
 
 module.exports = new MultiplayerManager();
-},{"../core/Logger":21,"../core/World":31,"../messaging/EventManager":65,"../messaging/Topic":67,"./Teammate":41,"three":1}],36:[function(require,module,exports){
+},{"../core/Logger":21,"../core/World":31,"../messaging/EventManager":77,"../messaging/Topic":80,"./Teammate":41,"three":1}],36:[function(require,module,exports){
 /**
  * @file A 3D arbitrarily oriented bounding box.
  * 
@@ -43752,7 +43656,7 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 
 module.exports = ObjectLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":65,"../messaging/Topic":67,"three":1}],38:[function(require,module,exports){
+},{"../core/System":27,"../messaging/EventManager":77,"../messaging/Topic":80,"three":1}],38:[function(require,module,exports){
 /**
  * @file Interface for performance handling. This prototype is used in stages to
  * create e.g. LOD instances.
@@ -44391,7 +44295,7 @@ Teammate.prototype.update = function( position, quaternion ) {
 };
 
 module.exports = Teammate;
-},{"../game/entity/GameEntity":45,"three":1}],42:[function(require,module,exports){
+},{"../game/entity/GameEntity":47,"three":1}],42:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire text-handling. This prototype is used in stages to
@@ -44566,7 +44470,7 @@ TextManager.prototype._searchAndRepalce = function() {
 
 module.exports = new TextManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":65,"../messaging/Topic":67}],43:[function(require,module,exports){
+},{"../core/System":27,"../messaging/EventManager":77,"../messaging/Topic":80}],43:[function(require,module,exports){
 (function (global){
 /**
  * @file All helper and util functions are organized in this module.
@@ -44637,6 +44541,319 @@ module.exports = new Utils();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],44:[function(require,module,exports){
 /**
+ * @file Prototype to define a goal for a soccer pitch.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require( "three" );
+
+var MovingEntity = require( "./MovingEntity" );
+var world = require( "../../core/World" );
+
+/**
+ * Creates a soccer ball.
+ * 
+ * @constructor
+ * @augments MovingEntity
+ * 
+ * @param {EntityManager} entityManager - The reference to the entity manager.
+ * @param {number} ballSize - The size (radius) of the ball.
+ * @param {number} mass - The mass of the entity.
+ * 
+ */
+function Ball( entityManager, ballSize, mass ) {
+
+	MovingEntity.call( this, entityManager, null, ballSize, new THREE.Vector3(), mass );
+
+	Object.defineProperties( this, {
+		previousPosition : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		}
+	} );
+
+	// setup mesh components
+	var geometry = new THREE.SphereGeometry( ballSize, 20, 20 );
+	geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, ballSize, 0 ) );
+	
+	var material = new THREE.MeshBasicMaterial( {
+		color : 0xffffff
+	} );
+	
+	// apply mesh
+	this.object3D = new THREE.Mesh( geometry, material );
+}
+
+Ball.prototype = Object.create( MovingEntity.prototype );
+Ball.prototype.constructor = Ball;
+
+/**
+ * Updates the ball physics, tests for any collisions and adjusts the ball's
+ * velocity accordingly.
+ */
+Ball.prototype.update = ( function() {
+
+	var newVelocity = new THREE.Vector3();
+
+	return function() {
+		
+		// save current position of ball
+		this.previousPosition.copy( this.object3D.position );
+		
+		// do wall collision test
+		this._testCollisionWithWalls();
+
+		// simulate friction. make sure the speed is positive first though
+		if ( this.velocity.lengthSq() > ( Ball.FRICTION * Ball.FRICTION ) )
+		{
+			newVelocity.copy( this.velocity ).normalize().multiplyScalar( Ball.FRICTION );
+
+			this.velocity.add( newVelocity );
+
+			this.object3D.position.add( this.velocity );
+			
+			// update the orientation if the vehicle has a non zero velocity
+			if ( this.velocity.lengthSq() > 0.00000001 )
+			{
+				this.rotateToDirection( this.velocity );
+			}
+		}
+	};
+
+}() );
+
+/**
+ * Applies a force to the ball in the direction of heading. Truncates the new
+ * velocity to make sure it doesn't exceed the max allowable.
+ * 
+ * @param {THREE.Vector3} direction - The direction of the kick.
+ * @param {number} force - The amount of force.
+ */
+Ball.prototype.kick = function( direction, force ) {
+
+	var acceleration = new THREE.Vector3();
+
+	// ensure direction is normalized
+	direction.normalize();
+
+	// calculate the acceleration
+	acceleration.copy( direction ).multiplyScalar( force ).divideScalar( this.mass );
+
+	// update the velocity
+	this.velocity.copy( acceleration );
+};
+
+/**
+ * This can be used to vary the accuracy of a player's kick. Just call it prior
+ * to kicking the ball using the ball target as a parameter.
+ * 
+ * @param {THREE.Vector3} target - The target of the kick.
+ */
+Ball.prototype.addNoiseToKick = ( function() {
+
+	var toTarget = new THREE.Vector3();
+
+	var rotationMatrix = new THREE.Matrix4();
+
+	return function( target ) {
+
+		// create displacement
+		var displacement = ( Math.PI - Math.PI * Ball.ACCURACY ) * THREE.Math.randFloat( -1, 1 );
+
+		// create rotation matrix from displacement value
+		rotationMatrix.makeRotationY( displacement );
+
+		// calculate vector displacement
+		toTarget.subVectors( target, this.object3D.position ).applyMatrix4( rotationMatrix );
+
+		// calculate new target
+		target.addVectors( toTarget, this.object3D.position );
+
+		return;
+	};
+
+}() );
+
+/**
+ * Given a force and a distance to cover given by two vectors, this method
+ * calculates how long it will take the ball to travel between the two points.
+ * 
+ * @param {THREE.Vector3} start - The start point of the distance.
+ * @param {THREE.Vector3} end - The end point of the distance.
+ * @param {number} force - The amount of force.
+ * 
+ * @returns {number} The time value.
+ */
+Ball.prototype.calculateTimeToCoverDistance = function( start, end, force ) {
+
+	// this will be the velocity of the ball in the next time step *if*
+	// the player was to make the pass
+	var speed = force / this.mass;
+
+	// calculate the velocity at B using the equation: v^2 = u^2 + 2as
+
+	// first calculate s (the distance between the two positions)
+	var distanceToCover = start.distanceTo( end );
+
+	var term = ( speed * speed ) + ( 2 * distanceToCover * Ball.FRICTION );
+
+	// if (u^2 + 2as) is negative it means the ball cannot reach point B
+	if ( term <= 0.0 )
+	{
+		return -1.0;
+	}
+
+	// it IS possible for the ball to reach B and we know its speed when it
+	// gets there, so now it's easy to calculate the time using the equation
+	//
+	// t = ( v-u ) / a
+	//
+
+	return ( Math.sqrt( term ) - speed ) / Ball.FRICTION;
+
+};
+
+/**
+ * Given a time this method returns the ball position at that time in the
+ * future.
+ * 
+ * @param {number} time - The time value.
+ * @param {THREE.Vector3} predictedPosition - The target vector.
+ * 
+ */
+Ball.prototype.calculateFuturePosition = ( function() {
+
+	var ut = new THREE.Vector3();
+	var scalarToVector = new THREE.Vector3();
+
+	return function( time, predictedPosition ) {
+
+		// using the equation s = ut + 1/2at^2, where s = distance,
+		// a = friction, u = start velocity
+
+		// calculate the ut term, which is a vector
+		ut.copy( this.velocity ).multiplyScalar( time );
+
+		// calculate the 1/2at^2 term, which is scalar
+		var half_a_t_squared = 0.5 * Ball.FRICTION * time * time;
+
+		// turn the scalar quantity into a vector by multiplying the value with
+		// the normalized velocity vector (because that gives the direction)
+		scalarToVector.copy( this.velocity ).normalize().multiplyScalar( half_a_t_squared );
+
+		// the predicted position is the balls position plus these two terms
+		// ( ut, scalarToVector )
+		predictedPosition.copy( this.object3D.position ).add( ut ).add( scalarToVector );
+	};
+
+}() );
+
+/**
+ * Positions the ball at the desired location and sets the ball's velocity to
+ * zero.
+ * 
+ * @param {THREE.Vector3} position - The new position of the ball.
+ */
+Ball.prototype.placeAtPosition = function( position ) {
+
+	if ( position === undefined )
+	{
+		this.object3D.position.set( 0, 0, 0 );
+	}
+	else
+	{
+		this.object3D.position.copy( position );
+	}
+
+	this.velocity.set( 0, 0, 0 );
+};
+
+/**
+ * This is used by players and goalkeepers to "trap" a ball, to stop it dead.
+ * That player is then assumed to be in possession of the ball.
+ * 
+ * @param {THREE.Vector3} position - The new position of the ball.
+ */
+Ball.prototype.trap = function() {
+
+	this.velocity.set( 0, 0, 0 );
+};
+
+/**
+ * Tests to see if the ball has collided with a ball and reflects the ball's
+ * velocity accordingly.
+ */
+Ball.prototype._testCollisionWithWalls = ( function() {
+
+	var raycaster = new THREE.Raycaster();
+
+	return function() {
+		
+		var index, intersects;
+
+		// this will be used to track the distance to the closest wall
+		var distanceToClosestWall = Infinity;
+
+		// this will keep track of the normal of the closest wall
+		var normal = null;
+
+		// calculate reach of the ray
+		var far = this.boundingRadius + this.getSpeed();
+
+		// setup raycaster
+		raycaster.ray.origin.copy( this.object3D.position );
+		raycaster.ray.direction.copy( this.velocity ).normalize();
+		raycaster.far = far;
+
+		// iterate through each wall and calculate if the ball intersects. If it
+		// does then store the normal of the closest intersection point.
+		for ( index = 0; index < world.walls.length; index++ )
+		{
+			intersects = raycaster.intersectObject( world.walls[ index ] );
+
+			if ( intersects.length > 0 )
+			{
+				// if the distance of the intersection point is smaller
+				// than the current distanceToClosestWall and smaller than the
+				// speed of the ball, continue
+				if ( intersects[ 0 ].distance < distanceToClosestWall )
+				{
+					distanceToClosestWall = intersects[ 0 ].distance;
+
+					normal = intersects[ 0 ].face.normal;
+					
+					normal.transformDirection( world.walls[ index ].matrixWorld );
+				}
+			}
+		}
+
+		if ( normal !== null )
+		{
+			this.velocity.reflect( normal );
+		}
+	};
+
+}() );
+
+// In the range zero to 1.0. adjusts the amount of noise added to a kick,
+// the lower the value the worse the players get.
+Ball.ACCURACY = 0.99;
+
+// This value will decrease the velocity of the ball.
+Ball.FRICTION = -0.005;
+
+// physics
+Ball.SIZE = 1;
+Ball.MASS = 1;
+
+module.exports = Ball;
+},{"../../core/World":31,"./MovingEntity":50,"three":1}],45:[function(require,module,exports){
+/**
  * @file This prototype manages all game entities.
  * 
  * @author Human Interactive
@@ -44644,6 +44861,7 @@ module.exports = new Utils();
 "use strict";
 
 var Vehicle = require( "./Vehicle" );
+var SoccerPitch = require( "./Pitch" );
 
 /**
  * Creates the entity manager.
@@ -44683,6 +44901,20 @@ EntityManager.prototype.createVehicle = function( object3D, boundingRadius, velo
 	var vehicle = new Vehicle( this, object3D, boundingRadius, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing );
 	this.addEntity( vehicle );
 	return vehicle;
+};
+
+/**
+ * Creates a soccer game with all game entities (teams, players, goals, ball).
+ * 
+ * @param {THREE.Vector2} pitchDimension - The dimensions of the soccer pitch.
+ * 
+ * @returns {Vehicle} The new soccer pitch.
+ */
+EntityManager.prototype.createSoccerGame = function( pitchDimension ) {
+
+	var pitch = new SoccerPitch( this, pitchDimension );
+	this.addEntity( pitch );
+	return pitch;
 };
 
 /**
@@ -44759,7 +44991,182 @@ EntityManager.prototype.removeEntities = function() {
 };
 
 module.exports = new EntityManager();
-},{"./Vehicle":47}],45:[function(require,module,exports){
+},{"./Pitch":51,"./Vehicle":56}],46:[function(require,module,exports){
+/**
+ * @file Prototype to define a field player.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require( "three" );
+
+var PlayerBase = require( "./PlayerBase" );
+var Regulator = require( "../../core/Regulator" );
+var world = require( "../../core/World" );
+var system = require( "../../core/System" );
+
+var StateMachine = require( "../fsm/StateMachine" );
+var FieldPlayerStates = require( "../fsm/FieldPlayerStates" );
+
+/**
+ * Creates a field player.
+ * 
+ * @constructor
+ * @augments PlayerBase
+ * 
+ * @param {EntityManager} entityManager - The reference to the entity manager.
+ * @param {number} boundingRadius - The bounding radius of the goal keeper.
+ * @param {Team} team - The player's team.
+ * @param {number} homeRegionId - The id of the home region.
+ * @param {State} startState - The initial state of the goalkeeper.
+ * @param {THREE.Vector3} velocity - The velocity of the entity.
+ * @param {number} mass - The mass of the entity.
+ * @param {number} maxSpeed - The maximum speed at which this entity may travel.
+ * @param {number} maxForce - The maximum force this entity can produce to power itself (think rockets and thrust).
+ * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
+ * @param {number} role - The role of the player.
+ * 
+ */
+function FieldPlayer( entityManager, boundingRadius, team, homeRegionId, startState, velocity, mass, maxSpeed, maxForce, maxTurnRate, role ) {
+
+	PlayerBase.call( this, entityManager, null, boundingRadius, team, homeRegionId, velocity, mass, maxSpeed, maxForce, maxTurnRate, role );
+
+	Object.defineProperties( this, {
+		// an instance of the state machine prototype
+		stateMachine : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// limits the number of kicks a player may take per second
+		_kickLimiter : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		}
+	} );
+
+	// setup state machine
+	this.stateMachine = new StateMachine( this );
+	this.stateMachine.currentState = startState;
+	this.stateMachine.previousState = startState;
+	this.stateMachine.globalState = FieldPlayerStates.GlobalState;
+
+	this.stateMachine.currentState.enter( this );
+
+	// setup the kick regulator
+	this._kickLimiter = new Regulator( PlayerBase.CONFIG.PLAYER_KICK_FREQUENCY );
+
+	// setup mesh components
+	var geometry = new THREE.CylinderGeometry( PlayerBase.CONFIG.PLAYER_RADIUS, PlayerBase.CONFIG.PLAYER_RADIUS, 4 );
+	geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 2, 0 ) );
+	var material = new THREE.MeshBasicMaterial( {
+		color : team.color
+	} );
+	
+	// setup mesh
+	this.object3D = new THREE.Mesh( geometry, material );
+	
+	// set start position
+	this.object3D.position.copy( this.getHomeRegion().center );
+
+	// a player's start target is its start position (because it's just waiting)
+	this.steering.target.copy( this.object3D.position );
+	
+	// add helpers in dev mode
+	if ( system.isDevModeActive === true )
+	{
+		world.addObject3D( this._arrowHelper );
+	}
+}
+
+FieldPlayer.prototype = Object.create( PlayerBase.prototype );
+FieldPlayer.prototype.constructor = FieldPlayer;
+
+/**
+ * Update function.
+ */
+FieldPlayer.prototype.update = ( function() {
+
+	var acceleration = new THREE.Vector3();
+	var rotationMatrix = new THREE.Matrix4();
+
+	return function() {
+
+		// run the logic for the current state
+		this.stateMachine.update();
+
+		// calculate the combined force from each steering behavior
+		var steeringForce = this.steering.calculate();
+
+		// if no steering force is produced decelerate the player by applying a
+		// braking force
+		if ( steeringForce.lengthSq() === 0 )
+		{
+			this.velocity.multiplyScalar( PlayerBase.CONFIG.PLAYER_BRAKING_RATE );
+		}
+
+		// acceleration = force/mass
+		acceleration.copy( steeringForce ).divideScalar( this.mass );
+
+		// update velocity
+		this.velocity.add( acceleration );
+
+		// make sure player does not exceed maximum velocity
+		if ( this.velocity.length() > this.maxSpeed )
+		{
+			this.velocity.normalize();
+
+			this.velocity.multiplyScalar( this.maxSpeed );
+		}
+
+		// update the position
+		this.object3D.position.add( this.velocity );
+
+		// update the orientation if the vehicle has a non zero velocity
+		if ( this.velocity.lengthSq() > 0.00000001 )
+		{
+			this.rotateToDirection( this.velocity );
+		}
+
+		// update helpers in dev mode
+		if ( system.isDevModeActive === true )
+		{
+			this._arrowHelper.setDirection( this.getDirection() );
+			this._arrowHelper.position.copy( this.object3D.position );
+		}
+	};
+
+}() );
+
+/**
+ * This method handles messages of other entities.
+ * 
+ * @param {Telegram} telegram - The telegram of the message.
+ * 
+ * @returns {boolean} Is the message handled successfully?
+ */
+FieldPlayer.prototype.handleMessage = function( telegram ){
+	
+	return this.stateMachine.handleMessage( telegram );
+};
+
+/**
+ * Returns true if the field player is ready for the next kick.
+ * 
+ * @returns {boolean} Is the player ready for the next kick?
+ */
+FieldPlayer.prototype.isReadyForNextKick = function() {
+
+	return this._kickLimiter.isReady();
+};
+
+module.exports = FieldPlayer;
+},{"../../core/Regulator":22,"../../core/System":27,"../../core/World":31,"../fsm/FieldPlayerStates":57,"../fsm/StateMachine":60,"./PlayerBase":52,"three":1}],47:[function(require,module,exports){
 /**
  * @file All entities that are part of the game logic inherit from this
  * prototype.
@@ -44831,7 +45238,345 @@ GameEntity.prototype.handleMessage = function( telegram ) {
 };
 
 module.exports = GameEntity;
-},{}],46:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
+/**
+ * @file Prototype to define a goal for a soccer pitch.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require( "three" );
+var GameEntity = require( "./GameEntity" );
+
+/**
+ * Creates a goal.
+ * 
+ * @constructor
+ * @augments GameEntity
+ * 
+ * @param {EntityManager} entityManager - The reference to the entity manager.
+ * @param {THREE.Vector3} position - The position of the goal
+ * @param {THREE.Vector3} size - A vector representing the the size of the goal.
+ * @param {THREE.Vector3} facing - A vector representing the facing direction of
+ * the goal.
+ * 
+ */
+function Goal( entityManager, position, size, facing, color ) {
+
+	GameEntity.call( this, entityManager );
+
+	Object.defineProperties( this, {
+		facing : {
+			value : facing,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		size : {
+			value : size,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		leftPost : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		rightPost : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		center : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		numberGoalsScored : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		}
+	} );
+	
+	// setup mesh components
+	var geometry = new THREE.BoxGeometry( this.size.x, this.size.y, this.size.z );
+	var material = new THREE.MeshBasicMaterial( {
+		color : color
+	} );
+	
+	// apply mesh
+	this.object3D = new THREE.Mesh( geometry, material );
+
+	// apply position
+	this.object3D.position.copy( position );
+
+	// calculate posts
+	this._calculatePosts();
+
+	// calculate center of goal line
+	this.center.addVectors( this.leftPost, this.rightPost ).multiplyScalar( 0.5 );
+}
+
+Goal.prototype = Object.create( GameEntity.prototype );
+Goal.prototype.constructor = Goal;
+
+/**
+ * Given the current ball position, this method returns true if the ball is
+ * inside the goal and increments "numberGoalsScored".
+ * 
+ * @param {SoccerBall} ball - The soccer ball.
+ * 
+ * @returns {boolean} Is the ball behind the goal line?
+ */
+Goal.prototype.isScored = function( ball ) {
+
+	var isScored = false;
+
+	// goal of team blue
+	if ( this.facing.x > 0 )
+	{
+		if ( ball.object3D.position.x < this.center.x && ball.previousPosition.x > this.center.x )
+		{
+			isScored = true;
+			this.numberGoalsScored++;
+		}
+
+	}
+	// goal of team red
+	else
+	{
+		if ( ball.object3D.position.x > this.center.x && ball.previousPosition.x < this.center.x )
+		{
+			isScored = true;
+			this.numberGoalsScored++;
+		}
+	}
+
+	return isScored;
+
+};
+
+/**
+ * Resets the scored goals.
+ */
+Goal.prototype.resetGoalsScored = function() {
+
+	this.numberGoalsScored = 0;
+};
+
+/**
+ * Calculate the left and the right post of the goal.
+ */
+Goal.prototype._calculatePosts = function() {
+
+	// calculate half size vector
+	var halfSize = this.size.clone().multiplyScalar( 0.5 );
+
+	// the values of the posts depends of the facing of the goal.
+	// the post are calculated form the players's viewpoint.
+	if ( this.facing.x > 0 )
+	{
+		this.leftPost.x = this.object3D.position.x + halfSize.x;
+		this.leftPost.z = this.object3D.position.z - halfSize.z;
+		
+		this.rightPost.x = this.object3D.position.x + halfSize.x;
+		this.rightPost.z = this.object3D.position.z + halfSize.z;
+	}
+	else
+	{
+		this.leftPost.x = this.object3D.position.x - halfSize.x;
+		this.leftPost.z = this.object3D.position.z - halfSize.z;
+		
+		this.rightPost.x = this.object3D.position.x - halfSize.x;
+		this.rightPost.z = this.object3D.position.z + halfSize.z;
+	}
+};
+
+module.exports = Goal;
+},{"./GameEntity":47,"three":1}],49:[function(require,module,exports){
+/**
+ * @file Prototype to define a goalkeeper.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require( "three" );
+
+var PlayerBase = require( "./PlayerBase" );
+var StateMachine = require( "../fsm/StateMachine" );
+var GoalKeeperStates = require( "../fsm/GoalKeeperStates" );
+
+/**
+ * Creates a goalkeeper.
+ * 
+ * @constructor
+ * @augments PlayerBase
+ * 
+ * @param {EntityManager} entityManager - The reference to the entity manager.
+ * @param {number} boundingRadius - The bounding radius of the goal keeper.
+ * @param {Team} team - The player's team.
+ * @param {number} homeRegionId - The id of the home region.
+ * @param {THREE.Vector3} velocity - The velocity of the entity.
+ * @param {number} mass - The mass of the entity.
+ * @param {number} maxSpeed - The maximum speed at which this entity may travel.
+ * @param {number} maxForce - The maximum force this entity can produce to power itself (think rockets and thrust).
+ * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
+ */
+function GoalKeeper( entityManager, boundingRadius, team, homeRegionId, startState, velocity, mass, maxSpeed, maxForce, maxTurnRate ) {
+	
+	PlayerBase.call( this, entityManager, null, boundingRadius, team, homeRegionId, velocity, mass, maxSpeed, maxForce, maxTurnRate, PlayerBase.ROLE.GOAL_KEEPER );
+
+	Object.defineProperties( this, {
+		// an instance of the state machine prototype
+		stateMachine : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		}
+	} );
+	
+	// setup state machine
+	this.stateMachine = new StateMachine( this );
+	this.stateMachine.currentState = startState;
+	this.stateMachine.previousState = startState;
+	this.stateMachine.globalState = GoalKeeperStates.GlobalState;
+	
+	this.stateMachine.currentState.enter( this );
+	
+	// setup mesh components
+	var geometry = new THREE.CylinderGeometry( PlayerBase.CONFIG.PLAYER_RADIUS, PlayerBase.CONFIG.PLAYER_RADIUS, 4 );
+	geometry.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 2, 0 ) );
+	var material = new THREE.MeshBasicMaterial( {
+		color : team.color
+	} );
+	
+	// setup mesh
+	this.object3D = new THREE.Mesh( geometry, material );
+	
+	// set start position
+	this.object3D.position.copy( this.getHomeRegion().center );
+
+	// a player's start target is its start position (because it's just waiting)
+	this.steering.target.copy( this.object3D.position );
+}
+
+GoalKeeper.prototype = Object.create( PlayerBase.prototype );
+GoalKeeper.prototype.constructor = GoalKeeper;
+
+/**
+ * Update function.
+ */
+GoalKeeper.prototype.update = ( function() {
+
+	var acceleration = new THREE.Vector3();
+
+	return function() {
+		
+		// run the logic for the current state
+		this.stateMachine.update();
+
+		// calculate the combined force from each steering behavior
+		var steeringForce = this.steering.calculate();
+		
+		// acceleration = force/mass
+		acceleration.copy( steeringForce ).divideScalar( this.mass );
+
+		// update velocity
+		this.velocity.add( acceleration );
+
+		// make sure player does not exceed maximum velocity
+		if ( this.velocity.length() > this.maxSpeed )
+		{
+			this.velocity.normalize();
+
+			this.velocity.multiplyScalar( this.maxSpeed );
+		}
+
+		// update the position
+		this.object3D.position.add( this.velocity );
+
+		// update the orientation if the vehicle has a non zero velocity
+		if ( this.velocity.lengthSq() > 0.00000001 )
+		{
+			this.rotateToDirection( this.velocity );
+		}
+	};
+
+}() );
+
+/**
+ * This method handles messages of other entities.
+ * 
+ * @param {Telegram} telegram - The telegram of the message.
+ * 
+ * @returns {boolean} Is the message handled successfully?
+ */
+GoalKeeper.prototype.handleMessage = function( telegram ){
+	
+	return this.stateMachine.handleMessage( telegram );
+};
+
+/**
+ * Returns true if the ball comes close enough for the keeper to consider
+ * intercepting.
+ * 
+ * @returns {boolean} Is the ball close enough for intercepting?
+ */
+GoalKeeper.prototype.isBallWithinRangeForIntercept = function() {
+
+	return this.team.homeGoal.center.distanceToSquared( this.ball.object3D.position ) <= PlayerBase.CONFIG.KEEPER_INTERCEPT_RANGE_SQ;
+};
+
+/**
+ * Returns true if the keeper has ventured too far away from the goalmouth.
+ * 
+ * @returns {boolean} Is the keeper too far away from the goalmouth?
+ */
+GoalKeeper.prototype.isTooFarFromGoalMouth = function() {
+
+	return this.object3D.position.distanceToSquared( this.getRearInterposeTarget() ) > PlayerBase.CONFIG.KEEPER_INTERCEPT_RANGE_SQ;
+};
+
+/**
+ * This method is called by the "interpose" state to determine the spot
+ * along the goalmouth which will act as one of the interpose targets 
+ * (the other is the ball). The specific point at the goal line that
+ * the keeper is trying to cover is flexible and can move depending on 
+ * where the ball is on the field. To achieve this we just scale the 
+ * ball's z value by the ratio of the goal width to playing field height.
+ * 
+ * @returns {THREE.Vector3} The interpose target.
+ */
+GoalKeeper.prototype.getRearInterposeTarget = function() {
+	
+	var target = new THREE.Vector3();
+
+	// save the width of the goal
+	var goalWidth = this.team.homeGoal.size.z;
+
+	// calculate x coordinate
+	target.x = this.team.homeGoal.center.x;
+
+	// calculate z coordinate
+	target.z = this.ball.object3D.position.z * goalWidth / this.pitch.playingArea.height;
+
+	return target;
+
+};
+
+module.exports = GoalKeeper;
+},{"../fsm/GoalKeeperStates":58,"../fsm/StateMachine":60,"./PlayerBase":52,"three":1}],50:[function(require,module,exports){
 /**
  * @file Base prototype from which all moving game agents are derived.
  * 
@@ -44951,21 +45696,28 @@ MovingEntity.prototype.rotateToDirection = ( function() {
  * Given a target position, this method rotates the entity by an amount not
  * greater than maxTurnRate until it directly faces the target.
  * 
- * @param {THREE.Vector3} targetPosition - The target position to face.
+ * @param {THREE.Object3D} - The target position to face.
  * 
- * @returns {boolean} Is the entity facing the target?
+ * @returns {boolean} Is the entity facing in the desired direction?
  */
-MovingEntity.prototype.isRotateToTarget = ( function() {
+MovingEntity.prototype.isRotateHeadingToFacePosition = ( function() {
 
-	var rotationToTarget = new THREE.Matrix4();
-	var quaternionToTarget = new THREE.Quaternion();
+	var toTarget = new THREE.Vector3(); 
 
-	return function( targetPosition ) {
+	return function( position ) {
 		
-		var angle, t;
+		var direction, dot, angle, sign;
 
-		// first determine the angle between the look vector and the target
-		angle = targetPosition.angleTo( this.getDirection() );
+		toTarget.subVectors( position, this.object3D.position ).normalize();
+		
+		direction = this.getDirection();
+
+		dot = direction.dot( toTarget );
+
+		dot = THREE.Math.clamp( dot, -1, 1 );
+
+		// first determine the angle between the view direction and the target
+		angle = Math.acos( dot );
 
 		// return true if the player is facing the target
 		if ( angle < 0.00001 )
@@ -44974,18 +45726,20 @@ MovingEntity.prototype.isRotateToTarget = ( function() {
 		}
 
 		// clamp the amount to turn to the max turn rate
-		t = ( angle > this.maxTurnRate ) ? ( this.maxTurnRate / angle ) : 1;
+		if ( angle > this.maxTurnRate )
+		{
+			angle = this.maxTurnRate;
+		}
+		
+		// calculate direction of rotation ( clockwise / anti-clockwise )
+		sign =  (  ( direction.x * toTarget.z ) < ( direction.z * toTarget.x ) ) ? 1 : -1;
 
-		// get target rotation
-		rotationToTarget.lookAt( targetPosition, this.object3D.position, this.object3D.up );
-		quaternionToTarget.setFromRotationMatrix( rotationToTarget );
-
-		// interpolate rotation
-		this.object3D.quaternion.slerp( quaternionToTarget, t );
+		// rotate player
+		this.object3D.rotateY( angle * sign );
 
 		// adjust velocity
 		this.velocity.applyQuaternion( this.object3D.quaternion );
-
+		
 		return false;
 	};
 
@@ -45022,7 +45776,2228 @@ MovingEntity.prototype.getDirection = function() {
 };
 
 module.exports = MovingEntity;
-},{"./GameEntity":45,"three":1}],47:[function(require,module,exports){
+},{"./GameEntity":47,"three":1}],51:[function(require,module,exports){
+/**
+ * @file Prototype to define a goal for a soccer pitch.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require( "three" );
+
+var GameEntity = require( "./GameEntity" );
+var Region = require( "./Region" );
+var Ball = require( "./Ball" );
+var Goal = require( "./Goal" );
+var Team = require( "./Team" );
+var TeamStates = require( "../fsm/TeamStates" );
+var eventManager = require( "../../messaging/EventManager" );
+var TOPIC = require( "../../messaging/Topic" );
+var world = require( "../../core/World" );
+var logger = require( "../../core/Logger" );
+
+/**
+ * Creates a soccer pitch.
+ * 
+ * @constructor
+ * @augments GameEntity
+ * 
+ * @param {EntityManager} entityManager - The reference to the entity manager.
+ * @param {THREE.Vector2} dimension - The dimensions of the playing area.
+ * 
+ */
+function Pitch( entityManager, dimension ) {
+
+	GameEntity.call( this, entityManager );
+
+	Object.defineProperties( this, {
+		// soccer entities
+		ball : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		redTeam : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		blueTeam : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		redGoal : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		blueGoal : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// defines the dimensions of the playing area
+		playingArea : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// true if a goalkeeper has possession
+		isGoalKeeperInBallPossession : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// true if the game is in play. Set to false whenever the players are
+		// getting ready for kickoff.
+		isGameOn : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// set true to pause the motion
+		isPaused : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the playing field is broken up into regions that the team
+		// can make use of to implement strategies
+		_regions : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
+		}
+	} );
+	
+	// setup playing area
+	this.playingArea = new Region( dimension.y * 0.5, dimension.x * 0.5, dimension.x * -0.5, dimension.y * -0.5 );
+	
+	// setup mesh components
+	var geometry = new THREE.PlaneBufferGeometry( this.playingArea.width, this.playingArea.height );
+	var material = new THREE.MeshBasicMaterial( {
+		color : 0x1f4b1a
+	} );
+	
+	// apply mesh
+	this.object3D = new THREE.Mesh( geometry, material );
+
+	// apply default rotation
+	this.object3D.rotation.set( Math.PI * -0.5, 0, 0 );
+
+	// setup regions
+	this._createRegions();
+
+	// setup game
+	this._createGame();
+	
+	// setup boundary
+	this._createWalls();
+	
+	// start game
+	this.isGameOn = true;
+}
+
+Pitch.prototype = Object.create( GameEntity.prototype );
+Pitch.prototype.constructor = Pitch;
+
+/**
+ * Updates the pitch.
+ */
+Pitch.prototype.update = function() {
+
+	if ( this.isPaused === true )
+	{
+		return;
+	}
+
+	// update ball
+	this.ball.update();
+
+	// update the teams
+	this.redTeam.update();
+	this.blueTeam.update();
+
+	// if a goal has been detected reset the pitch ready for kickoff
+	if ( this.redGoal.isScored( this.ball ) || this.blueGoal.isScored( this.ball ) )
+	{
+		this.isGameOn = false;
+
+		// reset ball at origin
+		this.ball.placeAtPosition();
+
+		// get the teams ready for kickoff
+		this.redTeam.stateMachine.changeState( TeamStates.PrepareForKickOff );
+		this.blueTeam.stateMachine.changeState( TeamStates.PrepareForKickOff );
+
+		// inform system about goal
+		eventManager.publish( TOPIC.GAME.SCORE, {
+			goalsBlue : this.redGoal.numberGoalsScored,
+			goalsRed : this.blueGoal.numberGoalsScored
+		} );
+	}
+};
+
+/**
+ * Returns the region by the given ID.
+ * 
+ * @param {number} id - The ID of the region
+ * 
+ * @returns {Region} The requested region.
+ */
+Pitch.prototype.getRegionById = function( id ) {
+
+	logger.assert( id >= 0 && id < this._regions.length );
+
+	return this._regions[ id ];
+};
+
+/**
+ * Toggles pause state.
+ */
+Pitch.prototype.togglePause = function() {
+
+	this.isPaused = !this.isPaused;
+};
+
+/**
+ * This instantiates the regions the players utilize to position themselves.
+ */
+Pitch.prototype._createRegions = function() {
+
+	// identifier of a region
+	var id = 0;
+
+	// calculate dimension
+	var width = this.playingArea.width / Pitch.REGIONS.HORIZONTAL;
+	var height = this.playingArea.height / Pitch.REGIONS.VERTICAL;
+
+	// create regions
+	for ( var col = 0; col < Pitch.REGIONS.HORIZONTAL; col++ )
+	{
+		for ( var row = 0; row < Pitch.REGIONS.VERTICAL; row++ )
+		{
+			this._regions[ id ] = new Region( 
+					this.playingArea.bottom + ( row + 1 ) * height, // top
+					this.playingArea.left + ( col + 1 ) * width, // right
+					this.playingArea.left + col * width, // left
+					this.playingArea.bottom + row * height, // bottom
+					id );
+			
+			// increase id
+			id++;
+		}
+	}
+};
+
+/**
+ * Creates the game with all entities.
+ */
+Pitch.prototype._createGame = function() {
+
+	// ball
+	this.ball = new Ball( this.entityManager, Ball.SIZE, Ball.MASS );
+	world.addObject3D( this.ball.object3D );
+
+	// goals
+	this.redGoal = new Goal( this.entityManager, new THREE.Vector3( this.playingArea.right + 1, 3, 0 ), new THREE.Vector3( 2, 6, 10 ), new THREE.Vector3( -1, 0, 0 ), Team.RED );
+	world.addObject3D( this.redGoal.object3D );
+
+	this.blueGoal = new Goal( this.entityManager, new THREE.Vector3( this.playingArea.left - 1, 3, 0 ), new THREE.Vector3( 2, 6, 10 ), new THREE.Vector3( 1, 0, 0 ), Team.BLUE );
+	world.addObject3D( this.blueGoal.object3D );
+
+	// teams
+	this.blueTeam = new Team( this.entityManager, this.blueGoal, this.redGoal, this, Team.BLUE );
+	this.redTeam = new Team( this.entityManager, this.redGoal, this.blueGoal, this, Team.RED );
+	
+	// make sure each team knows who their opponents are
+	this.blueTeam.opponents = this.redTeam;
+	this.redTeam.opponents = this.blueTeam;
+};
+
+/**
+ * Creates the walls.
+ */
+Pitch.prototype._createWalls = function() {
+
+	var wall;
+
+	// calculate the distance "post - out"
+	var distance = ( this.playingArea.height * 0.5 ) - this.blueGoal.rightPost.z;
+
+	var wallFrontGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( this.playingArea.width, 10, 1, 1 ) );
+	var wallSideGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( distance, 10, 1, 1 ) );
+	var wallMaterial = new THREE.MeshBasicMaterial( {
+		visible : false
+	} );
+
+	// bottom wall
+	wall = new THREE.Mesh( wallFrontGeometry, wallMaterial );
+	wall.position.set( 0, 5, this.playingArea.bottom );
+	world.addWall( wall );
+
+	// top wall
+	wall = new THREE.Mesh( wallFrontGeometry, wallMaterial );
+	wall.position.set( 0, 5, this.playingArea.top );
+	wall.rotation.set( 0, -Math.PI, 0 );
+	world.addWall( wall );
+
+	// left wall ( right post blue goal )
+	wall = new THREE.Mesh( wallSideGeometry, wallMaterial );
+	wall.position.set( this.blueGoal.center.x, 5, ( distance * 0.5 ) + this.blueGoal.rightPost.z );
+	wall.rotation.set( 0, Math.PI * 0.5, 0 );
+	world.addWall( wall );
+
+	// left wall ( left post blue goal )
+	wall = new THREE.Mesh( wallSideGeometry, wallMaterial );
+	wall.position.set( this.blueGoal.center.x, 5, ( distance * -0.5 ) + this.blueGoal.leftPost.z );
+	wall.rotation.set( 0, Math.PI * 0.5, 0 );
+	world.addWall( wall );
+	
+	// right wall ( right post red goal )
+	wall = new THREE.Mesh( wallSideGeometry, wallMaterial );
+	wall.position.set( this.redGoal.center.x, 5, ( distance * 0.5 ) + this.redGoal.rightPost.z );
+	wall.rotation.set( 0, Math.PI * -0.5, 0 );
+	world.addWall( wall );
+	
+	// right wall ( left post red goal )
+	wall = new THREE.Mesh( wallSideGeometry, wallMaterial );
+	wall.position.set( this.redGoal.center.x, 5, ( distance * -0.5 ) + this.redGoal.leftPost.z );
+	wall.rotation.set( 0, Math.PI * -0.5, 0 );
+	world.addWall( wall );
+};
+
+Pitch.REGIONS = {
+	HORIZONTAL : 6,
+	VERTICAL : 3
+};
+
+module.exports = Pitch;
+},{"../../core/Logger":21,"../../core/World":31,"../../messaging/EventManager":77,"../../messaging/Topic":80,"../fsm/TeamStates":61,"./Ball":44,"./GameEntity":47,"./Goal":48,"./Region":53,"./Team":55,"three":1}],52:[function(require,module,exports){
+/**
+ * @file Super-prototype to define a soccer player.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require( "three" );
+
+var MESSAGE = require( "../../messaging/Message" );
+var eventManager = require( "../../messaging/EventManager" );
+var MovingEntity = require( "./MovingEntity" );
+var SteeringBehaviors = require( "../steering/SteeringBehaviors" );
+
+/**
+ * Creates a soccer player.
+ * 
+ * @constructor
+ * @augments MovingEntity
+ * 
+ * @param {EntityManager} entityManager - The reference to the entity manager.
+ * @param {THREE.Object3D} object3D - The 3D object of the player.
+ * @param {number} boundingRadius - The bounding radius of the player.
+ * @param {Team} team - The player's team.
+ * @param {number} homeRegionId - The id of the home region.
+ * @param {THREE.Vector3} velocity - The velocity of the entity.
+ * @param {number} mass - The mass of the entity.
+ * @param {number} maxSpeed - The maximum speed at which this entity may travel.
+ * @param {number} maxForce - The maximum force this entity can produce to power itself (think rockets and thrust).
+ * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
+ * @param {number} role - The role of the player.
+ */
+function PlayerBase( entityManager, object3D, boundingRadius, team, homeRegionId, velocity, mass, maxSpeed, maxForce, maxTurnRate, role ) {
+
+	MovingEntity.call( this, entityManager, object3D, boundingRadius, velocity, mass, maxSpeed, maxForce, maxTurnRate );
+
+	Object.defineProperties( this, {
+		// player's role in the team
+		role : {
+			value : role,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// a reference to the player's team
+		team : {
+			value : team,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// a reference to the soccer pitch
+		pitch : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// a reference to the soccer ball
+		ball : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the id of the region that this player is assigned to
+		homeRegionId : {
+			value : homeRegionId,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the steering behaviors
+		steering : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the distance to the ball (in squared-space). This value is queried
+		// a lot so it's calculated once each time-step and stored here
+		distanceSqToBall : {
+			value : Infinity,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the id of the region this player moves to before kickoff
+		_defaultRegionId : {
+			value : homeRegionId,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
+		_arrowHelper : {
+			value :  new THREE.ArrowHelper( new THREE.Vector3(), new THREE.Vector3(), 5, 0xf3f4f6 ),
+			configurable : false,
+			enumerable : false,
+			writable : false
+		}
+	} );
+	
+	// set references for pitch and ball
+	this.pitch = this.team.pitch;
+	this.ball = this.team.pitch.ball;
+
+	// setup steering behaviors
+	this.steering = new SteeringBehaviors( this, this.ball, this.pitch );
+}
+
+PlayerBase.prototype = Object.create( MovingEntity.prototype );
+PlayerBase.prototype.constructor = PlayerBase;
+
+/**
+ * Determines the player who is closest to the support spot and messages him to
+ * change state to "SupportAttacker".
+ */
+PlayerBase.prototype.findSupport = function() {
+
+	// if there is no support, make "bestSupportPlayer" to the new supporting player
+	if ( this.team.supportingPlayer === null )
+	{
+		this.team.supportingPlayer = this.team.calculateBestSupportingAttacker();
+		
+		// inform the new supporting player to support the attacking player
+		eventManager.sendMessageToEntitySync( this.id, this.team.supportingPlayer.id, MESSAGE.SUPPORT_ATTACKER );
+		
+		return;
+	}
+	
+	// calculate best supporting player for attacking
+	var bestSupportPlayer = this.team.calculateBestSupportingAttacker();
+
+	// if the best player available to support the attacker changes, update the
+	// pointers and send messages to the relevant players to update their states
+	if ( bestSupportPlayer !== null && bestSupportPlayer !== this.team.supportingPlayer )
+	{
+		// the previous supporting player can return to his home region
+		eventManager.sendMessageToEntitySync( this.id, this.team.supportingPlayer.id, MESSAGE.GO_HOME );
+		
+		// assign the new supporting player and inform it
+		this.team.supportingPlayer = bestSupportPlayer;
+		
+		// inform the new supporting player to support the attacking player
+		eventManager.sendMessageToEntitySync( this.id, this.team.supportingPlayer.id, MESSAGE.SUPPORT_ATTACKER );
+	}
+};
+
+/**
+ * Sets the player's heading to point at the ball.
+ */
+PlayerBase.prototype.trackBall = function() {
+
+	this.isRotateHeadingToFacePosition( this.ball.object3D.position );
+};
+
+/**
+ * Sets the player's heading to point at the current target.
+ */
+PlayerBase.prototype.trackTarget = ( function() {
+
+	var target = new THREE.Vector3();
+
+	return function() {
+
+		target.subVectors( this.steering.target, this.object3D.position ).normalize();
+
+		this.setOrientation( target );
+	};
+
+}() );
+
+/**
+ * Calculates distance to home opponent's goal. Used frequently by the
+ * passing methods.
+ * 
+ * @returns {number} The distance to the opponent's goal.
+ */
+PlayerBase.prototype.getDistanceToOppGoal = function() {
+
+	return Math.abs( this.object3D.position.x - this.team.opponentsGoal.center.x );
+};
+
+/**
+ * Calculates distance to the home goal. Used frequently by the
+ * passing methods.
+ * 
+ * @returns {number} The distance to the home goal.
+ */
+PlayerBase.prototype.getDistanceToHomeGoal = function() {
+
+	return Math.abs( this.object3D.position.x - this.team.homeGoal.center.x );
+};
+
+/**
+ * Returns true if there is an opponent within this player's comfort zone.
+ * 
+ * @returns {boolean} Is the player threatened by an opponent?
+ */
+PlayerBase.prototype.isThreatened = function() {
+
+	var index, opponent;
+
+	// check against all opponents to make sure non are within this player's
+	// comfort zone
+	for ( index = 0; index < this.team.opponents.players.length; index++ )
+	{
+		// buffer opponent
+		opponent = this.team.opponents.players[ index ];
+
+		// if opponent is in front of the player and the distance to the
+		// opponent is less than our comfort zone, return true
+		if ( this.isPositionInFrontOfPlayer( opponent.object3D.position ) && this.object3D.position.distanceToSquared( opponent.object3D.position ) < PlayerBase.CONFIG.PLAYER_COMFORT_ZONE_SQ )
+		{
+			return true;
+		}
+	} // next opponent
+
+	return false;
+
+};
+
+/**
+ * Returns true if the subject is within field of view of this player.
+ * 
+ * @param {THREE.Vector3} position - The position to test.
+ * 
+ * @returns {boolean} Is the position in front of the player?
+ */
+PlayerBase.prototype.isPositionInFrontOfPlayer = ( function() {
+
+	var toPosition = new THREE.Vector3();
+
+	return function( position ) {
+
+		toPosition.subVectors( position, this.object3D.position );
+
+		if ( toPosition.dot( this.getDirection() ) > 0 )
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	};
+
+}() );
+
+/**
+ * Returns true if the ball can be grabbed by the goalkeeper.
+ * 
+ * @returns {boolean} Can the ball be grabbed by the goalkeeper?
+ */
+PlayerBase.prototype.isBallWithinKeeperRange = function() {
+
+	return this.object3D.position.distanceToSquared( this.ball.object3D.position ) < PlayerBase.CONFIG.KEEPER_IN_TARGET_RANGE_SQ;
+};
+
+/**
+ * Returns true if the ball is within kicking range.
+ * 
+ * @returns {boolean} Is the ball within kicking range?
+ */
+PlayerBase.prototype.isBallWithinKickingRange = function() {
+
+	return this.object3D.position.distanceToSquared( this.ball.object3D.position ) < PlayerBase.CONFIG.PLAYER_KICKING_DISTANCE_SQ;
+};
+
+/**
+ * Returns true if a ball comes within range of a receiver.
+ * 
+ * @returns {boolean} Is the ball within range of a receiver?
+ */
+PlayerBase.prototype.isBallWithinReceivingRange = function() {
+
+	return this.object3D.position.distanceToSquared( this.ball.object3D.position ) < PlayerBase.CONFIG.PLAYER_RECEIVING_RANGE_SQ;
+};
+
+/**
+ * Returns true if the player is located within the boundaries of his home
+ * region.
+ * 
+ * @returns {number} The distance to the home goal.
+ */
+PlayerBase.prototype.isInHomeRegion = function() {
+
+	if ( this.role === PlayerBase.ROLE.GOAL_KEEPER )
+	{
+		return this.getHomeRegion().isInside( this.object3D.position, false );
+	}
+	else
+	{
+		return this.getHomeRegion().isInside( this.object3D.position, true );
+	}
+};
+
+/**
+ * Returns true if this player is ahead of the attacker.
+ * 
+ * @returns {boolean} Is the player ahead of the attacker?
+ */
+PlayerBase.prototype.isAheadOfAttacker = function() {
+	
+	return this.getDistanceToOppGoal() < Math.abs( this.team.controllingPlayer.object3D.position.x - this.team.opponentsGoal.center.x );
+};
+
+/**
+ * Returns true if the player is located at his steering target.
+ * 
+ * @returns {boolean} Is the player located at his steering target?
+ */
+PlayerBase.prototype.isAtTarget = function() {
+
+	return this.object3D.position.distanceToSquared( this.steering.target ) < PlayerBase.CONFIG.PLAYER_IN_TARGET_RANGE_SQ;
+};
+
+/**
+ * Returns true if the player is the closest player in his team to the ball.
+ * 
+ * @returns {boolean} Is the player the closest player in his team to the ball?
+ */
+PlayerBase.prototype.isClosestTeamMemberToBall = function() {
+
+	return this === this.team.playerClosestToBall;
+};
+
+/**
+ * Returns true if the player is the closest player on the pitch to the ball.
+ * 
+ * @returns {boolean} Is the player the closest player on the pitch to the ball?
+ */
+PlayerBase.prototype.isClosestPlayerOnPitchToBall = function() {
+
+	return this.isClosestTeamMemberToBall() && this.distanceSqToBall < this.team.opponents.distSqToBallOfClosestPlayer;
+};
+
+/**
+ * Checks if this player is the current controlling player.
+ * 
+ * @returns {boolean} Is the player the current controlling player?
+ */
+PlayerBase.prototype.isControllingPlayer = function() {
+
+	return this === this.team.controllingPlayer;
+};
+
+/**
+ * Returns true if the player is located in the designated "hot region" -- the
+ * area close to the opponent's goal.
+ * 
+ * @returns {boolean} Is the player in the hot region?
+ */
+PlayerBase.prototype.isInHotRegion = function() {
+
+	return this.getDistanceToOppGoal() < this.pitch.playingArea.length / 3;
+};
+
+/**
+ * Sets the home region id to the default region id.
+ */
+PlayerBase.prototype.setDefaultHomeRegion = function() {
+
+	this.homeRegionId = this._defaultRegionId;
+};
+
+/**
+ * Returns the home region of the player.
+ * 
+ * @returns {Region} Player's home region.
+ */
+PlayerBase.prototype.getHomeRegion = function() {
+
+	return this.pitch.getRegionById( this.homeRegionId );
+};
+
+PlayerBase.CONFIG = {
+
+	// the goalkeeper has to be this close to the ball to be able to interact with it
+	KEEPER_IN_TARGET_RANGE : 2,
+	
+	// when the ball becomes within this distance of the goalkeeper he changes state to intercept the ball
+	KEEPER_INTERCEPT_RANGE : 15,
+	
+	// this is the distance the keeper puts between the back of the net and the ball when using the interpose steering behavior
+	KEEPER_TENDING_DISTANCE : 4,
+	
+	// the minimum distance a player must be from the goalkeeper before it will pass the ball
+	KEEPER_MIN_PASS_DISTANCE: 5,
+
+	// how close the ball must be to a receiver before he starts chasing it
+	PLAYER_RECEIVING_RANGE : 2,
+	
+	// the player has to be this close to the ball to be able to interact with it
+	PLAYER_IN_TARGET_RANGE : 2,
+
+	// player has to be this close to the ball to be able to kick it. The higher
+	// the value this gets, the easier it gets to tackle.
+	PLAYER_KICKING_DISTANCE : 1.5,
+	
+	// the number of times a player can kick the ball per second
+	PLAYER_KICK_FREQUENCY : 8,
+	
+	// the radius in which a pass in dangerous
+	PLAYER_PASS_THREAD_RADIUS: 15,
+	
+	// the number of times the player attempts to find a valid shot
+	PLAYER_NUM_ATTEMPTS_TO_FIND_VALID_STRIKE : 5,
+
+	// when an opponents comes within this range the player will attempt to pass
+	// the ball. Players tend to pass more often, the higher the value
+	PLAYER_COMFORT_ZONE : 10,
+	
+	// this force decelerates the player if the steering force has a zero length
+	PLAYER_BRAKING_RATE: 0.8,
+	
+	//this is the chance that a player will receive a pass using the "arrive" steering behavior, rather than "pursuit"
+	PLAYER_CHANCE_OF_USING_ARRIVE_TYPE_RECEIVE_BEHAVIOR : 0.5,
+	
+	// the chance a player might take a random pot shot at the goal
+	PLAYER_CHANCE_ATTEMPT_POT_SHOT: 0.005,
+	
+	// the minimum distance a receiving player must be from the passing player
+	PLAYER_MIN_PASS_DISTANCE: 20,
+
+	// physics
+	PLAYER_MASS : 1,
+	PLAYER_RADIUS : 1,
+	PLAYER_MAX_SPEED_WITH_BALL : 0.12,
+	PLAYER_MAX_SPEED_WITHOUT_BALL : 0.1,
+	PLAYER_MAX_FORCE : 1.0,
+	PLAYER_MAX_TURN_RATE : 0.1,
+	PLAYER_MAX_DRIBBLE_FORCE : 0.2,
+	PLAYER_MAX_DRIBBLE_AND_TURN_FORCE : 0.12,
+	PLAYER_MAX_SHOOTING_FORCE : 0.75,
+	PLAYER_MAX_PASSING_FORCE : 0.5
+};
+
+// buffer squared values
+PlayerBase.CONFIG.KEEPER_IN_TARGET_RANGE_SQ = PlayerBase.CONFIG.KEEPER_IN_TARGET_RANGE * PlayerBase.CONFIG.KEEPER_IN_TARGET_RANGE;
+PlayerBase.CONFIG.KEEPER_INTERCEPT_RANGE_SQ = PlayerBase.CONFIG.KEEPER_INTERCEPT_RANGE * PlayerBase.CONFIG.KEEPER_INTERCEPT_RANGE;
+PlayerBase.CONFIG.PLAYER_IN_TARGET_RANGE_SQ = PlayerBase.CONFIG.PLAYER_IN_TARGET_RANGE * PlayerBase.CONFIG.PLAYER_IN_TARGET_RANGE;
+PlayerBase.CONFIG.PLAYER_RECEIVING_RANGE_SQ = PlayerBase.CONFIG.PLAYER_RECEIVING_RANGE * PlayerBase.CONFIG.PLAYER_RECEIVING_RANGE;
+PlayerBase.CONFIG.PLAYER_KICKING_DISTANCE_SQ = PlayerBase.CONFIG.PLAYER_KICKING_DISTANCE * PlayerBase.CONFIG.PLAYER_KICKING_DISTANCE;
+PlayerBase.CONFIG.PLAYER_COMFORT_ZONE_SQ = PlayerBase.CONFIG.PLAYER_COMFORT_ZONE * PlayerBase.CONFIG.PLAYER_COMFORT_ZONE;
+
+PlayerBase.ROLE = {
+	GOAL_KEEPER : 0,
+	ATTACKER : 1,
+	DEFENDER : 2
+};
+
+module.exports = PlayerBase;
+
+},{"../../messaging/EventManager":77,"../../messaging/Message":78,"../steering/SteeringBehaviors":76,"./MovingEntity":50,"three":1}],53:[function(require,module,exports){
+/**
+ * @file Defines a rectangular region. A region has an identifying number, and
+ * four corners. The y-value of any position in this region is in this prototype
+ * always zero.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require( "three" );
+
+/**
+ * Creates a region.
+ * 
+ * @constructor
+ * 
+ * @param {number} id - The id of the region.
+ * @param {number} top - The top side of the region.
+ * @param {number} left - The left side of the region.
+ * @param {number} right - The right side of the region.
+ * @param {number} bottom - The bottom side of the region.
+ * 
+ */
+function Region( top, right, left, bottom, id ) {
+
+	Object.defineProperties( this, {
+		id : {
+			value : id || -1,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		top : {
+			value : top || 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		right : {
+			value : right || 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		left : {
+			value : left || 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		bottom : {
+			value : bottom || 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		width : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		height : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		length : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		breadth : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		center : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		}
+	} );
+
+	// calculate dimensions
+	this.width  = Math.abs( this.right - this.left );
+	this.height = Math.abs( this.top - this.bottom );
+
+	// calculate center of region
+	this.center.x = ( this.right + this.left ) * 0.5;
+	this.center.z = ( this.top + this.bottom ) * 0.5;
+	
+	// calculate shortest and longest side
+	this.length  = Math.max( this.width, this.height );
+	this.breadth = Math.min( this.width, this.height );
+}
+
+/**
+ * Returns a vector representing a random location within the region.
+ * 
+ * @returns {THREE.Vector3} A random position inside the region.
+ */
+Region.prototype.getRandomPosition = function() {
+
+	return new THREE.Vector3( THREE.Math.randFloat( this.left, this.right ), 0, THREE.Math.randFloat( this.top, this.bottom ) );
+};
+
+/**
+ * Returns true if the given position lays inside the region. The
+ * "isHalfSize" can be used to contract the region boundaries.
+ * 
+ * @param {THREE.Vector3} position -The position vector to test.
+ * @param {boolean} isHalfSize - Should the calculation use the half size of the
+ * region?
+ * 
+ * @returns {boolean} Is the position inside the region?
+ */
+Region.prototype.isInside = function( position, isHalfSize ) {
+
+	var marginX, marginY;
+
+	if ( isHalfSize === true )
+	{
+		marginX = this.width * 0.25;
+		marginY = this.height * 0.25;
+
+		return ( ( position.x > ( this.left + marginX ) ) && 
+				 ( position.x < ( this.right - marginX ) ) && 
+				 ( position.z > ( this.bottom + marginY ) ) && 
+				 ( position.z < ( this.top - marginY ) ) );
+	}
+	else
+	{
+		return ( ( position.x > this.left ) && 
+				 ( position.x < this.right ) && 
+				 ( position.z > this.bottom ) && 
+				 ( position.z < this.top ) );
+	}
+};
+
+module.exports = Region;
+},{"three":1}],54:[function(require,module,exports){
+/**
+ * @file Prototype to determine the best spots for a supporting soccer player to
+ * move to.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require( "three" );
+
+var Regulator = require( "../../core/Regulator" );
+var world = require( "../../core/World" );
+var system = require( "../../core/System" );
+
+var PlayerBase = require( "./PlayerBase" );
+
+/**
+ * Creates a SupportSpotCalculator.
+ * 
+ * @param {Team} team - A reference to the soccer team.
+ * @param {boolean} isLeftSide - This value indicates, if the team is on the
+ * left side of the pitch.
+ */
+function SupportSpotCalculator( team, isLeftSide ) {
+
+	Object.defineProperties( this, {
+		team : {
+			value : team,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		isLeftSide : {
+			value : isLeftSide,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// an array to manage all spots
+		_spots : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		// a reference to the highest valued spot from the last update
+		_bestSupportSpot : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
+		// this will regulate how often the spots are calculated (default is one
+		// update per second)
+		_regulator : {
+			value : new Regulator( SupportSpotCalculator.UPDATE_FREQUENCY ),
+			configurable : false,
+			enumerable : false,
+			writable : false
+		}
+	} );
+
+	this._calculateSupportingSpots();
+}
+
+/**
+ * This method calculates the positions of all spots, creates them and stores
+ * them in the internal array.
+ */
+SupportSpotCalculator.prototype._calculateSupportingSpots = function() {
+
+	var playingField = this.team.pitch.playingArea;
+
+	// the dimensions of the spot region is derived from the playing field
+	var widthOfSpotRegion = playingField.width * 0.9;
+	var heightOfSpotRegion = playingField.height * 0.8;
+
+	// calculate the dimensions per spot
+	var sliceX = widthOfSpotRegion / SupportSpotCalculator.SPOTS_X;
+	var sliceY = heightOfSpotRegion / SupportSpotCalculator.SPOTS_Y;
+
+	// calculate offsets
+	var top = playingField.top - ( ( playingField.height - heightOfSpotRegion ) * 0.5 ) - ( sliceY * 0.5 );
+	var right = playingField.right - ( ( playingField.width - widthOfSpotRegion ) * 0.5 ) - ( sliceX * 0.5 );
+	var left = playingField.left + ( ( playingField.width - widthOfSpotRegion ) * 0.5 ) + ( sliceX * 0.5 );
+
+	// create the spots for the respective team. the spots are always located in
+	// the
+	// opposing part of the soccer pitch.
+	for ( var x = 0; x < ( SupportSpotCalculator.SPOTS_X * 0.5 ) - 1; x++ )
+	{
+		for ( var y = 0; y < SupportSpotCalculator.SPOTS_Y; y++ )
+		{
+			if ( this.isLeftSide === true )
+			{
+				this._spots.push( {
+					position : new THREE.Vector3( left + ( x * sliceX ), 0, top - ( y * sliceY ) ),
+					score : 0
+				} );
+			}
+			else
+			{
+				this._spots.push( {
+					position : new THREE.Vector3( right - ( x * sliceX ), 0, top - ( y * sliceY ) ),
+					score : 0
+				} );
+			}
+		}
+	}
+
+	// add helpers in dev mode
+	if ( system.isDevModeActive === true )
+	{
+		var helper;
+		var spotGeometry = new THREE.CircleGeometry( 0.5, 10 );
+
+		for ( var index = 0; index < this._spots.length; index++ )
+		{
+			helper = new THREE.Mesh( spotGeometry,  new THREE.MeshBasicMaterial( {color : 0xf3f4f6} ) );
+			helper.position.copy( this._spots[ index ].position );
+			helper.position.y += 0.1;
+			helper.rotation.set( Math.PI * -0.5, 0, 0 );
+			world.addObject3D( helper );
+			this._spots[ index ].helper = helper;
+		}
+
+	}
+};
+
+/**
+ * This method iterates through each possible spot and calculates its score.
+ * 
+ * @returns {THREE.Vector3} The best supporting spot on the soccer pitch.
+ */
+SupportSpotCalculator.prototype.calculateBestSupportingPosition = ( function() {
+
+	var shotTarget = new THREE.Vector3();
+
+	return function() {
+		
+		var spot, distance, temp;
+		
+		// this will be used to track the best supporting spot
+		var bestScoreSoFar = 0;
+
+		if ( !this._regulator.isReady() && this._bestSupportSpot !== null )
+		{
+			return this._bestSupportSpot.position;
+		}
+
+		// reset the best supporting spot
+		this._bestSupportSpot = null;
+
+		for ( var index = 0; index < this._spots.length; index++ )
+		{
+			spot = this._spots[ index ];
+
+			// first remove any previous score
+			spot.score = 1;
+			
+			// reset color in dev mode
+			if ( system.isDevModeActive === true )
+			{
+				spot.helper.material.color = new THREE.Color( 0xf3f4f6 );
+			}
+
+			// Test 1. is it possible to make a safe pass from the ball's
+			// position to this position?
+			if ( this.team.isPassSafeFromAllOpponents( this.team.controllingPlayer.object3D.position, spot.position, null, PlayerBase.CONFIG.PLAYER_MAX_PASSING_FORCE ) )
+			{
+				spot.score += SupportSpotCalculator.SCORE.CAN_PASS;
+			}
+
+			// Test 2. determine if a goal can be scored from this position
+			if ( this.team.isShootPossible( spot.position, PlayerBase.CONFIG.PLAYER_MAX_SHOOTING_FORCE, shotTarget ) )
+			{
+				spot.score += SupportSpotCalculator.SCORE.CAN_SCORE;
+			}
+
+			// Test 3. calculate how far this spot is away from the controlling
+			// player. The further away, the higher the score. Any distances
+			// further away than optimalDistance do not receive a score
+			if ( this.team.supportingPlayer !== null )
+			{
+				distance = this.team.controllingPlayer.object3D.position.distanceTo( spot.position );
+
+				temp = Math.abs( SupportSpotCalculator.OPT_DISTANCE - distance );
+
+				if ( temp < SupportSpotCalculator.OPT_DISTANCE )
+				{
+					// normalize the distance and add it to the score
+					spot.score += SupportSpotCalculator.SCORE.DISTANCE_SCORE * ( SupportSpotCalculator.OPT_DISTANCE - temp ) / SupportSpotCalculator.OPT_DISTANCE;
+				}
+			}
+
+			// check to see if this spot has the highest score so far
+			if ( spot.score > bestScoreSoFar )
+			{
+				bestScoreSoFar = spot.score;
+				
+				this._bestSupportSpot = spot;
+			}
+		} // next spot
+		
+		// higlight the best supporting spot in dev mode
+		if ( system.isDevModeActive === true )
+		{
+			this._bestSupportSpot.helper.material.color = new THREE.Color( 0x20252f );
+		}
+
+		return this._bestSupportSpot.position;
+	};
+
+}() );
+
+/**
+ * Returns the best supporting spot if there is one. If one hasn't been
+ * calculated yet, this method calls determineBestSupportingPosition and returns
+ * the result.
+ * 
+ * @returns {THREE.Vector3} The best supporting spot on the soccer pitch.
+ */
+SupportSpotCalculator.prototype.getBestSupportingSpot = function() {
+
+	if ( this._bestSupportSpot === null )
+	{
+		return this.calculateBestSupportingPosition();
+	}
+	else
+	{
+		return this._bestSupportSpot.position;
+	}
+};
+
+SupportSpotCalculator.SCORE = {
+		CAN_PASS : 2,
+		CAN_SCORE : 1,
+		DISTANCE_SCORE : 2
+};
+
+SupportSpotCalculator.UPDATE_FREQUENCY = 1;
+SupportSpotCalculator.SPOTS_X = 13;
+SupportSpotCalculator.SPOTS_Y = 6;
+SupportSpotCalculator.OPT_DISTANCE = 20;
+
+module.exports = SupportSpotCalculator;
+},{"../../core/Regulator":22,"../../core/System":27,"../../core/World":31,"./PlayerBase":52,"three":1}],55:[function(require,module,exports){
+/**
+ * @file Prototype to define a soccer team.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require( "three" );
+
+var world = require( "../../core/World" );
+var MESSAGE = require( "../../messaging/Message" );
+var eventManager = require( "../../messaging/EventManager" );
+
+var GameEntity = require( "./GameEntity" );
+var PlayerBase = require( "./PlayerBase" );
+var GoalKeeper = require( "./GoalKeeper" );
+var FieldPlayer = require( "./FieldPlayer" );
+var SupportSpotCalculator = require( "./SupportSpotCalculator" );
+
+var StateMachine = require( "../fsm/StateMachine" );
+var GoalKeeperStates = require( "../fsm/GoalKeeperStates" );
+var FieldPlayerStates = require( "../fsm/FieldPlayerStates" );
+var TeamStates = require( "../fsm/TeamStates" );
+
+/**
+ * Creates a soccer team.
+ * 
+ * @constructor
+ * @augments GameEntity
+ * 
+ * @param {EntityManager} entityManager - The reference to the entity manager.
+ * @param {Goal} homeGoal - The home goal of the team.
+ * @param {Goal} opponentsGoal - The goal of the opponents.
+ * @param {Pitch} pitch - A reference to the soccer pitch.
+ * @param {number} color - The color of the team.
+ */
+function Team( entityManager, homeGoal, opponentsGoal, pitch, color ) {
+
+	GameEntity.call( this, entityManager );
+
+	Object.defineProperties( this, {
+		stateMachine : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		players : {
+			value : [],
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		homeGoal : {
+			value : homeGoal,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		opponentsGoal : {
+			value : opponentsGoal,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		opponents : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		pitch : {
+			value : pitch,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		color : {
+			value : color,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		// references to "key" players
+		controllingPlayer : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		supportingPlayer : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		receivingPlayer : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		playerClosestToBall : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the squared distance the closest player is from the ball
+		distSqToBallOfClosestPlayer : {
+			value : Infinity,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// players use this to determine strategic positions on the playing
+		// field
+		_supportSpotCalculator : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		}
+	} );
+
+	// setup the state machine
+	this.stateMachine = new StateMachine( this );
+	this.stateMachine.currentState = TeamStates.Defending;
+	this.stateMachine.previousState = TeamStates.Defending;
+
+	// create the players and goalkeeper
+	this._createPlayers();
+
+	// create the spot calculator
+	if ( this.color === Team.RED )
+	{
+		this._supportSpotCalculator = new SupportSpotCalculator( this, true );
+	}
+	else
+	{
+		this._supportSpotCalculator = new SupportSpotCalculator( this, false );
+	}
+}
+
+Team.prototype = Object.create( GameEntity.prototype );
+Team.prototype.constructor = Team;
+
+/**
+ * Iterates through each player's update function and calculates frequently
+ * accessed info.
+ */
+Team.prototype.update = function() {
+	
+	var index;
+
+	// this information is used frequently so it's more efficient to
+	// calculate it just once each frame
+	this._calculateClosestPlayerToBall();
+
+	// the team state machine switches between attack/defense behavior. It
+	// also handles the "kick off" state where a team must return to their
+	// kick off positions before the whistle is blown
+	this.stateMachine.update();
+
+	// now update each player
+	for ( index = 0; index < this.players.length; index++ )
+	{
+		this.players[ index ].update();
+	}
+
+};
+
+/**
+ * This method updates the steering targets of waiting field players.
+ */
+Team.prototype.updateTargetsOfWaitingPlayers = function() {
+
+	var index, player;
+
+	// now update each player
+	for ( index = 0; index < this.players.length; index++ )
+	{
+		player = this.players[ index ];
+
+		if ( player.role !== PlayerBase.ROLE.GOAL_KEEPER )
+		{
+			if ( player.stateMachine.isInState( FieldPlayerStates.Wait ) || player.stateMachine.isInState( FieldPlayerStates.ReturnToHomeRegion ) )
+			{
+				player.steering.target.copy( player.getHomeRegion().center );
+			}
+		}
+	}
+
+};
+
+/**
+ * Calculates the closest player to the supporting spot.
+ * 
+ * @returns {FieldPlayer} The best supporting attacker.
+ */
+Team.prototype.calculateBestSupportingAttacker = function() {
+
+	var index, player, distance;
+
+	// this will track the closest distance to the "best supporting spot"
+	var closestSoFar = Infinity;
+
+	// this will track the best supporting attacker
+	var bestPlayer = null;
+
+	for ( index = 0; index < this.players.length; index++ )
+	{
+		player = this.players[ index ];
+
+		// only attackers utilize the "best supporting spot"
+		if ( player.role === PlayerBase.ROLE.ATTACKER && player !== this.controllingPlayer )
+		{
+			// calculate the distance between player and supporting spot
+			distance = player.object3D.position.distanceToSquared( this._supportSpotCalculator.getBestSupportingSpot() );
+
+			// if the distance is the closest so far and the player is not a
+			// goalkeeper and the player is not the one currently
+			// controlling the ball, keep a record of this player
+			if ( distance < closestSoFar )
+			{
+				closestSoFar = distance;
+
+				bestPlayer = player;
+			}
+		}
+	}
+
+	return bestPlayer;
+
+};
+
+/**
+ * Calculates the best supporting position for attackers.
+ */
+Team.prototype.calculateBestSupportingPosition = function() {
+
+	this._supportSpotCalculator.calculateBestSupportingPosition();
+};
+
+/**
+ * Returns the best support spot on the soccer pitch.
+ * 
+ * @returns {THREE.Vector3} The supporting spot on the soccer pitch.
+ */
+Team.prototype.getSupportSpot = function() {
+
+	return this._supportSpotCalculator.getBestSupportingSpot();
+};
+
+/**
+ * This tests to see if a pass is possible between the requester and the
+ * controlling player. If it is possible a message is sent to the controlling
+ * player to pass the ball.
+ * 
+ * @param {FieldPlayer} requester - The field player who requests the pass.
+ */
+Team.prototype.requestPass = function( requester ) {
+
+	// maybe put a restriction here
+	if ( Math.random() > 0.1 )
+	{
+		return;
+	}
+
+	// check the safety of the pass
+	if ( this.isPassSafeFromAllOpponents( this.controllingPlayer.object3D.position, requester.object3D.position, requester, PlayerBase.CONFIG.PLAYER_MAX_PASSING_FORCE ) )
+	{
+		// send message to the controlling player
+		eventManager.sendMessageToEntitySync( requester.id, this.controllingPlayer.id, MESSAGE.PASS_TO_ME, requester );
+	}
+};
+
+/**
+ * Calling this changes the state of all field players to that of
+ * "ReturnToHomeRegion". Mainly used when a goal keeper has possession.
+ * 
+ * @param {boolean} withGoalKeeper - Should the goalkeeper also go home?
+ */
+Team.prototype.returnAllFieldPlayersToHome = function( withGoalKeeper ) {
+
+	var index, player;
+
+	for ( index = 0; index < this.players.length; index++ )
+	{
+		player = this.players[ index ];
+
+		if ( withGoalKeeper === true )
+		{
+			// send message to each player
+			eventManager.sendMessageToEntitySync( this.id, player.id, MESSAGE.GO_HOME );
+		}
+		else
+		{
+			if ( player.role !== PlayerBase.ROLE.GOAL_KEEPER )
+			{
+				// send message to each player
+				eventManager.sendMessageToEntitySync( this.id, player.id, MESSAGE.GO_HOME );
+			}
+		}
+	}
+};
+
+/**
+ * Set the control over the ball to a player in this team.
+ * 
+ * @param {PlayerBase} player - The player to set.
+ */
+Team.prototype.setControllingPlayer = function( player ) {
+
+	this.controllingPlayer = player;
+
+	this.opponents.lostControl();
+};
+
+/**
+ * Use this method to change the home regions of players.
+ */
+Team.prototype.setupTeamPositions = ( function() {
+
+	// these define the home regions for this state of each of the players
+	var blueAttackingRegions = [ 1, 12, 14, 6, 4 ];
+	var redAttackingRegions = [ 16, 3, 5, 9, 13 ];
+
+	var blueDefendingRegions = [ 1, 6, 8, 3, 5 ];
+	var redDefendingRegions = [ 16, 9, 11, 12, 14 ];
+
+	return function() {
+		
+		var index, newRegions;
+
+		// determine the correct regions
+		if ( this.stateMachine.isInState( TeamStates.Attacking ) )
+		{
+			newRegions = this.color === Team.BLUE ? blueAttackingRegions : redAttackingRegions;
+		}
+		else if ( this.stateMachine.isInState( TeamStates.Defending ) )
+		{
+			newRegions = this.color === Team.BLUE ? blueDefendingRegions : redDefendingRegions;
+		}
+		else
+		{
+			throw "ERROR: Team: No team position data for current state.";
+		}
+
+		// apply the regions to the players
+		for ( index = 0; index < this.players.length; index++ )
+		{
+			this.players[ index ].homeRegionId = newRegions[ index ];
+		}
+	};
+
+}() );
+
+/**
+ * Use this method to indicate that the team has no control over the ball.
+ */
+Team.prototype.lostControl = function() {
+
+	this.controllingPlayer = null;
+};
+
+/**
+ * Returns true if the team controls the ball.
+ * 
+ * @returns {boolean} Does the team control the ball?
+ */
+Team.prototype.isInControl = function() {
+	
+	return this.controllingPlayer !== null ? true : false;
+};
+
+/**
+ * Returns true if all players are located within their home region.
+ * 
+ * @returns {boolean} Are all players in their home region?
+ */
+Team.prototype.isAllPlayersAtHome = function() {
+
+	for ( var index = 0; index < this.players.length; index++ )
+	{
+		if ( this.players[ index ].isInHomeRegion() === false )
+		{
+			return false;
+		}
+	}
+
+	return true;
+
+};
+
+/**
+ * Given a ball position, a kicking power and a reference to a target vector
+ * this function will sample random positions along the opponent's goalmouth and
+ * check to see if a goal can be scored if the ball was to be kicked in that
+ * direction with the given power. If a possible shot is found, the function
+ * will immediately return true, with the target position stored in the target
+ * vector.
+ * 
+ * @param {THREE.Vector3} ballPosition - The position of the ball.
+ * @param {number} kickingPower - The power of the shoot.
+ * @param {THREE.Vector3} shootTarget - The target vector.
+ * 
+ * @returns {boolean} Is a shoot on the opposing goal possible?
+ */
+Team.prototype.isShootPossible = function( ballPosition, kickingPower, shootTarget ) {
+
+	var index, minZ, maxZ, time;
+
+	for ( index = 0; index < PlayerBase.CONFIG.PLAYER_NUM_ATTEMPTS_TO_FIND_VALID_STRIKE; index++ )
+	{
+		// choose a random position along the opponent's goalmouth (making
+		// sure the ball's radius is taken into account)
+		shootTarget.copy( this.opponentsGoal.center );
+
+		// the z value of the shot position should lay somewhere between two
+		// goalposts (taking into consideration the ball diameter)
+		minZ = this.opponentsGoal.leftPost.z + this.pitch.ball.boundingRadius;
+		maxZ = this.opponentsGoal.rightPost.z - this.pitch.ball.boundingRadius;
+
+		shootTarget.z = THREE.Math.randInt( minZ, maxZ );
+
+		// make sure striking the ball with the given power is
+		// enough to drive the ball over the goal line.
+		time = this.pitch.ball.calculateTimeToCoverDistance( ballPosition, shootTarget, kickingPower );
+
+		// if it is, this shot is then tested to see if any of
+		// the opponents can intercept it.
+		if ( time >= 0 )
+		{
+			if ( this.isPassSafeFromAllOpponents( ballPosition, shootTarget, null, kickingPower ) )
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+
+};
+
+/**
+ * The best pass is considered to be the pass that cannot be intercepted by an
+ * opponent and that is as far forward of the receiver as possible.
+ * 
+ * @param {PlayerBase} passer - The player who passes the ball.
+ * @param {object} receiver - The player who receives the ball.
+ * @param {THREE.Vector3} passTarget - The target of the pass.
+ * @param {number} passPower - The power of the pass.
+ * @param {number} minPassingDistance - The minimum distance of the pass.
+ * 
+ * @returns {boolean} Is an optimal pass possible?
+ */
+Team.prototype.isPassPossible = ( function() {
+
+	var target = new THREE.Vector3();
+
+	return function( passer, receiver, passTarget, passPower, minPassingDistance ) {
+		
+		var index, player, distanceSqToReceiver, distanceToGoal;
+
+		// this will be used to track the closest pass to the opposing goal
+		var closestToGoalSoFar = Infinity;
+		
+		// ensure receiver argument is null
+		receiver.object = null;
+
+		for ( index = 0; index < this.players.length; index++ )
+		{
+			player = this.players[ index ];
+
+			// calculate distance from passer to receiver
+			distanceSqToReceiver = passer.object3D.position.distanceToSquared( player.object3D.position );
+
+			// make sure the potential receiver being examined is not this
+			// player and that it is further away than the minimum pass distance
+			if ( player !== passer && distanceSqToReceiver > ( minPassingDistance * minPassingDistance ) )
+			{
+				if ( this._isPassToReceiverPossible( passer, player, target, passPower ) )
+				{
+					// calculate simplified distance to goal
+					distanceToGoal = Math.abs( target.x - this.opponentsGoal.center.x );
+
+					// if the pass target is the closest to the opponent's goal
+					// line found so far, keep a record of it
+					if ( distanceToGoal < closestToGoalSoFar )
+					{
+						closestToGoalSoFar = distanceToGoal;
+
+						receiver.object = player;
+
+						passTarget.copy( target );
+					}
+				}
+			}
+		}// next team member
+
+		if ( receiver.object !== null )
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	};
+
+}() );
+
+/**
+ * Tests a pass from position "from" to position "target" against each member of
+ * the opposing team. Returns true if the pass can be made without getting
+ * intercepted.
+ * 
+ * @param {THREE.Vector3} start - The start position of the pass.
+ * @param {THREE.Vector3} target - The target position of the pass.
+ * @param {PlayerBase} receiver - The receiver of the pass.
+ * @param {number} passingForce - The force of the pass.
+ * 
+ * @returns {boolean} Can the pass be intercepted by one of the opposing
+ * players?
+ */
+Team.prototype.isPassSafeFromAllOpponents = ( function() {
+	
+	var xAxis = new THREE.Vector3(); // right
+	var yAxis = new THREE.Vector3(); // up
+	var zAxis = new THREE.Vector3(); // front
+
+	var upTemp = new THREE.Vector3( 0, 1, 0 );
+	
+	var matrix = new THREE.Matrix4();
+	var matrixInverse = new THREE.Matrix4();
+
+	return function( start, target, receiver, passingForce ) {
+		
+		var index;
+		
+		// calculate front vector
+		zAxis.subVectors( target, start ).normalize();
+
+		// avoid zero-length axis
+		if ( zAxis.lengthSq() === 0 )
+		{
+			zAxis.z = 1;
+		}
+
+		// compute right vector
+		xAxis.crossVectors( upTemp, zAxis );
+
+		// avoid zero-length axis
+		if ( xAxis.lengthSq() === 0 )
+		{
+			zAxis.x += 0.0001;
+			xAxis.crossVectors( upTemp, zAxis ).normalize();
+		}
+
+		// compute up vector
+		yAxis.crossVectors( zAxis, xAxis );
+
+		// setup inverse of model matrix of start position
+		matrix.makeBasis( xAxis, yAxis, zAxis );	
+		matrix.setPosition( start );
+		matrixInverse.getInverse( matrix );
+
+		// check all players of the opposing team
+		for ( index = 0; index < this.opponents.players.length; index++ )
+		{
+			if ( !this._isPassSafeFromOpponent( start, target, receiver, this.opponents.players[ index ], passingForce, matrixInverse ) )
+			{
+				return false;
+			}
+		}
+		
+		return true;
+	};
+
+}() );
+
+/**
+ * Returns true if an opposing player is within the radius of the position given
+ * as a parameter.
+ *
+ * @param {THREE.Vector3} position - The position of the opposing player.
+ * @param {number} radius - The radius to test.
+ *  
+ * @returns {boolean} Is an opposing player within the radius?
+ */
+Team.prototype.isOpponentWithinRadius = function( position, radius ) {
+
+	var index, distanceSq;
+
+	var radiusSq = radius * radius;
+
+	// check all players of the opposing team
+	for ( index = 0; index < this.opponents.players.length; index++ )
+	{
+		// calculate the distance. use the squared value to avoid sqrt
+		distanceSq = this.opponents.players[ index ].object3D.position.distanceToSquared( position );
+
+		if ( distanceSq < radiusSq )
+		{
+			return true;
+		}
+	}
+	return false;
+
+};
+
+/**
+ * Creates all the players for this team.
+ */
+Team.prototype._createPlayers = function() {
+
+	var player;
+
+	if ( this.color === Team.BLUE )
+	{
+		// goalkeeper
+		player = new GoalKeeper( this.entityManager,
+								 PlayerBase.PLAYER_RADIUS,
+								 this, 
+								 1, 
+								 GoalKeeperStates.TendGoal, 
+								 new THREE.Vector3(), 
+								 PlayerBase.CONFIG.PLAYER_MASS, 
+								 PlayerBase.CONFIG.PLAYER_MAX_SPEED_WITHOUT_BALL, 
+								 PlayerBase.CONFIG.PLAYER_MAX_FORCE, 
+								 PlayerBase.CONFIG.PLAYER_MAX_TURN_RATE );
+
+		player.object3D.rotation.set( 0, Math.PI * 0.5, 0);
+		this.players.push( player );
+		world.addObject3D( player.object3D );
+
+		// field players
+
+		// attackers
+		player = new FieldPlayer( this.entityManager,
+				 				  PlayerBase.PLAYER_RADIUS,
+								  this, 
+								  6, 
+								  FieldPlayerStates.Wait,
+								  new THREE.Vector3(), 
+								  PlayerBase.CONFIG.PLAYER_MASS, 
+								  PlayerBase.CONFIG.PLAYER_MAX_SPEED_WITHOUT_BALL, 
+								  PlayerBase.CONFIG.PLAYER_MAX_FORCE, 
+								  PlayerBase.CONFIG.PLAYER_MAX_TURN_RATE, 
+								  PlayerBase.ROLE.ATTACKER );
+
+		player.object3D.rotation.set( 0, Math.PI * 0.5, 0);
+		this.players.push( player );
+		world.addObject3D( player.object3D );
+
+		player = new FieldPlayer( this.entityManager, 
+				 				  PlayerBase.PLAYER_RADIUS,
+								  this, 
+								  8, 
+								  FieldPlayerStates.Wait, 
+								  new THREE.Vector3(), 
+								  PlayerBase.CONFIG.PLAYER_MASS, 
+								  PlayerBase.CONFIG.PLAYER_MAX_SPEED_WITHOUT_BALL, 
+								  PlayerBase.CONFIG.PLAYER_MAX_FORCE, 
+								  PlayerBase.CONFIG.PLAYER_MAX_TURN_RATE, 
+								  PlayerBase.ROLE.ATTACKER );
+
+		player.object3D.rotation.set( 0, Math.PI * 0.5, 0);
+		this.players.push( player );
+		world.addObject3D( player.object3D );
+
+		// defenders
+		player = new FieldPlayer( this.entityManager,
+				  				  PlayerBase.PLAYER_RADIUS,
+								  this, 
+								  3, 
+								  FieldPlayerStates.Wait,
+								  new THREE.Vector3(), 
+								  PlayerBase.CONFIG.PLAYER_MASS, 
+								  PlayerBase.CONFIG.PLAYER_MAX_SPEED_WITHOUT_BALL, 
+								  PlayerBase.CONFIG.PLAYER_MAX_FORCE, 
+								  PlayerBase.CONFIG.PLAYER_MAX_TURN_RATE, 
+								  PlayerBase.ROLE.DEFENDER );
+
+		player.object3D.rotation.set( 0, Math.PI * 0.5, 0);
+		this.players.push( player );
+		world.addObject3D( player.object3D );
+
+		player = new FieldPlayer( this.entityManager,
+				  				  PlayerBase.PLAYER_RADIUS,
+								  this, 
+								  5, 
+								  FieldPlayerStates.Wait, 
+								  new THREE.Vector3(), 
+								  PlayerBase.CONFIG.PLAYER_MASS, 
+								  PlayerBase.CONFIG.PLAYER_MAX_SPEED_WITHOUT_BALL, 
+								  PlayerBase.CONFIG.PLAYER_MAX_FORCE, 
+								  PlayerBase.CONFIG.PLAYER_MAX_TURN_RATE, 
+								  PlayerBase.ROLE.DEFENDER );
+
+		player.object3D.rotation.set( 0, Math.PI * 0.5, 0);
+		this.players.push( player );
+		world.addObject3D( player.object3D );
+
+	}
+	else
+	{
+		// goalkeeper
+		player = new GoalKeeper( this.entityManager,
+								 PlayerBase.PLAYER_RADIUS,
+								 this, 
+								 16, 
+								 GoalKeeperStates.TendGoal, 
+								 new THREE.Vector3(),
+								 PlayerBase.CONFIG.PLAYER_MASS, 
+								 PlayerBase.CONFIG.PLAYER_MAX_SPEED_WITHOUT_BALL, 
+								 PlayerBase.CONFIG.PLAYER_MAX_FORCE, 
+								 PlayerBase.CONFIG.PLAYER_MAX_TURN_RATE );
+
+		player.object3D.rotation.set( 0, Math.PI * -0.5, 0);
+		this.players.push( player );
+		world.addObject3D( player.object3D );
+
+		// field players
+
+		// attackers
+		player = new FieldPlayer( this.entityManager,
+								  PlayerBase.PLAYER_RADIUS,
+								  this, 
+								  9, 
+								  FieldPlayerStates.Wait, 
+								  new THREE.Vector3(), 
+								  PlayerBase.CONFIG.PLAYER_MASS, 
+								  PlayerBase.CONFIG.PLAYER_MAX_SPEED_WITHOUT_BALL, 
+								  PlayerBase.CONFIG.PLAYER_MAX_FORCE, 
+								  PlayerBase.CONFIG.PLAYER_MAX_TURN_RATE, 
+								  PlayerBase.ROLE.ATTACKER );
+
+		player.object3D.rotation.set( 0, Math.PI * -0.5, 0);
+		this.players.push( player );
+		world.addObject3D( player.object3D );
+
+		player = new FieldPlayer( this.entityManager,
+				 				  PlayerBase.PLAYER_RADIUS,
+								  this, 
+								  11, 
+								  FieldPlayerStates.Wait, 
+								  new THREE.Vector3(), 
+								  PlayerBase.CONFIG.PLAYER_MASS, 
+								  PlayerBase.CONFIG.PLAYER_MAX_SPEED_WITHOUT_BALL, 
+								  PlayerBase.CONFIG.PLAYER_MAX_FORCE,
+								  PlayerBase.CONFIG.PLAYER_MAX_TURN_RATE, 
+								  PlayerBase.ROLE.ATTACKER );
+
+		player.object3D.rotation.set( 0, Math.PI * -0.5, 0);
+		this.players.push( player );
+		world.addObject3D( player.object3D );
+
+		// defenders
+		player = new FieldPlayer( this.entityManager,
+				 				  PlayerBase.PLAYER_RADIUS,
+								  this, 
+								  12, 
+								  FieldPlayerStates.Wait,
+								  new THREE.Vector3(), 
+								  PlayerBase.CONFIG.PLAYER_MASS, 
+								  PlayerBase.CONFIG.PLAYER_MAX_SPEED_WITHOUT_BALL, 
+								  PlayerBase.CONFIG.PLAYER_MAX_FORCE, 
+								  PlayerBase.CONFIG.PLAYER_MAX_TURN_RATE, 
+								  PlayerBase.ROLE.DEFENDER );
+
+		player.object3D.rotation.set( 0, Math.PI * -0.5, 0);
+		this.players.push( player );
+		world.addObject3D( player.object3D );
+
+		player = new FieldPlayer( this.entityManager,
+				 				  PlayerBase.PLAYER_RADIUS,
+							      this, 
+							      14, 
+							      FieldPlayerStates.Wait,
+							      new THREE.Vector3(),
+							      PlayerBase.CONFIG.PLAYER_MASS, 
+							      PlayerBase.CONFIG.PLAYER_MAX_SPEED_WITHOUT_BALL, 
+							      PlayerBase.CONFIG.PLAYER_MAX_FORCE,
+							      PlayerBase.CONFIG.PLAYER_MAX_TURN_RATE,
+							      PlayerBase.ROLE.DEFENDER );
+
+		player.object3D.rotation.set( 0, Math.PI * -0.5, 0);
+		this.players.push( player );
+		world.addObject3D( player.object3D );
+	}
+	
+	// register all players for messaging
+	for ( var index = 0; index < this.players.length; index++ )
+	{
+		eventManager.registerEntity( this.players[ index ] );
+	}
+	
+	// finally register team
+	eventManager.registerEntity( this );
+};
+
+/**
+ * Called each frame. Sets "playerClosestToBall" to point to the player closest
+ * to the ball.
+ */
+Team.prototype._calculateClosestPlayerToBall = function() {
+
+	var index, distanceSq, player;
+
+	var closestDistanceSq = Infinity;
+
+	for ( index = 0; index < this.players.length; index++ )
+	{
+		player = this.players[ index ];
+
+		// calculate the distance. use the squared value to avoid sqrt
+		distanceSq = player.object3D.position.distanceToSquared( this.pitch.ball.object3D.position );
+
+		// keep a record of this value for each player
+		player.distanceSqToBall = distanceSq;
+
+		if ( distanceSq < closestDistanceSq )
+		{
+			// set new closest distance
+			closestDistanceSq = distanceSq;
+
+			// save the reference to the player closest to the ball
+			this.playerClosestToBall = player;
+		}
+	}
+
+	// also save the value of the closest distance
+	this.distSqToBallOfClosestPlayer = closestDistanceSq;
+
+};
+
+/**
+ * Tests if a pass from positions "from" to "target" kicked with force
+ * "PassingForce" can be intercepted by an opposing player.
+ * 
+ * @param {THREE.Vector3} start - The start position of the pass.
+ * @param {THREE.Vector3} target - The target position of the pass.
+ * @param {PlayerBase} receiver - The receiver of the pass.
+ * @param {PlayerBase} opponent - The opposing player.
+ * @param {number} passingForce - The force of the pass.
+ * @param {THREE.Matrix4} matrixInverse - The inverse matrix of from position.
+ * 
+ * @returns {boolean} Can the pass be intercepted by an opposing player?
+ */
+Team.prototype._isPassSafeFromOpponent = ( function() {
+
+	var localPositionOfOpponent = new THREE.Vector3();
+	var origin = new THREE.Vector3();
+	var orthoPosition = new THREE.Vector3();
+
+	return function( start, target, receiver, opponent, passingForce, matrixInverse ) {
+		
+		var timeForBall, reach;
+
+		// do transformation to the ball's object space
+		localPositionOfOpponent.copy( opponent.object3D.position ).applyMatrix4( matrixInverse );
+		
+		var test = target.clone().applyMatrix4( matrixInverse );
+
+		// if opponent is behind the ball then pass is considered okay (this
+		// is based on the assumption that the ball is going to be kicked with a
+		// velocity greater than the opponent's max velocity)
+		if ( localPositionOfOpponent.z < 0 )
+		{
+			return true;
+		}
+
+		// if the opponent is further away than the target we need to
+		// consider if the opponent can reach the position before the receiver.
+		if ( start.distanceToSquared( target ) < start.distanceToSquared( opponent.object3D.position ) )
+		{
+			// this condition is here because sometimes this function may be
+			// called without reference to a receiver. (For example, you may
+			// want to find out if a ball can reach a position on the field
+			// before an opponent can get to it)
+			if ( receiver !== null )
+			{
+				if ( target.distanceToSquared( opponent.object3D.position ) > target.distanceToSquared( receiver.object3D.position ) )
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+			else
+			{
+				return true;
+			}
+		}
+
+		// calculate how long it takes the ball to cover the distance to the
+		// position orthogonal to the opponents position
+		orthoPosition.set( localPositionOfOpponent.z, 0, 0 );
+
+		timeForBall = this.pitch.ball.calculateTimeToCoverDistance( origin, orthoPosition, passingForce );
+
+		// now calculate how far the opponent can run in this time
+		reach = opponent.maxSpeed * timeForBall + this.pitch.ball.boundingRadius + opponent.boundingRadius;
+
+		// if the distance to the opponent's z position is less than his running
+		// range plus the radius of the ball then the ball can be intercepted
+		if ( Math.abs( localPositionOfOpponent.x ) < reach )
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	};
+
+}() );
+
+/**
+ * Three potential passes are calculated. One directly toward the receiver's
+ * current position and two that are the tangents from the ball position to the
+ * circle of radius "range" from the receiver. These passes are then tested to
+ * see if they can be intercepted by an opponent and to make sure they terminate
+ * within the playing area. If all the passes are invalidated the function
+ * returns false. Otherwise the function returns the pass that takes the ball
+ * closest to the opponent's goal area.
+ * 
+ * @param {PlayerBase} passer - The player who passes the ball.
+ * @param {PlayerBase} receiver - The player who receives the ball.
+ * @param {THREE.Vector3} passTarget - The target of the pass.
+ * @param {number} passPower - The power of the pass.
+ * 
+ * @returns {boolean} Is a pass to the receiver possible?
+ */
+Team.prototype._isPassToReceiverPossible = ( function() {
+
+	var intersectPosition1 = new THREE.Vector3();
+	var intersectPosition2 = new THREE.Vector3();
+
+	var passes = [];
+
+	var SCALING_FACTOR = 0.3;
+
+	return function( passer, receiver, passTarget, passPower ) {
+		
+		var index, time, interceptRange, distance, pass, result = false;
+
+		// this will be used to track the shortest pass
+		var closestPassSoFar = Infinity;
+		
+		// reset the array
+		passes.length = 0;
+
+		// first, calculate how much time it will take for the ball to reach
+		// this receiver, if the receiver was to remain motionless
+		time = this.pitch.ball.calculateTimeToCoverDistance( this.pitch.ball.object3D.position, receiver.object3D.position, passPower );
+
+		// return false if the ball cannot reach the receiver after having been
+		// kicked with the given power
+		if ( time < 0 )
+		{
+			return false;
+		}
+
+		// the maximum distance the receiver can cover in this time
+		interceptRange = time * receiver.maxSpeed;
+
+		// scale the intercept range
+		interceptRange *= SCALING_FACTOR;
+
+		// now calculate the pass targets which are positioned at the intercepts
+		// of the tangents from the ball to the receiver's range circle
+		this._getTangentPoints( receiver.object3D.position, interceptRange, this.pitch.ball.object3D.position, intersectPosition1, intersectPosition2 );
+
+		// store pass targets
+		passes.push( intersectPosition1, receiver.object3D.position, intersectPosition2 );
+
+		for ( index = 0; index < passes.length; index++ )
+		{
+			pass = passes[ index ];
+
+			// calculate simplified distance to goal
+			distance = Math.abs( pass.x - this.opponentsGoal.center.x );
+
+			// this pass is the best found so far if it is:
+			//
+			// 1. Further upfield than the closest valid pass for this receiver
+			// found so far
+			// 2. Within the playing area
+			// 3. Cannot be intercepted by any opponents
+			if ( distance < closestPassSoFar && this.pitch.playingArea.isInside( pass ) && this.isPassSafeFromAllOpponents( this.pitch.ball.object3D.position, pass, receiver, passPower ) )
+			{
+				// save values
+				closestPassSoFar = distance;
+
+				passTarget.copy( pass );
+
+				result = true;
+			}
+		}
+
+		return result;
+	};
+
+}() );
+
+/**
+ * Given a point P and a circle of radius R centered at C this function
+ * determines the two points on the circle that intersect with the tangents from
+ * P to the circle. Returns false if P is within the circle.
+ * 
+ * @param {THREE.Vector3} C - The center of the circle.
+ * @param {number} R - The radius of the circle.
+ * @param {THREE.Vector3} P - The origin point.
+ * @param {THREE.Vector3} T1 - The first tangent.
+ * @param {THREE.Vector3} T2 - The second tangent.
+ * 
+ * @returns {boolean} Is point P inside the circle?
+ */
+Team.prototype._getTangentPoints = ( function() {
+
+	var toPoint = new THREE.Vector3();
+
+	return function( C, R, P, T1, T2 ) {
+		
+		var lengthSq, lengthSqInv, RSq, root;
+
+		toPoint.subVectors( P, C );
+		lengthSq = toPoint.lengthSq();
+		RSq = R * R;
+
+		if ( lengthSq <= RSq )
+		{
+			// P is inside or on the circle
+			return false;
+		}
+
+		lengthSqInv = 1 / lengthSq;
+		root = Math.sqrt( lengthSq - RSq );
+
+		T1.x = C.x + R * ( R * toPoint.x - toPoint.z * root ) * lengthSqInv;
+		T1.z = C.z + R * ( R * toPoint.z + toPoint.x * root ) * lengthSqInv;
+		T2.x = C.x + R * ( R * toPoint.x + toPoint.z * root ) * lengthSqInv;
+		T2.z = C.z + R * ( R * toPoint.z - toPoint.x * root ) * lengthSqInv;
+
+		return true;
+	};
+
+}() );
+
+Team.BLUE = 0x0000ff;
+Team.RED = 0xff0000;
+
+module.exports = Team;
+},{"../../core/World":31,"../../messaging/EventManager":77,"../../messaging/Message":78,"../fsm/FieldPlayerStates":57,"../fsm/GoalKeeperStates":58,"../fsm/StateMachine":60,"../fsm/TeamStates":61,"./FieldPlayer":46,"./GameEntity":47,"./GoalKeeper":49,"./PlayerBase":52,"./SupportSpotCalculator":54,"three":1}],56:[function(require,module,exports){
 /**
  * @file A simple vehicle that uses steering behaviors.
  * 
@@ -45147,7 +48122,963 @@ Vehicle.prototype.update = ( function() {
 }() );
 
 module.exports = Vehicle;
-},{"../steering/Smoother":63,"../steering/SteeringBehaviors":64,"./MovingEntity":46,"three":1}],48:[function(require,module,exports){
+},{"../steering/Smoother":75,"../steering/SteeringBehaviors":76,"./MovingEntity":50,"three":1}],57:[function(require,module,exports){
+"use strict";
+
+var THREE = require( "three" );
+
+var MESSAGE = require( "../../messaging/Message" );
+var eventManager = require( "../../messaging/EventManager" );
+var logger = require( "../../core/Logger" );
+var PlayerBase = require( "../entity/PlayerBase" );
+var State = require( "./State" );
+
+
+/*
+ * State GlobalState ---------------------------------------------------
+ */
+function GlobalState() {
+
+}
+
+GlobalState.prototype = Object.create( State.prototype );
+GlobalState.prototype.constructor = GlobalState;
+
+GlobalState.prototype.execute = function( player ) {
+
+	// if a player is in possession and close to the ball reduce his max speed
+	if ( player.isBallWithinReceivingRange() && player.isControllingPlayer() )
+	{
+		player.maxSpeed = PlayerBase.CONFIG.PLAYER_MAX_SPEED_WITH_BALL;
+	}
+	else
+	{
+		player.maxSpeed = PlayerBase.CONFIG.PLAYER_MAX_SPEED_WITHOUT_BALL;
+	}
+};
+
+GlobalState.prototype.onMessage = ( function() {
+
+	var kickDirection = new THREE.Vector3();
+
+	return function( player, telegram ) {
+
+		// check message type
+		switch ( telegram.message )
+		{
+			case MESSAGE.RECEIVE_BALL:
+
+				// set the target
+				player.steering.target.copy( telegram.data.target );
+
+				// change state
+				player.stateMachine.changeState( States.ReceiveBall );
+
+				return true;
+
+			case MESSAGE.SUPPORT_ATTACKER:
+
+				// if already supporting just return
+				if ( player.stateMachine.isInState( States.SupportAttacker ) )
+				{
+					return true;
+				}
+
+				// set the target to be the best supporting position
+				player.steering.target.copy( player.team.getSupportSpot() );
+
+				// change state
+				player.stateMachine.changeState( States.SupportAttacker );
+
+				return true;
+
+			case MESSAGE.GO_HOME:
+
+				player.setDefaultHomeRegion();
+
+				// change state
+				player.stateMachine.changeState( States.ReturnToHomeRegion );
+
+				return true;
+
+			case MESSAGE.PASS_TO_ME:
+
+				var requester = telegram.data;
+
+				// if there is already a receiving player or the ball is not
+				// within kicking range, this player cannot pass the ball to
+				// the player making the request
+				if ( player.team.receivingPlayer !== null || !player.isBallWithinKickingRange() )
+				{
+					return true;
+				}
+
+				// calculate kick direction
+				kickDirection.subVectors( requester.object3D.position, player.ball.object3D.position );
+
+				// make the pass
+				player.ball.kick( kickDirection, PlayerBase.CONFIG.PLAYER_MAX_PASSING_FORCE );
+
+				// let the receiver know a pass is coming
+				eventManager.sendMessageToEntitySync( player.id, requester.id, MESSAGE.RECEIVE_BALL, {
+					target : requester.object3D.position.clone()
+				} );
+
+				// change state
+				player.stateMachine.changeState( States.Wait );
+
+				player.findSupport();
+
+				return true;
+
+		}// end switch
+
+		return false;
+	};
+
+}() );
+
+/*
+ * State ChaseBall --------------------------------------------------- 
+ * In this state the field player will try to seek to the ball position.
+ */
+
+function ChaseBall() {
+
+}
+
+ChaseBall.prototype = Object.create( State.prototype );
+ChaseBall.prototype.constructor = ChaseBall;
+
+ChaseBall.prototype.enter = function( player ) {
+
+	player.steering.seekOn();
+	
+	logger.log("Enter State \"ChaseBall\" with field player: ", player.id );
+};
+
+ChaseBall.prototype.execute = function( player ) {
+
+	// if the ball is within kicking range the player changes state to "KickBall"
+	if ( player.isBallWithinKickingRange() )
+	{
+		player.stateMachine.changeState( States.KickBall );
+
+		return;
+	}
+
+	// if the player is the closest player to the ball then he should keep
+	// chasing it
+	if ( player.isClosestTeamMemberToBall() )
+	{
+		player.steering.target.copy( player.ball.object3D.position );
+		
+		return;
+	}
+	
+	// if the player is not closest to the ball anymore, he should return back
+	// to his home region and wait for another opportunity
+	player.stateMachine.changeState( States.ReturnToHomeRegion );
+};
+
+ChaseBall.prototype.exit = function( player ) {
+
+	player.steering.seekOff();
+	
+	logger.log("Exit State \"ChaseBall\" with field player: ", player.id );
+};
+
+/*
+ * State SupportAttacker --------------------------------------------------- 
+ * In this state the field player will try to support to the attacker.
+ */
+
+function SupportAttacker() {
+
+}
+
+SupportAttacker.prototype = Object.create( State.prototype );
+SupportAttacker.prototype.constructor = SupportAttacker;
+
+SupportAttacker.prototype.enter = function( player ) {
+
+	player.steering.arriveOn();
+	
+	player.steering.target.copy( player.team.getSupportSpot() );
+	
+	logger.log("Enter State \"SupportAttacker\" with field player: ", player.id );
+};
+
+SupportAttacker.prototype.execute = function( player ) {
+
+	// if his team loses control go back home
+	if ( !player.team.isInControl() )
+	{
+		player.stateMachine.changeState( States.ReturnToHomeRegion );
+
+		return;
+	}
+
+	// if the best supporting spot changes, change the steering target
+	if ( !player.team.getSupportSpot().equals( player.steering.target ) )
+	{
+		player.steering.target.copy( player.team.getSupportSpot() );
+
+		player.steering.arriveOn();
+	}
+
+	// if this player has a shot at the goal AND the attacker can pass the ball
+	// to him the attacker should pass the ball to this player
+	if ( player.team.isShootPossible( player.object3D.position, PlayerBase.CONFIG.PLAYER_MAX_SHOOTING_FORCE, new THREE.Vector3() ) )
+	{
+		player.team.requestPass( player );
+	}
+
+	// if this player is located at the support spot and his team still have
+	// possession, he should remain still and turn to face the ball
+	if ( player.isAtTarget() )
+	{
+		player.steering.arriveOff();
+
+		// the player should keep his eyes on the ball!
+		player.trackBall();
+
+		player.velocity.set( 0, 0, 0 );
+
+		// if not threatened by another player request a pass
+		if ( !player.isThreatened() )
+		{
+			player.team.requestPass( player );
+		}
+	}
+};
+
+SupportAttacker.prototype.exit = function( player ) {
+
+	// set supporting player to null so that the team knows it has to determine a new one
+	player.team.supportingPlayer = null;
+	
+	player.steering.arriveOff();
+	
+	logger.log("Exit State \"SupportAttacker\" with field player: ", player.id );
+};
+
+/*
+ * State ReturnToHomeRegion --------------------------------------------------- 
+ * In this state the field player will return to his home region.
+ */
+function ReturnToHomeRegion() {
+
+}
+
+ReturnToHomeRegion.prototype = Object.create( State.prototype );
+ReturnToHomeRegion.prototype.constructor = ReturnToHomeRegion;
+
+ReturnToHomeRegion.prototype.enter = function( player ) {
+
+	player.steering.arriveOn();
+
+	// ensure the player's steering target is within the home region
+	if ( !player.getHomeRegion().isInside( player.steering.target, true ) )
+	{
+		player.steering.target.copy( player.getHomeRegion().center );
+	}
+	
+	logger.log("Enter State \"ReturnToHomeRegion\" with field player: ", player.id );
+};
+
+ReturnToHomeRegion.prototype.execute = function( player ) {
+
+	if ( player.pitch.isGameOn )
+	{
+		// if the ball is nearer this player than any other team member &&
+		// there is not an assigned receiver && the goalkeeper does not has
+		// the ball, go chase it
+		if ( player.isClosestTeamMemberToBall() && player.team.receivingPlayer === null && !player.pitch.isGoalKeeperInBallPossession )
+		{
+			player.stateMachine.changeState( States.ChaseBall );
+			
+			return;
+		}
+	}
+	
+	// if game is on and the player is close enough to home, change state to
+	// wait and set the player target to his current position (so that if he
+	// gets jostled out of position he can move back to it)
+	if ( player.pitch.isGameOn && player.isInHomeRegion() )
+	{
+		player.steering.target.copy( player.object3D.position );
+		
+		player.stateMachine.changeState( States.Wait );
+	}
+	
+	// if game is not on the player must return much closer to the center of
+	// his home region
+	else if ( !player.pitch.isGameOn && player.isAtTarget() )
+	{
+		player.stateMachine.changeState( States.Wait );
+	}
+	
+};
+
+ReturnToHomeRegion.prototype.exit = function( player ) {
+
+	player.steering.arriveOff();
+	
+	logger.log("Exit State \"ReturnToHomeRegion\" with field player: ", player.id );
+};
+
+/*
+ * State Wait --------------------------------------------------- 
+ * In this state the field player will wait in his home region.
+ */
+function Wait() {
+
+}
+
+Wait.prototype = Object.create( State.prototype );
+Wait.prototype.constructor = Wait;
+
+Wait.prototype.enter = function( player ) {
+
+	// if the game is not on make sure the target is the center of the player's
+	// home region. This is ensure all the players are in the correct positions
+	// ready for kick off
+	if ( !player.pitch.isGameOn )
+	{
+		player.steering.target.copy( player.getHomeRegion().center );
+	}
+	
+	logger.log("Enter State \"Wait\" with field player: ", player.id );
+};
+
+Wait.prototype.execute = function( player ) {
+
+	// if the player has been jostled out of position, get back in position
+	if ( !player.isAtTarget() )
+	{
+		player.steering.arriveOn();
+	}
+	else
+	{
+		player.steering.arriveOff();
+
+		player.velocity.set( 0, 0, 0 );
+
+		// the player should keep his eyes on the ball!
+		player.trackBall();
+	}
+
+	// if this player's team is controlling AND this player is not the
+	// attacker AND is further up the field than the attacker he should
+	// request a pass
+	if ( player.team.isInControl() && !player.isControllingPlayer() && player.isAheadOfAttacker() )
+	{
+		player.team.requestPass( player );
+
+		return;
+	}
+
+	if ( player.pitch.isGameOn )
+	{
+		// if the ball is nearer to this player than any other team member AND
+		// there is not an assigned receiver AND neither goalkeeper has the
+		// ball, go chase it
+		if ( player.isClosestTeamMemberToBall() && player.team.receivingPlayer === null && !player.pitch.isGoalKeeperInBallPossession )
+		{
+			player.stateMachine.changeState( States.ChaseBall );
+			
+			return;
+		}
+	}
+};
+
+Wait.prototype.exit = function( player ) {
+
+	logger.log( "Exit State \"Wait\" with field player: ", player.id );
+};
+
+/*
+ * State KickBall --------------------------------------------------- 
+ * In this state the player kicks the ball. The player can shot a the goal
+ * or pass to a team member.
+ */
+function KickBall() {
+
+}
+
+KickBall.prototype = Object.create( State.prototype );
+KickBall.prototype.constructor = KickBall;
+
+KickBall.prototype.enter = function( player ) {
+
+	// let the team know this player is controlling
+	player.team.setControllingPlayer( player );
+
+	// the player can only make a specific amount of kicks per second
+	if ( !player.isReadyForNextKick() )
+	{
+		player.stateMachine.changeState( States.ChaseBall );
+	}
+	
+	logger.log("Enter State \"KickBall\" with field player: ", player.id );
+};
+
+KickBall.prototype.execute = ( function() {
+
+	// the direction player to ball
+	var toBall = new THREE.Vector3();
+
+	// if a shot is possible, this vector will hold the position along the
+	// opponent's goal line the player should aim for
+	var ballTarget = new THREE.Vector3();
+
+	// this is the direction the ball will be kicked in to shot a goal
+	var kickDirection = new THREE.Vector3();
+
+	// if a receiver for the pass is found this will point to it
+	var receiver = {
+		object : null
+	};
+
+	return function( player ) {
+		
+		var dot, power;
+
+		// calculate the dot product of the vector pointing to the ball and the
+		// player's heading
+		toBall.subVectors( player.ball.object3D.position, player.object3D.position ).normalize();
+		dot = toBall.dot( player.getDirection() );
+
+		// cannot kick the ball if the goalkeeper is in possession or if it is
+		// behind the player or if there is already an assigned receiver. So
+		// just continue chasing the ball
+		if ( player.pitch.isGoalKeeperInBallPossession || ( dot < 0 ) || player.team.receivingPlayer !== null )
+		{
+			player.stateMachine.changeState( States.ChaseBall );
+
+			return;
+		}
+
+		/* attempt a shot at the goal */
+
+		// the dot product is used to adjust the shooting force. The more
+		// directly the ball is ahead, the more forceful the kick
+		power = PlayerBase.CONFIG.PLAYER_MAX_SHOOTING_FORCE * dot;
+
+		// if it is determined that the player could score a goal from this
+		// position OR if he should just kick the ball anyway, the player will
+		// attempt to make the shot
+		if ( ( player.team.isShootPossible( player.ball.object3D.position, power, ballTarget ) ) || ( Math.random() < PlayerBase.CONFIG.PLAYER_CHANCE_ATTEMPT_POT_SHOT ) )
+		{
+			// add some noise to the kick. We don't want players who are too
+			// accurate!
+			player.ball.addNoiseToKick( ballTarget );
+
+			// this is the direction the ball will be kicked in
+			kickDirection.subVectors( ballTarget, player.ball.object3D.position );
+
+			// do the kick!
+			player.ball.kick( kickDirection, power );
+
+			// change state
+			player.stateMachine.changeState( States.Wait );
+
+			player.findSupport();
+
+			return;
+		}
+
+		/* attempt a pass to a player */
+
+		power = PlayerBase.CONFIG.PLAYER_MAX_PASSING_FORCE * dot;
+
+		// test if there are any potential candidates available to receive a pass
+		if ( player.isThreatened() && player.team.isPassPossible( player, receiver, ballTarget, power, PlayerBase.CONFIG.PLAYER_MIN_PASS_DISTANCE ) )
+		{
+			// add some noise to the kick
+			player.ball.addNoiseToKick( ballTarget );
+
+			// this is the direction the ball will be kicked in
+			kickDirection.subVectors( ballTarget, player.ball.object3D.position );
+
+			// do the kick!
+			player.ball.kick( kickDirection, power );
+
+			// let the receiving player know the ball's coming at him
+			eventManager.sendMessageToEntitySync( player.id, receiver.object.id, MESSAGE.RECEIVE_BALL, {
+				target : ballTarget.clone()
+			} );
+
+			// the player should wait at his current position unless instructed
+			// otherwise
+			player.stateMachine.changeState( States.Wait );
+
+			player.findSupport();
+		}
+		else
+		{
+			// cannot shoot or pass, so dribble the ball upfield
+			player.findSupport();
+
+			player.stateMachine.changeState( States.Dribble );
+		}
+	};
+
+}() );
+
+KickBall.prototype.exit = function( player ) {
+
+	logger.log( "Exit State \"KickBall\" with field player: ", player.id );
+};
+
+
+/*
+ * State Dribble --------------------------------------------------- In this
+ * state the ball controlling field player moves to the opposing goal.
+ */
+function Dribble() {
+
+}
+
+Dribble.prototype = Object.create( State.prototype );
+Dribble.prototype.constructor = Dribble;
+
+Dribble.prototype.enter = function( player ) {
+
+	// let the team know this player is controlling
+	player.team.setControllingPlayer( player );
+	
+	logger.log("Enter State \"Dribble\" with field player: ", player.id );
+};
+
+Dribble.prototype.execute = ( function() {
+
+	var quarterPI = Math.PI * 0.25;
+
+	var rotationMatrix = new THREE.Matrix4();
+
+	return function( player ) {
+		
+		// get direction of player
+		var playerDirection = player.getDirection();
+
+		// calculate the dot product of direction and home goal facing
+		var dot = playerDirection.dot( player.team.homeGoal.facing );
+
+		// if the ball is between the player and the home goal, it needs to
+		// swivel the ball around by doing multiple small kicks and turns until
+		// the player is facing in the correct direction
+		if ( dot < 0 )
+		{
+			// the player's heading is going to be rotated by a small amount
+			// (Pi/4) and then the ball will be kicked in that direction
+
+			// calculate the sign (+/-) of the angle between the player heading
+			// and the facing direction of the goal so that the player rotates
+			// around in the correct direction
+			var sign = ( ( playerDirection.x * player.team.homeGoal.facing.z ) < ( playerDirection.z * player.team.homeGoal.facing.x ) ) ? 1 : -1;
+
+			// setup rotation matrix
+			rotationMatrix.makeRotationY( ( quarterPI * sign ) );
+
+			// apply rotation to direction
+			playerDirection.transformDirection( rotationMatrix );
+
+			// kick the ball with a lower force if the player turns around
+			player.ball.kick( playerDirection, PlayerBase.CONFIG.PLAYER_MAX_DRIBBLE_AND_TURN_FORCE );
+		}
+		else
+		{
+			// kick the ball down the field
+			player.ball.kick( player.team.homeGoal.facing, PlayerBase.CONFIG.PLAYER_MAX_DRIBBLE_FORCE );
+		}
+
+		// the player has kicked the ball so he must now change state to follow
+		// it
+		player.stateMachine.changeState( States.ChaseBall );
+	};
+
+}() );
+
+Dribble.prototype.exit = function( player ) {
+
+	logger.log( "Exit State \"Dribble\" with field player: ", player.id );
+};
+
+/*
+ * State ReceiveBall --------------------------------------------------- In this
+ * state the field player receives the ball.
+ */
+function ReceiveBall() {
+
+}
+
+ReceiveBall.prototype = Object.create( State.prototype );
+ReceiveBall.prototype.constructor = ReceiveBall;
+
+ReceiveBall.prototype.enter = function( player ) {
+		
+	// let the team know this player is receiving the ball
+	player.team.receivingPlayer = player;
+
+	// this player is also now the controlling player
+	player.team.setControllingPlayer( player );
+
+	// there are two types of receive behavior. One uses arrive to direct the
+	// receiver to the position sent by the passer in its message. The other
+	// uses the pursuit behavior to pursue the ball. This statement selects
+	// between them dependent on the probability
+	// CHANCE_OF_USING_ARRIVE_TYPE_RECEIVE_BEHAVIOR, whether or not an opposing
+	// player is close to the receiving player, and whether or not the receiving
+	// player is in the opponents "hot region" (the third of the pitch closest
+	// to the opponent's goal)
+	if ( ( player.isInHotRegion() || Math.random() < PlayerBase.CONFIG.PLAYER_CHANCE_OF_USING_ARRIVE_TYPE_RECEIVE_BEHAVIOR ) && 
+		 !player.team.isOpponentWithinRadius( player.object3D.position, PlayerBase.CONFIG.PLAYER_PASS_THREAD_RADIUS ) ) 
+	{
+		player.steering.arriveOn();
+	}
+	else
+	{
+		player.steering.pursuitOn();
+	}
+	
+	logger.log("Enter State \"ReceiveBall\" with field player: ", player.id );
+};
+
+ReceiveBall.prototype.execute = function( player ) {
+
+	// if the ball comes close enough to the player or if his team lose
+	// control he should change state to chase the ball
+	if ( player.isBallWithinReceivingRange() || !player.team.isInControl() )
+	{
+		player.stateMachine.changeState( States.ChaseBall );
+
+		return;
+	}
+
+	// if "pursuit" is active, it's necessary to update the target position
+	if ( player.steering.isPursuitOn() )
+	{
+		player.steering.target.copy( player.ball.object3D.position );
+	}
+
+	// if the player has "arrived" at the steering target he should wait and
+	// turn to face the ball
+	if ( player.isAtTarget() )
+	{
+		player.steering.arriveOff();
+		player.steering.pursuitOff();
+		player.trackBall();
+		player.velocity.set( 0, 0, 0 );
+	}
+};
+
+ReceiveBall.prototype.exit = function( player ) {
+
+	player.steering.arriveOff();
+	player.steering.pursuitOff();
+	
+	player.team.receivingPlayer = null;
+	
+	logger.log( "Exit State \"ReceiveBall\" with field player: ", player.id );
+};
+
+var States = {
+	GlobalState : new GlobalState(),
+	ChaseBall : new ChaseBall(),
+	SupportAttacker : new SupportAttacker(),
+	ReturnToHomeRegion : new ReturnToHomeRegion(),
+	Wait : new Wait(),
+	KickBall : new KickBall(),
+	Dribble : new Dribble(),
+	ReceiveBall : new ReceiveBall()
+};
+
+module.exports = States;
+},{"../../core/Logger":21,"../../messaging/EventManager":77,"../../messaging/Message":78,"../entity/PlayerBase":52,"./State":59,"three":1}],58:[function(require,module,exports){
+"use strict";
+
+var THREE = require( "three" );
+
+var MESSAGE = require( "../../messaging/Message" );
+var eventManager = require( "../../messaging/EventManager" );
+var logger = require( "../../core/Logger" );
+var PlayerBase = require( "../entity/PlayerBase" );
+var State = require( "./State" );
+
+/*
+ * State GlobalState ---------------------------------------------------
+ */
+
+function GlobalState() {
+
+}
+
+GlobalState.prototype = Object.create( State.prototype );
+GlobalState.prototype.constructor = GlobalState;
+
+GlobalState.prototype.onMessage = function( keeper, telegram ) {
+
+	// check message type
+	switch ( telegram.message )
+	{
+		case MESSAGE.GO_HOME:
+
+			keeper.setDefaultHomeRegion();
+
+			keeper.stateMachine.changeState( States.ReturnHome );
+
+			return true;
+
+		case MESSAGE.RECEIVE_BALL:
+
+			keeper.stateMachine.changeState( States.InterceptBall );
+
+			return true;
+	}
+	
+	return false;
+};
+
+/*
+ * State TendGoal --------------------------------------------------- 
+ * This is the main state for the goalkeeper. When in this state he will move left to
+ * right across the goalmouth using the "interpose" steering behavior to put
+ * himself between the ball and the back of the net. If the ball comes within
+ * the "goalkeeper range" he moves out of the goalmouth to attempt to intercept
+ * it. (see next state)
+ */
+
+function TendGoal() {
+
+}
+
+TendGoal.prototype = Object.create( State.prototype );
+TendGoal.prototype.constructor = TendGoal;
+
+TendGoal.prototype.enter = function( keeper ) {
+
+	// turn interpose on
+	keeper.steering.interposeOn( PlayerBase.CONFIG.KEEPER_TENDING_DISTANCE );
+
+	// interpose will position the agent between the ball position and a target
+	// position situated along the goalmouth. This call sets the target.
+	keeper.steering.target.copy( keeper.getRearInterposeTarget() );
+	
+	logger.log("Enter State \"TendGoal\" with keeper: ", keeper.id );
+};
+
+TendGoal.prototype.execute = function( keeper ) {
+
+	// the rear interpose target will change as the ball's position changes
+	// so it must be updated each update-step
+	keeper.steering.target.copy( keeper.getRearInterposeTarget() );
+
+	// if the ball comes in range the keeper traps it and then changes state
+	// to put the ball back in play
+	if ( keeper.isBallWithinKeeperRange() )
+	{
+		keeper.ball.trap();
+
+		keeper.pitch.isGoalKeeperInBallPossession = true;
+
+		keeper.stateMachine.changeState( States.PutBallBackInPlay );
+
+		return;
+	}
+
+	// if ball is within a predefined distance, the keeper moves out from
+	// position to try to intercept it.
+	if ( keeper.isBallWithinRangeForIntercept() && !keeper.team.isInControl() )
+	{
+		keeper.stateMachine.changeState( States.InterceptBall );
+	}
+
+	// if the keeper has ventured too far away from the goalline and there
+	// is no threat from the opponents he should move back towards it
+	if ( keeper.isTooFarFromGoalMouth() && keeper.team.isInControl() )
+	{
+		keeper.stateMachine.changeState( States.ReturnHome );
+	}
+};
+
+TendGoal.prototype.exit = function( keeper ) {
+
+	// turn interpose off
+	keeper.steering.interposeOff();
+	
+	logger.log("Exit State \"TendGoal\" with keeper: ", keeper.id );
+};
+
+/*
+ * State ReturnHome ---------------------------------------------------
+ * 
+ * In this state the goalkeeper simply returns back to the center of
+ * the goal region before changing state back to TendGoal.
+ */
+
+function ReturnHome() {
+
+}
+
+ReturnHome.prototype = Object.create( State.prototype );
+ReturnHome.prototype.constructor = ReturnHome;
+
+ReturnHome.prototype.enter = function( keeper ) {
+
+	keeper.steering.arriveOn();
+	
+	logger.log("Enter State \"ReturnHome\" with keeper: ", keeper.id );
+};
+
+ReturnHome.prototype.execute = function( keeper ) {
+
+	keeper.steering.target.copy( keeper.getHomeRegion().center );
+
+	// if close enough to home or the opponents get control over the ball,
+	// change state to tend goal
+	if ( keeper.isInHomeRegion() || !keeper.team.isInControl() )
+	{
+		keeper.stateMachine.changeState( States.TendGoal );
+	}
+};
+
+ReturnHome.prototype.exit = function( keeper ) {
+
+	keeper.steering.arriveOff();
+	
+	logger.log("Exit State \"ReturnHome\" with keeper: ", keeper.id );
+};
+
+/*
+ * State InterceptBall ---------------------------------------------------
+ * 
+ * In this state the goalkeeper will attempt to intercept the ball using the
+ * pursuit steering behavior, but he only does so so long as he remains
+ * within his home region.
+ */
+
+function InterceptBall() {
+
+}
+
+InterceptBall.prototype = Object.create( State.prototype );
+InterceptBall.prototype.constructor = InterceptBall;
+
+InterceptBall.prototype.enter = function( keeper ) {
+
+	keeper.steering.pursuitOn();
+	
+	logger.log("Enter State \"InterceptBall\" with keeper: ", keeper.id );
+};
+
+InterceptBall.prototype.execute = function( keeper ) {
+
+	// if the goalkeeper moves too far away from the goal he should return to his
+	// home region UNLESS he is the closest player to the ball, in which case,
+	// he should keep trying to intercept it.
+	if ( keeper.isTooFarFromGoalMouth() && !keeper.isClosestPlayerOnPitchToBall() )
+	{
+		keeper.stateMachine.changeState( States.ReturnHome );
+		
+		return;
+	}
+
+	// if the ball becomes in range of the goalkeeper's hands he traps the ball
+	// and puts it back in play
+	if ( keeper.isBallWithinKeeperRange() )
+	{
+		keeper.ball.trap();
+
+		keeper.pitch.isGoalKeeperInBallPossession = true;
+
+		keeper.stateMachine.changeState( States.PutBallBackInPlay );
+	}
+};
+
+InterceptBall.prototype.exit = function( keeper ) {
+
+	keeper.steering.pursuitOff();
+	
+	logger.log("Exit State \"InterceptBall\" with keeper: ", keeper.id );
+};
+
+/*
+ * State PutBallBackInPlay ---------------------------------------------------
+ * 
+ * In this state the goalkeeper will put the ball back in play.
+ */
+
+function PutBallBackInPlay() {
+
+}
+
+PutBallBackInPlay.prototype = Object.create( State.prototype );
+PutBallBackInPlay.prototype.constructor = PutBallBackInPlay;
+
+PutBallBackInPlay.prototype.enter = function( keeper ) {
+
+	// let the team know that the keeper is in control
+	keeper.team.setControllingPlayer( keeper );
+	
+	// send all players home
+	keeper.team.returnAllFieldPlayersToHome();
+	keeper.team.opponents.returnAllFieldPlayersToHome();
+	
+	logger.log("Enter State \"PutBallBackInPlay\" with keeper: ", keeper.id );
+};
+
+PutBallBackInPlay.prototype.execute = function( keeper ) {
+
+	var receiver = {
+		object : null
+	};
+
+	var ballTarget = new THREE.Vector3();
+	var kickDirection = new THREE.Vector3();
+
+	// test if there are players further forward on the field we might be able
+	// to pass to. If so, make a pass.
+	if ( keeper.team.isPassPossible( keeper, receiver, ballTarget, PlayerBase.CONFIG.PLAYER_MAX_PASSING_FORCE, PlayerBase.CONFIG.KEEPER_MIN_PASS_DISTANCE ) )
+	{
+		kickDirection.subVectors( ballTarget, keeper.ball.object3D.position ).normalize();
+
+		// make the pass
+		keeper.ball.kick( kickDirection, PlayerBase.CONFIG.PLAYER_MAX_PASSING_FORCE );
+
+		// goalkeeper no longer has ball
+		keeper.pitch.isGoalKeeperInBallPossession = false;
+
+		// let the receiving player know the ball's coming at him
+		eventManager.sendMessageToEntitySync( keeper.id, receiver.object.id, MESSAGE.RECEIVE_BALL, {
+			target : ballTarget.clone()
+		} );
+
+		// go back to tending the goal
+		keeper.stateMachine.changeState( States.TendGoal );
+
+		return;
+	}
+
+	keeper.velocity.set( 0, 0, 0 );
+};
+
+PutBallBackInPlay.prototype.exit = function( keeper ) {
+
+	logger.log( "Exit State \"PutBallBackInPlay\" with keeper: ", keeper.id );
+};
+
+var States = {
+	GlobalState : new GlobalState(),
+	TendGoal : new TendGoal(),
+	ReturnHome : new ReturnHome(),
+	InterceptBall : new InterceptBall(),
+	PutBallBackInPlay : new PutBallBackInPlay(),
+};
+
+module.exports = States;
+},{"../../core/Logger":21,"../../messaging/EventManager":77,"../../messaging/Message":78,"../entity/PlayerBase":52,"./State":59,"three":1}],59:[function(require,module,exports){
 /**
  * @file Super prototype for states used by FSMs.
  * 
@@ -45198,7 +49129,7 @@ State.prototype.exit = function( entity ) { };
 State.prototype.onMessage = function( entity, telegram ) { return false; };
 
 module.exports = State;
-},{}],49:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 /**
  * @file This prototype is a basic finite state machine used for AI logic.
  * 
@@ -45339,7 +49270,151 @@ StateMachine.prototype.isInState = function( state ) {
 };
 
 module.exports = StateMachine;
-},{"../../core/Logger":21,"./State":48}],50:[function(require,module,exports){
+},{"../../core/Logger":21,"./State":59}],61:[function(require,module,exports){
+"use strict";
+
+var logger = require( "../../core/Logger" );
+var State = require( "./State" );
+
+/*
+ * State Attacking ---------------------------------------------------
+ * 
+ * In this state the team tries to make a goal.
+ */
+
+function Attacking() {
+
+}
+
+Attacking.prototype = Object.create( State.prototype );
+Attacking.prototype.constructor = Attacking;
+
+Attacking.prototype.enter = function( team ) {
+
+	// set up the player's home regions
+	team.setupTeamPositions();
+
+	// if a player is in either the Wait or ReturnToHomeRegion states, its
+	// steering target must be updated to that of its new home region to
+	// enable it to move into the correct position.
+	team.updateTargetsOfWaitingPlayers();
+	
+	logger.log("Enter State \"Attacking\" with team: ", team.id );
+};
+
+Attacking.prototype.execute = function( team ) {
+
+	// if this team is no longer in control change states
+	if ( !team.isInControl() )
+	{
+		team.stateMachine.changeState( States.Defending );
+
+		return;
+	}
+	
+	// calculate the best position for any supporting attacker to move to
+	team.calculateBestSupportingPosition();
+};
+
+Attacking.prototype.exit = function( team ) {
+
+	// there is no supporting player for defense
+	team.supportingPlayer = null;
+
+	logger.log("Exit State \"Attacking\" with team: ", team.id );
+};
+
+/*
+ * State Defending ---------------------------------------------------
+ * 
+ * In this state the team tries to defend its goal.
+ */
+
+function Defending() {
+
+}
+
+Defending.prototype = Object.create( State.prototype );
+Defending.prototype.constructor = Defending;
+
+Defending.prototype.enter = function( team ) {
+
+	// set up the player's home regions
+	team.setupTeamPositions();
+
+	// if a player is in either the Wait or ReturnToHomeRegion states, its
+	// steering target must be updated to that of its new home region to
+	// enable it to move into the correct position.
+	team.updateTargetsOfWaitingPlayers();
+	
+	logger.log("Enter State \"Defending\" with team: ", team.id );
+};
+
+Defending.prototype.execute = function( team ) {
+
+	// if in control change states
+	if ( team.isInControl() )
+	{
+		team.stateMachine.changeState( States.Attacking );
+	}
+};
+
+Defending.prototype.exit = function( team ) {
+
+	logger.log("Exit State \"Defending\" with team: ", team.id );
+};
+
+/*
+ * State PrepareForKickOff ---------------------------------------------------
+ * 
+ * In this state the team prepares for kick of.
+ */
+
+function PrepareForKickOff() {
+
+}
+
+PrepareForKickOff.prototype = Object.create( State.prototype );
+PrepareForKickOff.prototype.constructor = PrepareForKickOff;
+
+PrepareForKickOff.prototype.enter = function( team ) {
+
+	// reset key player references
+	team.controllingPlayer = null;
+	team.supportingPlayer = null;
+	team.receivingPlayer = null;
+	team.playerClosestToBall = null;
+	
+	// send "GO_HOME" message to all players
+	team.returnAllFieldPlayersToHome( true );
+	
+	logger.log("Enter State \"PrepareForKickOff\" with team: ", team.id );
+};
+
+PrepareForKickOff.prototype.execute = function( team ) {
+
+	if ( team.isAllPlayersAtHome() && team.opponents.isAllPlayersAtHome() )
+	{
+		team.stateMachine.changeState( States.Defending );
+	}
+};
+
+PrepareForKickOff.prototype.exit = function( team ) {
+
+	team.pitch.isGameOn = true;
+	
+	logger.log("Exit State \"PrepareForKickOff\" with team: ", team.id );
+};
+
+
+var States = {
+	Attacking : new Attacking(),
+	Defending : new Defending(),
+	PrepareForKickOff : new PrepareForKickOff()
+};
+
+module.exports = States;
+},{"../../core/Logger":21,"./State":59}],62:[function(require,module,exports){
 /**
  * @file Prototype to define an edge connecting two nodes. An edge has an
  * associated cost.
@@ -45424,7 +49499,7 @@ GraphEdge.prototype.copy = function( source ){
 };
 
 module.exports = GraphEdge;
-},{}],51:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 /**
  * @file Some useful functions you can use with graphs.
  * 
@@ -45757,7 +49832,7 @@ function generateEdges( graph, offset ) {
 	}// next node
 
 }
-},{"../../core/World":31,"./NavGraphEdge":53,"./NavGraphNode":54,"three":1}],52:[function(require,module,exports){
+},{"../../core/World":31,"./NavGraphEdge":65,"./NavGraphNode":66,"three":1}],64:[function(require,module,exports){
 /**
  * @file Node prototype to be used with graphs.
  * 
@@ -45791,7 +49866,7 @@ function GraphNode( index ) {
 GraphNode.INVALID_NODE_INDEX = -1;
 
 module.exports = GraphNode;
-},{}],53:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 /**
  * @file Prototype to define an edge connecting two navigation nodes.
  * 
@@ -45876,7 +49951,7 @@ NavGraphEdge.FLAGS = {
 };
 
 module.exports = NavGraphEdge;
-},{"./GraphEdge":50}],54:[function(require,module,exports){
+},{"./GraphEdge":62}],66:[function(require,module,exports){
 /**
  * @file Graph node for use in creating a navigation graph. This node contains
  * the position of the node and a pointer to a GameEntity... useful if you want
@@ -45931,7 +50006,7 @@ NavGraphNode.prototype = Object.create( GraphNode.prototype );
 NavGraphNode.prototype.constructor = NavGraphNode;
 
 module.exports = NavGraphNode;
-},{"./GraphNode":52,"three":1}],55:[function(require,module,exports){
+},{"./GraphNode":64,"three":1}],67:[function(require,module,exports){
 /**
  * @file Graph prototype using the adjacency list representation.
  * 
@@ -46458,7 +50533,7 @@ SparseGraph.prototype._cullInvalidEdges = function() {
 };
 
 module.exports = SparseGraph;
-},{}],56:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 /**
  * @file Some useful functions you can use with algorithms.
  * 
@@ -46526,7 +50601,7 @@ AlgorithmHelper.prototype.sortQueueByCost = function( a, b ) {
 };
 
 module.exports = new AlgorithmHelper();
-},{}],57:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 /**
  * @file Prototype to implement the A* search algorithm.
  * 
@@ -46797,7 +50872,7 @@ GraphSearchAStar.prototype._search = function() {
 };
 
 module.exports = GraphSearchAStar;
-},{"../GraphEdge":50,"../GraphNode":52,"./AlgorithmHelper":56}],58:[function(require,module,exports){
+},{"../GraphEdge":62,"../GraphNode":64,"./AlgorithmHelper":68}],70:[function(require,module,exports){
 /**
  * @file Prototype to implement a breadth first search.
  * 
@@ -46985,7 +51060,7 @@ GraphSearchBFS.prototype._search = function() {
 };
 
 module.exports = GraphSearchBFS;
-},{"../GraphEdge":50,"../GraphNode":52}],59:[function(require,module,exports){
+},{"../GraphEdge":62,"../GraphNode":64}],71:[function(require,module,exports){
 /**
  * @file Prototype to implement a depth first search.
  * 
@@ -47145,7 +51220,7 @@ GraphSearchDFS.prototype._search = function() {
 };
 
 module.exports = GraphSearchDFS;
-},{"../GraphEdge":50,"../GraphNode":52}],60:[function(require,module,exports){
+},{"../GraphEdge":62,"../GraphNode":64}],72:[function(require,module,exports){
 /**
  * @file Prototype to implement dijkstra’s shortest path algorithm.
  * 
@@ -47397,7 +51472,7 @@ GraphSearchDijkstra.prototype._search = function() {
 };
 
 module.exports = GraphSearchDijkstra;
-},{"../GraphEdge":50,"../GraphNode":52,"./AlgorithmHelper":56}],61:[function(require,module,exports){
+},{"../GraphEdge":62,"../GraphNode":64,"./AlgorithmHelper":68}],73:[function(require,module,exports){
 /**
  * @file This prototype defines heuristic policies for use with the A* search
  * algorithm.
@@ -47534,7 +51609,7 @@ module.exports = {
 	EuclideanSq : new HeuristicPolicyEuclidSq(),
 	Dijkstra : new HeuristicPolicyDijkstra()
 };
-},{}],62:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 /**
  * @file Prototype to define, manage, and traverse a path defined by a series of
  * 3D vectors.
@@ -47696,7 +51771,7 @@ Path.prototype.createRandomPath = function( numberOfWaypoints, boundingBox ) {
 };
 
 module.exports = Path;
-},{"../../core/Logger":21,"three":1}],63:[function(require,module,exports){
+},{"../../core/Logger":21,"three":1}],75:[function(require,module,exports){
 /**
  * @file Prototype to help calculate the average value of a history of vector
  * values.
@@ -47781,9 +51856,9 @@ Smoother.prototype.update = function( mostRecentValue, average ) {
 };
 
 module.exports = Smoother;
-},{"three":1}],64:[function(require,module,exports){
+},{"three":1}],76:[function(require,module,exports){
 /**
- * @file Prototype to encapsulate steering behaviors for a vehicle.
+ * @file Prototype to encapsulate steering behaviors for a soccer player.
  * 
  * see "Programming Game AI by Example", Mat Buckland, Chapter 3
  * 
@@ -47793,42 +51868,39 @@ module.exports = Smoother;
 
 var THREE = require( "three" );
 
-var world = require( "../../core/World" );
-var logger = require( "../../core/Logger" );
-var Path = require( "./Path" );
-
 /**
  * Creates a steering behaviors instance.
  * 
  * @constructor
  * 
- * @param {Vehicle} vehicle - The vehicle agent.
+ * @param {PlayerBase} player - The player.
+ * @param {Ball} ball - The soccer ball.
+ * @param {Pitch} pitch - The soccer pitch.
  */
-function SteeringBehaviors( vehicle ) {
+function SteeringBehaviors( player, ball, pitch ) {
 
 	Object.defineProperties( this, {
-		vehicle : {
-			value : vehicle,
+		player : {
+			value : player,
 			configurable : false,
 			enumerable : true,
 			writable : false
 		},
-		// the current target
+		ball : {
+			value : ball,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		pitch : {
+			value : pitch,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		// the current target (usually the ball or predicted ball position)
 		target : {
 			value : new THREE.Vector3(),
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// these can be used to keep track of friends, pursuers or prey
-		targetAgent1 : {
-			value : null,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		targetAgent2 : {
-			value : null,
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -47838,36 +51910,18 @@ function SteeringBehaviors( vehicle ) {
 		weights : {
 			value : {
 				seek : 1,
-				flee : 1,
 				arrive : 1,
-				wander : 1,
-				cohesion : 3,
-				separation : 1,
-				alignment : 1,
-				obstacleAvoidance : 10,
-				wallAvoidance : 10,
-				followPath : 1,
+				separation : 10,
 				pursuit : 1,
-				evade : 1,
-				interpose : 1,
-				hide : 1,
-				flock : 1,
-				offsetPursuit : 1
+				interpose : 1
 			},
 			configurable : false,
 			enumerable : true,
 			writable : false
 		},
-		// the list of waypoints to follow
-		path : {
-			value : new Path(),
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// distance from the hiding spot
-		distanceFromBoundary : {
-			value : 10,
+		// the distance the player tries to interpose from the target
+		interposeDistance : {
+			value : 0,
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -47879,68 +51933,11 @@ function SteeringBehaviors( vehicle ) {
 			enumerable : true,
 			writable : true
 		},
-		// offset for offset pursuit behavior
-		offset : {
-			value : new THREE.Vector3(),
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// panic distance for flee and evade behavior
-		panicDistance : {
-			value : 50,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the distance a waypoint is set to the new target
-		waypointSeekDist : {
-			value : 5,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the length of the "feeler/s" used in wall detection
-		wallDetectionFeelerLength : {
-			value : 20,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the radius of the constraining circle for the wander behavior
-		wanderRadius : {
-			value : 5,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the distance the wander sphere is projected in front of the agent
-		wanderDistance : {
-			value : 10,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the maximum amount of displacement along the sphere each frame
-		wanderJitter : {
-			value : 80,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// how close a neighbour must be before an agent perceives it (considers
-		// it to be within its neighborhood)
+		// how close a neighbor must be to be considered for separation
 		viewDistance : {
-			value : 200,
+			value : 5,
 			configurable : false,
 			enumerable : true,
-			writable : true
-		},
-		// the actual target of the wander behavior
-		_wanderTarget : {
-			value : new THREE.Vector3(),
-			configurable : false,
-			enumerable : false,
 			writable : true
 		},
 		// the calculated steering force per simulation step
@@ -47957,13 +51954,6 @@ function SteeringBehaviors( vehicle ) {
 			enumerable : false,
 			writable : true
 		},
-		// array with "feelers" for wall avoidance
-		_feelers : {
-			value : [],
-			configurable : false,
-			enumerable : false,
-			writable : false
-		},
 		// array with neighbors for flocking
 		_neighbors : {
 			value : [],
@@ -47973,26 +51963,35 @@ function SteeringBehaviors( vehicle ) {
 		}
 	} );
 
-	this.setupWanderTarget();
 }
 
 /**
  * Calculates and sums the steering forces from any active behaviors.
  * 
- * @param {number} delta - The time delta value.
- * 
  * @returns {THREE.Vector3} The steering force.
  */
-SteeringBehaviors.prototype.calculate = function( delta ) {
+SteeringBehaviors.prototype.calculate = function() {
 
 	// preparations
 	this._prepareCalculation();
 
 	// summing method
-	this._calculatePrioritized( delta );
+	this._calculatePrioritized();
 
 	// return a copy of the member
 	return this._steeringForce.clone();
+};
+
+/**
+ * Prepares the calculation of the steering behaviors.
+ */
+SteeringBehaviors.prototype._prepareCalculation = function() {
+
+	// reset steering force
+	this._steeringForce.set( 0, 0, 0 );
+
+	// calculate neighbors for separation
+	this._calculateNeighbors();
 };
 
 /**
@@ -48000,57 +51999,10 @@ SteeringBehaviors.prototype.calculate = function( delta ) {
  * accumulates their forces until the max steering force magnitude is reached,
  * at which time the function returns the steering force accumulated to that
  * point.
- * 
- * @param {number} delta - The time delta value.
- * 
  */
-SteeringBehaviors.prototype._calculatePrioritized = function( delta ) {
+SteeringBehaviors.prototype._calculatePrioritized = function() {
 
 	var force;
-
-	// wall avoidance
-	if ( this._isOn( SteeringBehaviors.TYPES.WALLAVOIDANCE ) )
-	{
-		force = this._wallAvoidance();
-
-		force.multiplyScalar( this.weights.wallAvoidance );
-
-		if ( !this._accumulateForce( force ) )
-		{
-			return;
-		}
-
-	}
-
-	// obstacle avoidance
-	if ( this._isOn( SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE ) )
-	{
-		force = this._obstacleAvoidance();
-
-		force.multiplyScalar( this.weights.obstacleAvoidance );
-
-		if ( !this._accumulateForce( force ) )
-		{
-			return;
-		}
-
-	}
-
-	// evade
-	if ( this._isOn( SteeringBehaviors.TYPES.EVADE ) )
-	{
-		logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Evade target not assigned" );
-
-		force = this._evade( this.targetAgent1 );
-
-		force.multiplyScalar( this.weights.evade );
-
-		if ( !this._accumulateForce( force ) )
-		{
-			return;
-		}
-
-	}
 
 	// separation
 	if ( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) )
@@ -48063,55 +52015,11 @@ SteeringBehaviors.prototype._calculatePrioritized = function( delta ) {
 		{
 			return;
 		}
-
-	}
-
-	// alignment
-	if ( this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) )
-	{
-		force = this._alignment();
-
-		force.multiplyScalar( this.weights.alignment );
-
-		if ( !this._accumulateForce( force ) )
-		{
-			return;
-		}
-
-	}
-
-	// cohesion
-	if ( this._isOn( SteeringBehaviors.TYPES.COHESION ) )
-	{
-		force = this._cohesion();
-
-		force.multiplyScalar( this.weights.cohesion );
-
-		if ( !this._accumulateForce( force ) )
-		{
-			return;
-		}
-
-	}
-
-	// flee
-	if ( this._isOn( SteeringBehaviors.TYPES.FLEE ) )
-	{
-		force = this._flee( this.target );
-
-		force.multiplyScalar( this.weights.flee );
-
-		if ( !this._accumulateForce( force ) )
-		{
-			return;
-		}
-
 	}
 
 	// seek
 	if ( this._isOn( SteeringBehaviors.TYPES.SEEK ) )
 	{
-
 		force = this._seek( this.target );
 
 		force.multiplyScalar( this.weights.seek );
@@ -48120,13 +52028,12 @@ SteeringBehaviors.prototype._calculatePrioritized = function( delta ) {
 		{
 			return;
 		}
-
 	}
 
 	// arrive
 	if ( this._isOn( SteeringBehaviors.TYPES.ARRIVE ) )
 	{
-		force = this._arrive( this.target, this.deceleration );
+		force = this._arrive( this.target, SteeringBehaviors.DECELERATION.FAST );
 
 		force.multiplyScalar( this.weights.arrive );
 
@@ -48134,29 +52041,12 @@ SteeringBehaviors.prototype._calculatePrioritized = function( delta ) {
 		{
 			return;
 		}
-
-	}
-
-	// wander
-	if ( this._isOn( SteeringBehaviors.TYPES.WANDER ) )
-	{
-		force = this._wander( delta );
-
-		force.multiplyScalar( this.weights.wander );
-
-		if ( !this._accumulateForce( force ) )
-		{
-			return;
-		}
-
 	}
 
 	// pursuit
 	if ( this._isOn( SteeringBehaviors.TYPES.PURSUIT ) )
 	{
-		logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Pursuit target not assigned" );
-
-		force = this._pursuit( this.targetAgent1 );
+		force = this._pursuit( this.ball );
 
 		force.multiplyScalar( this.weights.pursuit );
 
@@ -48164,31 +52054,12 @@ SteeringBehaviors.prototype._calculatePrioritized = function( delta ) {
 		{
 			return;
 		}
-
-	}
-
-	// offset pursuit
-	if ( this._isOn( SteeringBehaviors.TYPES.OFFSETPURSUIT ) )
-	{
-		logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Pursuit target not assigned" );
-
-		force = this._offsetPursuit( this.targetAgent1, this.offset );
-
-		force.multiplyScalar( this.weights.offsetPursuit );
-
-		if ( !this._accumulateForce( force ) )
-		{
-			return;
-		}
-
 	}
 
 	// interpose
 	if ( this._isOn( SteeringBehaviors.TYPES.INTERPOSE ) )
 	{
-		logger.assert( this.targetAgent1 !== null && this.targetAgent2 !== null, "SteeringBehaviors: Interpose targets not assigned" );
-
-		force = this._interpose( this.targetAgent1, this.targetAgent2 );
+		force = this._interpose( this.ball, this.target, this.interposeDistance );
 
 		force.multiplyScalar( this.weights.interpose );
 
@@ -48196,43 +52067,12 @@ SteeringBehaviors.prototype._calculatePrioritized = function( delta ) {
 		{
 			return;
 		}
-
-	}
-
-	// hide
-	if ( this._isOn( SteeringBehaviors.TYPES.HIDE ) )
-	{
-		logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Hide target not assigned" );
-
-		force = this._hide( this.targetAgent1 );
-
-		force.multiplyScalar( this.weights.hide );
-
-		if ( !this._accumulateForce( force ) )
-		{
-			return;
-		}
-
-	}
-
-	// follow path
-	if ( this._isOn( SteeringBehaviors.TYPES.FOLLOWPATH ) )
-	{
-		force = this._followPath();
-
-		force.multiplyScalar( this.weights.followPath );
-
-		if ( !this._accumulateForce( force ) )
-		{
-			return;
-		}
-
 	}
 
 };
 
 /**
- * This function calculates how much of its max steering force the vehicle has
+ * This function calculates how much of its max steering force the player has
  * left to apply and then applies that amount of the force to add.
  * 
  * @param {THREE.Vector3} forceToAdd - The time delta value.
@@ -48243,11 +52083,11 @@ SteeringBehaviors.prototype._accumulateForce = function( forceToAdd ) {
 
 	var magnitudeSoFar, magnitudeRemaining, magnitudeToAdd;
 
-	// calculate how much steering force the vehicle has used so far
+	// calculate how much steering force the player has used so far
 	magnitudeSoFar = this._steeringForce.length();
 
-	// calculate how much steering force remains to be used by this vehicle
-	magnitudeRemaining = this.vehicle.maxForce - magnitudeSoFar;
+	// calculate how much steering force remains to be used by this player
+	magnitudeRemaining = this.player.maxForce - magnitudeSoFar;
 
 	// return false if there is no more force left to use
 	if ( magnitudeRemaining <= 0 )
@@ -48259,7 +52099,7 @@ SteeringBehaviors.prototype._accumulateForce = function( forceToAdd ) {
 	magnitudeToAdd = forceToAdd.length();
 
 	// restrict the magnitude of forceToAdd, so we don't exceed the
-	// maximum force of the vehicle
+	// maximum force of the player
 	if ( magnitudeToAdd > magnitudeRemaining )
 	{
 		forceToAdd.normalize().multiplyScalar( magnitudeRemaining );
@@ -48269,6 +52109,7 @@ SteeringBehaviors.prototype._accumulateForce = function( forceToAdd ) {
 	this._steeringForce.add( forceToAdd );
 
 	return true;
+
 };
 
 /**
@@ -48284,162 +52125,112 @@ SteeringBehaviors.prototype._isOn = function( behaviorType ) {
 };
 
 /**
- * Prepares the calculation of the steering behaviors.
- */
-SteeringBehaviors.prototype._prepareCalculation = function() {
-
-	// reset steering force
-	this._steeringForce.set( 0, 0, 0 );
-
-	// update model matrices of 3D object
-	this.vehicle.object3D.updateMatrixWorld();
-
-	if ( this.targetAgent1 !== null )
-	{
-		this.targetAgent1.object3D.updateMatrixWorld();
-	}
-
-	if ( this.targetAgent2 !== null )
-	{
-		this.targetAgent2.object3D.updateMatrixWorld();
-	}
-
-	// calculate neighbors if one of the following group behaviors is active
-	if ( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) || this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) || this._isOn( SteeringBehaviors.TYPES.COHESION ) )
-	{
-		this._calculateNeighbors();
-	}
-
-};
-
-/**
- * Calculates all neighbors of the vehicle.
+ * Calculates all neighbors of the player.
  */
 SteeringBehaviors.prototype._calculateNeighbors = ( function() {
 
-	var toEntity = new THREE.Vector3();
-
+	var toPlayer = new THREE.Vector3();
+	
 	return function() {
 		
-		var index, entity;
+		var index, player;
 
 		// reset array
 		this._neighbors.length = 0;
 
-		// iterate over all entities
-		for ( index = 0; index < this.vehicle.entityManager.entities.length; index++ )
+		// iterate over red team
+		for ( index = 0; index < this.pitch.redTeam.players.length; index++ )
 		{
-			entity = this.vehicle.entityManager.entities[ index ];
+			player = this.pitch.redTeam.players[ index ];
 
-			if ( entity !== this.vehicle )
+			if ( player !== this.player )
 			{
 				// calculate displacement vector
-				toEntity.subVectors( entity.position, this.vehicle.object3D.position );
+				toPlayer.subVectors( player.object3D.position, this.player.object3D.position );
 
-				// if entity within range, push into neighbors array for further
+				// if player within range, push into neighbors array for further
 				// consideration.
-				// ( working in distance-squared space to avoid sqrt )
-				if ( toEntity.lengthSq() < ( this.viewDistance * this.viewDistance ) )
+				if ( toPlayer.lengthSq() < ( this.viewDistance * this.viewDistance ) )
 				{
-					this._neighbors.push( entity );
+					this._neighbors.push( player );
 				}
 
 			}
 		}
-	};
 
-}() );
-
-/**
- * Creates the antenna utilized by wallAvoidance.
- */
-SteeringBehaviors.prototype._createFeelers = ( function() {
-
-	var rotation = new THREE.Matrix4();
-
-	return function() {
-
-		// if there are no feelers yet, create them
-		if ( this._feelers.length === 0 )
+		// iterate over blue team
+		for ( index = 0; index < this.pitch.blueTeam.players.length; index++ )
 		{
-			this._feelers.push( new THREE.Raycaster(), new THREE.Raycaster(), new THREE.Raycaster() );
+			player = this.pitch.blueTeam.players[ index ];
+
+			if ( player !== this.player )
+			{
+				// calculate displacement vector
+				toPlayer.subVectors( player.object3D.position, this.player.object3D.position );
+
+				// if player within range, push into neighbors array for further
+				// consideration.
+				if ( toPlayer.lengthSq() < ( this.viewDistance * this.viewDistance ) )
+				{
+					this._neighbors.push( player );
+				}
+
+			}
 		}
 
-		// first feeler pointing straight in front
-		this._feelers[ 0 ].ray.origin.copy( this.vehicle.object3D.position );
-		this._feelers[ 0 ].ray.direction = this.vehicle.getDirection();
-		this._feelers[ 0 ].far = this.wallDetectionFeelerLength;
-
-		// second feeler to left
-		rotation.identity();
-		rotation.makeRotationY( Math.PI * 1.75 );
-
-		this._feelers[ 1 ].ray.origin.copy( this.vehicle.object3D.position );
-		this._feelers[ 1 ].ray.direction = this.vehicle.getDirection().transformDirection( rotation );
-		this._feelers[ 1 ].far = this.wallDetectionFeelerLength * 0.5;
-
-		// third feeler to right
-		rotation.identity();
-		rotation.makeRotationY( Math.PI * 0.25 );
-
-		this._feelers[ 2 ].ray.origin.copy( this.vehicle.object3D.position );
-		this._feelers[ 2 ].ray.direction = this.vehicle.getDirection().transformDirection( rotation );
-		this._feelers[ 2 ].far = this.wallDetectionFeelerLength * 0.5;
 	};
 
 }() );
 
 /**
- * Given the position of a hunter, and the position and radius of an obstacle,
- * this method calculates a position distanceFromBoundary away from its bounding
- * radius and directly opposite the hunter.
+ * Calculates the forward component of the steering force.
  * 
- * @param {THREE.Vector3} positionObstacle - The position of the obstacle.
- * @param {THREE.Vector3} radiusObstacle - The radius of the obstacle.
- * @param {THREE.Vector3} positionHunter - The position of the hunter.
- * @param {THREE.Vector3} hidingSpot - The calculated hiding spot.
+ * @returns {number} The force in forward direction.
  */
-SteeringBehaviors.prototype._getHidingPosition = ( function() {
+SteeringBehaviors.prototype.calculateForwardComponent = function() {
 
-	var toHidingSpot = new THREE.Vector3();
+	return this.player.getDirection().dot( this._steeringForce );
+};
 
-	return function( positionObstacle, radiusObstacle, positionHunter, hidingSpot ) {
+/**
+ * Calculates the side component of the steering force.
+ * 
+ * @returns {number} The force in side direction.
+ */
+SteeringBehaviors.prototype.calculateSideComponent = ( function() {
 
-		// calculate how far away the agent is to be from the chosen obstacle's
-		// bounding radius
-		var distanceAway = radiusObstacle + this.distanceFromBoundary;
+	var side = new THREE.Vector3();
+	
+	return function() {
 
-		// calculate the heading toward the object from the hunter
-		toHidingSpot.subVectors( positionObstacle, positionHunter ).normalize();
+		// get direction
+		var direction = this.player.getDirection();
 
-		// scale it to size
-		toHidingSpot.multiplyScalar( distanceAway );
+		// calculate a perpendicular vector
+		side.x = -direction.z;
+		side.y = direction.y;
+		side.z = direction.x;
 
-		// add direction vector to the obstacles position to get the hiding spot
-		hidingSpot.addVectors( toHidingSpot, positionObstacle );
+		return side.dot( this._steeringForce ) * this.player.maxTurnRate;
 	};
 
 }() );
 
 /**
- * Setup wander target.
+ * Test, if the "pursuit" behavior is active.
+ * 
+ * @returns {boolean} Is the  "pursuit" behavior active?
  */
-SteeringBehaviors.prototype.setupWanderTarget = function() {
+SteeringBehaviors.prototype.isPursuitOn = function() {
 
-	var theta = Math.random() * Math.PI * 2;
-
-	// setup a vector to a target position on the wander sphere
-	this._wanderTarget.x = this.wanderRadius * Math.cos( theta );
-	this._wanderTarget.y = 0;
-	this._wanderTarget.z = this.wanderRadius * Math.sin( theta );
-
+	return this._isOn( SteeringBehaviors.TYPES.PURSUIT );
 };
 
 // /////////////////////////////////////////////////////////////////////////////
 // START OF BEHAVIORS
 
 /**
- * This behavior moves the agent towards a target position.
+ * This behavior moves the player towards a target position.
  * 
  * @param {THREE.Vector3} targetPosition - The target position.
  * 
@@ -48453,59 +52244,13 @@ SteeringBehaviors.prototype._seek = ( function() {
 
 		var force = new THREE.Vector3();
 
-		// First the desired velocity is calculated.
-		// This is the velocity the agent would need to reach the target
-		// position in an ideal world.
-		// It represents the vector from the agent to the target,
-		// scaled to be the length of the maximum possible speed of the agent.
-		desiredVelocity.subVectors( targetPosition, this.vehicle.object3D.position ).normalize();
+		desiredVelocity.subVectors( targetPosition, this.player.object3D.position ).normalize();
 
-		desiredVelocity.multiplyScalar( this.vehicle.maxSpeed );
+		desiredVelocity.multiplyScalar( this.player.maxSpeed );
 
-		// The steering force returned by this method is the force required,
-		// which when added to the agent’s current velocity vector gives the
-		// desired velocity.
-		// To achieve this you simply subtract the agent’s current velocity from
-		// the desired velocity.
-		force.subVectors( desiredVelocity, this.vehicle.velocity );
+		force.subVectors( desiredVelocity, this.player.velocity );
 
 		return force;
-
-	};
-
-}() );
-
-/**
- * Does the opposite of seek.
- * 
- * @param {THREE.Vector3} targetPosition - The target position.
- * 
- * @returns {THREE.Vector3} The calculated force.
- */
-SteeringBehaviors.prototype._flee = ( function() {
-
-	var desiredVelocity = new THREE.Vector3();
-
-	return function( targetPosition ) {
-
-		var force = new THREE.Vector3();
-
-		// only flee if the target is within panic distance
-		if ( this.vehicle.object3D.position.distanceToSquared( targetPosition ) < ( this.panicDistance * this.panicDistance ) )
-		{
-			// from here, the only difference compared to seek is that the
-			// desired velocity is calculated using a vector pointing in the
-			// opposite direction
-			desiredVelocity.subVectors( this.vehicle.object3D.position, targetPosition ).normalize();
-
-			desiredVelocity.multiplyScalar( this.vehicle.maxSpeed );
-
-			force.subVectors( desiredVelocity, this.vehicle.velocity );
-
-		}
-
-		return force;
-
 	};
 
 }() );
@@ -48515,7 +52260,7 @@ SteeringBehaviors.prototype._flee = ( function() {
  * a zero velocity.
  * 
  * @param {THREE.Vector3} targetPosition - The target position.
- * @param {number} deceleration - The deceleration of the vehicle.
+ * @param {number} deceleration - The deceleration of the player.
  * 
  * @returns {THREE.Vector3} The calculated force.
  */
@@ -48531,7 +52276,7 @@ SteeringBehaviors.prototype._arrive = ( function() {
 		var force = new THREE.Vector3();
 
 		// calculate displacement vector
-		toTarget.subVectors( targetPosition, this.vehicle.object3D.position );
+		toTarget.subVectors( targetPosition, this.player.object3D.position );
 
 		// calculate the distance to the target
 		distance = toTarget.length();
@@ -48543,15 +52288,14 @@ SteeringBehaviors.prototype._arrive = ( function() {
 			speed = distance / deceleration;
 
 			// make sure the velocity does not exceed the max
-			speed = Math.min( speed, this.vehicle.maxSpeed );
+			speed = Math.min( speed, this.player.maxSpeed );
 
 			// from here proceed just like "seek" except we don't need to
-			// normalize
-			// the "toTarget" vector because we have already gone to the trouble
-			// of calculating its length: distance.
+			// normalize the "toTarget" vector because we have already gone to
+			// the trouble of calculating its length: distance.
 			desiredVelocity.copy( toTarget ).multiplyScalar( speed ).divideScalar( distance );
 
-			force.subVectors( desiredVelocity, this.vehicle.velocity );
+			force.subVectors( desiredVelocity, this.player.velocity );
 		}
 
 		return force;
@@ -48560,543 +52304,79 @@ SteeringBehaviors.prototype._arrive = ( function() {
 }() );
 
 /**
- * This behavior creates a force that steers the agent towards the evader.
+ * This behavior creates a force that steers the player towards the ball.
  * 
- * @param {Vehicle} evader - The evader to pursuit.
+ * @param {Ball} ball - The soccer ball.
  * 
  * @returns {THREE.Vector3} The calculated force.
  */
 SteeringBehaviors.prototype._pursuit = ( function() {
 
-	var toEvader = new THREE.Vector3();
-	var newEvaderVelocity = new THREE.Vector3();
+	var toBall = new THREE.Vector3();
 	var predcitedPosition = new THREE.Vector3();
 
-	return function( evader ) {
+	return function( ball ) {
 		
-		var isFacing, isEvaderAhead, vehicleDirection, lookAheadTime;
+		var ballSpeed, lookAheadTime;
 
-		// 1. if the evader is ahead and facing the agent then we can just seek
-		// for the evader's current position
+		// the lookahead time is proportional to the distance between the ball
+		// and the pursuer
+		lookAheadTime = 0;
 
 		// calculate displacement vector
-		toEvader.subVectors( evader.object3D.position, this.vehicle.object3D.position );
+		toBall.subVectors( ball.object3D.position, this.player.object3D.position );
 
-		// buffer vehicle direction
-		vehicleDirection = this.vehicle.getDirection();
+		// get speed of ball
+		ballSpeed = ball.getSpeed();
 
-		// check first condition. evader must be in front of the pursuer
-		isEvaderAhead = toEvader.dot( vehicleDirection ) > 0;
-
-		// check second condition. evader must almost directly facing the agent
-		isFacing = vehicleDirection.dot( evader.getDirection() ) < 0.95;
-
-		if ( isEvaderAhead && isFacing )
+		if ( ballSpeed !== 0 )
 		{
-			return this._seek( evader.object3D.position );
+			lookAheadTime = toBall.length() / ballSpeed;
 		}
 
-		// 2. not considered ahead so we predict where the evader will be
+		// calculate where the ball will be at this time in the future
+		this.ball.calculateFuturePosition( lookAheadTime, predcitedPosition );
 
-		// the lookahead time is proportional to the distance between the evader
-		// and the pursuer. and is inversely proportional to the sum of the
-		// agent's velocities
-		lookAheadTime = toEvader.length() / ( this.vehicle.maxSpeed + evader.getSpeed() );
-
-		// calculate new velocity and predicted future position
-		newEvaderVelocity.copy( evader.velocity ).multiplyScalar( lookAheadTime );
-
-		predcitedPosition.addVectors( evader.object3D.position, newEvaderVelocity );
-
-		// now seek to the predicted future position of the evader
-		return this._seek( predcitedPosition );
+		// now arrive to the predicted future position of the ball
+		return this._arrive( predcitedPosition, SteeringBehaviors.DECELERATION.FAST );
 	};
 
 }() );
 
 /**
- * Produces a steering force that keeps a vehicle at a specified offset from a
- * leader vehicle.
+ * Given the soccer ball and a target position (e.g. goal center) this method
+ * returns a force that attempts to position the player between them.
  * 
- * @param {Vehicle} leader - The leader vehicle.
- * @param {THREE.Vector3} offset - The offset of the leader.
- * 
- * @returns {THREE.Vector3} The calculated force.
- */
-SteeringBehaviors.prototype._offsetPursuit = ( function() {
-
-	var offsetWorld = new THREE.Vector3();
-	var toOffset = new THREE.Vector3();
-	
-	var newLeaderVelocity = new THREE.Vector3();
-	var predcitedPosition = new THREE.Vector3();
-
-	return function( leader, offset ) {
-		
-		var lookAheadTime;
-
-		// calculate the offset's position in world space
-		offsetWorld.copy( offset ).applyMatrix4( leader.object3D.matrixWorld );
-
-		toOffset.subVectors( offsetWorld, this.vehicle.object3D.position );
-
-		// the lookahead time is proportional to the distance between the leader
-		// and the pursuer; and is inversely proportional to the sum of both
-		// agent's velocities
-		lookAheadTime = toOffset.length() / ( this.vehicle.maxSpeed + leader.getSpeed() );
-
-		// calculate new velocity and predicted future position
-		newLeaderVelocity.copy( leader.velocity ).multiplyScalar( lookAheadTime );
-
-		predcitedPosition.addVectors( offsetWorld, newLeaderVelocity );
-
-		// now arrive at the predicted future position of the offset
-		return this._arrive( predcitedPosition, SteeringBehaviors.DECELERATION.VERY_FAST );
-
-	};
-
-}() );
-
-/**
- * Similar to pursuit except the agent flees from the estimated future position
- * of the pursuer.
- * 
- * @param {Vehicle} pursuer - The pursuer.
- * 
- * @returns {THREE.Vector3} The calculated force.
- */
-SteeringBehaviors.prototype._evade = ( function() {
-
-	var toPursuer = new THREE.Vector3();
-	
-	var newPursuerVelocity = new THREE.Vector3();
-	var predcitedPosition = new THREE.Vector3();
-
-	return function( pursuer ) {
-		
-		var lookAheadTime;
-
-		// calculate displacement vector
-		toPursuer.subVectors( pursuer.object3D.position, this.vehicle.object3D.position );
-
-		// evade only when pursuers are inside a threat range
-		if ( toPursuer.lengthSq() > ( this.panicDistance * this.panicDistance ) )
-		{
-			return new THREE.Vector3();
-		}
-
-		// the lookahead time is proportional to the distance between the evader
-		// and the pursuer. and is inversely proportional to the sum of the
-		// agent's velocities
-		lookAheadTime = toPursuer.length() / ( this.vehicle.maxSpeed + pursuer.getSpeed() );
-
-		// calculate new velocity and predicted future position
-		newPursuerVelocity.copy( pursuer.velocity ).multiplyScalar( lookAheadTime );
-
-		predcitedPosition.addVectors( pursuer.object3D.position, newPursuerVelocity );
-
-		// now flee away from predicted future position of the pursuer
-		return this._flee( predcitedPosition );
-	};
-
-}() );
-
-/**
- * Given two agents, this method returns a force that attempts to position the
- * vehicle between them.
- * 
- * @param {Vehicle} agentA - The first agent.
- * @param {Vehicle} agentB - The second agent.
+ * @param {Ball} ball - The soccer ball.
+ * @param {THREE.Vector3} target - The position of the target.
+ * @param {number} distanceFromTarget - The distance from target.
  * 
  * @returns {THREE.Vector3} The calculated force.
  */
 SteeringBehaviors.prototype._interpose = ( function() {
 
-	var midPoint = new THREE.Vector3();
+	var displacement = new THREE.Vector3();
+	var interposePosition = new THREE.Vector3();
 
-	var newVelocityAgentA = new THREE.Vector3();
-	var newVelocityAgentB = new THREE.Vector3();
+	return function( ball, target, distanceFromTarget ) {
 
-	var predcitedPositionAgentA = new THREE.Vector3();
-	var predcitedPositionAgentB = new THREE.Vector3();
+		displacement.subVectors( ball.object3D.position, target ).normalize().multiplyScalar( distanceFromTarget );
 
-	return function( agentA, agentB ) {
-		
-		var time;
+		interposePosition.copy( target ).add( displacement );
 
-		// first we need to figure out where the two agents are going to be
-		// in the future. This is approximated by determining the time
-		// taken to reach the mid way point at the current time at at max speed
-		midPoint.addVectors( agentA.object3D.position, agentB.object3D.position ).multiplyScalar( 0.5 );
-
-		time = this.vehicle.object3D.position.distanceTo( midPoint ) / this.vehicle.maxSpeed;
-
-		// now we have the time, we assume that agent A and agent B will
-		// continue on a
-		// straight trajectory and extrapolate to get their future positions
-		newVelocityAgentA.copy( agentA.velocity ).multiplyScalar( time );
-		predcitedPositionAgentA.addVectors( agentA.object3D.position, newVelocityAgentA );
-
-		newVelocityAgentB.copy( agentB.velocity ).multiplyScalar( time );
-		predcitedPositionAgentB.addVectors( agentB.object3D.position, newVelocityAgentB );
-
-		// calculate the mid point of these predicted positions
-		midPoint.addVectors( predcitedPositionAgentA, predcitedPositionAgentB ).multiplyScalar( 0.5 );
-
-		// then steer to arrive at it
-		return this._arrive( midPoint, SteeringBehaviors.DECELERATION.VERY_FAST );
+		return this._arrive( interposePosition, SteeringBehaviors.DECELERATION.MIDDLE );
 	};
 
 }() );
 
 /**
- * Given another agent position to hide from and a list of obstacles this method
- * attempts to put an obstacle between itself and its opponent.
- * 
- * @param {Vehicle} hunter - The hunter agent.
- * 
- * @returns {THREE.Vector3} The calculated force.
- */
-SteeringBehaviors.prototype._hide = ( function() {
-
-	var hidingSpot = new THREE.Vector3();
-	var bestHidingSpot = new THREE.Vector3();
-
-	return function( hunter ) {
-		
-		var distanceSq, closestDistanceSq, numberOfObstacle, obstacle, index;
-
-		// this will be used to track the distance to the closest hiding spot
-		closestDistanceSq = Infinity;
-
-		// get number of obstacles in the world
-		numberOfObstacle = world.getNumberOfObstacles();
-
-		for ( index = 0; index < numberOfObstacle; index++ )
-		{
-			// retrieve obstacle
-			obstacle = world.getObstacle( index );
-
-			// calculate the position of the hiding spot for this obstacle
-			this._getHidingPosition( obstacle.boundingSphere.center, obstacle.boundingSphere.radius, hunter.object3D.position, hidingSpot );
-
-			// work in distance-squared space to find the closest hiding spot to
-			// the agent
-			distanceSq = hidingSpot.distanceToSquared( this.vehicle.object3D.position );
-
-			if ( distanceSq < closestDistanceSq )
-			{
-				// save values
-				closestDistanceSq = distanceSq;
-
-				bestHidingSpot = hidingSpot;
-			}
-		}
-
-		// if no suitable obstacles found then evade the hunter
-		if ( closestDistanceSq === Infinity )
-		{
-			return this._evade( hunter );
-		}
-		else
-		{
-			return this._arrive( bestHidingSpot, SteeringBehaviors.DECELERATION.VERY_FAST );
-		}
-	};
-
-}() );
-
-/**
- * This behavior makes the agent wander about randomly on a planar surface.
- * 
- * @param {number} delta - The time delta value.
- * 
- * @returns {THREE.Vector3} The calculated force.
- */
-SteeringBehaviors.prototype._wander = ( function() {
-
-	var target = new THREE.Vector3();
-	var randomDisplacement = new THREE.Vector3();
-	var distanceVector = new THREE.Vector3();
-
-	return function( delta ) {
-		
-		var force = new THREE.Vector3();
-
-		// this behavior is dependent on the update rate, so this line must be
-		// included when using time independent frame rate.
-		var jitterThisTimeSlice = this.wanderJitter * delta;
-
-		// prepare random vector
-		randomDisplacement.x = THREE.Math.randFloat( -1, 1 ) * jitterThisTimeSlice;
-		randomDisplacement.y = 0;
-		randomDisplacement.z = THREE.Math.randFloat( -1, 1 ) * jitterThisTimeSlice;
-
-		// add random vector to the target's position
-		this._wanderTarget.add( randomDisplacement );
-
-		// re-project this new vector back onto a unit sphere
-		this._wanderTarget.normalize();
-
-		// increase the length of the vector to the same as the radius of the
-		// wander sphere
-		this._wanderTarget.multiplyScalar( this.wanderRadius );
-
-		// move the target into a position wanderDist in front of the agent
-		distanceVector.z = this.wanderDistance;
-		target.addVectors( this._wanderTarget, distanceVector );
-
-		// project the target into world space
-		target.applyMatrix4( this.vehicle.object3D.matrixWorld );
-
-		// and steer towards it
-		force.subVectors( target, this.vehicle.object3D.position );
-
-		return force;
-	};
-
-}() );
-
-/**
- * Given an array of obstacles, this method returns a steering force that will
- * prevent the agent colliding with the closest obstacle.
- * 
- * @returns {THREE.Vector3} The calculated force.
- */
-SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
-
-	var boundingBox = new THREE.Box3();
-	var boundingSphere = new THREE.Sphere();
-
-	var vehicleSize = new THREE.Vector3();
-	var localPositionOfObstacle = new THREE.Vector3();
-	var localPositionOfClosestObstacle = new THREE.Vector3();
-	var intersectionPoint = new THREE.Vector3();
-
-	var brakingWeight = 0.2;
-
-	var inverseMatrix = new THREE.Matrix4();
-
-	// this will be used for ray/sphere intersection test
-	var ray = new THREE.Ray( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, 1 ) );
-
-	return function() {
-		
-		var index, obstacle, expandedRadius, multiplier;
-
-		var force = new THREE.Vector3();
-		
-		// this will keep track of the closest intersecting obstacle
-		var closestObstacle = null;
-
-		// this will be used to track the distance to the closest obstacle
-		var distanceToClosestObstacle = Infinity;
-		
-		// get number of obstacles in the world
-		var numberOfObstacle = world.getNumberOfObstacles();
-		
-		// the detection box length is proportional to the agent's velocity
-		var detectionBoxLength = this.vehicle.getSpeed() + this.vehicle.maxSpeed + vehicleSize.z * 0.5;
-
-		// calculate bounding box of vehicle
-		boundingBox.setFromObject( this.vehicle.object3D );
-
-		// get size of bounding box
-		boundingBox.size( vehicleSize );
-
-		// this matrix will transform points to the local space of the vehicle
-		inverseMatrix.getInverse( this.vehicle.object3D.matrixWorld );
-
-		for ( index = 0; index < numberOfObstacle; index++ )
-		{
-			// retrieve obstacle
-			obstacle = world.getObstacle( index );
-
-			// calculate this obstacle's position in local space
-			localPositionOfObstacle.copy( obstacle.boundingSphere.center ).applyMatrix4( inverseMatrix );
-
-			// if the local position has a positive z value then it must lay
-			// behind the agent. besides the absolute z value must be smaller
-			// than the length of the detection box
-			if ( localPositionOfObstacle.z > 0 && Math.abs( localPositionOfObstacle.z ) < detectionBoxLength )
-			{
-				// if the distance from the x axis to the object's position is less
-				// than its radius + half the width of the detection box then
-				// there is a potential intersection.
-				expandedRadius = obstacle.boundingSphere.radius + vehicleSize.x * 0.5;
-
-				if ( Math.abs( localPositionOfObstacle.x ) < expandedRadius )
-				{
-					// prepare intersection test
-					boundingSphere.center = localPositionOfObstacle;
-					boundingSphere.radius = expandedRadius;
-
-					// do intersection test in local space of the vehicle
-					ray.intersectSphere( boundingSphere, intersectionPoint );
-
-					// compare distances
-					if ( intersectionPoint.z < distanceToClosestObstacle )
-					{
-						// save new minimum distance
-						distanceToClosestObstacle = intersectionPoint.z;
-
-						// save closest obstacle
-						closestObstacle = obstacle;
-
-						// save local position for force calculation
-						localPositionOfClosestObstacle.copy( localPositionOfObstacle );
-					}
-				}
-			}
-		}
-
-		// if we have found an intersecting obstacle, calculate a steering force
-		// away from it
-		if ( closestObstacle !== null )
-		{
-			// the closer the agent is to an object, the stronger the steering
-			// force should be
-			multiplier = 1 + ( detectionBoxLength - localPositionOfClosestObstacle.z ) / detectionBoxLength;
-
-			// calculate the lateral force
-			force.x = ( closestObstacle.boundingSphere.radius - localPositionOfClosestObstacle.x ) * multiplier;
-
-			// apply a braking force proportional to the obstacles distance from
-			// the vehicle
-			force.z = ( closestObstacle.boundingSphere.radius - localPositionOfClosestObstacle.z ) * brakingWeight;
-
-			// finally, convert the steering vector from local to world space
-			force.transformDirection( this.vehicle.object3D.matrixWorld );
-		}
-
-		return force;
-	};
-
-}() );
-
-/**
- * This returns a steering force that will keep the agent away from any walls it
- * may encounter.
- * 
- * @returns {THREE.Vector3} The calculated force.
- */
-SteeringBehaviors.prototype._wallAvoidance = ( function() {
-
-	var overShoot = new THREE.Vector3();
-	var closestPoint = new THREE.Vector3();
-	var normal = new THREE.Vector3();
-
-	return function() {
-		
-		var indexFeeler, indexWall, feeler, intersects;
-
-		var force = new THREE.Vector3();
-
-		// this will be used to track the distance to the closest wall
-		var distanceToClosestWall = Infinity;
-		
-		// this will keep track of the closest wall
-		var closestWall = null;
-		
-		// this will keep track of the feeler that caused an intersection
-		var intersectionFeeler = null;
-		
-		// this will keep track of the closes point
-		closestPoint.set( 0, 0, 0 );
-		
-		// this will keep track of the wall normal
-		normal.set( 0, 0, 0 );
-
-		// create feelers for test
-		this._createFeelers();
-
-		// examine each feeler in turn
-		for ( indexFeeler = 0; indexFeeler < this._feelers.length; indexFeeler++ )
-		{
-			// run through each wall checking for any intersection points
-			for ( indexWall = 0; indexWall < world.walls.length; indexWall++ )
-			{
-				feeler = this._feelers[ indexFeeler ];
-
-				// do intersection test
-				intersects = feeler.intersectObject( world.walls[ indexWall ] );
-				
-				if( intersects.length > 0 )
-				{
-					// if the distance of the intersection point is smaller 
-					// than the current distanceToClosestWall, continue
-					if ( intersects[ 0 ].distance < distanceToClosestWall )
-					{
-						distanceToClosestWall = intersects[ 0 ].distance;
-						
-						closestWall = world.walls[ indexWall ];
-						
-						closestPoint.copy( intersects[ 0 ].point );
-						
-						normal.copy( intersects[ 0 ].face.normal );
-
-						intersectionFeeler = feeler;
-					}
-				}
-			}
-		}
-
-		// if a wall was found, calculate a force that will direct the agent away
-		if ( closestWall !== null )
-		{
-			// calculate by what distance the projected position of the agent will overshoot the wall
-			overShoot.copy( intersectionFeeler.ray.direction ).multiplyScalar( intersectionFeeler.far ).add( intersectionFeeler.ray.origin );
-			overShoot.sub( closestPoint );
-
-			// transform the normal with the world matrix of the wall
-			// on this way you get the true orientation of the normal
-			 normal.transformDirection( closestWall.matrixWorld );
-			
-			// create a force in the direction of the wall normal, with a magnitude of the overshoot
-			force.copy( normal ).multiplyScalar( overShoot.length() );
-		}
-
-		return force;
-	};
-}() );
-
-/**
- * Given a series of Vector2Ds, this method produces a force that will move the
- * agent along the waypoints in order. The agent uses the "seek" behavior to
- * move to the next waypoint - unless it is the last waypoint, in which case it
- * "arrives".
- * 
- * @returns {THREE.Vector3} The calculated force.
- */
-SteeringBehaviors.prototype._followPath = function() {
-
-	// calculate distance in square space from current waypoint to vehicle
-	var distanceSq = this.path.getCurrentWaypoint().distanceToSquared( this.vehicle.object3D.position );
-
-	// move to next waypoint if close enough to current target
-	if ( distanceSq < ( this.waypointSeekDist * this.waypointSeekDist ) )
-	{
-		this.path.setNextWaypoint();
-	}
-
-	if ( !this.path.isFinished() )
-	{
-		return this._seek( this.path.getCurrentWaypoint() );
-	}
-	else
-	{
-		return this._arrive( this.path.getCurrentWaypoint(), SteeringBehaviors.DECELERATION.MIDDLE );
-	}
-};
-
-/**
- * This calculates a force repelling from the other neighbors
+ * This calculates a force repelling from the other neighbors.
  * 
  * @returns {THREE.Vector3} The calculated force.
  */
 SteeringBehaviors.prototype._separation = ( function() {
 
-	var toAgent = new THREE.Vector3();
+	var toNeighbor = new THREE.Vector3();
 
 	return function() {
 		
@@ -49108,141 +52388,33 @@ SteeringBehaviors.prototype._separation = ( function() {
 		{
 			neighbor = this._neighbors[ index ];
 
-			// make sure this agent isn't included in the calculations
-			// also make sure it doesn't include the evade target
-			if ( neighbor !== this.vehicle && neighbor !== this.targetAgent1 )
+			// make sure this player isn't included in the calculations
+			if ( neighbor !== this.player )
 			{
 				// calculate displacement vector
-				toAgent.subVectors( this.vehicle.object3D.position, neighbor.object3D.position );
+				toNeighbor.subVectors( this.player.object3D.position, neighbor.object3D.position );
 
 				// get length
-				length = toAgent.length();
+				length = toNeighbor.length();
 
-				// handle zero length. this is necessary if both vehicles have
+				// handle zero length. this is necessary if both players have
 				// the same position
 				if ( length === 0 )
 				{
 					length = 0.0001;
 				}
 
-				// scale the force inversely proportional to the agents distance
+				// scale the force inversely proportional to the player's
+				// distance
 				// from its neighbor
-				toAgent.normalize().divideScalar( length );
+				toNeighbor.normalize().divideScalar( length );
 
 				// add force
-				force.add( toAgent );
+				force.add( toNeighbor );
 			}
 		}
 
 		return force;
-	};
-
-}() );
-
-/**
- * Returns a force that attempts to align this agents heading with that of its
- * neighbors.
- * 
- * @returns {THREE.Vector3} The calculated force.
- */
-SteeringBehaviors.prototype._alignment = ( function() {
-
-	// used to record the average heading of the neighbors
-	var averageHeading = new THREE.Vector3();
-
-	return function() {
-		
-		var index, neighbor;
-		
-		// used to count the number of vehicles in the neighborhood
-		var neighborCount = 0;
-
-		var force = new THREE.Vector3();
-
-		// reset values
-		averageHeading.set( 0, 0, 0 );
-
-		for ( index = 0; index < this._neighbors.length; index++ )
-		{
-			neighbor = this._neighbors[ index ];
-
-			// make sure this agent isn't included in the calculations
-			// also make sure it doesn't include the evade target
-			if ( neighbor !== this.vehicle && neighbor !== this.targetAgent1 )
-			{
-				averageHeading.add( neighbor.getDirection() );
-
-				neighborCount++;
-			}
-		}
-
-		// if the neighborhood contained one or more vehicles, average their
-		// heading vectors.
-		if ( neighborCount > 0 )
-		{
-			averageHeading.divideScalar( neighborCount );
-
-			force.subVectors( averageHeading, this.vehicle.getDirection() );
-		}
-
-		return force;
-
-	};
-
-}() );
-
-/**
- * Returns a steering force that attempts to move the agent towards the center
- * of mass of the agents in its immediate area.
- * 
- * @returns {THREE.Vector3} The calculated force.
- */
-SteeringBehaviors.prototype._cohesion = ( function() {
-
-	var averageHeading = new THREE.Vector3();
-
-	// center of mass of all the agents
-	var centerOfMass = new THREE.Vector3(); 
-
-	return function() {
-		
-		var index, neighbor;
-		
-		// used to count the number of vehicles in the neighborhood
-		var neighborCount = 0; 
-
-		var force = new THREE.Vector3();
-
-		// reset values
-		centerOfMass.set( 0, 0, 0 );
-
-		for ( index = 0; index < this._neighbors.length; index++ )
-		{
-			neighbor = this._neighbors[ index ];
-
-			// make sure this agent isn't included in the calculations
-			// also make sure it doesn't include the evade target
-			if ( neighbor !== this.vehicle && neighbor !== this.targetAgent1 )
-			{
-				centerOfMass.add( neighbor.object3D.position );
-
-				neighborCount++;
-			}
-
-		}
-
-		if ( neighborCount > 0 )
-		{
-			// the center of mass is the average of the sum of positions
-			centerOfMass.divideScalar( neighborCount );
-
-			// now seek towards that position
-			force = this._seek( centerOfMass );
-		}
-
-		// the magnitude of cohesion is usually much larger than separation or
-		// allignment so it usually helps to normalize it
-		return force.normalize();
 	};
 
 }() );
@@ -49258,10 +52430,6 @@ SteeringBehaviors.prototype.seekOn = function() {
 
 	this._behaviorFlag |= SteeringBehaviors.TYPES.SEEK;
 };
-SteeringBehaviors.prototype.fleeOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.FLEE;
-};
 SteeringBehaviors.prototype.arriveOn = function() {
 
 	this._behaviorFlag |= SteeringBehaviors.TYPES.ARRIVE;
@@ -49270,56 +52438,15 @@ SteeringBehaviors.prototype.pursuitOn = function() {
 
 	this._behaviorFlag |= SteeringBehaviors.TYPES.PURSUIT;
 };
-SteeringBehaviors.prototype.offsetPursuitOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.OFFSETPURSUIT;
-};
-SteeringBehaviors.prototype.evadeOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.EVADE;
-};
-SteeringBehaviors.prototype.interposeOn = function() {
+SteeringBehaviors.prototype.interposeOn = function( d ) {
 
 	this._behaviorFlag |= SteeringBehaviors.TYPES.INTERPOSE;
+	this.interposeDistance = d;
 };
-SteeringBehaviors.prototype.hideOn = function() {
 
-	this._behaviorFlag |= SteeringBehaviors.TYPES.HIDE;
-};
-SteeringBehaviors.prototype.wanderOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.WANDER;
-};
-SteeringBehaviors.prototype.obstacleAvoidanceOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE;
-};
-SteeringBehaviors.prototype.wallAvoidanceOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.WALLAVOIDANCE;
-};
-SteeringBehaviors.prototype.followPathOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.FOLLOWPATH;
-};
-SteeringBehaviors.prototype.cohesionOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.COHESION;
-};
 SteeringBehaviors.prototype.separationOn = function() {
 
 	this._behaviorFlag |= SteeringBehaviors.TYPES.SEPARATION;
-};
-SteeringBehaviors.prototype.alignmentOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.ALIGNMENT;
-};
-SteeringBehaviors.prototype.flockingOn = function() {
-
-	this.cohesionOn();
-	this.separationOn();
-	this.alignmentOn();
-	this.wanderOn();
 };
 
 SteeringBehaviors.prototype.seekOff = function() {
@@ -49327,82 +52454,29 @@ SteeringBehaviors.prototype.seekOff = function() {
 	if ( this._isOn( SteeringBehaviors.TYPES.SEEK ) )
 		this._behaviorFlag ^= SteeringBehaviors.TYPES.SEEK;
 };
-SteeringBehaviors.prototype.fleeOff = function() {
 
-	if ( this._isOn( SteeringBehaviors.TYPES.FLEE ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.FLEE;
-};
 SteeringBehaviors.prototype.arriveOff = function() {
 
 	if ( this._isOn( SteeringBehaviors.TYPES.ARRIVE ) )
 		this._behaviorFlag ^= SteeringBehaviors.TYPES.ARRIVE;
 };
+
 SteeringBehaviors.prototype.pursuitOff = function() {
 
 	if ( this._isOn( SteeringBehaviors.TYPES.PURSUIT ) )
 		this._behaviorFlag ^= SteeringBehaviors.TYPES.PURSUIT;
 };
-SteeringBehaviors.prototype.offsetPursuitOff = function() {
 
-	if ( this._isOn( SteeringBehaviors.TYPES.OFFSETPURSUIT ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.OFFSETPURSUIT;
-};
-SteeringBehaviors.prototype.evadeOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.EVADE ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.EVADE;
-};
 SteeringBehaviors.prototype.interposeOff = function() {
 
 	if ( this._isOn( SteeringBehaviors.TYPES.INTERPOSE ) )
 		this._behaviorFlag ^= SteeringBehaviors.TYPES.INTERPOSE;
 };
-SteeringBehaviors.prototype.hideOff = function() {
 
-	if ( this._isOn( SteeringBehaviors.TYPES.HIDE ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.HIDE;
-};
-SteeringBehaviors.prototype.wanderOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.WANDER ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.WANDER;
-};
-SteeringBehaviors.prototype.obstacleAvoidanceOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE;
-};
-SteeringBehaviors.prototype.wallAvoidanceOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.WALLAVOIDANCE ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.WALLAVOIDANCE;
-};
-SteeringBehaviors.prototype.followPathOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.FOLLOWPATH ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.FOLLOWPATH;
-};
-SteeringBehaviors.prototype.cohesionOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.COHESION ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.COHESION;
-};
 SteeringBehaviors.prototype.separationOff = function() {
 
 	if ( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) )
 		this._behaviorFlag ^= SteeringBehaviors.TYPES.SEPARATION;
-};
-SteeringBehaviors.prototype.alignmentOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.ALIGNMENT;
-};
-SteeringBehaviors.prototype.flockingOff = function() {
-
-	this.cohesionOff();
-	this.separationOff();
-	this.alignmentOff();
-	this.wanderOff();
 };
 
 /* jshint ignore:end */
@@ -49411,23 +52485,12 @@ SteeringBehaviors.prototype.flockingOff = function() {
 // END OF CONTROL METHODS
 // types of behavior as flags
 SteeringBehaviors.TYPES = {
-	NONE : 0x00000,
-	SEEK : 0x00002,
-	FLEE : 0x00004,
-	ARRIVE : 0x00008,
-	WANDER : 0x00010,
-	COHESION : 0x00020,
-	SEPARATION : 0x00040,
-	ALIGNMENT : 0x00080,
-	OBSTACLEAVOIDANCE : 0x00100,
-	WALLAVOIDANCE : 0x00200,
-	FOLLOWPATH : 0x00400,
-	PURSUIT : 0x00800,
-	EVADE : 0x01000,
-	INTERPOSE : 0x02000,
-	HIDE : 0x04000,
-	FLOCK : 0x08000,
-	OFFSETPURSUIT : 0x10000
+	NONE : 0x0000,
+	SEEK : 0x0001,
+	ARRIVE : 0x0002,
+	SEPARATION : 0x0004,
+	PURSUIT : 0x0008,
+	INTERPOSE : 0x0010,
 };
 
 // amounts of deceleration
@@ -49440,7 +52503,7 @@ SteeringBehaviors.DECELERATION = {
 };
 
 module.exports = SteeringBehaviors;
-},{"../../core/Logger":21,"../../core/World":31,"./Path":62,"three":1}],65:[function(require,module,exports){
+},{"three":1}],77:[function(require,module,exports){
 /**
  * @file This prototype provides topic-based publish/subscribe messaging and
  * enables communication between game entities.
@@ -49981,7 +53044,22 @@ function sendMessageToEntity( sender, receiver, message, data, isSync, delay ) {
 }
 
 module.exports = new EventManager();
-},{"../core/Logger":21,"../game/entity/GameEntity":45,"./Telegram":66}],66:[function(require,module,exports){
+},{"../core/Logger":21,"../game/entity/GameEntity":47,"./Telegram":79}],78:[function(require,module,exports){
+/**
+ * @file Messages for game entity communication
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+module.exports = {
+	RECEIVE_BALL : "receive",
+	PASS_TO_ME : "pass",
+	SUPPORT_ATTACKER : "support",
+	GO_HOME : "home"
+};
+},{}],79:[function(require,module,exports){
 /**
  * @file This defines a telegram. A telegram is a data structure that records
  * information required to dispatch game messages. These messages are used by
@@ -50039,7 +53117,7 @@ function Telegram( sender, receiver, message, data, delay ) {
 }
 
 module.exports = Telegram;
-},{}],67:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 /**
  * @file This file contains all topics for publish & subscribe. YUME supports a
  * publish/subscribe messaging system with hierarchical addressing, so topics
@@ -50091,11 +53169,14 @@ var TOPIC = {
 		},
 		READY : "stage.ready",
 		START : "stage.start"
+	},
+	GAME : {
+		SCORE : "game.score"
 	}
 };
 
 module.exports = TOPIC;
-},{}],68:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 /**
  * @file Prototype for network-messages.
  * 
@@ -50145,7 +53226,7 @@ Message.TYPES = {
 };
 
 module.exports = Message;
-},{}],69:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for network-based
@@ -50400,7 +53481,7 @@ NetworkManager.SERVER = {
 
 module.exports = new NetworkManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Logger":21,"../core/ThreadManager":29,"../messaging/EventManager":65,"../messaging/Topic":67,"./Message":68,"ws":2}],70:[function(require,module,exports){
+},{"../core/Logger":21,"../core/ThreadManager":29,"../messaging/EventManager":77,"../messaging/Topic":80,"./Message":81,"ws":2}],83:[function(require,module,exports){
 /**
  * @file This prototype manages effects for post-processing.
  * 
@@ -50579,7 +53660,7 @@ EffectComposer.prototype._reset = function( renderTarget ) {
 };
 
 module.exports = EffectComposer;
-},{"three":1}],71:[function(require,module,exports){
+},{"three":1}],84:[function(require,module,exports){
 /**
  * @file This prototype provides a render pass for post-processing.
  * 
@@ -50641,7 +53722,7 @@ RenderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = RenderPass;
-},{"three":1}],72:[function(require,module,exports){
+},{"three":1}],85:[function(require,module,exports){
 /**
  * @file This prototype provides a shader pass for post-processing.
  * 
@@ -50747,7 +53828,7 @@ ShaderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = ShaderPass;
-},{"three":1}],73:[function(require,module,exports){
+},{"three":1}],86:[function(require,module,exports){
 /**
  * @file This shader can be used for vertex displacement to create
  * water or fabric materials. It implements an exemplary diffuse lighting
@@ -50849,7 +53930,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":1}],74:[function(require,module,exports){
+},{"three":1}],87:[function(require,module,exports){
 /**
  * @file This shader applies a gaussian blur effect.
  * It can be used for both x and y direction.
@@ -50916,7 +53997,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":1}],75:[function(require,module,exports){
+},{"three":1}],88:[function(require,module,exports){
 /**
  * @file This shader transforms all colors to grayscale.
  * 
@@ -50965,7 +54046,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],76:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 /**
  * @file This shader creates a vignette effect.
  * 
@@ -51026,16 +54107,15 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],77:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
+(function (global){
 "use strict";
 
 var THREE = require( "three" );
 
 var StageBase = require( "../core/StageBase" );
-var JSONLoader = require( "../etc/JSONLoader" );
-var Easing = require( "../animation/Easing" );
 
-var self;
+var self, soccerGame;
 
 function Stage() {
 
@@ -51051,1776 +54131,53 @@ Stage.prototype.setup = function() {
 
 	StageBase.prototype.setup.call( this );
 
-	// controls setup
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+	// camera
+	this.camera.position.set( 0, 40, 60 );
+	this.camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
 
-	// load texts
-	this.textManager.load( this.stageId );
-
-	// add ground
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
-	var groundMaterial = new THREE.MeshBasicMaterial( {
-		vertexColors : THREE.FaceColors
-	} );
-
-	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
-	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
-	ground.updateMatrix();
-	ground.receiveShadow = true;
-	this.world.addGround( ground );
-
-	// color faces
-	colorFaces( groundGeometry );
-
-	// add sign
-	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
-
-		self.settingsManager.adjustMaterials( materials, self.renderer );
-
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
-		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.world.addObject3D( sign );
-
-		self.animationManager.createHoverAnimation( {
-			object : sign.position,
-			property : "y",
-			duration : 5000,
-			start : sign.position.y,
-			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
-		} ).play();
-	} );
-
-	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
-
-		self._changeStage( "002", true );
-	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
+	// create soccer game
+	soccerGame = this.entityManager.createSoccerGame( new THREE.Vector2( 80, 40 ) );
+	this.world.addObject3D( soccerGame.object3D );
 	
-	// start rendering
-	this._render();
-};
-
-Stage.prototype.start = function() {
-
-	StageBase.prototype.start.call( this );
-
-	// set information panel text
-	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
-};
-
-Stage.prototype.destroy = function() {
-
-	StageBase.prototype.destroy.call( this );
-};
-
-Stage.prototype._render = function() {
-
-	StageBase.prototype._render.call( self );
-};
-
-// custom functions
-
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
-
-module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],78:[function(require,module,exports){
-"use strict";
-
-var THREE = require( "three" );
-
-var StageBase = require( "../core/StageBase" );
-var JSONLoader = require( "../etc/JSONLoader" );
-var Easing = require( "../animation/Easing" );
-
-var self;
-
-function Stage() {
-
-	StageBase.call( this, "002" );
-
-	self = this;
-}
-
-Stage.prototype = Object.create( StageBase.prototype );
-Stage.prototype.constructor = Stage;
-
-Stage.prototype.setup = function() {
-
-	StageBase.prototype.setup.call( this );
-
-	// setup controls
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
-
-	// load texts
-	this.textManager.load( this.stageId );
-
-	// add ground
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
-	var groundMaterial = new THREE.MeshBasicMaterial( {
-		vertexColors : THREE.FaceColors
-	} );
-
-	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
-	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
-	ground.updateMatrix();
-	ground.receiveShadow = true;
-	this.world.addGround( ground );
-
-	// color faces
-	colorFaces( groundGeometry );
-
-	// create interactive box
-	var interactiveBox = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
-		color : StageBase.COLORS.BLUE_DARK
-	} ) );
-	interactiveBox.matrixAutoUpdate = false;
-	interactiveBox.position.set( 50, 5, 0 );
-	interactiveBox.castShadow = true;
-	interactiveBox.updateMatrix();
-	this.world.addObject3D( interactiveBox );
-
-	this.actionManager.createInteraction( interactiveBox, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Action", function() {
-
-		// nothing happens here...
-	} );
-
-	// create first static box with AABB collision detection
-	var staticBoxHover = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
-		color : StageBase.COLORS.PRIMARY
-	} ) );
-	staticBoxHover.matrixAutoUpdate = false;
-	staticBoxHover.position.set( 17, 15, 0 );
-	staticBoxHover.castShadow = true;
-	staticBoxHover.updateMatrix();
-	this.world.addObject3D( staticBoxHover );
-
-	this.actionManager.createStatic( staticBoxHover, this.actionManager.COLLISIONTYPES.AABB );
-
-	// create second static box with OBB collision detection
-	var staticBox = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 20 ), new THREE.MeshLambertMaterial( {
-		color : StageBase.COLORS.PRIMARY
-	} ) );
-	staticBox.matrixAutoUpdate = false;
-	staticBox.position.set( -17, 5, 0 );
-	staticBox.rotation.set( 0, Math.PI * 0.2, 0 );
-	staticBox.castShadow = true;
-	staticBox.updateMatrix();
-	this.world.addObject3D( staticBox );
-
-	this.actionManager.createStatic( staticBox, this.actionManager.COLLISIONTYPES.OBB );
-
-	// create plain object
-	var plainBox = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
-		color : StageBase.COLORS.BLUE_WHITE
-	} ) );
-	plainBox.matrixAutoUpdate = false;
-	plainBox.position.set( -50, 5, 0 );
-	plainBox.castShadow = true;
-	plainBox.updateMatrix();
-	this.world.addObject3D( plainBox );
-
-	// add sign
-	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
-
-		self.settingsManager.adjustMaterials( materials, self.renderer );
-
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
-		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.world.addObject3D( sign );
-
-		self.animationManager.createHoverAnimation( {
-			object : sign.position,
-			property : "y",
-			duration : 5000,
-			start : sign.position.y,
-			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
-		} ).play();
-	} );
-
-	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
-
-		self._changeStage( "003", true );
-	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
-
-	// light
-	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.world.addObject3D( ambientLight );
-
-	var directionalLight = new THREE.DirectionalLight( 0xffffff );
-	directionalLight.position.set( -100, 50, -100 );
-	directionalLight.shadowCameraLeft = -50;
-	directionalLight.shadowCameraRight = 50;
-	directionalLight.shadowCameraTop = 40;
-	directionalLight.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight( directionalLight );
-	this.world.addObject3D( directionalLight );
-
-	// start rendering
-	this._render();
-
-};
-
-Stage.prototype.start = function() {
-
-	StageBase.prototype.start.call( this );
-
-	// set information panel text
-	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
-};
-
-Stage.prototype.destroy = function() {
-
-	StageBase.prototype.destroy.call( this );
-};
-
-Stage.prototype._render = function() {
-
-	StageBase.prototype._render.call( self );
-};
-
-// custom functions
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
-
-module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],79:[function(require,module,exports){
-"use strict";
-
-var THREE = require( "three" );
-
-var StageBase = require( "../core/StageBase" );
-var JSONLoader = require( "../etc/JSONLoader" );
-var Easing = require( "../animation/Easing" );
-
-var self, index = 0;
-
-function Stage() {
-
-	StageBase.call( this, "003" );
-
-	self = this;
-}
-
-Stage.prototype = Object.create( StageBase.prototype );
-Stage.prototype.constructor = Stage;
-
-Stage.prototype.setup = function() {
-
-	StageBase.prototype.setup.call( this );
-
-	// setup controls
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
-
-	// load texts
-	this.textManager.load( this.stageId );
-
-	// add ground
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
-	var groundMaterial = new THREE.MeshBasicMaterial( {
-		vertexColors : THREE.FaceColors
-	} );
-
-	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
-	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
-	ground.updateMatrix();
-	ground.receiveShadow = true;
-	this.world.addGround( ground );
-
-	// color faces
-	colorFaces( groundGeometry );
-
-	// create interactive box
-	var interactiveBox = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
-		color : StageBase.COLORS.PRIMARY
-	} ) );
-	interactiveBox.matrixAutoUpdate = false;
-	interactiveBox.position.set( 20, 5, 0 );
-	interactiveBox.castShadow = true;
-	interactiveBox.updateMatrix();
-	this.world.addObject3D( interactiveBox );
-
-	this.actionManager.createInteraction( interactiveBox, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Color", function() {
-
-		colorMesh( interactiveBox );
-	} );
-
-	// add trigger for color change
-	var colorTrigger = this.actionManager.createTrigger( "Color Change", 10, function() {
-
-		colorMesh( interactiveBox );
-	} );
-	colorTrigger.position.set( -20, 0, 0 );
-	this.world.addObject3D( colorTrigger );
-
-	// visualize trigger with circle
-	var triggerCircle = new THREE.Mesh( new THREE.CircleGeometry( 10 ), new THREE.MeshBasicMaterial( {
-		wireframe : true
-	} ) );
-	colorTrigger.add( triggerCircle );
-
-	// add sign
-	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
-
-		self.settingsManager.adjustMaterials( materials, self.renderer );
-
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
-		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.world.addObject3D( sign );
-
-		self.animationManager.createHoverAnimation( {
-			object : sign.position,
-			property : "y",
-			duration : 5000,
-			start : sign.position.y,
-			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
-		} ).play();
-	} );
-
-	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
-
-		self._changeStage( "004", true );
-	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
-
-	// light
-	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.world.addObject3D( ambientLight );
-
-	var directionalLight = new THREE.DirectionalLight( 0xffffff );
-	directionalLight.position.set( -100, 50, -100 );
-	directionalLight.shadowCameraLeft = -40;
-	directionalLight.shadowCameraRight = 40;
-	directionalLight.shadowCameraTop = 40;
-	directionalLight.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight( directionalLight );
-	this.world.addObject3D( directionalLight );
-
-	// start rendering
-	this._render();
-
-};
-
-Stage.prototype.start = function() {
-
-	StageBase.prototype.start.call( this );
-
-	// set information panel text
-	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
-};
-
-Stage.prototype.destroy = function() {
-
-	StageBase.prototype.destroy.call( this );
-};
-
-Stage.prototype._render = function() {
-
-	StageBase.prototype._render.call( self );
-};
-
-// custom functions
-
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
-
-function colorMesh( mesh ) {
-
-	if ( ++index % 2 === 0 )
-	{
-		mesh.material.color = StageBase.COLORS.PRIMARY;
-	}
-	else
-	{
-		mesh.material.color = StageBase.COLORS.BLUE_WHITE;
-	}
-}
-
-module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],80:[function(require,module,exports){
-"use strict";
-
-var THREE = require( "three" );
-
-var StageBase = require( "../core/StageBase" );
-var JSONLoader = require( "../etc/JSONLoader" );
-var Easing = require( "../animation/Easing" );
-
-var self;
-
-function Stage() {
-
-	StageBase.call( this, "004" );
-
-	self = this;
-}
-
-Stage.prototype = Object.create( StageBase.prototype );
-Stage.prototype.constructor = Stage;
-
-Stage.prototype.setup = function() {
-
-	StageBase.prototype.setup.call( this );
-
-	// setup controls
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
-
-	// load texts
-	this.textManager.load( this.stageId );
-
-	// add ground
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
-	var groundMaterial = new THREE.MeshBasicMaterial( {
-		vertexColors : THREE.FaceColors
-	} );
-
-	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
-	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
-	ground.updateMatrix();
-	ground.receiveShadow = true;
-	this.world.addGround( ground );
-
-	// color faces
-	colorFaces( groundGeometry );
-
-	// create interactive box
-	var interactiveBoxTextScreen = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
-		color : StageBase.COLORS.BLUE_DARK
-	} ) );
-	interactiveBoxTextScreen.matrixAutoUpdate = false;
-	interactiveBoxTextScreen.position.set( 20, 5, 0 );
-	interactiveBoxTextScreen.castShadow = true;
-	interactiveBoxTextScreen.updateMatrix();
-	this.world.addObject3D( interactiveBoxTextScreen );
-
-	this.actionManager.createInteraction( interactiveBoxTextScreen, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.TextScreen", function() {
-
-		self.controls.isActionInProgress = true;
-		self.userInterfaceManager.showTextScreen( [ {
-			name : "Name.Daniel",
-			text : "TextScreen.Part1"
-		}, {
-			name : "Name.Peter",
-			text : "TextScreen.Part2"
-		}, {
-			name : undefined,
-			text : "TextScreen.Part3"
-		} ], function() {
-
-			self.controls.isActionInProgress = false;
-		} );
-	} );
-
-	// create interactive box
-	var interactiveBoxModal = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
-		color : StageBase.COLORS.PRIMARY
-	} ) );
-	interactiveBoxModal.matrixAutoUpdate = false;
-	interactiveBoxModal.position.set( -20, 5, 0 );
-	interactiveBoxModal.castShadow = true;
-	interactiveBoxModal.updateMatrix();
-	this.world.addObject3D( interactiveBoxModal );
-
-	this.actionManager.createInteraction( interactiveBoxModal, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Modal", function() {
-
-		self.userInterfaceManager.showModalDialog( {
-			headline : "Modal.Headline",
-			button : "Modal.Button",
-			content : "Modal.Content"
-		} );
-	} );
-
-	// add sign
-	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
-
-		self.settingsManager.adjustMaterials( materials, self.renderer );
-
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
-		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.world.addObject3D( sign );
-
-		self.animationManager.createHoverAnimation( {
-			object : sign.position,
-			property : "y",
-			duration : 5000,
-			start : sign.position.y,
-			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
-		} ).play();
-	} );
-
-	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
-
-		self._changeStage( "005", true );
-	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
-
-	// light
-	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.world.addObject3D( ambientLight );
-
-	var directionalLight = new THREE.DirectionalLight( 0xffffff );
-	directionalLight.position.set( -100, 50, -100 );
-	directionalLight.shadowCameraLeft = -40;
-	directionalLight.shadowCameraRight = 40;
-	directionalLight.shadowCameraTop = 40;
-	directionalLight.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight( directionalLight );
-	this.world.addObject3D( directionalLight );
-
-	// start rendering
-	this._render();
-
-};
-
-Stage.prototype.start = function() {
-
-	StageBase.prototype.start.call( this );
-
-	// set information panel text
-	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
-};
-
-Stage.prototype.destroy = function() {
-
-	StageBase.prototype.destroy.call( this );
-};
-
-Stage.prototype._render = function() {
-
-	StageBase.prototype._render.call( self );
-};
-
-// custom functions
-
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
-
-module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],81:[function(require,module,exports){
-"use strict";
-
-var THREE = require( "three" );
-
-var StageBase = require( "../core/StageBase" );
-var JSONLoader = require( "../etc/JSONLoader" );
-var Easing = require( "../animation/Easing" );
-
-var self;
-
-function Stage() {
-
-	StageBase.call( this, "005" );
-
-	self = this;
-}
-
-Stage.prototype = Object.create( StageBase.prototype );
-Stage.prototype.constructor = Stage;
-
-Stage.prototype.setup = function() {
-
-	StageBase.prototype.setup.call( this );
-
-	// setup controls
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
-
-	// load texts
-	this.textManager.load( this.stageId );
-
-	// add ground
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
-	var groundMaterial = new THREE.MeshBasicMaterial( {
-		vertexColors : THREE.FaceColors
-	} );
-
-	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
-	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
-	ground.updateMatrix();
-	ground.receiveShadow = true;
-	this.world.addGround( ground );
-
-	// color faces
-	colorFaces( groundGeometry );
-
-	// add background music
-	this.audioManager.setBackgroundMusic( "music", 0.5 );
-
-	// add sign
-	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
-
-		self.settingsManager.adjustMaterials( materials, self.renderer );
-
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
-		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.world.addObject3D( sign );
-
-		self.animationManager.createHoverAnimation( {
-			object : sign.position,
-			property : "y",
-			duration : 5000,
-			start : sign.position.y,
-			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
-		} ).play();
-	} );
-
-	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
-
-		self._changeStage( "006", true );
-	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
-
-	// start rendering
-	this._render();
-};
-
-Stage.prototype.start = function() {
-
-	StageBase.prototype.start.call( this );
-
-	// start playing
-	this.audioManager.playBackgroundMusic();
-
-	// set information panel text
-	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
-};
-
-Stage.prototype.destroy = function() {
-
-	StageBase.prototype.destroy.call( this );
-
-	// stop playing
-	this.audioManager.stopBackgroundMusic();
-};
-
-Stage.prototype._render = function() {
-
-	StageBase.prototype._render.call( self );
-};
-
-// custom functions
-
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
-
-module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],82:[function(require,module,exports){
-"use strict";
-
-var THREE = require( "three" );
-
-var StageBase = require( "../core/StageBase" );
-var JSONLoader = require( "../etc/JSONLoader" );
-var Easing = require( "../animation/Easing" );
-
-var self;
-
-var audioFire, audioClock;
-
-function Stage() {
-
-	StageBase.call( this, "006" );
-
-	self = this;
-}
-
-Stage.prototype = Object.create( StageBase.prototype );
-Stage.prototype.constructor = Stage;
-
-Stage.prototype.setup = function() {
-
-	StageBase.prototype.setup.call( this );
-
-	// setup controls
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
-
-	// load texts
-	this.textManager.load( this.stageId );
-
-	// add ground
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
-	var groundMaterial = new THREE.MeshBasicMaterial( {
-		vertexColors : THREE.FaceColors
-	} );
-
-	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
-	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
-	ground.updateMatrix();
-	ground.receiveShadow = true;
-	this.world.addGround( ground );
-
-	// color faces
-	colorFaces( groundGeometry );
-
-	// add boxes
-	var staticBoxFire = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
-		color :StageBase.COLORS.PRIMARY
-	} ) );
-	staticBoxFire.matrixAutoUpdate = false;
-	staticBoxFire.position.set( 40, 5, 0 );
-	staticBoxFire.castShadow = true;
-	staticBoxFire.updateMatrix();
-	this.world.addObject3D( staticBoxFire );
-	this.actionManager.createStatic( staticBoxFire, this.actionManager.COLLISIONTYPES.AABB );
-
-	var staticBoxClock = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
-		color : StageBase.COLORS.BLUE_WHITE
-	} ) );
-	staticBoxClock.matrixAutoUpdate = false;
-	staticBoxClock.position.set( -40, 5, 0 );
-	staticBoxClock.castShadow = true;
-	staticBoxClock.updateMatrix();
-	this.world.addObject3D( staticBoxClock );
-	this.actionManager.createStatic( staticBoxClock, this.actionManager.COLLISIONTYPES.AABB );
-
-	var staticBoxWall = new THREE.Mesh( new THREE.BoxGeometry( 1, 20, 40 ), new THREE.MeshBasicMaterial( {
-		wireframe : true
-	} ) );
-	staticBoxWall.matrixAutoUpdate = false;
-	staticBoxWall.position.set( -5.5, 5, 0 );
-	staticBoxWall.updateMatrix();
-	staticBoxClock.add( staticBoxWall );
-	this.actionManager.createStatic( staticBoxWall, this.actionManager.COLLISIONTYPES.AABB );
-
-	// add dynamic sounds
-	this.audioManager.createAudioBufferList( [ "fire", "clock" ], function( bufferList ) {
-
-		audioFire = self.audioManager.createDynamicSound( "ambient.fire", bufferList[ 0 ], true );
-		audioFire.setRefDistance( 20 );
-		audioFire.setRolloffFactor( 1 );
-		audioFire.setMaxDistance( 50 );
-
-		audioClock = self.audioManager.createDynamicSound( "ambient.clock", bufferList[ 1 ], true );
-		audioClock.setRefDistance( 20 );
-		audioClock.setRolloffFactor( 1 );
-		audioClock.setMaxDistance( 50 );
-		audioClock.addDirection( 180, 0, 0 );
-		audioClock.position.set( -5, 0, 0 );
-
-		staticBoxFire.add( audioFire );
-		staticBoxClock.add( audioClock );
-	} ).load();
-
-	// add sign
-	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
-
-		self.settingsManager.adjustMaterials( materials, self.renderer );
-
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
-		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.world.addObject3D( sign );
-
-		self.animationManager.createHoverAnimation( {
-			object : sign.position,
-			property : "y",
-			duration : 5000,
-			start : sign.position.y,
-			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
-		} ).play();
-	} );
-
-	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
-
-		self._changeStage( "007", true );
-	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
-
-	// light
-	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.world.addObject3D( ambientLight );
-
-	var directionalLight = new THREE.DirectionalLight( 0xffffff );
-	directionalLight.position.set( -100, 50, -100 );
-	directionalLight.shadowCameraLeft = -40;
-	directionalLight.shadowCameraRight = 40;
-	directionalLight.shadowCameraTop = 40;
-	directionalLight.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight( directionalLight );
-	this.world.addObject3D( directionalLight );
-
-	// start rendering
-	this._render();
-};
-
-Stage.prototype.start = function() {
-
-	StageBase.prototype.start.call( this );
-
-	// start playing
-	audioFire.play();
-	audioClock.play();
-
-	// set information panel text
-	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
-};
-
-Stage.prototype.destroy = function() {
-
-	StageBase.prototype.destroy.call( this );
-
-	// stop playing
-	audioFire.stop();
-	audioClock.stop();
-};
-
-Stage.prototype._render = function() {
-
-	StageBase.prototype._render.call( self );
-};
-
-// custom functions
-
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
-
-module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],83:[function(require,module,exports){
-"use strict";
-
-var THREE = require( "three" );
-
-var StageBase = require( "../core/StageBase" );
-var JSONLoader = require( "../etc/JSONLoader" );
-var Easing = require( "../animation/Easing" );
-
-var self;
-
-function Stage() {
-
-	StageBase.call( this, "007" );
-
-	self = this;
-}
-
-Stage.prototype = Object.create( StageBase.prototype );
-Stage.prototype.constructor = Stage;
-
-Stage.prototype.setup = function() {
-
-	StageBase.prototype.setup.call( this );
-
-	// setup controls
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
-
-	// load texts
-	this.textManager.load( this.stageId );
-
-	// add ground
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
-	var groundMaterial = new THREE.MeshBasicMaterial( {
-		vertexColors : THREE.FaceColors
-	} );
-
-	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
-	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
-	ground.updateMatrix();
-	ground.receiveShadow = true;
-	this.world.addGround( ground );
-
-	// color faces
-	colorFaces( groundGeometry );
-
-	// add objects
-	var interactiveBoxBasic = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
-		color :StageBase.COLORS.PRIMARY
-	} ) );
-	interactiveBoxBasic.position.set( 20, 5, 0 );
-	interactiveBoxBasic.castShadow = true;
-	this.world.addObject3D( interactiveBoxBasic );
-
-	var interactiveObject = this.actionManager.createInteraction( interactiveBoxBasic, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.BasicAnimation", function() {
-
-		interactiveObject.action.isActive = false;
-
-		// create a basic animation, which animates a single value
-		self.animationManager.createBasicAnimation( {
-			object : interactiveBoxBasic.position,
-			property : "x",
-			duration : 5000,
-			start : interactiveBoxBasic.position.x,
-			end : interactiveBoxBasic.position.x + 30,
-			easing : Easing.Quartic.InOut
-		} ).play();
-	} );
-
-	var staticBoxHover = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
-		color : StageBase.COLORS.BLUE_WHITE
-	} ) );
-	staticBoxHover.position.set( -40, 8, 0 );
-	staticBoxHover.castShadow = true;
-	this.world.addObject3D( staticBoxHover );
-	this.actionManager.createStatic( staticBoxHover, this.actionManager.COLLISIONTYPES.AABB );
-
-	// create a hover animation, which animates infinitely a property between
-	// start- and end-value
-	this.animationManager.createHoverAnimation( {
-		object : staticBoxHover.position,
-		property : "y",
-		duration : 4000,
-		delayTime : 2000,
-		start : staticBoxHover.position.y,
-		end : staticBoxHover.position.y + 2,
-		easing : Easing.Sinusoidal.InOut
-	} ).play();
-
-	// add sign
-	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
-
-		self.settingsManager.adjustMaterials( materials, self.renderer );
-
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
-		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.world.addObject3D( sign );
-
-		self.animationManager.createHoverAnimation( {
-			object : sign.position,
-			property : "y",
-			duration : 5000,
-			start : sign.position.y,
-			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
-		} ).play();
-	} );
-
-	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
-
-		self._changeStage( "008", true );
-	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
-
-	// light
-	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.world.addObject3D( ambientLight );
-
-	var directionalLight = new THREE.DirectionalLight( 0xffffff );
-	directionalLight.position.set( -100, 50, -100 );
-	directionalLight.shadowCameraLeft = -50;
-	directionalLight.shadowCameraRight = 50;
-	directionalLight.shadowCameraTop = 40;
-	directionalLight.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight( directionalLight );
-	this.world.addObject3D( directionalLight );
-
-	// start rendering
-	this._render();
-};
-
-Stage.prototype.start = function() {
-
-	StageBase.prototype.start.call( this );
-
-	// set information panel text
-	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
-};
-
-Stage.prototype.destroy = function() {
-
-	StageBase.prototype.destroy.call( this );
-};
-
-Stage.prototype._render = function() {
-
-	StageBase.prototype._render.call( self );
-};
-
-// custom functions
-
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
-
-module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],84:[function(require,module,exports){
-"use strict";
-
-var THREE = require( "three" );
-
-var StageBase = require( "../core/StageBase" );
-var JSONLoader = require( "../etc/JSONLoader" );
-var Easing = require( "../animation/Easing" );
-
-var self;
-
-function Stage() {
-
-	StageBase.call( this, "008" );
-
-	self = this;
-}
-
-Stage.prototype = Object.create( StageBase.prototype );
-Stage.prototype.constructor = Stage;
-
-Stage.prototype.setup = function() {
-
-	StageBase.prototype.setup.call( this );
-
-	// controls setup
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
-
-	// load texts
-	this.textManager.load( this.stageId );
-
-	// add materials and geometry
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 100, 20, 10 ) );
-	var groundMaterial = new THREE.MeshBasicMaterial( {
-		vertexColors : THREE.FaceColors
-	} );
-
-	// add ground down
-	var groundDown = new THREE.Mesh( groundGeometry, groundMaterial );
-	groundDown.matrixAutoUpdate = false;
-	groundDown.position.set( 0, 0, -50 );
-	groundDown.rotation.x = -0.5 * Math.PI;
-	groundDown.updateMatrix();
-	groundDown.receiveShadow = true;
-	this.world.addGround( groundDown );
-
-	// add ground up
-	var groundUp = new THREE.Mesh( groundGeometry, groundMaterial );
-	groundUp.matrixAutoUpdate = false;
-	groundUp.position.set( 0, 7.5, 68 );
-	groundUp.rotation.x = -0.5 * Math.PI;
-	groundUp.updateMatrix();
-	groundUp.receiveShadow = true;
-	this.world.addGround( groundUp );
-
-	// color faces
-	colorFaces( groundGeometry );
-
-	// add sign
-	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
-
-		self.settingsManager.adjustMaterials( materials, self.renderer );
-
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
-		sign.position.set( 0, 27.5, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.world.addObject3D( sign );
-
-		self.animationManager.createHoverAnimation( {
-			object : sign.position,
-			property : "y",
-			duration : 5000,
-			start : sign.position.y,
-			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
-		} ).play();
-	} );
-
-	// add stairs
-	var stairsLoader = new JSONLoader();
-	stairsLoader.load( "assets/models/stairs.json", function( geometry, materials ) {
-
-		self.settingsManager.adjustMaterials( materials, self.renderer );
-
-		materials[ 0 ].color = StageBase.COLORS.PRIMARY;
-		materials[ 1 ].color = StageBase.COLORS.BLUE_DARK;
-
-		var stairs = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
-		stairs.receiveShadow = true;
-		self.world.addObject3D( stairs );
-	} );
-
-	// add invisible ramp
-	var rampGeometry = new THREE.PlaneBufferGeometry( 200, 25, 1, 1 );
-	var rampMaterial = new THREE.MeshBasicMaterial( { visible:false } );
-
-	var ramp = new THREE.Mesh( rampGeometry, rampMaterial );
-	ramp.matrixAutoUpdate = false;
-	ramp.position.set( 0, 2.8, 6.4 );
-	ramp.rotation.x = 1.378 * Math.PI;
-	ramp.updateMatrix();
-	this.world.addGround( ramp );
-
-	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
-
-		self._changeStage( "009", true );
-	} );
-	stageTrigger.position.set( 0, 7.5, 75 );
-	this.world.addObject3D( stageTrigger );
-
-	// start rendering
-	this._render();
-};
-
-Stage.prototype.start = function() {
-
-	StageBase.prototype.start.call( this );
-
-	// set information panel text
-	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
-};
-
-Stage.prototype.destroy = function() {
-
-	StageBase.prototype.destroy.call( this );
-};
-
-Stage.prototype._render = function() {
-
-	StageBase.prototype._render.call( self );
-};
-
-// custom functions
-
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
-
-module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],85:[function(require,module,exports){
-"use strict";
-
-var THREE = require( "three" );
-
-var StageBase = require( "../core/StageBase" );
-var JSONLoader = require( "../etc/JSONLoader" );
-var Easing = require( "../animation/Easing" );
-
-var self;
-
-function Stage() {
-
-	StageBase.call( this, "009" );
-
-	self = this;
-}
-
-Stage.prototype = Object.create( StageBase.prototype );
-Stage.prototype.constructor = Stage;
-
-Stage.prototype.setup = function() {
-
-	StageBase.prototype.setup.call( this );
-
-	// controls setup
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
-
-	// load texts
-	this.textManager.load( this.stageId );
-
-	// add ground
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
-	var groundMaterial = new THREE.MeshBasicMaterial( {
-		vertexColors : THREE.FaceColors
-	} );
-
-	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
-	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
-	ground.updateMatrix();
-	ground.receiveShadow = true;
-	this.world.addGround( ground );
-
-	// color faces
-	colorFaces( groundGeometry );
-
-	// add sign
-	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
-
-		self.settingsManager.adjustMaterials( materials, self.renderer );
-
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
-		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.world.addObject3D( sign );
-
-		self.animationManager.createHoverAnimation( {
-			object : sign.position,
-			property : "y",
-			duration : 5000,
-			start : sign.position.y,
-			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
-		} ).play();
-	} );
-
-	// create spheres for LOD switching
-	var sphereOne = new THREE.Mesh( new THREE.SphereGeometry( 10, 25, 25 ), new THREE.MeshLambertMaterial( {
-		color : StageBase.COLORS.PRIMARY
-	} ) );
-	var sphereTwo = new THREE.Mesh( new THREE.SphereGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
-		color : StageBase.COLORS.PRIMARY
-	} ) );
-	var sphereThree = new THREE.Mesh( new THREE.SphereGeometry( 10, 6, 6 ), new THREE.MeshLambertMaterial( {
-		color : StageBase.COLORS.PRIMARY
-	} ) );
-
-	sphereOne.matrixAutoUpdate = false;
-	sphereTwo.matrixAutoUpdate = false;
-	sphereThree.matrixAutoUpdate = false;
-
-	sphereOne.castShadow = true;
-	sphereTwo.castShadow = true;
-	sphereThree.castShadow = true;
-
-	// create LOD instance
-	var lod = this.performanceManager.createSmoothLOD( "sphere", 10 );
-	lod.matrixAutoUpdate = false;
-	lod.position.set( 0, 10, 0 );
-	lod.updateMatrix();
-
-	// add objects and distances
-	lod.addLevel( sphereOne, 0 );
-	lod.addLevel( sphereTwo, 60 );
-	lod.addLevel( sphereThree, 100 );
-
-	this.world.addObject3D( lod );
-
-	// create circles to visualize the LOD distances
-	showLODCircles( this.world );
-
-	// light
-	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.world.addObject3D( ambientLight );
-
-	var directionalLight = new THREE.DirectionalLight( 0xffffff );
-	directionalLight.position.set( -100, 50, -100 );
-	directionalLight.shadowCameraLeft = -40;
-	directionalLight.shadowCameraRight = 40;
-	directionalLight.shadowCameraTop = 40;
-	directionalLight.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight( directionalLight );
-	this.world.addObject3D( directionalLight );
-
-	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
-
-		self._changeStage( "010", true );
-	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
-
-	// start rendering
-	this._render();
-};
-
-Stage.prototype.start = function() {
-
-	StageBase.prototype.start.call( this );
-
-	// set information panel text
-	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
-};
-
-Stage.prototype.destroy = function() {
-
-	StageBase.prototype.destroy.call( this );
-};
-
-Stage.prototype._render = function() {
-
-	StageBase.prototype._render.call( self );
-};
-
-// custom functions
-
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
-
-function showLODCircles( world ) {
-
-	var circleOne = new THREE.Mesh( new THREE.CircleGeometry( 60, 25 ), new THREE.MeshBasicMaterial( {
-		wireframe : true
-	} ) );
-	var circleTwo = new THREE.Mesh( new THREE.CircleGeometry( 100, 25 ), new THREE.MeshBasicMaterial( {
-		wireframe : true
-	} ) );
-
-	circleOne.rotation.set( Math.PI * 0.5, 0, 0 );
-	circleTwo.rotation.set( Math.PI * 0.5, 0, 0 );
-
-	world.addObject3D( circleOne );
-	world.addObject3D( circleTwo );
-}
-
-module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],86:[function(require,module,exports){
-(function (global){
-"use strict";
-
-var THREE = require( "three" );
-
-var StageBase = require( "../core/StageBase" );
-var JSONLoader = require( "../etc/JSONLoader" );
-var Easing = require( "../animation/Easing" );
-
-var self, box, sphere;
-
-function Stage() {
-
-	StageBase.call( this, "010" );
-
-	self = this;
-}
-
-Stage.prototype = Object.create( StageBase.prototype );
-Stage.prototype.constructor = Stage;
-
-Stage.prototype.setup = function() {
-
-	StageBase.prototype.setup.call( this );
-
-	// controls setup
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
-
-	// load texts
-	this.textManager.load( this.stageId );
-
-	// add ground
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
-	var groundMaterial = new THREE.MeshBasicMaterial( {
-		vertexColors : THREE.FaceColors
-	} );
-
-	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
-	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
-	ground.updateMatrix();
-	ground.receiveShadow = true;
-	this.world.addGround( ground );
-
-	// color faces
-	colorFaces( groundGeometry );
-
-	// create first mesh for impostor demo
-	sphere = new THREE.Mesh( new THREE.SphereGeometry( 10, 25, 25 ), new THREE.MeshLambertMaterial( {
-		color : StageBase.COLORS.PRIMARY
-	} ) );
-	sphere.matrixAutoUpdate = false;
-	sphere.position.set( -20, 10, 0 );
-	sphere.updateMatrix();
-	sphere.visible = false;
-	this.world.addObject3D( sphere );
-
-	// create second mesh for impostor demo
-	box = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
-		color : StageBase.COLORS.PRIMARY
-	} ) );
-	box.matrixAutoUpdate = false;
-	box.position.set( 20, 10, 0 );
-	box.updateMatrix();
-	box.visible = false;
-	this.world.addObject3D( box );
-
-	this.performanceManager.createImpostor( "sphere", sphere, 512 );
-	this.performanceManager.createImpostor( "box", box, 512 );
-
-	// add sign
-	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
-
-		self.settingsManager.adjustMaterials( materials, self.renderer );
-
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
-		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.world.addObject3D( sign );
-
-		self.animationManager.createHoverAnimation( {
-			object : sign.position,
-			property : "y",
-			duration : 5000,
-			start : sign.position.y,
-			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
-		} ).play();
-	} );
-
-	// light
-	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.world.addObject3D( ambientLight );
-
-	var directionalLight = new THREE.DirectionalLight( 0xffffff );
-	directionalLight.position.set( -100, 50, -100 );
-	directionalLight.shadowCameraLeft = -40;
-	directionalLight.shadowCameraRight = 40;
-	directionalLight.shadowCameraTop = 40;
-	directionalLight.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight( directionalLight );
-	this.world.addObject3D( directionalLight );
-
-	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
-
-		self._changeStage( "011", true );
-	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
-
-	// generate impostors
-	this.performanceManager.generateImpostors();
-
-	// start rendering
-	this._render();
-};
-
-Stage.prototype.start = function() {
-
-	StageBase.prototype.start.call( this );
-
-	// set information panel text
-	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
-
-	// add special event handler for demo
+	// add event handler
 	global.document.addEventListener( "keydown", onKeyDown );
+
+	// start rendering
+	this._render();
+};
+
+Stage.prototype.start = function() {
+
+	StageBase.prototype.start.call( this );
 };
 
 Stage.prototype.destroy = function() {
 
 	StageBase.prototype.destroy.call( this );
-
-	// remove special event handler for demo
+	
+	// remove event handler
 	global.document.removeEventListener( "keydown", onKeyDown );
 };
 
 Stage.prototype._render = function() {
-
+	
 	StageBase.prototype._render.call( self );
 };
-
-// custom functions
-
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
 
 function onKeyDown( event ) {
 
 	switch ( event.keyCode )
 	{
-		case 73:
-			// i
-			sphere.visible = !sphere.visible;
-			box.visible = !box.visible;
-			break;
-		case 71:
-			// g
-			self.performanceManager.generateImpostors();
+		case 80:
+			// p
+			soccerGame.isPaused = !soccerGame.isPaused;
 			break;
 	}
 }
 
 module.exports = Stage;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],87:[function(require,module,exports){
-"use strict";
-
-var THREE = require( "three" );
-
-var StageBase = require( "../core/StageBase" );
-var JSONLoader = require( "../etc/JSONLoader" );
-var Easing = require( "../animation/Easing" );
-
-var self;
-
-function Stage() {
-
-	StageBase.call( this, "011" );
-
-	self = this;
-}
-
-Stage.prototype = Object.create( StageBase.prototype );
-Stage.prototype.constructor = Stage;
-
-Stage.prototype.setup = function() {
-
-	StageBase.prototype.setup.call( this );
-
-	// controls setup
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
-
-	// load texts
-	this.textManager.load( this.stageId );
-
-	// add ground
-	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
-	var groundMaterial = new THREE.MeshBasicMaterial( {
-		vertexColors : THREE.FaceColors
-	} );
-
-	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
-	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
-	ground.updateMatrix();
-	ground.receiveShadow = true;
-	this.world.addGround( ground );
-
-	// color faces
-	colorFaces( groundGeometry );
-
-	// add sign
-	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
-
-		self.settingsManager.adjustMaterials( materials, self.renderer );
-
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
-		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
-		self.world.addObject3D( sign );
-
-		self.animationManager.createHoverAnimation( {
-			object : sign.position,
-			property : "y",
-			duration : 5000,
-			start : sign.position.y,
-			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
-		} ).play();
-	} );
-
-	// light
-	var ambientLight = new THREE.AmbientLight( 0x111111 );
-	this.world.addObject3D( ambientLight );
-
-	var directionalLight = new THREE.DirectionalLight( 0xffffff );
-	directionalLight.position.set( -100, 50, -100 );
-	directionalLight.shadowCameraLeft = -40;
-	directionalLight.shadowCameraRight = 40;
-	directionalLight.shadowCameraTop = 40;
-	directionalLight.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight( directionalLight );
-	this.world.addObject3D( directionalLight );
-
-	// add trigger for ending
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
-
-		self.userInterfaceManager.showModalDialog( {
-			headline : "Modal.Headline",
-			button : "Modal.Button",
-			content : "Modal.Content"
-		} );
-
-		self.saveGameManager.remove();
-	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
-
-	// post processing
-	this.renderer.preparePostProcessing( this.world, this.camera );
-	this.renderer.addGrayscaleEffect();
-	this.renderer.addHBlurEffect();
-	this.renderer.addVBlurEffect();
-	this.renderer.addVignetteEffect( {
-		renderToScreen : true
-	} );
-
-	// start rendering
-	this._render();
-};
-
-Stage.prototype.start = function() {
-
-	StageBase.prototype.start.call( this );
-
-	// set information panel text
-	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
-};
-
-Stage.prototype.destroy = function() {
-
-	StageBase.prototype.destroy.call( this );
-};
-
-Stage.prototype._render = function() {
-
-	StageBase.prototype._render.call( self );
-};
-
-// custom functions
-
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
-
-module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],88:[function(require,module,exports){
+},{"../core/StageBase":25,"three":1}],91:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -52999,7 +54356,7 @@ Chat.prototype._onMessage = function( message, data ) {
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":65,"../messaging/Topic":67,"./UiElement":97}],89:[function(require,module,exports){
+},{"../messaging/EventManager":77,"../messaging/Topic":80,"./UiElement":100}],92:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel. Only if the development
@@ -53061,7 +54418,7 @@ DevelopmentPanel.prototype.setText = function( text ) {
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":97}],90:[function(require,module,exports){
+},{"./UiElement":100}],93:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -53122,7 +54479,7 @@ InformationPanel.prototype.setText = function( textKey ) {
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":97}],91:[function(require,module,exports){
+},{"./UiElement":100}],94:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -53199,7 +54556,7 @@ InteractionLabel.prototype.hide = function() {
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":97}],92:[function(require,module,exports){
+},{"./UiElement":100}],95:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -53389,7 +54746,7 @@ LoadingScreen.prototype._onReady = function( message, data ) {
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":65,"../messaging/Topic":67,"./UiElement":97}],93:[function(require,module,exports){
+},{"../messaging/EventManager":77,"../messaging/Topic":80,"./UiElement":100}],96:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -53545,7 +54902,7 @@ Menu.prototype._publishFinishEvent = function( message, data ) {
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Environment":20,"../messaging/EventManager":65,"../messaging/Topic":67,"./UiElement":97}],94:[function(require,module,exports){
+},{"../core/Environment":20,"../messaging/EventManager":77,"../messaging/Topic":80,"./UiElement":100}],97:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -53669,7 +55026,7 @@ ModalDialog.prototype._onClose = function( event ) {
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":97}],95:[function(require,module,exports){
+},{"./UiElement":100}],98:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor. Only if the development
@@ -53888,7 +55245,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":97}],96:[function(require,module,exports){
+},{"./UiElement":100}],99:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -54101,7 +55458,7 @@ TextScreen.prototype._printName = function() {
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":97}],97:[function(require,module,exports){
+},{"./UiElement":100}],100:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -54151,7 +55508,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":42}],98:[function(require,module,exports){
+},{"../etc/TextManager":42}],101:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in stages to
@@ -54417,4 +55774,4 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":65,"../messaging/Topic":67,"./Chat":88,"./DevelopmentPanel":89,"./InformationPanel":90,"./InteractionLabel":91,"./LoadingScreen":92,"./Menu":93,"./ModalDialog":94,"./PerformanceMonitor":95,"./TextScreen":96}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98]);
+},{"../core/System":27,"../messaging/EventManager":77,"../messaging/Topic":80,"./Chat":91,"./DevelopmentPanel":92,"./InformationPanel":93,"./InteractionLabel":94,"./LoadingScreen":95,"./Menu":96,"./ModalDialog":97,"./PerformanceMonitor":98,"./TextScreen":99}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101]);

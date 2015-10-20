@@ -49,6 +49,9 @@ var TOPIC = {
 		},
 		READY : "stage.ready",
 		START : "stage.start"
+	},
+	GAME : {
+		SCORE : "game.score"
 	}
 };
 

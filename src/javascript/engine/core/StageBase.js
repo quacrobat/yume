@@ -16,7 +16,6 @@ var renderer = require( "./Renderer" );
 var camera = require( "./Camera" );
 var world = require( "./World" );
 var system = require( "./System" );
-var controls = require( "../controls/FirstPersonControls" );
 var actionManager = require( "../action/ActionManager" );
 var audioManager = require( "../audio/AudioManager" );
 var animationManager = require( "../animation/AnimationManager" );
@@ -57,12 +56,6 @@ function StageBase( stageId ) {
 		},
 		world : {
 			value : world,
-			configurable : false,
-			enumerable : true,
-			writable : false
-		},
-		controls : {
-			value : controls,
 			configurable : false,
 			enumerable : true,
 			writable : false
@@ -160,7 +153,6 @@ StageBase.prototype.setup = function() {
  */
 StageBase.prototype.start = function() {
 
-	this.controls.isActionInProgress = false;
 };
 
 /**
@@ -206,15 +198,6 @@ StageBase.prototype._render = function() {
 
 	// get delta time value
 	this._delta = this.timeManager.getDelta();
-	
-	// update controls
-	this.controls.update( this._delta );
-
-	// update managers
-	this.actionManager.update( controls.getPosition(), controls.getDirection() );
-	this.animationManager.update( this._delta );
-	this.performanceManager.update();
-	this.userInterfaceManager.update();
 
 	// finally update entity manager
 	this.entityManager.update( this._delta );
@@ -233,9 +216,6 @@ StageBase.prototype._render = function() {
  * @param {boolean} isSaveGame - Should the progress be saved?
  */
 StageBase.prototype._changeStage = function( stageId, isSaveGame ) {
-
-	// lock controls
-	this.controls.isActionInProgress = true;
 	
 	// publish message to trigger the change
 	eventManager.publish( TOPIC.STAGE.CHANGE, {

@@ -117,21 +117,28 @@ MovingEntity.prototype.rotateToDirection = ( function() {
  * Given a target position, this method rotates the entity by an amount not
  * greater than maxTurnRate until it directly faces the target.
  * 
- * @param {THREE.Vector3} targetPosition - The target position to face.
+ * @param {THREE.Object3D} - The target position to face.
  * 
- * @returns {boolean} Is the entity facing the target?
+ * @returns {boolean} Is the entity facing in the desired direction?
  */
-MovingEntity.prototype.isRotateToTarget = ( function() {
+MovingEntity.prototype.isRotateHeadingToFacePosition = ( function() {
 
-	var rotationToTarget = new THREE.Matrix4();
-	var quaternionToTarget = new THREE.Quaternion();
+	var toTarget = new THREE.Vector3(); 
 
-	return function( targetPosition ) {
+	return function( position ) {
 		
-		var angle, t;
+		var direction, dot, angle, sign;
 
-		// first determine the angle between the look vector and the target
-		angle = targetPosition.angleTo( this.getDirection() );
+		toTarget.subVectors( position, this.object3D.position ).normalize();
+		
+		direction = this.getDirection();
+
+		dot = direction.dot( toTarget );
+
+		dot = THREE.Math.clamp( dot, -1, 1 );
+
+		// first determine the angle between the view direction and the target
+		angle = Math.acos( dot );
 
 		// return true if the player is facing the target
 		if ( angle < 0.00001 )
@@ -140,18 +147,20 @@ MovingEntity.prototype.isRotateToTarget = ( function() {
 		}
 
 		// clamp the amount to turn to the max turn rate
-		t = ( angle > this.maxTurnRate ) ? ( this.maxTurnRate / angle ) : 1;
+		if ( angle > this.maxTurnRate )
+		{
+			angle = this.maxTurnRate;
+		}
+		
+		// calculate direction of rotation ( clockwise / anti-clockwise )
+		sign =  (  ( direction.x * toTarget.z ) < ( direction.z * toTarget.x ) ) ? 1 : -1;
 
-		// get target rotation
-		rotationToTarget.lookAt( targetPosition, this.object3D.position, this.object3D.up );
-		quaternionToTarget.setFromRotationMatrix( rotationToTarget );
-
-		// interpolate rotation
-		this.object3D.quaternion.slerp( quaternionToTarget, t );
+		// rotate player
+		this.object3D.rotateY( angle * sign );
 
 		// adjust velocity
 		this.velocity.applyQuaternion( this.object3D.quaternion );
-
+		
 		return false;
 	};
 

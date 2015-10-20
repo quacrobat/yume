@@ -13,7 +13,6 @@ var environment = require( "./Environment" );
 var renderer = require( "./Renderer" );
 var camera = require( "./Camera" );
 var system = require( "./System" );
-var controls = require( "../controls/FirstPersonControls" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var saveGameManager = require( "../etc/SaveGameManager" );
 var multiplayerManager = require( "../etc/MultiplayerManager" );
@@ -64,7 +63,6 @@ Bootstrap.prototype._initEngine = function() {
 		// initialize basic components
 		renderer.init();
 		camera.init();
-		controls.init();
 		userInterfaceManager.init();
 
 		// initialize network and multiplayer manager only if necessary
@@ -88,21 +86,8 @@ Bootstrap.prototype._initEngine = function() {
  */
 Bootstrap.prototype._loadStage = function() {
 
-	var stageId = null;
-	var saveGame = saveGameManager.load();
-
-	if ( saveGame === null )
-	{
-		stageId = "001";
-		saveGameManager.save( stageId );
-	}
-	else
-	{
-		stageId = saveGame.stageId;
-	}
-
 	eventManager.publish( TOPIC.APPLICATION.START, {
-		stageId : stageId
+		stageId : "001"
 	} );
 };
 

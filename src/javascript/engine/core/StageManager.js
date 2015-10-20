@@ -16,17 +16,6 @@ var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 
 // stages
 var Stage_001 = require( "../stages/Stage_001" );
-var Stage_002 = require( "../stages/Stage_002" );
-var Stage_003 = require( "../stages/Stage_003" );
-var Stage_004 = require( "../stages/Stage_004" );
-var Stage_005 = require( "../stages/Stage_005" );
-var Stage_006 = require( "../stages/Stage_006" );
-var Stage_007 = require( "../stages/Stage_007" );
-var Stage_008 = require( "../stages/Stage_008" );
-var Stage_009 = require( "../stages/Stage_009" );
-var Stage_010 = require( "../stages/Stage_010" );
-var Stage_011 = require( "../stages/Stage_011" );
-
 /**
  * Creates the stage manager.
  * 
@@ -89,56 +78,6 @@ StageManager.prototype.load = function( stageId ) {
 		case "001":
 
 			this._stage = new Stage_001();
-			break;
-
-		case "002":
-
-			this._stage = new Stage_002();
-			break;
-
-		case "003":
-
-			this._stage = new Stage_003();
-			break;
-
-		case "004":
-
-			this._stage = new Stage_004();
-			break;
-
-		case "005":
-
-			this._stage = new Stage_005();
-			break;
-
-		case "006":
-
-			this._stage = new Stage_006();
-			break;
-
-		case "007":
-
-			this._stage = new Stage_007();
-			break;
-
-		case "008":
-
-			this._stage = new Stage_008();
-			break;
-
-		case "009":
-
-			this._stage = new Stage_009();
-			break;
-
-		case "010":
-
-			this._stage = new Stage_010();
-			break;
-
-		case "011":
-
-			this._stage = new Stage_011();
 			break;
 
 		default:

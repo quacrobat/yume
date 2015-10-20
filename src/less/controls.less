@@ -2,6 +2,7 @@
 @import "mixins.less";
 
 #interaction-label {
+	display: none;
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -15,6 +16,7 @@
 }
 
 #menu {
+	display: none;
 	position: absolute;
 	z-index: 5;
 	width: 100%;
@@ -196,6 +198,29 @@
 		&:empty{
 			display: none;
 		}
+	}
+}
+
+#score-panel{
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: 1;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	div{
+		width: 50px;
+		height: 40px;
+		text-align: center;
+		font-size: 20px;
+		line-height: 35px;
+	}
+	.blue{
+		background-color: #0000ff;
+	}
+	.red{
+		background-color: #ff0000;
 	}
 }
 

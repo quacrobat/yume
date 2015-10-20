@@ -6,6 +6,7 @@
 "use strict";
 
 var Vehicle = require( "./Vehicle" );
+var SoccerPitch = require( "./Pitch" );
 
 /**
  * Creates the entity manager.
@@ -45,6 +46,20 @@ EntityManager.prototype.createVehicle = function( object3D, boundingRadius, velo
 	var vehicle = new Vehicle( this, object3D, boundingRadius, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing );
 	this.addEntity( vehicle );
 	return vehicle;
+};
+
+/**
+ * Creates a soccer game with all game entities (teams, players, goals, ball).
+ * 
+ * @param {THREE.Vector2} pitchDimension - The dimensions of the soccer pitch.
+ * 
+ * @returns {Vehicle} The new soccer pitch.
+ */
+EntityManager.prototype.createSoccerGame = function( pitchDimension ) {
+
+	var pitch = new SoccerPitch( this, pitchDimension );
+	this.addEntity( pitch );
+	return pitch;
 };
 
 /**

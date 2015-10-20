@@ -11,7 +11,7 @@
       "duration": "1d"
     },
     "multiplayer": {
-      "active": true,
+      "active": false,
       "clients_per_session": 4
     },
     "cdn": {
