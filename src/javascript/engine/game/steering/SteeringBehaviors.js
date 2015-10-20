@@ -220,236 +220,232 @@ SteeringBehaviors.prototype.calculate = function( delta ) {
  * @param {number} delta - The time delta value.
  * 
  */
-SteeringBehaviors.prototype._calculatePrioritized = ( function() {
+SteeringBehaviors.prototype._calculatePrioritized = function( delta ) {
 
 	var force;
 
-	return function( delta ) {
+	// wall avoidance
+	if ( this._isOn( SteeringBehaviors.TYPES.WALLAVOIDANCE ) )
+	{
+		force = this._wallAvoidance();
 
-		// wall avoidance
-		if ( this._isOn( SteeringBehaviors.TYPES.WALLAVOIDANCE ) )
+		force.multiplyScalar( this.weights.wallAvoidance );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			force = this._wallAvoidance();
-
-			force.multiplyScalar( this.weights.wallAvoidance );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// obstacle avoidance
-		if ( this._isOn( SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE ) )
+	}
+
+	// obstacle avoidance
+	if ( this._isOn( SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE ) )
+	{
+		force = this._obstacleAvoidance();
+
+		force.multiplyScalar( this.weights.obstacleAvoidance );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			force = this._obstacleAvoidance();
-
-			force.multiplyScalar( this.weights.obstacleAvoidance );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// evade
-		if ( this._isOn( SteeringBehaviors.TYPES.EVADE ) )
+	}
+
+	// evade
+	if ( this._isOn( SteeringBehaviors.TYPES.EVADE ) )
+	{
+		logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Evade target not assigned" );
+
+		force = this._evade( this.targetAgent1 );
+
+		force.multiplyScalar( this.weights.evade );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Evade target not assigned" );
-
-			force = this._evade( this.targetAgent1 );
-
-			force.multiplyScalar( this.weights.evade );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// separation
-		if ( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) )
+	}
+
+	// separation
+	if ( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) )
+	{
+		force = this._separation();
+
+		force.multiplyScalar( this.weights.separation );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			force = this._separation();
-
-			force.multiplyScalar( this.weights.separation );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// alignment
-		if ( this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) )
+	}
+
+	// alignment
+	if ( this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) )
+	{
+		force = this._alignment();
+
+		force.multiplyScalar( this.weights.alignment );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			force = this._alignment();
-
-			force.multiplyScalar( this.weights.alignment );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// cohesion
-		if ( this._isOn( SteeringBehaviors.TYPES.COHESION ) )
+	}
+
+	// cohesion
+	if ( this._isOn( SteeringBehaviors.TYPES.COHESION ) )
+	{
+		force = this._cohesion();
+
+		force.multiplyScalar( this.weights.cohesion );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			force = this._cohesion();
-
-			force.multiplyScalar( this.weights.cohesion );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// flee
-		if ( this._isOn( SteeringBehaviors.TYPES.FLEE ) )
+	}
+
+	// flee
+	if ( this._isOn( SteeringBehaviors.TYPES.FLEE ) )
+	{
+		force = this._flee( this.target );
+
+		force.multiplyScalar( this.weights.flee );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			force = this._flee( this.target );
-
-			force.multiplyScalar( this.weights.flee );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// seek
-		if ( this._isOn( SteeringBehaviors.TYPES.SEEK ) )
+	}
+
+	// seek
+	if ( this._isOn( SteeringBehaviors.TYPES.SEEK ) )
+	{
+
+		force = this._seek( this.target );
+
+		force.multiplyScalar( this.weights.seek );
+
+		if ( !this._accumulateForce( force ) )
 		{
-
-			force = this._seek( this.target );
-
-			force.multiplyScalar( this.weights.seek );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// arrive
-		if ( this._isOn( SteeringBehaviors.TYPES.ARRIVE ) )
+	}
+
+	// arrive
+	if ( this._isOn( SteeringBehaviors.TYPES.ARRIVE ) )
+	{
+		force = this._arrive( this.target, this.deceleration );
+
+		force.multiplyScalar( this.weights.arrive );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			force = this._arrive( this.target, this.deceleration );
-
-			force.multiplyScalar( this.weights.arrive );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// wander
-		if ( this._isOn( SteeringBehaviors.TYPES.WANDER ) )
+	}
+
+	// wander
+	if ( this._isOn( SteeringBehaviors.TYPES.WANDER ) )
+	{
+		force = this._wander( delta );
+
+		force.multiplyScalar( this.weights.wander );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			force = this._wander( delta );
-
-			force.multiplyScalar( this.weights.wander );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// pursuit
-		if ( this._isOn( SteeringBehaviors.TYPES.PURSUIT ) )
+	}
+
+	// pursuit
+	if ( this._isOn( SteeringBehaviors.TYPES.PURSUIT ) )
+	{
+		logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Pursuit target not assigned" );
+
+		force = this._pursuit( this.targetAgent1 );
+
+		force.multiplyScalar( this.weights.pursuit );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Pursuit target not assigned" );
-
-			force = this._pursuit( this.targetAgent1 );
-
-			force.multiplyScalar( this.weights.pursuit );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// offset pursuit
-		if ( this._isOn( SteeringBehaviors.TYPES.OFFSETPURSUIT ) )
+	}
+
+	// offset pursuit
+	if ( this._isOn( SteeringBehaviors.TYPES.OFFSETPURSUIT ) )
+	{
+		logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Pursuit target not assigned" );
+
+		force = this._offsetPursuit( this.targetAgent1, this.offset );
+
+		force.multiplyScalar( this.weights.offsetPursuit );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Pursuit target not assigned" );
-
-			force = this._offsetPursuit( this.targetAgent1, this.offset );
-
-			force.multiplyScalar( this.weights.offsetPursuit );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// interpose
-		if ( this._isOn( SteeringBehaviors.TYPES.INTERPOSE ) )
+	}
+
+	// interpose
+	if ( this._isOn( SteeringBehaviors.TYPES.INTERPOSE ) )
+	{
+		logger.assert( this.targetAgent1 !== null && this.targetAgent2 !== null, "SteeringBehaviors: Interpose targets not assigned" );
+
+		force = this._interpose( this.targetAgent1, this.targetAgent2 );
+
+		force.multiplyScalar( this.weights.interpose );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			logger.assert( this.targetAgent1 !== null && this.targetAgent2 !== null, "SteeringBehaviors: Interpose targets not assigned" );
-
-			force = this._interpose( this.targetAgent1, this.targetAgent2 );
-
-			force.multiplyScalar( this.weights.interpose );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// hide
-		if ( this._isOn( SteeringBehaviors.TYPES.HIDE ) )
+	}
+
+	// hide
+	if ( this._isOn( SteeringBehaviors.TYPES.HIDE ) )
+	{
+		logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Hide target not assigned" );
+
+		force = this._hide( this.targetAgent1 );
+
+		force.multiplyScalar( this.weights.hide );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Hide target not assigned" );
-
-			force = this._hide( this.targetAgent1 );
-
-			force.multiplyScalar( this.weights.hide );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// follow path
-		if ( this._isOn( SteeringBehaviors.TYPES.FOLLOWPATH ) )
+	}
+
+	// follow path
+	if ( this._isOn( SteeringBehaviors.TYPES.FOLLOWPATH ) )
+	{
+		force = this._followPath();
+
+		force.multiplyScalar( this.weights.followPath );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			force = this._followPath();
-
-			force.multiplyScalar( this.weights.followPath );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-	};
+	}
 
-}() );
+};
 
 /**
  * This function calculates how much of its max steering force the vehicle has
@@ -459,43 +455,37 @@ SteeringBehaviors.prototype._calculatePrioritized = ( function() {
  * 
  * @returns {boolean} The steering force.
  */
-SteeringBehaviors.prototype._accumulateForce = ( function() {
+SteeringBehaviors.prototype._accumulateForce = function( forceToAdd ) {
 
-	var magnitudeSoFar;
-	var magnitudeRemaining;
-	var magnitudeToAdd;
+	var magnitudeSoFar, magnitudeRemaining, magnitudeToAdd;
 
-	return function( forceToAdd ) {
+	// calculate how much steering force the vehicle has used so far
+	magnitudeSoFar = this._steeringForce.length();
 
-		// calculate how much steering force the vehicle has used so far
-		magnitudeSoFar = this._steeringForce.length();
+	// calculate how much steering force remains to be used by this vehicle
+	magnitudeRemaining = this.vehicle.maxForce - magnitudeSoFar;
 
-		// calculate how much steering force remains to be used by this vehicle
-		magnitudeRemaining = this.vehicle.maxForce - magnitudeSoFar;
+	// return false if there is no more force left to use
+	if ( magnitudeRemaining <= 0 )
+	{
+		return false;
+	}
 
-		// return false if there is no more force left to use
-		if ( magnitudeRemaining <= 0 )
-		{
-			return false;
-		}
+	// calculate the magnitude of the force we want to add
+	magnitudeToAdd = forceToAdd.length();
 
-		// calculate the magnitude of the force we want to add
-		magnitudeToAdd = forceToAdd.length();
+	// restrict the magnitude of forceToAdd, so we don't exceed the
+	// maximum force of the vehicle
+	if ( magnitudeToAdd > magnitudeRemaining )
+	{
+		forceToAdd.normalize().multiplyScalar( magnitudeRemaining );
+	}
 
-		// restrict the magnitude of forceToAdd, so we don't exceed the
-		// maximum force of the vehicle
-		if ( magnitudeToAdd > magnitudeRemaining )
-		{
-			forceToAdd.normalize().multiplyScalar( magnitudeRemaining );
-		}
+	// add force
+	this._steeringForce.add( forceToAdd );
 
-		// add force
-		this._steeringForce.add( forceToAdd );
-
-		return true;
-	};
-
-}() );
+	return true;
+};
 
 /**
  * This method tests if a specific bit of m_iFlags is set.
@@ -512,36 +502,31 @@ SteeringBehaviors.prototype._isOn = function( behaviorType ) {
 /**
  * Prepares the calculation of the steering behaviors.
  */
-SteeringBehaviors.prototype._prepareCalculation = ( function() {
+SteeringBehaviors.prototype._prepareCalculation = function() {
 
-	var index, obstacle;
+	// reset steering force
+	this._steeringForce.set( 0, 0, 0 );
 
-	return function() {
+	// update model matrices of 3D object
+	this.vehicle.object3D.updateMatrixWorld();
 
-		// reset steering force
-		this._steeringForce.set( 0, 0, 0 );
+	if ( this.targetAgent1 !== null )
+	{
+		this.targetAgent1.object3D.updateMatrixWorld();
+	}
 
-		// update model matrices of 3D object
-		this.vehicle.object3D.updateMatrixWorld();
+	if ( this.targetAgent2 !== null )
+	{
+		this.targetAgent2.object3D.updateMatrixWorld();
+	}
 
-		if ( this.targetAgent1 !== null )
-		{
-			this.targetAgent1.object3D.updateMatrixWorld();
-		}
+	// calculate neighbors if one of the following group behaviors is active
+	if ( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) || this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) || this._isOn( SteeringBehaviors.TYPES.COHESION ) )
+	{
+		this._calculateNeighbors();
+	}
 
-		if ( this.targetAgent2 !== null )
-		{
-			this.targetAgent2.object3D.updateMatrixWorld();
-		}
-
-		// calculate neighbors if one of the following group behaviors is active
-		if ( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) || this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) || this._isOn( SteeringBehaviors.TYPES.COHESION ) )
-		{
-			this._calculateNeighbors();
-		}
-	};
-
-}() );
+};
 
 /**
  * Calculates all neighbors of the vehicle.
@@ -549,10 +534,10 @@ SteeringBehaviors.prototype._prepareCalculation = ( function() {
 SteeringBehaviors.prototype._calculateNeighbors = ( function() {
 
 	var toEntity = new THREE.Vector3();
-	var entity;
-	var index;
 
 	return function() {
+		
+		var index, entity;
 
 		// reset array
 		this._neighbors.length = 0;
@@ -633,13 +618,12 @@ SteeringBehaviors.prototype._createFeelers = ( function() {
 SteeringBehaviors.prototype._getHidingPosition = ( function() {
 
 	var toHidingSpot = new THREE.Vector3();
-	var distanceAway;
 
 	return function( positionObstacle, radiusObstacle, positionHunter, hidingSpot ) {
 
 		// calculate how far away the agent is to be from the chosen obstacle's
 		// bounding radius
-		distanceAway = radiusObstacle + this.distanceFromBoundary;
+		var distanceAway = radiusObstacle + this.distanceFromBoundary;
 
 		// calculate the heading toward the object from the hunter
 		toHidingSpot.subVectors( positionObstacle, positionHunter ).normalize();
@@ -756,9 +740,9 @@ SteeringBehaviors.prototype._arrive = ( function() {
 	var desiredVelocity = new THREE.Vector3();
 	var toTarget = new THREE.Vector3();
 
-	var distance, speed;
-
 	return function( targetPosition, deceleration ) {
+		
+		var distance, speed;
 
 		var force = new THREE.Vector3();
 
@@ -804,9 +788,9 @@ SteeringBehaviors.prototype._pursuit = ( function() {
 	var newEvaderVelocity = new THREE.Vector3();
 	var predcitedPosition = new THREE.Vector3();
 
-	var isFacing, isEvaderAhead, vehicleDirection, lookAheadTime;
-
 	return function( evader ) {
+		
+		var isFacing, isEvaderAhead, vehicleDirection, lookAheadTime;
 
 		// 1. if the evader is ahead and facing the agent then we can just seek
 		// for the evader's current position
@@ -863,9 +847,9 @@ SteeringBehaviors.prototype._offsetPursuit = ( function() {
 	var newLeaderVelocity = new THREE.Vector3();
 	var predcitedPosition = new THREE.Vector3();
 
-	var lookAheadTime;
-
 	return function( leader, offset ) {
+		
+		var lookAheadTime;
 
 		// calculate the offset's position in world space
 		offsetWorld.copy( offset ).applyMatrix4( leader.object3D.matrixWorld );
@@ -904,9 +888,9 @@ SteeringBehaviors.prototype._evade = ( function() {
 	var newPursuerVelocity = new THREE.Vector3();
 	var predcitedPosition = new THREE.Vector3();
 
-	var lookAheadTime;
-
 	return function( pursuer ) {
+		
+		var lookAheadTime;
 
 		// calculate displacement vector
 		toPursuer.subVectors( pursuer.object3D.position, this.vehicle.object3D.position );
@@ -952,9 +936,9 @@ SteeringBehaviors.prototype._interpose = ( function() {
 	var predcitedPositionAgentA = new THREE.Vector3();
 	var predcitedPositionAgentB = new THREE.Vector3();
 
-	var time;
-
 	return function( agentA, agentB ) {
+		
+		var time;
 
 		// first we need to figure out where the two agents are going to be
 		// in the future. This is approximated by determining the time
@@ -994,9 +978,9 @@ SteeringBehaviors.prototype._hide = ( function() {
 	var hidingSpot = new THREE.Vector3();
 	var bestHidingSpot = new THREE.Vector3();
 
-	var distanceSq, closestDistanceSq, numberOfObstacle, obstacle, index;
-
 	return function( hunter ) {
+		
+		var distanceSq, closestDistanceSq, numberOfObstacle, obstacle, index;
 
 		// this will be used to track the distance to the closest hiding spot
 		closestDistanceSq = Infinity;
@@ -1051,16 +1035,13 @@ SteeringBehaviors.prototype._wander = ( function() {
 	var randomDisplacement = new THREE.Vector3();
 	var distanceVector = new THREE.Vector3();
 
-	var jitterThisTimeSlice;
-
 	return function( delta ) {
-
+		
 		var force = new THREE.Vector3();
 
 		// this behavior is dependent on the update rate, so this line must be
-		// included
-		// when using time independent frame rate.
-		jitterThisTimeSlice = this.wanderJitter * delta;
+		// included when using time independent frame rate.
+		var jitterThisTimeSlice = this.wanderJitter * delta;
 
 		// prepare random vector
 		randomDisplacement.x = THREE.Math.randFloat( -1, 1 ) * jitterThisTimeSlice;
@@ -1108,14 +1089,6 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
 	var localPositionOfClosestObstacle = new THREE.Vector3();
 	var intersectionPoint = new THREE.Vector3();
 
-	var numberOfObstacle;
-	var detectionBoxLength;
-	var closestObstacle;
-	var distanceToClosestObstacle;
-	var obstacle;
-	var index;
-	var expandedRadius;
-	var multiplier;
 	var brakingWeight = 0.2;
 
 	var inverseMatrix = new THREE.Matrix4();
@@ -1124,8 +1097,22 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
 	var ray = new THREE.Ray( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, 1 ) );
 
 	return function() {
+		
+		var index, obstacle, expandedRadius, multiplier;
 
 		var force = new THREE.Vector3();
+		
+		// this will keep track of the closest intersecting obstacle
+		var closestObstacle = null;
+
+		// this will be used to track the distance to the closest obstacle
+		var distanceToClosestObstacle = Infinity;
+		
+		// get number of obstacles in the world
+		var numberOfObstacle = world.getNumberOfObstacles();
+		
+		// the detection box length is proportional to the agent's velocity
+		var detectionBoxLength = this.vehicle.getSpeed() + this.vehicle.maxSpeed + vehicleSize.z * 0.5;
 
 		// calculate bounding box of vehicle
 		boundingBox.setFromObject( this.vehicle.object3D );
@@ -1133,20 +1120,8 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
 		// get size of bounding box
 		boundingBox.size( vehicleSize );
 
-		// the detection box length is proportional to the agent's velocity
-		detectionBoxLength = this.vehicle.getSpeed() + this.vehicle.maxSpeed + vehicleSize.z * 0.5;
-
-		// this will keep track of the closest intersecting obstacle
-		closestObstacle = null;
-
-		// this will be used to track the distance to the closest obstacle
-		distanceToClosestObstacle = Infinity;
-
 		// this matrix will transform points to the local space of the vehicle
 		inverseMatrix.getInverse( this.vehicle.object3D.matrixWorld );
-
-		// get number of obstacles in the world
-		numberOfObstacle = world.getNumberOfObstacles();
 
 		for ( index = 0; index < numberOfObstacle; index++ )
 		{
@@ -1227,33 +1202,26 @@ SteeringBehaviors.prototype._wallAvoidance = ( function() {
 	var closestPoint = new THREE.Vector3();
 	var normal = new THREE.Vector3();
 
-	var indexFeeler;
-	var indexWall;
-
-	var closestWall;
-	var feeler;
-	var intersectionFeeler;
-	var intersects;
-	var distanceToClosestWall;
-
 	return function() {
+		
+		var indexFeeler, indexWall, feeler, intersects;
 
 		var force = new THREE.Vector3();
 
 		// this will be used to track the distance to the closest wall
-		distanceToClosestWall = Infinity;
+		var distanceToClosestWall = Infinity;
 		
 		// this will keep track of the closest wall
-		closestWall = null;
+		var closestWall = null;
+		
+		// this will keep track of the feeler that caused an intersection
+		var intersectionFeeler = null;
 		
 		// this will keep track of the closes point
 		closestPoint.set( 0, 0, 0 );
 		
 		// this will keep track of the wall normal
 		normal.set( 0, 0, 0 );
-
-		// this will keep track of the feeler that caused an intersection
-		intersectionFeeler = null;
 
 		// create feelers for test
 		this._createFeelers();
@@ -1316,32 +1284,26 @@ SteeringBehaviors.prototype._wallAvoidance = ( function() {
  * 
  * @returns {THREE.Vector3} The calculated force.
  */
-SteeringBehaviors.prototype._followPath = ( function() {
+SteeringBehaviors.prototype._followPath = function() {
 
-	var distanceSq;
+	// calculate distance in square space from current waypoint to vehicle
+	var distanceSq = this.path.getCurrentWaypoint().distanceToSquared( this.vehicle.object3D.position );
 
-	return function() {
+	// move to next waypoint if close enough to current target
+	if ( distanceSq < ( this.waypointSeekDist * this.waypointSeekDist ) )
+	{
+		this.path.setNextWaypoint();
+	}
 
-		// calculate distance in square space from current waypoint to vehicle
-		distanceSq = this.path.getCurrentWaypoint().distanceToSquared( this.vehicle.object3D.position );
-
-		// move to next waypoint if close enough to current target
-		if ( distanceSq < ( this.waypointSeekDist * this.waypointSeekDist ) )
-		{
-			this.path.setNextWaypoint();
-		}
-
-		if ( !this.path.isFinished() )
-		{
-			return this._seek( this.path.getCurrentWaypoint() );
-		}
-		else
-		{
-			return this._arrive( this.path.getCurrentWaypoint(), SteeringBehaviors.DECELERATION.MIDDLE );
-		}
-	};
-
-}() );
+	if ( !this.path.isFinished() )
+	{
+		return this._seek( this.path.getCurrentWaypoint() );
+	}
+	else
+	{
+		return this._arrive( this.path.getCurrentWaypoint(), SteeringBehaviors.DECELERATION.MIDDLE );
+	}
+};
 
 /**
  * This calculates a force repelling from the other neighbors
@@ -1352,9 +1314,9 @@ SteeringBehaviors.prototype._separation = ( function() {
 
 	var toAgent = new THREE.Vector3();
 
-	var index, neighbor, length;
-
 	return function() {
+		
+		var index, neighbor, length;
 
 		var force = new THREE.Vector3();
 
@@ -1404,17 +1366,16 @@ SteeringBehaviors.prototype._alignment = ( function() {
 	// used to record the average heading of the neighbors
 	var averageHeading = new THREE.Vector3();
 
-	// used to count the number of vehicles in the neighborhood
-	var neighborCount;
-
-	var index, neighbor;
-
 	return function() {
+		
+		var index, neighbor;
+		
+		// used to count the number of vehicles in the neighborhood
+		var neighborCount = 0;
 
 		var force = new THREE.Vector3();
 
 		// reset values
-		neighborCount = 0;
 		averageHeading.set( 0, 0, 0 );
 
 		for ( index = 0; index < this._neighbors.length; index++ )
@@ -1459,17 +1420,16 @@ SteeringBehaviors.prototype._cohesion = ( function() {
 	// center of mass of all the agents
 	var centerOfMass = new THREE.Vector3(); 
 
-	// used to count the number of vehicles in the neighborhood
-	var neighborCount; 
-	
-	var index, neighbor;
-
 	return function() {
+		
+		var index, neighbor;
+		
+		// used to count the number of vehicles in the neighborhood
+		var neighborCount = 0; 
 
 		var force = new THREE.Vector3();
 
 		// reset values
-		neighborCount = 0;
 		centerOfMass.set( 0, 0, 0 );
 
 		for ( index = 0; index < this._neighbors.length; index++ )

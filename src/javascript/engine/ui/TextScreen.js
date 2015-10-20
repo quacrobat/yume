@@ -172,31 +172,31 @@ TextScreen.prototype.complete = function() {
  * 
  * @param {number} index - The array-index of the current text.
  */
-TextScreen.prototype._printText = ( function() {
+TextScreen.prototype._printText = function( index ) {
 
-	var text;
+	// receive text
+	var text = self.textManager.get( self._textKeys[ self._textIndex ].text );
+	
+	// if index is undefined, set the value to zero
+	index = index || 0;
 
-	return function( index ) {
+	if ( index < text.length )
+	{
+		// get the next character of the text
+		self._$textScreenContent.textContent += text[ index ];
+		
+		// set a timeout to print the next character
+		self._printId = setTimeout( self._printText, 75, ++index );
+	}
+	else
+	{
+		self._isPrint = false;
+	}
 
-		index = index || 0;
-		text = self.textManager.get( self._textKeys[ self._textIndex ].text );
-
-		if ( index < text.length )
-		{
-			self._$textScreenContent.textContent += text[ index ];
-			self._printId = setTimeout( self._printText, 75, ++index );
-		}
-		else
-		{
-			self._isPrint = false;
-		}
-	};
-
-}() );
+};
 
 /**
  * Prints entirely the name of the person, who is currently speaking.
- * 
  */
 TextScreen.prototype._printName = function() {
 

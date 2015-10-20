@@ -157,35 +157,29 @@ World.prototype.removeWalls = function() {
  * @param {object} obstacle - The target object.
  * 
  */
-World.prototype.getObstacle = ( function() {
+World.prototype.getObstacle = function( index ) {
 
-	var i;
+	var i = index;
 
-	return function( index ) {
+	if ( i < actionManager.interactiveObjects.length )
+	{
+		return actionManager.interactiveObjects[ i ];
+	}
+	else
+	{
+		i -= actionManager.interactiveObjects.length;
+	}
 
-		i = index;
+	if ( i < actionManager.staticObjects.length )
+	{
+		return actionManager.staticObjects[ i ];
+	}
+	else
+	{
+		throw "ERROR: World: Obstacle index out of range.";
+	}
 
-		if ( i < actionManager.interactiveObjects.length )
-		{
-			return actionManager.interactiveObjects[ i ];
-		}
-		else
-		{
-			i -= actionManager.interactiveObjects.length;
-		}
-
-		if ( i < actionManager.staticObjects.length )
-		{
-			return actionManager.staticObjects[ i ];
-		}
-		else
-		{
-			throw "ERROR: World: Obstacle index out of range.";
-		}
-
-	};
-
-}() );
+};
 
 /**
  * Returns the number of obstacles in the game world.

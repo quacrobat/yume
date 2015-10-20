@@ -103,30 +103,27 @@ EffectComposer.prototype.removePasses = function() {
 /**
  * Does the actual post processing.
  */
-EffectComposer.prototype.render = ( function() {
+EffectComposer.prototype.render = function() {
 
 	var pass, index;
 
-	return function() {
+	// process all assigned passes and call their render method
+	for ( index = 0; index < this._passes.length; index++ )
+	{
+		pass = this._passes[ index ];
 
-		// process all assigned passes and call their render method
-		for ( index = 0; index < this._passes.length; index++ )
+		if ( pass.enabled === true )
 		{
-			pass = this._passes[ index ];
+			pass.render( this._renderer, this._writeBuffer, this._readBuffer );
 
-			if ( pass.enabled === true )
+			if ( pass.needsSwap === true )
 			{
-				pass.render( this._renderer, this._writeBuffer, this._readBuffer );
-
-				if ( pass.needsSwap === true )
-				{
-					this._swapBuffers();
-				}
+				this._swapBuffers();
 			}
 		}
-	};
-
-}() );
+	}
+	
+};
 
 /**
  * Sets the size of the render target.
@@ -147,17 +144,13 @@ EffectComposer.prototype.setSize = function( width, height ) {
 /**
  * Swaps the internal framebuffers.
  */
-EffectComposer.prototype._swapBuffers = ( function() {
+EffectComposer.prototype._swapBuffers = function() {
 
-	var temp = null;
+	var temp = this._readBuffer;
+	this._readBuffer = this._writeBuffer;
+	this._writeBuffer = temp;
 
-	return function() {
-
-		temp = this._readBuffer;
-		this._readBuffer = this._writeBuffer;
-		this._writeBuffer = temp;
-	};
-}() );
+};
 
 /**
  * Resets the internal render targets/framebuffers.

@@ -189,8 +189,7 @@ Impostor.prototype.update = ( function() {
 
 		// first, compute zAxis
 		zAxis.subVectors( cameraPosition, this.billboard.position );
-		zAxis.y = 0; // this will ensure, that the impostor rotates correctly
-						// around the axis
+		zAxis.y = 0; // this will ensure, that the impostor rotates correctly around the axis
 		zAxis.normalize();
 
 		// compute the last axis with the cross product
@@ -216,43 +215,40 @@ Impostor.prototype.update = ( function() {
  * 
  * @returns {boolean} Is a generation necessary?
  */
-Impostor.prototype.isGenerationNeeded = ( function() {
+Impostor.prototype.isGenerationNeeded = function( currentDirection ) {
 
-	var angle = 0;
+	var angle;
 
-	return function( currentDirection ) {
+	if ( this._lastDirection === null )
+	{
+		this._lastDirection = currentDirection.clone();
 
-		if ( this._lastDirection === null )
+	}
+	else
+	{
+		// compute the angle between current and last direction
+		angle = Math.acos( this._lastDirection.dot( currentDirection ) );
+
+		// convert radians to degrees
+		angle *= ( 180 / Math.PI );
+
+		// check against property
+		if ( angle > this.angle * 0.5 )
 		{
+
+			// save the direction
 			this._lastDirection = currentDirection.clone();
 
-		}
-		else
-		{
-			// compute the angle between current and last direction
-			angle = Math.acos( this._lastDirection.dot( currentDirection ) );
-
-			// convert radians to degrees
-			angle *= ( 180 / Math.PI );
-
-			// check against property
-			if ( angle > this.angle * 0.5 )
-			{
-
-				// save the direction
-				this._lastDirection = currentDirection.clone();
-
-				// return true to trigger a generation
-				return true;
-			}
-
-			return false;
+			// return true to trigger a generation
+			return true;
 		}
 
 		return false;
-	};
+	}
 
-}() );
+	return false;
+
+};
 
 /**
  * Computes the axis-aligned bounding box of the object.
@@ -342,8 +338,6 @@ Impostor.prototype._computePosition = function() {
  */
 Impostor.prototype._computeGeometry = ( function() {
 
-	var geometry, index;
-
 	var translationMatrix = new THREE.Matrix4();
 	var rotationMatrix = new THREE.Matrix4();
 
@@ -355,9 +349,11 @@ Impostor.prototype._computeGeometry = ( function() {
 	var uvs = new Float32Array( [ 0, 0, 0, 1, 1, 0, 1, 1 ] ); // fix values
 
 	return function() {
+		
+		var index;
 
 		// create new geometry
-		geometry = new THREE.BufferGeometry();
+		var geometry = new THREE.BufferGeometry();
 
 		// create vertex buffer, unique for each impostor
 		var vertices = new Float32Array( 12 );

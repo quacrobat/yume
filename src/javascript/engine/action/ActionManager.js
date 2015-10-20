@@ -85,32 +85,29 @@ function ActionManager() {
  * @param {THREE.Vector3} position - The position of the player.
  * @param {THREE.Vector3} direction - The direction the player is looking at.
  */
-ActionManager.prototype.update = ( function() {
+ActionManager.prototype.update = function( position, direction ) {
 
 	var index;
 
-	return function( position, direction ) {
+	// update interactive objects
+	for ( index = 0; index < this.interactiveObjects.length; index++ )
+	{
+		this.interactiveObjects[ index ].update();
+	}
 
-		// update interactive objects
-		for ( index = 0; index < this.interactiveObjects.length; index++ )
-		{
-			this.interactiveObjects[ index ].update();
-		}
+	// update static objects
+	for ( index = 0; index < this.staticObjects.length; index++ )
+	{
+		this.staticObjects[ index ].update();
+	}
 
-		// update static objects
-		for ( index = 0; index < this.staticObjects.length; index++ )
-		{
-			this.staticObjects[ index ].update();
-		}
+	// check interaction objects
+	this._checkInteraction( position, direction );
 
-		// check interaction objects
-		this._checkInteraction( position, direction );
+	// check trigger objects
+	this._checkTrigger( position );
 
-		// check trigger objects
-		this._checkTrigger( position );
-	};
-
-}() );
+};
 
 /**
  * Creates a new interactive object and stores it to the respective internal
@@ -254,46 +251,42 @@ ActionManager.prototype.removeStaticObjects = function() {
 /**
  * Calculates the closest intersection with an interactive object.
  */
-ActionManager.prototype._calculateClosestIntersection = ( function() {
+ActionManager.prototype._calculateClosestIntersection = function( position, direction ) {
 
-	var intersects = [];
-	var interactiveObject;
-	var index;
+	var interactiveObject, intersects, index;
 
-	return function( position, direction ) {
+	// prepare raycaster
+	this._raycaster.set( position, direction );
+	this._raycaster.far = 20;
 
-		// prepare raycaster
-		this._raycaster.set( position, direction );
-		this._raycaster.far = 20;
+	// intersection test. the result is already sorted by distance
+	intersects = this._raycaster.intersectObjects( this.interactiveObjects );
 
-		// intersection test. the result is already sorted by distance
-		intersects = this._raycaster.intersectObjects( this.interactiveObjects );
-
-		if ( intersects.length > 0 )
+	if ( intersects.length > 0 )
+	{
+		for ( index = 0; index < intersects.length; index++ )
 		{
-			for ( index = 0; index < intersects.length; index++ )
-			{
-				interactiveObject = intersects[ index ].object;
-				
-				// the action property must always set
-				if(  interactiveObject.action !== undefined )
-				{
-					// return the object if it has an active action. if not, continue with the next object
-					if ( interactiveObject.action.isActive === true )
-					{
-						return interactiveObject;
-					}
-				}
-				else
-				{
-					throw "ERROR: ActionManager: No action defined for interactive object.";
-				}
-				
-			}
-		}
-	};
+			interactiveObject = intersects[ index ].object;
 
-}() );
+			// the action property must always set
+			if ( interactiveObject.action !== undefined )
+			{
+				// return the object if it has an active action. if not,
+				// continue with the next object
+				if ( interactiveObject.action.isActive === true )
+				{
+					return interactiveObject;
+				}
+			}
+			else
+			{
+				throw "ERROR: ActionManager: No action defined for interactive object.";
+			}
+
+		}
+	}
+
+};
 
 /**
  * This method checks if the user interface should indicate, that the player can
@@ -302,27 +295,22 @@ ActionManager.prototype._calculateClosestIntersection = ( function() {
  * @param {THREE.Vector3} position - The position of the player.
  * @param {THREE.Vector3} direction - The direction the player is looking at.
  */
-ActionManager.prototype._checkInteraction = ( function() {
+ActionManager.prototype._checkInteraction = function( position, direction ) {
 
-	var interactiveObject;
+	// calculate the intersection with the closest visible and active interactive object
+	var interactiveObject = this._calculateClosestIntersection( position, direction );
 
-	return function( position, direction ) {
+	// show the interaction label if there is an intersection
+	if ( interactiveObject !== undefined )
+	{
+		userInterfaceManager.showInteractionLabel( interactiveObject.action.label );
+	}
+	else
+	{
+		userInterfaceManager.hideInteractionLabel();
+	}
 
-		// calculate the intersection with the closest visible and active interactive object
-		interactiveObject = this._calculateClosestIntersection( position, direction );
-
-		// show the interaction label if there is an intersection
-		if ( interactiveObject !== undefined )
-		{
-			userInterfaceManager.showInteractionLabel( interactiveObject.action.label );
-		}
-		else
-		{
-			userInterfaceManager.hideInteractionLabel();
-		}
-	};
-
-}() );
+};
 
 /**
  * This method checks the execution of triggers. If the player's position is above a trigger,
@@ -332,12 +320,12 @@ ActionManager.prototype._checkInteraction = ( function() {
  */
 ActionManager.prototype._checkTrigger = ( function() {
 
-	var intersects = [];
-	var trigger;
 	var direction = new THREE.Vector3( 0, -1, 0 );
 	var isInRadius = false;
 
 	return function( position ) {
+		
+		var intersects, trigger;
 
 		// prepare raycaster
 		this._raycaster.set( position, direction );

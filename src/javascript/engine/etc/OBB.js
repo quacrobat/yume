@@ -82,9 +82,6 @@ OBB.prototype.setFromObject = ( function() {
 
 	var vector = new THREE.Vector3();
 
-	var aabb = null;
-	var w = null;
-
 	return function( object ) {
 
 		// calculate AABB, if necessary
@@ -97,8 +94,8 @@ OBB.prototype.setFromObject = ( function() {
 		object.updateMatrixWorld();
 
 		// shortcuts
-		aabb = object.geometry.boundingBox;
-		w = object.matrixWorld.elements;
+		var aabb = object.geometry.boundingBox;
+		var w = object.matrixWorld.elements;
 
 		// assign the transform center to the position member
 		this.position = aabb.center().applyMatrix4( object.matrixWorld );
@@ -172,11 +169,9 @@ OBB.prototype.closestPoint = ( function() {
 	var yAxis = new THREE.Vector3();
 	var zAxis = new THREE.Vector3();
 
-	var axis = [];
-
-	var index = 0, value = 0;
-
 	return function( point ) {
+		
+		var index, value, axis = [];
 
 		var closesPoint = new THREE.Vector3();
 
@@ -353,20 +348,19 @@ OBB.prototype.isIntersectionOBB = ( function() {
 	var yAxisB = new THREE.Vector3();
 	var zAxisB = new THREE.Vector3();
 
-	var axisA = [];
-	var axisB = [];
-	var rotationMatrix = [ [], [], [] ];
-	var rotationMatrixAbs = [ [], [], [] ];
-
-	var halfSizeA = 0;
-	var halfSizeB = 0;
-
 	var translation = new THREE.Vector3();
 
 	var vector = new THREE.Vector3();
-	var t = 0, i = 0;
 
 	return function( obb ) {
+		
+		var axisA = [];
+		var axisB = [];
+		var rotationMatrix = [ [], [], [] ];
+		var rotationMatrixAbs = [ [], [], [] ];
+		
+		var halfSizeA, halfSizeB;
+		var t, i;
 
 		// extract each axis
 		this.basis.extractBasis( xAxisA, yAxisA, zAxisA );
@@ -545,13 +539,13 @@ OBB.prototype.isIntersectionOBB = ( function() {
  */
 OBB.prototype.isIntersectionPlane = ( function() {
 
-	var t = 0, s = 0;
-
 	var xAxis = new THREE.Vector3();
 	var yAxis = new THREE.Vector3();
 	var zAxis = new THREE.Vector3();
 
 	return function( plane ) {
+		
+		var t, s;
 
 		// extract each axis
 		this.basis.extractBasis( xAxis, yAxis, zAxis );

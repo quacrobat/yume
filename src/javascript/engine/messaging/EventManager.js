@@ -68,35 +68,31 @@ EventManager.prototype.publishSync = function( message, data ) {
  * 
  * @returns {string} Token for unsubscribing.
  */
-EventManager.prototype.subscribe = ( function() {
+EventManager.prototype.subscribe = function( message, callback ) {
 
 	var token;
 
-	return function( message, callback ) {
+	// ensure, the callback parameter is a function
+	if ( typeof callback !== "function" )
+	{
+		throw "ERROR: EventManager: No callback function for subscription assigned.";
+	}
 
-		// ensure, the callback parameter is a function
-		if ( typeof callback !== "function" )
-		{
-			throw "ERROR: EventManager: No callback function for subscription assigned.";
-		}
+	// register message if necessary
+	if ( messages.hasOwnProperty( message ) === false )
+	{
+		messages[ message ] = {};
+	}
 
-		// register message if necessary
-		if ( messages.hasOwnProperty( message ) === false )
-		{
-			messages[ message ] = {};
-		}
+	// forcing token as string, to allow for future expansions without
+	// breaking usage and allow for easy use as key names for the "messages"
+	// object
+	token = "uid_" + String( ++lastUid );
+	messages[ message ][ token ] = callback;
 
-		// forcing token as string, to allow for future expansions without
-		// breaking
-		// usage and allow for easy use as key names for the "messages" object
-		token = "uid_" + String( ++lastUid );
-		messages[ message ][ token ] = callback;
+	return token;
 
-		return token;
-
-	};
-
-}() );
+};
 
 /**
  * Clears all subscriptions
@@ -111,22 +107,18 @@ EventManager.prototype.clearAllSubscriptions = function() {
  * 
  * @param {string} topic - The corresponding topic of the subscriptions to clear.
  */
-EventManager.prototype.clearSubscriptions = ( function() {
+EventManager.prototype.clearSubscriptions = function( topic ) {
 
 	var m;
 
-	return function( topic ) {
-
-		for ( m in messages ) // jshint ignore:line
+	for ( m in messages ) // jshint ignore:line
+	{
+		if ( messages.hasOwnProperty( m ) === true && m.indexOf( topic ) === 0 )
 		{
-			if ( messages.hasOwnProperty( m ) === true && m.indexOf( topic ) === 0 )
-			{
-				delete messages[ m ];
-			}
+			delete messages[ m ];
 		}
-	};
-
-}() );
+	}
+};
 
 /**
  * Removes subscriptions.
@@ -139,69 +131,66 @@ EventManager.prototype.clearSubscriptions = ( function() {
  * 
  * @returns {any} The return value depends on the type of parameter "value".
  */
-EventManager.prototype.unsubscribe = ( function() {
+EventManager.prototype.unsubscribe = function( value ) {
 
 	var isTopic, isToken, isFunction;
+	var message, m, t;
+	var result = false;
 
-	var result = false, message, m, t;
+	isTopic = ( typeof value === "string" ) && ( messages.hasOwnProperty( value ) === true );
+	isToken = ( isTopic === false ) && ( typeof value === "string" );
+	isFunction = typeof value === "function";
 
-	return function( value ) {
+	// this handles the case if "value" is a topic
+	if ( isTopic === true )
+	{
+		delete messages[ value ];
+		return;
+	}
 
-		isTopic = ( typeof value === "string" ) && ( messages.hasOwnProperty( value ) === true );
-		isToken = ( isTopic === false ) && ( typeof value === "string" );
-		isFunction = typeof value === "function";
-
-		// this handles the case if "value" is a topic
-		if ( isTopic === true )
+	// iterate over all messages/topics
+	for ( m in messages ) // jshint ignore:line
+	{
+		if ( messages.hasOwnProperty( m ) === true )
 		{
-			delete messages[ value ];
-			return;
-		}
+			// buffer message
+			message = messages[ m ];
 
-		// iterate over all messages/topics
-		for ( m in messages ) // jshint ignore:line
-		{
-			if ( messages.hasOwnProperty( m ) === true )
+			// this handles the case if "value" is a token
+			if ( isToken === true && message[ value ] )
 			{
-				// buffer message
-				message = messages[ m ];
+				// delete the token of the corresponding topic
+				delete message[ value ];
 
-				// this handles the case if "value" is a token
-				if ( isToken === true && message[ value ] )
-				{
-					// delete the token of the corresponding topic
-					delete message[ value ];
+				// return the token to the caller
+				result = value;
 
-					// return the token to the caller
-					result = value;
-
-					// because tokens are unique, we can just stop here
-					break;
-				}
-
-				// this handles the case if "value" is a function
-				if ( isFunction === true )
-				{
-					// iterate over all subscriptions of a topic
-					for ( t in message ) // jshint ignore:line
-					{
-						// check the value (callback) of the token
-						if ( message.hasOwnProperty( t ) === true && message[ t ] === value )
-						{
-							// delete the token
-							delete message[ t ];
-
-							result = true;
-						}
-					}// next token
-				}
+				// because tokens are unique, we can just stop here
+				break;
 			}
-		}// next topic
 
-		return result;
-	};
-	
-}() );
+			// this handles the case if "value" is a function
+			if ( isFunction === true )
+			{
+				// iterate over all subscriptions of a topic
+				for ( t in message ) // jshint ignore:line
+				{
+					// check the value (callback) of the token
+					if ( message.hasOwnProperty( t ) === true && message[ t ] === value )
+					{
+						// delete the token
+						delete message[ t ];
+
+						result = true;
+					}
+				}// next token
+			}
+		}
+	}// next topic
+
+	return result;
+
+};
 
 /**
  * Sends a message to a game entity.

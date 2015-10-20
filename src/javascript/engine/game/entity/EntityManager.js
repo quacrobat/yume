@@ -52,19 +52,13 @@ EntityManager.prototype.createVehicle = function( object3D, boundingRadius, velo
  * 
  * @param {number} delta - The time delta value.
  */
-EntityManager.prototype.update = ( function() {
+EntityManager.prototype.update = function( delta ) {
 
-	var index = 0;
-
-	return function( delta ) {
-
-		for ( index = 0; index < this.entities.length; index++ )
-		{
-			this.entities[ index ].update( delta );
-		}
-	};
-
-}() );
+	for ( var index = 0; index < this.entities.length; index++ )
+	{
+		this.entities[ index ].update( delta );
+	}
+};
 
 /**
  * Gets an entity by its ID.

@@ -126,9 +126,9 @@ MovingEntity.prototype.isRotateToTarget = ( function() {
 	var rotationToTarget = new THREE.Matrix4();
 	var quaternionToTarget = new THREE.Quaternion();
 
-	var angle, t;
-
 	return function( targetPosition ) {
+		
+		var angle, t;
 
 		// first determine the angle between the look vector and the target
 		angle = targetPosition.angleTo( this.getDirection() );

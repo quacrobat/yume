@@ -68,14 +68,14 @@ LOD.prototype.update = ( function() {
 	var positionCamera = new THREE.Vector3();
 	var positionObject = new THREE.Vector3();
 
-	var distance = 0; // calculated distance
-	var edge = 0; // this distance marks the begin/end of the transition
-	var opacity = 0; // opacity value for blending
-	var index = 0; // index for loops
-	var currentObject = null; // current object of the loop
-	var previousObject = null; // previous object of the loop
-
 	return function() {
+		
+		var distance; // calculated distance
+		var edge; // this distance marks the begin/end of the transition
+		var opacity; // opacity value for blending
+		var index; // index for loops
+		var currentObject; // current object of the loop
+		var previousObject; // previous object of the loop
 
 		if ( this.mode === LOD.MODE.DIRECT )
 		{
@@ -168,6 +168,7 @@ LOD.prototype.update = ( function() {
 			}
 		}
 	};
+	
 }() );
 
 LOD.MODE = {

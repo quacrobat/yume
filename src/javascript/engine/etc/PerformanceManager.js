@@ -286,39 +286,27 @@ PerformanceManager.prototype.generateImpostors = function() {
 /**
  * Updates all LOD instances.
  */
-PerformanceManager.prototype._updateLODs = ( function() {
+PerformanceManager.prototype._updateLODs = function() {
 
-	var index = 0;
+	for ( var index = 0; index < this._lods.length; index++ )
+	{
+		this._lods[ index ].update();
+	}
 
-	return function() {
-
-		for ( index = 0; index < this._lods.length; index++ )
-		{
-			this._lods[ index ].update();
-		}
-	};
-
-}() );
+};
 
 /**
  * Updates all LOD instances.
  */
-PerformanceManager.prototype._updateImpostors = ( function() {
+PerformanceManager.prototype._updateImpostors = function() {
 
-	var index = 0;
-	var cameraWorldPosition = new THREE.Vector3();
+	// the camera world position is equal for each impostor
+	var cameraWorldPosition = camera.getWorldPosition();
 
-	return function() {
-
-		// the camera world position is equal for each impostor
-		cameraWorldPosition = camera.getWorldPosition();
-
-		for ( index = 0; index < this._impostors.length; index++ )
-		{
-			this._impostors[ index ].update( cameraWorldPosition );
-		}
-	};
-
-}() );
+	for ( var index = 0; index < this._impostors.length; index++ )
+	{
+		this._impostors[ index ].update( cameraWorldPosition );
+	}
+};
 
 module.exports = new PerformanceManager();

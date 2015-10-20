@@ -78,42 +78,38 @@ function SpriteAnimation( rows, columns, numberOfImages, texture, imagesPerSecon
  * 
  * @param {number} delta - The update time.
  */
-SpriteAnimation.prototype.update = ( function() {
+SpriteAnimation.prototype.update = function( delta ) {
 
-	var elapsedTime = 0;
-	var currentColumn, currentRow = 0;
+	var currentColumn, currentRow;
 
-	return function( delta ) {
+	// calculate the elapsed time
+	this._elapsedTime += delta * this.imagesPerSecond;
 
-		// calculate the elapsed time
-		elapsedTime += delta * this.imagesPerSecond;
+	// derive the index of the current image
+	this._currentImage = Math.floor( this._elapsedTime );
 
-		// derive the index of the current image
-		this._currentImage = Math.floor( elapsedTime );
+	// if the index is greater than the total number of images,
+	// reset the the counter to zero.
+	if ( this._currentImage >= this.numberOfImages )
+	{
+		this._currentImage = 0;
+		this._elapsedTime = 0;
+	}
 
-		// if the index is greater than the total number of images,
-		// reset the the counter to zero.
-		if ( this._currentImage >= this.numberOfImages )
-		{
-			this._currentImage = 0;
-			elapsedTime = 0;
-		}
+	// calculate the index of the current column
+	currentColumn = this._currentImage % this.columns;
 
-		// calculate the index of the current column
-		currentColumn = this._currentImage % this.columns;
+	// calculate texture offset in x-direction
+	this.texture.offset.x = currentColumn / this.columns;
 
-		// calculate texture offset in x-direction
-		this.texture.offset.x = currentColumn / this.columns;
+	// calculate the index of the current row
+	currentRow = Math.floor( this._currentImage / this.columns );
 
-		// calculate the index of the current row
-		currentRow = Math.floor( this._currentImage / this.columns );
+	// calculate texture offset in y-direction.
+	// because the first picture in sprites is usually in the upper left,
+	// you need to start from 1 instead from zero.
+	this.texture.offset.y = 1 - ( currentRow / this.rows + 1 / this.rows );
 
-		// calculate texture offset in y-direction.
-		// because the first picture in sprites is usually in the upper left,
-		// you need to start from 1 instead from zero.
-		this.texture.offset.y = 1 - ( currentRow / this.rows + 1 / this.rows );
-	};
-
-}() );
+};
 
 module.exports = SpriteAnimation;

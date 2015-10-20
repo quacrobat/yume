@@ -94,96 +94,88 @@ InteractiveObject.prototype.update = function() {
  * @param {THREE.Raycaster} raycaster - A raycaster instance.
  * @param {object} intersects - An array with intersection points.
  */
-InteractiveObject.prototype.raycast = ( function() {
+InteractiveObject.prototype.raycast = function( raycaster, intersects ) {
 
-	var index = 0;
-	var intersectsRay = [];
-	var intersectionPoint = null;
-	var distance = 0;
+	var intersectsRay = [], intersectionPoint, index, distance;
 
-	return function( raycaster, intersects ) {
+	// check raycast precision
+	switch ( this.raycastPrecision )
+	{
 
-		// check raycast precision
-		switch ( this.raycastPrecision )
+		case InteractiveObject.RAYCASTPRECISION.AABB:
 		{
+			// apply transformation
+			this.aabb.copy( this.mesh.geometry.boundingBox );
+			this.aabb.applyMatrix4( this.mesh.matrixWorld );
 
-			case InteractiveObject.RAYCASTPRECISION.AABB:
-			{
-				// apply transformation
-				this.aabb.copy( this.mesh.geometry.boundingBox );
-				this.aabb.applyMatrix4( this.mesh.matrixWorld );
+			// do intersection test
+			intersectionPoint = raycaster.ray.intersectBox( this.aabb );
 
-				// do intersection test
-				intersectionPoint = raycaster.ray.intersectBox( this.aabb );
-
-				break;
-			}
-
-			case InteractiveObject.RAYCASTPRECISION.OBB:
-			{
-				// calculate OBB
-				this.obb.setFromObject( this.mesh );
-
-				// do intersection test
-				intersectionPoint = this.obb.intersectRay( raycaster.ray );
-
-				break;
-			}
-
-			case InteractiveObject.RAYCASTPRECISION.FACE:
-			{
-				// call default raycast method of the mesh object
-				this.mesh.raycast( raycaster, intersectsRay );
-
-				for ( index = 0; index < intersectsRay.length; index++ )
-				{
-					// set the interactive object as result object
-					intersectsRay[ index ].object = this;
-
-					// push to result array
-					intersects.push( intersectsRay[ index ] );
-				}
-				// reset array for next call
-				intersectsRay.length = 0;
-
-				break;
-			}
-
-			default:
-			{
-
-				throw "ERROR: InteractiveObject: No valid raycast precision applied to object.";
-			}
-
+			break;
 		}
 
-		// if a single intersectionPoint is found, we need to calculate
-		// additional data and push the point into the intersects array
-		if ( intersectionPoint !== null )
+		case InteractiveObject.RAYCASTPRECISION.OBB:
 		{
-			// get the distance to the intersection point
-			distance = raycaster.ray.origin.distanceTo( intersectionPoint );
+			// calculate OBB
+			this.obb.setFromObject( this.mesh );
 
-			if ( distance >= raycaster.precision && distance >= raycaster.near && distance <= raycaster.far )
-			{
-				// store the result in special data structure, see
-				// THREE.Mesh.raycast
-				intersects.push( {
-					distance : distance,
-					point : intersectionPoint,
-					face : null,
-					faceIndex : null,
-					object : this
-				} );
-			}
+			// do intersection test
+			intersectionPoint = this.obb.intersectRay( raycaster.ray );
 
-			// reset value
-			intersectionPoint = null;
+			break;
 		}
 
-	};
+		case InteractiveObject.RAYCASTPRECISION.FACE:
+		{
+			// call default raycast method of the mesh object
+			this.mesh.raycast( raycaster, intersectsRay );
 
-}() );
+			for ( index = 0; index < intersectsRay.length; index++ )
+			{
+				// set the interactive object as result object
+				intersectsRay[ index ].object = this;
+
+				// push to result array
+				intersects.push( intersectsRay[ index ] );
+			}
+			// reset array for next call
+			intersectsRay.length = 0;
+
+			break;
+		}
+
+		default:
+		{
+
+			throw "ERROR: InteractiveObject: No valid raycast precision applied to object.";
+		}
+
+	}
+
+	// if a single intersectionPoint is found, we need to calculate
+	// additional data and push the point into the intersects array
+	if ( intersectionPoint !== undefined )
+	{
+		// get the distance to the intersection point
+		distance = raycaster.ray.origin.distanceTo( intersectionPoint );
+
+		if ( distance >= raycaster.precision && distance >= raycaster.near && distance <= raycaster.far )
+		{
+			// store the result in special data structure, see
+			// THREE.Mesh.raycast
+			intersects.push( {
+				distance : distance,
+				point : intersectionPoint,
+				face : null,
+				faceIndex : null,
+				object : this
+			} );
+		}
+
+		// reset value
+		intersectionPoint = null;
+	}
+};
 
 /**
  * This method detects an intersection between the given bounding box and the
@@ -193,52 +185,46 @@ InteractiveObject.prototype.raycast = ( function() {
  * 
  * @returns {boolean} Intersects the object with the given bounding box?
  */
-InteractiveObject.prototype.isIntersection = ( function() {
+InteractiveObject.prototype.isIntersection = function( boundingBox ) {
 
-	var isIntersection;
+	var isIntersection = false;
 
-	return function( boundingBox ) {
+	// check type of collision test
+	switch ( this.collisionType )
+	{
 
-		isIntersection = false;
-
-		// check type of collision test
-		switch ( this.collisionType )
+		case InteractiveObject.COLLISIONTYPES.AABB:
 		{
+			// apply transformation
+			this.aabb.copy( this.mesh.geometry.boundingBox );
+			this.aabb.applyMatrix4( this.mesh.matrixWorld );
 
-			case InteractiveObject.COLLISIONTYPES.AABB:
-			{
-				// apply transformation
-				this.aabb.copy( this.mesh.geometry.boundingBox );
-				this.aabb.applyMatrix4( this.mesh.matrixWorld );
+			// do intersection test
+			isIntersection = this.aabb.isIntersectionBox( boundingBox );
 
-				// do intersection test
-				isIntersection = this.aabb.isIntersectionBox( boundingBox );
-
-				break;
-			}
-
-			case InteractiveObject.COLLISIONTYPES.OBB:
-			{
-				// calculate OBB
-				this.obb.setFromObject( this.mesh );
-
-				// do intersection test
-				isIntersection = this.obb.isIntersectionAABB( boundingBox );
-
-				break;
-			}
-
-			default:
-			{
-				throw "ERROR: InteractiveObject: No valid collision type applied to object.";
-			}
+			break;
 		}
 
-		return isIntersection;
+		case InteractiveObject.COLLISIONTYPES.OBB:
+		{
+			// calculate OBB
+			this.obb.setFromObject( this.mesh );
 
-	};
+			// do intersection test
+			isIntersection = this.obb.isIntersectionAABB( boundingBox );
 
-}() );
+			break;
+		}
+
+		default:
+		{
+			throw "ERROR: InteractiveObject: No valid collision type applied to object.";
+		}
+	}
+
+	return isIntersection;
+
+};
 
 InteractiveObject.COLLISIONTYPES = {
 	AABB : 0,

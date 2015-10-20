@@ -54,36 +54,31 @@ function Smoother( numberOfSamples ) {
  * @param {THREE.Vector3} mostRecentValue - The most recent value to add.
  * @param {THREE.Vector3} average - The target average vector.
  */
-Smoother.prototype.update = ( function() {
+Smoother.prototype.update = function( mostRecentValue, average ) {
 
-	var index, average;
+	// ensure, average is a zero vector
+	average.set( 0, 0, 0 );
 
-	return function( mostRecentValue, average ) {
+	// make sure the slot index wraps around
+	if ( this._slot === this._numberOfSamples )
+	{
+		this._slot = 0;
+	}
 
-		// reset average
-		average.set( 0, 0, 0 );
+	// overwrite the oldest value with the newest
+	this._history[ this._slot ].copy( mostRecentValue );
 
-		// make sure the slot index wraps around
-		if ( this._slot === this._numberOfSamples )
-		{
-			this._slot = 0;
-		}
+	// increase slot index
+	this._slot++;
 
-		// overwrite the oldest value with the newest
-		this._history[ this._slot ].copy( mostRecentValue );
+	// now calculate the average of the history array
+	for ( var index = 0; index < this._numberOfSamples; index++ )
+	{
+		average.add( this._history[ index ] );
+	}
 
-		// increase slot index
-		this._slot++;
+	average.divideScalar( this._numberOfSamples );
 
-		// now calculate the average of the history array
-		for ( index = 0; index < this._numberOfSamples; index++ )
-		{
-			average.add( this._history[ index ] );
-		}
-
-		average.divideScalar( this._numberOfSamples );
-	};
-
-}() );
+};
 
 module.exports = Smoother;

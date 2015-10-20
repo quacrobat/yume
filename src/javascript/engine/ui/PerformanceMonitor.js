@@ -185,17 +185,12 @@ PerformanceMonitor.prototype._generateBarChart = function( $graph ) {
  * 
  * @param {object} $graph - The target graph object.
  */
-PerformanceMonitor.prototype._updateChart = ( function() {
+PerformanceMonitor.prototype._updateChart = function( $graph, value ) {
 
-	var child = null;
+	var child = $graph.appendChild( $graph.firstChild );
+	child.style.height = value + "px";
 
-	return function( $graph, value ) {
-
-		child = $graph.appendChild( $graph.firstChild );
-		child.style.height = value + "px";
-	};
-
-}() );
+};
 
 /**
  * Switches the mode of the performance monitor.

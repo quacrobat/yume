@@ -125,83 +125,77 @@ function Animation( options ) {
  * 
  * @returns {boolean} Is the animation finished?
  */
-Animation.prototype.update = ( function() {
+Animation.prototype.update = function( time ) {
 
 	var index, elapsed, value, temp = 0;
 	var isFinished = false;
 
-	return function( time ) {
+	// if the startTime is greater than the current time,
+	// we will skip the update. this is important for delayed
+	// start time.
+	if ( time < this._startTime )
+	{
+		return isFinished;
+	}
 
-		// set default value
-		isFinished = false;
+	// calculate elapsed time. the final value of "elapsed"
+	// will always be inside the range of [0, 1].
+	elapsed = ( time - this._startTime ) / this.duration;
+	elapsed = elapsed > 1 ? 1 : elapsed;
 
-		// if the startTime is greater than the current time,
-		// we will skip the update. this is important for delayed
-		// start time.
-		if ( time < this._startTime )
+	// execute easing function
+	if ( typeof this.easing === "function" )
+	{
+		value = this.easing( elapsed );
+	}
+	else
+	{
+		throw "ERROR: Animation: No easing function assigned.";
+	}
+
+	// check, if the object has the specified property
+	if ( this.object.hasOwnProperty( this.property ) === true )
+	{
+		// calculate and assign new value
+		this.object[ this.property ] = this.start + ( this.end - this.start ) * value;
+	}
+
+	// execute callback
+	if ( typeof this.onUpdateCallback === "function" )
+	{
+		this.onUpdateCallback();
+	}
+
+	// check finish
+	if ( elapsed === 1 )
+	{
+		// when the hover flag is set, the animation
+		// will be played in an endless loop.
+		if ( this._isHover === true )
 		{
-			return isFinished;
-		}
+			// switch start and end values
+			temp = this.start;
+			this.start = this.end;
+			this.end = temp;
 
-		// calculate elapsed time. the final value of "elapsed"
-		// will always be inside the range of [0, 1].
-		elapsed = ( time - this._startTime ) / this.duration;
-		elapsed = elapsed > 1 ? 1 : elapsed;
-
-		// execute easing function
-		if ( typeof this.easing === "function" )
-		{
-			value = this.easing( elapsed );
+			// set new start time
+			this._startTime = time + this.delayTime;
 		}
 		else
 		{
-			throw "ERROR: Animation: No easing function assigned.";
-		}
-
-		// check, if the object has the specified property
-		if ( this.object.hasOwnProperty( this.property ) === true )
-		{
-			// calculate and assign new value
-			this.object[ this.property ] = this.start + ( this.end - this.start ) * value;
-		}
-
-		// execute callback
-		if ( typeof this.onUpdateCallback === "function" )
-		{
-			this.onUpdateCallback();
-		}
-
-		// check finish
-		if ( elapsed === 1 )
-		{
-			// when the hover flag is set, the animation
-			// will be played in an endless loop.
-			if ( this._isHover === true )
+			// execute callback
+			if ( typeof this.onCompleteCallback === "function" )
 			{
-				// switch start and end values
-				temp = this.start;
-				this.start = this.end;
-				this.end = temp;
-
-				// set new start time
-				this._startTime = time + this.delayTime;
+				this.onCompleteCallback();
 			}
-			else
-			{
-				// execute callback
-				if ( typeof this.onCompleteCallback === "function" )
-				{
-					this.onCompleteCallback();
-				}
 
-				isFinished = true;
-			}
+			isFinished = true;
 		}
+	}
 
-		return isFinished;
-	};
+	return isFinished;
 
-}() );
+};
 
 /**
  * Plays the animation.

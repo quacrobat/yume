@@ -81,7 +81,7 @@ System.prototype.init = function( parameter ) {
 	}
 	else
 	{
-		throw "ERROR: System: Unable to initialize system. Empty parameter object";
+		throw "ERROR: System: Unable to initialize system. Empty parameter object.";
 	}
 
 };

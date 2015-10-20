@@ -78,52 +78,46 @@ StaticObject.prototype.update = function() {
  * 
  * @returns {boolean} Intersects the object with the given bounding box?
  */
-StaticObject.prototype.isIntersection = ( function() {
+StaticObject.prototype.isIntersection = function( boundingBox ) {
 
-	var isIntersection;
+	var isIntersection = false;
 
-	return function( boundingBox ) {
+	// check type of collision test
+	switch ( this.collisionType )
+	{
 
-		isIntersection = false;
-
-		// check type of collision test
-		switch ( this.collisionType )
+		case StaticObject.COLLISIONTYPES.AABB:
 		{
+			// apply transformation
+			this.aabb.copy( this.mesh.geometry.boundingBox );
+			this.aabb.applyMatrix4( this.mesh.matrixWorld );
 
-			case StaticObject.COLLISIONTYPES.AABB:
-			{
-				// apply transformation
-				this.aabb.copy( this.mesh.geometry.boundingBox );
-				this.aabb.applyMatrix4( this.mesh.matrixWorld );
+			// do intersection test
+			isIntersection = this.aabb.isIntersectionBox( boundingBox );
 
-				// do intersection test
-				isIntersection = this.aabb.isIntersectionBox( boundingBox );
-
-				break;
-			}
-
-			case StaticObject.COLLISIONTYPES.OBB:
-			{
-				// calculate OBB
-				this.obb.setFromObject( this.mesh );
-
-				// do intersection test
-				isIntersection = this.obb.isIntersectionAABB( boundingBox );
-
-				break;
-			}
-
-			default:
-			{
-				throw "ERROR: StaticObject: No valid collision type applied to object.";
-			}
+			break;
 		}
 
-		return isIntersection;
+		case StaticObject.COLLISIONTYPES.OBB:
+		{
+			// calculate OBB
+			this.obb.setFromObject( this.mesh );
 
-	};
+			// do intersection test
+			isIntersection = this.obb.isIntersectionAABB( boundingBox );
 
-}() );
+			break;
+		}
+
+		default:
+		{
+			throw "ERROR: StaticObject: No valid collision type applied to object.";
+		}
+	}
+
+	return isIntersection;
+
+};
 
 StaticObject.COLLISIONTYPES = {
 	AABB : 0,

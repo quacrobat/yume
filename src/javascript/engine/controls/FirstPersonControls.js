@@ -447,62 +447,51 @@ FirstPersonControls.prototype._translate = ( function() {
  * translation of the current frame
  * @param {number} delta - Elapsed time between two frames.
  */
-FirstPersonControls.prototype._calculateCameraMotion = ( function() {
+FirstPersonControls.prototype._calculateCameraMotion = function( normalizedMovement, delta ) {
 
-	var motion = 0;
-	var audioStep1 = null;
-	var audioStep2 = null;
+	var motion, audioStep1, audioStep2;
 
-	return function( normalizedMovement, delta ) {
+	audioStep1 = audioManager.getDynamicAudio( "controls.step1" );
+	audioStep2 = audioManager.getDynamicAudio( "controls.step2" );
 
-		if ( audioStep1 === null )
+	if ( this._move !== 0 || this._strafe !== 0 )
+	{
+		// get motion factor from normalized movement
+		this._motionFactor += delta * normalizedMovement.length();
+
+		// calculate frequency for sine curve
+		this._calculateFrequency();
+
+		// calculate actual motion
+		motion = Math.sin( this._motionFactor * this._frequency + this._phase );
+
+		// play audio steps
+		if ( motion < this._motionLastValue && this._motionCurveUp === true )
 		{
-			audioStep1 = audioManager.getDynamicAudio( "controls.step1" );
+			this._motionCurveUp = false;
+			audioStep1.play();
 		}
-		if ( audioStep2 === null )
+		else if ( motion > this._motionLastValue && this._motionCurveUp === false )
 		{
-			audioStep2 = audioManager.getDynamicAudio( "controls.step2" );
+			this._motionCurveUp = true;
+			audioStep2.play();
 		}
 
-		if ( this._move !== 0 || this._strafe !== 0 )
-		{
-			// get motion factor from normalized movement
-			this._motionFactor += delta * normalizedMovement.length();
+		// set values to camera
+		camera.position.y = Math.abs( motion ) * this._deflection;
+		camera.position.x = motion * this._deflection;
 
-			// calculate frequency for sine curve
-			this._calculateFrequency();
+		// store current motion for next calculation
+		this._motionLastValue = motion;
 
-			// calculate actual motion
-			motion = Math.sin( this._motionFactor * this._frequency + this._phase );
+	}
+	else
+	{
+		// if player is not moving, translate camera back to origin
+		this._translateCameraToOrigin();
+	}
 
-			// play audio steps
-			if ( motion < this._motionLastValue && this._motionCurveUp === true )
-			{
-				this._motionCurveUp = false;
-				audioStep1.play();
-			}
-			else if ( motion > this._motionLastValue && this._motionCurveUp === false )
-			{
-				this._motionCurveUp = true;
-				audioStep2.play();
-			}
-
-			// set values to camera
-			camera.position.y = Math.abs( motion ) * this._deflection;
-			camera.position.x = motion * this._deflection;
-
-			// store current motion for next calculation
-			this._motionLastValue = motion;
-
-		}
-		else
-		{
-			// if player is not moving, translate camera back to origin
-			this._translateCameraToOrigin();
-		}
-	};
-
-}() );
+};
 
 /**
  * Calculates a new sine frequency for camera motion. It ensures, that the new
@@ -510,10 +499,11 @@ FirstPersonControls.prototype._calculateCameraMotion = ( function() {
  */
 FirstPersonControls.prototype._calculateFrequency = ( function() {
 
-	var current, next = 0;
 	var TWO_PI = 2 * Math.PI;
 
 	return function() {
+		
+		var current, next;
 
 		if ( this._frequency !== this._lastFrequency )
 		{
@@ -642,18 +632,17 @@ FirstPersonControls.prototype._calculateHeight = function( distance ) {
  */
 FirstPersonControls.prototype._isCollisionHandlingRequired = ( function() {
 
-	var intersects = [];
 	var direction = new THREE.Vector3( 0, -1, 0 );
-	var numberOfObstacle;
-	var obstacle;
-	var index;
 
-	var boundingBox = new THREE.Box3(); // mathematical representation of the
-	// player body
+	// mathematical representation of the player body
+	var boundingBox = new THREE.Box3(); 
+	
 	var center = new THREE.Vector3(); // center of body
 	var size = new THREE.Vector3(); // body size
 
 	return function() {
+		
+		var index, obstacle, numberOfObstacle, intersects;
 
 		if ( world.grounds.length !== 0 )
 		{
@@ -769,84 +758,78 @@ FirstPersonControls.prototype._handleRun = function( isRun ) {
 /**
  * Animates the transition between crouch and default position.
  */
-FirstPersonControls.prototype._animateCrouch = ( function() {
+FirstPersonControls.prototype._animateCrouch = function() {
 
 	var elapsed, factor, targetHeight, targetMove, targetStrafe, targetDeflection, targetFrequency, valueHeight, valueSpeed;
 
-	return function() {
+	// animate only if necessary
+	if ( ( this._isCrouch === true && this._height > FirstPersonControls.CROUCH.HEIGHT ) || 
+		 ( this._isCrouch === false && this._isRun === false && this._height < FirstPersonControls.DEFAULT.HEIGHT ) )
+	{
+		// calculate elapsed time
+		elapsed = ( global.performance.now() - this._animationStartTime ) * FirstPersonControls.CROUCH.ANIMATION.DURATION;
 
-		// animate only if necessary
-		if ( ( this._isCrouch === true && this._height > FirstPersonControls.CROUCH.HEIGHT ) || 
-			 ( this._isCrouch === false && this._isRun === false && this._height < FirstPersonControls.DEFAULT.HEIGHT ) )
-		{
-			// calculate elapsed time
-			elapsed = ( global.performance.now() - this._animationStartTime ) * FirstPersonControls.CROUCH.ANIMATION.DURATION;
+		// calculate factor for easing formula
+		factor = elapsed > 1 ? 1 : elapsed;
 
-			// calculate factor for easing formula
-			factor = elapsed > 1 ? 1 : elapsed;
+		// calculate easing value
+		valueSpeed = Easing.Cubic.In( factor );
+		valueHeight = Easing.Cubic.Out( factor );
 
-			// calculate easing value
-			valueSpeed = Easing.Cubic.In( factor );
-			valueHeight = Easing.Cubic.Out( factor );
+		// determine target values
+		targetHeight = this._isCrouch === true ? FirstPersonControls.CROUCH.HEIGHT : FirstPersonControls.DEFAULT.HEIGHT;
+		targetMove = this._isCrouch === true ? FirstPersonControls.CROUCH.SPEED.MOVE : FirstPersonControls.DEFAULT.SPEED.MOVE;
+		targetStrafe = this._isCrouch === true ? FirstPersonControls.CROUCH.SPEED.STRAFE : FirstPersonControls.DEFAULT.SPEED.STRAFE;
+		targetDeflection = this._isCrouch === true ? FirstPersonControls.CROUCH.CAMERA.DEFLECTION : FirstPersonControls.DEFAULT.CAMERA.DEFLECTION;
+		targetFrequency = this._isCrouch === true ? FirstPersonControls.CROUCH.CAMERA.FREQUENCY : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY;
 
-			// determine target values
-			targetHeight = this._isCrouch === true ? FirstPersonControls.CROUCH.HEIGHT : FirstPersonControls.DEFAULT.HEIGHT;
-			targetMove = this._isCrouch === true ? FirstPersonControls.CROUCH.SPEED.MOVE : FirstPersonControls.DEFAULT.SPEED.MOVE;
-			targetStrafe = this._isCrouch === true ? FirstPersonControls.CROUCH.SPEED.STRAFE : FirstPersonControls.DEFAULT.SPEED.STRAFE;
-			targetDeflection = this._isCrouch === true ? FirstPersonControls.CROUCH.CAMERA.DEFLECTION : FirstPersonControls.DEFAULT.CAMERA.DEFLECTION;
-			targetFrequency = this._isCrouch === true ? FirstPersonControls.CROUCH.CAMERA.FREQUENCY : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY;
+		// do transition
+		this._height = this._animationHeight + ( targetHeight - this._animationHeight ) * valueHeight;
+		this._moveSpeed = this._animationMove + ( targetMove - this._animationMove ) * valueSpeed;
+		this._strafeSpeed = this._animationStrafe + ( targetStrafe - this._animationStrafe ) * valueSpeed;
+		this._deflection = this._animationDeflection + ( targetDeflection - this._animationDeflection ) * valueSpeed;
+		this._frequency = this._animationFrequency + ( targetFrequency - this._animationFrequency ) * valueSpeed;
+	}
 
-			// do transition
-			this._height = this._animationHeight + ( targetHeight - this._animationHeight ) * valueHeight;
-			this._moveSpeed = this._animationMove + ( targetMove - this._animationMove ) * valueSpeed;
-			this._strafeSpeed = this._animationStrafe + ( targetStrafe - this._animationStrafe ) * valueSpeed;
-			this._deflection = this._animationDeflection + ( targetDeflection - this._animationDeflection ) * valueSpeed;
-			this._frequency = this._animationFrequency + ( targetFrequency - this._animationFrequency ) * valueSpeed;
-		}
-	};
-
-}() );
+};
 
 /**
  * Animates the transition between run and default movement.
  */
-FirstPersonControls.prototype._animateRun = ( function() {
+FirstPersonControls.prototype._animateRun = function() {
 
 	var elapsed, factor, targetHeight, targetMove, targetStrafe, targetDeflection, targetFrequency, valueHeight, valueSpeed;
 
-	return function() {
-		
-		// animate only if necessary
-		if ( ( this._isRun === true && this._moveSpeed < FirstPersonControls.RUN.SPEED.MOVE ) ||
-			 ( this._isRun === false && this._isCrouch === false && this._moveSpeed > FirstPersonControls.DEFAULT.SPEED.MOVE ) )
-		{
-			// calculate elapsed time
-			elapsed = ( global.performance.now() - this._animationStartTime ) * FirstPersonControls.RUN.ANIMATION.DURATION;
+	// animate only if necessary
+	if ( ( this._isRun === true && this._moveSpeed < FirstPersonControls.RUN.SPEED.MOVE ) || 
+	     ( this._isRun === false && this._isCrouch === false && this._moveSpeed > FirstPersonControls.DEFAULT.SPEED.MOVE ) )
+	{
+		// calculate elapsed time
+		elapsed = ( global.performance.now() - this._animationStartTime ) * FirstPersonControls.RUN.ANIMATION.DURATION;
 
-			// calculate factor for easing formula
-			factor = elapsed > 1 ? 1 : elapsed;
+		// calculate factor for easing formula
+		factor = elapsed > 1 ? 1 : elapsed;
 
-			// calculate easing value
-			valueSpeed = Easing.Cubic.In( factor );
-			valueHeight = Easing.Cubic.Out( factor );
+		// calculate easing value
+		valueSpeed = Easing.Cubic.In( factor );
+		valueHeight = Easing.Cubic.Out( factor );
 
-			// determine target values
-			targetHeight = this._isRun === true ? FirstPersonControls.RUN.HEIGHT : FirstPersonControls.DEFAULT.HEIGHT;
-			targetMove = this._isRun === true ? FirstPersonControls.RUN.SPEED.MOVE : FirstPersonControls.DEFAULT.SPEED.MOVE;
-			targetStrafe = this._isRun === true ? FirstPersonControls.RUN.SPEED.STRAFE : FirstPersonControls.DEFAULT.SPEED.STRAFE;
-			targetDeflection = this._isRun === true ? FirstPersonControls.RUN.CAMERA.DEFLECTION : FirstPersonControls.DEFAULT.CAMERA.DEFLECTION;
-			targetFrequency = this._isRun === true ? FirstPersonControls.RUN.CAMERA.FREQUENCY : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY;
+		// determine target values
+		targetHeight = this._isRun === true ? FirstPersonControls.RUN.HEIGHT : FirstPersonControls.DEFAULT.HEIGHT;
+		targetMove = this._isRun === true ? FirstPersonControls.RUN.SPEED.MOVE : FirstPersonControls.DEFAULT.SPEED.MOVE;
+		targetStrafe = this._isRun === true ? FirstPersonControls.RUN.SPEED.STRAFE : FirstPersonControls.DEFAULT.SPEED.STRAFE;
+		targetDeflection = this._isRun === true ? FirstPersonControls.RUN.CAMERA.DEFLECTION : FirstPersonControls.DEFAULT.CAMERA.DEFLECTION;
+		targetFrequency = this._isRun === true ? FirstPersonControls.RUN.CAMERA.FREQUENCY : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY;
 
-			// do transition
-			this._height = this._animationHeight + ( targetHeight - this._animationHeight ) * valueHeight;
-			this._moveSpeed = this._animationMove + ( targetMove - this._animationMove ) * valueSpeed;
-			this._strafeSpeed = this._animationStrafe + ( targetStrafe - this._animationStrafe ) * valueSpeed;
-			this._deflection = this._animationDeflection + ( targetDeflection - this._animationDeflection ) * valueSpeed;
-			this._frequency = this._animationFrequency + ( targetFrequency - this._animationFrequency ) * valueSpeed;
-		}
-	};
+		// do transition
+		this._height = this._animationHeight + ( targetHeight - this._animationHeight ) * valueHeight;
+		this._moveSpeed = this._animationMove + ( targetMove - this._animationMove ) * valueSpeed;
+		this._strafeSpeed = this._animationStrafe + ( targetStrafe - this._animationStrafe ) * valueSpeed;
+		this._deflection = this._animationDeflection + ( targetDeflection - this._animationDeflection ) * valueSpeed;
+		this._frequency = this._animationFrequency + ( targetFrequency - this._animationFrequency ) * valueSpeed;
 
-}() );
+	}
+};
 
 /**
  * Publish the world information of the player for multiplayer.
@@ -973,10 +956,11 @@ FirstPersonControls.prototype._onPointerlockerror = function( event ) {
  */
 FirstPersonControls.prototype._onMouseMove = ( function() {
 
-	var movementX, movementY = 0;
 	var HALF_PI = Math.PI * 0.5;
 
 	return function( event ) {
+		
+		var movementX, movementY;
 
 		if ( self._isControlsActive === true && self.isActionInProgress === false )
 		{

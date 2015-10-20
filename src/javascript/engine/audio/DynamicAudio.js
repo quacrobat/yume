@@ -279,6 +279,7 @@ DynamicAudio.prototype.updateMatrixWorld = ( function() {
 
 		this._panner.setPosition( position.x, position.y, position.z );
 	};
+
 } )();
 
 module.exports = DynamicAudio;

@@ -36194,32 +36194,29 @@ function ActionManager() {
  * @param {THREE.Vector3} position - The position of the player.
  * @param {THREE.Vector3} direction - The direction the player is looking at.
  */
-ActionManager.prototype.update = ( function() {
+ActionManager.prototype.update = function( position, direction ) {
 
 	var index;
 
-	return function( position, direction ) {
+	// update interactive objects
+	for ( index = 0; index < this.interactiveObjects.length; index++ )
+	{
+		this.interactiveObjects[ index ].update();
+	}
 
-		// update interactive objects
-		for ( index = 0; index < this.interactiveObjects.length; index++ )
-		{
-			this.interactiveObjects[ index ].update();
-		}
+	// update static objects
+	for ( index = 0; index < this.staticObjects.length; index++ )
+	{
+		this.staticObjects[ index ].update();
+	}
 
-		// update static objects
-		for ( index = 0; index < this.staticObjects.length; index++ )
-		{
-			this.staticObjects[ index ].update();
-		}
+	// check interaction objects
+	this._checkInteraction( position, direction );
 
-		// check interaction objects
-		this._checkInteraction( position, direction );
+	// check trigger objects
+	this._checkTrigger( position );
 
-		// check trigger objects
-		this._checkTrigger( position );
-	};
-
-}() );
+};
 
 /**
  * Creates a new interactive object and stores it to the respective internal
@@ -36363,46 +36360,42 @@ ActionManager.prototype.removeStaticObjects = function() {
 /**
  * Calculates the closest intersection with an interactive object.
  */
-ActionManager.prototype._calculateClosestIntersection = ( function() {
+ActionManager.prototype._calculateClosestIntersection = function( position, direction ) {
 
-	var intersects = [];
-	var interactiveObject;
-	var index;
+	var interactiveObject, intersects, index;
 
-	return function( position, direction ) {
+	// prepare raycaster
+	this._raycaster.set( position, direction );
+	this._raycaster.far = 20;
 
-		// prepare raycaster
-		this._raycaster.set( position, direction );
-		this._raycaster.far = 20;
+	// intersection test. the result is already sorted by distance
+	intersects = this._raycaster.intersectObjects( this.interactiveObjects );
 
-		// intersection test. the result is already sorted by distance
-		intersects = this._raycaster.intersectObjects( this.interactiveObjects );
-
-		if ( intersects.length > 0 )
+	if ( intersects.length > 0 )
+	{
+		for ( index = 0; index < intersects.length; index++ )
 		{
-			for ( index = 0; index < intersects.length; index++ )
-			{
-				interactiveObject = intersects[ index ].object;
-				
-				// the action property must always set
-				if(  interactiveObject.action !== undefined )
-				{
-					// return the object if it has an active action. if not, continue with the next object
-					if ( interactiveObject.action.isActive === true )
-					{
-						return interactiveObject;
-					}
-				}
-				else
-				{
-					throw "ERROR: ActionManager: No action defined for interactive object.";
-				}
-				
-			}
-		}
-	};
+			interactiveObject = intersects[ index ].object;
 
-}() );
+			// the action property must always set
+			if ( interactiveObject.action !== undefined )
+			{
+				// return the object if it has an active action. if not,
+				// continue with the next object
+				if ( interactiveObject.action.isActive === true )
+				{
+					return interactiveObject;
+				}
+			}
+			else
+			{
+				throw "ERROR: ActionManager: No action defined for interactive object.";
+			}
+
+		}
+	}
+
+};
 
 /**
  * This method checks if the user interface should indicate, that the player can
@@ -36411,27 +36404,22 @@ ActionManager.prototype._calculateClosestIntersection = ( function() {
  * @param {THREE.Vector3} position - The position of the player.
  * @param {THREE.Vector3} direction - The direction the player is looking at.
  */
-ActionManager.prototype._checkInteraction = ( function() {
+ActionManager.prototype._checkInteraction = function( position, direction ) {
 
-	var interactiveObject;
+	// calculate the intersection with the closest visible and active interactive object
+	var interactiveObject = this._calculateClosestIntersection( position, direction );
 
-	return function( position, direction ) {
+	// show the interaction label if there is an intersection
+	if ( interactiveObject !== undefined )
+	{
+		userInterfaceManager.showInteractionLabel( interactiveObject.action.label );
+	}
+	else
+	{
+		userInterfaceManager.hideInteractionLabel();
+	}
 
-		// calculate the intersection with the closest visible and active interactive object
-		interactiveObject = this._calculateClosestIntersection( position, direction );
-
-		// show the interaction label if there is an intersection
-		if ( interactiveObject !== undefined )
-		{
-			userInterfaceManager.showInteractionLabel( interactiveObject.action.label );
-		}
-		else
-		{
-			userInterfaceManager.hideInteractionLabel();
-		}
-	};
-
-}() );
+};
 
 /**
  * This method checks the execution of triggers. If the player's position is above a trigger,
@@ -36441,12 +36429,12 @@ ActionManager.prototype._checkInteraction = ( function() {
  */
 ActionManager.prototype._checkTrigger = ( function() {
 
-	var intersects = [];
-	var trigger;
 	var direction = new THREE.Vector3( 0, -1, 0 );
 	var isInRadius = false;
 
 	return function( position ) {
+		
+		var intersects, trigger;
 
 		// prepare raycaster
 		this._raycaster.set( position, direction );
@@ -36676,96 +36664,88 @@ InteractiveObject.prototype.update = function() {
  * @param {THREE.Raycaster} raycaster - A raycaster instance.
  * @param {object} intersects - An array with intersection points.
  */
-InteractiveObject.prototype.raycast = ( function() {
+InteractiveObject.prototype.raycast = function( raycaster, intersects ) {
 
-	var index = 0;
-	var intersectsRay = [];
-	var intersectionPoint = null;
-	var distance = 0;
+	var intersectsRay = [], intersectionPoint, index, distance;
 
-	return function( raycaster, intersects ) {
+	// check raycast precision
+	switch ( this.raycastPrecision )
+	{
 
-		// check raycast precision
-		switch ( this.raycastPrecision )
+		case InteractiveObject.RAYCASTPRECISION.AABB:
 		{
+			// apply transformation
+			this.aabb.copy( this.mesh.geometry.boundingBox );
+			this.aabb.applyMatrix4( this.mesh.matrixWorld );
 
-			case InteractiveObject.RAYCASTPRECISION.AABB:
-			{
-				// apply transformation
-				this.aabb.copy( this.mesh.geometry.boundingBox );
-				this.aabb.applyMatrix4( this.mesh.matrixWorld );
+			// do intersection test
+			intersectionPoint = raycaster.ray.intersectBox( this.aabb );
 
-				// do intersection test
-				intersectionPoint = raycaster.ray.intersectBox( this.aabb );
-
-				break;
-			}
-
-			case InteractiveObject.RAYCASTPRECISION.OBB:
-			{
-				// calculate OBB
-				this.obb.setFromObject( this.mesh );
-
-				// do intersection test
-				intersectionPoint = this.obb.intersectRay( raycaster.ray );
-
-				break;
-			}
-
-			case InteractiveObject.RAYCASTPRECISION.FACE:
-			{
-				// call default raycast method of the mesh object
-				this.mesh.raycast( raycaster, intersectsRay );
-
-				for ( index = 0; index < intersectsRay.length; index++ )
-				{
-					// set the interactive object as result object
-					intersectsRay[ index ].object = this;
-
-					// push to result array
-					intersects.push( intersectsRay[ index ] );
-				}
-				// reset array for next call
-				intersectsRay.length = 0;
-
-				break;
-			}
-
-			default:
-			{
-
-				throw "ERROR: InteractiveObject: No valid raycast precision applied to object.";
-			}
-
+			break;
 		}
 
-		// if a single intersectionPoint is found, we need to calculate
-		// additional data and push the point into the intersects array
-		if ( intersectionPoint !== null )
+		case InteractiveObject.RAYCASTPRECISION.OBB:
 		{
-			// get the distance to the intersection point
-			distance = raycaster.ray.origin.distanceTo( intersectionPoint );
+			// calculate OBB
+			this.obb.setFromObject( this.mesh );
 
-			if ( distance >= raycaster.precision && distance >= raycaster.near && distance <= raycaster.far )
-			{
-				// store the result in special data structure, see
-				// THREE.Mesh.raycast
-				intersects.push( {
-					distance : distance,
-					point : intersectionPoint,
-					face : null,
-					faceIndex : null,
-					object : this
-				} );
-			}
+			// do intersection test
+			intersectionPoint = this.obb.intersectRay( raycaster.ray );
 
-			// reset value
-			intersectionPoint = null;
+			break;
 		}
 
-	};
+		case InteractiveObject.RAYCASTPRECISION.FACE:
+		{
+			// call default raycast method of the mesh object
+			this.mesh.raycast( raycaster, intersectsRay );
 
-}() );
+			for ( index = 0; index < intersectsRay.length; index++ )
+			{
+				// set the interactive object as result object
+				intersectsRay[ index ].object = this;
+
+				// push to result array
+				intersects.push( intersectsRay[ index ] );
+			}
+			// reset array for next call
+			intersectsRay.length = 0;
+
+			break;
+		}
+
+		default:
+		{
+
+			throw "ERROR: InteractiveObject: No valid raycast precision applied to object.";
+		}
+
+	}
+
+	// if a single intersectionPoint is found, we need to calculate
+	// additional data and push the point into the intersects array
+	if ( intersectionPoint !== undefined )
+	{
+		// get the distance to the intersection point
+		distance = raycaster.ray.origin.distanceTo( intersectionPoint );
+
+		if ( distance >= raycaster.precision && distance >= raycaster.near && distance <= raycaster.far )
+		{
+			// store the result in special data structure, see
+			// THREE.Mesh.raycast
+			intersects.push( {
+				distance : distance,
+				point : intersectionPoint,
+				face : null,
+				faceIndex : null,
+				object : this
+			} );
+		}
+
+		// reset value
+		intersectionPoint = null;
+	}
+};
 
 /**
  * This method detects an intersection between the given bounding box and the
@@ -36775,52 +36755,46 @@ InteractiveObject.prototype.raycast = ( function() {
  * 
  * @returns {boolean} Intersects the object with the given bounding box?
  */
-InteractiveObject.prototype.isIntersection = ( function() {
+InteractiveObject.prototype.isIntersection = function( boundingBox ) {
 
-	var isIntersection;
+	var isIntersection = false;
 
-	return function( boundingBox ) {
+	// check type of collision test
+	switch ( this.collisionType )
+	{
 
-		isIntersection = false;
-
-		// check type of collision test
-		switch ( this.collisionType )
+		case InteractiveObject.COLLISIONTYPES.AABB:
 		{
+			// apply transformation
+			this.aabb.copy( this.mesh.geometry.boundingBox );
+			this.aabb.applyMatrix4( this.mesh.matrixWorld );
 
-			case InteractiveObject.COLLISIONTYPES.AABB:
-			{
-				// apply transformation
-				this.aabb.copy( this.mesh.geometry.boundingBox );
-				this.aabb.applyMatrix4( this.mesh.matrixWorld );
+			// do intersection test
+			isIntersection = this.aabb.isIntersectionBox( boundingBox );
 
-				// do intersection test
-				isIntersection = this.aabb.isIntersectionBox( boundingBox );
-
-				break;
-			}
-
-			case InteractiveObject.COLLISIONTYPES.OBB:
-			{
-				// calculate OBB
-				this.obb.setFromObject( this.mesh );
-
-				// do intersection test
-				isIntersection = this.obb.isIntersectionAABB( boundingBox );
-
-				break;
-			}
-
-			default:
-			{
-				throw "ERROR: InteractiveObject: No valid collision type applied to object.";
-			}
+			break;
 		}
 
-		return isIntersection;
+		case InteractiveObject.COLLISIONTYPES.OBB:
+		{
+			// calculate OBB
+			this.obb.setFromObject( this.mesh );
 
-	};
+			// do intersection test
+			isIntersection = this.obb.isIntersectionAABB( boundingBox );
 
-}() );
+			break;
+		}
+
+		default:
+		{
+			throw "ERROR: InteractiveObject: No valid collision type applied to object.";
+		}
+	}
+
+	return isIntersection;
+
+};
 
 InteractiveObject.COLLISIONTYPES = {
 	AABB : 0,
@@ -36915,52 +36889,46 @@ StaticObject.prototype.update = function() {
  * 
  * @returns {boolean} Intersects the object with the given bounding box?
  */
-StaticObject.prototype.isIntersection = ( function() {
+StaticObject.prototype.isIntersection = function( boundingBox ) {
 
-	var isIntersection;
+	var isIntersection = false;
 
-	return function( boundingBox ) {
+	// check type of collision test
+	switch ( this.collisionType )
+	{
 
-		isIntersection = false;
-
-		// check type of collision test
-		switch ( this.collisionType )
+		case StaticObject.COLLISIONTYPES.AABB:
 		{
+			// apply transformation
+			this.aabb.copy( this.mesh.geometry.boundingBox );
+			this.aabb.applyMatrix4( this.mesh.matrixWorld );
 
-			case StaticObject.COLLISIONTYPES.AABB:
-			{
-				// apply transformation
-				this.aabb.copy( this.mesh.geometry.boundingBox );
-				this.aabb.applyMatrix4( this.mesh.matrixWorld );
+			// do intersection test
+			isIntersection = this.aabb.isIntersectionBox( boundingBox );
 
-				// do intersection test
-				isIntersection = this.aabb.isIntersectionBox( boundingBox );
-
-				break;
-			}
-
-			case StaticObject.COLLISIONTYPES.OBB:
-			{
-				// calculate OBB
-				this.obb.setFromObject( this.mesh );
-
-				// do intersection test
-				isIntersection = this.obb.isIntersectionAABB( boundingBox );
-
-				break;
-			}
-
-			default:
-			{
-				throw "ERROR: StaticObject: No valid collision type applied to object.";
-			}
+			break;
 		}
 
-		return isIntersection;
+		case StaticObject.COLLISIONTYPES.OBB:
+		{
+			// calculate OBB
+			this.obb.setFromObject( this.mesh );
 
-	};
+			// do intersection test
+			isIntersection = this.obb.isIntersectionAABB( boundingBox );
 
-}() );
+			break;
+		}
+
+		default:
+		{
+			throw "ERROR: StaticObject: No valid collision type applied to object.";
+		}
+	}
+
+	return isIntersection;
+
+};
 
 StaticObject.COLLISIONTYPES = {
 	AABB : 0,
@@ -37097,83 +37065,77 @@ function Animation( options ) {
  * 
  * @returns {boolean} Is the animation finished?
  */
-Animation.prototype.update = ( function() {
+Animation.prototype.update = function( time ) {
 
 	var index, elapsed, value, temp = 0;
 	var isFinished = false;
 
-	return function( time ) {
+	// if the startTime is greater than the current time,
+	// we will skip the update. this is important for delayed
+	// start time.
+	if ( time < this._startTime )
+	{
+		return isFinished;
+	}
 
-		// set default value
-		isFinished = false;
+	// calculate elapsed time. the final value of "elapsed"
+	// will always be inside the range of [0, 1].
+	elapsed = ( time - this._startTime ) / this.duration;
+	elapsed = elapsed > 1 ? 1 : elapsed;
 
-		// if the startTime is greater than the current time,
-		// we will skip the update. this is important for delayed
-		// start time.
-		if ( time < this._startTime )
+	// execute easing function
+	if ( typeof this.easing === "function" )
+	{
+		value = this.easing( elapsed );
+	}
+	else
+	{
+		throw "ERROR: Animation: No easing function assigned.";
+	}
+
+	// check, if the object has the specified property
+	if ( this.object.hasOwnProperty( this.property ) === true )
+	{
+		// calculate and assign new value
+		this.object[ this.property ] = this.start + ( this.end - this.start ) * value;
+	}
+
+	// execute callback
+	if ( typeof this.onUpdateCallback === "function" )
+	{
+		this.onUpdateCallback();
+	}
+
+	// check finish
+	if ( elapsed === 1 )
+	{
+		// when the hover flag is set, the animation
+		// will be played in an endless loop.
+		if ( this._isHover === true )
 		{
-			return isFinished;
-		}
+			// switch start and end values
+			temp = this.start;
+			this.start = this.end;
+			this.end = temp;
 
-		// calculate elapsed time. the final value of "elapsed"
-		// will always be inside the range of [0, 1].
-		elapsed = ( time - this._startTime ) / this.duration;
-		elapsed = elapsed > 1 ? 1 : elapsed;
-
-		// execute easing function
-		if ( typeof this.easing === "function" )
-		{
-			value = this.easing( elapsed );
+			// set new start time
+			this._startTime = time + this.delayTime;
 		}
 		else
 		{
-			throw "ERROR: Animation: No easing function assigned.";
-		}
-
-		// check, if the object has the specified property
-		if ( this.object.hasOwnProperty( this.property ) === true )
-		{
-			// calculate and assign new value
-			this.object[ this.property ] = this.start + ( this.end - this.start ) * value;
-		}
-
-		// execute callback
-		if ( typeof this.onUpdateCallback === "function" )
-		{
-			this.onUpdateCallback();
-		}
-
-		// check finish
-		if ( elapsed === 1 )
-		{
-			// when the hover flag is set, the animation
-			// will be played in an endless loop.
-			if ( this._isHover === true )
+			// execute callback
+			if ( typeof this.onCompleteCallback === "function" )
 			{
-				// switch start and end values
-				temp = this.start;
-				this.start = this.end;
-				this.end = temp;
-
-				// set new start time
-				this._startTime = time + this.delayTime;
+				this.onCompleteCallback();
 			}
-			else
-			{
-				// execute callback
-				if ( typeof this.onCompleteCallback === "function" )
-				{
-					this.onCompleteCallback();
-				}
 
-				isFinished = true;
-			}
+			isFinished = true;
 		}
+	}
 
-		return isFinished;
-	};
+	return isFinished;
 
-}() );
+};
 
 /**
  * Plays the animation.
@@ -37326,59 +37288,45 @@ AnimationManager.prototype.update = function( delta ) {
 /**
  * Updates the standard animations.
  */
-AnimationManager.prototype._updateAnimations = ( function() {
+AnimationManager.prototype._updateAnimations = function() {
 
-	var index, time = 0;
-	var isFinished = false;
-	var animation = null;
+	var animation, index, time;
 
-	return function() {
+	// use the same time value for all animations
+	time = global.performance.now();
 
-		// use the same time value for all animations
-		time = global.performance.now();
+	// iterate over all animations
+	for ( index = 0; index < this._animations.length; index++ )
+	{
+		// buffer current animation
+		animation = this._animations[ index ];
 
-		// iterate over all animations
-		for ( index = 0; index < this._animations.length; index++ )
+		// only update the animation if it actually runs
+		if ( animation.isPlaying === true )
 		{
-			// buffer current animation
-			animation = this._animations[ index ];
-
-			// only update the animation if it actually runs
-			if ( animation.isPlaying === true )
+			// update the animation and check status
+			if ( animation.update( time ) === true )
 			{
-				// update it and receive status
-				isFinished = animation.update( time );
-
-				// check status
-				if ( isFinished === true )
-				{
-					// remove automatically the animation after ending
-					this.removeAnimation( animation );
-				}
+				// remove automatically the animation after ending
+				this.removeAnimation( animation );
 			}
 		}
-	};
-
-}() );
+	}
+};
 
 /**
  * Updates the sprite objects.
  * 
  * @param {number} delta - The time delta value.
  */
-AnimationManager.prototype._updateSprites = ( function() {
+AnimationManager.prototype._updateSprites = function( delta ) {
 
-	var index = 0;
+	for ( var index = 0; index < this._sprites.length; index++ )
+	{
+		this._sprites[ index ].update( delta );
+	}
 
-	return function( delta ) {
-
-		for ( index = 0; index < this._sprites.length; index++ )
-		{
-			this._sprites[ index ].update( delta );
-		}
-	};
-
-}() );
+};
 
 /**
  * Adds a single animation object to the internal array.
@@ -37897,43 +37845,39 @@ function SpriteAnimation( rows, columns, numberOfImages, texture, imagesPerSecon
  * 
  * @param {number} delta - The update time.
  */
-SpriteAnimation.prototype.update = ( function() {
+SpriteAnimation.prototype.update = function( delta ) {
 
-	var elapsedTime = 0;
-	var currentColumn, currentRow = 0;
+	var currentColumn, currentRow;
 
-	return function( delta ) {
+	// calculate the elapsed time
+	this._elapsedTime += delta * this.imagesPerSecond;
 
-		// calculate the elapsed time
-		elapsedTime += delta * this.imagesPerSecond;
+	// derive the index of the current image
+	this._currentImage = Math.floor( this._elapsedTime );
 
-		// derive the index of the current image
-		this._currentImage = Math.floor( elapsedTime );
+	// if the index is greater than the total number of images,
+	// reset the the counter to zero.
+	if ( this._currentImage >= this.numberOfImages )
+	{
+		this._currentImage = 0;
+		this._elapsedTime = 0;
+	}
 
-		// if the index is greater than the total number of images,
-		// reset the the counter to zero.
-		if ( this._currentImage >= this.numberOfImages )
-		{
-			this._currentImage = 0;
-			elapsedTime = 0;
-		}
+	// calculate the index of the current column
+	currentColumn = this._currentImage % this.columns;
 
-		// calculate the index of the current column
-		currentColumn = this._currentImage % this.columns;
+	// calculate texture offset in x-direction
+	this.texture.offset.x = currentColumn / this.columns;
 
-		// calculate texture offset in x-direction
-		this.texture.offset.x = currentColumn / this.columns;
+	// calculate the index of the current row
+	currentRow = Math.floor( this._currentImage / this.columns );
 
-		// calculate the index of the current row
-		currentRow = Math.floor( this._currentImage / this.columns );
+	// calculate texture offset in y-direction.
+	// because the first picture in sprites is usually in the upper left,
+	// you need to start from 1 instead from zero.
+	this.texture.offset.y = 1 - ( currentRow / this.rows + 1 / this.rows );
 
-		// calculate texture offset in y-direction.
-		// because the first picture in sprites is usually in the upper left,
-		// you need to start from 1 instead from zero.
-		this.texture.offset.y = 1 - ( currentRow / this.rows + 1 / this.rows );
-	};
-
-}() );
+};
 
 module.exports = SpriteAnimation;
 },{"three":1}],13:[function(require,module,exports){
@@ -38823,6 +38767,7 @@ DynamicAudio.prototype.updateMatrixWorld = ( function() {
 
 		this._panner.setPosition( position.x, position.y, position.z );
 	};
+
 } )();
 
 module.exports = DynamicAudio;
@@ -39277,62 +39222,51 @@ FirstPersonControls.prototype._translate = ( function() {
  * translation of the current frame
  * @param {number} delta - Elapsed time between two frames.
  */
-FirstPersonControls.prototype._calculateCameraMotion = ( function() {
+FirstPersonControls.prototype._calculateCameraMotion = function( normalizedMovement, delta ) {
 
-	var motion = 0;
-	var audioStep1 = null;
-	var audioStep2 = null;
+	var motion, audioStep1, audioStep2;
 
-	return function( normalizedMovement, delta ) {
+	audioStep1 = audioManager.getDynamicAudio( "controls.step1" );
+	audioStep2 = audioManager.getDynamicAudio( "controls.step2" );
 
-		if ( audioStep1 === null )
+	if ( this._move !== 0 || this._strafe !== 0 )
+	{
+		// get motion factor from normalized movement
+		this._motionFactor += delta * normalizedMovement.length();
+
+		// calculate frequency for sine curve
+		this._calculateFrequency();
+
+		// calculate actual motion
+		motion = Math.sin( this._motionFactor * this._frequency + this._phase );
+
+		// play audio steps
+		if ( motion < this._motionLastValue && this._motionCurveUp === true )
 		{
-			audioStep1 = audioManager.getDynamicAudio( "controls.step1" );
+			this._motionCurveUp = false;
+			audioStep1.play();
 		}
-		if ( audioStep2 === null )
+		else if ( motion > this._motionLastValue && this._motionCurveUp === false )
 		{
-			audioStep2 = audioManager.getDynamicAudio( "controls.step2" );
+			this._motionCurveUp = true;
+			audioStep2.play();
 		}
 
-		if ( this._move !== 0 || this._strafe !== 0 )
-		{
-			// get motion factor from normalized movement
-			this._motionFactor += delta * normalizedMovement.length();
+		// set values to camera
+		camera.position.y = Math.abs( motion ) * this._deflection;
+		camera.position.x = motion * this._deflection;
 
-			// calculate frequency for sine curve
-			this._calculateFrequency();
+		// store current motion for next calculation
+		this._motionLastValue = motion;
 
-			// calculate actual motion
-			motion = Math.sin( this._motionFactor * this._frequency + this._phase );
+	}
+	else
+	{
+		// if player is not moving, translate camera back to origin
+		this._translateCameraToOrigin();
+	}
 
-			// play audio steps
-			if ( motion < this._motionLastValue && this._motionCurveUp === true )
-			{
-				this._motionCurveUp = false;
-				audioStep1.play();
-			}
-			else if ( motion > this._motionLastValue && this._motionCurveUp === false )
-			{
-				this._motionCurveUp = true;
-				audioStep2.play();
-			}
-
-			// set values to camera
-			camera.position.y = Math.abs( motion ) * this._deflection;
-			camera.position.x = motion * this._deflection;
-
-			// store current motion for next calculation
-			this._motionLastValue = motion;
-
-		}
-		else
-		{
-			// if player is not moving, translate camera back to origin
-			this._translateCameraToOrigin();
-		}
-	};
-
-}() );
+};
 
 /**
  * Calculates a new sine frequency for camera motion. It ensures, that the new
@@ -39340,10 +39274,11 @@ FirstPersonControls.prototype._calculateCameraMotion = ( function() {
  */
 FirstPersonControls.prototype._calculateFrequency = ( function() {
 
-	var current, next = 0;
 	var TWO_PI = 2 * Math.PI;
 
 	return function() {
+		
+		var current, next;
 
 		if ( this._frequency !== this._lastFrequency )
 		{
@@ -39472,18 +39407,17 @@ FirstPersonControls.prototype._calculateHeight = function( distance ) {
  */
 FirstPersonControls.prototype._isCollisionHandlingRequired = ( function() {
 
-	var intersects = [];
 	var direction = new THREE.Vector3( 0, -1, 0 );
-	var numberOfObstacle;
-	var obstacle;
-	var index;
 
-	var boundingBox = new THREE.Box3(); // mathematical representation of the
-	// player body
+	// mathematical representation of the player body
+	var boundingBox = new THREE.Box3(); 
+	
 	var center = new THREE.Vector3(); // center of body
 	var size = new THREE.Vector3(); // body size
 
 	return function() {
+		
+		var index, obstacle, numberOfObstacle, intersects;
 
 		if ( world.grounds.length !== 0 )
 		{
@@ -39599,84 +39533,78 @@ FirstPersonControls.prototype._handleRun = function( isRun ) {
 /**
  * Animates the transition between crouch and default position.
  */
-FirstPersonControls.prototype._animateCrouch = ( function() {
+FirstPersonControls.prototype._animateCrouch = function() {
 
 	var elapsed, factor, targetHeight, targetMove, targetStrafe, targetDeflection, targetFrequency, valueHeight, valueSpeed;
 
-	return function() {
+	// animate only if necessary
+	if ( ( this._isCrouch === true && this._height > FirstPersonControls.CROUCH.HEIGHT ) || 
+		 ( this._isCrouch === false && this._isRun === false && this._height < FirstPersonControls.DEFAULT.HEIGHT ) )
+	{
+		// calculate elapsed time
+		elapsed = ( global.performance.now() - this._animationStartTime ) * FirstPersonControls.CROUCH.ANIMATION.DURATION;
 
-		// animate only if necessary
-		if ( ( this._isCrouch === true && this._height > FirstPersonControls.CROUCH.HEIGHT ) || 
-			 ( this._isCrouch === false && this._isRun === false && this._height < FirstPersonControls.DEFAULT.HEIGHT ) )
-		{
-			// calculate elapsed time
-			elapsed = ( global.performance.now() - this._animationStartTime ) * FirstPersonControls.CROUCH.ANIMATION.DURATION;
+		// calculate factor for easing formula
+		factor = elapsed > 1 ? 1 : elapsed;
 
-			// calculate factor for easing formula
-			factor = elapsed > 1 ? 1 : elapsed;
+		// calculate easing value
+		valueSpeed = Easing.Cubic.In( factor );
+		valueHeight = Easing.Cubic.Out( factor );
 
-			// calculate easing value
-			valueSpeed = Easing.Cubic.In( factor );
-			valueHeight = Easing.Cubic.Out( factor );
+		// determine target values
+		targetHeight = this._isCrouch === true ? FirstPersonControls.CROUCH.HEIGHT : FirstPersonControls.DEFAULT.HEIGHT;
+		targetMove = this._isCrouch === true ? FirstPersonControls.CROUCH.SPEED.MOVE : FirstPersonControls.DEFAULT.SPEED.MOVE;
+		targetStrafe = this._isCrouch === true ? FirstPersonControls.CROUCH.SPEED.STRAFE : FirstPersonControls.DEFAULT.SPEED.STRAFE;
+		targetDeflection = this._isCrouch === true ? FirstPersonControls.CROUCH.CAMERA.DEFLECTION : FirstPersonControls.DEFAULT.CAMERA.DEFLECTION;
+		targetFrequency = this._isCrouch === true ? FirstPersonControls.CROUCH.CAMERA.FREQUENCY : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY;
 
-			// determine target values
-			targetHeight = this._isCrouch === true ? FirstPersonControls.CROUCH.HEIGHT : FirstPersonControls.DEFAULT.HEIGHT;
-			targetMove = this._isCrouch === true ? FirstPersonControls.CROUCH.SPEED.MOVE : FirstPersonControls.DEFAULT.SPEED.MOVE;
-			targetStrafe = this._isCrouch === true ? FirstPersonControls.CROUCH.SPEED.STRAFE : FirstPersonControls.DEFAULT.SPEED.STRAFE;
-			targetDeflection = this._isCrouch === true ? FirstPersonControls.CROUCH.CAMERA.DEFLECTION : FirstPersonControls.DEFAULT.CAMERA.DEFLECTION;
-			targetFrequency = this._isCrouch === true ? FirstPersonControls.CROUCH.CAMERA.FREQUENCY : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY;
+		// do transition
+		this._height = this._animationHeight + ( targetHeight - this._animationHeight ) * valueHeight;
+		this._moveSpeed = this._animationMove + ( targetMove - this._animationMove ) * valueSpeed;
+		this._strafeSpeed = this._animationStrafe + ( targetStrafe - this._animationStrafe ) * valueSpeed;
+		this._deflection = this._animationDeflection + ( targetDeflection - this._animationDeflection ) * valueSpeed;
+		this._frequency = this._animationFrequency + ( targetFrequency - this._animationFrequency ) * valueSpeed;
+	}
 
-			// do transition
-			this._height = this._animationHeight + ( targetHeight - this._animationHeight ) * valueHeight;
-			this._moveSpeed = this._animationMove + ( targetMove - this._animationMove ) * valueSpeed;
-			this._strafeSpeed = this._animationStrafe + ( targetStrafe - this._animationStrafe ) * valueSpeed;
-			this._deflection = this._animationDeflection + ( targetDeflection - this._animationDeflection ) * valueSpeed;
-			this._frequency = this._animationFrequency + ( targetFrequency - this._animationFrequency ) * valueSpeed;
-		}
-	};
-
-}() );
+};
 
 /**
  * Animates the transition between run and default movement.
  */
-FirstPersonControls.prototype._animateRun = ( function() {
+FirstPersonControls.prototype._animateRun = function() {
 
 	var elapsed, factor, targetHeight, targetMove, targetStrafe, targetDeflection, targetFrequency, valueHeight, valueSpeed;
 
-	return function() {
-		
-		// animate only if necessary
-		if ( ( this._isRun === true && this._moveSpeed < FirstPersonControls.RUN.SPEED.MOVE ) ||
-			 ( this._isRun === false && this._isCrouch === false && this._moveSpeed > FirstPersonControls.DEFAULT.SPEED.MOVE ) )
-		{
-			// calculate elapsed time
-			elapsed = ( global.performance.now() - this._animationStartTime ) * FirstPersonControls.RUN.ANIMATION.DURATION;
+	// animate only if necessary
+	if ( ( this._isRun === true && this._moveSpeed < FirstPersonControls.RUN.SPEED.MOVE ) || 
+	     ( this._isRun === false && this._isCrouch === false && this._moveSpeed > FirstPersonControls.DEFAULT.SPEED.MOVE ) )
+	{
+		// calculate elapsed time
+		elapsed = ( global.performance.now() - this._animationStartTime ) * FirstPersonControls.RUN.ANIMATION.DURATION;
 
-			// calculate factor for easing formula
-			factor = elapsed > 1 ? 1 : elapsed;
+		// calculate factor for easing formula
+		factor = elapsed > 1 ? 1 : elapsed;
 
-			// calculate easing value
-			valueSpeed = Easing.Cubic.In( factor );
-			valueHeight = Easing.Cubic.Out( factor );
+		// calculate easing value
+		valueSpeed = Easing.Cubic.In( factor );
+		valueHeight = Easing.Cubic.Out( factor );
 
-			// determine target values
-			targetHeight = this._isRun === true ? FirstPersonControls.RUN.HEIGHT : FirstPersonControls.DEFAULT.HEIGHT;
-			targetMove = this._isRun === true ? FirstPersonControls.RUN.SPEED.MOVE : FirstPersonControls.DEFAULT.SPEED.MOVE;
-			targetStrafe = this._isRun === true ? FirstPersonControls.RUN.SPEED.STRAFE : FirstPersonControls.DEFAULT.SPEED.STRAFE;
-			targetDeflection = this._isRun === true ? FirstPersonControls.RUN.CAMERA.DEFLECTION : FirstPersonControls.DEFAULT.CAMERA.DEFLECTION;
-			targetFrequency = this._isRun === true ? FirstPersonControls.RUN.CAMERA.FREQUENCY : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY;
+		// determine target values
+		targetHeight = this._isRun === true ? FirstPersonControls.RUN.HEIGHT : FirstPersonControls.DEFAULT.HEIGHT;
+		targetMove = this._isRun === true ? FirstPersonControls.RUN.SPEED.MOVE : FirstPersonControls.DEFAULT.SPEED.MOVE;
+		targetStrafe = this._isRun === true ? FirstPersonControls.RUN.SPEED.STRAFE : FirstPersonControls.DEFAULT.SPEED.STRAFE;
+		targetDeflection = this._isRun === true ? FirstPersonControls.RUN.CAMERA.DEFLECTION : FirstPersonControls.DEFAULT.CAMERA.DEFLECTION;
+		targetFrequency = this._isRun === true ? FirstPersonControls.RUN.CAMERA.FREQUENCY : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY;
 
-			// do transition
-			this._height = this._animationHeight + ( targetHeight - this._animationHeight ) * valueHeight;
-			this._moveSpeed = this._animationMove + ( targetMove - this._animationMove ) * valueSpeed;
-			this._strafeSpeed = this._animationStrafe + ( targetStrafe - this._animationStrafe ) * valueSpeed;
-			this._deflection = this._animationDeflection + ( targetDeflection - this._animationDeflection ) * valueSpeed;
-			this._frequency = this._animationFrequency + ( targetFrequency - this._animationFrequency ) * valueSpeed;
-		}
-	};
+		// do transition
+		this._height = this._animationHeight + ( targetHeight - this._animationHeight ) * valueHeight;
+		this._moveSpeed = this._animationMove + ( targetMove - this._animationMove ) * valueSpeed;
+		this._strafeSpeed = this._animationStrafe + ( targetStrafe - this._animationStrafe ) * valueSpeed;
+		this._deflection = this._animationDeflection + ( targetDeflection - this._animationDeflection ) * valueSpeed;
+		this._frequency = this._animationFrequency + ( targetFrequency - this._animationFrequency ) * valueSpeed;
 
-}() );
+	}
+};
 
 /**
  * Publish the world information of the player for multiplayer.
@@ -39803,10 +39731,11 @@ FirstPersonControls.prototype._onPointerlockerror = function( event ) {
  */
 FirstPersonControls.prototype._onMouseMove = ( function() {
 
-	var movementX, movementY = 0;
 	var HALF_PI = Math.PI * 0.5;
 
 	return function( event ) {
+		
+		var movementX, movementY;
 
 		if ( self._isControlsActive === true && self.isActionInProgress === false )
 		{
@@ -41484,7 +41413,7 @@ System.prototype.init = function( parameter ) {
 	}
 	else
 	{
-		throw "ERROR: System: Unable to initialize system. Empty parameter object";
+		throw "ERROR: System: Unable to initialize system. Empty parameter object.";
 	}
 
 };
@@ -41954,35 +41883,29 @@ World.prototype.removeWalls = function() {
  * @param {object} obstacle - The target object.
  * 
  */
-World.prototype.getObstacle = ( function() {
+World.prototype.getObstacle = function( index ) {
 
-	var i;
+	var i = index;
 
-	return function( index ) {
+	if ( i < actionManager.interactiveObjects.length )
+	{
+		return actionManager.interactiveObjects[ i ];
+	}
+	else
+	{
+		i -= actionManager.interactiveObjects.length;
+	}
 
-		i = index;
+	if ( i < actionManager.staticObjects.length )
+	{
+		return actionManager.staticObjects[ i ];
+	}
+	else
+	{
+		throw "ERROR: World: Obstacle index out of range.";
+	}
 
-		if ( i < actionManager.interactiveObjects.length )
-		{
-			return actionManager.interactiveObjects[ i ];
-		}
-		else
-		{
-			i -= actionManager.interactiveObjects.length;
-		}
-
-		if ( i < actionManager.staticObjects.length )
-		{
-			return actionManager.staticObjects[ i ];
-		}
-		else
-		{
-			throw "ERROR: World: Obstacle index out of range.";
-		}
-
-	};
-
-}() );
+};
 
 /**
  * Returns the number of obstacles in the game world.
@@ -42197,8 +42120,7 @@ Impostor.prototype.update = ( function() {
 
 		// first, compute zAxis
 		zAxis.subVectors( cameraPosition, this.billboard.position );
-		zAxis.y = 0; // this will ensure, that the impostor rotates correctly
-						// around the axis
+		zAxis.y = 0; // this will ensure, that the impostor rotates correctly around the axis
 		zAxis.normalize();
 
 		// compute the last axis with the cross product
@@ -42224,43 +42146,40 @@ Impostor.prototype.update = ( function() {
  * 
  * @returns {boolean} Is a generation necessary?
  */
-Impostor.prototype.isGenerationNeeded = ( function() {
+Impostor.prototype.isGenerationNeeded = function( currentDirection ) {
 
-	var angle = 0;
+	var angle;
 
-	return function( currentDirection ) {
+	if ( this._lastDirection === null )
+	{
+		this._lastDirection = currentDirection.clone();
 
-		if ( this._lastDirection === null )
+	}
+	else
+	{
+		// compute the angle between current and last direction
+		angle = Math.acos( this._lastDirection.dot( currentDirection ) );
+
+		// convert radians to degrees
+		angle *= ( 180 / Math.PI );
+
+		// check against property
+		if ( angle > this.angle * 0.5 )
 		{
+
+			// save the direction
 			this._lastDirection = currentDirection.clone();
 
-		}
-		else
-		{
-			// compute the angle between current and last direction
-			angle = Math.acos( this._lastDirection.dot( currentDirection ) );
-
-			// convert radians to degrees
-			angle *= ( 180 / Math.PI );
-
-			// check against property
-			if ( angle > this.angle * 0.5 )
-			{
-
-				// save the direction
-				this._lastDirection = currentDirection.clone();
-
-				// return true to trigger a generation
-				return true;
-			}
-
-			return false;
+			// return true to trigger a generation
+			return true;
 		}
 
 		return false;
-	};
+	}
 
-}() );
+	return false;
+
+};
 
 /**
  * Computes the axis-aligned bounding box of the object.
@@ -42350,8 +42269,6 @@ Impostor.prototype._computePosition = function() {
  */
 Impostor.prototype._computeGeometry = ( function() {
 
-	var geometry, index;
-
 	var translationMatrix = new THREE.Matrix4();
 	var rotationMatrix = new THREE.Matrix4();
 
@@ -42363,9 +42280,11 @@ Impostor.prototype._computeGeometry = ( function() {
 	var uvs = new Float32Array( [ 0, 0, 0, 1, 1, 0, 1, 1 ] ); // fix values
 
 	return function() {
+		
+		var index;
 
 		// create new geometry
-		geometry = new THREE.BufferGeometry();
+		var geometry = new THREE.BufferGeometry();
 
 		// create vertex buffer, unique for each impostor
 		var vertices = new Float32Array( 12 );
@@ -42653,14 +42572,14 @@ LOD.prototype.update = ( function() {
 	var positionCamera = new THREE.Vector3();
 	var positionObject = new THREE.Vector3();
 
-	var distance = 0; // calculated distance
-	var edge = 0; // this distance marks the begin/end of the transition
-	var opacity = 0; // opacity value for blending
-	var index = 0; // index for loops
-	var currentObject = null; // current object of the loop
-	var previousObject = null; // previous object of the loop
-
 	return function() {
+		
+		var distance; // calculated distance
+		var edge; // this distance marks the begin/end of the transition
+		var opacity; // opacity value for blending
+		var index; // index for loops
+		var currentObject; // current object of the loop
+		var previousObject; // previous object of the loop
 
 		if ( this.mode === LOD.MODE.DIRECT )
 		{
@@ -42753,6 +42672,7 @@ LOD.prototype.update = ( function() {
 			}
 		}
 	};
+	
 }() );
 
 LOD.MODE = {
@@ -42816,15 +42736,13 @@ MultiplayerManager.prototype.init = function() {
  */
 MultiplayerManager.prototype._onUpdate = ( function() {
 
-	var teammate = null;
-
 	var position = new THREE.Vector3();
 	var quaternion = new THREE.Quaternion();
 
 	return function( message, data ) {
 
 		// get correct teammate
-		teammate = self._getTeammate( data.clientId );
+		var teammate = self._getTeammate( data.clientId );
 
 		// process position and orientation
 		position.set( data.player.position.x, data.player.position.y, data.player.position.z );
@@ -43018,9 +42936,6 @@ OBB.prototype.setFromObject = ( function() {
 
 	var vector = new THREE.Vector3();
 
-	var aabb = null;
-	var w = null;
-
 	return function( object ) {
 
 		// calculate AABB, if necessary
@@ -43033,8 +42948,8 @@ OBB.prototype.setFromObject = ( function() {
 		object.updateMatrixWorld();
 
 		// shortcuts
-		aabb = object.geometry.boundingBox;
-		w = object.matrixWorld.elements;
+		var aabb = object.geometry.boundingBox;
+		var w = object.matrixWorld.elements;
 
 		// assign the transform center to the position member
 		this.position = aabb.center().applyMatrix4( object.matrixWorld );
@@ -43108,11 +43023,9 @@ OBB.prototype.closestPoint = ( function() {
 	var yAxis = new THREE.Vector3();
 	var zAxis = new THREE.Vector3();
 
-	var axis = [];
-
-	var index = 0, value = 0;
-
 	return function( point ) {
+		
+		var index, value, axis = [];
 
 		var closesPoint = new THREE.Vector3();
 
@@ -43289,20 +43202,19 @@ OBB.prototype.isIntersectionOBB = ( function() {
 	var yAxisB = new THREE.Vector3();
 	var zAxisB = new THREE.Vector3();
 
-	var axisA = [];
-	var axisB = [];
-	var rotationMatrix = [ [], [], [] ];
-	var rotationMatrixAbs = [ [], [], [] ];
-
-	var halfSizeA = 0;
-	var halfSizeB = 0;
-
 	var translation = new THREE.Vector3();
 
 	var vector = new THREE.Vector3();
-	var t = 0, i = 0;
 
 	return function( obb ) {
+		
+		var axisA = [];
+		var axisB = [];
+		var rotationMatrix = [ [], [], [] ];
+		var rotationMatrixAbs = [ [], [], [] ];
+		
+		var halfSizeA, halfSizeB;
+		var t, i;
 
 		// extract each axis
 		this.basis.extractBasis( xAxisA, yAxisA, zAxisA );
@@ -43481,13 +43393,13 @@ OBB.prototype.isIntersectionOBB = ( function() {
  */
 OBB.prototype.isIntersectionPlane = ( function() {
 
-	var t = 0, s = 0;
-
 	var xAxis = new THREE.Vector3();
 	var yAxis = new THREE.Vector3();
 	var zAxis = new THREE.Vector3();
 
 	return function( plane ) {
+		
+		var t, s;
 
 		// extract each axis
 		this.basis.extractBasis( xAxis, yAxis, zAxis );
@@ -44028,40 +43940,28 @@ PerformanceManager.prototype.generateImpostors = function() {
 /**
  * Updates all LOD instances.
  */
-PerformanceManager.prototype._updateLODs = ( function() {
+PerformanceManager.prototype._updateLODs = function() {
 
-	var index = 0;
+	for ( var index = 0; index < this._lods.length; index++ )
+	{
+		this._lods[ index ].update();
+	}
 
-	return function() {
-
-		for ( index = 0; index < this._lods.length; index++ )
-		{
-			this._lods[ index ].update();
-		}
-	};
-
-}() );
+};
 
 /**
  * Updates all LOD instances.
  */
-PerformanceManager.prototype._updateImpostors = ( function() {
+PerformanceManager.prototype._updateImpostors = function() {
 
-	var index = 0;
-	var cameraWorldPosition = new THREE.Vector3();
+	// the camera world position is equal for each impostor
+	var cameraWorldPosition = camera.getWorldPosition();
 
-	return function() {
-
-		// the camera world position is equal for each impostor
-		cameraWorldPosition = camera.getWorldPosition();
-
-		for ( index = 0; index < this._impostors.length; index++ )
-		{
-			this._impostors[ index ].update( cameraWorldPosition );
-		}
-	};
-
-}() );
+	for ( var index = 0; index < this._impostors.length; index++ )
+	{
+		this._impostors[ index ].update( cameraWorldPosition );
+	}
+};
 
 module.exports = new PerformanceManager();
 },{"../core/Camera":19,"../core/Renderer":22,"../core/World":30,"./Impostor":31,"./LOD":33,"three":1}],38:[function(require,module,exports){
@@ -44675,19 +44575,13 @@ EntityManager.prototype.createVehicle = function( object3D, boundingRadius, velo
  * 
  * @param {number} delta - The time delta value.
  */
-EntityManager.prototype.update = ( function() {
+EntityManager.prototype.update = function( delta ) {
 
-	var index = 0;
-
-	return function( delta ) {
-
-		for ( index = 0; index < this.entities.length; index++ )
-		{
-			this.entities[ index ].update( delta );
-		}
-	};
-
-}() );
+	for ( var index = 0; index < this.entities.length; index++ )
+	{
+		this.entities[ index ].update( delta );
+	}
+};
 
 /**
  * Gets an entity by its ID.
@@ -44951,9 +44845,9 @@ MovingEntity.prototype.isRotateToTarget = ( function() {
 	var rotationToTarget = new THREE.Matrix4();
 	var quaternionToTarget = new THREE.Quaternion();
 
-	var angle, t;
-
 	return function( targetPosition ) {
+		
+		var angle, t;
 
 		// first determine the angle between the look vector and the target
 		angle = targetPosition.angleTo( this.getDirection() );
@@ -45086,15 +44980,13 @@ Vehicle.prototype.constructor = Vehicle;
  */
 Vehicle.prototype.update = ( function() {
 
-	var steeringForce = null;
-
 	var displacement = new THREE.Vector3();
 	var acceleration = new THREE.Vector3();
 
 	return function( delta ) {
 
 		// calculate steering force
-		steeringForce = this.steering.calculate( delta );
+		var steeringForce = this.steering.calculate( delta );
 
 		// acceleration = force / mass
 		acceleration.copy( steeringForce ).divideScalar( this.mass );
@@ -47746,37 +47638,32 @@ function Smoother( numberOfSamples ) {
  * @param {THREE.Vector3} mostRecentValue - The most recent value to add.
  * @param {THREE.Vector3} average - The target average vector.
  */
-Smoother.prototype.update = ( function() {
+Smoother.prototype.update = function( mostRecentValue, average ) {
 
-	var index, average;
+	// ensure, average is a zero vector
+	average.set( 0, 0, 0 );
 
-	return function( mostRecentValue, average ) {
+	// make sure the slot index wraps around
+	if ( this._slot === this._numberOfSamples )
+	{
+		this._slot = 0;
+	}
 
-		// reset average
-		average.set( 0, 0, 0 );
+	// overwrite the oldest value with the newest
+	this._history[ this._slot ].copy( mostRecentValue );
 
-		// make sure the slot index wraps around
-		if ( this._slot === this._numberOfSamples )
-		{
-			this._slot = 0;
-		}
+	// increase slot index
+	this._slot++;
 
-		// overwrite the oldest value with the newest
-		this._history[ this._slot ].copy( mostRecentValue );
+	// now calculate the average of the history array
+	for ( var index = 0; index < this._numberOfSamples; index++ )
+	{
+		average.add( this._history[ index ] );
+	}
 
-		// increase slot index
-		this._slot++;
+	average.divideScalar( this._numberOfSamples );
 
-		// now calculate the average of the history array
-		for ( index = 0; index < this._numberOfSamples; index++ )
-		{
-			average.add( this._history[ index ] );
-		}
-
-		average.divideScalar( this._numberOfSamples );
-	};
-
-}() );
+};
 
 module.exports = Smoother;
 },{"three":1}],63:[function(require,module,exports){
@@ -48002,236 +47889,232 @@ SteeringBehaviors.prototype.calculate = function( delta ) {
  * @param {number} delta - The time delta value.
  * 
  */
-SteeringBehaviors.prototype._calculatePrioritized = ( function() {
+SteeringBehaviors.prototype._calculatePrioritized = function( delta ) {
 
 	var force;
 
-	return function( delta ) {
+	// wall avoidance
+	if ( this._isOn( SteeringBehaviors.TYPES.WALLAVOIDANCE ) )
+	{
+		force = this._wallAvoidance();
 
-		// wall avoidance
-		if ( this._isOn( SteeringBehaviors.TYPES.WALLAVOIDANCE ) )
+		force.multiplyScalar( this.weights.wallAvoidance );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			force = this._wallAvoidance();
-
-			force.multiplyScalar( this.weights.wallAvoidance );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// obstacle avoidance
-		if ( this._isOn( SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE ) )
+	}
+
+	// obstacle avoidance
+	if ( this._isOn( SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE ) )
+	{
+		force = this._obstacleAvoidance();
+
+		force.multiplyScalar( this.weights.obstacleAvoidance );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			force = this._obstacleAvoidance();
-
-			force.multiplyScalar( this.weights.obstacleAvoidance );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// evade
-		if ( this._isOn( SteeringBehaviors.TYPES.EVADE ) )
+	}
+
+	// evade
+	if ( this._isOn( SteeringBehaviors.TYPES.EVADE ) )
+	{
+		logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Evade target not assigned" );
+
+		force = this._evade( this.targetAgent1 );
+
+		force.multiplyScalar( this.weights.evade );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Evade target not assigned" );
-
-			force = this._evade( this.targetAgent1 );
-
-			force.multiplyScalar( this.weights.evade );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// separation
-		if ( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) )
+	}
+
+	// separation
+	if ( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) )
+	{
+		force = this._separation();
+
+		force.multiplyScalar( this.weights.separation );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			force = this._separation();
-
-			force.multiplyScalar( this.weights.separation );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// alignment
-		if ( this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) )
+	}
+
+	// alignment
+	if ( this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) )
+	{
+		force = this._alignment();
+
+		force.multiplyScalar( this.weights.alignment );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			force = this._alignment();
-
-			force.multiplyScalar( this.weights.alignment );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// cohesion
-		if ( this._isOn( SteeringBehaviors.TYPES.COHESION ) )
+	}
+
+	// cohesion
+	if ( this._isOn( SteeringBehaviors.TYPES.COHESION ) )
+	{
+		force = this._cohesion();
+
+		force.multiplyScalar( this.weights.cohesion );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			force = this._cohesion();
-
-			force.multiplyScalar( this.weights.cohesion );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// flee
-		if ( this._isOn( SteeringBehaviors.TYPES.FLEE ) )
+	}
+
+	// flee
+	if ( this._isOn( SteeringBehaviors.TYPES.FLEE ) )
+	{
+		force = this._flee( this.target );
+
+		force.multiplyScalar( this.weights.flee );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			force = this._flee( this.target );
-
-			force.multiplyScalar( this.weights.flee );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// seek
-		if ( this._isOn( SteeringBehaviors.TYPES.SEEK ) )
+	}
+
+	// seek
+	if ( this._isOn( SteeringBehaviors.TYPES.SEEK ) )
+	{
+
+		force = this._seek( this.target );
+
+		force.multiplyScalar( this.weights.seek );
+
+		if ( !this._accumulateForce( force ) )
 		{
-
-			force = this._seek( this.target );
-
-			force.multiplyScalar( this.weights.seek );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// arrive
-		if ( this._isOn( SteeringBehaviors.TYPES.ARRIVE ) )
+	}
+
+	// arrive
+	if ( this._isOn( SteeringBehaviors.TYPES.ARRIVE ) )
+	{
+		force = this._arrive( this.target, this.deceleration );
+
+		force.multiplyScalar( this.weights.arrive );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			force = this._arrive( this.target, this.deceleration );
-
-			force.multiplyScalar( this.weights.arrive );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// wander
-		if ( this._isOn( SteeringBehaviors.TYPES.WANDER ) )
+	}
+
+	// wander
+	if ( this._isOn( SteeringBehaviors.TYPES.WANDER ) )
+	{
+		force = this._wander( delta );
+
+		force.multiplyScalar( this.weights.wander );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			force = this._wander( delta );
-
-			force.multiplyScalar( this.weights.wander );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// pursuit
-		if ( this._isOn( SteeringBehaviors.TYPES.PURSUIT ) )
+	}
+
+	// pursuit
+	if ( this._isOn( SteeringBehaviors.TYPES.PURSUIT ) )
+	{
+		logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Pursuit target not assigned" );
+
+		force = this._pursuit( this.targetAgent1 );
+
+		force.multiplyScalar( this.weights.pursuit );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Pursuit target not assigned" );
-
-			force = this._pursuit( this.targetAgent1 );
-
-			force.multiplyScalar( this.weights.pursuit );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// offset pursuit
-		if ( this._isOn( SteeringBehaviors.TYPES.OFFSETPURSUIT ) )
+	}
+
+	// offset pursuit
+	if ( this._isOn( SteeringBehaviors.TYPES.OFFSETPURSUIT ) )
+	{
+		logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Pursuit target not assigned" );
+
+		force = this._offsetPursuit( this.targetAgent1, this.offset );
+
+		force.multiplyScalar( this.weights.offsetPursuit );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Pursuit target not assigned" );
-
-			force = this._offsetPursuit( this.targetAgent1, this.offset );
-
-			force.multiplyScalar( this.weights.offsetPursuit );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// interpose
-		if ( this._isOn( SteeringBehaviors.TYPES.INTERPOSE ) )
+	}
+
+	// interpose
+	if ( this._isOn( SteeringBehaviors.TYPES.INTERPOSE ) )
+	{
+		logger.assert( this.targetAgent1 !== null && this.targetAgent2 !== null, "SteeringBehaviors: Interpose targets not assigned" );
+
+		force = this._interpose( this.targetAgent1, this.targetAgent2 );
+
+		force.multiplyScalar( this.weights.interpose );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			logger.assert( this.targetAgent1 !== null && this.targetAgent2 !== null, "SteeringBehaviors: Interpose targets not assigned" );
-
-			force = this._interpose( this.targetAgent1, this.targetAgent2 );
-
-			force.multiplyScalar( this.weights.interpose );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// hide
-		if ( this._isOn( SteeringBehaviors.TYPES.HIDE ) )
+	}
+
+	// hide
+	if ( this._isOn( SteeringBehaviors.TYPES.HIDE ) )
+	{
+		logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Hide target not assigned" );
+
+		force = this._hide( this.targetAgent1 );
+
+		force.multiplyScalar( this.weights.hide );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			logger.assert( this.targetAgent1 !== null, "SteeringBehaviors: Hide target not assigned" );
-
-			force = this._hide( this.targetAgent1 );
-
-			force.multiplyScalar( this.weights.hide );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-		// follow path
-		if ( this._isOn( SteeringBehaviors.TYPES.FOLLOWPATH ) )
+	}
+
+	// follow path
+	if ( this._isOn( SteeringBehaviors.TYPES.FOLLOWPATH ) )
+	{
+		force = this._followPath();
+
+		force.multiplyScalar( this.weights.followPath );
+
+		if ( !this._accumulateForce( force ) )
 		{
-			force = this._followPath();
-
-			force.multiplyScalar( this.weights.followPath );
-
-			if ( !this._accumulateForce( force ) )
-			{
-				return;
-			}
-
+			return;
 		}
 
-	};
+	}
 
-}() );
+};
 
 /**
  * This function calculates how much of its max steering force the vehicle has
@@ -48241,43 +48124,37 @@ SteeringBehaviors.prototype._calculatePrioritized = ( function() {
  * 
  * @returns {boolean} The steering force.
  */
-SteeringBehaviors.prototype._accumulateForce = ( function() {
+SteeringBehaviors.prototype._accumulateForce = function( forceToAdd ) {
 
-	var magnitudeSoFar;
-	var magnitudeRemaining;
-	var magnitudeToAdd;
+	var magnitudeSoFar, magnitudeRemaining, magnitudeToAdd;
 
-	return function( forceToAdd ) {
+	// calculate how much steering force the vehicle has used so far
+	magnitudeSoFar = this._steeringForce.length();
 
-		// calculate how much steering force the vehicle has used so far
-		magnitudeSoFar = this._steeringForce.length();
+	// calculate how much steering force remains to be used by this vehicle
+	magnitudeRemaining = this.vehicle.maxForce - magnitudeSoFar;
 
-		// calculate how much steering force remains to be used by this vehicle
-		magnitudeRemaining = this.vehicle.maxForce - magnitudeSoFar;
+	// return false if there is no more force left to use
+	if ( magnitudeRemaining <= 0 )
+	{
+		return false;
+	}
 
-		// return false if there is no more force left to use
-		if ( magnitudeRemaining <= 0 )
-		{
-			return false;
-		}
+	// calculate the magnitude of the force we want to add
+	magnitudeToAdd = forceToAdd.length();
 
-		// calculate the magnitude of the force we want to add
-		magnitudeToAdd = forceToAdd.length();
+	// restrict the magnitude of forceToAdd, so we don't exceed the
+	// maximum force of the vehicle
+	if ( magnitudeToAdd > magnitudeRemaining )
+	{
+		forceToAdd.normalize().multiplyScalar( magnitudeRemaining );
+	}
 
-		// restrict the magnitude of forceToAdd, so we don't exceed the
-		// maximum force of the vehicle
-		if ( magnitudeToAdd > magnitudeRemaining )
-		{
-			forceToAdd.normalize().multiplyScalar( magnitudeRemaining );
-		}
+	// add force
+	this._steeringForce.add( forceToAdd );
 
-		// add force
-		this._steeringForce.add( forceToAdd );
-
-		return true;
-	};
-
-}() );
+	return true;
+};
 
 /**
  * This method tests if a specific bit of m_iFlags is set.
@@ -48294,36 +48171,31 @@ SteeringBehaviors.prototype._isOn = function( behaviorType ) {
 /**
  * Prepares the calculation of the steering behaviors.
  */
-SteeringBehaviors.prototype._prepareCalculation = ( function() {
+SteeringBehaviors.prototype._prepareCalculation = function() {
 
-	var index, obstacle;
+	// reset steering force
+	this._steeringForce.set( 0, 0, 0 );
 
-	return function() {
+	// update model matrices of 3D object
+	this.vehicle.object3D.updateMatrixWorld();
 
-		// reset steering force
-		this._steeringForce.set( 0, 0, 0 );
+	if ( this.targetAgent1 !== null )
+	{
+		this.targetAgent1.object3D.updateMatrixWorld();
+	}
 
-		// update model matrices of 3D object
-		this.vehicle.object3D.updateMatrixWorld();
+	if ( this.targetAgent2 !== null )
+	{
+		this.targetAgent2.object3D.updateMatrixWorld();
+	}
 
-		if ( this.targetAgent1 !== null )
-		{
-			this.targetAgent1.object3D.updateMatrixWorld();
-		}
+	// calculate neighbors if one of the following group behaviors is active
+	if ( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) || this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) || this._isOn( SteeringBehaviors.TYPES.COHESION ) )
+	{
+		this._calculateNeighbors();
+	}
 
-		if ( this.targetAgent2 !== null )
-		{
-			this.targetAgent2.object3D.updateMatrixWorld();
-		}
-
-		// calculate neighbors if one of the following group behaviors is active
-		if ( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) || this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) || this._isOn( SteeringBehaviors.TYPES.COHESION ) )
-		{
-			this._calculateNeighbors();
-		}
-	};
-
-}() );
+};
 
 /**
  * Calculates all neighbors of the vehicle.
@@ -48331,10 +48203,10 @@ SteeringBehaviors.prototype._prepareCalculation = ( function() {
 SteeringBehaviors.prototype._calculateNeighbors = ( function() {
 
 	var toEntity = new THREE.Vector3();
-	var entity;
-	var index;
 
 	return function() {
+		
+		var index, entity;
 
 		// reset array
 		this._neighbors.length = 0;
@@ -48415,13 +48287,12 @@ SteeringBehaviors.prototype._createFeelers = ( function() {
 SteeringBehaviors.prototype._getHidingPosition = ( function() {
 
 	var toHidingSpot = new THREE.Vector3();
-	var distanceAway;
 
 	return function( positionObstacle, radiusObstacle, positionHunter, hidingSpot ) {
 
 		// calculate how far away the agent is to be from the chosen obstacle's
 		// bounding radius
-		distanceAway = radiusObstacle + this.distanceFromBoundary;
+		var distanceAway = radiusObstacle + this.distanceFromBoundary;
 
 		// calculate the heading toward the object from the hunter
 		toHidingSpot.subVectors( positionObstacle, positionHunter ).normalize();
@@ -48538,9 +48409,9 @@ SteeringBehaviors.prototype._arrive = ( function() {
 	var desiredVelocity = new THREE.Vector3();
 	var toTarget = new THREE.Vector3();
 
-	var distance, speed;
-
 	return function( targetPosition, deceleration ) {
+		
+		var distance, speed;
 
 		var force = new THREE.Vector3();
 
@@ -48586,9 +48457,9 @@ SteeringBehaviors.prototype._pursuit = ( function() {
 	var newEvaderVelocity = new THREE.Vector3();
 	var predcitedPosition = new THREE.Vector3();
 
-	var isFacing, isEvaderAhead, vehicleDirection, lookAheadTime;
-
 	return function( evader ) {
+		
+		var isFacing, isEvaderAhead, vehicleDirection, lookAheadTime;
 
 		// 1. if the evader is ahead and facing the agent then we can just seek
 		// for the evader's current position
@@ -48645,9 +48516,9 @@ SteeringBehaviors.prototype._offsetPursuit = ( function() {
 	var newLeaderVelocity = new THREE.Vector3();
 	var predcitedPosition = new THREE.Vector3();
 
-	var lookAheadTime;
-
 	return function( leader, offset ) {
+		
+		var lookAheadTime;
 
 		// calculate the offset's position in world space
 		offsetWorld.copy( offset ).applyMatrix4( leader.object3D.matrixWorld );
@@ -48686,9 +48557,9 @@ SteeringBehaviors.prototype._evade = ( function() {
 	var newPursuerVelocity = new THREE.Vector3();
 	var predcitedPosition = new THREE.Vector3();
 
-	var lookAheadTime;
-
 	return function( pursuer ) {
+		
+		var lookAheadTime;
 
 		// calculate displacement vector
 		toPursuer.subVectors( pursuer.object3D.position, this.vehicle.object3D.position );
@@ -48734,9 +48605,9 @@ SteeringBehaviors.prototype._interpose = ( function() {
 	var predcitedPositionAgentA = new THREE.Vector3();
 	var predcitedPositionAgentB = new THREE.Vector3();
 
-	var time;
-
 	return function( agentA, agentB ) {
+		
+		var time;
 
 		// first we need to figure out where the two agents are going to be
 		// in the future. This is approximated by determining the time
@@ -48776,9 +48647,9 @@ SteeringBehaviors.prototype._hide = ( function() {
 	var hidingSpot = new THREE.Vector3();
 	var bestHidingSpot = new THREE.Vector3();
 
-	var distanceSq, closestDistanceSq, numberOfObstacle, obstacle, index;
-
 	return function( hunter ) {
+		
+		var distanceSq, closestDistanceSq, numberOfObstacle, obstacle, index;
 
 		// this will be used to track the distance to the closest hiding spot
 		closestDistanceSq = Infinity;
@@ -48833,16 +48704,13 @@ SteeringBehaviors.prototype._wander = ( function() {
 	var randomDisplacement = new THREE.Vector3();
 	var distanceVector = new THREE.Vector3();
 
-	var jitterThisTimeSlice;
-
 	return function( delta ) {
-
+		
 		var force = new THREE.Vector3();
 
 		// this behavior is dependent on the update rate, so this line must be
-		// included
-		// when using time independent frame rate.
-		jitterThisTimeSlice = this.wanderJitter * delta;
+		// included when using time independent frame rate.
+		var jitterThisTimeSlice = this.wanderJitter * delta;
 
 		// prepare random vector
 		randomDisplacement.x = THREE.Math.randFloat( -1, 1 ) * jitterThisTimeSlice;
@@ -48890,14 +48758,6 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
 	var localPositionOfClosestObstacle = new THREE.Vector3();
 	var intersectionPoint = new THREE.Vector3();
 
-	var numberOfObstacle;
-	var detectionBoxLength;
-	var closestObstacle;
-	var distanceToClosestObstacle;
-	var obstacle;
-	var index;
-	var expandedRadius;
-	var multiplier;
 	var brakingWeight = 0.2;
 
 	var inverseMatrix = new THREE.Matrix4();
@@ -48906,8 +48766,22 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
 	var ray = new THREE.Ray( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, 1 ) );
 
 	return function() {
+		
+		var index, obstacle, expandedRadius, multiplier;
 
 		var force = new THREE.Vector3();
+		
+		// this will keep track of the closest intersecting obstacle
+		var closestObstacle = null;
+
+		// this will be used to track the distance to the closest obstacle
+		var distanceToClosestObstacle = Infinity;
+		
+		// get number of obstacles in the world
+		var numberOfObstacle = world.getNumberOfObstacles();
+		
+		// the detection box length is proportional to the agent's velocity
+		var detectionBoxLength = this.vehicle.getSpeed() + this.vehicle.maxSpeed + vehicleSize.z * 0.5;
 
 		// calculate bounding box of vehicle
 		boundingBox.setFromObject( this.vehicle.object3D );
@@ -48915,20 +48789,8 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
 		// get size of bounding box
 		boundingBox.size( vehicleSize );
 
-		// the detection box length is proportional to the agent's velocity
-		detectionBoxLength = this.vehicle.getSpeed() + this.vehicle.maxSpeed + vehicleSize.z * 0.5;
-
-		// this will keep track of the closest intersecting obstacle
-		closestObstacle = null;
-
-		// this will be used to track the distance to the closest obstacle
-		distanceToClosestObstacle = Infinity;
-
 		// this matrix will transform points to the local space of the vehicle
 		inverseMatrix.getInverse( this.vehicle.object3D.matrixWorld );
-
-		// get number of obstacles in the world
-		numberOfObstacle = world.getNumberOfObstacles();
 
 		for ( index = 0; index < numberOfObstacle; index++ )
 		{
@@ -49009,33 +48871,26 @@ SteeringBehaviors.prototype._wallAvoidance = ( function() {
 	var closestPoint = new THREE.Vector3();
 	var normal = new THREE.Vector3();
 
-	var indexFeeler;
-	var indexWall;
-
-	var closestWall;
-	var feeler;
-	var intersectionFeeler;
-	var intersects;
-	var distanceToClosestWall;
-
 	return function() {
+		
+		var indexFeeler, indexWall, feeler, intersects;
 
 		var force = new THREE.Vector3();
 
 		// this will be used to track the distance to the closest wall
-		distanceToClosestWall = Infinity;
+		var distanceToClosestWall = Infinity;
 		
 		// this will keep track of the closest wall
-		closestWall = null;
+		var closestWall = null;
+		
+		// this will keep track of the feeler that caused an intersection
+		var intersectionFeeler = null;
 		
 		// this will keep track of the closes point
 		closestPoint.set( 0, 0, 0 );
 		
 		// this will keep track of the wall normal
 		normal.set( 0, 0, 0 );
-
-		// this will keep track of the feeler that caused an intersection
-		intersectionFeeler = null;
 
 		// create feelers for test
 		this._createFeelers();
@@ -49098,32 +48953,26 @@ SteeringBehaviors.prototype._wallAvoidance = ( function() {
  * 
  * @returns {THREE.Vector3} The calculated force.
  */
-SteeringBehaviors.prototype._followPath = ( function() {
+SteeringBehaviors.prototype._followPath = function() {
 
-	var distanceSq;
+	// calculate distance in square space from current waypoint to vehicle
+	var distanceSq = this.path.getCurrentWaypoint().distanceToSquared( this.vehicle.object3D.position );
 
-	return function() {
+	// move to next waypoint if close enough to current target
+	if ( distanceSq < ( this.waypointSeekDist * this.waypointSeekDist ) )
+	{
+		this.path.setNextWaypoint();
+	}
 
-		// calculate distance in square space from current waypoint to vehicle
-		distanceSq = this.path.getCurrentWaypoint().distanceToSquared( this.vehicle.object3D.position );
-
-		// move to next waypoint if close enough to current target
-		if ( distanceSq < ( this.waypointSeekDist * this.waypointSeekDist ) )
-		{
-			this.path.setNextWaypoint();
-		}
-
-		if ( !this.path.isFinished() )
-		{
-			return this._seek( this.path.getCurrentWaypoint() );
-		}
-		else
-		{
-			return this._arrive( this.path.getCurrentWaypoint(), SteeringBehaviors.DECELERATION.MIDDLE );
-		}
-	};
-
-}() );
+	if ( !this.path.isFinished() )
+	{
+		return this._seek( this.path.getCurrentWaypoint() );
+	}
+	else
+	{
+		return this._arrive( this.path.getCurrentWaypoint(), SteeringBehaviors.DECELERATION.MIDDLE );
+	}
+};
 
 /**
  * This calculates a force repelling from the other neighbors
@@ -49134,9 +48983,9 @@ SteeringBehaviors.prototype._separation = ( function() {
 
 	var toAgent = new THREE.Vector3();
 
-	var index, neighbor, length;
-
 	return function() {
+		
+		var index, neighbor, length;
 
 		var force = new THREE.Vector3();
 
@@ -49186,17 +49035,16 @@ SteeringBehaviors.prototype._alignment = ( function() {
 	// used to record the average heading of the neighbors
 	var averageHeading = new THREE.Vector3();
 
-	// used to count the number of vehicles in the neighborhood
-	var neighborCount;
-
-	var index, neighbor;
-
 	return function() {
+		
+		var index, neighbor;
+		
+		// used to count the number of vehicles in the neighborhood
+		var neighborCount = 0;
 
 		var force = new THREE.Vector3();
 
 		// reset values
-		neighborCount = 0;
 		averageHeading.set( 0, 0, 0 );
 
 		for ( index = 0; index < this._neighbors.length; index++ )
@@ -49241,17 +49089,16 @@ SteeringBehaviors.prototype._cohesion = ( function() {
 	// center of mass of all the agents
 	var centerOfMass = new THREE.Vector3(); 
 
-	// used to count the number of vehicles in the neighborhood
-	var neighborCount; 
-	
-	var index, neighbor;
-
 	return function() {
+		
+		var index, neighbor;
+		
+		// used to count the number of vehicles in the neighborhood
+		var neighborCount = 0; 
 
 		var force = new THREE.Vector3();
 
 		// reset values
-		neighborCount = 0;
 		centerOfMass.set( 0, 0, 0 );
 
 		for ( index = 0; index < this._neighbors.length; index++ )
@@ -49549,35 +49396,31 @@ EventManager.prototype.publishSync = function( message, data ) {
  * 
  * @returns {string} Token for unsubscribing.
  */
-EventManager.prototype.subscribe = ( function() {
+EventManager.prototype.subscribe = function( message, callback ) {
 
 	var token;
 
-	return function( message, callback ) {
+	// ensure, the callback parameter is a function
+	if ( typeof callback !== "function" )
+	{
+		throw "ERROR: EventManager: No callback function for subscription assigned.";
+	}
 
-		// ensure, the callback parameter is a function
-		if ( typeof callback !== "function" )
-		{
-			throw "ERROR: EventManager: No callback function for subscription assigned.";
-		}
+	// register message if necessary
+	if ( messages.hasOwnProperty( message ) === false )
+	{
+		messages[ message ] = {};
+	}
 
-		// register message if necessary
-		if ( messages.hasOwnProperty( message ) === false )
-		{
-			messages[ message ] = {};
-		}
+	// forcing token as string, to allow for future expansions without
+	// breaking usage and allow for easy use as key names for the "messages"
+	// object
+	token = "uid_" + String( ++lastUid );
+	messages[ message ][ token ] = callback;
 
-		// forcing token as string, to allow for future expansions without
-		// breaking
-		// usage and allow for easy use as key names for the "messages" object
-		token = "uid_" + String( ++lastUid );
-		messages[ message ][ token ] = callback;
+	return token;
 
-		return token;
-
-	};
-
-}() );
+};
 
 /**
  * Clears all subscriptions
@@ -49592,22 +49435,18 @@ EventManager.prototype.clearAllSubscriptions = function() {
  * 
  * @param {string} topic - The corresponding topic of the subscriptions to clear.
  */
-EventManager.prototype.clearSubscriptions = ( function() {
+EventManager.prototype.clearSubscriptions = function( topic ) {
 
 	var m;
 
-	return function( topic ) {
-
-		for ( m in messages ) // jshint ignore:line
+	for ( m in messages ) // jshint ignore:line
+	{
+		if ( messages.hasOwnProperty( m ) === true && m.indexOf( topic ) === 0 )
 		{
-			if ( messages.hasOwnProperty( m ) === true && m.indexOf( topic ) === 0 )
-			{
-				delete messages[ m ];
-			}
+			delete messages[ m ];
 		}
-	};
-
-}() );
+	}
+};
 
 /**
  * Removes subscriptions.
@@ -49620,69 +49459,66 @@ EventManager.prototype.clearSubscriptions = ( function() {
  * 
  * @returns {any} The return value depends on the type of parameter "value".
  */
-EventManager.prototype.unsubscribe = ( function() {
+EventManager.prototype.unsubscribe = function( value ) {
 
 	var isTopic, isToken, isFunction;
+	var message, m, t;
+	var result = false;
 
-	var result = false, message, m, t;
+	isTopic = ( typeof value === "string" ) && ( messages.hasOwnProperty( value ) === true );
+	isToken = ( isTopic === false ) && ( typeof value === "string" );
+	isFunction = typeof value === "function";
 
-	return function( value ) {
+	// this handles the case if "value" is a topic
+	if ( isTopic === true )
+	{
+		delete messages[ value ];
+		return;
+	}
 
-		isTopic = ( typeof value === "string" ) && ( messages.hasOwnProperty( value ) === true );
-		isToken = ( isTopic === false ) && ( typeof value === "string" );
-		isFunction = typeof value === "function";
-
-		// this handles the case if "value" is a topic
-		if ( isTopic === true )
+	// iterate over all messages/topics
+	for ( m in messages ) // jshint ignore:line
+	{
+		if ( messages.hasOwnProperty( m ) === true )
 		{
-			delete messages[ value ];
-			return;
-		}
+			// buffer message
+			message = messages[ m ];
 
-		// iterate over all messages/topics
-		for ( m in messages ) // jshint ignore:line
-		{
-			if ( messages.hasOwnProperty( m ) === true )
+			// this handles the case if "value" is a token
+			if ( isToken === true && message[ value ] )
 			{
-				// buffer message
-				message = messages[ m ];
+				// delete the token of the corresponding topic
+				delete message[ value ];
 
-				// this handles the case if "value" is a token
-				if ( isToken === true && message[ value ] )
-				{
-					// delete the token of the corresponding topic
-					delete message[ value ];
+				// return the token to the caller
+				result = value;
 
-					// return the token to the caller
-					result = value;
-
-					// because tokens are unique, we can just stop here
-					break;
-				}
-
-				// this handles the case if "value" is a function
-				if ( isFunction === true )
-				{
-					// iterate over all subscriptions of a topic
-					for ( t in message ) // jshint ignore:line
-					{
-						// check the value (callback) of the token
-						if ( message.hasOwnProperty( t ) === true && message[ t ] === value )
-						{
-							// delete the token
-							delete message[ t ];
-
-							result = true;
-						}
-					}// next token
-				}
+				// because tokens are unique, we can just stop here
+				break;
 			}
-		}// next topic
 
-		return result;
-	};
-	
-}() );
+			// this handles the case if "value" is a function
+			if ( isFunction === true )
+			{
+				// iterate over all subscriptions of a topic
+				for ( t in message ) // jshint ignore:line
+				{
+					// check the value (callback) of the token
+					if ( message.hasOwnProperty( t ) === true && message[ t ] === value )
+					{
+						// delete the token
+						delete message[ t ];
+
+						result = true;
+					}
+				}// next token
+			}
+		}
+	}// next topic
+
+	return result;
+
+};
 
 /**
  * Sends a message to a game entity.
@@ -50555,30 +50391,27 @@ EffectComposer.prototype.removePasses = function() {
 /**
  * Does the actual post processing.
  */
-EffectComposer.prototype.render = ( function() {
+EffectComposer.prototype.render = function() {
 
 	var pass, index;
 
-	return function() {
+	// process all assigned passes and call their render method
+	for ( index = 0; index < this._passes.length; index++ )
+	{
+		pass = this._passes[ index ];
 
-		// process all assigned passes and call their render method
-		for ( index = 0; index < this._passes.length; index++ )
+		if ( pass.enabled === true )
 		{
-			pass = this._passes[ index ];
+			pass.render( this._renderer, this._writeBuffer, this._readBuffer );
 
-			if ( pass.enabled === true )
+			if ( pass.needsSwap === true )
 			{
-				pass.render( this._renderer, this._writeBuffer, this._readBuffer );
-
-				if ( pass.needsSwap === true )
-				{
-					this._swapBuffers();
-				}
+				this._swapBuffers();
 			}
 		}
-	};
-
-}() );
+	}
+	
+};
 
 /**
  * Sets the size of the render target.
@@ -50599,17 +50432,13 @@ EffectComposer.prototype.setSize = function( width, height ) {
 /**
  * Swaps the internal framebuffers.
  */
-EffectComposer.prototype._swapBuffers = ( function() {
+EffectComposer.prototype._swapBuffers = function() {
 
-	var temp = null;
+	var temp = this._readBuffer;
+	this._readBuffer = this._writeBuffer;
+	this._writeBuffer = temp;
 
-	return function() {
-
-		temp = this._readBuffer;
-		this._readBuffer = this._writeBuffer;
-		this._writeBuffer = temp;
-	};
-}() );
+};
 
 /**
  * Resets the internal render targets/framebuffers.
@@ -53914,17 +53743,12 @@ PerformanceMonitor.prototype._generateBarChart = function( $graph ) {
  * 
  * @param {object} $graph - The target graph object.
  */
-PerformanceMonitor.prototype._updateChart = ( function() {
+PerformanceMonitor.prototype._updateChart = function( $graph, value ) {
 
-	var child = null;
+	var child = $graph.appendChild( $graph.firstChild );
+	child.style.height = value + "px";
 
-	return function( $graph, value ) {
-
-		child = $graph.appendChild( $graph.firstChild );
-		child.style.height = value + "px";
-	};
-
-}() );
+};
 
 /**
  * Switches the mode of the performance monitor.
@@ -54125,31 +53949,31 @@ TextScreen.prototype.complete = function() {
  * 
  * @param {number} index - The array-index of the current text.
  */
-TextScreen.prototype._printText = ( function() {
+TextScreen.prototype._printText = function( index ) {
 
-	var text;
+	// receive text
+	var text = self.textManager.get( self._textKeys[ self._textIndex ].text );
+	
+	// if index is undefined, set the value to zero
+	index = index || 0;
 
-	return function( index ) {
+	if ( index < text.length )
+	{
+		// get the next character of the text
+		self._$textScreenContent.textContent += text[ index ];
+		
+		// set a timeout to print the next character
+		self._printId = setTimeout( self._printText, 75, ++index );
+	}
+	else
+	{
+		self._isPrint = false;
+	}
 
-		index = index || 0;
-		text = self.textManager.get( self._textKeys[ self._textIndex ].text );
-
-		if ( index < text.length )
-		{
-			self._$textScreenContent.textContent += text[ index ];
-			self._printId = setTimeout( self._printText, 75, ++index );
-		}
-		else
-		{
-			self._isPrint = false;
-		}
-	};
-
-}() );
+};
 
 /**
  * Prints entirely the name of the person, who is currently speaking.
- * 
  */
 TextScreen.prototype._printName = function() {
 

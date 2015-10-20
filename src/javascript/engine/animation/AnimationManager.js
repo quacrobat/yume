@@ -99,59 +99,45 @@ AnimationManager.prototype.update = function( delta ) {
 /**
  * Updates the standard animations.
  */
-AnimationManager.prototype._updateAnimations = ( function() {
+AnimationManager.prototype._updateAnimations = function() {
 
-	var index, time = 0;
-	var isFinished = false;
-	var animation = null;
+	var animation, index, time;
 
-	return function() {
+	// use the same time value for all animations
+	time = global.performance.now();
 
-		// use the same time value for all animations
-		time = global.performance.now();
+	// iterate over all animations
+	for ( index = 0; index < this._animations.length; index++ )
+	{
+		// buffer current animation
+		animation = this._animations[ index ];
 
-		// iterate over all animations
-		for ( index = 0; index < this._animations.length; index++ )
+		// only update the animation if it actually runs
+		if ( animation.isPlaying === true )
 		{
-			// buffer current animation
-			animation = this._animations[ index ];
-
-			// only update the animation if it actually runs
-			if ( animation.isPlaying === true )
+			// update the animation and check status
+			if ( animation.update( time ) === true )
 			{
-				// update it and receive status
-				isFinished = animation.update( time );
-
-				// check status
-				if ( isFinished === true )
-				{
-					// remove automatically the animation after ending
-					this.removeAnimation( animation );
-				}
+				// remove automatically the animation after ending
+				this.removeAnimation( animation );
 			}
 		}
-	};
-
-}() );
+	}
+};
 
 /**
  * Updates the sprite objects.
  * 
  * @param {number} delta - The time delta value.
  */
-AnimationManager.prototype._updateSprites = ( function() {
+AnimationManager.prototype._updateSprites = function( delta ) {
 
-	var index = 0;
+	for ( var index = 0; index < this._sprites.length; index++ )
+	{
+		this._sprites[ index ].update( delta );
+	}
 
-	return function( delta ) {
-
-		for ( index = 0; index < this._sprites.length; index++ )
-		{
-			this._sprites[ index ].update( delta );
-		}
-	};
-
-}() );
+};
 
 /**
  * Adds a single animation object to the internal array.

@@ -52,15 +52,13 @@ MultiplayerManager.prototype.init = function() {
  */
 MultiplayerManager.prototype._onUpdate = ( function() {
 
-	var teammate = null;
-
 	var position = new THREE.Vector3();
 	var quaternion = new THREE.Quaternion();
 
 	return function( message, data ) {
 
 		// get correct teammate
-		teammate = self._getTeammate( data.clientId );
+		var teammate = self._getTeammate( data.clientId );
 
 		// process position and orientation
 		position.set( data.player.position.x, data.player.position.y, data.player.position.z );
