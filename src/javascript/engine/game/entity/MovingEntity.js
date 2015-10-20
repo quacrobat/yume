@@ -127,18 +127,14 @@ MovingEntity.prototype.isRotateHeadingToFacePosition = ( function() {
 
 	return function( position ) {
 		
-		var direction, dot, angle, sign;
+		var direction, angle, sign;
 
 		toTarget.subVectors( position, this.object3D.position ).normalize();
 		
 		direction = this.getDirection();
 
-		dot = direction.dot( toTarget );
-
-		dot = THREE.Math.clamp( dot, -1, 1 );
-
 		// first determine the angle between the view direction and the target
-		angle = Math.acos( dot );
+		angle = direction.angleTo( toTarget );
 
 		// return true if the player is facing the target
 		if ( angle < 0.00001 )
@@ -154,7 +150,7 @@ MovingEntity.prototype.isRotateHeadingToFacePosition = ( function() {
 		
 		// calculate direction of rotation ( clockwise / anti-clockwise )
 		sign =  (  ( direction.x * toTarget.z ) < ( direction.z * toTarget.x ) ) ? 1 : -1;
-
+		
 		// rotate player
 		this.object3D.rotateY( angle * sign );
 

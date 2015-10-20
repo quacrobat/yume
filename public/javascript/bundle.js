@@ -36496,7 +36496,7 @@ ActionManager.prototype._onInteraction = function( message, data ) {
 };
 
 module.exports = new ActionManager();
-},{"../core/Logger":21,"../messaging/EventManager":77,"../messaging/Topic":80,"../ui/UserInterfaceManager":101,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
+},{"../core/Logger":21,"../messaging/EventManager":77,"../messaging/Topic":80,"../ui/UserInterfaceManager":102,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
 /**
  * @file The ActionTrigger is a static trigger for actions.
  * 
@@ -39908,7 +39908,7 @@ FirstPersonControls.RUN = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/World":31,"../etc/SettingsManager":40,"../etc/Utils":43,"../messaging/EventManager":77,"../messaging/Topic":80,"../ui/UserInterfaceManager":101,"three":1}],18:[function(require,module,exports){
+},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/World":31,"../etc/SettingsManager":40,"../etc/Utils":43,"../messaging/EventManager":77,"../messaging/Topic":80,"../ui/UserInterfaceManager":102,"three":1}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -40005,7 +40005,7 @@ Bootstrap.prototype._loadStage = function() {
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/MultiplayerManager":35,"../etc/SaveGameManager":39,"../messaging/EventManager":77,"../messaging/Topic":80,"../network/NetworkManager":82,"../ui/UserInterfaceManager":101,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27}],19:[function(require,module,exports){
+},{"../etc/MultiplayerManager":35,"../etc/SaveGameManager":39,"../messaging/EventManager":77,"../messaging/Topic":80,"../network/NetworkManager":82,"../ui/UserInterfaceManager":102,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for camera-based
@@ -41103,7 +41103,7 @@ StageBase.COLORS = {
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../etc/PerformanceManager":38,"../etc/SaveGameManager":39,"../etc/SettingsManager":40,"../etc/TextManager":42,"../game/entity/EntityManager":45,"../messaging/EventManager":77,"../messaging/Topic":80,"../ui/UserInterfaceManager":101,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
+},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../etc/PerformanceManager":38,"../etc/SaveGameManager":39,"../etc/SettingsManager":40,"../etc/TextManager":42,"../game/entity/EntityManager":45,"../messaging/EventManager":77,"../messaging/Topic":80,"../ui/UserInterfaceManager":102,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -41334,7 +41334,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":39,"../messaging/EventManager":77,"../messaging/Topic":80,"../stages/Stage_001":90,"../ui/UserInterfaceManager":101,"./Logger":21}],27:[function(require,module,exports){
+},{"../etc/SaveGameManager":39,"../messaging/EventManager":77,"../messaging/Topic":80,"../stages/Stage_001":90,"../ui/UserInterfaceManager":102,"./Logger":21}],27:[function(require,module,exports){
 /**
  * @file This prototype holds core information about the engine. The runtime
  * behavior of the application depends crucially of this prototype.
@@ -45706,18 +45706,14 @@ MovingEntity.prototype.isRotateHeadingToFacePosition = ( function() {
 
 	return function( position ) {
 		
-		var direction, dot, angle, sign;
+		var direction, angle, sign;
 
 		toTarget.subVectors( position, this.object3D.position ).normalize();
 		
 		direction = this.getDirection();
 
-		dot = direction.dot( toTarget );
-
-		dot = THREE.Math.clamp( dot, -1, 1 );
-
 		// first determine the angle between the view direction and the target
-		angle = Math.acos( dot );
+		angle = direction.angleTo( toTarget );
 
 		// return true if the player is facing the target
 		if ( angle < 0.00001 )
@@ -45733,7 +45729,7 @@ MovingEntity.prototype.isRotateHeadingToFacePosition = ( function() {
 		
 		// calculate direction of rotation ( clockwise / anti-clockwise )
 		sign =  (  ( direction.x * toTarget.z ) < ( direction.z * toTarget.x ) ) ? 1 : -1;
-
+		
 		// rotate player
 		this.object3D.rotateY( angle * sign );
 
@@ -46849,7 +46845,7 @@ SupportSpotCalculator.prototype.calculateBestSupportingPosition = ( function() {
 			spot = this._spots[ index ];
 
 			// first remove any previous score
-			spot.score = 1;
+			spot.score = 0;
 			
 			// reset color in dev mode
 			if ( system.isDevModeActive === true )
@@ -46893,9 +46889,10 @@ SupportSpotCalculator.prototype.calculateBestSupportingPosition = ( function() {
 				
 				this._bestSupportSpot = spot;
 			}
+			
 		} // next spot
 		
-		// higlight the best supporting spot in dev mode
+		// highlight the best supporting spot in dev mode
 		if ( system.isDevModeActive === true )
 		{
 			this._bestSupportSpot.helper.material.color = new THREE.Color( 0x20252f );
@@ -48458,6 +48455,8 @@ Wait.prototype.execute = function( player ) {
 	if ( !player.isAtTarget() )
 	{
 		player.steering.arriveOn();
+		
+		return;
 	}
 	else
 	{
@@ -48487,8 +48486,6 @@ Wait.prototype.execute = function( player ) {
 		if ( player.isClosestTeamMemberToBall() && player.team.receivingPlayer === null && !player.pitch.isGoalKeeperInBallPossession )
 		{
 			player.stateMachine.changeState( States.ChaseBall );
-			
-			return;
 		}
 	}
 };
@@ -53026,7 +53023,7 @@ function sendMessageToEntity( sender, receiver, message, data, isSync, delay ) {
 		// call the "handleMessage" method of the game entity
 		if ( entities[ receiver ].handleMessage( telegram ) === false )
 		{
-			logger.warn( "WARN: EventManager: Message not handled by receiver with ID: %i.", receiver );
+			logger.warn( "WARN: EventManager: Message not handled by receiver. Telegram: %O", telegram );
 		}
 	}
 	else
@@ -53036,7 +53033,7 @@ function sendMessageToEntity( sender, receiver, message, data, isSync, delay ) {
 			// call the "handleMessage" method of the game entity with a delay
 			if ( entities[ receiver ].handleMessage( telegram ) === false )
 			{
-				logger.warn( "WARN: EventManager: Message not handled by receiver with ID: %i.", receiver );
+				logger.warn( "WARN: EventManager: Message not handled by receiver. Telegram: %O", telegram );
 			}
 
 		}, delay );
@@ -54356,7 +54353,7 @@ Chat.prototype._onMessage = function( message, data ) {
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":77,"../messaging/Topic":80,"./UiElement":100}],92:[function(require,module,exports){
+},{"../messaging/EventManager":77,"../messaging/Topic":80,"./UiElement":101}],92:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel. Only if the development
@@ -54418,7 +54415,7 @@ DevelopmentPanel.prototype.setText = function( text ) {
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":100}],93:[function(require,module,exports){
+},{"./UiElement":101}],93:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -54479,7 +54476,7 @@ InformationPanel.prototype.setText = function( textKey ) {
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":100}],94:[function(require,module,exports){
+},{"./UiElement":101}],94:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -54556,7 +54553,7 @@ InteractionLabel.prototype.hide = function() {
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":100}],95:[function(require,module,exports){
+},{"./UiElement":101}],95:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -54746,7 +54743,7 @@ LoadingScreen.prototype._onReady = function( message, data ) {
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":77,"../messaging/Topic":80,"./UiElement":100}],96:[function(require,module,exports){
+},{"../messaging/EventManager":77,"../messaging/Topic":80,"./UiElement":101}],96:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -54902,7 +54899,7 @@ Menu.prototype._publishFinishEvent = function( message, data ) {
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Environment":20,"../messaging/EventManager":77,"../messaging/Topic":80,"./UiElement":100}],97:[function(require,module,exports){
+},{"../core/Environment":20,"../messaging/EventManager":77,"../messaging/Topic":80,"./UiElement":101}],97:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -55026,7 +55023,7 @@ ModalDialog.prototype._onClose = function( event ) {
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":100}],98:[function(require,module,exports){
+},{"./UiElement":101}],98:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor. Only if the development
@@ -55245,7 +55242,85 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":100}],99:[function(require,module,exports){
+},{"./UiElement":101}],99:[function(require,module,exports){
+(function (global){
+/**
+ * @file Prototype for ui-element soccer panel.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var UiElement = require( "./UiElement" );
+var eventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
+
+var self;
+
+/**
+ * Creates the development panel.
+ * 
+ * @constructor
+ */
+function ScorePanel() {
+
+	UiElement.call( this );
+
+	Object.defineProperties( this, {
+		_$scorePanel : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
+		_$blueGoals : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
+		_$redGoals : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		}
+	} );
+	
+	self = this;
+}
+
+ScorePanel.prototype = Object.create( UiElement.prototype );
+ScorePanel.prototype.constructor = ScorePanel;
+
+/**
+ * Initializes the control.
+ */
+ScorePanel.prototype.init = function() {
+
+	this._$scorePanel = global.document.querySelector( "#score-panel" );
+	this._$blueGoals = this._$scorePanel.querySelector( ".blue" );
+	this._$redGoals = this._$scorePanel.querySelector( ".red" );
+	
+	eventManager.subscribe( TOPIC.GAME.SCORE, this._onGoal );
+};
+
+/**
+ * Updates the score, if a team shots a goal.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ */
+ScorePanel.prototype._onGoal = function( message, data ) {
+
+	self._$blueGoals.textContent = data.goalsBlue;
+	self._$redGoals.textContent = data.goalsRed;
+};
+
+module.exports = new ScorePanel();
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../messaging/EventManager":77,"../messaging/Topic":80,"./UiElement":101}],100:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -55458,7 +55533,7 @@ TextScreen.prototype._printName = function() {
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":100}],100:[function(require,module,exports){
+},{"./UiElement":101}],101:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -55508,7 +55583,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":42}],101:[function(require,module,exports){
+},{"../etc/TextManager":42}],102:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in stages to
@@ -55526,6 +55601,7 @@ var system = require( "../core/System" );
 
 var developmentPanel = require( "./DevelopmentPanel" );
 var performanceMonitor = require( "./PerformanceMonitor" );
+var scorePanel = require( "./ScorePanel" );
 var informationPanel = require( "./InformationPanel" );
 var interactionLabel = require( "./InteractionLabel" );
 var loadingScreen = require( "./LoadingScreen" );
@@ -55560,22 +55636,7 @@ UserInterfaceManager.prototype.init = function() {
 	this._$uiContainer = global.document.querySelector( "#ui-container" );
 
 	// init controls
-	informationPanel.init();
-	interactionLabel.init();
-	loadingScreen.init();
-	menu.init();
-	textScreen.init();
-	modalDialog.init();
-	chat.init();
-
-	// add development information
-	if ( system.isDevModeActive === true )
-	{
-		performanceMonitor.init();
-
-		developmentPanel.init();
-		developmentPanel.setText( "Development Mode Active: " + system.name + " Version: " + system.version );
-	}
+	scorePanel.init();
 
 	// eventing
 	this._mapGlobalEventsToTopics();
@@ -55774,4 +55835,4 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":77,"../messaging/Topic":80,"./Chat":91,"./DevelopmentPanel":92,"./InformationPanel":93,"./InteractionLabel":94,"./LoadingScreen":95,"./Menu":96,"./ModalDialog":97,"./PerformanceMonitor":98,"./TextScreen":99}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101]);
+},{"../core/System":27,"../messaging/EventManager":77,"../messaging/Topic":80,"./Chat":91,"./DevelopmentPanel":92,"./InformationPanel":93,"./InteractionLabel":94,"./LoadingScreen":95,"./Menu":96,"./ModalDialog":97,"./PerformanceMonitor":98,"./ScorePanel":99,"./TextScreen":100}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102]);

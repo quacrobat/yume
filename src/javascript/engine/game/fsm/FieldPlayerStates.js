@@ -333,6 +333,8 @@ Wait.prototype.execute = function( player ) {
 	if ( !player.isAtTarget() )
 	{
 		player.steering.arriveOn();
+		
+		return;
 	}
 	else
 	{
@@ -362,8 +364,6 @@ Wait.prototype.execute = function( player ) {
 		if ( player.isClosestTeamMemberToBall() && player.team.receivingPlayer === null && !player.pitch.isGoalKeeperInBallPossession )
 		{
 			player.stateMachine.changeState( States.ChaseBall );
-			
-			return;
 		}
 	}
 };

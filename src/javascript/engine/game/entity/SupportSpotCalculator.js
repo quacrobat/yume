@@ -157,7 +157,7 @@ SupportSpotCalculator.prototype.calculateBestSupportingPosition = ( function() {
 			spot = this._spots[ index ];
 
 			// first remove any previous score
-			spot.score = 1;
+			spot.score = 0;
 			
 			// reset color in dev mode
 			if ( system.isDevModeActive === true )
@@ -201,9 +201,10 @@ SupportSpotCalculator.prototype.calculateBestSupportingPosition = ( function() {
 				
 				this._bestSupportSpot = spot;
 			}
+			
 		} // next spot
 		
-		// higlight the best supporting spot in dev mode
+		// highlight the best supporting spot in dev mode
 		if ( system.isDevModeActive === true )
 		{
 			this._bestSupportSpot.helper.material.color = new THREE.Color( 0x20252f );

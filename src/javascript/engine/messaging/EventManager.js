@@ -520,7 +520,7 @@ function sendMessageToEntity( sender, receiver, message, data, isSync, delay ) {
 		// call the "handleMessage" method of the game entity
 		if ( entities[ receiver ].handleMessage( telegram ) === false )
 		{
-			logger.warn( "WARN: EventManager: Message not handled by receiver with ID: %i.", receiver );
+			logger.warn( "WARN: EventManager: Message not handled by receiver. Telegram: %O", telegram );
 		}
 	}
 	else
@@ -530,7 +530,7 @@ function sendMessageToEntity( sender, receiver, message, data, isSync, delay ) {
 			// call the "handleMessage" method of the game entity with a delay
 			if ( entities[ receiver ].handleMessage( telegram ) === false )
 			{
-				logger.warn( "WARN: EventManager: Message not handled by receiver with ID: %i.", receiver );
+				logger.warn( "WARN: EventManager: Message not handled by receiver. Telegram: %O", telegram );
 			}
 
 		}, delay );

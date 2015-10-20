@@ -14,6 +14,7 @@ var system = require( "../core/System" );
 
 var developmentPanel = require( "./DevelopmentPanel" );
 var performanceMonitor = require( "./PerformanceMonitor" );
+var scorePanel = require( "./ScorePanel" );
 var informationPanel = require( "./InformationPanel" );
 var interactionLabel = require( "./InteractionLabel" );
 var loadingScreen = require( "./LoadingScreen" );
@@ -48,22 +49,7 @@ UserInterfaceManager.prototype.init = function() {
 	this._$uiContainer = global.document.querySelector( "#ui-container" );
 
 	// init controls
-	informationPanel.init();
-	interactionLabel.init();
-	loadingScreen.init();
-	menu.init();
-	textScreen.init();
-	modalDialog.init();
-	chat.init();
-
-	// add development information
-	if ( system.isDevModeActive === true )
-	{
-		performanceMonitor.init();
-
-		developmentPanel.init();
-		developmentPanel.setText( "Development Mode Active: " + system.name + " Version: " + system.version );
-	}
+	scorePanel.init();
 
 	// eventing
 	this._mapGlobalEventsToTopics();
