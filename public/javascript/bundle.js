@@ -36496,7 +36496,7 @@ ActionManager.prototype._onInteraction = function( message, data ) {
 };
 
 module.exports = new ActionManager();
-},{"../core/Logger":21,"../messaging/EventManager":64,"../messaging/Topic":66,"../ui/UserInterfaceManager":97,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
+},{"../core/Logger":21,"../messaging/EventManager":65,"../messaging/Topic":67,"../ui/UserInterfaceManager":98,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
 /**
  * @file The ActionTrigger is a static trigger for actions.
  * 
@@ -36567,7 +36567,7 @@ ActionTrigger.prototype = Object.create( THREE.Mesh.prototype );
 ActionTrigger.prototype.constructor = ActionTrigger;
 
 module.exports = ActionTrigger;
-},{"../core/System":26,"three":1}],7:[function(require,module,exports){
+},{"../core/System":27,"three":1}],7:[function(require,module,exports){
 /**
  * @file The prototype InteractiveObject enables ordinary 3D-Objects to be
  * interactive. Any interactive object is part of the collision-detection logic
@@ -36808,7 +36808,7 @@ InteractiveObject.RAYCASTPRECISION = {
 };
 
 module.exports = InteractiveObject;
-},{"../etc/OBB":35,"three":1}],8:[function(require,module,exports){
+},{"../etc/OBB":36,"three":1}],8:[function(require,module,exports){
 /**
  * @file The prototype StaticObject enables ordinary 3D-Objects to be static.
  * Any interactive object is part of the collision-detection logic.
@@ -36936,7 +36936,7 @@ StaticObject.COLLISIONTYPES = {
 };
 
 module.exports = StaticObject;
-},{"../etc/OBB":35,"three":1}],9:[function(require,module,exports){
+},{"../etc/OBB":36,"three":1}],9:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for defining an animation for a single property.
@@ -38030,7 +38030,7 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 
 module.exports = AudioBufferList;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":26,"../messaging/EventManager":64,"../messaging/Topic":66}],14:[function(require,module,exports){
+},{"../core/System":27,"../messaging/EventManager":65,"../messaging/Topic":67}],14:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype holds the central Web Audio context and manages the
@@ -38485,7 +38485,7 @@ AudioManager.prototype._onErrorBackgroundMusic = function() {
 
 module.exports = new AudioManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Camera":19,"../core/Logger":21,"../messaging/EventManager":64,"../messaging/Topic":66,"./AudioBufferList":13,"./AudioListener":14,"./DynamicAudio":16}],16:[function(require,module,exports){
+},{"../core/Camera":19,"../core/Logger":21,"../messaging/EventManager":65,"../messaging/Topic":67,"./AudioBufferList":13,"./AudioListener":14,"./DynamicAudio":16}],16:[function(require,module,exports){
 /**
  * @file Prototype for creating dynamic, full-buffered audio objects.
  * 
@@ -39908,7 +39908,7 @@ FirstPersonControls.RUN = {
 
 module.exports = new FirstPersonControls();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/World":30,"../etc/SettingsManager":39,"../etc/Utils":42,"../messaging/EventManager":64,"../messaging/Topic":66,"../ui/UserInterfaceManager":97,"three":1}],18:[function(require,module,exports){
+},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/World":31,"../etc/SettingsManager":40,"../etc/Utils":43,"../messaging/EventManager":65,"../messaging/Topic":67,"../ui/UserInterfaceManager":98,"three":1}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -40020,7 +40020,7 @@ Bootstrap.prototype._loadStage = function() {
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":17,"../etc/MultiplayerManager":34,"../etc/SaveGameManager":38,"../messaging/EventManager":64,"../messaging/Topic":66,"../network/NetworkManager":68,"../ui/UserInterfaceManager":97,"./Camera":19,"./Environment":20,"./Renderer":22,"./System":26}],19:[function(require,module,exports){
+},{"../controls/FirstPersonControls":17,"../etc/MultiplayerManager":35,"../etc/SaveGameManager":39,"../messaging/EventManager":65,"../messaging/Topic":67,"../network/NetworkManager":69,"../ui/UserInterfaceManager":98,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for camera-based
@@ -40090,7 +40090,7 @@ Camera.prototype._onResize = function( message, data ) {
 
 module.exports = new Camera();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":64,"../messaging/Topic":66,"three":1}],20:[function(require,module,exports){
+},{"../messaging/EventManager":65,"../messaging/Topic":67,"three":1}],20:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype is used to ensure that all necessary browser features
@@ -40420,7 +40420,116 @@ Logger.prototype.logSystemInfo = function( renderer ) {
 };
 
 module.exports = new Logger();
-},{"./System":26}],22:[function(require,module,exports){
+},{"./System":27}],22:[function(require,module,exports){
+(function (global){
+/**
+ * @file Use this prototype to regulate code flow (e.g. for an update function).
+ * Instantiate the prototype with the frequency you would like your code section
+ * to flow (like 10 times per second) and then only allow the program flow to
+ * continue if isReady() returns true.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require( "three" );
+
+// the number of milliseconds the update period can vary per required
+// update-step. This is here to make sure any multiple clients of this prototype
+// have their updates spread evenly.
+var updatePeriodVariator = 10;
+
+/**
+ * Creates a regulator instance.
+ * 
+ * @param {number} updatesPerSeconds - The update frequency.
+ * 
+ */
+function Regulator( updatesPerSeconds ) {
+
+	Object.defineProperties( this, {
+		// the time period between updates
+		_updatePeriod : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
+		// the next time the regulator allows code flow
+		_nextUpdateTime : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
+		// the current timestamp
+		_currentTime : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		}
+	} );
+
+	// setup initial timestamp
+	this._nextUpdateTime = global.performance.now();
+
+	// setup update period
+	if ( updatesPerSeconds > 0 )
+	{
+		this._updatePeriod = 1000 / updatesPerSeconds;
+	}
+	else if ( updatesPerSeconds === 0 )
+	{
+		this._updatePeriod = 0;
+	}
+	else if ( updatesPerSeconds < 0 )
+	{
+		this._updatePeriod = -1;
+	}
+}
+
+/**
+ * Returns true if the current time exceeds the next update time.
+ * 
+ * @returns {boolean} Is the code allowed to flow?
+ */
+Regulator.prototype.isReady = function() {
+
+	// if a regulator is instantiated with a zero frequency then it goes into
+	// stealth mode (doesn't regulate)
+	if ( this._updatePeriod === 0 )
+	{
+		return true;
+	}
+
+	// if the regulator is instantiated with a negative frequency then it will
+	// never allow the code to flow
+	if ( this._updatePeriod < 0 )
+	{
+		return false;
+	}
+
+	// retrieve timestamp
+	this._currentTime = global.performance.now();
+
+	// if the current timestamp is equal or greater than the "nextUpdateTime"
+	// allow the code to flow
+	if ( this._currentTime >= this._nextUpdateTime )
+	{
+		// calculate next update time
+		this._nextUpdateTime = this._currentTime + this._updatePeriod + THREE.Math.randFloat( -updatePeriodVariator, updatePeriodVariator );
+
+		return true;
+	}
+
+	return false;
+};
+
+module.exports = Regulator;
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"three":1}],23:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for rendering-based
@@ -40729,7 +40838,7 @@ Renderer.prototype._onResize = function( message, data ) {
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":64,"../messaging/Topic":66,"../postprocessing/EffectComposer":69,"../postprocessing/RenderPass":70,"../postprocessing/ShaderPass":71,"../shader/GaussianBlurShader":73,"../shader/GrayscaleShader":74,"../shader/VignetteShader":75,"./Logger":21,"three":1}],23:[function(require,module,exports){
+},{"../messaging/EventManager":65,"../messaging/Topic":67,"../postprocessing/EffectComposer":70,"../postprocessing/RenderPass":71,"../postprocessing/ShaderPass":72,"../shader/GaussianBlurShader":74,"../shader/GrayscaleShader":75,"../shader/VignetteShader":76,"./Logger":21,"three":1}],24:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic for scene-based functionality.
  * 
@@ -40771,7 +40880,7 @@ Scene.prototype.clear = function() {
 };
 
 module.exports = new Scene();
-},{"three":1}],24:[function(require,module,exports){
+},{"three":1}],25:[function(require,module,exports){
 (function (global){
 /**
  * @file Basis prototype for all stages. It is used to provide specific stages a
@@ -41029,7 +41138,7 @@ StageBase.COLORS = {
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../controls/FirstPersonControls":17,"../etc/PerformanceManager":37,"../etc/SaveGameManager":38,"../etc/SettingsManager":39,"../etc/TextManager":41,"../game/entity/EntityManager":43,"../messaging/EventManager":64,"../messaging/Topic":66,"../ui/UserInterfaceManager":97,"./Camera":19,"./Renderer":22,"./System":26,"./World":30,"three":1}],25:[function(require,module,exports){
+},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../controls/FirstPersonControls":17,"../etc/PerformanceManager":38,"../etc/SaveGameManager":39,"../etc/SettingsManager":40,"../etc/TextManager":42,"../game/entity/EntityManager":44,"../messaging/EventManager":65,"../messaging/Topic":67,"../ui/UserInterfaceManager":98,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -41321,7 +41430,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":38,"../messaging/EventManager":64,"../messaging/Topic":66,"../stages/Stage_001":76,"../stages/Stage_002":77,"../stages/Stage_003":78,"../stages/Stage_004":79,"../stages/Stage_005":80,"../stages/Stage_006":81,"../stages/Stage_007":82,"../stages/Stage_008":83,"../stages/Stage_009":84,"../stages/Stage_010":85,"../stages/Stage_011":86,"../ui/UserInterfaceManager":97,"./Logger":21}],26:[function(require,module,exports){
+},{"../etc/SaveGameManager":39,"../messaging/EventManager":65,"../messaging/Topic":67,"../stages/Stage_001":77,"../stages/Stage_002":78,"../stages/Stage_003":79,"../stages/Stage_004":80,"../stages/Stage_005":81,"../stages/Stage_006":82,"../stages/Stage_007":83,"../stages/Stage_008":84,"../stages/Stage_009":85,"../stages/Stage_010":86,"../stages/Stage_011":87,"../ui/UserInterfaceManager":98,"./Logger":21}],27:[function(require,module,exports){
 /**
  * @file This prototype holds core information about the engine. The runtime
  * behavior of the application depends crucially of this prototype.
@@ -41411,7 +41520,7 @@ System.prototype.init = function( parameter ) {
 };
 
 module.exports = new System();
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It uses the HTML5-API Web
@@ -41494,7 +41603,7 @@ Thread.prototype.onError = function( listener ) {
 
 module.exports = Thread;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for thread-based
@@ -41637,7 +41746,7 @@ ThreadManager.prototype._getScriptURL = function( script ) {
 
 module.exports = new ThreadManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Thread":27}],29:[function(require,module,exports){
+},{"./Thread":28}],30:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype is a wrapper for the HTML5 User Timing API. It provides
@@ -41715,7 +41824,7 @@ Timing.prototype.print = function( name ) {
 
 module.exports = new Timing();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Logger":21,"./System":26}],30:[function(require,module,exports){
+},{"./Logger":21,"./System":27}],31:[function(require,module,exports){
 /**
  * @file This prototype contains all important environment data of a stage.
  * 
@@ -41920,7 +42029,7 @@ World.prototype.clear = function() {
 };
 
 module.exports = new World();
-},{"../action/ActionManager":5,"./Scene":23}],31:[function(require,module,exports){
+},{"../action/ActionManager":5,"./Scene":24}],32:[function(require,module,exports){
 /**
  * @file This prototype handles all stuff for impostors. An impostor is a
  * billboard that is created on the fly by rendering a complex object from the
@@ -42385,7 +42494,7 @@ Impostor.prototype._render = function() {
 };
 
 module.exports = Impostor;
-},{"three":1}],32:[function(require,module,exports){
+},{"three":1}],33:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading 3D objects in JSON-format from the server. The
@@ -42493,7 +42602,7 @@ JSONLoader.prototype.load = function( url, onLoad ) {
 
 module.exports = JSONLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":26,"../messaging/EventManager":64,"../messaging/Topic":66,"three":1}],33:[function(require,module,exports){
+},{"../core/System":27,"../messaging/EventManager":65,"../messaging/Topic":67,"three":1}],34:[function(require,module,exports){
 /**
  * @file This prototype is used for LOD handling. It is an enhancement of the
  * LOD functionality of three.js. Instead of switching directly between LOD
@@ -42673,7 +42782,7 @@ LOD.MODE = {
 };
 
 module.exports = LOD;
-},{"three":1}],34:[function(require,module,exports){
+},{"three":1}],35:[function(require,module,exports){
 /**
  * @file This prototype manages the characters of the other teammates.
  * 
@@ -42843,7 +42952,7 @@ MultiplayerManager.prototype._getTeammate = function( id ) {
 };
 
 module.exports = new MultiplayerManager();
-},{"../core/Logger":21,"../core/World":30,"../messaging/EventManager":64,"../messaging/Topic":66,"./Teammate":40,"three":1}],35:[function(require,module,exports){
+},{"../core/Logger":21,"../core/World":31,"../messaging/EventManager":65,"../messaging/Topic":67,"./Teammate":41,"three":1}],36:[function(require,module,exports){
 /**
  * @file A 3D arbitrarily oriented bounding box.
  * 
@@ -43539,7 +43648,7 @@ OBB.prototype.clone = function() {
 };
 
 module.exports = OBB;
-},{"three":1}],36:[function(require,module,exports){
+},{"three":1}],37:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading 3D objects in object-format from the server. The
@@ -43643,7 +43752,7 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 
 module.exports = ObjectLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":26,"../messaging/EventManager":64,"../messaging/Topic":66,"three":1}],37:[function(require,module,exports){
+},{"../core/System":27,"../messaging/EventManager":65,"../messaging/Topic":67,"three":1}],38:[function(require,module,exports){
 /**
  * @file Interface for performance handling. This prototype is used in stages to
  * create e.g. LOD instances.
@@ -43956,7 +44065,7 @@ PerformanceManager.prototype._updateImpostors = function() {
 };
 
 module.exports = new PerformanceManager();
-},{"../core/Camera":19,"../core/Renderer":22,"../core/World":30,"./Impostor":31,"./LOD":33,"three":1}],38:[function(require,module,exports){
+},{"../core/Camera":19,"../core/Renderer":23,"../core/World":31,"./Impostor":32,"./LOD":34,"three":1}],39:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire savegame-handling. This prototype is using HTML
@@ -44035,7 +44144,7 @@ SaveGameManager.prototype.remove = function() {
 
 module.exports = new SaveGameManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire settings-handling. This prototype is used to
@@ -44230,7 +44339,7 @@ SettingsManager.MOUSE = {
 
 module.exports = new SettingsManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":26,"three":1}],40:[function(require,module,exports){
+},{"../core/System":27,"three":1}],41:[function(require,module,exports){
 /**
  * @file This prototype represents the character of a teammate.
  * 
@@ -44282,7 +44391,7 @@ Teammate.prototype.update = function( position, quaternion ) {
 };
 
 module.exports = Teammate;
-},{"../game/entity/GameEntity":44,"three":1}],41:[function(require,module,exports){
+},{"../game/entity/GameEntity":45,"three":1}],42:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire text-handling. This prototype is used in stages to
@@ -44457,7 +44566,7 @@ TextManager.prototype._searchAndRepalce = function() {
 
 module.exports = new TextManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":26,"../messaging/EventManager":64,"../messaging/Topic":66}],42:[function(require,module,exports){
+},{"../core/System":27,"../messaging/EventManager":65,"../messaging/Topic":67}],43:[function(require,module,exports){
 (function (global){
 /**
  * @file All helper and util functions are organized in this module.
@@ -44526,7 +44635,7 @@ Utils.prototype.preloadImages = function( images, callback ) {
 
 module.exports = new Utils();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 /**
  * @file This prototype manages all game entities.
  * 
@@ -44650,7 +44759,7 @@ EntityManager.prototype.removeEntities = function() {
 };
 
 module.exports = new EntityManager();
-},{"./Vehicle":46}],44:[function(require,module,exports){
+},{"./Vehicle":47}],45:[function(require,module,exports){
 /**
  * @file All entities that are part of the game logic inherit from this
  * prototype.
@@ -44722,7 +44831,7 @@ GameEntity.prototype.handleMessage = function( telegram ) {
 };
 
 module.exports = GameEntity;
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 /**
  * @file Base prototype from which all moving game agents are derived.
  * 
@@ -44913,7 +45022,7 @@ MovingEntity.prototype.getDirection = function() {
 };
 
 module.exports = MovingEntity;
-},{"./GameEntity":44,"three":1}],46:[function(require,module,exports){
+},{"./GameEntity":45,"three":1}],47:[function(require,module,exports){
 /**
  * @file A simple vehicle that uses steering behaviors.
  * 
@@ -45038,7 +45147,7 @@ Vehicle.prototype.update = ( function() {
 }() );
 
 module.exports = Vehicle;
-},{"../steering/Smoother":62,"../steering/SteeringBehaviors":63,"./MovingEntity":45,"three":1}],47:[function(require,module,exports){
+},{"../steering/Smoother":63,"../steering/SteeringBehaviors":64,"./MovingEntity":46,"three":1}],48:[function(require,module,exports){
 /**
  * @file Super prototype for states used by FSMs.
  * 
@@ -45089,7 +45198,7 @@ State.prototype.exit = function( entity ) { };
 State.prototype.onMessage = function( entity, telegram ) { return false; };
 
 module.exports = State;
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 /**
  * @file This prototype is a basic finite state machine used for AI logic.
  * 
@@ -45230,7 +45339,7 @@ StateMachine.prototype.isInState = function( state ) {
 };
 
 module.exports = StateMachine;
-},{"../../core/Logger":21,"./State":47}],49:[function(require,module,exports){
+},{"../../core/Logger":21,"./State":48}],50:[function(require,module,exports){
 /**
  * @file Prototype to define an edge connecting two nodes. An edge has an
  * associated cost.
@@ -45315,7 +45424,7 @@ GraphEdge.prototype.copy = function( source ){
 };
 
 module.exports = GraphEdge;
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 /**
  * @file Some useful functions you can use with graphs.
  * 
@@ -45648,7 +45757,7 @@ function generateEdges( graph, offset ) {
 	}// next node
 
 }
-},{"../../core/World":30,"./NavGraphEdge":52,"./NavGraphNode":53,"three":1}],51:[function(require,module,exports){
+},{"../../core/World":31,"./NavGraphEdge":53,"./NavGraphNode":54,"three":1}],52:[function(require,module,exports){
 /**
  * @file Node prototype to be used with graphs.
  * 
@@ -45682,7 +45791,7 @@ function GraphNode( index ) {
 GraphNode.INVALID_NODE_INDEX = -1;
 
 module.exports = GraphNode;
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 /**
  * @file Prototype to define an edge connecting two navigation nodes.
  * 
@@ -45767,7 +45876,7 @@ NavGraphEdge.FLAGS = {
 };
 
 module.exports = NavGraphEdge;
-},{"./GraphEdge":49}],53:[function(require,module,exports){
+},{"./GraphEdge":50}],54:[function(require,module,exports){
 /**
  * @file Graph node for use in creating a navigation graph. This node contains
  * the position of the node and a pointer to a GameEntity... useful if you want
@@ -45822,7 +45931,7 @@ NavGraphNode.prototype = Object.create( GraphNode.prototype );
 NavGraphNode.prototype.constructor = NavGraphNode;
 
 module.exports = NavGraphNode;
-},{"./GraphNode":51,"three":1}],54:[function(require,module,exports){
+},{"./GraphNode":52,"three":1}],55:[function(require,module,exports){
 /**
  * @file Graph prototype using the adjacency list representation.
  * 
@@ -46349,7 +46458,7 @@ SparseGraph.prototype._cullInvalidEdges = function() {
 };
 
 module.exports = SparseGraph;
-},{}],55:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 /**
  * @file Some useful functions you can use with algorithms.
  * 
@@ -46417,7 +46526,7 @@ AlgorithmHelper.prototype.sortQueueByCost = function( a, b ) {
 };
 
 module.exports = new AlgorithmHelper();
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 /**
  * @file Prototype to implement the A* search algorithm.
  * 
@@ -46688,7 +46797,7 @@ GraphSearchAStar.prototype._search = function() {
 };
 
 module.exports = GraphSearchAStar;
-},{"../GraphEdge":49,"../GraphNode":51,"./AlgorithmHelper":55}],57:[function(require,module,exports){
+},{"../GraphEdge":50,"../GraphNode":52,"./AlgorithmHelper":56}],58:[function(require,module,exports){
 /**
  * @file Prototype to implement a breadth first search.
  * 
@@ -46876,7 +46985,7 @@ GraphSearchBFS.prototype._search = function() {
 };
 
 module.exports = GraphSearchBFS;
-},{"../GraphEdge":49,"../GraphNode":51}],58:[function(require,module,exports){
+},{"../GraphEdge":50,"../GraphNode":52}],59:[function(require,module,exports){
 /**
  * @file Prototype to implement a depth first search.
  * 
@@ -47036,7 +47145,7 @@ GraphSearchDFS.prototype._search = function() {
 };
 
 module.exports = GraphSearchDFS;
-},{"../GraphEdge":49,"../GraphNode":51}],59:[function(require,module,exports){
+},{"../GraphEdge":50,"../GraphNode":52}],60:[function(require,module,exports){
 /**
  * @file Prototype to implement dijkstra’s shortest path algorithm.
  * 
@@ -47288,7 +47397,7 @@ GraphSearchDijkstra.prototype._search = function() {
 };
 
 module.exports = GraphSearchDijkstra;
-},{"../GraphEdge":49,"../GraphNode":51,"./AlgorithmHelper":55}],60:[function(require,module,exports){
+},{"../GraphEdge":50,"../GraphNode":52,"./AlgorithmHelper":56}],61:[function(require,module,exports){
 /**
  * @file This prototype defines heuristic policies for use with the A* search
  * algorithm.
@@ -47425,7 +47534,7 @@ module.exports = {
 	EuclideanSq : new HeuristicPolicyEuclidSq(),
 	Dijkstra : new HeuristicPolicyDijkstra()
 };
-},{}],61:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 /**
  * @file Prototype to define, manage, and traverse a path defined by a series of
  * 3D vectors.
@@ -47587,7 +47696,7 @@ Path.prototype.createRandomPath = function( numberOfWaypoints, boundingBox ) {
 };
 
 module.exports = Path;
-},{"../../core/Logger":21,"three":1}],62:[function(require,module,exports){
+},{"../../core/Logger":21,"three":1}],63:[function(require,module,exports){
 /**
  * @file Prototype to help calculate the average value of a history of vector
  * values.
@@ -47672,7 +47781,7 @@ Smoother.prototype.update = function( mostRecentValue, average ) {
 };
 
 module.exports = Smoother;
-},{"three":1}],63:[function(require,module,exports){
+},{"three":1}],64:[function(require,module,exports){
 /**
  * @file Prototype to encapsulate steering behaviors for a vehicle.
  * 
@@ -49331,7 +49440,7 @@ SteeringBehaviors.DECELERATION = {
 };
 
 module.exports = SteeringBehaviors;
-},{"../../core/Logger":21,"../../core/World":30,"./Path":61,"three":1}],64:[function(require,module,exports){
+},{"../../core/Logger":21,"../../core/World":31,"./Path":62,"three":1}],65:[function(require,module,exports){
 /**
  * @file This prototype provides topic-based publish/subscribe messaging and
  * enables communication between game entities.
@@ -49872,7 +49981,7 @@ function sendMessageToEntity( sender, receiver, message, data, isSync, delay ) {
 }
 
 module.exports = new EventManager();
-},{"../core/Logger":21,"../game/entity/GameEntity":44,"./Telegram":65}],65:[function(require,module,exports){
+},{"../core/Logger":21,"../game/entity/GameEntity":45,"./Telegram":66}],66:[function(require,module,exports){
 /**
  * @file This defines a telegram. A telegram is a data structure that records
  * information required to dispatch game messages. These messages are used by
@@ -49930,7 +50039,7 @@ function Telegram( sender, receiver, message, data, delay ) {
 }
 
 module.exports = Telegram;
-},{}],66:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 /**
  * @file This file contains all topics for publish & subscribe. YUME supports a
  * publish/subscribe messaging system with hierarchical addressing, so topics
@@ -49986,7 +50095,7 @@ var TOPIC = {
 };
 
 module.exports = TOPIC;
-},{}],67:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 /**
  * @file Prototype for network-messages.
  * 
@@ -50036,7 +50145,7 @@ Message.TYPES = {
 };
 
 module.exports = Message;
-},{}],68:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for network-based
@@ -50291,7 +50400,7 @@ NetworkManager.SERVER = {
 
 module.exports = new NetworkManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Logger":21,"../core/ThreadManager":28,"../messaging/EventManager":64,"../messaging/Topic":66,"./Message":67,"ws":2}],69:[function(require,module,exports){
+},{"../core/Logger":21,"../core/ThreadManager":29,"../messaging/EventManager":65,"../messaging/Topic":67,"./Message":68,"ws":2}],70:[function(require,module,exports){
 /**
  * @file This prototype manages effects for post-processing.
  * 
@@ -50470,7 +50579,7 @@ EffectComposer.prototype._reset = function( renderTarget ) {
 };
 
 module.exports = EffectComposer;
-},{"three":1}],70:[function(require,module,exports){
+},{"three":1}],71:[function(require,module,exports){
 /**
  * @file This prototype provides a render pass for post-processing.
  * 
@@ -50532,7 +50641,7 @@ RenderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = RenderPass;
-},{"three":1}],71:[function(require,module,exports){
+},{"three":1}],72:[function(require,module,exports){
 /**
  * @file This prototype provides a shader pass for post-processing.
  * 
@@ -50638,7 +50747,7 @@ ShaderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = ShaderPass;
-},{"three":1}],72:[function(require,module,exports){
+},{"three":1}],73:[function(require,module,exports){
 /**
  * @file This shader can be used for vertex displacement to create
  * water or fabric materials. It implements an exemplary diffuse lighting
@@ -50740,7 +50849,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":1}],73:[function(require,module,exports){
+},{"three":1}],74:[function(require,module,exports){
 /**
  * @file This shader applies a gaussian blur effect.
  * It can be used for both x and y direction.
@@ -50807,7 +50916,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":1}],74:[function(require,module,exports){
+},{"three":1}],75:[function(require,module,exports){
 /**
  * @file This shader transforms all colors to grayscale.
  * 
@@ -50856,7 +50965,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],75:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 /**
  * @file This shader creates a vignette effect.
  * 
@@ -50917,7 +51026,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],76:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51034,7 +51143,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],77:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],78:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51214,7 +51323,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],78:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],79:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51386,7 +51495,7 @@ function colorMesh( mesh ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],79:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],80:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51564,7 +51673,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],80:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],81:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51690,7 +51799,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],81:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],82:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51879,7 +51988,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],82:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],83:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52052,7 +52161,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],83:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],84:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52205,7 +52314,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],84:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],85:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52386,7 +52495,7 @@ function showLODCircles( world ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],85:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],86:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -52566,7 +52675,7 @@ function onKeyDown( event ) {
 
 module.exports = Stage;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],86:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],87:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52711,7 +52820,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],87:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],88:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -52890,7 +52999,7 @@ Chat.prototype._onMessage = function( message, data ) {
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":64,"../messaging/Topic":66,"./UiElement":96}],88:[function(require,module,exports){
+},{"../messaging/EventManager":65,"../messaging/Topic":67,"./UiElement":97}],89:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel. Only if the development
@@ -52952,7 +53061,7 @@ DevelopmentPanel.prototype.setText = function( text ) {
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":96}],89:[function(require,module,exports){
+},{"./UiElement":97}],90:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -53013,7 +53122,7 @@ InformationPanel.prototype.setText = function( textKey ) {
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":96}],90:[function(require,module,exports){
+},{"./UiElement":97}],91:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -53090,7 +53199,7 @@ InteractionLabel.prototype.hide = function() {
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":96}],91:[function(require,module,exports){
+},{"./UiElement":97}],92:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -53280,7 +53389,7 @@ LoadingScreen.prototype._onReady = function( message, data ) {
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":64,"../messaging/Topic":66,"./UiElement":96}],92:[function(require,module,exports){
+},{"../messaging/EventManager":65,"../messaging/Topic":67,"./UiElement":97}],93:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -53436,7 +53545,7 @@ Menu.prototype._publishFinishEvent = function( message, data ) {
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Environment":20,"../messaging/EventManager":64,"../messaging/Topic":66,"./UiElement":96}],93:[function(require,module,exports){
+},{"../core/Environment":20,"../messaging/EventManager":65,"../messaging/Topic":67,"./UiElement":97}],94:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -53560,7 +53669,7 @@ ModalDialog.prototype._onClose = function( event ) {
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":96}],94:[function(require,module,exports){
+},{"./UiElement":97}],95:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor. Only if the development
@@ -53779,7 +53888,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":96}],95:[function(require,module,exports){
+},{"./UiElement":97}],96:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -53992,7 +54101,7 @@ TextScreen.prototype._printName = function() {
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":96}],96:[function(require,module,exports){
+},{"./UiElement":97}],97:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -54042,7 +54151,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":41}],97:[function(require,module,exports){
+},{"../etc/TextManager":42}],98:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in stages to
@@ -54308,4 +54417,4 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":26,"../messaging/EventManager":64,"../messaging/Topic":66,"./Chat":87,"./DevelopmentPanel":88,"./InformationPanel":89,"./InteractionLabel":90,"./LoadingScreen":91,"./Menu":92,"./ModalDialog":93,"./PerformanceMonitor":94,"./TextScreen":95}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97]);
+},{"../core/System":27,"../messaging/EventManager":65,"../messaging/Topic":67,"./Chat":88,"./DevelopmentPanel":89,"./InformationPanel":90,"./InteractionLabel":91,"./LoadingScreen":92,"./Menu":93,"./ModalDialog":94,"./PerformanceMonitor":95,"./TextScreen":96}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98]);
