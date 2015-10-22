@@ -17,39 +17,47 @@ var Smoother = require( "../steering/Smoother" );
  * @constructor
  * @augments MovingEntity
  * 
- * @param {EntityManager} entityManager - The reference to the entity manager.
+ * @param {World} world - The reference to the world object.
  * @param {THREE.Object3D} object3D - The 3D object of the entity.
- * @param {number} boundingRadius - The bounding radius of the entity.
- * @param {THREE.Vector3} velocity - The velocity of the agent.
- * @param {number} mass - The mass of the agent.
- * @param {number} maxSpeed - The maximum speed at which this entity may travel.
- * @param {number} maxForce - The maximum force this entity can produce to power itself (think rockets and thrust).
- * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
  * @param {number} numSamplesForSmoothing - How many samples the smoother will use to average the velocity.
  */
-function Vehicle( entityManager, object3D, boundingRadius, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ) {
+function Vehicle( world, object3D, numSamplesForSmoothing ) {
 
-	MovingEntity.call( this, entityManager, object3D, boundingRadius, velocity, mass, maxSpeed, maxForce, maxTurnRate );
+	MovingEntity.call( this, object3D );
 
 	Object.defineProperties( this, {
+		// the reference to the world object, so the vehicle can access
+		// obstacles, walls etc.
+		world : {
+			value : world,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		// an instance of the steering behavior prototype
 		steering : {
 			value : new SteeringBehaviors( this ),
 			configurable : false,
 			enumerable : true,
 			writable : false
 		},
+		// when true, smoothing is active
 		isSmoothingOn : {
 			value : false,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
+		// some steering behaviors give jerky looking movement. The following
+		// member us are to smooth the vehicle's velocity
 		_smoother : {
 			value : new Smoother( numSamplesForSmoothing || 0 ),
 			configurable : false,
 			enumerable : false,
 			writable : false
 		},
+		// this vector represents the average of the vehicle's heading vector
+		// smoothed over the last few frames
 		_smoothedVelocity : {
 			value : new THREE.Vector3(),
 			configurable : false,
@@ -57,7 +65,7 @@ function Vehicle( entityManager, object3D, boundingRadius, velocity, mass, maxSp
 			writable : true
 		}
 	} );
-
+	
 }
 
 Vehicle.prototype = Object.create( MovingEntity.prototype );
@@ -96,7 +104,7 @@ Vehicle.prototype.update = ( function() {
 		displacement.copy( this.velocity ).multiplyScalar( delta );
 
 		// update the position
-		this.object3D.position.add( displacement );
+		this.position.add( displacement );
 
 		// update the orientation if the vehicle has non zero speed
 		if ( this.getSpeedSq() > 0.00000001 )

@@ -6,8 +6,11 @@
 
 "use strict";
 
+var THREE = require( "three" );
+
 var scene = require( "./Scene" );
 var actionManager = require( "../action/ActionManager" );
+var entityManager = require( "../game/entity/EntityManager" );
 
 /**
  * Creates a world object.
@@ -190,6 +193,49 @@ World.prototype.getNumberOfObstacles = function() {
 
 	return actionManager.interactiveObjects.length + actionManager.staticObjects.length;
 };
+
+/**
+ * Calculates neighbors for a given vehicle.
+ * 
+ * @param {Vehicle} vehicle - The given vehicle.
+ * @param {number} viewDistance - The view distance of the vehicle.
+ * @param {object} neighbors - The calculated neighbors.
+ */
+World.prototype.calculateNeighbors = ( function() {
+
+	var toEntity = new THREE.Vector3();
+
+	return function( vehicle, viewDistance, neighbors ) {
+		
+		var index, entity;
+
+		// reset array
+		neighbors.length = 0;
+
+		// iterate over all entities
+		for ( index = 0; index < entityManager.entities.length; index++ )
+		{
+			entity = entityManager.entities[ index ];
+
+			if ( entity !== vehicle )
+			{
+				// calculate displacement vector
+				toEntity.subVectors( entity.position, vehicle.object3D.position );
+
+				// if entity within range, push into neighbors array for further
+				// consideration.
+				if ( toEntity.lengthSq() < ( viewDistance * viewDistance ) )
+				{
+					neighbors.push( entity );
+				}
+
+			}
+			
+		}
+		
+	};
+
+}() );
 
 /**
  * Clears the world object.

@@ -21,7 +21,7 @@ function Path( isLoop ) {
 
 	Object.defineProperties( this, {
 		isLoop : {
-			value : false,
+			value : isLoop || false,
 			configurable : false,
 			enumerable : true,
 			writable : true

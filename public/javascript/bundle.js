@@ -40872,7 +40872,7 @@ Scene.prototype.clear = function() {
 
 	for ( var index = this.children.length - 1; index >= 0; index-- )
 	{
-		if ( this.children[ index ].type !== "Controls" && this.children[ index ].type !== "Player" )
+		if ( this.children[ index ].type !== "Controls" )
 		{
 			this.remove( this.children[ index ] );
 		}
@@ -41833,8 +41833,11 @@ module.exports = new Timing();
 
 "use strict";
 
+var THREE = require( "three" );
+
 var scene = require( "./Scene" );
 var actionManager = require( "../action/ActionManager" );
+var entityManager = require( "../game/entity/EntityManager" );
 
 /**
  * Creates a world object.
@@ -42019,6 +42022,49 @@ World.prototype.getNumberOfObstacles = function() {
 };
 
 /**
+ * Calculates neighbors for a given vehicle.
+ * 
+ * @param {Vehicle} vehicle - The given vehicle.
+ * @param {number} viewDistance - The view distance of the vehicle.
+ * @param {object} neighbors - The calculated neighbors.
+ */
+World.prototype.calculateNeighbors = ( function() {
+
+	var toEntity = new THREE.Vector3();
+
+	return function( vehicle, viewDistance, neighbors ) {
+		
+		var index, entity;
+
+		// reset array
+		neighbors.length = 0;
+
+		// iterate over all entities
+		for ( index = 0; index < entityManager.entities.length; index++ )
+		{
+			entity = entityManager.entities[ index ];
+
+			if ( entity !== vehicle )
+			{
+				// calculate displacement vector
+				toEntity.subVectors( entity.position, vehicle.object3D.position );
+
+				// if entity within range, push into neighbors array for further
+				// consideration.
+				if ( toEntity.lengthSq() < ( viewDistance * viewDistance ) )
+				{
+					neighbors.push( entity );
+				}
+
+			}
+			
+		}
+		
+	};
+
+}() );
+
+/**
  * Clears the world object.
  */
 World.prototype.clear = function() {
@@ -42029,7 +42075,7 @@ World.prototype.clear = function() {
 };
 
 module.exports = new World();
-},{"../action/ActionManager":5,"./Scene":24}],32:[function(require,module,exports){
+},{"../action/ActionManager":5,"../game/entity/EntityManager":44,"./Scene":24,"three":1}],32:[function(require,module,exports){
 /**
  * @file This prototype handles all stuff for impostors. An impostor is a
  * billboard that is created on the fly by rendering a complex object from the
@@ -44667,20 +44713,15 @@ function EntityManager() {
 /**
  * Creates a vehicle, a moving entity that uses steering behaviors.
  * 
+ * @param {World} world - The reference to the world object.
  * @param {THREE.Object3D} object3D - The 3D object of the entity.
- * @param {number} boundingRadius - The bounding radius of the entity.
- * @param {THREE.Vector3} velocity - The velocity of the agent.
- * @param {number} mass - The mass of the agent.
- * @param {number} maxSpeed - The maximum speed at which this entity may travel.
- * @param {number} maxForce - The maximum force this entity can produce to power itself (think rockets and thrust).
- * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
  * @param {number} numSamplesForSmoothing - How many samples the smoother will use to average the velocity.
  * 
  * @returns {Vehicle} The new vehicle.
  */
-EntityManager.prototype.createVehicle = function( object3D, boundingRadius, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ) {
+EntityManager.prototype.createVehicle = function( world, object3D, numSamplesForSmoothing ) {
 
-	var vehicle = new Vehicle( this, object3D, boundingRadius, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing );
+	var vehicle = new Vehicle( world, object3D, numSamplesForSmoothing );
 	this.addEntity( vehicle );
 	return vehicle;
 };
@@ -44776,44 +44817,91 @@ var nextId = 0;
  * 
  * @constructor
  * 
- * @param {EntityManager} entityManager - The reference to the entity manager.
  * @param {THREE.Object3D} object3D - The 3D object of the entity.
- * @param {number} boundingRadius - The bounding radius of the entity.
  */
-function GameEntity( entityManager, object3D, boundingRadius ) {
+function GameEntity( object3D ) {
 
 	Object.defineProperties( this, {
+		// a unique id to identify a game entity
 		id : {
 			value : nextId++,
 			configurable : false,
 			enumerable : true,
 			writable : false
 		},
-		entityManager : {
-			value : entityManager,
-			configurable : false,
-			enumerable : true,
-			writable : false
-		},
+		// each game entity is a 3D object
 		object3D : {
 			value : object3D,
 			configurable : false,
 			enumerable : true,
-			writable : true
+			writable : false
 		},
+		// this will be used for collision detection
 		boundingRadius : {
-			value : boundingRadius || 0,
+			value : 0,
 			configurable : false,
 			enumerable : true,
 			writable : true
+		},
+		// the following are shortcuts to object3D properties
+		position : {
+			configurable : false,
+			enumerable : true,
+			get : function() {
+
+				return this.object3D.position;
+			},
+			set : function( value ) {
+
+				this.object3D.position.copy( value );
+			}
+		},
+		rotation : {
+			configurable : false,
+			enumerable : true,
+			get : function() {
+
+				return this.object3D.rotation;
+			},
+			set : function( value ) {
+
+				this.object3D.rotation.copy( value );
+			}
+		},
+		quaternion : {
+			configurable : false,
+			enumerable : true,
+			get : function() {
+
+				return this.object3D.quaternion;
+			},
+			set : function( value ) {
+
+				this.object3D.quaternion.copy( value );
+			}
+		},
+		scale : {
+			configurable : false,
+			enumerable : true,
+			get : function() {
+
+				return this.object3D.scale;
+			},
+			set : function( value ) {
+
+				this.object3D.scale.copy( value );
+			}
 		}
+
 	} );
 }
 
 /**
  * All entities must implement an update function.
+ * 
+ * @param {number} delta - The time delta value.
  */
-GameEntity.prototype.update = function() {
+GameEntity.prototype.update = function( delta ) {
 
 };
 
@@ -44849,46 +44937,46 @@ var GameEntity = require( "./GameEntity" );
  * @constructor
  * @augments GameEntity
  * 
- * @param {EntityManager} entityManager - The reference to the entity manager.
  * @param {THREE.Object3D} object3D - The 3D object of the entity.
- * @param {number} boundingRadius - The bounding radius of the entity.
- * @param {THREE.Vector3} velocity - The velocity of the agent.
- * @param {number} mass - The mass of the agent.
- * @param {number} maxSpeed - The maximum speed at which this entity may travel.
- * @param {number} maxForce - The maximum force this entity can produce to power itself (think rockets and thrust).
- * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
  */
-function MovingEntity( entityManager, object3D, boundingRadius, velocity, mass, maxSpeed, maxForce, maxTurnRate ) {
+function MovingEntity( object3D ) {
 
-	GameEntity.call( this, entityManager, object3D, boundingRadius );
+	GameEntity.call( this, object3D );
 
 	Object.defineProperties( this, {
+		// the velocity of the agent
 		velocity : {
-			value : velocity || new THREE.Vector3(),
+			value : new THREE.Vector3(),
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
+		// the mass of the agent
 		mass : {
-			value : mass || 1,
+			value : 1,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
+		// the maximum speed at which this entity may travel
 		maxSpeed : {
-			value : maxSpeed || 1,
+			value : 1,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
+		// the maximum force this entity can produce to power itself (think
+		// rockets and thrust).
 		maxForce : {
-			value : maxForce || 100,
+			value : 100,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
+		// the maximum rate (radians per second) at which this vehicle can
+		// rotate.
 		maxTurnRate : {
-			value : maxTurnRate || Math.PI,
+			value : Math.PI,
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -44942,7 +45030,7 @@ MovingEntity.prototype.rotateToDirection = ( function() {
 		rotationMatrix.makeBasis( xAxis, yAxis, zAxis );
 
 		// apply rotation
-		this.object3D.quaternion.setFromRotationMatrix( rotationMatrix );
+		this.quaternion.setFromRotationMatrix( rotationMatrix );
 	};
 
 }() );
@@ -44977,14 +45065,14 @@ MovingEntity.prototype.isRotateToTarget = ( function() {
 		t = ( angle > this.maxTurnRate ) ? ( this.maxTurnRate / angle ) : 1;
 
 		// get target rotation
-		rotationToTarget.lookAt( targetPosition, this.object3D.position, this.object3D.up );
+		rotationToTarget.lookAt( targetPosition, this.position, this.object3D.up );
 		quaternionToTarget.setFromRotationMatrix( rotationToTarget );
 
 		// interpolate rotation
-		this.object3D.quaternion.slerp( quaternionToTarget, t );
+		this.quaternion.slerp( quaternionToTarget, t );
 
 		// adjust velocity
-		this.velocity.applyQuaternion( this.object3D.quaternion );
+		this.velocity.applyQuaternion( this.quaternion );
 
 		return false;
 	};
@@ -45018,7 +45106,7 @@ MovingEntity.prototype.getSpeedSq = function() {
  */
 MovingEntity.prototype.getDirection = function() {
 
-	return new THREE.Vector3( 0, 0, 1 ).applyQuaternion( this.object3D.quaternion ).normalize();
+	return new THREE.Vector3( 0, 0, 1 ).applyQuaternion( this.quaternion ).normalize();
 };
 
 module.exports = MovingEntity;
@@ -45042,39 +45130,47 @@ var Smoother = require( "../steering/Smoother" );
  * @constructor
  * @augments MovingEntity
  * 
- * @param {EntityManager} entityManager - The reference to the entity manager.
+ * @param {World} world - The reference to the world object.
  * @param {THREE.Object3D} object3D - The 3D object of the entity.
- * @param {number} boundingRadius - The bounding radius of the entity.
- * @param {THREE.Vector3} velocity - The velocity of the agent.
- * @param {number} mass - The mass of the agent.
- * @param {number} maxSpeed - The maximum speed at which this entity may travel.
- * @param {number} maxForce - The maximum force this entity can produce to power itself (think rockets and thrust).
- * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
  * @param {number} numSamplesForSmoothing - How many samples the smoother will use to average the velocity.
  */
-function Vehicle( entityManager, object3D, boundingRadius, velocity, mass, maxSpeed, maxForce, maxTurnRate, numSamplesForSmoothing ) {
+function Vehicle( world, object3D, numSamplesForSmoothing ) {
 
-	MovingEntity.call( this, entityManager, object3D, boundingRadius, velocity, mass, maxSpeed, maxForce, maxTurnRate );
+	MovingEntity.call( this, object3D );
 
 	Object.defineProperties( this, {
+		// the reference to the world object, so the vehicle can access
+		// obstacles, walls etc.
+		world : {
+			value : world,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		// an instance of the steering behavior prototype
 		steering : {
 			value : new SteeringBehaviors( this ),
 			configurable : false,
 			enumerable : true,
 			writable : false
 		},
+		// when true, smoothing is active
 		isSmoothingOn : {
 			value : false,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
+		// some steering behaviors give jerky looking movement. The following
+		// member us are to smooth the vehicle's velocity
 		_smoother : {
 			value : new Smoother( numSamplesForSmoothing || 0 ),
 			configurable : false,
 			enumerable : false,
 			writable : false
 		},
+		// this vector represents the average of the vehicle's heading vector
+		// smoothed over the last few frames
 		_smoothedVelocity : {
 			value : new THREE.Vector3(),
 			configurable : false,
@@ -45082,7 +45178,7 @@ function Vehicle( entityManager, object3D, boundingRadius, velocity, mass, maxSp
 			writable : true
 		}
 	} );
-
+	
 }
 
 Vehicle.prototype = Object.create( MovingEntity.prototype );
@@ -45121,7 +45217,7 @@ Vehicle.prototype.update = ( function() {
 		displacement.copy( this.velocity ).multiplyScalar( delta );
 
 		// update the position
-		this.object3D.position.add( displacement );
+		this.position.add( displacement );
 
 		// update the orientation if the vehicle has non zero speed
 		if ( this.getSpeedSq() > 0.00000001 )
@@ -47558,7 +47654,7 @@ function Path( isLoop ) {
 
 	Object.defineProperties( this, {
 		isLoop : {
-			value : false,
+			value : isLoop || false,
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -47793,7 +47889,6 @@ module.exports = Smoother;
 
 var THREE = require( "three" );
 
-var world = require( "../../core/World" );
 var logger = require( "../../core/Logger" );
 var Path = require( "./Path" );
 
@@ -47841,7 +47936,7 @@ function SteeringBehaviors( vehicle ) {
 				flee : 1,
 				arrive : 1,
 				wander : 1,
-				cohesion : 3,
+				cohesion : 4,
 				separation : 1,
 				alignment : 1,
 				obstacleAvoidance : 10,
@@ -48307,48 +48402,10 @@ SteeringBehaviors.prototype._prepareCalculation = function() {
 	// calculate neighbors if one of the following group behaviors is active
 	if ( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) || this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) || this._isOn( SteeringBehaviors.TYPES.COHESION ) )
 	{
-		this._calculateNeighbors();
+		this.vehicle.world.calculateNeighbors( this.vehicle, this.viewDistance, this._neighbors );
 	}
 
 };
-
-/**
- * Calculates all neighbors of the vehicle.
- */
-SteeringBehaviors.prototype._calculateNeighbors = ( function() {
-
-	var toEntity = new THREE.Vector3();
-
-	return function() {
-		
-		var index, entity;
-
-		// reset array
-		this._neighbors.length = 0;
-
-		// iterate over all entities
-		for ( index = 0; index < this.vehicle.entityManager.entities.length; index++ )
-		{
-			entity = this.vehicle.entityManager.entities[ index ];
-
-			if ( entity !== this.vehicle )
-			{
-				// calculate displacement vector
-				toEntity.subVectors( entity.position, this.vehicle.object3D.position );
-
-				// if entity within range, push into neighbors array for further
-				// consideration.
-				// ( working in distance-squared space to avoid sqrt )
-				if ( toEntity.lengthSq() < ( this.viewDistance * this.viewDistance ) )
-				{
-					this._neighbors.push( entity );
-				}
-
-			}
-		}
-	};
-
-}() );
 
 /**
  * Creates the antenna utilized by wallAvoidance.
@@ -48366,7 +48423,7 @@ SteeringBehaviors.prototype._createFeelers = ( function() {
 		}
 
 		// first feeler pointing straight in front
-		this._feelers[ 0 ].ray.origin.copy( this.vehicle.object3D.position );
+		this._feelers[ 0 ].ray.origin.copy( this.vehicle.position );
 		this._feelers[ 0 ].ray.direction = this.vehicle.getDirection();
 		this._feelers[ 0 ].far = this.wallDetectionFeelerLength;
 
@@ -48374,7 +48431,7 @@ SteeringBehaviors.prototype._createFeelers = ( function() {
 		rotation.identity();
 		rotation.makeRotationY( Math.PI * 1.75 );
 
-		this._feelers[ 1 ].ray.origin.copy( this.vehicle.object3D.position );
+		this._feelers[ 1 ].ray.origin.copy( this.vehicle.position );
 		this._feelers[ 1 ].ray.direction = this.vehicle.getDirection().transformDirection( rotation );
 		this._feelers[ 1 ].far = this.wallDetectionFeelerLength * 0.5;
 
@@ -48382,7 +48439,7 @@ SteeringBehaviors.prototype._createFeelers = ( function() {
 		rotation.identity();
 		rotation.makeRotationY( Math.PI * 0.25 );
 
-		this._feelers[ 2 ].ray.origin.copy( this.vehicle.object3D.position );
+		this._feelers[ 2 ].ray.origin.copy( this.vehicle.position );
 		this._feelers[ 2 ].ray.direction = this.vehicle.getDirection().transformDirection( rotation );
 		this._feelers[ 2 ].far = this.wallDetectionFeelerLength * 0.5;
 	};
@@ -48458,7 +48515,7 @@ SteeringBehaviors.prototype._seek = ( function() {
 		// position in an ideal world.
 		// It represents the vector from the agent to the target,
 		// scaled to be the length of the maximum possible speed of the agent.
-		desiredVelocity.subVectors( targetPosition, this.vehicle.object3D.position ).normalize();
+		desiredVelocity.subVectors( targetPosition, this.vehicle.position ).normalize();
 
 		desiredVelocity.multiplyScalar( this.vehicle.maxSpeed );
 
@@ -48491,12 +48548,12 @@ SteeringBehaviors.prototype._flee = ( function() {
 		var force = new THREE.Vector3();
 
 		// only flee if the target is within panic distance
-		if ( this.vehicle.object3D.position.distanceToSquared( targetPosition ) < ( this.panicDistance * this.panicDistance ) )
+		if ( this.vehicle.position.distanceToSquared( targetPosition ) < ( this.panicDistance * this.panicDistance ) )
 		{
 			// from here, the only difference compared to seek is that the
 			// desired velocity is calculated using a vector pointing in the
 			// opposite direction
-			desiredVelocity.subVectors( this.vehicle.object3D.position, targetPosition ).normalize();
+			desiredVelocity.subVectors( this.vehicle.position, targetPosition ).normalize();
 
 			desiredVelocity.multiplyScalar( this.vehicle.maxSpeed );
 
@@ -48531,7 +48588,7 @@ SteeringBehaviors.prototype._arrive = ( function() {
 		var force = new THREE.Vector3();
 
 		// calculate displacement vector
-		toTarget.subVectors( targetPosition, this.vehicle.object3D.position );
+		toTarget.subVectors( targetPosition, this.vehicle.position );
 
 		// calculate the distance to the target
 		distance = toTarget.length();
@@ -48580,7 +48637,7 @@ SteeringBehaviors.prototype._pursuit = ( function() {
 		// for the evader's current position
 
 		// calculate displacement vector
-		toEvader.subVectors( evader.object3D.position, this.vehicle.object3D.position );
+		toEvader.subVectors( evader.position, this.vehicle.position );
 
 		// buffer vehicle direction
 		vehicleDirection = this.vehicle.getDirection();
@@ -48593,7 +48650,7 @@ SteeringBehaviors.prototype._pursuit = ( function() {
 
 		if ( isEvaderAhead && isFacing )
 		{
-			return this._seek( evader.object3D.position );
+			return this._seek( evader.position );
 		}
 
 		// 2. not considered ahead so we predict where the evader will be
@@ -48606,7 +48663,7 @@ SteeringBehaviors.prototype._pursuit = ( function() {
 		// calculate new velocity and predicted future position
 		newEvaderVelocity.copy( evader.velocity ).multiplyScalar( lookAheadTime );
 
-		predcitedPosition.addVectors( evader.object3D.position, newEvaderVelocity );
+		predcitedPosition.addVectors( evader.position, newEvaderVelocity );
 
 		// now seek to the predicted future position of the evader
 		return this._seek( predcitedPosition );
@@ -48638,7 +48695,7 @@ SteeringBehaviors.prototype._offsetPursuit = ( function() {
 		// calculate the offset's position in world space
 		offsetWorld.copy( offset ).applyMatrix4( leader.object3D.matrixWorld );
 
-		toOffset.subVectors( offsetWorld, this.vehicle.object3D.position );
+		toOffset.subVectors( offsetWorld, this.vehicle.position );
 
 		// the lookahead time is proportional to the distance between the leader
 		// and the pursuer; and is inversely proportional to the sum of both
@@ -48677,7 +48734,7 @@ SteeringBehaviors.prototype._evade = ( function() {
 		var lookAheadTime;
 
 		// calculate displacement vector
-		toPursuer.subVectors( pursuer.object3D.position, this.vehicle.object3D.position );
+		toPursuer.subVectors( pursuer.position, this.vehicle.position );
 
 		// evade only when pursuers are inside a threat range
 		if ( toPursuer.lengthSq() > ( this.panicDistance * this.panicDistance ) )
@@ -48693,7 +48750,7 @@ SteeringBehaviors.prototype._evade = ( function() {
 		// calculate new velocity and predicted future position
 		newPursuerVelocity.copy( pursuer.velocity ).multiplyScalar( lookAheadTime );
 
-		predcitedPosition.addVectors( pursuer.object3D.position, newPursuerVelocity );
+		predcitedPosition.addVectors( pursuer.position, newPursuerVelocity );
 
 		// now flee away from predicted future position of the pursuer
 		return this._flee( predcitedPosition );
@@ -48727,18 +48784,17 @@ SteeringBehaviors.prototype._interpose = ( function() {
 		// first we need to figure out where the two agents are going to be
 		// in the future. This is approximated by determining the time
 		// taken to reach the mid way point at the current time at at max speed
-		midPoint.addVectors( agentA.object3D.position, agentB.object3D.position ).multiplyScalar( 0.5 );
+		midPoint.addVectors( agentA.position, agentB.position ).multiplyScalar( 0.5 );
 
-		time = this.vehicle.object3D.position.distanceTo( midPoint ) / this.vehicle.maxSpeed;
+		time = this.vehicle.position.distanceTo( midPoint ) / this.vehicle.maxSpeed;
 
 		// now we have the time, we assume that agent A and agent B will
-		// continue on a
-		// straight trajectory and extrapolate to get their future positions
+		// continue on a straight trajectory and extrapolate to get their future positions
 		newVelocityAgentA.copy( agentA.velocity ).multiplyScalar( time );
-		predcitedPositionAgentA.addVectors( agentA.object3D.position, newVelocityAgentA );
+		predcitedPositionAgentA.addVectors( agentA.position, newVelocityAgentA );
 
 		newVelocityAgentB.copy( agentB.velocity ).multiplyScalar( time );
-		predcitedPositionAgentB.addVectors( agentB.object3D.position, newVelocityAgentB );
+		predcitedPositionAgentB.addVectors( agentB.position, newVelocityAgentB );
 
 		// calculate the mid point of these predicted positions
 		midPoint.addVectors( predcitedPositionAgentA, predcitedPositionAgentB ).multiplyScalar( 0.5 );
@@ -48770,19 +48826,19 @@ SteeringBehaviors.prototype._hide = ( function() {
 		closestDistanceSq = Infinity;
 
 		// get number of obstacles in the world
-		numberOfObstacle = world.getNumberOfObstacles();
+		numberOfObstacle = this.vehicle.world.getNumberOfObstacles();
 
 		for ( index = 0; index < numberOfObstacle; index++ )
 		{
 			// retrieve obstacle
-			obstacle = world.getObstacle( index );
+			obstacle = this.vehicle.world.getObstacle( index );
 
 			// calculate the position of the hiding spot for this obstacle
-			this._getHidingPosition( obstacle.boundingSphere.center, obstacle.boundingSphere.radius, hunter.object3D.position, hidingSpot );
+			this._getHidingPosition( obstacle.boundingSphere.center, obstacle.boundingSphere.radius, hunter.position, hidingSpot );
 
 			// work in distance-squared space to find the closest hiding spot to
 			// the agent
-			distanceSq = hidingSpot.distanceToSquared( this.vehicle.object3D.position );
+			distanceSq = hidingSpot.distanceToSquared( this.vehicle.position );
 
 			if ( distanceSq < closestDistanceSq )
 			{
@@ -48850,7 +48906,7 @@ SteeringBehaviors.prototype._wander = ( function() {
 		target.applyMatrix4( this.vehicle.object3D.matrixWorld );
 
 		// and steer towards it
-		force.subVectors( target, this.vehicle.object3D.position );
+		force.subVectors( target, this.vehicle.position );
 
 		return force;
 	};
@@ -48893,7 +48949,7 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
 		var distanceToClosestObstacle = Infinity;
 		
 		// get number of obstacles in the world
-		var numberOfObstacle = world.getNumberOfObstacles();
+		var numberOfObstacle = this.vehicle.world.getNumberOfObstacles();
 		
 		// the detection box length is proportional to the agent's velocity
 		var detectionBoxLength = this.vehicle.getSpeed() + this.vehicle.maxSpeed + vehicleSize.z * 0.5;
@@ -48910,7 +48966,7 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
 		for ( index = 0; index < numberOfObstacle; index++ )
 		{
 			// retrieve obstacle
-			obstacle = world.getObstacle( index );
+			obstacle = this.vehicle.world.getObstacle( index );
 
 			// calculate this obstacle's position in local space
 			localPositionOfObstacle.copy( obstacle.boundingSphere.center ).applyMatrix4( inverseMatrix );
@@ -49014,12 +49070,12 @@ SteeringBehaviors.prototype._wallAvoidance = ( function() {
 		for ( indexFeeler = 0; indexFeeler < this._feelers.length; indexFeeler++ )
 		{
 			// run through each wall checking for any intersection points
-			for ( indexWall = 0; indexWall < world.walls.length; indexWall++ )
+			for ( indexWall = 0; indexWall < this.vehicle.world.walls.length; indexWall++ )
 			{
 				feeler = this._feelers[ indexFeeler ];
 
 				// do intersection test
-				intersects = feeler.intersectObject( world.walls[ indexWall ] );
+				intersects = feeler.intersectObject( this.vehicle.world.walls[ indexWall ] );
 				
 				if( intersects.length > 0 )
 				{
@@ -49029,7 +49085,7 @@ SteeringBehaviors.prototype._wallAvoidance = ( function() {
 					{
 						distanceToClosestWall = intersects[ 0 ].distance;
 						
-						closestWall = world.walls[ indexWall ];
+						closestWall = this.vehicle.world.walls[ indexWall ];
 						
 						closestPoint.copy( intersects[ 0 ].point );
 						
@@ -49071,7 +49127,7 @@ SteeringBehaviors.prototype._wallAvoidance = ( function() {
 SteeringBehaviors.prototype._followPath = function() {
 
 	// calculate distance in square space from current waypoint to vehicle
-	var distanceSq = this.path.getCurrentWaypoint().distanceToSquared( this.vehicle.object3D.position );
+	var distanceSq = this.path.getCurrentWaypoint().distanceToSquared( this.vehicle.position );
 
 	// move to next waypoint if close enough to current target
 	if ( distanceSq < ( this.waypointSeekDist * this.waypointSeekDist ) )
@@ -49113,7 +49169,7 @@ SteeringBehaviors.prototype._separation = ( function() {
 			if ( neighbor !== this.vehicle && neighbor !== this.targetAgent1 )
 			{
 				// calculate displacement vector
-				toAgent.subVectors( this.vehicle.object3D.position, neighbor.object3D.position );
+				toAgent.subVectors( this.vehicle.position, neighbor.position );
 
 				// get length
 				length = toAgent.length();
@@ -49177,7 +49233,7 @@ SteeringBehaviors.prototype._alignment = ( function() {
 		}
 
 		// if the neighborhood contained one or more vehicles, average their
-		// heading vectors.
+		// heading vectors
 		if ( neighborCount > 0 )
 		{
 			averageHeading.divideScalar( neighborCount );
@@ -49224,7 +49280,7 @@ SteeringBehaviors.prototype._cohesion = ( function() {
 			// also make sure it doesn't include the evade target
 			if ( neighbor !== this.vehicle && neighbor !== this.targetAgent1 )
 			{
-				centerOfMass.add( neighbor.object3D.position );
+				centerOfMass.add( neighbor.position );
 
 				neighborCount++;
 			}
@@ -49254,156 +49310,40 @@ SteeringBehaviors.prototype._cohesion = ( function() {
 // START OF CONTROL METHODS
 
 /* jshint ignore:start */
-SteeringBehaviors.prototype.seekOn = function() {
 
-	this._behaviorFlag |= SteeringBehaviors.TYPES.SEEK;
-};
-SteeringBehaviors.prototype.fleeOn = function() {
+SteeringBehaviors.prototype.seekOn = function() { this._behaviorFlag |= SteeringBehaviors.TYPES.SEEK; };
+SteeringBehaviors.prototype.fleeOn = function() { this._behaviorFlag |= SteeringBehaviors.TYPES.FLEE; };
+SteeringBehaviors.prototype.arriveOn = function() { this._behaviorFlag |= SteeringBehaviors.TYPES.ARRIVE; };
+SteeringBehaviors.prototype.pursuitOn = function() { this._behaviorFlag |= SteeringBehaviors.TYPES.PURSUIT; };
+SteeringBehaviors.prototype.offsetPursuitOn = function() { this._behaviorFlag |= SteeringBehaviors.TYPES.OFFSETPURSUIT; };
+SteeringBehaviors.prototype.evadeOn = function() { this._behaviorFlag |= SteeringBehaviors.TYPES.EVADE; };
+SteeringBehaviors.prototype.interposeOn = function() { this._behaviorFlag |= SteeringBehaviors.TYPES.INTERPOSE; };
+SteeringBehaviors.prototype.hideOn = function() { this._behaviorFlag |= SteeringBehaviors.TYPES.HIDE; };
+SteeringBehaviors.prototype.wanderOn = function() { this._behaviorFlag |= SteeringBehaviors.TYPES.WANDER; };
+SteeringBehaviors.prototype.obstacleAvoidanceOn = function() { this._behaviorFlag |= SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE; };
+SteeringBehaviors.prototype.wallAvoidanceOn = function() { this._behaviorFlag |= SteeringBehaviors.TYPES.WALLAVOIDANCE; };
+SteeringBehaviors.prototype.followPathOn = function() { this._behaviorFlag |= SteeringBehaviors.TYPES.FOLLOWPATH; };
+SteeringBehaviors.prototype.cohesionOn = function() { this._behaviorFlag |= SteeringBehaviors.TYPES.COHESION; };
+SteeringBehaviors.prototype.separationOn = function() { this._behaviorFlag |= SteeringBehaviors.TYPES.SEPARATION; };
+SteeringBehaviors.prototype.alignmentOn = function() { this._behaviorFlag |= SteeringBehaviors.TYPES.ALIGNMENT; };
+SteeringBehaviors.prototype.flockingOn = function() { this.cohesionOn(); this.separationOn(); this.alignmentOn(); this.wanderOn(); };
 
-	this._behaviorFlag |= SteeringBehaviors.TYPES.FLEE;
-};
-SteeringBehaviors.prototype.arriveOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.ARRIVE;
-};
-SteeringBehaviors.prototype.pursuitOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.PURSUIT;
-};
-SteeringBehaviors.prototype.offsetPursuitOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.OFFSETPURSUIT;
-};
-SteeringBehaviors.prototype.evadeOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.EVADE;
-};
-SteeringBehaviors.prototype.interposeOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.INTERPOSE;
-};
-SteeringBehaviors.prototype.hideOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.HIDE;
-};
-SteeringBehaviors.prototype.wanderOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.WANDER;
-};
-SteeringBehaviors.prototype.obstacleAvoidanceOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE;
-};
-SteeringBehaviors.prototype.wallAvoidanceOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.WALLAVOIDANCE;
-};
-SteeringBehaviors.prototype.followPathOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.FOLLOWPATH;
-};
-SteeringBehaviors.prototype.cohesionOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.COHESION;
-};
-SteeringBehaviors.prototype.separationOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.SEPARATION;
-};
-SteeringBehaviors.prototype.alignmentOn = function() {
-
-	this._behaviorFlag |= SteeringBehaviors.TYPES.ALIGNMENT;
-};
-SteeringBehaviors.prototype.flockingOn = function() {
-
-	this.cohesionOn();
-	this.separationOn();
-	this.alignmentOn();
-	this.wanderOn();
-};
-
-SteeringBehaviors.prototype.seekOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.SEEK ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.SEEK;
-};
-SteeringBehaviors.prototype.fleeOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.FLEE ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.FLEE;
-};
-SteeringBehaviors.prototype.arriveOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.ARRIVE ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.ARRIVE;
-};
-SteeringBehaviors.prototype.pursuitOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.PURSUIT ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.PURSUIT;
-};
-SteeringBehaviors.prototype.offsetPursuitOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.OFFSETPURSUIT ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.OFFSETPURSUIT;
-};
-SteeringBehaviors.prototype.evadeOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.EVADE ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.EVADE;
-};
-SteeringBehaviors.prototype.interposeOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.INTERPOSE ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.INTERPOSE;
-};
-SteeringBehaviors.prototype.hideOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.HIDE ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.HIDE;
-};
-SteeringBehaviors.prototype.wanderOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.WANDER ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.WANDER;
-};
-SteeringBehaviors.prototype.obstacleAvoidanceOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE;
-};
-SteeringBehaviors.prototype.wallAvoidanceOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.WALLAVOIDANCE ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.WALLAVOIDANCE;
-};
-SteeringBehaviors.prototype.followPathOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.FOLLOWPATH ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.FOLLOWPATH;
-};
-SteeringBehaviors.prototype.cohesionOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.COHESION ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.COHESION;
-};
-SteeringBehaviors.prototype.separationOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.SEPARATION;
-};
-SteeringBehaviors.prototype.alignmentOff = function() {
-
-	if ( this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) )
-		this._behaviorFlag ^= SteeringBehaviors.TYPES.ALIGNMENT;
-};
-SteeringBehaviors.prototype.flockingOff = function() {
-
-	this.cohesionOff();
-	this.separationOff();
-	this.alignmentOff();
-	this.wanderOff();
-};
+SteeringBehaviors.prototype.seekOff = function() { if ( this._isOn( SteeringBehaviors.TYPES.SEEK ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.SEEK; };
+SteeringBehaviors.prototype.fleeOff = function() { if ( this._isOn( SteeringBehaviors.TYPES.FLEE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.FLEE; };
+SteeringBehaviors.prototype.arriveOff = function() { if ( this._isOn( SteeringBehaviors.TYPES.ARRIVE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.ARRIVE; };
+SteeringBehaviors.prototype.pursuitOff = function() { if ( this._isOn( SteeringBehaviors.TYPES.PURSUIT ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.PURSUIT; };
+SteeringBehaviors.prototype.offsetPursuitOff = function() { if ( this._isOn( SteeringBehaviors.TYPES.OFFSETPURSUIT ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.OFFSETPURSUIT; };
+SteeringBehaviors.prototype.evadeOff = function() { if ( this._isOn( SteeringBehaviors.TYPES.EVADE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.EVADE; };
+SteeringBehaviors.prototype.interposeOff = function() { if ( this._isOn( SteeringBehaviors.TYPES.INTERPOSE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.INTERPOSE; };
+SteeringBehaviors.prototype.hideOff = function() { if ( this._isOn( SteeringBehaviors.TYPES.HIDE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.HIDE; };
+SteeringBehaviors.prototype.wanderOff = function() { if ( this._isOn( SteeringBehaviors.TYPES.WANDER ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.WANDER; };
+SteeringBehaviors.prototype.obstacleAvoidanceOff = function() { if ( this._isOn( SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.OBSTACLEAVOIDANCE; };
+SteeringBehaviors.prototype.wallAvoidanceOff = function() { if ( this._isOn( SteeringBehaviors.TYPES.WALLAVOIDANCE ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.WALLAVOIDANCE; };
+SteeringBehaviors.prototype.followPathOff = function() { if ( this._isOn( SteeringBehaviors.TYPES.FOLLOWPATH ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.FOLLOWPATH; };
+SteeringBehaviors.prototype.cohesionOff = function() { if ( this._isOn( SteeringBehaviors.TYPES.COHESION ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.COHESION; };
+SteeringBehaviors.prototype.separationOff = function() { if ( this._isOn( SteeringBehaviors.TYPES.SEPARATION ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.SEPARATION; };
+SteeringBehaviors.prototype.alignmentOff = function() { if ( this._isOn( SteeringBehaviors.TYPES.ALIGNMENT ) ) this._behaviorFlag ^= SteeringBehaviors.TYPES.ALIGNMENT; };
+SteeringBehaviors.prototype.flockingOff = function() { this.cohesionOff(); this.separationOff(); this.alignmentOff(); this.wanderOff(); };
 
 /* jshint ignore:end */
 
@@ -49440,7 +49380,7 @@ SteeringBehaviors.DECELERATION = {
 };
 
 module.exports = SteeringBehaviors;
-},{"../../core/Logger":21,"../../core/World":31,"./Path":62,"three":1}],65:[function(require,module,exports){
+},{"../../core/Logger":21,"./Path":62,"three":1}],65:[function(require,module,exports){
 /**
  * @file This prototype provides topic-based publish/subscribe messaging and
  * enables communication between game entities.

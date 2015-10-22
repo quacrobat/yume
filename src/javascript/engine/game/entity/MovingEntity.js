@@ -15,46 +15,46 @@ var GameEntity = require( "./GameEntity" );
  * @constructor
  * @augments GameEntity
  * 
- * @param {EntityManager} entityManager - The reference to the entity manager.
  * @param {THREE.Object3D} object3D - The 3D object of the entity.
- * @param {number} boundingRadius - The bounding radius of the entity.
- * @param {THREE.Vector3} velocity - The velocity of the agent.
- * @param {number} mass - The mass of the agent.
- * @param {number} maxSpeed - The maximum speed at which this entity may travel.
- * @param {number} maxForce - The maximum force this entity can produce to power itself (think rockets and thrust).
- * @param {number} maxTurnRate - The maximum rate (radians per second) at which this vehicle can rotate.
  */
-function MovingEntity( entityManager, object3D, boundingRadius, velocity, mass, maxSpeed, maxForce, maxTurnRate ) {
+function MovingEntity( object3D ) {
 
-	GameEntity.call( this, entityManager, object3D, boundingRadius );
+	GameEntity.call( this, object3D );
 
 	Object.defineProperties( this, {
+		// the velocity of the agent
 		velocity : {
-			value : velocity || new THREE.Vector3(),
+			value : new THREE.Vector3(),
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
+		// the mass of the agent
 		mass : {
-			value : mass || 1,
+			value : 1,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
+		// the maximum speed at which this entity may travel
 		maxSpeed : {
-			value : maxSpeed || 1,
+			value : 1,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
+		// the maximum force this entity can produce to power itself (think
+		// rockets and thrust).
 		maxForce : {
-			value : maxForce || 100,
+			value : 100,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
+		// the maximum rate (radians per second) at which this vehicle can
+		// rotate.
 		maxTurnRate : {
-			value : maxTurnRate || Math.PI,
+			value : Math.PI,
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -108,7 +108,7 @@ MovingEntity.prototype.rotateToDirection = ( function() {
 		rotationMatrix.makeBasis( xAxis, yAxis, zAxis );
 
 		// apply rotation
-		this.object3D.quaternion.setFromRotationMatrix( rotationMatrix );
+		this.quaternion.setFromRotationMatrix( rotationMatrix );
 	};
 
 }() );
@@ -143,14 +143,14 @@ MovingEntity.prototype.isRotateToTarget = ( function() {
 		t = ( angle > this.maxTurnRate ) ? ( this.maxTurnRate / angle ) : 1;
 
 		// get target rotation
-		rotationToTarget.lookAt( targetPosition, this.object3D.position, this.object3D.up );
+		rotationToTarget.lookAt( targetPosition, this.position, this.object3D.up );
 		quaternionToTarget.setFromRotationMatrix( rotationToTarget );
 
 		// interpolate rotation
-		this.object3D.quaternion.slerp( quaternionToTarget, t );
+		this.quaternion.slerp( quaternionToTarget, t );
 
 		// adjust velocity
-		this.velocity.applyQuaternion( this.object3D.quaternion );
+		this.velocity.applyQuaternion( this.quaternion );
 
 		return false;
 	};
@@ -184,7 +184,7 @@ MovingEntity.prototype.getSpeedSq = function() {
  */
 MovingEntity.prototype.getDirection = function() {
 
-	return new THREE.Vector3( 0, 0, 1 ).applyQuaternion( this.object3D.quaternion ).normalize();
+	return new THREE.Vector3( 0, 0, 1 ).applyQuaternion( this.quaternion ).normalize();
 };
 
 module.exports = MovingEntity;

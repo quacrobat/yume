@@ -14,44 +14,91 @@ var nextId = 0;
  * 
  * @constructor
  * 
- * @param {EntityManager} entityManager - The reference to the entity manager.
  * @param {THREE.Object3D} object3D - The 3D object of the entity.
- * @param {number} boundingRadius - The bounding radius of the entity.
  */
-function GameEntity( entityManager, object3D, boundingRadius ) {
+function GameEntity( object3D ) {
 
 	Object.defineProperties( this, {
+		// a unique id to identify a game entity
 		id : {
 			value : nextId++,
 			configurable : false,
 			enumerable : true,
 			writable : false
 		},
-		entityManager : {
-			value : entityManager,
-			configurable : false,
-			enumerable : true,
-			writable : false
-		},
+		// each game entity is a 3D object
 		object3D : {
 			value : object3D,
 			configurable : false,
 			enumerable : true,
-			writable : true
+			writable : false
 		},
+		// this will be used for collision detection
 		boundingRadius : {
-			value : boundingRadius || 0,
+			value : 0,
 			configurable : false,
 			enumerable : true,
 			writable : true
+		},
+		// the following are shortcuts to object3D properties
+		position : {
+			configurable : false,
+			enumerable : true,
+			get : function() {
+
+				return this.object3D.position;
+			},
+			set : function( value ) {
+
+				this.object3D.position.copy( value );
+			}
+		},
+		rotation : {
+			configurable : false,
+			enumerable : true,
+			get : function() {
+
+				return this.object3D.rotation;
+			},
+			set : function( value ) {
+
+				this.object3D.rotation.copy( value );
+			}
+		},
+		quaternion : {
+			configurable : false,
+			enumerable : true,
+			get : function() {
+
+				return this.object3D.quaternion;
+			},
+			set : function( value ) {
+
+				this.object3D.quaternion.copy( value );
+			}
+		},
+		scale : {
+			configurable : false,
+			enumerable : true,
+			get : function() {
+
+				return this.object3D.scale;
+			},
+			set : function( value ) {
+
+				this.object3D.scale.copy( value );
+			}
 		}
+
 	} );
 }
 
 /**
  * All entities must implement an update function.
+ * 
+ * @param {number} delta - The time delta value.
  */
-GameEntity.prototype.update = function() {
+GameEntity.prototype.update = function( delta ) {
 
 };
 
