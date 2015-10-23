@@ -5,6 +5,8 @@
  */
 "use strict";
 
+var GameEntity = require( "./GameEntity" );
+var Player = require( "./Player" );
 var Vehicle = require( "./Vehicle" );
 
 /**
@@ -25,6 +27,20 @@ function EntityManager() {
 
 	} );
 }
+
+/**
+ * Creates the player object
+ * 
+ * @param {World} world - The reference to the world object.
+ * 
+ * @returns {Player} The new player.
+ */
+EntityManager.prototype.createPlayer = function( world ) {
+
+	var player = new Player( world );
+	this.addEntity( player );
+	return player;
+};
 
 /**
  * Creates a vehicle, a moving entity that uses steering behaviors.
@@ -109,10 +125,26 @@ EntityManager.prototype.removeEntity = function( entity ) {
 
 /**
  * Removes all entities from the internal array.
+ * 
+ * @param {boolean} isClear - Should also all world entities be removed?
  */
-EntityManager.prototype.removeEntities = function() {
+EntityManager.prototype.removeEntities = function( isClear ) {
 
-	this.entities.length = 0;
+	if ( isClear === true )
+	{
+		this.entities.length = 0;
+	}
+	else
+	{
+		for ( var index = this.entities.length - 1; index >= 0; index-- )
+		{
+			// only remove entities with scope "STAGE"
+			if ( this.entities[ index ].scope === GameEntity.SCOPE.STAGE )
+			{
+				this.remove( this.children[ index ] );
+			}
+		}
+	}
 };
 
 module.exports = new EntityManager();

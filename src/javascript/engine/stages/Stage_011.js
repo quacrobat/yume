@@ -22,9 +22,9 @@ Stage.prototype.setup = function() {
 
 	StageBase.prototype.setup.call( this );
 
-	// controls setup
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+	// player setup
+	this.world.player.position.set( 0, 0, -75 );
+	this.world.player.setDirection( new THREE.Vector3( 0, 0, 1 ) );
 
 	// load texts
 	this.textManager.load( this.stageId );
@@ -80,7 +80,7 @@ Stage.prototype.setup = function() {
 	this.world.addObject3D( directionalLight );
 
 	// add trigger for ending
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
 
 		self.userInterfaceManager.showModalDialog( {
 			headline : "Modal.Headline",
@@ -88,10 +88,8 @@ Stage.prototype.setup = function() {
 			content : "Modal.Content"
 		} );
 
-		self.saveGameManager.remove();
+		self.saveGameManager.remove();	
 	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
 
 	// post processing
 	this.renderer.preparePostProcessing( this.world, this.camera );

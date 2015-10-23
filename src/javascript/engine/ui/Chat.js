@@ -82,9 +82,9 @@ Chat.prototype.toogle = function() {
 		// hide input field
 		this.hide();
 
-		// activate controls
-		eventManager.publish( TOPIC.CONTROLS.ACTIVE, {
-			isActive : true
+		// capture controls
+		eventManager.publish( TOPIC.CONTROLS.CAPTURE, {
+			isCaptured : true
 		} );
 	}
 	else
@@ -92,9 +92,9 @@ Chat.prototype.toogle = function() {
 		// show input field
 		this.show();
 
-		// deactivate controls
-		eventManager.publish( TOPIC.CONTROLS.ACTIVE, {
-			isActive : false
+		// release controls
+		eventManager.publish( TOPIC.CONTROLS.CAPTURE, {
+			isCaptured : false
 		} );
 	}
 };

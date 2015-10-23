@@ -8,6 +8,9 @@
 var self;
 
 var UiElement = require( "./UiElement" );
+var eventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
+
 /**
  * Creates the text screen.
  * 
@@ -110,6 +113,11 @@ TextScreen.prototype.show = function( textKeys, completeCallback ) {
 		this._printName();
 		this._printText();
 		this._$textScreen.classList.add( "slideEffect" );
+		
+		// lock controls
+		eventManager.publish( TOPIC.CONTROLS.LOCK, {
+			isLocked : true
+		} );
 	}
 };
 
@@ -124,6 +132,11 @@ TextScreen.prototype.hide = function() {
 		this._$textScreen.classList.remove( "slideEffect" );
 		this._$textScreenContent.textContent = "";
 		this._textIndex = 0;
+		
+		// release controls
+		eventManager.publish( TOPIC.CONTROLS.LOCK, {
+			isLocked : false
+		} );
 	}
 };
 

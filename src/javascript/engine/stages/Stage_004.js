@@ -22,9 +22,9 @@ Stage.prototype.setup = function() {
 
 	StageBase.prototype.setup.call( this );
 
-	// setup controls
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+	// player setup
+	this.world.player.position.set( 0, 0, -75 );
+	this.world.player.setDirection( new THREE.Vector3( 0, 0, 1 ) );
 
 	// load texts
 	this.textManager.load( this.stageId );
@@ -57,7 +57,6 @@ Stage.prototype.setup = function() {
 
 	this.actionManager.createInteraction( interactiveBoxTextScreen, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.TextScreen", function() {
 
-		self.controls.isActionInProgress = true;
 		self.userInterfaceManager.showTextScreen( [ {
 			name : "Name.Daniel",
 			text : "TextScreen.Part1"
@@ -67,10 +66,7 @@ Stage.prototype.setup = function() {
 		}, {
 			name : undefined,
 			text : "TextScreen.Part3"
-		} ], function() {
-
-			self.controls.isActionInProgress = false;
-		} );
+		} ] );
 	} );
 
 	// create interactive box
@@ -114,12 +110,10 @@ Stage.prototype.setup = function() {
 	} );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
 
-		self._changeStage( "005", true );
+		self._changeStage( "005", true );	
 	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
 
 	// light
 	var ambientLight = new THREE.AmbientLight( 0x111111 );

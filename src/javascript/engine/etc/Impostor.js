@@ -187,22 +187,27 @@ Impostor.prototype.update = ( function() {
 
 	return function( cameraPosition ) {
 
-		// first, compute zAxis
-		zAxis.subVectors( cameraPosition, this.billboard.position );
-		zAxis.y = 0; // this will ensure, that the impostor rotates correctly around the axis
-		zAxis.normalize();
+		if ( this.billboard !== null )
+		{
+			// first, compute zAxis
+			zAxis.subVectors( cameraPosition, this.billboard.position );
+			
+			// this will ensure, that the impostor rotates correctly around the axis
+			zAxis.y = 0;
+			zAxis.normalize();
 
-		// compute the last axis with the cross product
-		xAxis.crossVectors( yAxis, zAxis );
+			// compute the last axis with the cross product
+			xAxis.crossVectors( yAxis, zAxis );
 
-		// create new model matrix from basis vectors
-		this.billboard.matrix.makeBasis( xAxis, yAxis, zAxis );
+			// create new model matrix from basis vectors
+			this.billboard.matrix.makeBasis( xAxis, yAxis, zAxis );
 
-		// apply the position
-		this.billboard.matrix.setPosition( this.billboard.position );
+			// apply the position
+			this.billboard.matrix.setPosition( this.billboard.position );
 
-		// force world matrix to update
-		this.billboard.matrixWorldNeedsUpdate = true;
+			// force world matrix to update
+			this.billboard.matrixWorldNeedsUpdate = true;
+		}
 	};
 
 }() );

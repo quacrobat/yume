@@ -31,7 +31,7 @@ Camera.prototype = Object.create( THREE.PerspectiveCamera.prototype );
 Camera.prototype.constructor = Camera;
 
 /**
- * Inits the camera.
+ * Initializes the camera.
  * 
  * @param {number} fov - The field of view.
  * @param {number} aspect - The aspect ratio.

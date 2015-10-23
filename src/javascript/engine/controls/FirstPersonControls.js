@@ -1,7 +1,7 @@
 /**
  * @file Prototype for first person controls. The logic uses HTML5 Pointer Lock
- * API to capture mouse-movements. The camera is stored within two 3D-objects
- * (yaw and pitch) to effectively handle orientation stuff and head motions.
+ * API to capture mouse-movements. The camera is stored within an additional 3D-object
+ * (head) to effectively handle orientation stuff and camera motions.
  * 
  * @author Human Interactive
  */
@@ -14,7 +14,6 @@ var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var camera = require( "../core/Camera" );
-var world = require( "../core/World" );
 var audioManager = require( "../audio/AudioManager" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var settingsManager = require( "../etc/SettingsManager" );
@@ -28,18 +27,12 @@ var self;
  * 
  * @constructor
  */
-function FirstPersonControls() {
+function FirstPersonControls( player ) {
 
-	// parents of camera object
+	// a reference to the player object
 	Object.defineProperties( this, {
-		_yawObject : {
-			value : new THREE.Object3D(),
-			configurable : false,
-			enumerable : false,
-			writable : false
-		},
-		_pitchObject : {
-			value : new THREE.Object3D(),
+		_player : {
+			value : player,
 			configurable : false,
 			enumerable : false,
 			writable : false
@@ -48,25 +41,25 @@ function FirstPersonControls() {
 
 	// movement properties
 	Object.defineProperties( this, {
-		_moveForward : {
+		_isMoveForward : {
 			value : false,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
-		_moveBackward : {
+		_isMoveBackward : {
 			value : false,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
-		_moveLeft : {
+		_isMoveLeft : {
 			value : false,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
-		_moveRight : {
+		_isMoveRight : {
 			value : false,
 			configurable : false,
 			enumerable : false,
@@ -92,12 +85,6 @@ function FirstPersonControls() {
 		},
 		_strafeSpeed : {
 			value : FirstPersonControls.DEFAULT.SPEED.STRAFE,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
-		_height : {
-			value : FirstPersonControls.DEFAULT.HEIGHT,
 			configurable : false,
 			enumerable : false,
 			writable : true
@@ -192,107 +179,111 @@ function FirstPersonControls() {
 
 	// flags
 	Object.defineProperties( this, {
+		// indicates, if the player is crouching
 		_isCrouch : {
 			value : false,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
+		// indicates, if the player is running
 		_isRun : {
 			value : false,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
-		_isControlsActive : {
+		// indicates, if the mouse pointer is captured
+		isCaptured : {
 			value : false,
 			configurable : false,
-			enumerable : false,
+			enumerable : true,
 			writable : true
 		},
-		_isUiElementActive : {
+		// indicates, if an ui element is active
+		isUiElementActive : {
 			value : false,
 			configurable : false,
-			enumerable : false,
+			enumerable : true,
 			writable : true
 		},
-		isActionInProgress : {
+		// indicates, if the controls are locked
+		isLocked : {
 			value : false,
 			configurable : false,
-			enumerable : false,
+			enumerable : true,
 			writable : true
 		},
 	} );
-
-	// raycaster
-	Object.defineProperties( this, {
-		_rayCaster : {
-			value : new THREE.Raycaster(),
-			configurable : false,
-			enumerable : false,
-			writable : false
-		}
-	} );
-
-	// build relationship
-	this._pitchObject.add( camera ); // camera -> pitch
-	this._yawObject.add( this._pitchObject ); // pitch -> yaw
-
-	// add to world
-	world.addObject3D( this._yawObject );
-
-	// type definition
-	this._yawObject.type = "Controls";
-
-	self = this;
+	
+	this._init();
 }
 
 /**
- * Sets the position of the controls.
+ * Updates the controls.
  * 
- * @param {THREE.Vector3} position - The position to set.
+ * @param {number} delta - Elapsed time between two frames.
+ * @param {THREE.Vector3} displacement -The displacement vector.
  */
-FirstPersonControls.prototype.setPosition = function( position ) {
+FirstPersonControls.prototype.update = function( delta, displacement ) {
 
-	this._yawObject.position.x = position.x;
-	this._yawObject.position.y = position.y + this._height;
-	this._yawObject.position.z = position.z;
-
-	this._yawObject.updateMatrixWorld();
+	// calculate displacement caused by movement of the player
+	this._calculateMovement( delta, displacement );
+	
+	// animation control movements
+	this._animate();
 };
 
 /**
- * Gets the position of the controls.
+ * Sets the direction of the controls.
  * 
- * @returns {THREE.Vector3} The position vector.
+ * @param {THREE.Vector3} direction -  The direction to set.
  */
-FirstPersonControls.prototype.getPosition = function() {
+FirstPersonControls.prototype.setDirection = ( function() {
 
-	return new THREE.Vector3().copy( this._yawObject.position );
-};
+	var xAxis = new THREE.Vector3(); // right
+	var yAxis = new THREE.Vector3(); // up
+	var zAxis = new THREE.Vector3(); // front
 
-/**
- * Sets the rotation of the controls.
- * 
- * @param {THREE.Euler} rotation - The rotation to set.
- */
-FirstPersonControls.prototype.setRotation = function( rotation ) {
+	var rotationMatrix = new THREE.Matrix4();
+	var euler = new THREE.Euler( 0, 0, 0, "YXZ" );
 
-	this._pitchObject.rotation.x = rotation.x;
-	this._yawObject.rotation.y = rotation.y;
+	return function( direction ) {
 
-	this._yawObject.updateMatrixWorld();
-};
+		// the front vector always points to the direction vector
+		zAxis.copy( direction ).normalize();
 
-/**
- * Gets the rotation of the controls.
- * 
- * @returns {THREE.Euler} The rotation in euler.
- */
-FirstPersonControls.prototype.getRotation = function() {
+		// avoid zero-length axis
+		if ( zAxis.lengthSq() === 0 )
+		{
+			zAxis.z = 1;
+		}
 
-	return new THREE.Euler( this._pitchObject.rotation.x, this._yawObject.rotation.y, 0 );
-};
+		// compute right vector
+		xAxis.crossVectors( this._player.object3D.up, zAxis );
+
+		// avoid zero-length axis
+		if ( xAxis.lengthSq() === 0 )
+		{
+			zAxis.x += 0.0001;
+			xAxis.crossVectors( this._player.object3D.up, zAxis ).normalize();
+		}
+
+		// compute up vector
+		yAxis.crossVectors( zAxis, xAxis );
+
+		// setup a rotation matrix of the basis
+		rotationMatrix.makeBasis( xAxis, yAxis, zAxis );
+
+		// create euler angles from rotation
+		euler.setFromRotationMatrix( rotationMatrix );
+		
+		// apply rotation to control objects
+		this._player.rotation.y = euler.y;
+		this._player.head.rotation.x = euler.x;
+	};
+
+}() );
 
 /**
  * Gets the direction of the controls.
@@ -302,13 +293,13 @@ FirstPersonControls.prototype.getRotation = function() {
 FirstPersonControls.prototype.getDirection = ( function() {
 
 	var result = new THREE.Vector3();
-	var direction = new THREE.Vector3( 0, 0, -1 );
+	var direction = new THREE.Vector3( 0, 0, 1 );
 	var rotation = new THREE.Euler( 0, 0, 0, "YXZ" );
 
 	return function() {
 
 		// calculate direction
-		rotation.set( this._pitchObject.rotation.x, this._yawObject.rotation.y, 0 );
+		rotation.set( this._player.head.rotation.x, this._player.rotation.y, 0 );
 		result.copy( direction ).applyEuler( rotation );
 		return result;
 	};
@@ -316,208 +307,73 @@ FirstPersonControls.prototype.getDirection = ( function() {
 }() );
 
 /**
- * Initializes the controls
- */
-FirstPersonControls.prototype.init = function() {
-
-	// subscriptions
-	eventManager.subscribe( TOPIC.CONTROLS.ACTIVE, this._onActive );
-
-	// events
-	global.document.addEventListener( "lockPointer", this._onLockPointer );
-	global.document.addEventListener( "releasePointer", this._onReleasePointer );
-
-	global.document.addEventListener( "mousemove", this._onMouseMove );
-	global.document.addEventListener( "keydown", this._onKeyDown );
-	global.document.addEventListener( "keyup", this._onKeyUp );
-
-	global.document.addEventListener( "pointerlockchange", this._onPointerlockchange );
-	global.document.addEventListener( "mozpointerlockchange", this._onPointerlockchange );
-	global.document.addEventListener( "webkitpointerlockchange", this._onPointerlockchange );
-
-	global.document.addEventListener( "pointerlockerror", this._onPointerlockerror );
-	global.document.addEventListener( "mozpointerlockerror", this._onPointerlockerror );
-	global.document.addEventListener( "webkitpointerlockerror", this._onPointerlockerror );
-
-	// load and assign audio buffers for steps
-	audioManager.createAudioBufferList( [ "step1", "step2" ], function( bufferList ) {
-
-		// create new audios
-		var audioStep1 = audioManager.createDynamicSound( "controls.step1", bufferList[ 0 ], false, true );
-		var audioStep2 = audioManager.createDynamicSound( "controls.step2", bufferList[ 1 ], false, 1, true );
-
-		// add variations
-		audioStep1.addPitchVariation( function() {
-
-			return 0.9 + Math.random() * 0.4;
-		} );
-		audioStep2.addPitchVariation( function() {
-
-			return 0.9 + Math.random() * 0.4;
-		} );
-
-		// assign audios to camera
-		camera.add( audioStep1 );
-		camera.add( audioStep2 );
-
-	} ).load();
-};
-
-/**
- * Central update method called within the render-loop.
+ * This method calculates the motions of the camera.
  * 
  * @param {number} delta - Elapsed time between two frames.
+ * @param {THREE.Vector3} displacement - This vector contains the player's
+ * displacement of the current frame.
  */
-FirstPersonControls.prototype.update = function( delta ) {
+FirstPersonControls.prototype.calculateCameraMotion = ( function() {
 
-	if ( this._isControlsActive === true && this.isActionInProgress === false )
-	{
-		this._translate( delta );
-		
-		this._animateCrouch();
+	var audioStep1, audioStep2;
 
-		this._animateRun();
+	return function( delta, displacement ) {
 
-		this._publishPlayerStatus();
-	}
-	else
-	{
-		// reset camera position
-		this._translateCameraToOrigin();
-	}
-};
+		var motion;
 
-/**
- * This method does the actual translation of the controls.
- * 
- * @param {number} delta - Elapsed time between two frames.
- */
-FirstPersonControls.prototype._translate = ( function() {
-
-	var velocity = new THREE.Vector3();
-	var normalizedMovement = new THREE.Vector3();
-	var lastPosition = new THREE.Vector3();
-
-	return function( delta ) {
-
-		// store last position
-		lastPosition.copy( this._yawObject.position );
-
-		// convert booleans to one number per axis (1, 0, -1)
-		this._move = Number( this._moveBackward ) - Number( this._moveForward );
-		this._strafe = Number( this._moveRight ) - Number( this._moveLeft );
-
-		// calculate velocity
-		velocity.z = this._calculateMoveVelocity( delta );
-		velocity.x = this._calculateStrafeVelocity( delta );
-
-		// initialize movement vectors
-		normalizedMovement.z = this._move;
-		normalizedMovement.x = this._strafe;
-
-		// this prevents, that the player moves to fast when
-		// e.g. forward and right are pressed simultaneously
-		normalizedMovement.normalize().multiply( velocity );
-
-		// actual translation of the controls position
-		this._yawObject.translateX( normalizedMovement.x );
-		this._yawObject.translateY( normalizedMovement.y );
-		this._yawObject.translateZ( normalizedMovement.z );
-
-		if ( this._isCollisionHandlingRequired() === true )
+		// load audios if necessary
+		if ( audioStep1 === undefined || audioStep2 === undefined )
 		{
-			// restore last position
-			this._yawObject.position.copy( lastPosition );
+			audioStep1 = audioManager.getDynamicAudio( "controls.step1" );
+			audioStep2 = audioManager.getDynamicAudio( "controls.step2" );
+		}
 
-			// reset camera position
-			this._translateCameraToOrigin();
+		if ( this._move !== 0 || this._strafe !== 0 )
+		{
+			// get motion factor from displacement
+			this._motionFactor += delta * displacement.length();
+
+			// calculate frequency for sine curve
+			this._calculateFrequency();
+
+			// calculate actual motion
+			motion = Math.sin( this._motionFactor * this._frequency + this._phase );
+
+			// play audio steps
+			if ( motion < this._motionLastValue && this._motionCurveUp === true )
+			{
+				this._motionCurveUp = false;
+				audioStep1.play();
+			}
+			else if ( motion > this._motionLastValue && this._motionCurveUp === false )
+			{
+				this._motionCurveUp = true;
+				audioStep2.play();
+			}
+
+			// set values to camera
+			camera.position.y = Math.abs( motion ) * this._deflection;
+			camera.position.x = motion * this._deflection;
+
+			// store current motion for next calculation
+			this._motionLastValue = motion;
+
 		}
 		else
 		{
-			// calculate camera motions
-			this._calculateCameraMotion( normalizedMovement, delta );
+			// if player is not moving, reset camera
+			this.resetCamera();
 		}
+
 	};
 
 }() );
 
 /**
- * This method calculates the motions of the camera.
- * 
- * @param {THREE.Vector3} normalizedMovement - This vector contains the
- * translation of the current frame
- * @param {number} delta - Elapsed time between two frames.
+ * This method resets the camera to its native position. The reset is done with
+ * a simple linear transition.
  */
-FirstPersonControls.prototype._calculateCameraMotion = function( normalizedMovement, delta ) {
-
-	var motion, audioStep1, audioStep2;
-
-	audioStep1 = audioManager.getDynamicAudio( "controls.step1" );
-	audioStep2 = audioManager.getDynamicAudio( "controls.step2" );
-
-	if ( this._move !== 0 || this._strafe !== 0 )
-	{
-		// get motion factor from normalized movement
-		this._motionFactor += delta * normalizedMovement.length();
-
-		// calculate frequency for sine curve
-		this._calculateFrequency();
-
-		// calculate actual motion
-		motion = Math.sin( this._motionFactor * this._frequency + this._phase );
-
-		// play audio steps
-		if ( motion < this._motionLastValue && this._motionCurveUp === true )
-		{
-			this._motionCurveUp = false;
-			audioStep1.play();
-		}
-		else if ( motion > this._motionLastValue && this._motionCurveUp === false )
-		{
-			this._motionCurveUp = true;
-			audioStep2.play();
-		}
-
-		// set values to camera
-		camera.position.y = Math.abs( motion ) * this._deflection;
-		camera.position.x = motion * this._deflection;
-
-		// store current motion for next calculation
-		this._motionLastValue = motion;
-
-	}
-	else
-	{
-		// if player is not moving, translate camera back to origin
-		this._translateCameraToOrigin();
-	}
-
-};
-
-/**
- * Calculates a new sine frequency for camera motion. It ensures, that the new
- * sine cuvre is in-sync to the old one.
- */
-FirstPersonControls.prototype._calculateFrequency = function() {
-
-	var current, next;
-
-	if ( this._frequency !== this._lastFrequency )
-	{
-		current = ( this._motionFactor * this._lastFrequency + this._phase ) % utils.TWO_PI;
-		next = ( this._motionFactor * this._frequency ) % utils.TWO_PI;
-
-		this._phase = current - next;
-		this._lastFrequency = this._frequency;
-	}
-	
-};
-
-/**
- * This method resets the camera to its origin. The reset is done with a simple
- * linear transition.
- */
-FirstPersonControls.prototype._translateCameraToOrigin = function() {
+FirstPersonControls.prototype.resetCamera = function() {
 
 	// only translate if necessary
 	if ( camera.position.x !== 0 || camera.position.y !== 0 )
@@ -544,6 +400,120 @@ FirstPersonControls.prototype._translateCameraToOrigin = function() {
 		this._motionLastValue = 0;
 		this._phase = 0;
 	}
+};
+
+/**
+ * Initializes the controls
+ */
+FirstPersonControls.prototype._init = function() {
+	
+	self = this;
+	
+	// set default height of the head
+	this._setHeight( FirstPersonControls.DEFAULT.HEIGHT );
+	
+	// build relationship
+	this._player.head.add( camera ); // camera -> head
+	
+	// the camera should look to positive z-axis by default
+	camera.rotation.set( 0, Math.PI, 0 );
+
+	// subscriptions
+	eventManager.subscribe( TOPIC.CONTROLS.CAPTURE, this._onCapture );
+	eventManager.subscribe( TOPIC.CONTROLS.LOCK, this._onLock );
+
+	// events
+	global.document.addEventListener( "lockPointer", this._onLockPointer );
+	global.document.addEventListener( "releasePointer", this._onReleasePointer );
+
+	global.document.addEventListener( "mousemove", this._onMouseMove );
+	global.document.addEventListener( "keydown", this._onKeyDown );
+	global.document.addEventListener( "keyup", this._onKeyUp );
+
+	global.document.addEventListener( "pointerlockchange", this._onPointerlockchange );
+	global.document.addEventListener( "mozpointerlockchange", this._onPointerlockchange );
+	global.document.addEventListener( "webkitpointerlockchange", this._onPointerlockchange );
+
+	global.document.addEventListener( "pointerlockerror", this._onPointerlockerror );
+	global.document.addEventListener( "mozpointerlockerror", this._onPointerlockerror );
+	global.document.addEventListener( "webkitpointerlockerror", this._onPointerlockerror );
+
+	// load and assign audio buffers for steps
+	audioManager.createAudioBufferList( [ "step1", "step2" ], function( bufferList ) {
+
+		// create new audios
+		var audioStep1 = audioManager.createDynamicSound( "controls.step1", bufferList[ 0 ], false, true );
+		var audioStep2 = audioManager.createDynamicSound( "controls.step2", bufferList[ 1 ], false, true );
+
+		// add variations
+		audioStep1.addPitchVariation( function() {
+
+			return 0.9 + Math.random() * 0.4;
+		} );
+		audioStep2.addPitchVariation( function() {
+
+			return 0.9 + Math.random() * 0.4;
+		} );
+
+		// assign audios to camera
+		camera.add( audioStep1 );
+		camera.add( audioStep2 );
+
+	} ).load();
+};
+
+/**
+ * This method does the actual translation of the controls.
+ * 
+ * @param {number} delta - Elapsed time between two frames.
+ * @param {THREE.Vector3} displacement -The displacement vector.
+ */
+FirstPersonControls.prototype._calculateMovement = ( function() {
+
+	var velocity = new THREE.Vector3();
+
+	return function( delta, displacement) {
+		
+		displacement.set( 0, 0, 0 );
+
+		// convert booleans to one number to determine the movement direction
+		this._move = Number( this._isMoveForward ) - Number( this._isMoveBackward );
+		this._strafe = Number( this._isMoveLeft ) - Number( this._isMoveRight );
+
+		// calculate velocity
+		velocity.z = this._calculateMoveVelocity( delta );
+		velocity.x = this._calculateStrafeVelocity( delta );
+
+		// assign move and strafe values to displacement vector
+		displacement.z = this._move;
+		displacement.x = this._strafe;
+		
+		// normalization prevents that the player moves to fast when
+		// e.g. forward and right are pressed simultaneously
+		displacement.normalize().multiply( velocity );
+		
+		return displacement;
+	};
+
+}() );
+
+/**
+ * Calculates a new sine frequency for camera motion. It ensures, that the new
+ * sine cuvre is in-sync to the old one.
+ */
+FirstPersonControls.prototype._calculateFrequency = function() {
+
+	var current, next;
+
+	if ( this._frequency !== this._lastFrequency )
+	{
+		current = ( this._motionFactor * this._lastFrequency + this._phase ) % utils.TWO_PI;
+		next = ( this._motionFactor * this._frequency ) % utils.TWO_PI;
+
+		this._phase = current - next;
+		this._lastFrequency = this._frequency;
+	}
+	
 };
 
 /**
@@ -612,102 +582,24 @@ FirstPersonControls.prototype._calculateStrafeVelocity = ( function() {
 }() );
 
 /**
- * This method calculates the height of the controls.
+ * Sets the height of the controls.
  * 
- * @param {number} distance - The distance between yawObject and ground.
+ * @param {number} height -  The height to set.
  */
-FirstPersonControls.prototype._calculateHeight = function( distance ) {
+FirstPersonControls.prototype._setHeight = function( height ) {
 
-	this._yawObject.position.y += ( this._height - distance );
+	this._player.head.position.y = height;
 };
 
 /**
- * Does the actual collision detection and returns a boolean value, that
- * indicates the collision status.
+ * Gets the height of the controls.
  * 
- * @returns {boolean} - Is there a collision after the latest movement?
+ * @returns {number} The control's height.
  */
-FirstPersonControls.prototype._isCollisionHandlingRequired = ( function() {
+FirstPersonControls.prototype._getHeight = function() {
 
-	var direction = new THREE.Vector3( 0, -1, 0 );
-
-	// mathematical representation of the player body
-	var boundingBox = new THREE.Box3(); 
-	
-	var center = new THREE.Vector3(); // center of body
-	var size = new THREE.Vector3(); // body size
-
-	return function() {
-		
-		var index, obstacle, numberOfObstacle, intersects;
-
-		if ( world.grounds.length !== 0 )
-		{
-			this._rayCaster.set( this._yawObject.position, direction );
-			this._rayCaster.far = FirstPersonControls.DEFAULT.HEIGHT + 1;
-
-			// first, check grounds
-			intersects = this._rayCaster.intersectObjects( world.grounds );
-
-			// if there is an intersection, the player's position is inside the
-			// level boundaries
-			// now check intersections between the player and obstacle objects
-			if ( intersects.length > 0 )
-			{
-				// before doing the intersection test with action objects
-				// update the player's bounding volume (AABB)
-
-				// adjust height
-				this._calculateHeight( intersects[ 0 ].distance );
-
-				// calculate center of the player
-				center.copy( this._yawObject.position );
-				center.y -= this._height * 0.5;
-
-				// calculate size of the player
-				size.set( 4, this._height, 4 );
-
-				// create bounding box
-				boundingBox.setFromCenterAndSize( center, size );
-
-				// get number of obstacles in the world
-				numberOfObstacle = world.getNumberOfObstacles();
-
-				// check obstacles
-				for ( index = 0; index < numberOfObstacle; index++ )
-				{
-					// retrieve obstacle
-					obstacle = world.getObstacle( index );
-
-					// regard only visible objects
-					if ( obstacle.mesh.visible === true )
-					{
-						// do collision detection
-						if ( obstacle.isIntersection( boundingBox ) === true )
-						{
-							// true, because there is a collision with an
-							// obstacle
-							return true;
-						}
-
-					}
-
-				}
-
-				// false, because there is no collision
-				return false;
-			}
-			else
-			{
-				// true, because the player is not over a ground
-				return true;
-			}
-
-		}
-
-	};
-
-}() );
+	return this._player.head.position.y;
+};
 
 /**
  * Handles the "crouch" command. Crouching decreases the height and movement
@@ -723,7 +615,7 @@ FirstPersonControls.prototype._handleCrouch = function() {
 
 	// save current timestamp and values for animation
 	this._animationStartTime = global.performance.now();
-	this._animationHeight = this._height;
+	this._animationHeight = this._getHeight();
 	this._animationMove = this._moveSpeed;
 	this._animationStrafe = this._strafeSpeed;
 	this._animationDeflection = this._deflection;
@@ -745,11 +637,21 @@ FirstPersonControls.prototype._handleRun = function( isRun ) {
 
 	// save current timestamp and values for animation
 	this._animationStartTime = global.performance.now();
-	this._animationHeight = this._height;
+	this._animationHeight = this._getHeight();
 	this._animationMove = this._moveSpeed;
 	this._animationStrafe = this._strafeSpeed;
 	this._animationDeflection = this._deflection;
 	this._animationFrequency = this._frequency;
+};
+
+/**
+ * Executes all animation methods of the controls.
+ */
+FirstPersonControls.prototype._animate = function(){
+	
+	this._animateCrouch();
+	
+	this._animateRun();
 };
 
 /**
@@ -760,8 +662,8 @@ FirstPersonControls.prototype._animateCrouch = function() {
 	var elapsed, factor, targetHeight, targetMove, targetStrafe, targetDeflection, targetFrequency, valueHeight, valueSpeed;
 
 	// animate only if necessary
-	if ( ( this._isCrouch === true && this._height > FirstPersonControls.CROUCH.HEIGHT ) || 
-		 ( this._isCrouch === false && this._isRun === false && this._height < FirstPersonControls.DEFAULT.HEIGHT ) )
+	if ( ( this._isCrouch === true && this._getHeight() > FirstPersonControls.CROUCH.HEIGHT ) || 
+		 ( this._isCrouch === false && this._isRun === false && this._getHeight() < FirstPersonControls.DEFAULT.HEIGHT ) )
 	{
 		// calculate elapsed time
 		elapsed = ( global.performance.now() - this._animationStartTime ) * FirstPersonControls.CROUCH.ANIMATION.DURATION;
@@ -781,7 +683,7 @@ FirstPersonControls.prototype._animateCrouch = function() {
 		targetFrequency = this._isCrouch === true ? FirstPersonControls.CROUCH.CAMERA.FREQUENCY : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY;
 
 		// do transition
-		this._height = this._animationHeight + ( targetHeight - this._animationHeight ) * valueHeight;
+		this._setHeight( this._animationHeight + ( targetHeight - this._animationHeight ) * valueHeight );
 		this._moveSpeed = this._animationMove + ( targetMove - this._animationMove ) * valueSpeed;
 		this._strafeSpeed = this._animationStrafe + ( targetStrafe - this._animationStrafe ) * valueSpeed;
 		this._deflection = this._animationDeflection + ( targetDeflection - this._animationDeflection ) * valueSpeed;
@@ -819,7 +721,7 @@ FirstPersonControls.prototype._animateRun = function() {
 		targetFrequency = this._isRun === true ? FirstPersonControls.RUN.CAMERA.FREQUENCY : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY;
 
 		// do transition
-		this._height = this._animationHeight + ( targetHeight - this._animationHeight ) * valueHeight;
+		this._setHeight(  this._animationHeight + ( targetHeight - this._animationHeight ) * valueHeight );
 		this._moveSpeed = this._animationMove + ( targetMove - this._animationMove ) * valueSpeed;
 		this._strafeSpeed = this._animationStrafe + ( targetStrafe - this._animationStrafe ) * valueSpeed;
 		this._deflection = this._animationDeflection + ( targetDeflection - this._animationDeflection ) * valueSpeed;
@@ -829,29 +731,6 @@ FirstPersonControls.prototype._animateRun = function() {
 };
 
 /**
- * Publish the world information of the player for multiplayer.
- */
-FirstPersonControls.prototype._publishPlayerStatus = ( function() {
-
-	var position = new THREE.Vector3();
-	var quaternion = new THREE.Quaternion();
-	var scale = new THREE.Vector3();
-
-	return function() {
-
-		// The pitch-object contains the entire position and rotation
-		// values of the player
-		this._pitchObject.matrixWorld.decompose( position, quaternion, scale );
-
-		eventManager.publish( TOPIC.MULTIPLAYER.PLAYER, {
-			position : position,
-			quaternion : quaternion
-		} );
-	};
-
-}() );
-
-/**
  * Resets the movement. This avoids problems with moving players, even when they
  * hit no keys. This could happen, when you switch to main menu with pressed
  * wasd keys. The actual problem is, that the "keyup" event is not fired under
@@ -859,21 +738,39 @@ FirstPersonControls.prototype._publishPlayerStatus = ( function() {
  */
 FirstPersonControls.prototype._reset = function() {
 
-	this._moveForward = false;
-	this._moveBackward = false;
-	this._moveLeft = false;
-	this._moveRight = false;
+	this._isMoveForward = false;
+	this._isMoveBackward = false;
+	this._isMoveLeft = false;
+	this._isMoveRight = false;
+	this._isRun = false;
 };
 
 /**
- * Sets the control status.
+ * Handles the activation message for the controls. Sets the flag that
+ * indicates if the HTML5 pointer lock is active and the mouse pointer
+ * is captured.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-FirstPersonControls.prototype._onActive = function( message, data ) {
+FirstPersonControls.prototype._onCapture = function( message, data ) {
 
-	self._isControlsActive = data.isActive;
+	self.isCaptured = data.isCaptured;
+
+	self._reset();
+};
+
+/**
+ * Handles the lock message of the controls. Sets the flag that 
+ * indicates if the pointer lock is active, but the controls are
+ * blocked for the player.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ */
+FirstPersonControls.prototype._onLock = function( message, data ) {
+
+	self.isLocked = data.isLocked;
 
 	self._reset();
 };
@@ -883,7 +780,7 @@ FirstPersonControls.prototype._onActive = function( message, data ) {
  */
 FirstPersonControls.prototype._onLockPointer = function() {
 
-	self._isUiElementActive = false;
+	self.isUiElementActive = false;
 
 	var element = global.document.querySelector( "canvas" );
 
@@ -899,7 +796,7 @@ FirstPersonControls.prototype._onLockPointer = function() {
  */
 FirstPersonControls.prototype._onReleasePointer = function() {
 
-	self._isUiElementActive = true;
+	self.isUiElementActive = true;
 
 	// Ask the browser to release the pointer
 	global.document.exitPointerLock = global.document.exitPointerLock || global.document.mozExitPointerLock || global.document.webkitExitPointerLock;
@@ -916,9 +813,9 @@ FirstPersonControls.prototype._onPointerlockchange = function() {
 
 	if ( global.document.pointerLockElement === requestedElement || global.document.mozPointerLockElement === requestedElement || global.document.webkitPointerLockElement === requestedElement )
 	{
-		self._isControlsActive = true;
+		self.isCaptured = true;
 
-		if ( self._isUiElementActive === false )
+		if ( self.isUiElementActive === false )
 		{
 			userInterfaceManager.hideMenu();
 		}
@@ -926,9 +823,9 @@ FirstPersonControls.prototype._onPointerlockchange = function() {
 	}
 	else
 	{
-		self._isControlsActive = false;
+		self.isCaptured = false;
 
-		if ( self._isUiElementActive === false )
+		if ( self.isUiElementActive === false )
 		{
 			userInterfaceManager.showMenu();
 		}
@@ -947,7 +844,7 @@ FirstPersonControls.prototype._onPointerlockerror = function( event ) {
 
 /**
  * Detects any mouse movements, when pointer lock is active. Then it calculates
- * the rotation of yaw and pitch object.
+ * the rotation of player and head object.
  * 
  * @param {object} event - Default event object.
  */
@@ -955,18 +852,18 @@ FirstPersonControls.prototype._onMouseMove = function( event ) {
 
 	var movementX, movementY;
 
-	if ( self._isControlsActive === true && self.isActionInProgress === false )
+	if ( self.isCaptured === true && self.isLocked === false )
 	{
 		// capture mouse movement
 		movementX = event.movementX || event.mozMovementX || 0;
 		movementY = event.movementY || event.mozMovementY || 0;
 
-		// manipulate rotation of yaw and pitch object
-		self._yawObject.rotation.y -= movementX * ( settingsManager.getMouseSensitivity() * 0.0001 );
-		self._pitchObject.rotation.x -= movementY * ( settingsManager.getMouseSensitivity() * 0.0001 );
+		// manipulate rotation of player and head
+		self._player.rotation.y -= movementX * ( settingsManager.getMouseSensitivity() * 0.0001 );
+		self._player.head.rotation.x += movementY * ( settingsManager.getMouseSensitivity() * 0.0001 );
 
 		// prevent "loop" of x-axis
-		self._pitchObject.rotation.x = Math.max( - utils.HALF_PI, Math.min( utils.HALF_PI, self._pitchObject.rotation.x ) );
+		self._player.head.rotation.x = Math.max( - utils.HALF_PI, Math.min( utils.HALF_PI, self._player.head.rotation.x ) );
 	}
 
 };
@@ -978,28 +875,28 @@ FirstPersonControls.prototype._onMouseMove = function( event ) {
  */
 FirstPersonControls.prototype._onKeyDown = function( event ) {
 
-	if ( self._isControlsActive === true )
+	if ( self.isCaptured === true )
 	{
 		switch ( event.keyCode )
 		{
 			case 87:
 				// w
-				self._moveForward = true;
+				self._isMoveForward = true;
 				break;
 
 			case 65:
 				// a
-				self._moveLeft = true;
+				self._isMoveLeft = true;
 				break;
 
 			case 83:
 				// s
-				self._moveBackward = true;
+				self._isMoveBackward = true;
 				break;
 
 			case 68:
 				// d
-				self._moveRight = true;
+				self._isMoveRight = true;
 				break;
 
 			case 67:
@@ -1015,7 +912,7 @@ FirstPersonControls.prototype._onKeyDown = function( event ) {
 			case 69:
 				// e
 				eventManager.publish( TOPIC.ACTION.INTERACTION, {
-					position : self.getPosition(),
+					position : self._player.head.getWorldPosition(),
 					direction : self.getDirection()
 				} );
 				break;
@@ -1040,28 +937,28 @@ FirstPersonControls.prototype._onKeyDown = function( event ) {
  */
 FirstPersonControls.prototype._onKeyUp = function( event ) {
 
-	if ( self._isControlsActive === true )
+	if ( self.isCaptured === true )
 	{
 		switch ( event.keyCode )
 		{
 			case 87:
 				// w
-				self._moveForward = false;
+				self._isMoveForward = false;
 				break;
 
 			case 65:
 				// a
-				self._moveLeft = false;
+				self._isMoveLeft = false;
 				break;
 
 			case 83:
 				// a
-				self._moveBackward = false;
+				self._isMoveBackward = false;
 				break;
 
 			case 68:
 				// d
-				self._moveRight = false;
+				self._isMoveRight = false;
 				break;
 
 			case 16:
@@ -1131,4 +1028,4 @@ FirstPersonControls.RUN = {
 	}
 };
 
-module.exports = new FirstPersonControls();
+module.exports = FirstPersonControls;

@@ -19,7 +19,8 @@ var TOPIC = {
 		RESIZE : "application.resize"
 	},
 	CONTROLS : {
-		ACTIVE : "controls.active"
+		CAPTURE : "controls.capture",
+		LOCK : "controls.lock"
 	},
 	MULTIPLAYER : {
 		CHAT : "multiplayer.chat",

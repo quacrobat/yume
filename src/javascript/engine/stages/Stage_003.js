@@ -22,9 +22,9 @@ Stage.prototype.setup = function() {
 
 	StageBase.prototype.setup.call( this );
 
-	// setup controls
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+	// player setup
+	this.world.player.position.set( 0, 0, -75 );
+	this.world.player.setDirection( new THREE.Vector3( 0, 0, 1 ) );
 
 	// load texts
 	this.textManager.load( this.stageId );
@@ -61,18 +61,18 @@ Stage.prototype.setup = function() {
 	} );
 
 	// add trigger for color change
-	var colorTrigger = this.actionManager.createTrigger( "Color Change", 10, function() {
+	var colorTrigger = this.actionManager.createTrigger( "Color Change", new THREE.Vector3( -20, 0, 0 ), 10, false, function() {
 
 		colorMesh( interactiveBox );
 	} );
-	colorTrigger.position.set( -20, 0, 0 );
-	this.world.addObject3D( colorTrigger );
 
-	// visualize trigger with circle
-	var triggerCircle = new THREE.Mesh( new THREE.CircleGeometry( 10 ), new THREE.MeshBasicMaterial( {
-		wireframe : true
-	} ) );
-	colorTrigger.add( triggerCircle );
+	// add helper object
+	var helperGeometry = new THREE.SphereBufferGeometry( colorTrigger.boundingSphere.radius, 20, 20 );
+	var helperMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe: true } );
+	
+	var helper = new THREE.Mesh( helperGeometry, helperMaterial );
+	helper.position.copy(  colorTrigger.boundingSphere.center );
+	this.world.addObject3D( helper );
 
 	// add sign
 	var signLoader = new JSONLoader();
@@ -96,12 +96,10 @@ Stage.prototype.setup = function() {
 	} );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
 
-		self._changeStage( "004", true );
+		self._changeStage( "004", true );	
 	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
 
 	// light
 	var ambientLight = new THREE.AmbientLight( 0x111111 );

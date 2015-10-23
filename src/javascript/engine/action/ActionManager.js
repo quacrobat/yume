@@ -82,10 +82,9 @@ function ActionManager() {
 /**
  * Updates the action manager and all action objects.
  * 
- * @param {THREE.Vector3} position - The position of the player.
- * @param {THREE.Vector3} direction - The direction the player is looking at.
+ * @param {Player} player - The player object.
  */
-ActionManager.prototype.update = function( position, direction ) {
+ActionManager.prototype.update = function( player ) {
 
 	var index;
 
@@ -100,13 +99,15 @@ ActionManager.prototype.update = function( position, direction ) {
 	{
 		this.staticObjects[ index ].update();
 	}
+	
+	// update triggers
+	for ( index = 0; index < this.triggers.length; index++ )
+	{
+		this.triggers[ index ].update( player.boundingVolume );
+	}
 
 	// check interaction objects
-	this._checkInteraction( position, direction );
-
-	// check trigger objects
-	this._checkTrigger( position );
-
+	this._checkInteraction( player.getHeadPosition(), player.getDirection() );
 };
 
 /**
@@ -147,14 +148,16 @@ ActionManager.prototype.createStatic = function( mesh, collisionType ) {
  * Creates a new trigger and stores it to the respective internal array.
  * 
  * @param {string} label - The label of the trigger.
- * @param {THREE.Object3D} object - The radius of the trigger.
+ * @param {THREE.Vector3} position - The position of the trigger.
+ * @param {number} radius - The radius of the trigger.
+ * @param {boolean} isOnetime - Should the trigger run it's action just one time?
  * @param {function} actionCallback - The action callback.
  * 
  * @returns {ActionTrigger} The new action trigger.
  */
-ActionManager.prototype.createTrigger = function( label, radius, actionCallback ) {
+ActionManager.prototype.createTrigger = function( label, position, radius, isOnetime, actionCallback ) {
 
-	var trigger = new ActionTrigger( radius, new Action( Action.TYPES.SCRIPT, actionCallback, label ) );
+	var trigger = new ActionTrigger( position, radius, isOnetime, new Action( Action.TYPES.SCRIPT, actionCallback, label ) );
 	this.addTrigger( trigger );
 	return trigger;
 };
@@ -311,59 +314,6 @@ ActionManager.prototype._checkInteraction = function( position, direction ) {
 	}
 
 };
-
-/**
- * This method checks the execution of triggers. If the player's position is above a trigger,
- * the logic runs the corresponding action callback.
- * 
- * @param {THREE.Vector3} position - The position of the player.
- */
-ActionManager.prototype._checkTrigger = ( function() {
-
-	var direction = new THREE.Vector3( 0, -1, 0 );
-	var isInRadius = false;
-
-	return function( position ) {
-		
-		var intersects, trigger;
-
-		// prepare raycaster
-		this._raycaster.set( position, direction );
-		this._raycaster.far = Infinity;
-
-		// intersection test
-		intersects = this._raycaster.intersectObjects( this.triggers );
-
-		if ( intersects.length > 0 )
-		{
-			// get the closest trigger
-			trigger = intersects[ 0 ].object;
-			
-			// the action property must always set
-			if ( trigger.action !== undefined )
-			{
-				// if the player enters the trigger and the corresponding action is active, run it
-				if ( isInRadius === false && trigger.action.isActive === true )
-				{
-					trigger.action.run();
-
-					isInRadius = true;
-
-					logger.log( "INFO: ActionManager: Interaction with trigger object. Action executed." );
-				}
-			}
-			else
-			{
-				throw "ERROR: ActionManager: No action defined for trigger.";
-			}
-		}
-		else
-		{
-			isInRadius = false;
-		}
-	};
-
-}() );
 
 /**
  * This method is used to handle the interaction command of the player.

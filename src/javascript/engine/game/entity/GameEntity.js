@@ -40,6 +40,13 @@ function GameEntity( object3D ) {
 			enumerable : true,
 			writable : true
 		},
+		// this will be used to determine the lifetime of a game entity
+		scope : {
+			value : GameEntity.SCOPE.STAGE,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
 		// the following are shortcuts to object3D properties
 		position : {
 			configurable : false,
@@ -113,6 +120,11 @@ GameEntity.prototype.update = function( delta ) {
 GameEntity.prototype.handleMessage = function( telegram ) {
 
 	return false;
+};
+
+GameEntity.SCOPE = {
+	WORLD : 0,
+	STAGE : 1
 };
 
 module.exports = GameEntity;

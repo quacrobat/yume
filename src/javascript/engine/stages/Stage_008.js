@@ -22,9 +22,9 @@ Stage.prototype.setup = function() {
 
 	StageBase.prototype.setup.call( this );
 
-	// controls setup
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+	// player setup
+	this.world.player.position.set( 0, 0, -75 );
+	this.world.player.setDirection( new THREE.Vector3( 0, 0, 1 ) );
 
 	// load texts
 	this.textManager.load( this.stageId );
@@ -103,12 +103,10 @@ Stage.prototype.setup = function() {
 	this.world.addGround( ramp );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 7.5, 75 ), 10, true, function() {
 
-		self._changeStage( "009", true );
+		self._changeStage( "009", true );	
 	} );
-	stageTrigger.position.set( 0, 7.5, 75 );
-	this.world.addObject3D( stageTrigger );
 
 	// start rendering
 	this._render();

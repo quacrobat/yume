@@ -13,11 +13,12 @@ var environment = require( "./Environment" );
 var renderer = require( "./Renderer" );
 var camera = require( "./Camera" );
 var system = require( "./System" );
-var controls = require( "../controls/FirstPersonControls" );
+var world = require( "./World" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var saveGameManager = require( "../etc/SaveGameManager" );
 var multiplayerManager = require( "../etc/MultiplayerManager" );
 var networkManager = require( "../network/NetworkManager" );
+
 
 
 /**
@@ -64,7 +65,7 @@ Bootstrap.prototype._initEngine = function() {
 		// initialize basic components
 		renderer.init();
 		camera.init();
-		controls.init();
+		world.init();
 		userInterfaceManager.init();
 
 		// initialize network and multiplayer manager only if necessary

@@ -10,7 +10,6 @@
 var THREE = require( "three" );
 
 var logger = require( "../../core/Logger" );
-var Path = require( "./Path" );
 
 /**
  * Creates a steering behaviors instance.
@@ -75,7 +74,7 @@ function SteeringBehaviors( vehicle ) {
 		},
 		// the list of waypoints to follow
 		path : {
-			value : new Path(),
+			value : null,
 			configurable : false,
 			enumerable : true,
 			writable : true

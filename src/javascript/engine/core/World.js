@@ -11,17 +11,23 @@ var THREE = require( "three" );
 var scene = require( "./Scene" );
 var actionManager = require( "../action/ActionManager" );
 var entityManager = require( "../game/entity/EntityManager" );
+var GameEntity = require( "../game/entity/GameEntity" );
 
 /**
  * Creates a world object.
  * 
  * @constructor
- * 
  */
 function World() {
 
 	Object.defineProperties( this, {
 
+		player : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true,
+		},
 		scene : {
 			value : scene,
 			configurable : false,
@@ -45,10 +51,25 @@ function World() {
 }
 
 /**
+ * Initializes the world.
+ */
+World.prototype.init = function() {
+
+	// create player instance
+	this.player = entityManager.createPlayer( this );
+
+	// set the scope of this entity to WORLD. it won't get deleted within a
+	// stage change
+	this.player.scope = GameEntity.SCOPE.WORLD;
+
+	// add player to world
+	this.addObject3D( this.player.object3D );
+};
+
+/**
  * Adds a 3D object to the internal scene.
  * 
  * @param {THREE.Mesh} ground - The ground to add.
- * 
  */
 World.prototype.addObject3D = function( object ) {
 
@@ -59,7 +80,6 @@ World.prototype.addObject3D = function( object ) {
  * Removes a 3D object from the internal scene.
  * 
  * @param {THREE.Mesh} ground - The ground to add.
- * 
  */
 World.prototype.removeObject3D = function( object ) {
 
@@ -68,7 +88,6 @@ World.prototype.removeObject3D = function( object ) {
 
 /**
  * Removes all 3D object from the internal scene.
- * 
  */
 World.prototype.removeObjects3D = function( object ) {
 
@@ -79,7 +98,6 @@ World.prototype.removeObjects3D = function( object ) {
  * Adds a ground to the internal array.
  * 
  * @param {THREE.Mesh} ground - The ground to add.
- * 
  */
 World.prototype.addGround = function( ground ) {
 
@@ -118,7 +136,6 @@ World.prototype.removeGrounds = function() {
  * Adds a wall to the internal array.
  * 
  * @param {THREE.Mesh} wall - The wall to add.
- * 
  */
 World.prototype.addWall = function( wall ) {
 
@@ -158,7 +175,6 @@ World.prototype.removeWalls = function() {
  * 
  * @param {number} index - The index of the obstacle.
  * @param {object} obstacle - The target object.
- * 
  */
 World.prototype.getObstacle = function( index ) {
 

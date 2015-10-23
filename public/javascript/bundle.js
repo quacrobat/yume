@@ -36191,10 +36191,9 @@ function ActionManager() {
 /**
  * Updates the action manager and all action objects.
  * 
- * @param {THREE.Vector3} position - The position of the player.
- * @param {THREE.Vector3} direction - The direction the player is looking at.
+ * @param {Player} player - The player object.
  */
-ActionManager.prototype.update = function( position, direction ) {
+ActionManager.prototype.update = function( player ) {
 
 	var index;
 
@@ -36209,13 +36208,15 @@ ActionManager.prototype.update = function( position, direction ) {
 	{
 		this.staticObjects[ index ].update();
 	}
+	
+	// update triggers
+	for ( index = 0; index < this.triggers.length; index++ )
+	{
+		this.triggers[ index ].update( player.boundingVolume );
+	}
 
 	// check interaction objects
-	this._checkInteraction( position, direction );
-
-	// check trigger objects
-	this._checkTrigger( position );
-
+	this._checkInteraction( player.getHeadPosition(), player.getDirection() );
 };
 
 /**
@@ -36256,14 +36257,16 @@ ActionManager.prototype.createStatic = function( mesh, collisionType ) {
  * Creates a new trigger and stores it to the respective internal array.
  * 
  * @param {string} label - The label of the trigger.
- * @param {THREE.Object3D} object - The radius of the trigger.
+ * @param {THREE.Vector3} position - The position of the trigger.
+ * @param {number} radius - The radius of the trigger.
+ * @param {boolean} isOnetime - Should the trigger run it's action just one time?
  * @param {function} actionCallback - The action callback.
  * 
  * @returns {ActionTrigger} The new action trigger.
  */
-ActionManager.prototype.createTrigger = function( label, radius, actionCallback ) {
+ActionManager.prototype.createTrigger = function( label, position, radius, isOnetime, actionCallback ) {
 
-	var trigger = new ActionTrigger( radius, new Action( Action.TYPES.SCRIPT, actionCallback, label ) );
+	var trigger = new ActionTrigger( position, radius, isOnetime, new Action( Action.TYPES.SCRIPT, actionCallback, label ) );
 	this.addTrigger( trigger );
 	return trigger;
 };
@@ -36422,59 +36425,6 @@ ActionManager.prototype._checkInteraction = function( position, direction ) {
 };
 
 /**
- * This method checks the execution of triggers. If the player's position is above a trigger,
- * the logic runs the corresponding action callback.
- * 
- * @param {THREE.Vector3} position - The position of the player.
- */
-ActionManager.prototype._checkTrigger = ( function() {
-
-	var direction = new THREE.Vector3( 0, -1, 0 );
-	var isInRadius = false;
-
-	return function( position ) {
-		
-		var intersects, trigger;
-
-		// prepare raycaster
-		this._raycaster.set( position, direction );
-		this._raycaster.far = Infinity;
-
-		// intersection test
-		intersects = this._raycaster.intersectObjects( this.triggers );
-
-		if ( intersects.length > 0 )
-		{
-			// get the closest trigger
-			trigger = intersects[ 0 ].object;
-			
-			// the action property must always set
-			if ( trigger.action !== undefined )
-			{
-				// if the player enters the trigger and the corresponding action is active, run it
-				if ( isInRadius === false && trigger.action.isActive === true )
-				{
-					trigger.action.run();
-
-					isInRadius = true;
-
-					logger.log( "INFO: ActionManager: Interaction with trigger object. Action executed." );
-				}
-			}
-			else
-			{
-				throw "ERROR: ActionManager: No action defined for trigger.";
-			}
-		}
-		else
-		{
-			isInRadius = false;
-		}
-	};
-
-}() );
-
-/**
  * This method is used to handle the interaction command of the player.
  * 
  * @param {string} message - The message topic of the subscription.
@@ -36496,7 +36446,7 @@ ActionManager.prototype._onInteraction = function( message, data ) {
 };
 
 module.exports = new ActionManager();
-},{"../core/Logger":21,"../messaging/EventManager":65,"../messaging/Topic":67,"../ui/UserInterfaceManager":98,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
+},{"../core/Logger":21,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":99,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
 /**
  * @file The ActionTrigger is a static trigger for actions.
  * 
@@ -36507,6 +36457,7 @@ module.exports = new ActionManager();
 
 var THREE = require( "three" );
 
+var logger = require( "../core/Logger" );
 var system = require( "../core/System" );
 
 /**
@@ -36515,59 +36466,154 @@ var system = require( "../core/System" );
  * circle geometry.
  * 
  * @constructor
- * @augments THREE.Mesh
  * 
+ * @param {THREE.Vector3} position - The position of the trigger.
  * @param {number} radius - The radius of the trigger.
+ * @param {boolean} isOnetime - Should the trigger run it's action just one time?
  * @param {Action} action - The action, that should be executed.
  */
-function ActionTrigger( radius, action ) {
-
-	THREE.Mesh.call( this );
+function ActionTrigger( position, radius, isOnetime, action ) {
 
 	Object.defineProperties( this, {
-		type : {
-			value : "ActionTrigger",
+		boundingSphere : {
+			value : new THREE.Sphere( position, radius ),
 			configurable : false,
 			enumerable : true,
 			writable : false
-		},
-		radius : {
-			value : radius,
-			configurable : false,
-			enumerable : true,
-			writable : true
 		},
 		action : {
 			value : action,
 			configurable : false,
 			enumerable : true,
 			writable : true
-		}
+		},
+		// indicates, if the player is inside the trigger
+		isInRadius : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// indicates, if the trigger is executed just one time
+		isOnetime: {
+			value : isOnetime|| false,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
 	} );
-
-	// by default, trigger is parallel to the floor
-	this.rotation.x = -0.5 * Math.PI;
-
-	// apply geometry
-	this.geometry = new THREE.CircleGeometry( this.radius );
-
-	// hide default material
-	this.material.visible = false;
-
-	// show wireframe only in dev mode
-	if ( system.isDevModeActive === true )
-	{
-		this.material.visible = true;
-		this.material.wireframe = true;
-		this.material.color = new THREE.Color( 0xffffff );
+	
+	// in dev mode provide a mesh to visualize the trigger
+	if( system.isDevModeActive === true ){
+		
+		var geometry = new THREE.SphereBufferGeometry( radius, 10, 10 );
+		var material = new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe: true } );
+		
+		this.object3D = new THREE.Mesh( geometry, material);
+		this.object3D.position.copy( position );
 	}
 }
 
-ActionTrigger.prototype = Object.create( THREE.Mesh.prototype );
-ActionTrigger.prototype.constructor = ActionTrigger;
+/**
+ * The update method checks if the trigger should execute it's action.
+ * 
+ * @param {THREE.Box} boundingBox - The bounding volume to test.
+ */
+ActionTrigger.prototype.update = ( function() {
+
+	var closestPoint = new THREE.Vector3();
+
+	return function( boundingBox ) {
+
+		// the action property must always be set
+		if ( this.action !== undefined )
+		{
+			// only process if the action is active
+			if ( this.action.isActive === true )
+			{
+				boundingBox.clampPoint( this.boundingSphere.center, closestPoint );
+
+				// only process if the given bounding volume intersects with
+				// the trigger
+				if ( closestPoint.distanceToSquared( this.boundingSphere.center ) <= ( this.boundingSphere.radius * this.boundingSphere.radius ) )
+				{
+					// if the bounding volume is not already inside the trigger,
+					// run the corresponding action
+					if ( this.isInRadius === false )
+					{
+						// run the action
+						this.action.run();
+
+						this.isInRadius = true;
+
+						logger.log( "INFO: ActionTrigger: Interaction with trigger. Action executed." );
+						
+						// if the "isOnetime" flag is set, deactivate the trigger action
+						if ( this.isOnetime === true )
+						{
+							this.action.isActive = false;
+						}
+					}
+				}
+				else
+				{
+					// the bounding volume is not inside the trigger, so it's
+					// ready to run it's action again
+					this.isInRadius = false;
+				}
+			}
+		}
+		else
+		{
+			throw "ERROR: ActionTrigger: No action defined for trigger.";
+		}
+
+	};
+
+}() );
+
+/**
+ * Returns the position of the trigger.
+ * 
+ * @returns {THREE.Vector3} The position of the trigger.
+ */
+ActionTrigger.prototype.getPosition = function(){
+	
+	return this.boundingSphere.center;
+};
+
+/**
+ * Sets the position of the trigger. 
+ * 
+ * @param {THREE.Vector3} position - The position to set.
+ */
+ActionTrigger.prototype.setPosition = function( position ){
+	
+	this.boundingSphere.center.copy( position );
+};
+
+/**
+ * Returns the radius of the trigger. 
+ * 
+ * @returns {number} The radius of the trigger.
+ */
+ActionTrigger.prototype.getRadius = function(){
+	
+	return this.boundingSphere.radius;
+};
+
+/**
+ * Sets the radius of the trigger. 
+ * 
+ * @param {number} radius - The radius to set.
+ */
+ActionTrigger.prototype.setRadius = function( radius ){
+	
+	this.boundingSphere.radius.copy( radius );
+};
 
 module.exports = ActionTrigger;
-},{"../core/System":27,"three":1}],7:[function(require,module,exports){
+},{"../core/Logger":21,"../core/System":27,"three":1}],7:[function(require,module,exports){
 /**
  * @file The prototype InteractiveObject enables ordinary 3D-Objects to be
  * interactive. Any interactive object is part of the collision-detection logic
@@ -38030,7 +38076,7 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 
 module.exports = AudioBufferList;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":65,"../messaging/Topic":67}],14:[function(require,module,exports){
+},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68}],14:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype holds the central Web Audio context and manages the
@@ -38485,7 +38531,7 @@ AudioManager.prototype._onErrorBackgroundMusic = function() {
 
 module.exports = new AudioManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Camera":19,"../core/Logger":21,"../messaging/EventManager":65,"../messaging/Topic":67,"./AudioBufferList":13,"./AudioListener":14,"./DynamicAudio":16}],16:[function(require,module,exports){
+},{"../core/Camera":19,"../core/Logger":21,"../messaging/EventManager":66,"../messaging/Topic":68,"./AudioBufferList":13,"./AudioListener":14,"./DynamicAudio":16}],16:[function(require,module,exports){
 /**
  * @file Prototype for creating dynamic, full-buffered audio objects.
  * 
@@ -38775,8 +38821,8 @@ module.exports = DynamicAudio;
 (function (global){
 /**
  * @file Prototype for first person controls. The logic uses HTML5 Pointer Lock
- * API to capture mouse-movements. The camera is stored within two 3D-objects
- * (yaw and pitch) to effectively handle orientation stuff and head motions.
+ * API to capture mouse-movements. The camera is stored within an additional 3D-object
+ * (head) to effectively handle orientation stuff and camera motions.
  * 
  * @author Human Interactive
  */
@@ -38789,7 +38835,6 @@ var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var camera = require( "../core/Camera" );
-var world = require( "../core/World" );
 var audioManager = require( "../audio/AudioManager" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var settingsManager = require( "../etc/SettingsManager" );
@@ -38803,18 +38848,12 @@ var self;
  * 
  * @constructor
  */
-function FirstPersonControls() {
+function FirstPersonControls( player ) {
 
-	// parents of camera object
+	// a reference to the player object
 	Object.defineProperties( this, {
-		_yawObject : {
-			value : new THREE.Object3D(),
-			configurable : false,
-			enumerable : false,
-			writable : false
-		},
-		_pitchObject : {
-			value : new THREE.Object3D(),
+		_player : {
+			value : player,
 			configurable : false,
 			enumerable : false,
 			writable : false
@@ -38823,25 +38862,25 @@ function FirstPersonControls() {
 
 	// movement properties
 	Object.defineProperties( this, {
-		_moveForward : {
+		_isMoveForward : {
 			value : false,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
-		_moveBackward : {
+		_isMoveBackward : {
 			value : false,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
-		_moveLeft : {
+		_isMoveLeft : {
 			value : false,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
-		_moveRight : {
+		_isMoveRight : {
 			value : false,
 			configurable : false,
 			enumerable : false,
@@ -38867,12 +38906,6 @@ function FirstPersonControls() {
 		},
 		_strafeSpeed : {
 			value : FirstPersonControls.DEFAULT.SPEED.STRAFE,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
-		_height : {
-			value : FirstPersonControls.DEFAULT.HEIGHT,
 			configurable : false,
 			enumerable : false,
 			writable : true
@@ -38967,107 +39000,111 @@ function FirstPersonControls() {
 
 	// flags
 	Object.defineProperties( this, {
+		// indicates, if the player is crouching
 		_isCrouch : {
 			value : false,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
+		// indicates, if the player is running
 		_isRun : {
 			value : false,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
-		_isControlsActive : {
+		// indicates, if the mouse pointer is captured
+		isCaptured : {
 			value : false,
 			configurable : false,
-			enumerable : false,
+			enumerable : true,
 			writable : true
 		},
-		_isUiElementActive : {
+		// indicates, if an ui element is active
+		isUiElementActive : {
 			value : false,
 			configurable : false,
-			enumerable : false,
+			enumerable : true,
 			writable : true
 		},
-		isActionInProgress : {
+		// indicates, if the controls are locked
+		isLocked : {
 			value : false,
 			configurable : false,
-			enumerable : false,
+			enumerable : true,
 			writable : true
 		},
 	} );
-
-	// raycaster
-	Object.defineProperties( this, {
-		_rayCaster : {
-			value : new THREE.Raycaster(),
-			configurable : false,
-			enumerable : false,
-			writable : false
-		}
-	} );
-
-	// build relationship
-	this._pitchObject.add( camera ); // camera -> pitch
-	this._yawObject.add( this._pitchObject ); // pitch -> yaw
-
-	// add to world
-	world.addObject3D( this._yawObject );
-
-	// type definition
-	this._yawObject.type = "Controls";
-
-	self = this;
+	
+	this._init();
 }
 
 /**
- * Sets the position of the controls.
+ * Updates the controls.
  * 
- * @param {THREE.Vector3} position - The position to set.
+ * @param {number} delta - Elapsed time between two frames.
+ * @param {THREE.Vector3} displacement -The displacement vector.
  */
-FirstPersonControls.prototype.setPosition = function( position ) {
+FirstPersonControls.prototype.update = function( delta, displacement ) {
 
-	this._yawObject.position.x = position.x;
-	this._yawObject.position.y = position.y + this._height;
-	this._yawObject.position.z = position.z;
-
-	this._yawObject.updateMatrixWorld();
+	// calculate displacement caused by movement of the player
+	this._calculateMovement( delta, displacement );
+	
+	// animation control movements
+	this._animate();
 };
 
 /**
- * Gets the position of the controls.
+ * Sets the direction of the controls.
  * 
- * @returns {THREE.Vector3} The position vector.
+ * @param {THREE.Vector3} direction -  The direction to set.
  */
-FirstPersonControls.prototype.getPosition = function() {
+FirstPersonControls.prototype.setDirection = ( function() {
 
-	return new THREE.Vector3().copy( this._yawObject.position );
-};
+	var xAxis = new THREE.Vector3(); // right
+	var yAxis = new THREE.Vector3(); // up
+	var zAxis = new THREE.Vector3(); // front
 
-/**
- * Sets the rotation of the controls.
- * 
- * @param {THREE.Euler} rotation - The rotation to set.
- */
-FirstPersonControls.prototype.setRotation = function( rotation ) {
+	var rotationMatrix = new THREE.Matrix4();
+	var euler = new THREE.Euler( 0, 0, 0, "YXZ" );
 
-	this._pitchObject.rotation.x = rotation.x;
-	this._yawObject.rotation.y = rotation.y;
+	return function( direction ) {
 
-	this._yawObject.updateMatrixWorld();
-};
+		// the front vector always points to the direction vector
+		zAxis.copy( direction ).normalize();
 
-/**
- * Gets the rotation of the controls.
- * 
- * @returns {THREE.Euler} The rotation in euler.
- */
-FirstPersonControls.prototype.getRotation = function() {
+		// avoid zero-length axis
+		if ( zAxis.lengthSq() === 0 )
+		{
+			zAxis.z = 1;
+		}
 
-	return new THREE.Euler( this._pitchObject.rotation.x, this._yawObject.rotation.y, 0 );
-};
+		// compute right vector
+		xAxis.crossVectors( this._player.object3D.up, zAxis );
+
+		// avoid zero-length axis
+		if ( xAxis.lengthSq() === 0 )
+		{
+			zAxis.x += 0.0001;
+			xAxis.crossVectors( this._player.object3D.up, zAxis ).normalize();
+		}
+
+		// compute up vector
+		yAxis.crossVectors( zAxis, xAxis );
+
+		// setup a rotation matrix of the basis
+		rotationMatrix.makeBasis( xAxis, yAxis, zAxis );
+
+		// create euler angles from rotation
+		euler.setFromRotationMatrix( rotationMatrix );
+		
+		// apply rotation to control objects
+		this._player.rotation.y = euler.y;
+		this._player.head.rotation.x = euler.x;
+	};
+
+}() );
 
 /**
  * Gets the direction of the controls.
@@ -39077,13 +39114,13 @@ FirstPersonControls.prototype.getRotation = function() {
 FirstPersonControls.prototype.getDirection = ( function() {
 
 	var result = new THREE.Vector3();
-	var direction = new THREE.Vector3( 0, 0, -1 );
+	var direction = new THREE.Vector3( 0, 0, 1 );
 	var rotation = new THREE.Euler( 0, 0, 0, "YXZ" );
 
 	return function() {
 
 		// calculate direction
-		rotation.set( this._pitchObject.rotation.x, this._yawObject.rotation.y, 0 );
+		rotation.set( this._player.head.rotation.x, this._player.rotation.y, 0 );
 		result.copy( direction ).applyEuler( rotation );
 		return result;
 	};
@@ -39091,208 +39128,73 @@ FirstPersonControls.prototype.getDirection = ( function() {
 }() );
 
 /**
- * Initializes the controls
- */
-FirstPersonControls.prototype.init = function() {
-
-	// subscriptions
-	eventManager.subscribe( TOPIC.CONTROLS.ACTIVE, this._onActive );
-
-	// events
-	global.document.addEventListener( "lockPointer", this._onLockPointer );
-	global.document.addEventListener( "releasePointer", this._onReleasePointer );
-
-	global.document.addEventListener( "mousemove", this._onMouseMove );
-	global.document.addEventListener( "keydown", this._onKeyDown );
-	global.document.addEventListener( "keyup", this._onKeyUp );
-
-	global.document.addEventListener( "pointerlockchange", this._onPointerlockchange );
-	global.document.addEventListener( "mozpointerlockchange", this._onPointerlockchange );
-	global.document.addEventListener( "webkitpointerlockchange", this._onPointerlockchange );
-
-	global.document.addEventListener( "pointerlockerror", this._onPointerlockerror );
-	global.document.addEventListener( "mozpointerlockerror", this._onPointerlockerror );
-	global.document.addEventListener( "webkitpointerlockerror", this._onPointerlockerror );
-
-	// load and assign audio buffers for steps
-	audioManager.createAudioBufferList( [ "step1", "step2" ], function( bufferList ) {
-
-		// create new audios
-		var audioStep1 = audioManager.createDynamicSound( "controls.step1", bufferList[ 0 ], false, true );
-		var audioStep2 = audioManager.createDynamicSound( "controls.step2", bufferList[ 1 ], false, 1, true );
-
-		// add variations
-		audioStep1.addPitchVariation( function() {
-
-			return 0.9 + Math.random() * 0.4;
-		} );
-		audioStep2.addPitchVariation( function() {
-
-			return 0.9 + Math.random() * 0.4;
-		} );
-
-		// assign audios to camera
-		camera.add( audioStep1 );
-		camera.add( audioStep2 );
-
-	} ).load();
-};
-
-/**
- * Central update method called within the render-loop.
+ * This method calculates the motions of the camera.
  * 
  * @param {number} delta - Elapsed time between two frames.
+ * @param {THREE.Vector3} displacement - This vector contains the player's
+ * displacement of the current frame.
  */
-FirstPersonControls.prototype.update = function( delta ) {
+FirstPersonControls.prototype.calculateCameraMotion = ( function() {
 
-	if ( this._isControlsActive === true && this.isActionInProgress === false )
-	{
-		this._translate( delta );
-		
-		this._animateCrouch();
+	var audioStep1, audioStep2;
 
-		this._animateRun();
+	return function( delta, displacement ) {
 
-		this._publishPlayerStatus();
-	}
-	else
-	{
-		// reset camera position
-		this._translateCameraToOrigin();
-	}
-};
+		var motion;
 
-/**
- * This method does the actual translation of the controls.
- * 
- * @param {number} delta - Elapsed time between two frames.
- */
-FirstPersonControls.prototype._translate = ( function() {
-
-	var velocity = new THREE.Vector3();
-	var normalizedMovement = new THREE.Vector3();
-	var lastPosition = new THREE.Vector3();
-
-	return function( delta ) {
-
-		// store last position
-		lastPosition.copy( this._yawObject.position );
-
-		// convert booleans to one number per axis (1, 0, -1)
-		this._move = Number( this._moveBackward ) - Number( this._moveForward );
-		this._strafe = Number( this._moveRight ) - Number( this._moveLeft );
-
-		// calculate velocity
-		velocity.z = this._calculateMoveVelocity( delta );
-		velocity.x = this._calculateStrafeVelocity( delta );
-
-		// initialize movement vectors
-		normalizedMovement.z = this._move;
-		normalizedMovement.x = this._strafe;
-
-		// this prevents, that the player moves to fast when
-		// e.g. forward and right are pressed simultaneously
-		normalizedMovement.normalize().multiply( velocity );
-
-		// actual translation of the controls position
-		this._yawObject.translateX( normalizedMovement.x );
-		this._yawObject.translateY( normalizedMovement.y );
-		this._yawObject.translateZ( normalizedMovement.z );
-
-		if ( this._isCollisionHandlingRequired() === true )
+		// load audios if necessary
+		if ( audioStep1 === undefined || audioStep2 === undefined )
 		{
-			// restore last position
-			this._yawObject.position.copy( lastPosition );
+			audioStep1 = audioManager.getDynamicAudio( "controls.step1" );
+			audioStep2 = audioManager.getDynamicAudio( "controls.step2" );
+		}
 
-			// reset camera position
-			this._translateCameraToOrigin();
+		if ( this._move !== 0 || this._strafe !== 0 )
+		{
+			// get motion factor from displacement
+			this._motionFactor += delta * displacement.length();
+
+			// calculate frequency for sine curve
+			this._calculateFrequency();
+
+			// calculate actual motion
+			motion = Math.sin( this._motionFactor * this._frequency + this._phase );
+
+			// play audio steps
+			if ( motion < this._motionLastValue && this._motionCurveUp === true )
+			{
+				this._motionCurveUp = false;
+				audioStep1.play();
+			}
+			else if ( motion > this._motionLastValue && this._motionCurveUp === false )
+			{
+				this._motionCurveUp = true;
+				audioStep2.play();
+			}
+
+			// set values to camera
+			camera.position.y = Math.abs( motion ) * this._deflection;
+			camera.position.x = motion * this._deflection;
+
+			// store current motion for next calculation
+			this._motionLastValue = motion;
+
 		}
 		else
 		{
-			// calculate camera motions
-			this._calculateCameraMotion( normalizedMovement, delta );
+			// if player is not moving, reset camera
+			this.resetCamera();
 		}
+
 	};
 
 }() );
 
 /**
- * This method calculates the motions of the camera.
- * 
- * @param {THREE.Vector3} normalizedMovement - This vector contains the
- * translation of the current frame
- * @param {number} delta - Elapsed time between two frames.
+ * This method resets the camera to its native position. The reset is done with
+ * a simple linear transition.
  */
-FirstPersonControls.prototype._calculateCameraMotion = function( normalizedMovement, delta ) {
-
-	var motion, audioStep1, audioStep2;
-
-	audioStep1 = audioManager.getDynamicAudio( "controls.step1" );
-	audioStep2 = audioManager.getDynamicAudio( "controls.step2" );
-
-	if ( this._move !== 0 || this._strafe !== 0 )
-	{
-		// get motion factor from normalized movement
-		this._motionFactor += delta * normalizedMovement.length();
-
-		// calculate frequency for sine curve
-		this._calculateFrequency();
-
-		// calculate actual motion
-		motion = Math.sin( this._motionFactor * this._frequency + this._phase );
-
-		// play audio steps
-		if ( motion < this._motionLastValue && this._motionCurveUp === true )
-		{
-			this._motionCurveUp = false;
-			audioStep1.play();
-		}
-		else if ( motion > this._motionLastValue && this._motionCurveUp === false )
-		{
-			this._motionCurveUp = true;
-			audioStep2.play();
-		}
-
-		// set values to camera
-		camera.position.y = Math.abs( motion ) * this._deflection;
-		camera.position.x = motion * this._deflection;
-
-		// store current motion for next calculation
-		this._motionLastValue = motion;
-
-	}
-	else
-	{
-		// if player is not moving, translate camera back to origin
-		this._translateCameraToOrigin();
-	}
-
-};
-
-/**
- * Calculates a new sine frequency for camera motion. It ensures, that the new
- * sine cuvre is in-sync to the old one.
- */
-FirstPersonControls.prototype._calculateFrequency = function() {
-
-	var current, next;
-
-	if ( this._frequency !== this._lastFrequency )
-	{
-		current = ( this._motionFactor * this._lastFrequency + this._phase ) % utils.TWO_PI;
-		next = ( this._motionFactor * this._frequency ) % utils.TWO_PI;
-
-		this._phase = current - next;
-		this._lastFrequency = this._frequency;
-	}
-	
-};
-
-/**
- * This method resets the camera to its origin. The reset is done with a simple
- * linear transition.
- */
-FirstPersonControls.prototype._translateCameraToOrigin = function() {
+FirstPersonControls.prototype.resetCamera = function() {
 
 	// only translate if necessary
 	if ( camera.position.x !== 0 || camera.position.y !== 0 )
@@ -39319,6 +39221,120 @@ FirstPersonControls.prototype._translateCameraToOrigin = function() {
 		this._motionLastValue = 0;
 		this._phase = 0;
 	}
+};
+
+/**
+ * Initializes the controls
+ */
+FirstPersonControls.prototype._init = function() {
+	
+	self = this;
+	
+	// set default height of the head
+	this._setHeight( FirstPersonControls.DEFAULT.HEIGHT );
+	
+	// build relationship
+	this._player.head.add( camera ); // camera -> head
+	
+	// the camera should look to positive z-axis by default
+	camera.rotation.set( 0, Math.PI, 0 );
+
+	// subscriptions
+	eventManager.subscribe( TOPIC.CONTROLS.CAPTURE, this._onCapture );
+	eventManager.subscribe( TOPIC.CONTROLS.LOCK, this._onLock );
+
+	// events
+	global.document.addEventListener( "lockPointer", this._onLockPointer );
+	global.document.addEventListener( "releasePointer", this._onReleasePointer );
+
+	global.document.addEventListener( "mousemove", this._onMouseMove );
+	global.document.addEventListener( "keydown", this._onKeyDown );
+	global.document.addEventListener( "keyup", this._onKeyUp );
+
+	global.document.addEventListener( "pointerlockchange", this._onPointerlockchange );
+	global.document.addEventListener( "mozpointerlockchange", this._onPointerlockchange );
+	global.document.addEventListener( "webkitpointerlockchange", this._onPointerlockchange );
+
+	global.document.addEventListener( "pointerlockerror", this._onPointerlockerror );
+	global.document.addEventListener( "mozpointerlockerror", this._onPointerlockerror );
+	global.document.addEventListener( "webkitpointerlockerror", this._onPointerlockerror );
+
+	// load and assign audio buffers for steps
+	audioManager.createAudioBufferList( [ "step1", "step2" ], function( bufferList ) {
+
+		// create new audios
+		var audioStep1 = audioManager.createDynamicSound( "controls.step1", bufferList[ 0 ], false, true );
+		var audioStep2 = audioManager.createDynamicSound( "controls.step2", bufferList[ 1 ], false, true );
+
+		// add variations
+		audioStep1.addPitchVariation( function() {
+
+			return 0.9 + Math.random() * 0.4;
+		} );
+		audioStep2.addPitchVariation( function() {
+
+			return 0.9 + Math.random() * 0.4;
+		} );
+
+		// assign audios to camera
+		camera.add( audioStep1 );
+		camera.add( audioStep2 );
+
+	} ).load();
+};
+
+/**
+ * This method does the actual translation of the controls.
+ * 
+ * @param {number} delta - Elapsed time between two frames.
+ * @param {THREE.Vector3} displacement -The displacement vector.
+ */
+FirstPersonControls.prototype._calculateMovement = ( function() {
+
+	var velocity = new THREE.Vector3();
+
+	return function( delta, displacement) {
+		
+		displacement.set( 0, 0, 0 );
+
+		// convert booleans to one number to determine the movement direction
+		this._move = Number( this._isMoveForward ) - Number( this._isMoveBackward );
+		this._strafe = Number( this._isMoveLeft ) - Number( this._isMoveRight );
+
+		// calculate velocity
+		velocity.z = this._calculateMoveVelocity( delta );
+		velocity.x = this._calculateStrafeVelocity( delta );
+
+		// assign move and strafe values to displacement vector
+		displacement.z = this._move;
+		displacement.x = this._strafe;
+		
+		// normalization prevents that the player moves to fast when
+		// e.g. forward and right are pressed simultaneously
+		displacement.normalize().multiply( velocity );
+		
+		return displacement;
+	};
+
+}() );
+
+/**
+ * Calculates a new sine frequency for camera motion. It ensures, that the new
+ * sine cuvre is in-sync to the old one.
+ */
+FirstPersonControls.prototype._calculateFrequency = function() {
+
+	var current, next;
+
+	if ( this._frequency !== this._lastFrequency )
+	{
+		current = ( this._motionFactor * this._lastFrequency + this._phase ) % utils.TWO_PI;
+		next = ( this._motionFactor * this._frequency ) % utils.TWO_PI;
+
+		this._phase = current - next;
+		this._lastFrequency = this._frequency;
+	}
+	
 };
 
 /**
@@ -39387,102 +39403,24 @@ FirstPersonControls.prototype._calculateStrafeVelocity = ( function() {
 }() );
 
 /**
- * This method calculates the height of the controls.
+ * Sets the height of the controls.
  * 
- * @param {number} distance - The distance between yawObject and ground.
+ * @param {number} height -  The height to set.
  */
-FirstPersonControls.prototype._calculateHeight = function( distance ) {
+FirstPersonControls.prototype._setHeight = function( height ) {
 
-	this._yawObject.position.y += ( this._height - distance );
+	this._player.head.position.y = height;
 };
 
 /**
- * Does the actual collision detection and returns a boolean value, that
- * indicates the collision status.
+ * Gets the height of the controls.
  * 
- * @returns {boolean} - Is there a collision after the latest movement?
+ * @returns {number} The control's height.
  */
-FirstPersonControls.prototype._isCollisionHandlingRequired = ( function() {
+FirstPersonControls.prototype._getHeight = function() {
 
-	var direction = new THREE.Vector3( 0, -1, 0 );
-
-	// mathematical representation of the player body
-	var boundingBox = new THREE.Box3(); 
-	
-	var center = new THREE.Vector3(); // center of body
-	var size = new THREE.Vector3(); // body size
-
-	return function() {
-		
-		var index, obstacle, numberOfObstacle, intersects;
-
-		if ( world.grounds.length !== 0 )
-		{
-			this._rayCaster.set( this._yawObject.position, direction );
-			this._rayCaster.far = FirstPersonControls.DEFAULT.HEIGHT + 1;
-
-			// first, check grounds
-			intersects = this._rayCaster.intersectObjects( world.grounds );
-
-			// if there is an intersection, the player's position is inside the
-			// level boundaries
-			// now check intersections between the player and obstacle objects
-			if ( intersects.length > 0 )
-			{
-				// before doing the intersection test with action objects
-				// update the player's bounding volume (AABB)
-
-				// adjust height
-				this._calculateHeight( intersects[ 0 ].distance );
-
-				// calculate center of the player
-				center.copy( this._yawObject.position );
-				center.y -= this._height * 0.5;
-
-				// calculate size of the player
-				size.set( 4, this._height, 4 );
-
-				// create bounding box
-				boundingBox.setFromCenterAndSize( center, size );
-
-				// get number of obstacles in the world
-				numberOfObstacle = world.getNumberOfObstacles();
-
-				// check obstacles
-				for ( index = 0; index < numberOfObstacle; index++ )
-				{
-					// retrieve obstacle
-					obstacle = world.getObstacle( index );
-
-					// regard only visible objects
-					if ( obstacle.mesh.visible === true )
-					{
-						// do collision detection
-						if ( obstacle.isIntersection( boundingBox ) === true )
-						{
-							// true, because there is a collision with an
-							// obstacle
-							return true;
-						}
-
-					}
-
-				}
-
-				// false, because there is no collision
-				return false;
-			}
-			else
-			{
-				// true, because the player is not over a ground
-				return true;
-			}
-
-		}
-
-	};
-
-}() );
+	return this._player.head.position.y;
+};
 
 /**
  * Handles the "crouch" command. Crouching decreases the height and movement
@@ -39498,7 +39436,7 @@ FirstPersonControls.prototype._handleCrouch = function() {
 
 	// save current timestamp and values for animation
 	this._animationStartTime = global.performance.now();
-	this._animationHeight = this._height;
+	this._animationHeight = this._getHeight();
 	this._animationMove = this._moveSpeed;
 	this._animationStrafe = this._strafeSpeed;
 	this._animationDeflection = this._deflection;
@@ -39520,11 +39458,21 @@ FirstPersonControls.prototype._handleRun = function( isRun ) {
 
 	// save current timestamp and values for animation
 	this._animationStartTime = global.performance.now();
-	this._animationHeight = this._height;
+	this._animationHeight = this._getHeight();
 	this._animationMove = this._moveSpeed;
 	this._animationStrafe = this._strafeSpeed;
 	this._animationDeflection = this._deflection;
 	this._animationFrequency = this._frequency;
+};
+
+/**
+ * Executes all animation methods of the controls.
+ */
+FirstPersonControls.prototype._animate = function(){
+	
+	this._animateCrouch();
+	
+	this._animateRun();
 };
 
 /**
@@ -39535,8 +39483,8 @@ FirstPersonControls.prototype._animateCrouch = function() {
 	var elapsed, factor, targetHeight, targetMove, targetStrafe, targetDeflection, targetFrequency, valueHeight, valueSpeed;
 
 	// animate only if necessary
-	if ( ( this._isCrouch === true && this._height > FirstPersonControls.CROUCH.HEIGHT ) || 
-		 ( this._isCrouch === false && this._isRun === false && this._height < FirstPersonControls.DEFAULT.HEIGHT ) )
+	if ( ( this._isCrouch === true && this._getHeight() > FirstPersonControls.CROUCH.HEIGHT ) || 
+		 ( this._isCrouch === false && this._isRun === false && this._getHeight() < FirstPersonControls.DEFAULT.HEIGHT ) )
 	{
 		// calculate elapsed time
 		elapsed = ( global.performance.now() - this._animationStartTime ) * FirstPersonControls.CROUCH.ANIMATION.DURATION;
@@ -39556,7 +39504,7 @@ FirstPersonControls.prototype._animateCrouch = function() {
 		targetFrequency = this._isCrouch === true ? FirstPersonControls.CROUCH.CAMERA.FREQUENCY : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY;
 
 		// do transition
-		this._height = this._animationHeight + ( targetHeight - this._animationHeight ) * valueHeight;
+		this._setHeight( this._animationHeight + ( targetHeight - this._animationHeight ) * valueHeight );
 		this._moveSpeed = this._animationMove + ( targetMove - this._animationMove ) * valueSpeed;
 		this._strafeSpeed = this._animationStrafe + ( targetStrafe - this._animationStrafe ) * valueSpeed;
 		this._deflection = this._animationDeflection + ( targetDeflection - this._animationDeflection ) * valueSpeed;
@@ -39594,7 +39542,7 @@ FirstPersonControls.prototype._animateRun = function() {
 		targetFrequency = this._isRun === true ? FirstPersonControls.RUN.CAMERA.FREQUENCY : FirstPersonControls.DEFAULT.CAMERA.FREQUENCY;
 
 		// do transition
-		this._height = this._animationHeight + ( targetHeight - this._animationHeight ) * valueHeight;
+		this._setHeight(  this._animationHeight + ( targetHeight - this._animationHeight ) * valueHeight );
 		this._moveSpeed = this._animationMove + ( targetMove - this._animationMove ) * valueSpeed;
 		this._strafeSpeed = this._animationStrafe + ( targetStrafe - this._animationStrafe ) * valueSpeed;
 		this._deflection = this._animationDeflection + ( targetDeflection - this._animationDeflection ) * valueSpeed;
@@ -39604,29 +39552,6 @@ FirstPersonControls.prototype._animateRun = function() {
 };
 
 /**
- * Publish the world information of the player for multiplayer.
- */
-FirstPersonControls.prototype._publishPlayerStatus = ( function() {
-
-	var position = new THREE.Vector3();
-	var quaternion = new THREE.Quaternion();
-	var scale = new THREE.Vector3();
-
-	return function() {
-
-		// The pitch-object contains the entire position and rotation
-		// values of the player
-		this._pitchObject.matrixWorld.decompose( position, quaternion, scale );
-
-		eventManager.publish( TOPIC.MULTIPLAYER.PLAYER, {
-			position : position,
-			quaternion : quaternion
-		} );
-	};
-
-}() );
-
-/**
  * Resets the movement. This avoids problems with moving players, even when they
  * hit no keys. This could happen, when you switch to main menu with pressed
  * wasd keys. The actual problem is, that the "keyup" event is not fired under
@@ -39634,21 +39559,39 @@ FirstPersonControls.prototype._publishPlayerStatus = ( function() {
  */
 FirstPersonControls.prototype._reset = function() {
 
-	this._moveForward = false;
-	this._moveBackward = false;
-	this._moveLeft = false;
-	this._moveRight = false;
+	this._isMoveForward = false;
+	this._isMoveBackward = false;
+	this._isMoveLeft = false;
+	this._isMoveRight = false;
+	this._isRun = false;
 };
 
 /**
- * Sets the control status.
+ * Handles the activation message for the controls. Sets the flag that
+ * indicates if the HTML5 pointer lock is active and the mouse pointer
+ * is captured.
  * 
  * @param {string} message - The message topic of the subscription.
  * @param {object} data - The data of the message.
  */
-FirstPersonControls.prototype._onActive = function( message, data ) {
+FirstPersonControls.prototype._onCapture = function( message, data ) {
 
-	self._isControlsActive = data.isActive;
+	self.isCaptured = data.isCaptured;
+
+	self._reset();
+};
+
+/**
+ * Handles the lock message of the controls. Sets the flag that 
+ * indicates if the pointer lock is active, but the controls are
+ * blocked for the player.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ */
+FirstPersonControls.prototype._onLock = function( message, data ) {
+
+	self.isLocked = data.isLocked;
 
 	self._reset();
 };
@@ -39658,7 +39601,7 @@ FirstPersonControls.prototype._onActive = function( message, data ) {
  */
 FirstPersonControls.prototype._onLockPointer = function() {
 
-	self._isUiElementActive = false;
+	self.isUiElementActive = false;
 
 	var element = global.document.querySelector( "canvas" );
 
@@ -39674,7 +39617,7 @@ FirstPersonControls.prototype._onLockPointer = function() {
  */
 FirstPersonControls.prototype._onReleasePointer = function() {
 
-	self._isUiElementActive = true;
+	self.isUiElementActive = true;
 
 	// Ask the browser to release the pointer
 	global.document.exitPointerLock = global.document.exitPointerLock || global.document.mozExitPointerLock || global.document.webkitExitPointerLock;
@@ -39691,9 +39634,9 @@ FirstPersonControls.prototype._onPointerlockchange = function() {
 
 	if ( global.document.pointerLockElement === requestedElement || global.document.mozPointerLockElement === requestedElement || global.document.webkitPointerLockElement === requestedElement )
 	{
-		self._isControlsActive = true;
+		self.isCaptured = true;
 
-		if ( self._isUiElementActive === false )
+		if ( self.isUiElementActive === false )
 		{
 			userInterfaceManager.hideMenu();
 		}
@@ -39701,9 +39644,9 @@ FirstPersonControls.prototype._onPointerlockchange = function() {
 	}
 	else
 	{
-		self._isControlsActive = false;
+		self.isCaptured = false;
 
-		if ( self._isUiElementActive === false )
+		if ( self.isUiElementActive === false )
 		{
 			userInterfaceManager.showMenu();
 		}
@@ -39722,7 +39665,7 @@ FirstPersonControls.prototype._onPointerlockerror = function( event ) {
 
 /**
  * Detects any mouse movements, when pointer lock is active. Then it calculates
- * the rotation of yaw and pitch object.
+ * the rotation of player and head object.
  * 
  * @param {object} event - Default event object.
  */
@@ -39730,18 +39673,18 @@ FirstPersonControls.prototype._onMouseMove = function( event ) {
 
 	var movementX, movementY;
 
-	if ( self._isControlsActive === true && self.isActionInProgress === false )
+	if ( self.isCaptured === true && self.isLocked === false )
 	{
 		// capture mouse movement
 		movementX = event.movementX || event.mozMovementX || 0;
 		movementY = event.movementY || event.mozMovementY || 0;
 
-		// manipulate rotation of yaw and pitch object
-		self._yawObject.rotation.y -= movementX * ( settingsManager.getMouseSensitivity() * 0.0001 );
-		self._pitchObject.rotation.x -= movementY * ( settingsManager.getMouseSensitivity() * 0.0001 );
+		// manipulate rotation of player and head
+		self._player.rotation.y -= movementX * ( settingsManager.getMouseSensitivity() * 0.0001 );
+		self._player.head.rotation.x += movementY * ( settingsManager.getMouseSensitivity() * 0.0001 );
 
 		// prevent "loop" of x-axis
-		self._pitchObject.rotation.x = Math.max( - utils.HALF_PI, Math.min( utils.HALF_PI, self._pitchObject.rotation.x ) );
+		self._player.head.rotation.x = Math.max( - utils.HALF_PI, Math.min( utils.HALF_PI, self._player.head.rotation.x ) );
 	}
 
 };
@@ -39753,28 +39696,28 @@ FirstPersonControls.prototype._onMouseMove = function( event ) {
  */
 FirstPersonControls.prototype._onKeyDown = function( event ) {
 
-	if ( self._isControlsActive === true )
+	if ( self.isCaptured === true )
 	{
 		switch ( event.keyCode )
 		{
 			case 87:
 				// w
-				self._moveForward = true;
+				self._isMoveForward = true;
 				break;
 
 			case 65:
 				// a
-				self._moveLeft = true;
+				self._isMoveLeft = true;
 				break;
 
 			case 83:
 				// s
-				self._moveBackward = true;
+				self._isMoveBackward = true;
 				break;
 
 			case 68:
 				// d
-				self._moveRight = true;
+				self._isMoveRight = true;
 				break;
 
 			case 67:
@@ -39790,7 +39733,7 @@ FirstPersonControls.prototype._onKeyDown = function( event ) {
 			case 69:
 				// e
 				eventManager.publish( TOPIC.ACTION.INTERACTION, {
-					position : self.getPosition(),
+					position : self._player.head.getWorldPosition(),
 					direction : self.getDirection()
 				} );
 				break;
@@ -39815,28 +39758,28 @@ FirstPersonControls.prototype._onKeyDown = function( event ) {
  */
 FirstPersonControls.prototype._onKeyUp = function( event ) {
 
-	if ( self._isControlsActive === true )
+	if ( self.isCaptured === true )
 	{
 		switch ( event.keyCode )
 		{
 			case 87:
 				// w
-				self._moveForward = false;
+				self._isMoveForward = false;
 				break;
 
 			case 65:
 				// a
-				self._moveLeft = false;
+				self._isMoveLeft = false;
 				break;
 
 			case 83:
 				// a
-				self._moveBackward = false;
+				self._isMoveBackward = false;
 				break;
 
 			case 68:
 				// d
-				self._moveRight = false;
+				self._isMoveRight = false;
 				break;
 
 			case 16:
@@ -39906,9 +39849,9 @@ FirstPersonControls.RUN = {
 	}
 };
 
-module.exports = new FirstPersonControls();
+module.exports = FirstPersonControls;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/World":31,"../etc/SettingsManager":40,"../etc/Utils":43,"../messaging/EventManager":65,"../messaging/Topic":67,"../ui/UserInterfaceManager":98,"three":1}],18:[function(require,module,exports){
+},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../etc/SettingsManager":40,"../etc/Utils":43,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":99,"three":1}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -39925,11 +39868,12 @@ var environment = require( "./Environment" );
 var renderer = require( "./Renderer" );
 var camera = require( "./Camera" );
 var system = require( "./System" );
-var controls = require( "../controls/FirstPersonControls" );
+var world = require( "./World" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var saveGameManager = require( "../etc/SaveGameManager" );
 var multiplayerManager = require( "../etc/MultiplayerManager" );
 var networkManager = require( "../network/NetworkManager" );
+
 
 
 /**
@@ -39976,7 +39920,7 @@ Bootstrap.prototype._initEngine = function() {
 		// initialize basic components
 		renderer.init();
 		camera.init();
-		controls.init();
+		world.init();
 		userInterfaceManager.init();
 
 		// initialize network and multiplayer manager only if necessary
@@ -40020,7 +39964,7 @@ Bootstrap.prototype._loadStage = function() {
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../controls/FirstPersonControls":17,"../etc/MultiplayerManager":35,"../etc/SaveGameManager":39,"../messaging/EventManager":65,"../messaging/Topic":67,"../network/NetworkManager":69,"../ui/UserInterfaceManager":98,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27}],19:[function(require,module,exports){
+},{"../etc/MultiplayerManager":35,"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../network/NetworkManager":70,"../ui/UserInterfaceManager":99,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27,"./World":31}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for camera-based
@@ -40055,7 +39999,7 @@ Camera.prototype = Object.create( THREE.PerspectiveCamera.prototype );
 Camera.prototype.constructor = Camera;
 
 /**
- * Inits the camera.
+ * Initializes the camera.
  * 
  * @param {number} fov - The field of view.
  * @param {number} aspect - The aspect ratio.
@@ -40090,7 +40034,7 @@ Camera.prototype._onResize = function( message, data ) {
 
 module.exports = new Camera();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":65,"../messaging/Topic":67,"three":1}],20:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"three":1}],20:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype is used to ensure that all necessary browser features
@@ -40838,7 +40782,7 @@ Renderer.prototype._onResize = function( message, data ) {
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":65,"../messaging/Topic":67,"../postprocessing/EffectComposer":70,"../postprocessing/RenderPass":71,"../postprocessing/ShaderPass":72,"../shader/GaussianBlurShader":74,"../shader/GrayscaleShader":75,"../shader/VignetteShader":76,"./Logger":21,"three":1}],24:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"../postprocessing/EffectComposer":71,"../postprocessing/RenderPass":72,"../postprocessing/ShaderPass":73,"../shader/GaussianBlurShader":75,"../shader/GrayscaleShader":76,"../shader/VignetteShader":77,"./Logger":21,"three":1}],24:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic for scene-based functionality.
  * 
@@ -40872,7 +40816,7 @@ Scene.prototype.clear = function() {
 
 	for ( var index = this.children.length - 1; index >= 0; index-- )
 	{
-		if ( this.children[ index ].type !== "Controls" )
+		if ( this.children[ index ].type !== "Player" )
 		{
 			this.remove( this.children[ index ] );
 		}
@@ -40900,7 +40844,6 @@ var renderer = require( "./Renderer" );
 var camera = require( "./Camera" );
 var world = require( "./World" );
 var system = require( "./System" );
-var controls = require( "../controls/FirstPersonControls" );
 var actionManager = require( "../action/ActionManager" );
 var audioManager = require( "../audio/AudioManager" );
 var animationManager = require( "../animation/AnimationManager" );
@@ -40941,12 +40884,6 @@ function StageBase( stageId ) {
 		},
 		world : {
 			value : world,
-			configurable : false,
-			enumerable : true,
-			writable : false
-		},
-		controls : {
-			value : controls,
 			configurable : false,
 			enumerable : true,
 			writable : false
@@ -41044,7 +40981,10 @@ StageBase.prototype.setup = function() {
  */
 StageBase.prototype.start = function() {
 
-	this.controls.isActionInProgress = false;
+	// publish message to release the controls
+	eventManager.publish( TOPIC.CONTROLS.LOCK, {
+		isLocked : false
+	} );
 };
 
 /**
@@ -41091,17 +41031,14 @@ StageBase.prototype._render = function() {
 	// get delta time value
 	this._delta = this.timeManager.getDelta();
 	
-	// update controls
-	this.controls.update( this._delta );
-
+	// update entity manager
+	this.entityManager.update( this._delta );
+	
 	// update managers
-	this.actionManager.update( controls.getPosition(), controls.getDirection() );
+	this.actionManager.update( this.world.player );
 	this.animationManager.update( this._delta );
 	this.performanceManager.update();
 	this.userInterfaceManager.update();
-
-	// finally update entity manager
-	this.entityManager.update( this._delta );
 
 	// render frame
 	this.renderer.render( this.world.scene, this.camera );
@@ -41118,8 +41055,10 @@ StageBase.prototype._render = function() {
  */
 StageBase.prototype._changeStage = function( stageId, isSaveGame ) {
 
-	// lock controls
-	this.controls.isActionInProgress = true;
+	// publish message to lock the controls
+	eventManager.publish( TOPIC.CONTROLS.LOCK, {
+		isLocked : true
+	} );
 	
 	// publish message to trigger the change
 	eventManager.publish( TOPIC.STAGE.CHANGE, {
@@ -41138,7 +41077,7 @@ StageBase.COLORS = {
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../controls/FirstPersonControls":17,"../etc/PerformanceManager":38,"../etc/SaveGameManager":39,"../etc/SettingsManager":40,"../etc/TextManager":42,"../game/entity/EntityManager":44,"../messaging/EventManager":65,"../messaging/Topic":67,"../ui/UserInterfaceManager":98,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
+},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../etc/PerformanceManager":38,"../etc/SaveGameManager":39,"../etc/SettingsManager":40,"../etc/TextManager":42,"../game/entity/EntityManager":44,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":99,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -41430,7 +41369,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":39,"../messaging/EventManager":65,"../messaging/Topic":67,"../stages/Stage_001":77,"../stages/Stage_002":78,"../stages/Stage_003":79,"../stages/Stage_004":80,"../stages/Stage_005":81,"../stages/Stage_006":82,"../stages/Stage_007":83,"../stages/Stage_008":84,"../stages/Stage_009":85,"../stages/Stage_010":86,"../stages/Stage_011":87,"../ui/UserInterfaceManager":98,"./Logger":21}],27:[function(require,module,exports){
+},{"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../stages/Stage_001":78,"../stages/Stage_002":79,"../stages/Stage_003":80,"../stages/Stage_004":81,"../stages/Stage_005":82,"../stages/Stage_006":83,"../stages/Stage_007":84,"../stages/Stage_008":85,"../stages/Stage_009":86,"../stages/Stage_010":87,"../stages/Stage_011":88,"../ui/UserInterfaceManager":99,"./Logger":21}],27:[function(require,module,exports){
 /**
  * @file This prototype holds core information about the engine. The runtime
  * behavior of the application depends crucially of this prototype.
@@ -41838,17 +41777,23 @@ var THREE = require( "three" );
 var scene = require( "./Scene" );
 var actionManager = require( "../action/ActionManager" );
 var entityManager = require( "../game/entity/EntityManager" );
+var GameEntity = require( "../game/entity/GameEntity" );
 
 /**
  * Creates a world object.
  * 
  * @constructor
- * 
  */
 function World() {
 
 	Object.defineProperties( this, {
 
+		player : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true,
+		},
 		scene : {
 			value : scene,
 			configurable : false,
@@ -41872,10 +41817,25 @@ function World() {
 }
 
 /**
+ * Initializes the world.
+ */
+World.prototype.init = function() {
+
+	// create player instance
+	this.player = entityManager.createPlayer( this );
+
+	// set the scope of this entity to WORLD. it won't get deleted within a
+	// stage change
+	this.player.scope = GameEntity.SCOPE.WORLD;
+
+	// add player to world
+	this.addObject3D( this.player.object3D );
+};
+
+/**
  * Adds a 3D object to the internal scene.
  * 
  * @param {THREE.Mesh} ground - The ground to add.
- * 
  */
 World.prototype.addObject3D = function( object ) {
 
@@ -41886,7 +41846,6 @@ World.prototype.addObject3D = function( object ) {
  * Removes a 3D object from the internal scene.
  * 
  * @param {THREE.Mesh} ground - The ground to add.
- * 
  */
 World.prototype.removeObject3D = function( object ) {
 
@@ -41895,7 +41854,6 @@ World.prototype.removeObject3D = function( object ) {
 
 /**
  * Removes all 3D object from the internal scene.
- * 
  */
 World.prototype.removeObjects3D = function( object ) {
 
@@ -41906,7 +41864,6 @@ World.prototype.removeObjects3D = function( object ) {
  * Adds a ground to the internal array.
  * 
  * @param {THREE.Mesh} ground - The ground to add.
- * 
  */
 World.prototype.addGround = function( ground ) {
 
@@ -41945,7 +41902,6 @@ World.prototype.removeGrounds = function() {
  * Adds a wall to the internal array.
  * 
  * @param {THREE.Mesh} wall - The wall to add.
- * 
  */
 World.prototype.addWall = function( wall ) {
 
@@ -41985,7 +41941,6 @@ World.prototype.removeWalls = function() {
  * 
  * @param {number} index - The index of the obstacle.
  * @param {object} obstacle - The target object.
- * 
  */
 World.prototype.getObstacle = function( index ) {
 
@@ -42075,7 +42030,7 @@ World.prototype.clear = function() {
 };
 
 module.exports = new World();
-},{"../action/ActionManager":5,"../game/entity/EntityManager":44,"./Scene":24,"three":1}],32:[function(require,module,exports){
+},{"../action/ActionManager":5,"../game/entity/EntityManager":44,"../game/entity/GameEntity":45,"./Scene":24,"three":1}],32:[function(require,module,exports){
 /**
  * @file This prototype handles all stuff for impostors. An impostor is a
  * billboard that is created on the fly by rendering a complex object from the
@@ -42265,22 +42220,27 @@ Impostor.prototype.update = ( function() {
 
 	return function( cameraPosition ) {
 
-		// first, compute zAxis
-		zAxis.subVectors( cameraPosition, this.billboard.position );
-		zAxis.y = 0; // this will ensure, that the impostor rotates correctly around the axis
-		zAxis.normalize();
+		if ( this.billboard !== null )
+		{
+			// first, compute zAxis
+			zAxis.subVectors( cameraPosition, this.billboard.position );
+			
+			// this will ensure, that the impostor rotates correctly around the axis
+			zAxis.y = 0;
+			zAxis.normalize();
 
-		// compute the last axis with the cross product
-		xAxis.crossVectors( yAxis, zAxis );
+			// compute the last axis with the cross product
+			xAxis.crossVectors( yAxis, zAxis );
 
-		// create new model matrix from basis vectors
-		this.billboard.matrix.makeBasis( xAxis, yAxis, zAxis );
+			// create new model matrix from basis vectors
+			this.billboard.matrix.makeBasis( xAxis, yAxis, zAxis );
 
-		// apply the position
-		this.billboard.matrix.setPosition( this.billboard.position );
+			// apply the position
+			this.billboard.matrix.setPosition( this.billboard.position );
 
-		// force world matrix to update
-		this.billboard.matrixWorldNeedsUpdate = true;
+			// force world matrix to update
+			this.billboard.matrixWorldNeedsUpdate = true;
+		}
 	};
 
 }() );
@@ -42648,7 +42608,7 @@ JSONLoader.prototype.load = function( url, onLoad ) {
 
 module.exports = JSONLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":65,"../messaging/Topic":67,"three":1}],34:[function(require,module,exports){
+},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68,"three":1}],34:[function(require,module,exports){
 /**
  * @file This prototype is used for LOD handling. It is an enhancement of the
  * LOD functionality of three.js. Instead of switching directly between LOD
@@ -42998,7 +42958,7 @@ MultiplayerManager.prototype._getTeammate = function( id ) {
 };
 
 module.exports = new MultiplayerManager();
-},{"../core/Logger":21,"../core/World":31,"../messaging/EventManager":65,"../messaging/Topic":67,"./Teammate":41,"three":1}],36:[function(require,module,exports){
+},{"../core/Logger":21,"../core/World":31,"../messaging/EventManager":66,"../messaging/Topic":68,"./Teammate":41,"three":1}],36:[function(require,module,exports){
 /**
  * @file A 3D arbitrarily oriented bounding box.
  * 
@@ -43798,7 +43758,7 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 
 module.exports = ObjectLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":65,"../messaging/Topic":67,"three":1}],38:[function(require,module,exports){
+},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68,"three":1}],38:[function(require,module,exports){
 /**
  * @file Interface for performance handling. This prototype is used in stages to
  * create e.g. LOD instances.
@@ -44612,7 +44572,7 @@ TextManager.prototype._searchAndRepalce = function() {
 
 module.exports = new TextManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":65,"../messaging/Topic":67}],43:[function(require,module,exports){
+},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68}],43:[function(require,module,exports){
 (function (global){
 /**
  * @file All helper and util functions are organized in this module.
@@ -44689,6 +44649,8 @@ module.exports = new Utils();
  */
 "use strict";
 
+var GameEntity = require( "./GameEntity" );
+var Player = require( "./Player" );
 var Vehicle = require( "./Vehicle" );
 
 /**
@@ -44709,6 +44671,20 @@ function EntityManager() {
 
 	} );
 }
+
+/**
+ * Creates the player object
+ * 
+ * @param {World} world - The reference to the world object.
+ * 
+ * @returns {Player} The new player.
+ */
+EntityManager.prototype.createPlayer = function( world ) {
+
+	var player = new Player( world );
+	this.addEntity( player );
+	return player;
+};
 
 /**
  * Creates a vehicle, a moving entity that uses steering behaviors.
@@ -44793,14 +44769,30 @@ EntityManager.prototype.removeEntity = function( entity ) {
 
 /**
  * Removes all entities from the internal array.
+ * 
+ * @param {boolean} isClear - Should also all world entities be removed?
  */
-EntityManager.prototype.removeEntities = function() {
+EntityManager.prototype.removeEntities = function( isClear ) {
 
-	this.entities.length = 0;
+	if ( isClear === true )
+	{
+		this.entities.length = 0;
+	}
+	else
+	{
+		for ( var index = this.entities.length - 1; index >= 0; index-- )
+		{
+			// only remove entities with scope "STAGE"
+			if ( this.entities[ index ].scope === GameEntity.SCOPE.STAGE )
+			{
+				this.remove( this.children[ index ] );
+			}
+		}
+	}
 };
 
 module.exports = new EntityManager();
-},{"./Vehicle":47}],45:[function(require,module,exports){
+},{"./GameEntity":45,"./Player":47,"./Vehicle":48}],45:[function(require,module,exports){
 /**
  * @file All entities that are part of the game logic inherit from this
  * prototype.
@@ -44839,6 +44831,13 @@ function GameEntity( object3D ) {
 		// this will be used for collision detection
 		boundingRadius : {
 			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// this will be used to determine the lifetime of a game entity
+		scope : {
+			value : GameEntity.SCOPE.STAGE,
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -44916,6 +44915,11 @@ GameEntity.prototype.update = function( delta ) {
 GameEntity.prototype.handleMessage = function( telegram ) {
 
 	return false;
+};
+
+GameEntity.SCOPE = {
+	WORLD : 0,
+	STAGE : 1
 };
 
 module.exports = GameEntity;
@@ -45112,6 +45116,321 @@ MovingEntity.prototype.getDirection = function() {
 module.exports = MovingEntity;
 },{"./GameEntity":45,"three":1}],47:[function(require,module,exports){
 /**
+ * @file This prototype represents the player body.
+ * 
+ * @author Human Interactive
+ */
+"use strict";
+
+var THREE = require( "three" );
+
+var GameEntity = require( "./GameEntity" );
+var eventManager = require( "../../messaging/EventManager" );
+var TOPIC = require( "../../messaging/Topic" );
+var FirstPersonControls = require( "../../controls/FirstPersonControls" );
+var system = require( "../../core/System" );
+
+/**
+ * Creates a player object.
+ * 
+ * @constructor
+ * @augments GameEntity
+ * 
+ */
+function Player( world ) {
+
+	GameEntity.call( this, new THREE.Object3D() );
+
+	Object.defineProperties( this, {
+		// the reference to the world object, so the player can access
+		// obstacles, walls etc.
+		world : {
+			value : world,
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		// the controls of the player
+		controls : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the bounding volume of the player
+		boundingVolume : {
+			value : new THREE.Box3(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		// the center of the player's body
+		center : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		// the size of the player's body. this value changes if the player is
+		// crouching
+		size : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		// this will be used as the parent object for the camera
+		head : {
+			value : new THREE.Object3D(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		}
+	} );
+	
+	// create controls
+	this.controls = new FirstPersonControls( this );
+	
+	// change the default type of the object3D.
+	// this prevents the player object to be deleted 
+	// within a stage change
+	this.object3D.type = "Player";
+	
+	// build object hierarchy
+	this.object3D.add( this.head );
+}
+
+Player.prototype = Object.create( GameEntity.prototype );
+Player.prototype.constructor = Player;
+
+/**
+ * The update method of the player.
+ * 
+ * @param {number} delta - The time delta value.
+ */
+Player.prototype.update = ( function() {
+
+	var oldPosition = new THREE.Vector3();
+	var displacement = new THREE.Vector3();
+
+	return function( delta ) {
+		
+		// only update the controls if the mouse pointer is captured AND
+		// the controls are not locked
+		if ( this.controls.isCaptured === true && this.controls.isLocked === false )
+		{
+			// store current position
+			oldPosition.copy( this.position );
+			
+			// update the controls and retrieve new displacement values
+			this.controls.update( delta, displacement );
+
+			// translate the player to the new position. the used methods
+			// translate the player object on the rotated cardinal axis
+			this.object3D.translateX( displacement.x );
+			this.object3D.translateY( displacement.y );
+			this.object3D.translateZ( displacement.z );
+			
+			// update the bounding volume of the player
+			this._updateBoundingVolume();
+
+			// do ground and obstacle collision test. in this game scenario the
+			// player can only move on valid grounds and if there is no
+			// intersection
+			if ( this._isPlayerOnGround() === true && this._isCollisionDetected() === false )
+			{
+				// calculate camera motions only if the player can move without
+				// hindrance
+				this.controls.calculateCameraMotion( delta, displacement );
+			}
+			else
+			{
+				// restore old position
+				this.position.copy( oldPosition );
+				
+				// restore old bounding volume
+				this._updateBoundingVolume();
+
+				// reset camera position
+				this.controls.resetCamera();
+			}
+
+			// only publish player status if multiplayer components are active
+			if ( system.isMultiplayerActive === true )
+			{
+				this._publishPlayerStatus();
+			}
+		}
+		else
+		{
+			// reset the camera position to its native position
+			// if the player is not moving due to locked controls
+			this.controls.resetCamera();
+			
+			// the bounding volume must also calculated if the controls are locked
+			this._updateBoundingVolume();
+		}
+
+	};
+
+}() );
+
+/**
+ * Sets the direction of the player.
+ * 
+ * @param {THREE.Vector3} direction - The new direction of the player.
+ */
+Player.prototype.setDirection = function( direction ) {
+
+	this.controls.setDirection( direction );
+};
+
+/**
+ * Gets the direction of the player.
+ * 
+ * @returns {THREE.Vector3} The direction of the player.
+ */
+Player.prototype.getDirection = function() {
+
+	return this.controls.getDirection();
+};
+
+/**
+ * Gets the position of the head in world coordinates.
+ * 
+ * @returns {THREE.Vector3} The position of the head.
+ */
+Player.prototype.getHeadPosition = function() {
+
+	return this.head.getWorldPosition();
+};
+
+/**
+ * Publish the world information of the player to all players in the multiplayer
+ * session.
+ */
+Player.prototype._publishPlayerStatus = ( function() {
+
+	var position = new THREE.Vector3();
+	var quaternion = new THREE.Quaternion();
+
+	return function() {
+
+		position.copy( this.position );
+		quaternion.copy( this.quaternion );
+
+		eventManager.publish( TOPIC.MULTIPLAYER.PLAYER, {
+			position : position,
+			quaternion : quaternion
+		} );
+
+	};
+
+}() );
+
+/**
+ * Updates the bounding volume of the player.
+ */
+Player.prototype._updateBoundingVolume = function() {
+
+	// calculate the center of the players body
+	this.center.copy( this.position );
+	this.center.y += this.head.position.y * 0.5;
+
+	// calculate size of the player's body
+	this.size.set( 4, this.head.position.y, 4 );
+
+	// create bounding box
+	this.boundingVolume.setFromCenterAndSize( this.center, this.size );
+};
+
+/**
+ * Checks, of the player is on a ground object.
+ * 
+ * @returns {boolean} Is the player on a ground?
+ */
+Player.prototype._isPlayerOnGround = ( function() {
+
+	// this will be used for a intersection test to determine the distance to
+	// the current ground
+	var rayCaster = new THREE.Raycaster();
+
+	// ray properties
+	var origin = new THREE.Vector3();
+	var direction = new THREE.Vector3( 0, -1, 0 );
+
+	return function() {
+
+		var intersects;
+
+		// only do intersection test if there are grounds
+		if ( this.world.grounds.length !== 0 )
+		{
+			origin.copy( this.position );
+			origin.y += this.head.position.y;
+
+			// set origin and direction of raycast
+			rayCaster.set( origin, direction );
+			rayCaster.far = this.head.position.y + 1;
+
+			// do intersection test
+			intersects = rayCaster.intersectObjects( this.world.grounds );
+
+			// if there is an intersection, update the height of the player and return true
+			if ( intersects.length > 0 )
+			{
+				this.position.y += ( this.head.position.y - intersects[ 0 ].distance );
+				
+				return true;
+			}
+			else
+			{
+				// no ground intersection
+				return false;
+			}
+		}
+		
+		// no grounds
+		return false;
+	};
+
+}() );
+
+/**
+ * This method checks, if there are collision between the any obstacles in the
+ * world and the player's bounding volume.
+ * 
+ * @returns {boolean} Is there a collision between an obstacle and the player.
+ */
+Player.prototype._isCollisionDetected = function() {
+
+	var index, obstacle;
+
+	// this holds the current number if obstacles in the world
+	var numberOfObstacle = this.world.getNumberOfObstacles();
+
+	// now do the collision test with all obstacles
+	for ( index = 0; index < numberOfObstacle; index++ )
+	{
+		// retrieve obstacle
+		obstacle = this.world.getObstacle( index );
+
+		// do collision detection but only with visible obstacles
+		if ( obstacle.mesh.visible === true && obstacle.isIntersection( this.boundingVolume ) === true )
+		{
+			// exit method, because there is an intersection
+			return true;
+		}
+
+	} // next obstacle 
+
+	// no intersection
+	return false;
+};
+
+module.exports = Player;
+},{"../../controls/FirstPersonControls":17,"../../core/System":27,"../../messaging/EventManager":66,"../../messaging/Topic":68,"./GameEntity":45,"three":1}],48:[function(require,module,exports){
+/**
  * @file A simple vehicle that uses steering behaviors.
  * 
  * @author Human Interactive
@@ -45243,7 +45562,7 @@ Vehicle.prototype.update = ( function() {
 }() );
 
 module.exports = Vehicle;
-},{"../steering/Smoother":63,"../steering/SteeringBehaviors":64,"./MovingEntity":46,"three":1}],48:[function(require,module,exports){
+},{"../steering/Smoother":64,"../steering/SteeringBehaviors":65,"./MovingEntity":46,"three":1}],49:[function(require,module,exports){
 /**
  * @file Super prototype for states used by FSMs.
  * 
@@ -45294,7 +45613,7 @@ State.prototype.exit = function( entity ) { };
 State.prototype.onMessage = function( entity, telegram ) { return false; };
 
 module.exports = State;
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 /**
  * @file This prototype is a basic finite state machine used for AI logic.
  * 
@@ -45435,7 +45754,7 @@ StateMachine.prototype.isInState = function( state ) {
 };
 
 module.exports = StateMachine;
-},{"../../core/Logger":21,"./State":48}],50:[function(require,module,exports){
+},{"../../core/Logger":21,"./State":49}],51:[function(require,module,exports){
 /**
  * @file Prototype to define an edge connecting two nodes. An edge has an
  * associated cost.
@@ -45520,7 +45839,7 @@ GraphEdge.prototype.copy = function( source ){
 };
 
 module.exports = GraphEdge;
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 /**
  * @file Some useful functions you can use with graphs.
  * 
@@ -45853,7 +46172,7 @@ function generateEdges( graph, offset ) {
 	}// next node
 
 }
-},{"../../core/World":31,"./NavGraphEdge":53,"./NavGraphNode":54,"three":1}],52:[function(require,module,exports){
+},{"../../core/World":31,"./NavGraphEdge":54,"./NavGraphNode":55,"three":1}],53:[function(require,module,exports){
 /**
  * @file Node prototype to be used with graphs.
  * 
@@ -45887,7 +46206,7 @@ function GraphNode( index ) {
 GraphNode.INVALID_NODE_INDEX = -1;
 
 module.exports = GraphNode;
-},{}],53:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 /**
  * @file Prototype to define an edge connecting two navigation nodes.
  * 
@@ -45972,7 +46291,7 @@ NavGraphEdge.FLAGS = {
 };
 
 module.exports = NavGraphEdge;
-},{"./GraphEdge":50}],54:[function(require,module,exports){
+},{"./GraphEdge":51}],55:[function(require,module,exports){
 /**
  * @file Graph node for use in creating a navigation graph. This node contains
  * the position of the node and a pointer to a GameEntity... useful if you want
@@ -46027,7 +46346,7 @@ NavGraphNode.prototype = Object.create( GraphNode.prototype );
 NavGraphNode.prototype.constructor = NavGraphNode;
 
 module.exports = NavGraphNode;
-},{"./GraphNode":52,"three":1}],55:[function(require,module,exports){
+},{"./GraphNode":53,"three":1}],56:[function(require,module,exports){
 /**
  * @file Graph prototype using the adjacency list representation.
  * 
@@ -46554,7 +46873,7 @@ SparseGraph.prototype._cullInvalidEdges = function() {
 };
 
 module.exports = SparseGraph;
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 /**
  * @file Some useful functions you can use with algorithms.
  * 
@@ -46622,7 +46941,7 @@ AlgorithmHelper.prototype.sortQueueByCost = function( a, b ) {
 };
 
 module.exports = new AlgorithmHelper();
-},{}],57:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 /**
  * @file Prototype to implement the A* search algorithm.
  * 
@@ -46893,7 +47212,7 @@ GraphSearchAStar.prototype._search = function() {
 };
 
 module.exports = GraphSearchAStar;
-},{"../GraphEdge":50,"../GraphNode":52,"./AlgorithmHelper":56}],58:[function(require,module,exports){
+},{"../GraphEdge":51,"../GraphNode":53,"./AlgorithmHelper":57}],59:[function(require,module,exports){
 /**
  * @file Prototype to implement a breadth first search.
  * 
@@ -47081,7 +47400,7 @@ GraphSearchBFS.prototype._search = function() {
 };
 
 module.exports = GraphSearchBFS;
-},{"../GraphEdge":50,"../GraphNode":52}],59:[function(require,module,exports){
+},{"../GraphEdge":51,"../GraphNode":53}],60:[function(require,module,exports){
 /**
  * @file Prototype to implement a depth first search.
  * 
@@ -47241,7 +47560,7 @@ GraphSearchDFS.prototype._search = function() {
 };
 
 module.exports = GraphSearchDFS;
-},{"../GraphEdge":50,"../GraphNode":52}],60:[function(require,module,exports){
+},{"../GraphEdge":51,"../GraphNode":53}],61:[function(require,module,exports){
 /**
  * @file Prototype to implement dijkstra’s shortest path algorithm.
  * 
@@ -47493,7 +47812,7 @@ GraphSearchDijkstra.prototype._search = function() {
 };
 
 module.exports = GraphSearchDijkstra;
-},{"../GraphEdge":50,"../GraphNode":52,"./AlgorithmHelper":56}],61:[function(require,module,exports){
+},{"../GraphEdge":51,"../GraphNode":53,"./AlgorithmHelper":57}],62:[function(require,module,exports){
 /**
  * @file This prototype defines heuristic policies for use with the A* search
  * algorithm.
@@ -47630,7 +47949,7 @@ module.exports = {
 	EuclideanSq : new HeuristicPolicyEuclidSq(),
 	Dijkstra : new HeuristicPolicyDijkstra()
 };
-},{}],62:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 /**
  * @file Prototype to define, manage, and traverse a path defined by a series of
  * 3D vectors.
@@ -47792,7 +48111,7 @@ Path.prototype.createRandomPath = function( numberOfWaypoints, boundingBox ) {
 };
 
 module.exports = Path;
-},{"../../core/Logger":21,"three":1}],63:[function(require,module,exports){
+},{"../../core/Logger":21,"three":1}],64:[function(require,module,exports){
 /**
  * @file Prototype to help calculate the average value of a history of vector
  * values.
@@ -47877,7 +48196,7 @@ Smoother.prototype.update = function( mostRecentValue, average ) {
 };
 
 module.exports = Smoother;
-},{"three":1}],64:[function(require,module,exports){
+},{"three":1}],65:[function(require,module,exports){
 /**
  * @file Prototype to encapsulate steering behaviors for a vehicle.
  * 
@@ -47890,7 +48209,6 @@ module.exports = Smoother;
 var THREE = require( "three" );
 
 var logger = require( "../../core/Logger" );
-var Path = require( "./Path" );
 
 /**
  * Creates a steering behaviors instance.
@@ -47955,7 +48273,7 @@ function SteeringBehaviors( vehicle ) {
 		},
 		// the list of waypoints to follow
 		path : {
-			value : new Path(),
+			value : null,
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -49380,7 +49698,7 @@ SteeringBehaviors.DECELERATION = {
 };
 
 module.exports = SteeringBehaviors;
-},{"../../core/Logger":21,"./Path":62,"three":1}],65:[function(require,module,exports){
+},{"../../core/Logger":21,"three":1}],66:[function(require,module,exports){
 /**
  * @file This prototype provides topic-based publish/subscribe messaging and
  * enables communication between game entities.
@@ -49921,7 +50239,7 @@ function sendMessageToEntity( sender, receiver, message, data, isSync, delay ) {
 }
 
 module.exports = new EventManager();
-},{"../core/Logger":21,"../game/entity/GameEntity":45,"./Telegram":66}],66:[function(require,module,exports){
+},{"../core/Logger":21,"../game/entity/GameEntity":45,"./Telegram":67}],67:[function(require,module,exports){
 /**
  * @file This defines a telegram. A telegram is a data structure that records
  * information required to dispatch game messages. These messages are used by
@@ -49979,7 +50297,7 @@ function Telegram( sender, receiver, message, data, delay ) {
 }
 
 module.exports = Telegram;
-},{}],67:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 /**
  * @file This file contains all topics for publish & subscribe. YUME supports a
  * publish/subscribe messaging system with hierarchical addressing, so topics
@@ -50001,7 +50319,8 @@ var TOPIC = {
 		RESIZE : "application.resize"
 	},
 	CONTROLS : {
-		ACTIVE : "controls.active"
+		CAPTURE : "controls.capture",
+		LOCK : "controls.lock"
 	},
 	MULTIPLAYER : {
 		CHAT : "multiplayer.chat",
@@ -50035,7 +50354,7 @@ var TOPIC = {
 };
 
 module.exports = TOPIC;
-},{}],68:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 /**
  * @file Prototype for network-messages.
  * 
@@ -50085,7 +50404,7 @@ Message.TYPES = {
 };
 
 module.exports = Message;
-},{}],69:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for network-based
@@ -50340,7 +50659,7 @@ NetworkManager.SERVER = {
 
 module.exports = new NetworkManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Logger":21,"../core/ThreadManager":29,"../messaging/EventManager":65,"../messaging/Topic":67,"./Message":68,"ws":2}],70:[function(require,module,exports){
+},{"../core/Logger":21,"../core/ThreadManager":29,"../messaging/EventManager":66,"../messaging/Topic":68,"./Message":69,"ws":2}],71:[function(require,module,exports){
 /**
  * @file This prototype manages effects for post-processing.
  * 
@@ -50519,7 +50838,7 @@ EffectComposer.prototype._reset = function( renderTarget ) {
 };
 
 module.exports = EffectComposer;
-},{"three":1}],71:[function(require,module,exports){
+},{"three":1}],72:[function(require,module,exports){
 /**
  * @file This prototype provides a render pass for post-processing.
  * 
@@ -50581,7 +50900,7 @@ RenderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = RenderPass;
-},{"three":1}],72:[function(require,module,exports){
+},{"three":1}],73:[function(require,module,exports){
 /**
  * @file This prototype provides a shader pass for post-processing.
  * 
@@ -50687,7 +51006,7 @@ ShaderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = ShaderPass;
-},{"three":1}],73:[function(require,module,exports){
+},{"three":1}],74:[function(require,module,exports){
 /**
  * @file This shader can be used for vertex displacement to create
  * water or fabric materials. It implements an exemplary diffuse lighting
@@ -50789,7 +51108,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":1}],74:[function(require,module,exports){
+},{"three":1}],75:[function(require,module,exports){
 /**
  * @file This shader applies a gaussian blur effect.
  * It can be used for both x and y direction.
@@ -50856,7 +51175,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{"three":1}],75:[function(require,module,exports){
+},{"three":1}],76:[function(require,module,exports){
 /**
  * @file This shader transforms all colors to grayscale.
  * 
@@ -50905,7 +51224,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],76:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 /**
  * @file This shader creates a vignette effect.
  * 
@@ -50966,7 +51285,7 @@ module.exports  = {
 
 	].join("\n")
 };
-},{}],77:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -50991,9 +51310,9 @@ Stage.prototype.setup = function() {
 
 	StageBase.prototype.setup.call( this );
 
-	// controls setup
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+	// player setup
+	this.world.player.position.set( 0, 0, -75 );
+	this.world.player.setDirection( new THREE.Vector3( 0, 0, 1 ) );
 
 	// load texts
 	this.textManager.load( this.stageId );
@@ -51036,12 +51355,10 @@ Stage.prototype.setup = function() {
 	} );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
 
 		self._changeStage( "002", true );
 	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
 	
 	// start rendering
 	this._render();
@@ -51083,7 +51400,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],78:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],79:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51108,9 +51425,9 @@ Stage.prototype.setup = function() {
 
 	StageBase.prototype.setup.call( this );
 
-	// setup controls
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+	// player setup
+	this.world.player.position.set( 0, 0, -75 );
+	this.world.player.setDirection( new THREE.Vector3( 0, 0, 1 ) );
 
 	// load texts
 	this.textManager.load( this.stageId );
@@ -51203,12 +51520,10 @@ Stage.prototype.setup = function() {
 	} );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
 
-		self._changeStage( "003", true );
+		self._changeStage( "003", true );	
 	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
 
 	// light
 	var ambientLight = new THREE.AmbientLight( 0x111111 );
@@ -51263,7 +51578,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],79:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],80:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51288,9 +51603,9 @@ Stage.prototype.setup = function() {
 
 	StageBase.prototype.setup.call( this );
 
-	// setup controls
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+	// player setup
+	this.world.player.position.set( 0, 0, -75 );
+	this.world.player.setDirection( new THREE.Vector3( 0, 0, 1 ) );
 
 	// load texts
 	this.textManager.load( this.stageId );
@@ -51327,18 +51642,18 @@ Stage.prototype.setup = function() {
 	} );
 
 	// add trigger for color change
-	var colorTrigger = this.actionManager.createTrigger( "Color Change", 10, function() {
+	var colorTrigger = this.actionManager.createTrigger( "Color Change", new THREE.Vector3( -20, 0, 0 ), 10, false, function() {
 
 		colorMesh( interactiveBox );
 	} );
-	colorTrigger.position.set( -20, 0, 0 );
-	this.world.addObject3D( colorTrigger );
 
-	// visualize trigger with circle
-	var triggerCircle = new THREE.Mesh( new THREE.CircleGeometry( 10 ), new THREE.MeshBasicMaterial( {
-		wireframe : true
-	} ) );
-	colorTrigger.add( triggerCircle );
+	// add helper object
+	var helperGeometry = new THREE.SphereBufferGeometry( colorTrigger.boundingSphere.radius, 20, 20 );
+	var helperMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe: true } );
+	
+	var helper = new THREE.Mesh( helperGeometry, helperMaterial );
+	helper.position.copy(  colorTrigger.boundingSphere.center );
+	this.world.addObject3D( helper );
 
 	// add sign
 	var signLoader = new JSONLoader();
@@ -51362,12 +51677,10 @@ Stage.prototype.setup = function() {
 	} );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
 
-		self._changeStage( "004", true );
+		self._changeStage( "004", true );	
 	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
 
 	// light
 	var ambientLight = new THREE.AmbientLight( 0x111111 );
@@ -51435,7 +51748,7 @@ function colorMesh( mesh ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],80:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],81:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51460,9 +51773,9 @@ Stage.prototype.setup = function() {
 
 	StageBase.prototype.setup.call( this );
 
-	// setup controls
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+	// player setup
+	this.world.player.position.set( 0, 0, -75 );
+	this.world.player.setDirection( new THREE.Vector3( 0, 0, 1 ) );
 
 	// load texts
 	this.textManager.load( this.stageId );
@@ -51495,7 +51808,6 @@ Stage.prototype.setup = function() {
 
 	this.actionManager.createInteraction( interactiveBoxTextScreen, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.TextScreen", function() {
 
-		self.controls.isActionInProgress = true;
 		self.userInterfaceManager.showTextScreen( [ {
 			name : "Name.Daniel",
 			text : "TextScreen.Part1"
@@ -51505,10 +51817,7 @@ Stage.prototype.setup = function() {
 		}, {
 			name : undefined,
 			text : "TextScreen.Part3"
-		} ], function() {
-
-			self.controls.isActionInProgress = false;
-		} );
+		} ] );
 	} );
 
 	// create interactive box
@@ -51552,12 +51861,10 @@ Stage.prototype.setup = function() {
 	} );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
 
-		self._changeStage( "005", true );
+		self._changeStage( "005", true );	
 	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
 
 	// light
 	var ambientLight = new THREE.AmbientLight( 0x111111 );
@@ -51613,7 +51920,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],81:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],82:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51638,9 +51945,9 @@ Stage.prototype.setup = function() {
 
 	StageBase.prototype.setup.call( this );
 
-	// setup controls
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+	// player setup
+	this.world.player.position.set( 0, 0, -75 );
+	this.world.player.setDirection( new THREE.Vector3( 0, 0, 1 ) );
 
 	// load texts
 	this.textManager.load( this.stageId );
@@ -51686,12 +51993,10 @@ Stage.prototype.setup = function() {
 	} );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
 
-		self._changeStage( "006", true );
+		self._changeStage( "006", true );	
 	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
 
 	// start rendering
 	this._render();
@@ -51739,7 +52044,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],82:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],83:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51766,9 +52071,9 @@ Stage.prototype.setup = function() {
 
 	StageBase.prototype.setup.call( this );
 
-	// setup controls
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+	// player setup
+	this.world.player.position.set( 0, 0, -75 );
+	this.world.player.setDirection( new THREE.Vector3( 0, 0, 1 ) );
 
 	// load texts
 	this.textManager.load( this.stageId );
@@ -51860,12 +52165,10 @@ Stage.prototype.setup = function() {
 	} );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
 
-		self._changeStage( "007", true );
+		self._changeStage( "007", true );	
 	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
 
 	// light
 	var ambientLight = new THREE.AmbientLight( 0x111111 );
@@ -51928,7 +52231,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],83:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],84:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51953,9 +52256,9 @@ Stage.prototype.setup = function() {
 
 	StageBase.prototype.setup.call( this );
 
-	// setup controls
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+	// player setup
+	this.world.player.position.set( 0, 0, -75 );
+	this.world.player.setDirection( new THREE.Vector3( 0, 0, 1 ) );
 
 	// load texts
 	this.textManager.load( this.stageId );
@@ -52041,12 +52344,10 @@ Stage.prototype.setup = function() {
 	} );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
 
-		self._changeStage( "008", true );
+		self._changeStage( "008", true );	
 	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
 
 	// light
 	var ambientLight = new THREE.AmbientLight( 0x111111 );
@@ -52101,7 +52402,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],84:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],85:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52126,9 +52427,9 @@ Stage.prototype.setup = function() {
 
 	StageBase.prototype.setup.call( this );
 
-	// controls setup
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+	// player setup
+	this.world.player.position.set( 0, 0, -75 );
+	this.world.player.setDirection( new THREE.Vector3( 0, 0, 1 ) );
 
 	// load texts
 	this.textManager.load( this.stageId );
@@ -52207,12 +52508,10 @@ Stage.prototype.setup = function() {
 	this.world.addGround( ramp );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 7.5, 75 ), 10, true, function() {
 
-		self._changeStage( "009", true );
+		self._changeStage( "009", true );	
 	} );
-	stageTrigger.position.set( 0, 7.5, 75 );
-	this.world.addObject3D( stageTrigger );
 
 	// start rendering
 	this._render();
@@ -52254,7 +52553,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],85:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],86:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52279,9 +52578,9 @@ Stage.prototype.setup = function() {
 
 	StageBase.prototype.setup.call( this );
 
-	// controls setup
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+	// player setup
+	this.world.player.position.set( 0, 0, -75 );
+	this.world.player.setDirection( new THREE.Vector3( 0, 0, 1 ) );
 
 	// load texts
 	this.textManager.load( this.stageId );
@@ -52372,12 +52671,10 @@ Stage.prototype.setup = function() {
 	this.world.addObject3D( directionalLight );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
 
-		self._changeStage( "010", true );
+		self._changeStage( "010", true );	
 	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
 
 	// start rendering
 	this._render();
@@ -52435,7 +52732,7 @@ function showLODCircles( world ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],86:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],87:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -52461,9 +52758,9 @@ Stage.prototype.setup = function() {
 
 	StageBase.prototype.setup.call( this );
 
-	// controls setup
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+	// player setup
+	this.world.player.position.set( 0, 0, -75 );
+	this.world.player.setDirection( new THREE.Vector3( 0, 0, 1 ) );
 
 	// load texts
 	this.textManager.load( this.stageId );
@@ -52542,16 +52839,11 @@ Stage.prototype.setup = function() {
 	this.world.addObject3D( directionalLight );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
 
-		self._changeStage( "011", true );
+		self._changeStage( "011", true );	
 	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
-
-	// generate impostors
-	this.performanceManager.generateImpostors();
-
+	
 	// start rendering
 	this._render();
 };
@@ -52562,7 +52854,10 @@ Stage.prototype.start = function() {
 
 	// set information panel text
 	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
-
+	
+	// generate impostors
+	this.performanceManager.generateImpostors();
+	
 	// add special event handler for demo
 	global.document.addEventListener( "keydown", onKeyDown );
 };
@@ -52615,7 +52910,7 @@ function onKeyDown( event ) {
 
 module.exports = Stage;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],87:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],88:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52640,9 +52935,9 @@ Stage.prototype.setup = function() {
 
 	StageBase.prototype.setup.call( this );
 
-	// controls setup
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+	// player setup
+	this.world.player.position.set( 0, 0, -75 );
+	this.world.player.setDirection( new THREE.Vector3( 0, 0, 1 ) );
 
 	// load texts
 	this.textManager.load( this.stageId );
@@ -52698,7 +52993,7 @@ Stage.prototype.setup = function() {
 	this.world.addObject3D( directionalLight );
 
 	// add trigger for ending
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
 
 		self.userInterfaceManager.showModalDialog( {
 			headline : "Modal.Headline",
@@ -52706,10 +53001,8 @@ Stage.prototype.setup = function() {
 			content : "Modal.Content"
 		} );
 
-		self.saveGameManager.remove();
+		self.saveGameManager.remove();	
 	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
 
 	// post processing
 	this.renderer.preparePostProcessing( this.world, this.camera );
@@ -52760,7 +53053,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],88:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],89:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -52846,9 +53139,9 @@ Chat.prototype.toogle = function() {
 		// hide input field
 		this.hide();
 
-		// activate controls
-		eventManager.publish( TOPIC.CONTROLS.ACTIVE, {
-			isActive : true
+		// capture controls
+		eventManager.publish( TOPIC.CONTROLS.CAPTURE, {
+			isCaptured : true
 		} );
 	}
 	else
@@ -52856,9 +53149,9 @@ Chat.prototype.toogle = function() {
 		// show input field
 		this.show();
 
-		// deactivate controls
-		eventManager.publish( TOPIC.CONTROLS.ACTIVE, {
-			isActive : false
+		// release controls
+		eventManager.publish( TOPIC.CONTROLS.CAPTURE, {
+			isCaptured : false
 		} );
 	}
 };
@@ -52939,7 +53232,7 @@ Chat.prototype._onMessage = function( message, data ) {
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":65,"../messaging/Topic":67,"./UiElement":97}],89:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":98}],90:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel. Only if the development
@@ -53001,7 +53294,7 @@ DevelopmentPanel.prototype.setText = function( text ) {
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":97}],90:[function(require,module,exports){
+},{"./UiElement":98}],91:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -53062,7 +53355,7 @@ InformationPanel.prototype.setText = function( textKey ) {
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":97}],91:[function(require,module,exports){
+},{"./UiElement":98}],92:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -53139,7 +53432,7 @@ InteractionLabel.prototype.hide = function() {
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":97}],92:[function(require,module,exports){
+},{"./UiElement":98}],93:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -53329,7 +53622,7 @@ LoadingScreen.prototype._onReady = function( message, data ) {
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":65,"../messaging/Topic":67,"./UiElement":97}],93:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":98}],94:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -53485,7 +53778,7 @@ Menu.prototype._publishFinishEvent = function( message, data ) {
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Environment":20,"../messaging/EventManager":65,"../messaging/Topic":67,"./UiElement":97}],94:[function(require,module,exports){
+},{"../core/Environment":20,"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":98}],95:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -53609,7 +53902,7 @@ ModalDialog.prototype._onClose = function( event ) {
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":97}],95:[function(require,module,exports){
+},{"./UiElement":98}],96:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor. Only if the development
@@ -53828,7 +54121,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":97}],96:[function(require,module,exports){
+},{"./UiElement":98}],97:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -53840,6 +54133,9 @@ module.exports = new PerformanceMonitor();
 var self;
 
 var UiElement = require( "./UiElement" );
+var eventManager = require( "../messaging/EventManager" );
+var TOPIC = require( "../messaging/Topic" );
+
 /**
  * Creates the text screen.
  * 
@@ -53942,6 +54238,11 @@ TextScreen.prototype.show = function( textKeys, completeCallback ) {
 		this._printName();
 		this._printText();
 		this._$textScreen.classList.add( "slideEffect" );
+		
+		// lock controls
+		eventManager.publish( TOPIC.CONTROLS.LOCK, {
+			isLocked : true
+		} );
 	}
 };
 
@@ -53956,6 +54257,11 @@ TextScreen.prototype.hide = function() {
 		this._$textScreen.classList.remove( "slideEffect" );
 		this._$textScreenContent.textContent = "";
 		this._textIndex = 0;
+		
+		// release controls
+		eventManager.publish( TOPIC.CONTROLS.LOCK, {
+			isLocked : false
+		} );
 	}
 };
 
@@ -54041,7 +54347,7 @@ TextScreen.prototype._printName = function() {
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":97}],97:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":98}],98:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -54091,7 +54397,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":42}],98:[function(require,module,exports){
+},{"../etc/TextManager":42}],99:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in stages to
@@ -54357,4 +54663,4 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":65,"../messaging/Topic":67,"./Chat":88,"./DevelopmentPanel":89,"./InformationPanel":90,"./InteractionLabel":91,"./LoadingScreen":92,"./Menu":93,"./ModalDialog":94,"./PerformanceMonitor":95,"./TextScreen":96}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98]);
+},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68,"./Chat":89,"./DevelopmentPanel":90,"./InformationPanel":91,"./InteractionLabel":92,"./LoadingScreen":93,"./Menu":94,"./ModalDialog":95,"./PerformanceMonitor":96,"./TextScreen":97}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99]);

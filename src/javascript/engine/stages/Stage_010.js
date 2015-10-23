@@ -22,9 +22,9 @@ Stage.prototype.setup = function() {
 
 	StageBase.prototype.setup.call( this );
 
-	// controls setup
-	this.controls.setPosition( new THREE.Vector3( 0, 0, -75 ) );
-	this.controls.setRotation( new THREE.Vector3( 0, Math.PI, 0 ) );
+	// player setup
+	this.world.player.position.set( 0, 0, -75 );
+	this.world.player.setDirection( new THREE.Vector3( 0, 0, 1 ) );
 
 	// load texts
 	this.textManager.load( this.stageId );
@@ -103,16 +103,11 @@ Stage.prototype.setup = function() {
 	this.world.addObject3D( directionalLight );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", 15, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
 
-		self._changeStage( "011", true );
+		self._changeStage( "011", true );	
 	} );
-	stageTrigger.position.set( 0, 0, 75 );
-	this.world.addObject3D( stageTrigger );
-
-	// generate impostors
-	this.performanceManager.generateImpostors();
-
+	
 	// start rendering
 	this._render();
 };
@@ -123,7 +118,10 @@ Stage.prototype.start = function() {
 
 	// set information panel text
 	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
-
+	
+	// generate impostors
+	this.performanceManager.generateImpostors();
+	
 	// add special event handler for demo
 	global.document.addEventListener( "keydown", onKeyDown );
 };

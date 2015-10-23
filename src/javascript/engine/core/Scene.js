@@ -31,7 +31,7 @@ Scene.prototype.clear = function() {
 
 	for ( var index = this.children.length - 1; index >= 0; index-- )
 	{
-		if ( this.children[ index ].type !== "Controls" )
+		if ( this.children[ index ].type !== "Player" )
 		{
 			this.remove( this.children[ index ] );
 		}
