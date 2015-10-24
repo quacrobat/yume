@@ -103,7 +103,7 @@ ActionManager.prototype.update = function( player ) {
 	// update triggers
 	for ( index = 0; index < this.triggers.length; index++ )
 	{
-		this.triggers[ index ].update( player.boundingVolume );
+		this.triggers[ index ].update( player.position );
 	}
 
 	// check interaction objects

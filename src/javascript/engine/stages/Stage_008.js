@@ -103,7 +103,7 @@ Stage.prototype.setup = function() {
 	this.world.addGround( ramp );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 7.5, 75 ), 10, true, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 7.5, 75 ), 15, true, function() {
 
 		self._changeStage( "009", true );	
 	} );

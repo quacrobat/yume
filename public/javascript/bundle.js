@@ -36212,7 +36212,7 @@ ActionManager.prototype.update = function( player ) {
 	// update triggers
 	for ( index = 0; index < this.triggers.length; index++ )
 	{
-		this.triggers[ index ].update( player.boundingVolume );
+		this.triggers[ index ].update( player.position );
 	}
 
 	// check interaction objects
@@ -36487,8 +36487,8 @@ function ActionTrigger( position, radius, isOnetime, action ) {
 			enumerable : true,
 			writable : true
 		},
-		// indicates, if the player is inside the trigger
-		isInRadius : {
+		// indicates, if the entity is inside the trigger
+		isEntityInside : {
 			value : false,
 			configurable : false,
 			enumerable : true,
@@ -36517,13 +36517,13 @@ function ActionTrigger( position, radius, isOnetime, action ) {
 /**
  * The update method checks if the trigger should execute it's action.
  * 
- * @param {THREE.Box} boundingBox - The bounding volume to test.
+ * @param {THREE.Vector3} position - The position of the game entity.
  */
 ActionTrigger.prototype.update = ( function() {
 
 	var closestPoint = new THREE.Vector3();
 
-	return function( boundingBox ) {
+	return function( position ) {
 
 		// the action property must always be set
 		if ( this.action !== undefined )
@@ -36531,35 +36531,34 @@ ActionTrigger.prototype.update = ( function() {
 			// only process if the action is active
 			if ( this.action.isActive === true )
 			{
-				boundingBox.clampPoint( this.boundingSphere.center, closestPoint );
-
-				// only process if the given bounding volume intersects with
-				// the trigger
-				if ( closestPoint.distanceToSquared( this.boundingSphere.center ) <= ( this.boundingSphere.radius * this.boundingSphere.radius ) )
+				// only process if the given position is inside the trigger
+				if ( this.boundingSphere.containsPoint( position ) )
 				{
-					// if the bounding volume is not already inside the trigger,
+					// if the position is not already inside the trigger,
 					// run the corresponding action
-					if ( this.isInRadius === false )
+					if ( this.isEntityInside === false )
 					{
 						// run the action
 						this.action.run();
 
-						this.isInRadius = true;
+						// the entity is now inside the trigger
+						this.isEntityInside = true;
 
-						logger.log( "INFO: ActionTrigger: Interaction with trigger. Action executed." );
-						
-						// if the "isOnetime" flag is set, deactivate the trigger action
+						// if the "isOnetime" flag is set, deactivate the
+						// trigger action
 						if ( this.isOnetime === true )
 						{
 							this.action.isActive = false;
 						}
+
+						logger.log( "INFO: ActionTrigger: Interaction with trigger. Action executed." );
 					}
 				}
 				else
 				{
-					// the bounding volume is not inside the trigger, so it's
+					// the position is not inside the trigger, so it's
 					// ready to run it's action again
-					this.isInRadius = false;
+					this.isEntityInside = false;
 				}
 			}
 		}
@@ -51355,7 +51354,7 @@ Stage.prototype.setup = function() {
 	} );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 15, true, function() {
 
 		self._changeStage( "002", true );
 	} );
@@ -51520,7 +51519,7 @@ Stage.prototype.setup = function() {
 	} );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 15, true, function() {
 
 		self._changeStage( "003", true );	
 	} );
@@ -51677,7 +51676,7 @@ Stage.prototype.setup = function() {
 	} );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 15, true, function() {
 
 		self._changeStage( "004", true );	
 	} );
@@ -51861,7 +51860,7 @@ Stage.prototype.setup = function() {
 	} );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 15, true, function() {
 
 		self._changeStage( "005", true );	
 	} );
@@ -51993,7 +51992,7 @@ Stage.prototype.setup = function() {
 	} );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 15, true, function() {
 
 		self._changeStage( "006", true );	
 	} );
@@ -52165,7 +52164,7 @@ Stage.prototype.setup = function() {
 	} );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 15, true, function() {
 
 		self._changeStage( "007", true );	
 	} );
@@ -52344,7 +52343,7 @@ Stage.prototype.setup = function() {
 	} );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 15, true, function() {
 
 		self._changeStage( "008", true );	
 	} );
@@ -52508,7 +52507,7 @@ Stage.prototype.setup = function() {
 	this.world.addGround( ramp );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 7.5, 75 ), 10, true, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 7.5, 75 ), 15, true, function() {
 
 		self._changeStage( "009", true );	
 	} );
@@ -52671,7 +52670,7 @@ Stage.prototype.setup = function() {
 	this.world.addObject3D( directionalLight );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 15, true, function() {
 
 		self._changeStage( "010", true );	
 	} );
@@ -52839,7 +52838,7 @@ Stage.prototype.setup = function() {
 	this.world.addObject3D( directionalLight );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 15, true, function() {
 
 		self._changeStage( "011", true );	
 	} );
@@ -52993,7 +52992,7 @@ Stage.prototype.setup = function() {
 	this.world.addObject3D( directionalLight );
 
 	// add trigger for ending
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 15, true, function() {
 
 		self.userInterfaceManager.showModalDialog( {
 			headline : "Modal.Headline",

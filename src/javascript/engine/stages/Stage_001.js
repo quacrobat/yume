@@ -67,7 +67,7 @@ Stage.prototype.setup = function() {
 	} );
 
 	// add trigger for stage change
-	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 10, true, function() {
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 15, true, function() {
 
 		self._changeStage( "002", true );
 	} );
