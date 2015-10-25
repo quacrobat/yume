@@ -7,6 +7,8 @@
 
 "use strict";
 
+var THREE = require( "three" );
+
 var nextId = 0;
 
 /**
@@ -28,7 +30,7 @@ function GameEntity( object3D ) {
 		},
 		// each game entity is a 3D object
 		object3D : {
-			value : object3D,
+			value : object3D || new THREE.Object3D(),
 			configurable : false,
 			enumerable : true,
 			writable : false

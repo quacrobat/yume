@@ -44802,6 +44802,8 @@ module.exports = new EntityManager();
 
 "use strict";
 
+var THREE = require( "three" );
+
 var nextId = 0;
 
 /**
@@ -44823,7 +44825,7 @@ function GameEntity( object3D ) {
 		},
 		// each game entity is a 3D object
 		object3D : {
-			value : object3D,
+			value : object3D || new THREE.Object3D(),
 			configurable : false,
 			enumerable : true,
 			writable : false
@@ -44923,7 +44925,7 @@ GameEntity.SCOPE = {
 };
 
 module.exports = GameEntity;
-},{}],46:[function(require,module,exports){
+},{"three":1}],46:[function(require,module,exports){
 /**
  * @file Base prototype from which all moving game agents are derived.
  * 
@@ -45139,7 +45141,7 @@ var system = require( "../../core/System" );
  */
 function Player( world ) {
 
-	GameEntity.call( this, new THREE.Object3D() );
+	GameEntity.call( this );
 
 	Object.defineProperties( this, {
 		// the reference to the world object, so the player can access

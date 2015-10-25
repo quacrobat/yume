@@ -22,7 +22,7 @@ var system = require( "../../core/System" );
  */
 function Player( world ) {
 
-	GameEntity.call( this, new THREE.Object3D() );
+	GameEntity.call( this );
 
 	Object.defineProperties( this, {
 		// the reference to the world object, so the player can access
