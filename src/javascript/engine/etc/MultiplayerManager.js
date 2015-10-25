@@ -82,8 +82,11 @@ MultiplayerManager.prototype._onStatus = function( message, data ) {
 
 	if ( data.online === true )
 	{
+		// create mesh for teammate
+		var mesh = new THREE.Mesh( new THREE.BoxGeometry( 4, 4, 4 ),  new THREE.MeshBasicMaterial( {color : "#ff0000"} ) );
+		
 		// create new teammate
-		teammate = new Teammate( data.clientId );
+		teammate = new Teammate( data.clientId, mesh );
 
 		// add teammate
 		self._addTeammate( teammate );

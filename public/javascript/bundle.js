@@ -42872,8 +42872,11 @@ MultiplayerManager.prototype._onStatus = function( message, data ) {
 
 	if ( data.online === true )
 	{
+		// create mesh for teammate
+		var mesh = new THREE.Mesh( new THREE.BoxGeometry( 4, 4, 4 ),  new THREE.MeshBasicMaterial( {color : "#ff0000"} ) );
+		
 		// create new teammate
-		teammate = new Teammate( data.clientId );
+		teammate = new Teammate( data.clientId, mesh );
 
 		// add teammate
 		self._addTeammate( teammate );
@@ -44352,7 +44355,6 @@ module.exports = new SettingsManager();
  */
 "use strict";
 
-var THREE = require( "three" );
 var GameEntity = require( "../game/entity/GameEntity" );
 
 /**
@@ -44362,10 +44364,11 @@ var GameEntity = require( "../game/entity/GameEntity" );
  * @augments GameEntity
  * 
  * @param {number} id - The multiplayer id of the teammate entity.
+ * @param {THREE.Mesh} mesh - The mesh of the teammate.
  */
-function Teammate( id ) {
+function Teammate( id, mesh ) {
 
-	GameEntity.call( this );
+	GameEntity.call( this, mesh );
 
 	Object.defineProperties( this, {
 		multiplayerId : {
@@ -44375,9 +44378,7 @@ function Teammate( id ) {
 			writable : true
 		}
 	} );
-
-	// apply exemplary mesh object
-	this.object3D = new THREE.Mesh( new THREE.BoxGeometry( 4, 4, 4 ),  new THREE.MeshBasicMaterial( {color : "#ff0000"} ) );
+	
 }
 
 Teammate.prototype = Object.create( GameEntity.prototype );
@@ -44391,12 +44392,12 @@ Teammate.prototype.constructor = Teammate;
  */
 Teammate.prototype.update = function( position, quaternion ) {
 
-	this.object3D.position.copy( position );
-	this.object3D.quaternion.copy( quaternion );
+	this.position.copy( position );
+	this.quaternion.copy( quaternion );
 };
 
 module.exports = Teammate;
-},{"../game/entity/GameEntity":45,"three":1}],42:[function(require,module,exports){
+},{"../game/entity/GameEntity":45}],42:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire text-handling. This prototype is used in stages to
