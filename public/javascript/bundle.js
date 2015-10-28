@@ -43100,13 +43100,13 @@ OBB.prototype.setFromAABB = function( aabb ) {
 };
 
 /**
- * Sets the OBB from a Bounding Sphere.
+ * Sets the OBB from a bounding sphere.
  * 
  * @param {THREE.Sphere} sphere - The bounding sphere to convert to an OBB.
  * 
  * @returns {OBB} The reference to the OBB.
  */
-OBB.prototype.setFromBS = function( sphere ) {
+OBB.prototype.setFromSphere = function( sphere ) {
 
 	this.position = sphere.center;
 

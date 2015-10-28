@@ -14,7 +14,7 @@ describe( "OBB", function() {
 
 	describe( "#setFromObject()", function() {
 
-		it( "should generate from mesh object", function() {
+		it( "should generate an OBB from a mesh object", function() {
 
 			var geoemtry = new THREE.BoxGeometry( 10, 10, 10 );
 			var material = new THREE.MeshBasicMaterial();
@@ -35,7 +35,7 @@ describe( "OBB", function() {
 
 	describe( "#setFromAABB()", function() {
 
-		it( "should generate from axis-aligned bounding box", function() {
+		it( "should generate an OBB from an axis-aligned bounding box", function() {
 
 			var aabb = new THREE.Box3();
 			aabb.setFromCenterAndSize( new THREE.Vector3(), new THREE.Vector3( 10, 10, 10 ) );
@@ -52,7 +52,7 @@ describe( "OBB", function() {
 
 	describe( "#setFromSphere()", function() {
 
-		it( "should generate from bounding sphere", function() {
+		it( "should generate an OBB from a bounding sphere", function() {
 
 			var sphere = new THREE.Sphere( new THREE.Vector3(), 5 );
 
@@ -68,7 +68,7 @@ describe( "OBB", function() {
 
 	describe( "#closestPoint()", function() {
 
-		it( "should compute the closest point inside the OBB", function() {
+		it( "should compute the closest point inside the OBB of a given point", function() {
 
 			var point1 = new THREE.Vector3();
 			var point2 = new THREE.Vector3( -10, -10, -10 );
@@ -152,19 +152,6 @@ describe( "OBB", function() {
 
 			assert.equal( true, obb.isTriangleContained( triangle1 ) );
 			assert.equal( false, obb.isTriangleContained( triangle2 ) );
-
-		} );
-
-	} );
-
-	describe( "#size()", function() {
-
-		it( "should return the double amount of the 'halfSizes' vector", function() {
-
-			var halfSizes = new THREE.Vector3( 5, 5, 5 );
-			var obb = new OBB( new THREE.Vector3(), halfSizes );
-
-			assert.equal( true, obb.size().equals( halfSizes.multiplyScalar( 2 ) ) );
 
 		} );
 
@@ -269,6 +256,19 @@ describe( "OBB", function() {
 			assert.equal( true, obb.isIntersectionRay( ray2 ) );
 			assert.equal( true, obb.isIntersectionRay( ray3 ) );
 			assert.equal( false, obb.isIntersectionRay( ray4 ) );
+
+		} );
+
+	} );
+	
+	describe( "#size()", function() {
+
+		it( "should return the double amount of the 'halfSizes' vector", function() {
+
+			var halfSizes = new THREE.Vector3( 5, 5, 5 );
+			var obb = new OBB( new THREE.Vector3(), halfSizes );
+
+			assert.equal( true, obb.size().equals( halfSizes.multiplyScalar( 2 ) ) );
 
 		} );
 
