@@ -20,6 +20,9 @@ module.exports = function( grunt ) {
 		// css
 		srcPathCss : "src/css",
 		distPathCss : "public/stylesheets",
+		
+		// test
+		srcPathTest : "test",
 
 		// tasks
 		autoprefixer : {
@@ -83,7 +86,16 @@ module.exports = function( grunt ) {
 			}
 		},
 
-		clean : [ "<%= distPathLess %>/style.min.css" ]
+		clean : [ "<%= distPathLess %>/style.min.css" ],
+
+		mochaTest : {
+			test : {
+				options : {
+					reporter : "spec"
+				},
+				src : [ "<%= srcPathTest %>/**/*.js" ]
+			}
+		}
 	} );
 
 	grunt.loadNpmTasks( "grunt-contrib-concat" );
@@ -93,6 +105,8 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( "grunt-autoprefixer" );
 	grunt.loadNpmTasks( "grunt-contrib-clean" );
 	grunt.loadNpmTasks( "grunt-browserify" );
+	grunt.loadNpmTasks( "grunt-mocha-test" );
 
 	grunt.registerTask( "default", [ "browserify", "uglify", "less", "autoprefixer", "concat", "clean" ] );
+	grunt.registerTask( "test", "mochaTest" );
 };
