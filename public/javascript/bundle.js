@@ -39964,14 +39964,6 @@ Bootstrap.prototype._initEngine = function() {
 	// check capabilities of the runtime environment/ browser
 	if ( environment.isCompatible() === true )
 	{
-		// if the browser supports a touch-based user interface, show info
-		// message
-		if ( environment.isTouchDevice() === true )
-		{
-			message = "Please note: This demo works only with keyboard and mouse.";
-			global.alert( message );
-		}
-
 		// initialize basic components
 		renderer.init();
 		camera.init();
