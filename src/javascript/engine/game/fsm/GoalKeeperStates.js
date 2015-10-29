@@ -89,18 +89,20 @@ TendGoal.prototype.execute = function( keeper ) {
 		return;
 	}
 
-	// if ball is within a predefined distance, the keeper moves out from
-	// position to try to intercept it.
-	if ( keeper.isBallWithinRangeForIntercept() && !keeper.team.isInControl() )
-	{
-		keeper.stateMachine.changeState( States.InterceptBall );
-	}
-
 	// if the keeper has ventured too far away from the goalline and there
 	// is no threat from the opponents he should move back towards it
 	if ( keeper.isTooFarFromGoalMouth() && keeper.team.isInControl() )
 	{
 		keeper.stateMachine.changeState( States.ReturnHome );
+		
+		return;
+	}
+	
+	// if ball is within a predefined distance, the keeper moves out from
+	// position to try to intercept it.
+	if ( keeper.isBallWithinRangeForIntercept() && !keeper.team.isInControl() )
+	{
+		keeper.stateMachine.changeState( States.InterceptBall );
 	}
 };
 

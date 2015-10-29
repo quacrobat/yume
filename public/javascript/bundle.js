@@ -40343,7 +40343,7 @@ Logger.prototype.log = function() {
 	// log messages only in dev mode
 	if ( system.isDevModeActive === true )
 	{
-		console.log.apply( console, arguments );
+//		console.log.apply( console, arguments );
 	}
 };
 
@@ -46290,7 +46290,7 @@ PlayerBase.prototype.isThreatened = function() {
 		// opponent is less than our comfort zone, return true
 		if ( this.isPositionInFrontOfPlayer( opponent.object3D.position ) && this.object3D.position.distanceToSquared( opponent.object3D.position ) < PlayerBase.CONFIG.PLAYER_COMFORT_ZONE_SQ )
 		{
-			return true;
+			return true;	
 		}
 	} // next opponent
 
@@ -46499,18 +46499,18 @@ PlayerBase.CONFIG = {
 	PLAYER_CHANCE_ATTEMPT_POT_SHOT: 0.005,
 	
 	// the minimum distance a receiving player must be from the passing player
-	PLAYER_MIN_PASS_DISTANCE: 20,
+	PLAYER_MIN_PASS_DISTANCE: 15,
 
 	// physics
 	PLAYER_MASS : 1,
 	PLAYER_RADIUS : 1,
-	PLAYER_MAX_SPEED_WITH_BALL : 0.12,
-	PLAYER_MAX_SPEED_WITHOUT_BALL : 0.1,
+	PLAYER_MAX_SPEED_WITH_BALL : 0.085,
+	PLAYER_MAX_SPEED_WITHOUT_BALL : 0.11,
 	PLAYER_MAX_FORCE : 1.0,
 	PLAYER_MAX_TURN_RATE : 0.1,
-	PLAYER_MAX_DRIBBLE_FORCE : 0.2,
+	PLAYER_MAX_DRIBBLE_FORCE : 0.18,
 	PLAYER_MAX_DRIBBLE_AND_TURN_FORCE : 0.12,
-	PLAYER_MAX_SHOOTING_FORCE : 0.75,
+	PLAYER_MAX_SHOOTING_FORCE : 0.8,
 	PLAYER_MAX_PASSING_FORCE : 0.5
 };
 
@@ -46819,7 +46819,7 @@ SupportSpotCalculator.prototype.calculateBestSupportingPosition = ( function() {
 
 	return function() {
 		
-		var spot, distance, temp;
+		var spot, distance;
 		
 		// this will be used to track the best supporting spot
 		var bestScoreSoFar = 0;
@@ -46859,18 +46859,21 @@ SupportSpotCalculator.prototype.calculateBestSupportingPosition = ( function() {
 			}
 
 			// Test 3. calculate how far this spot is away from the controlling
-			// player. The further away, the higher the score. Any distances
-			// further away than optimalDistance do not receive a score
+			// player. The further away, the higher the score. The constant
+			// "OPT_DISTANCE" describes the optimal distance for this score.
 			if ( this.team.supportingPlayer !== null )
 			{
 				distance = this.team.controllingPlayer.object3D.position.distanceTo( spot.position );
 
-				temp = Math.abs( SupportSpotCalculator.OPT_DISTANCE - distance );
-
-				if ( temp < SupportSpotCalculator.OPT_DISTANCE )
+				if ( distance < SupportSpotCalculator.OPT_DISTANCE )
 				{
-					// normalize the distance and add it to the score
-					spot.score += SupportSpotCalculator.SCORE.DISTANCE_SCORE * ( SupportSpotCalculator.OPT_DISTANCE - temp ) / SupportSpotCalculator.OPT_DISTANCE;
+					// add the score proportionally to the distance
+					spot.score += SupportSpotCalculator.SCORE.DISTANCE_SCORE * ( Math.abs( SupportSpotCalculator.OPT_DISTANCE - distance ) / SupportSpotCalculator.OPT_DISTANCE );
+				}
+				else
+				{
+					// distances greater than "OPT_DISTANCE" get full score
+					spot.score += SupportSpotCalculator.SCORE.DISTANCE_SCORE;
 				}
 			}
 
@@ -46923,7 +46926,7 @@ SupportSpotCalculator.SCORE = {
 SupportSpotCalculator.UPDATE_FREQUENCY = 1;
 SupportSpotCalculator.SPOTS_X = 13;
 SupportSpotCalculator.SPOTS_Y = 6;
-SupportSpotCalculator.OPT_DISTANCE = 20;
+SupportSpotCalculator.OPT_DISTANCE = 50;
 
 module.exports = SupportSpotCalculator;
 },{"../../core/Regulator":22,"../../core/System":27,"../../core/World":31,"./PlayerBase":52,"three":1}],55:[function(require,module,exports){
@@ -48877,18 +48880,20 @@ TendGoal.prototype.execute = function( keeper ) {
 		return;
 	}
 
-	// if ball is within a predefined distance, the keeper moves out from
-	// position to try to intercept it.
-	if ( keeper.isBallWithinRangeForIntercept() && !keeper.team.isInControl() )
-	{
-		keeper.stateMachine.changeState( States.InterceptBall );
-	}
-
 	// if the keeper has ventured too far away from the goalline and there
 	// is no threat from the opponents he should move back towards it
 	if ( keeper.isTooFarFromGoalMouth() && keeper.team.isInControl() )
 	{
 		keeper.stateMachine.changeState( States.ReturnHome );
+		
+		return;
+	}
+	
+	// if ball is within a predefined distance, the keeper moves out from
+	// position to try to intercept it.
+	if ( keeper.isBallWithinRangeForIntercept() && !keeper.team.isInControl() )
+	{
+		keeper.stateMachine.changeState( States.InterceptBall );
 	}
 };
 
@@ -52312,15 +52317,15 @@ SteeringBehaviors.prototype._pursuit = ( function() {
 		// and the pursuer
 		lookAheadTime = 0;
 
-		// calculate displacement vector
-		toBall.subVectors( ball.object3D.position, this.player.object3D.position );
-
 		// get speed of ball
 		ballSpeed = ball.getSpeed();
 
 		if ( ballSpeed !== 0 )
 		{
-			lookAheadTime = toBall.length() / ballSpeed;
+			// calculate displacement vector
+			toBall.subVectors( ball.object3D.position, this.player.object3D.position );
+			
+			lookAheadTime = toBall.length() / ( this.player.maxSpeed + ballSpeed );
 		}
 
 		// calculate where the ball will be at this time in the future

@@ -464,15 +464,15 @@ SteeringBehaviors.prototype._pursuit = ( function() {
 		// and the pursuer
 		lookAheadTime = 0;
 
-		// calculate displacement vector
-		toBall.subVectors( ball.object3D.position, this.player.object3D.position );
-
 		// get speed of ball
 		ballSpeed = ball.getSpeed();
 
 		if ( ballSpeed !== 0 )
 		{
-			lookAheadTime = toBall.length() / ballSpeed;
+			// calculate displacement vector
+			toBall.subVectors( ball.object3D.position, this.player.object3D.position );
+			
+			lookAheadTime = toBall.length() / ( this.player.maxSpeed + ballSpeed );
 		}
 
 		// calculate where the ball will be at this time in the future

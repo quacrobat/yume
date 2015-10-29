@@ -139,7 +139,7 @@ SupportSpotCalculator.prototype.calculateBestSupportingPosition = ( function() {
 
 	return function() {
 		
-		var spot, distance, temp;
+		var spot, distance;
 		
 		// this will be used to track the best supporting spot
 		var bestScoreSoFar = 0;
@@ -179,18 +179,21 @@ SupportSpotCalculator.prototype.calculateBestSupportingPosition = ( function() {
 			}
 
 			// Test 3. calculate how far this spot is away from the controlling
-			// player. The further away, the higher the score. Any distances
-			// further away than optimalDistance do not receive a score
+			// player. The further away, the higher the score. The constant
+			// "OPT_DISTANCE" describes the optimal distance for this score.
 			if ( this.team.supportingPlayer !== null )
 			{
 				distance = this.team.controllingPlayer.object3D.position.distanceTo( spot.position );
 
-				temp = Math.abs( SupportSpotCalculator.OPT_DISTANCE - distance );
-
-				if ( temp < SupportSpotCalculator.OPT_DISTANCE )
+				if ( distance < SupportSpotCalculator.OPT_DISTANCE )
 				{
-					// normalize the distance and add it to the score
-					spot.score += SupportSpotCalculator.SCORE.DISTANCE_SCORE * ( SupportSpotCalculator.OPT_DISTANCE - temp ) / SupportSpotCalculator.OPT_DISTANCE;
+					// add the score proportionally to the distance
+					spot.score += SupportSpotCalculator.SCORE.DISTANCE_SCORE * ( Math.abs( SupportSpotCalculator.OPT_DISTANCE - distance ) / SupportSpotCalculator.OPT_DISTANCE );
+				}
+				else
+				{
+					// distances greater than "OPT_DISTANCE" get full score
+					spot.score += SupportSpotCalculator.SCORE.DISTANCE_SCORE;
 				}
 			}
 
@@ -243,6 +246,6 @@ SupportSpotCalculator.SCORE = {
 SupportSpotCalculator.UPDATE_FREQUENCY = 1;
 SupportSpotCalculator.SPOTS_X = 13;
 SupportSpotCalculator.SPOTS_Y = 6;
-SupportSpotCalculator.OPT_DISTANCE = 20;
+SupportSpotCalculator.OPT_DISTANCE = 50;
 
 module.exports = SupportSpotCalculator;

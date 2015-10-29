@@ -25,7 +25,7 @@ Logger.prototype.log = function() {
 	// log messages only in dev mode
 	if ( system.isDevModeActive === true )
 	{
-		console.log.apply( console, arguments );
+//		console.log.apply( console, arguments );
 	}
 };
 

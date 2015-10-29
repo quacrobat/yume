@@ -213,7 +213,7 @@ PlayerBase.prototype.isThreatened = function() {
 		// opponent is less than our comfort zone, return true
 		if ( this.isPositionInFrontOfPlayer( opponent.object3D.position ) && this.object3D.position.distanceToSquared( opponent.object3D.position ) < PlayerBase.CONFIG.PLAYER_COMFORT_ZONE_SQ )
 		{
-			return true;
+			return true;	
 		}
 	} // next opponent
 
@@ -422,18 +422,18 @@ PlayerBase.CONFIG = {
 	PLAYER_CHANCE_ATTEMPT_POT_SHOT: 0.005,
 	
 	// the minimum distance a receiving player must be from the passing player
-	PLAYER_MIN_PASS_DISTANCE: 20,
+	PLAYER_MIN_PASS_DISTANCE: 15,
 
 	// physics
 	PLAYER_MASS : 1,
 	PLAYER_RADIUS : 1,
-	PLAYER_MAX_SPEED_WITH_BALL : 0.12,
-	PLAYER_MAX_SPEED_WITHOUT_BALL : 0.1,
+	PLAYER_MAX_SPEED_WITH_BALL : 0.085,
+	PLAYER_MAX_SPEED_WITHOUT_BALL : 0.11,
 	PLAYER_MAX_FORCE : 1.0,
 	PLAYER_MAX_TURN_RATE : 0.1,
-	PLAYER_MAX_DRIBBLE_FORCE : 0.2,
+	PLAYER_MAX_DRIBBLE_FORCE : 0.18,
 	PLAYER_MAX_DRIBBLE_AND_TURN_FORCE : 0.12,
-	PLAYER_MAX_SHOOTING_FORCE : 0.75,
+	PLAYER_MAX_SHOOTING_FORCE : 0.8,
 	PLAYER_MAX_PASSING_FORCE : 0.5
 };
 
