@@ -3910,7 +3910,7 @@ THREE.Box2.prototype = {
 		};
 
 	}(),
-
+	
 	clone: function () {
 
 		return new this.constructor().copy( this );
@@ -11928,20 +11928,20 @@ THREE.OrthographicCamera.prototype.updateProjectionMatrix = function () {
 };
 
 THREE.OrthographicCamera.prototype.copy = function ( source ) {
-
+	
 	THREE.Camera.prototype.copy.call( this, source );
-
+	
 	this.left = source.left;
 	this.right = source.right;
 	this.top = source.top;
 	this.bottom = source.bottom;
 	this.near = source.near;
 	this.far = source.far;
-
+	
 	this.zoom = source.zoom;
-
+	
 	return this;
-
+		
 };
 
 THREE.OrthographicCamera.prototype.toJSON = function ( meta ) {
@@ -12087,18 +12087,18 @@ THREE.PerspectiveCamera.prototype.updateProjectionMatrix = function () {
 };
 
 THREE.PerspectiveCamera.prototype.copy = function ( source ) {
-
+	
 	THREE.Camera.prototype.copy.call( this, source );
-
+	
 	this.fov = source.fov;
 	this.aspect = source.aspect;
 	this.near = source.near;
 	this.far = source.far;
-
+	
 	this.zoom = source.zoom;
-
+	
 	return this;
-
+		
 };
 
 THREE.PerspectiveCamera.prototype.toJSON = function ( meta ) {
@@ -12136,11 +12136,11 @@ THREE.Light.prototype = Object.create( THREE.Object3D.prototype );
 THREE.Light.prototype.constructor = THREE.Light;
 
 THREE.Light.prototype.copy = function ( source ) {
-
+	
 	THREE.Object3D.prototype.copy.call( this, source );
-
+	
 	this.color.copy( source.color );
-
+	
 	return this;
 
 };
@@ -13101,7 +13101,7 @@ THREE.JSONLoader.prototype = {
 	constructor: THREE.JSONLoader,
 
 	// Deprecated
-
+	
 	get statusDomElement () {
 
 		if ( this._statusDomElement === undefined ) {
@@ -15188,7 +15188,7 @@ THREE.LineDashedMaterial.prototype.copy = function ( source ) {
 	THREE.Material.prototype.copy.call( this, source );
 
 	this.color.copy( source.color );
-
+	
 	this.linewidth = source.linewidth;
 
 	this.scale = source.scale;
@@ -15287,7 +15287,7 @@ THREE.MeshBasicMaterial.prototype = Object.create( THREE.Material.prototype );
 THREE.MeshBasicMaterial.prototype.constructor = THREE.MeshBasicMaterial;
 
 THREE.MeshBasicMaterial.prototype.copy = function ( source ) {
-
+	
 	THREE.Material.prototype.copy.call( this, source );
 
 	this.color.copy( source.color );
@@ -15319,7 +15319,7 @@ THREE.MeshBasicMaterial.prototype.copy = function ( source ) {
 
 	this.skinning = source.skinning;
 	this.morphTargets = source.morphTargets;
-
+	
 	return this;
 
 };
@@ -16399,9 +16399,9 @@ THREE.CubeTexture.prototype.constructor = THREE.CubeTexture;
 THREE.CubeTexture.prototype.copy = function ( source ) {
 
 	THREE.Texture.prototype.copy.call( this, source );
-
+	
 	this.images = source.images;
-
+	
 	return this;
 
 };
@@ -16447,7 +16447,7 @@ THREE.DataTexture = function ( data, width, height, format, type, mapping, wrapS
 
 	this.magFilter = magFilter !== undefined ? magFilter : THREE.NearestFilter;
 	this.minFilter = minFilter !== undefined ? minFilter : THREE.NearestFilter;
-
+	
 	this.flipY = false;
 	this.generateMipmaps  = false;
 
@@ -17314,11 +17314,11 @@ THREE.Bone.prototype = Object.create( THREE.Object3D.prototype );
 THREE.Bone.prototype.constructor = THREE.Bone;
 
 THREE.Bone.prototype.copy = function ( source ) {
-
+	
 	THREE.Object3D.prototype.copy.call( this, source );
-
+	
 	this.skin = source.skin;
-
+	
 	return this;
 
 };
@@ -17355,7 +17355,7 @@ THREE.Skeleton = function ( bones, boneInverses, useVertexTexture ) {
 		//       32x32 pixel texture max  256 bones * 4 pixels = (32 * 32)
 		//       64x64 pixel texture max 1024 bones * 4 pixels = (64 * 64)
 
-
+		
 		var size = Math.sqrt( this.bones.length * 4 ); // 4 pixels needed for 1 matrix
 		size = THREE.Math.nextPowerOfTwo( Math.ceil( size ) );
 		size = Math.max( size, 4 );
@@ -17581,7 +17581,7 @@ THREE.SkinnedMesh.prototype.bind = function( skeleton, bindMatrix ) {
 	if ( bindMatrix === undefined ) {
 
 		this.updateMatrixWorld( true );
-
+		
 		this.skeleton.calculateInverses();
 
 		bindMatrix = this.matrixWorld;
@@ -28529,7 +28529,7 @@ THREE.Path.prototype.getPoints = function( divisions, closedPath ) {
 
 			var cos, sin;
 			if ( aRotation !== 0 ) {
-
+		
 				cos = Math.cos( aRotation );
 				sin = Math.sin( aRotation );
 
@@ -29743,7 +29743,7 @@ THREE.EllipseCurve = function ( aX, aY, xRadius, yRadius, aStartAngle, aEndAngle
 	this.aEndAngle = aEndAngle;
 
 	this.aClockwise = aClockwise;
-
+	
 	this.aRotation = aRotation || 0;
 
 };
@@ -29769,7 +29769,7 @@ THREE.EllipseCurve.prototype.getPoint = function ( t ) {
 		angle = this.aStartAngle + t * deltaAngle;
 
 	}
-
+	
 	var x = this.aX + this.xRadius * Math.cos( angle );
 	var y = this.aY + this.yRadius * Math.sin( angle );
 
@@ -32560,7 +32560,7 @@ THREE.ShapeGeometry.prototype.addShape = function ( shape, options ) {
  * @author bhouston / http://exocortex.com
  */
 
-// points - to create a closed torus, one must use a set of points
+// points - to create a closed torus, one must use a set of points 
 //    like so: [ a, b, c, d, a ], see first is the same as last.
 // segments - the number of circumference segments to create
 // phiStart - the starting radian
@@ -34514,7 +34514,7 @@ THREE.ArrowHelper = ( function () {
 		if ( headWidth === undefined ) headWidth = 0.2 * headLength;
 
 		this.position.copy( origin );
-
+		
 		if ( headLength < length ) {
 			this.line = new THREE.Line( lineGeometry, new THREE.LineBasicMaterial( { color: color } ) );
 			this.line.matrixAutoUpdate = false;
@@ -51419,7 +51419,7 @@ Stage.prototype.setup = function() {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
 		self.world.addObject3D( sign );
@@ -51584,7 +51584,7 @@ Stage.prototype.setup = function() {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
 		self.world.addObject3D( sign );
@@ -51741,7 +51741,7 @@ Stage.prototype.setup = function() {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
 		self.world.addObject3D( sign );
@@ -51925,7 +51925,7 @@ Stage.prototype.setup = function() {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
 		self.world.addObject3D( sign );
@@ -52057,7 +52057,7 @@ Stage.prototype.setup = function() {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
 		self.world.addObject3D( sign );
@@ -52229,7 +52229,7 @@ Stage.prototype.setup = function() {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
 		self.world.addObject3D( sign );
@@ -52408,7 +52408,7 @@ Stage.prototype.setup = function() {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
 		self.world.addObject3D( sign );
@@ -52547,7 +52547,7 @@ Stage.prototype.setup = function() {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 27.5, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
 		self.world.addObject3D( sign );
@@ -52571,7 +52571,7 @@ Stage.prototype.setup = function() {
 		materials[ 0 ].color = StageBase.COLORS.PRIMARY;
 		materials[ 1 ].color = StageBase.COLORS.BLUE_DARK;
 
-		var stairs = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		var stairs = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		stairs.receiveShadow = true;
 		self.world.addObject3D( stairs );
 	} );
@@ -52687,7 +52687,7 @@ Stage.prototype.setup = function() {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
 		self.world.addObject3D( sign );
@@ -52890,7 +52890,7 @@ Stage.prototype.setup = function() {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
 		self.world.addObject3D( sign );
@@ -53044,7 +53044,7 @@ Stage.prototype.setup = function() {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
 		self.world.addObject3D( sign );

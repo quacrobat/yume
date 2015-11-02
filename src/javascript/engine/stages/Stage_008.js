@@ -62,7 +62,7 @@ Stage.prototype.setup = function() {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
-		var sign = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 27.5, 75 );
 		sign.rotation.set( 0, Math.PI * -0.5, 0 );
 		self.world.addObject3D( sign );
@@ -86,7 +86,7 @@ Stage.prototype.setup = function() {
 		materials[ 0 ].color = StageBase.COLORS.PRIMARY;
 		materials[ 1 ].color = StageBase.COLORS.BLUE_DARK;
 
-		var stairs = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( materials ) );
+		var stairs = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		stairs.receiveShadow = true;
 		self.world.addObject3D( stairs );
 	} );
