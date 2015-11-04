@@ -40549,7 +40549,7 @@ Renderer.prototype.init = function() {
 		alpha : true
 	} );
 
-	this._renderer.setPixelRatio(global.window.devicePixelRatio);
+	this._renderer.setPixelRatio( global.window.devicePixelRatio );
 	this._renderer.setSize( global.window.innerWidth, global.window.innerHeight );
 	this._renderer.setClearColor( 0x000000 );
 	this._renderer.gammaInput = true;
@@ -51010,221 +51010,254 @@ ShaderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 module.exports = ShaderPass;
 },{"three":1}],74:[function(require,module,exports){
 /**
- * @file This shader can be used for vertex displacement to create
- * water or fabric materials. It implements an exemplary diffuse lighting
- * equation, which uses ambient and directional lights. 
+ * @file This shader can be used for vertex displacement to create water or
+ * fabric materials. It implements an exemplary diffuse lighting equation, which
+ * uses ambient and directional lights.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
-module.exports  = {
-		
-	uniforms: THREE.UniformsUtils.merge( [
-	                                     THREE.UniformsLib.lights,
-	                                     { "fTime": { type: "f", value: 0 } }
-	                                     ] ),
+module.exports = {
+
+	uniforms : THREE.UniformsUtils.merge( [ THREE.UniformsLib.lights, {
+		"fTime" : {
+			type : "f",
+			value : 0
+		}
+	} ] ),
+
+	lights : true, // use lights of stage in this shader
+
+	vertexShader : [
+
+	"#define NUM_OCTAVES 5",
+
+	"uniform float fTime;",
+
+	"varying vec3 vNormalWorld;",
+
+	// 1D random function
+	"float hash( float n ) {", 
 	
-	lights: true, // use lights of stage in this shader
+		"return fract( sin( x ) * 1e4 );",
+		
+	"}",
 
-	vertexShader: [
-	               
-	    "#define NUM_OCTAVES 5",
-	         
-	    "uniform float fTime;", 
-	    
-	    "varying vec3 vNormalWorld;",
-	    
-	    // 1D random function
-	    "float hash(float n) { return fract(sin(n) * 1e4); }", 
-	    
-	    // 3D noise function
-	    "float noise(vec3 x) {",
-	        "const vec3 step = vec3(110, 241, 171);",
+	// 3D noise function
+	"float noise( vec3 x ) {",
 
-	        "vec3 i = floor(x);",
-	        "vec3 f = fract(x);",
-	     
-	        "float n = dot(i, step);",
+		"const vec3 step = vec3( 110, 241, 171 );",
 
-	        "vec3 u = f * f * (3.0 - 2.0 * f);",
-	        "return mix(mix(mix( hash(n + dot(step, vec3(0, 0, 0))), hash(n + dot(step, vec3(1, 0, 0))), u.x),",
-	                       "mix( hash(n + dot(step, vec3(0, 1, 0))), hash(n + dot(step, vec3(1, 1, 0))), u.x), u.y),",
-	                   "mix(mix( hash(n + dot(step, vec3(0, 0, 1))), hash(n + dot(step, vec3(1, 0, 1))), u.x),",
-	                       "mix( hash(n + dot(step, vec3(0, 1, 1))), hash(n + dot(step, vec3(1, 1, 1))), u.x), u.y), u.z);",
-	   "}",
-	   
-	    // 3D fbm-noise function
-	   "float fbm(vec3 x) {",
-			"float v = 0.0;",
-			"float a = 0.5;",
-			"vec3 shift = vec3(100);",
-			"for (int i = 0; i < NUM_OCTAVES; ++i) {",
-				"v += a * noise(x);",
-				"x = x * 2.0 + shift;",
-				"a *= 0.5;",
-			"}",
-			"return v;",
+		"vec3 i = floor( x );", 
+		"vec3 f = fract( x );",
+
+		"float n = dot( i, step );",
+
+		"vec3 u = f * f * ( 3.0 - 2.0 * f );",
+
+		"return mix( mix( mix( random( n + dot( step, vec3( 0, 0, 0 ) ) ), random( n + dot( step, vec3( 1, 0, 0 ) ) ), u.x ),", 
+						 "mix( random( n + dot( step, vec3( 0, 1, 0 ) ) ), random( n + dot( step, vec3( 1, 1, 0 ) ) ), u.x ), u.y ),", 
+					"mix( mix( random( n + dot( step, vec3( 0, 0, 1 ) ) ), random( n + dot( step, vec3( 1, 0, 1 ) ) ), u.x ),", 
+						 "mix( random( n + dot( step, vec3( 0, 1, 1 ) ) ), random( n + dot( step, vec3( 1, 1, 1 ) ) ), u.x ), u.y ), u.z );", 
+						 
+	"}",
+
+	// 3D fbm-noise function
+	"float fbm( in vec3 x ) {",
+
+		"float v = 0.0;", "float a = 0.5;",
+
+		"vec3 shift = vec3( 100 );",
+
+		"for ( int i = 0; i < NUM_OCTAVES; ++i ) {",
+
+			// sum noise functions
+			"v += a * noise( x );", "x = x * 2.0 + shift;", "a *= 0.5;",
+			
 		"}",
 
-		"void main(){",
-		  	
-			// calculate new vertex position (displacement)
-			"vec3 newPosition = position + 10.0 * normal * fbm(position * 0.05 + 0.05 * fTime);",
-			
-			// calculate normal in world space
-			"vNormalWorld = normalize( modelMatrix * vec4(normal, 0.0) ).xyz;",
-			
-			"gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );",
+		"return v;",
 
-		"}"
+	"}",
 
-	].join("\n"),
+	"void main(){",
 
-	fragmentShader: [
-	                 
-	    "uniform vec3 ambientLightColor;",
-	    "uniform vec3 directionalLightDirection[MAX_DIR_LIGHTS];",
-	    "uniform vec3 directionalLightColor[MAX_DIR_LIGHTS];",
-	                 
-	    "varying vec3 vNormalWorld;",
-	                 
-		"void main() {",
-	       
-	    	"vec4 color = vec4( 0.0, 0.0, 1.0, 1.0 );",
-	    	"vec3 diffuseLightColor = vec3(0.0, 0.0, 0.0);",
-	    	
-	    	// calculate for each directional light the diffuse light color
-	    	"for(int l = 0; l < MAX_DIR_LIGHTS; l++) {",
-	    		"diffuseLightColor += max( dot ( vNormalWorld, directionalLightDirection[l]), 0.0) * directionalLightColor[l];",
-	    	"}",
-	                 
-	    	"vec3 lightWeighting = ambientLightColor + diffuseLightColor;",
-		    
-	        "gl_FragColor = vec4( color.rgb * lightWeighting, color.a );",
+		// calculate new vertex position (displacement)
+		"vec3 newPosition = position + 10.0 * normal * fbm( position * 0.05 + 0.05 * fTime );",
 
-		"}"
+		// calculate normal in world space
+		"vNormalWorld = normalize( modelMatrix * vec4( normal, 0.0 ) ).xyz;",
 
-	].join("\n")
+		"gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );",
+
+	"}"
+
+	].join( "\n" ),
+
+	fragmentShader : [
+
+	"uniform vec3 ambientLightColor;", 
+	"uniform vec3 directionalLightDirection[MAX_DIR_LIGHTS];", 
+	"uniform vec3 directionalLightColor[MAX_DIR_LIGHTS];",
+
+	"varying vec3 vNormalWorld;",
+
+	"void main() {",
+
+		"vec4 color = vec4( 0.0, 0.0, 1.0, 1.0 );", "vec3 diffuseLightColor = vec3( 0.0, 0.0, 0.0 );",
+
+		// calculate for each directional light the diffuse light color
+		"for( int l = 0; l < MAX_DIR_LIGHTS; l++ ) {",
+
+			"diffuseLightColor += max( dot ( vNormalWorld, directionalLightDirection[ l ] ), 0.0 ) * directionalLightColor[ l ];",
+
+		"}",
+
+		"vec3 lightWeighting = ambientLightColor + diffuseLightColor;",
+
+		"gl_FragColor = vec4( color.rgb * lightWeighting, color.a );",
+
+	"}"
+
+	].join( "\n" )
 };
 },{"three":1}],75:[function(require,module,exports){
 /**
- * @file This shader applies a gaussian blur effect.
- * It can be used for both x and y direction.
+ * @file This shader applies a gaussian blur effect. Used in post-processing.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
-module.exports  = {
+module.exports = {
 
-	uniforms: {
+	uniforms : {
 
-		"tDiffuse": { type: "t", value: null },
-		"direction": { type: "v2", value: new THREE.Vector2() },  // the direction of the blur: (1.0, 0.0) -> x-axis blur, (0.0, 1.0) -> y-axis blur
-		"blur": { type: "f", value: 0.0 },  // the amount of blur
+		"tDiffuse" : {
+			type : "t",
+			value : null
+		},
+		// the direction of the blur: (1.0, 0.0) -> x-axis blur, (0.0, 1.0) -> y-axis blur
+		"direction" : {
+			type : "v2",
+			value : new THREE.Vector2()
+		},
+		// the amount of blur
+		"blur" : {
+			type : "f",
+			value : 0.0
+		},
 
 	},
 
-	vertexShader: [
+	vertexShader : [
 
-		"varying vec2 vUv;",
+	"varying vec2 vUv;",
 
-		"void main(){",
+	"void main(){",
 
-			"vUv = uv;",
-			
-			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+		"vUv = uv;",
 
-		"}"
+		"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 
-	].join("\n"),
+	"}"
 
-	fragmentShader: [
+	].join( "\n" ),
 
-		"uniform sampler2D tDiffuse;",
-		"uniform vec2 direction;",
-		"uniform float blur;",
+	fragmentShader : [
 
-		"varying vec2 vUv;",
+	"uniform sampler2D tDiffuse;", 
+	"uniform vec2 direction;", 
+	"uniform float blur;",
 
-		"void main() {",
-		
-			"vec4 result = vec4(0.0);",  // the result color
-			
-			// sample the texture 9 times for every fragment (9-tap filter)
-		    "result += texture2D(tDiffuse, vec2(vUv.x - 4.0 * blur * direction.x, vUv.y - 4.0 * blur * direction.y)) * 0.0162162162;",
-		    "result += texture2D(tDiffuse, vec2(vUv.x - 3.0 * blur * direction.x, vUv.y - 3.0 * blur * direction.y)) * 0.0540540541;",
-		    "result += texture2D(tDiffuse, vec2(vUv.x - 2.0 * blur * direction.x, vUv.y - 2.0 * blur * direction.y)) * 0.1216216216;",
-		    "result += texture2D(tDiffuse, vec2(vUv.x - 1.0 * blur * direction.x, vUv.y - 1.0 * blur * direction.y)) * 0.1945945946;",
-		    
-		    "result += texture2D(tDiffuse, vec2(vUv.x, vUv.y)) * 0.2270270270;",
-		    
-		    "result += texture2D(tDiffuse, vec2(vUv.x + 1.0 * blur * direction.x, vUv.y + 1.0 * blur * direction.y)) * 0.1945945946;",
-		    "result += texture2D(tDiffuse, vec2(vUv.x + 2.0 * blur * direction.x, vUv.y + 2.0 * blur * direction.y)) * 0.1216216216;",
-		    "result += texture2D(tDiffuse, vec2(vUv.x + 3.0 * blur * direction.x, vUv.y + 3.0 * blur * direction.y)) * 0.0540540541;",
-		    "result += texture2D(tDiffuse, vec2(vUv.x + 4.0 * blur * direction.x, vUv.y + 4.0 * blur * direction.y)) * 0.0162162162;",
-		    
-		    "gl_FragColor = result;",
-		   	    
-		"}"
+	"varying vec2 vUv;",
 
-	].join("\n")
+	"void main() {",
+
+		// the result color
+		"vec4 result = vec4( 0.0 );", 
+
+		// sample the texture 9 times for every fragment (9-tap filter)
+		"result += texture2D( tDiffuse, vec2( vUv.x - 4.0 * blur * direction.x, vUv.y - 4.0 * blur * direction.y ) ) * 0.0162162162;", 
+		"result += texture2D( tDiffuse, vec2( vUv.x - 3.0 * blur * direction.x, vUv.y - 3.0 * blur * direction.y ) ) * 0.0540540541;", 
+		"result += texture2D( tDiffuse, vec2( vUv.x - 2.0 * blur * direction.x, vUv.y - 2.0 * blur * direction.y ) ) * 0.1216216216;", 
+		"result += texture2D( tDiffuse, vec2( vUv.x - 1.0 * blur * direction.x, vUv.y - 1.0 * blur * direction.y ) ) * 0.1945945946;",
+
+		"result += texture2D( tDiffuse, vec2( vUv.x, vUv.y ) ) * 0.2270270270;",
+
+		"result += texture2D( tDiffuse, vec2( vUv.x + 1.0 * blur * direction.x, vUv.y + 1.0 * blur * direction.y ) ) * 0.1945945946;", 
+		"result += texture2D( tDiffuse, vec2( vUv.x + 2.0 * blur * direction.x, vUv.y + 2.0 * blur * direction.y ) ) * 0.1216216216;", 
+		"result += texture2D( tDiffuse, vec2( vUv.x + 3.0 * blur * direction.x, vUv.y + 3.0 * blur * direction.y ) ) * 0.0540540541;", 
+		"result += texture2D( tDiffuse, vec2( vUv.x + 4.0 * blur * direction.x, vUv.y + 4.0 * blur * direction.y ) ) * 0.0162162162;",
+
+		"gl_FragColor = result;",
+
+	"}"
+
+	].join( "\n" )
 };
 },{"three":1}],76:[function(require,module,exports){
 /**
- * @file This shader transforms all colors to grayscale.
+ * @file This shader transforms all colors to grayscale. Used in
+ * post-processing.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-module.exports  = {
+module.exports = {
 
-	uniforms: {
+	uniforms : {
 
-		"tDiffuse": { type: "t", value: null }
+		"tDiffuse" : {
+			type : "t",
+			value : null
+		}
 
 	},
 
-	vertexShader: [
+	vertexShader : [
 
-		"varying vec2 vUv;",
+	"varying vec2 vUv;",
 
-		"void main(){",
+	"void main(){",
 
-			"vUv = uv;",
-			
-			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+		"vUv = uv;",
 
-		"}"
+		"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 
-	].join("\n"),
+	"}"
 
-	fragmentShader: [
+	].join( "\n" ),
 
-		"uniform sampler2D tDiffuse;",
+	fragmentShader : [
 
-		"varying vec2 vUv;",
+	"uniform sampler2D tDiffuse;",
 
-		"void main() {",
-		
-			"vec4 texelColor = texture2D( tDiffuse, vUv );",  // sample the texture
-			
-		    "float grayscale = dot( texelColor.rgb, vec3( 0.299, 0.587, 0.114 ) );", // NTSC conversion weights
-		    
-	        "gl_FragColor = vec4( vec3( grayscale ), texelColor.a );", // apply grayscale to the respective rgb channels
+	"varying vec2 vUv;",
 
-		"}"
+	"void main() {",
 
-	].join("\n")
+		// sample the texture
+		"vec4 texelColor = texture2D( tDiffuse, vUv );",
+
+		// NTSC conversion weights
+		"float grayscale = dot( texelColor.rgb, vec3( 0.299, 0.587, 0.114 ) );",
+
+		// apply grayscale to the each rgb channel
+		"gl_FragColor = vec4( vec3( grayscale ), texelColor.a );",
+
+	"}"
+
+	].join( "\n" )
 };
 },{}],77:[function(require,module,exports){
 /**
@@ -51236,7 +51269,7 @@ module.exports  = {
 
 "use strict";
 
-var THREE = require("three");
+var THREE = require( "three" );
 
 module.exports = {
 
@@ -51267,15 +51300,85 @@ module.exports = {
 
 	vertexShader : [
 
-	"varying vec3 vWorldPosition;",
+		"varying vec3 vWorldPosition;",
+	
+		"void main(){",
+	
+			// calculate the world position of the vertex. used in fragment shader to
+			// determine the relative height and distance of the fragment to the horizon.
+			"vec4 worldPosition = modelMatrix * vec4( position, 1.0 );",
+	
+			"vWorldPosition = worldPosition.xyz;",
+	
+			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+	
+		"}"
+
+	].join( "\n" ),
+
+	fragmentShader : [
+	                  
+		"uniform vec3 colorTop;",
+		"uniform vec3 colorBottom;",
+		"uniform float offset;",
+		"uniform float exponent;",
+	
+		"varying vec3 vWorldPosition;",
+	
+		"void main() {",
+	
+			// this indicates the relative height and distance of the current fragment to the horizon ( default: y = 0 plane ).
+			// a negative value means full bottom color. a positive value means a gradient value from bottom to top color.
+			"float h = normalize( vWorldPosition + offset ).y;",
+	
+			"gl_FragColor = vec4( mix( colorBottom, colorTop, max( pow( max( h, 0.0 ), exponent ), 0.0 ) ), 1.0 );",
+	
+		"}"
+
+	].join( "\n" )
+};
+},{"three":1}],78:[function(require,module,exports){
+/**
+ * @file This shader creates a vignette effect. Used in post-processing.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+module.exports = {
+
+	uniforms : {
+
+		"tDiffuse" : {
+			type : "t",
+			value : null
+		},
+		// radius of the vignette, where 0.5 results in a circle fitting the
+		// screen, between 0.0 and 1.0
+		"radius" : {
+			type : "f",
+			value : 0.75
+		},
+		// strength of the vignette, between 0.0 and 1.0
+		"strength" : {
+			type : "f",
+			value : 0.8
+		},
+		// softness of the vignette, between 0.0 and 1.0
+		"softness" : {
+			type : "f",
+			value : 0.45
+		}
+	},
+
+	vertexShader : [
+
+	"varying vec2 vUv;",
 
 	"void main(){",
 
-		// calculate the world position of the vertex. used in fragment shader to
-		// determine the relative height and distance of the fragment to the horizon.
-		"vec4 worldPosition = modelMatrix * vec4( position, 1.0 );",
-
-		"vWorldPosition = worldPosition.xyz;",
+		"vUv = uv;",
 
 		"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 
@@ -51284,86 +51387,35 @@ module.exports = {
 	].join( "\n" ),
 
 	fragmentShader : [
-	                  
-	"uniform vec3 colorTop;",
-	"uniform vec3 colorBottom;",
-	"uniform float offset;",
-	"uniform float exponent;",
 
-	"varying vec3 vWorldPosition;",
+	"uniform sampler2D tDiffuse;",
+	"uniform float radius;",
+	"uniform float strength;",
+	"uniform float softness;",
+
+	"varying vec2 vUv;",
 
 	"void main() {",
 
-		// this indicates the relative height and distance of the current fragment to the horizon ( default: y = 0 plane ).
-		// a negative value means full bottom color. a positive value means a gradient value from bottom to top color.
-		"float h = normalize( vWorldPosition + offset ).y;",
+		// sample the texture
+		"vec4 texelColor = texture2D ( tDiffuse, vUv );",
+		
+		// determine the position from center, rather than lower-left (the origin)
+		"vec2 position = vUv - vec2( 0.5 );",
 
-		"gl_FragColor = vec4( mix( colorBottom, colorTop, max( pow( max( h, 0.0 ), exponent ), 0.0 ) ), 1.0 );",
+		// determine the vector length of the center position
+		"float length = length( position );",
+
+		// the vignette effect, using smoothstep
+		"float vignette = 1.0 - smoothstep( radius - softness, radius, length );",
+
+		"texelColor.rgb = mix( texelColor.rgb, texelColor.rgb * vignette, strength );",
+
+		"gl_FragColor = texelColor;",
 
 	"}"
 
 	].join( "\n" )
-};
-},{"three":1}],78:[function(require,module,exports){
-/**
- * @file This shader creates a vignette effect.
- * 
- * @author Human Interactive
- */
-
-"use strict";
-
-module.exports  = {
-
-	uniforms: {
-
-		"tDiffuse": { type: "t", value: null },   
-		"radius":   { type: "f", value: 0.75 },	// radius of the vignette, where 0.5 results in a circle fitting the screen, between 0.0 and 1.0
-		"strength": { type: "f", value: 0.8 },  	// strength of the vignette, between 0.0 and 1.0
-		"softness": { type: "f", value: 0.45 }   	// softness of the vignette, between 0.0 and 1.0
-		
-	},
-
-	vertexShader: [
-
-		"varying vec2 vUv;",
-
-		"void main(){",
-
-			"vUv = uv;",
-			
-			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-
-		"}"
-
-	].join("\n"),
-
-	fragmentShader: [
-
-		"uniform sampler2D tDiffuse;",
-		"uniform float radius;",
-		"uniform float strength;",
-		"uniform float softness;",
-
-		"varying vec2 vUv;", 
-
-		"void main() {",
-		
-			"vec4 texelColor = texture2D (tDiffuse, vUv );",  // sample the texture
-			
-		    "vec2 position = vUv - vec2(0.5);", // determine the position from center, rather than lower-left (the origin).
-		    
-		    "float length = length(position);",  // determine the vector length of the center position
-		    
-		    "float vignette = 1.0 - smoothstep( radius - softness, radius, length);",    // the vignette effect, using smoothstep
-		    
-	        "texelColor.rgb = mix( texelColor.rgb, texelColor.rgb * vignette, strength );",
-	        
-	        "gl_FragColor = texelColor;",
-
-		"}"
-
-	].join("\n")
 };
 },{}],79:[function(require,module,exports){
 "use strict";

@@ -1,60 +1,79 @@
 /**
- * @file This shader creates a vignette effect.
+ * @file This shader creates a vignette effect. Used in post-processing.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-module.exports  = {
+module.exports = {
 
-	uniforms: {
+	uniforms : {
 
-		"tDiffuse": { type: "t", value: null },   
-		"radius":   { type: "f", value: 0.75 },	// radius of the vignette, where 0.5 results in a circle fitting the screen, between 0.0 and 1.0
-		"strength": { type: "f", value: 0.8 },  	// strength of the vignette, between 0.0 and 1.0
-		"softness": { type: "f", value: 0.45 }   	// softness of the vignette, between 0.0 and 1.0
-		
+		"tDiffuse" : {
+			type : "t",
+			value : null
+		},
+		// radius of the vignette, where 0.5 results in a circle fitting the
+		// screen, between 0.0 and 1.0
+		"radius" : {
+			type : "f",
+			value : 0.75
+		},
+		// strength of the vignette, between 0.0 and 1.0
+		"strength" : {
+			type : "f",
+			value : 0.8
+		},
+		// softness of the vignette, between 0.0 and 1.0
+		"softness" : {
+			type : "f",
+			value : 0.45
+		}
 	},
 
-	vertexShader: [
+	vertexShader : [
 
-		"varying vec2 vUv;",
+	"varying vec2 vUv;",
 
-		"void main(){",
+	"void main(){",
 
-			"vUv = uv;",
-			
-			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+		"vUv = uv;",
 
-		"}"
+		"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 
-	].join("\n"),
+	"}"
 
-	fragmentShader: [
+	].join( "\n" ),
 
-		"uniform sampler2D tDiffuse;",
-		"uniform float radius;",
-		"uniform float strength;",
-		"uniform float softness;",
+	fragmentShader : [
 
-		"varying vec2 vUv;", 
+	"uniform sampler2D tDiffuse;",
+	"uniform float radius;",
+	"uniform float strength;",
+	"uniform float softness;",
 
-		"void main() {",
+	"varying vec2 vUv;",
+
+	"void main() {",
+
+		// sample the texture
+		"vec4 texelColor = texture2D ( tDiffuse, vUv );",
 		
-			"vec4 texelColor = texture2D (tDiffuse, vUv );",  // sample the texture
-			
-		    "vec2 position = vUv - vec2(0.5);", // determine the position from center, rather than lower-left (the origin).
-		    
-		    "float length = length(position);",  // determine the vector length of the center position
-		    
-		    "float vignette = 1.0 - smoothstep( radius - softness, radius, length);",    // the vignette effect, using smoothstep
-		    
-	        "texelColor.rgb = mix( texelColor.rgb, texelColor.rgb * vignette, strength );",
-	        
-	        "gl_FragColor = texelColor;",
+		// determine the position from center, rather than lower-left (the origin)
+		"vec2 position = vUv - vec2( 0.5 );",
 
-		"}"
+		// determine the vector length of the center position
+		"float length = length( position );",
 
-	].join("\n")
+		// the vignette effect, using smoothstep
+		"float vignette = 1.0 - smoothstep( radius - softness, radius, length );",
+
+		"texelColor.rgb = mix( texelColor.rgb, texelColor.rgb * vignette, strength );",
+
+		"gl_FragColor = texelColor;",
+
+	"}"
+
+	].join( "\n" )
 };

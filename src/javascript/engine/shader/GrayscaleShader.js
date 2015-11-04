@@ -1,48 +1,55 @@
 /**
- * @file This shader transforms all colors to grayscale.
+ * @file This shader transforms all colors to grayscale. Used in
+ * post-processing.
  * 
  * @author Human Interactive
  */
 
 "use strict";
 
-module.exports  = {
+module.exports = {
 
-	uniforms: {
+	uniforms : {
 
-		"tDiffuse": { type: "t", value: null }
+		"tDiffuse" : {
+			type : "t",
+			value : null
+		}
 
 	},
 
-	vertexShader: [
+	vertexShader : [
 
-		"varying vec2 vUv;",
+	"varying vec2 vUv;",
 
-		"void main(){",
+	"void main(){",
 
-			"vUv = uv;",
-			
-			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+		"vUv = uv;",
 
-		"}"
+		"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 
-	].join("\n"),
+	"}"
 
-	fragmentShader: [
+	].join( "\n" ),
 
-		"uniform sampler2D tDiffuse;",
+	fragmentShader : [
 
-		"varying vec2 vUv;",
+	"uniform sampler2D tDiffuse;",
 
-		"void main() {",
-		
-			"vec4 texelColor = texture2D( tDiffuse, vUv );",  // sample the texture
-			
-		    "float grayscale = dot( texelColor.rgb, vec3( 0.299, 0.587, 0.114 ) );", // NTSC conversion weights
-		    
-	        "gl_FragColor = vec4( vec3( grayscale ), texelColor.a );", // apply grayscale to the respective rgb channels
+	"varying vec2 vUv;",
 
-		"}"
+	"void main() {",
 
-	].join("\n")
+		// sample the texture
+		"vec4 texelColor = texture2D( tDiffuse, vUv );",
+
+		// NTSC conversion weights
+		"float grayscale = dot( texelColor.rgb, vec3( 0.299, 0.587, 0.114 ) );",
+
+		// apply grayscale to the each rgb channel
+		"gl_FragColor = vec4( vec3( grayscale ), texelColor.a );",
+
+	"}"
+
+	].join( "\n" )
 };
