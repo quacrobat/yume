@@ -11,6 +11,10 @@
 var THREE = require( "three" );
 
 module.exports = {
+		
+	defines: {
+		NUM_OCTAVES: 5
+	},
 
 	uniforms : THREE.UniformsUtils.merge( [ THREE.UniformsLib.lights, {
 		"fTime" : {
@@ -23,14 +27,12 @@ module.exports = {
 
 	vertexShader : [
 
-	"#define NUM_OCTAVES 5",
-
 	"uniform float fTime;",
 
 	"varying vec3 vNormalWorld;",
 
 	// 1D random function
-	"float hash( float n ) {", 
+	"float random( float n ) {", 
 	
 		"return fract( sin( x ) * 1e4 );",
 		
@@ -58,7 +60,8 @@ module.exports = {
 	// 3D fbm-noise function
 	"float fbm( in vec3 x ) {",
 
-		"float v = 0.0;", "float a = 0.5;",
+		"float v = 0.0;", 
+		"float a = 0.5;",
 
 		"vec3 shift = vec3( 100 );",
 

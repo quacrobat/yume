@@ -36446,7 +36446,7 @@ ActionManager.prototype._onInteraction = function( message, data ) {
 };
 
 module.exports = new ActionManager();
-},{"../core/Logger":21,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":100,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
+},{"../core/Logger":21,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":101,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
 /**
  * @file The ActionTrigger is a static trigger for actions.
  * 
@@ -39850,7 +39850,7 @@ FirstPersonControls.RUN = {
 
 module.exports = FirstPersonControls;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../etc/SettingsManager":40,"../etc/Utils":43,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":100,"three":1}],18:[function(require,module,exports){
+},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../etc/SettingsManager":40,"../etc/Utils":43,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":101,"three":1}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -39963,7 +39963,7 @@ Bootstrap.prototype._loadStage = function() {
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/MultiplayerManager":35,"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../network/NetworkManager":70,"../ui/UserInterfaceManager":100,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27,"./World":31}],19:[function(require,module,exports){
+},{"../etc/MultiplayerManager":35,"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../network/NetworkManager":70,"../ui/UserInterfaceManager":101,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27,"./World":31}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for camera-based
@@ -40781,7 +40781,7 @@ Renderer.prototype._onResize = function( message, data ) {
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"../postprocessing/EffectComposer":71,"../postprocessing/RenderPass":72,"../postprocessing/ShaderPass":73,"../shader/GaussianBlurShader":75,"../shader/GrayscaleShader":76,"../shader/VignetteShader":78,"./Logger":21,"three":1}],24:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"../postprocessing/EffectComposer":71,"../postprocessing/RenderPass":72,"../postprocessing/ShaderPass":73,"../shader/GaussianBlurShader":76,"../shader/GrayscaleShader":77,"../shader/VignetteShader":79,"./Logger":21,"three":1}],24:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic for scene-based functionality.
  * 
@@ -41076,7 +41076,7 @@ StageBase.COLORS = {
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../etc/PerformanceManager":38,"../etc/SaveGameManager":39,"../etc/SettingsManager":40,"../etc/TextManager":42,"../game/entity/EntityManager":44,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":100,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
+},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../etc/PerformanceManager":38,"../etc/SaveGameManager":39,"../etc/SettingsManager":40,"../etc/TextManager":42,"../game/entity/EntityManager":44,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":101,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -41368,7 +41368,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../stages/Stage_001":79,"../stages/Stage_002":80,"../stages/Stage_003":81,"../stages/Stage_004":82,"../stages/Stage_005":83,"../stages/Stage_006":84,"../stages/Stage_007":85,"../stages/Stage_008":86,"../stages/Stage_009":87,"../stages/Stage_010":88,"../stages/Stage_011":89,"../ui/UserInterfaceManager":100,"./Logger":21}],27:[function(require,module,exports){
+},{"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../stages/Stage_001":80,"../stages/Stage_002":81,"../stages/Stage_003":82,"../stages/Stage_004":83,"../stages/Stage_005":84,"../stages/Stage_006":85,"../stages/Stage_007":86,"../stages/Stage_008":87,"../stages/Stage_009":88,"../stages/Stage_010":89,"../stages/Stage_011":90,"../ui/UserInterfaceManager":101,"./Logger":21}],27:[function(require,module,exports){
 /**
  * @file This prototype holds core information about the engine. The runtime
  * behavior of the application depends crucially of this prototype.
@@ -51022,6 +51022,10 @@ module.exports = ShaderPass;
 var THREE = require( "three" );
 
 module.exports = {
+		
+	defines: {
+		NUM_OCTAVES: 5
+	},
 
 	uniforms : THREE.UniformsUtils.merge( [ THREE.UniformsLib.lights, {
 		"fTime" : {
@@ -51033,8 +51037,6 @@ module.exports = {
 	lights : true, // use lights of stage in this shader
 
 	vertexShader : [
-
-	"#define NUM_OCTAVES 5",
 
 	"uniform float fTime;",
 
@@ -51069,7 +51071,8 @@ module.exports = {
 	// 3D fbm-noise function
 	"float fbm( in vec3 x ) {",
 
-		"float v = 0.0;", "float a = 0.5;",
+		"float v = 0.0;", 
+		"float a = 0.5;",
 
 		"vec3 shift = vec3( 100 );",
 
@@ -51126,6 +51129,160 @@ module.exports = {
 	].join( "\n" )
 };
 },{"three":1}],75:[function(require,module,exports){
+/**
+ * @file This shader creates a simple horizon. Use this shader as a material on
+ * a sphere.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+module.exports = {
+		
+	defines: {
+		NUM_OCTAVES: 5
+	},
+
+	uniforms : {
+
+		// use this to control the motion speed of the flame
+		"speed" : {
+			type : "f",
+			value : 0.3
+		},
+		// use this to control the disturbance of the flame. a higher value
+		// means more scattering
+		"scattering" : {
+			type : "f",
+			value : 1.0
+		},
+		// use this to control the sharpness of the flame's border
+		"sharpness" : {
+			type : "f",
+			value : 64
+		},
+		// use this to control the general intensity of the flame. lower values
+		// will dim the light
+		"intensity" : {
+			type : "f",
+			value : 1.5
+		},
+		// the elapsed time
+		"time" : {
+			type : "f",
+			value : 0.0
+		}
+
+	},
+
+	vertexShader : [
+	                
+	    "varying vec2 vUv;",
+
+		"void main(){",
+	
+			"vUv = uv;",
+	
+			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+	
+		"}"
+
+	].join( "\n" ),
+
+	fragmentShader : [
+
+		"uniform float speed;",
+		"uniform float scattering;",
+		"uniform float sharpness;",
+		"uniform float intensity;",
+		"uniform float time;",
+		
+		"varying vec2 vUv;",
+	                  
+		"float random( in float x ) {",
+		
+		    "return fract( sin( x ) * 1e4 );",
+		"}",
+		
+		"float random( in vec2 uv ) {",
+		    
+		    "return fract( 1e4 * sin( 17.0 * uv.x + uv.y * 0.1 ) * ( 0.1 + abs( sin( uv.y * 13.0 + uv.x ) ) ) );",
+		"}",
+		
+		"float noise( in vec2 x ) {",
+		    
+		    "vec2 i = floor( x );",
+		    "vec2 f = fract( x );",
+		    
+		    // these four points are used for interpolation in 2D
+		    "float a = random( i );",
+		    "float b = random( i + vec2( 1.0, 0.0 ) );",
+		    "float c = random( i + vec2( 0.0, 1.0 ) );",
+		    "float d = random( i + vec2( 1.0, 1.0 ) );",
+		    
+		    // cubic curve for interpolation
+		    "vec2 u = f * f * ( 3.0 - 2.0 * f );",
+		    
+		    "return mix( a, b, u.x ) + ( c - a ) * u.y * ( 1.0 - u.x ) + ( d - b ) * u.x * u.y;",
+		"}",
+		
+		"float fbm( in vec2 x ) {",
+		    
+		    "float v = 0.0;",
+		    "float a = 0.5;",
+		    
+		    "vec2 shift = vec2( 100 );",
+		    
+		    // rotate to reduce axial bias
+		    "mat2 rot = mat2( cos( 0.5 ), sin( 0.5 ), -sin( 0.5 ), cos( 0.5 ) );",
+		    
+		    "for ( int i = 0; i < NUM_OCTAVES; ++i ) {",
+		        
+		        // sum noise functions
+		        "v += a * noise( x );",
+		        "x = rot * x * 2.0 + shift;",
+		        "a *= 0.5;",
+		    "}",
+		    
+		    "return v;",
+		"}",
+		
+		"void main(){",
+			
+		    "vec2 position = vUv;",
+		    
+		    // position the flame in the center of the screen
+		    "position.x -= 0.5;",
+		    "position.y -= 0.25;",
+		    
+		    // the default color of the background
+		    "vec4 defaultColor = vec4( 0.5, 0.5, 0.5, 0.0 );",
+		    
+		    // this will calculate the motions and structure of the flame
+		    "float n = fbm( vUv * scattering - vec2( 0.0, time * speed ) );",
+		    
+		    // this will compute the form of the flame
+		    "float c = 1.0 - sharpness * pow( max( 0.0, length( position * vec2( 4.0 + position.y, 1.0 ) ) - n * max( 0.0, position.y + 0.25 ) ), 1.2 );",
+		    "float c1 = n * c * ( 1.5 - pow( 1.2 * vUv.y, 4.0 ) );",
+		    
+		    // ensure the value is between zero and one
+		    "c1 = clamp( c1, 0.0 ,1.0 );",
+		    
+		    // the color of the flame
+		    "vec4 flameColor = vec4( 1.5 * c1, 1.5 * c1 * c1 * c1, c1 * c1 * c1 * c1 * c1 * c1, 1.0 );",
+		    
+		    // this will determine the final shape of the flame
+		    "float a =  c * ( 1.0 - pow( vUv.y, intensity ) );",
+		    
+		    // mix the background and flame shape
+		    "gl_FragColor = vec4( mix( defaultColor, flameColor, a ) );",
+		    
+		"}",
+
+	].join( "\n" )
+};
+},{}],76:[function(require,module,exports){
 /**
  * @file This shader applies a gaussian blur effect. Used in post-processing.
  * 
@@ -51203,7 +51360,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{"three":1}],76:[function(require,module,exports){
+},{"three":1}],77:[function(require,module,exports){
 /**
  * @file This shader transforms all colors to grayscale. Used in
  * post-processing.
@@ -51259,7 +51416,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{}],77:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 /**
  * @file This shader creates a simple horizon. Use this shader as a material on
  * a sphere.
@@ -51337,7 +51494,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{"three":1}],78:[function(require,module,exports){
+},{"three":1}],79:[function(require,module,exports){
 /**
  * @file This shader creates a vignette effect. Used in post-processing.
  * 
@@ -51417,7 +51574,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{}],79:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51532,7 +51689,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],80:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],81:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51710,7 +51867,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],81:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],82:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51880,7 +52037,7 @@ function colorMesh( mesh ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],82:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],83:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52052,7 +52209,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],83:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],84:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52176,7 +52333,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],84:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],85:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52363,7 +52520,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],85:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],86:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52534,7 +52691,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],86:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],87:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52685,7 +52842,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],87:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],88:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52864,7 +53021,7 @@ function showLODCircles( world ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],88:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],89:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -53042,7 +53199,7 @@ function onKeyDown( event ) {
 
 module.exports = Stage;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],89:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],90:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -53185,7 +53342,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],90:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],91:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -53364,7 +53521,7 @@ Chat.prototype._onMessage = function( message, data ) {
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":99}],91:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":100}],92:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel. Only if the development
@@ -53426,7 +53583,7 @@ DevelopmentPanel.prototype.setText = function( text ) {
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":99}],92:[function(require,module,exports){
+},{"./UiElement":100}],93:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -53487,7 +53644,7 @@ InformationPanel.prototype.setText = function( textKey ) {
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":99}],93:[function(require,module,exports){
+},{"./UiElement":100}],94:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -53564,7 +53721,7 @@ InteractionLabel.prototype.hide = function() {
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":99}],94:[function(require,module,exports){
+},{"./UiElement":100}],95:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -53754,7 +53911,7 @@ LoadingScreen.prototype._onReady = function( message, data ) {
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":99}],95:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":100}],96:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -53910,7 +54067,7 @@ Menu.prototype._publishFinishEvent = function( message, data ) {
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Environment":20,"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":99}],96:[function(require,module,exports){
+},{"../core/Environment":20,"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":100}],97:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -54034,7 +54191,7 @@ ModalDialog.prototype._onClose = function( event ) {
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":99}],97:[function(require,module,exports){
+},{"./UiElement":100}],98:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor. Only if the development
@@ -54253,7 +54410,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":99}],98:[function(require,module,exports){
+},{"./UiElement":100}],99:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -54479,7 +54636,7 @@ TextScreen.prototype._printName = function() {
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":99}],99:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":100}],100:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -54529,7 +54686,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":42}],100:[function(require,module,exports){
+},{"../etc/TextManager":42}],101:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in stages to
@@ -54795,4 +54952,4 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68,"./Chat":90,"./DevelopmentPanel":91,"./InformationPanel":92,"./InteractionLabel":93,"./LoadingScreen":94,"./Menu":95,"./ModalDialog":96,"./PerformanceMonitor":97,"./TextScreen":98}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100]);
+},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68,"./Chat":91,"./DevelopmentPanel":92,"./InformationPanel":93,"./InteractionLabel":94,"./LoadingScreen":95,"./Menu":96,"./ModalDialog":97,"./PerformanceMonitor":98,"./TextScreen":99}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101]);

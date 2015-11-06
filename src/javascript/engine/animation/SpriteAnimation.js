@@ -68,7 +68,7 @@ function SpriteAnimation( rows, columns, numberOfImages, texture, imagesPerSecon
 		}
 	} );
 
-	// this will zoom into the texture, so you see exactly on image of the
+	// this will zoom into the texture, so you see exactly one image of the
 	// sprite
 	this.texture.repeat.set( 1 / this.columns, 1 / this.rows );
 }
