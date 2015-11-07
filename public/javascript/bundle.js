@@ -36446,7 +36446,7 @@ ActionManager.prototype._onInteraction = function( message, data ) {
 };
 
 module.exports = new ActionManager();
-},{"../core/Logger":21,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":101,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
+},{"../core/Logger":21,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":106,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
 /**
  * @file The ActionTrigger is a static trigger for actions.
  * 
@@ -37880,7 +37880,7 @@ function SpriteAnimation( rows, columns, numberOfImages, texture, imagesPerSecon
 		}
 	} );
 
-	// this will zoom into the texture, so you see exactly on image of the
+	// this will zoom into the texture, so you see exactly one image of the
 	// sprite
 	this.texture.repeat.set( 1 / this.columns, 1 / this.rows );
 }
@@ -39850,7 +39850,7 @@ FirstPersonControls.RUN = {
 
 module.exports = FirstPersonControls;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../etc/SettingsManager":40,"../etc/Utils":43,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":101,"three":1}],18:[function(require,module,exports){
+},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../etc/SettingsManager":40,"../etc/Utils":43,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":106,"three":1}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -39963,7 +39963,7 @@ Bootstrap.prototype._loadStage = function() {
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/MultiplayerManager":35,"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../network/NetworkManager":70,"../ui/UserInterfaceManager":101,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27,"./World":31}],19:[function(require,module,exports){
+},{"../etc/MultiplayerManager":35,"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../network/NetworkManager":70,"../ui/UserInterfaceManager":106,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27,"./World":31}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for camera-based
@@ -40781,7 +40781,7 @@ Renderer.prototype._onResize = function( message, data ) {
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"../postprocessing/EffectComposer":71,"../postprocessing/RenderPass":72,"../postprocessing/ShaderPass":73,"../shader/GaussianBlurShader":76,"../shader/GrayscaleShader":77,"../shader/VignetteShader":79,"./Logger":21,"three":1}],24:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"../postprocessing/EffectComposer":76,"../postprocessing/RenderPass":77,"../postprocessing/ShaderPass":78,"../shader/GaussianBlurShader":81,"../shader/GrayscaleShader":82,"../shader/VignetteShader":84,"./Logger":21,"three":1}],24:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic for scene-based functionality.
  * 
@@ -41076,7 +41076,7 @@ StageBase.COLORS = {
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../etc/PerformanceManager":38,"../etc/SaveGameManager":39,"../etc/SettingsManager":40,"../etc/TextManager":42,"../game/entity/EntityManager":44,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":101,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
+},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../etc/PerformanceManager":38,"../etc/SaveGameManager":39,"../etc/SettingsManager":40,"../etc/TextManager":42,"../game/entity/EntityManager":44,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":106,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -41368,7 +41368,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../stages/Stage_001":80,"../stages/Stage_002":81,"../stages/Stage_003":82,"../stages/Stage_004":83,"../stages/Stage_005":84,"../stages/Stage_006":85,"../stages/Stage_007":86,"../stages/Stage_008":87,"../stages/Stage_009":88,"../stages/Stage_010":89,"../stages/Stage_011":90,"../ui/UserInterfaceManager":101,"./Logger":21}],27:[function(require,module,exports){
+},{"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../stages/Stage_001":85,"../stages/Stage_002":86,"../stages/Stage_003":87,"../stages/Stage_004":88,"../stages/Stage_005":89,"../stages/Stage_006":90,"../stages/Stage_007":91,"../stages/Stage_008":92,"../stages/Stage_009":93,"../stages/Stage_010":94,"../stages/Stage_011":95,"../ui/UserInterfaceManager":106,"./Logger":21}],27:[function(require,module,exports){
 /**
  * @file This prototype holds core information about the engine. The runtime
  * behavior of the application depends crucially of this prototype.
@@ -50058,14 +50058,14 @@ function callSubscriberWithImmediateExceptions( subscriber, message, data ) {
  * @param {object} data - The data to pass to subscribers.
  * @param {object} isImmediateExceptions - Force immediate exceptions?
  */
-function deliverMessage( originalMessage, matchedMessage, data, immediateExceptions ) {
+function deliverMessage( originalMessage, matchedMessage, data, isImmediateExceptions ) {
 
 	// get the subscribers of the topic.
 	// thats a object with the structure token -> callback.
 	var subscribers = messages[ matchedMessage ];
 
 	// determine the type of function call
-	var callSubscriber = immediateExceptions ? callSubscriberWithImmediateExceptions : callSubscriberWithDelayedExceptions;
+	var callSubscriber = isImmediateExceptions ? callSubscriberWithImmediateExceptions : callSubscriberWithDelayedExceptions;
 
 	// ensure the matchedMessage is an existing topic
 	if ( messages.hasOwnProperty( matchedMessage ) === false )
@@ -50663,6 +50663,604 @@ module.exports = new NetworkManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../core/Logger":21,"../core/ThreadManager":29,"../messaging/EventManager":66,"../messaging/Topic":68,"./Message":69,"ws":2}],71:[function(require,module,exports){
 /**
+ * @file The particle prototype defines the properties of a single particle that
+ * is used to simulate the particle effect.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require( "three" );
+
+/**
+ * Creates a particle.
+ * 
+ * @constructor
+ */
+function Particle() {
+
+	Object.defineProperties( this, {
+		// the position of the particle
+		position : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		// the velocity of the particle
+		velocity : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		// the duration in seconds since the particle was emitted
+		age : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// how long the particle will live for. when the particle’s age has
+		// exceeded it’s lifetime, it is considered “dead” and will not be
+		// rendered until it is re-emitted
+		lifetime : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		}
+
+	} );
+
+}
+
+/**
+ * Updates the particle.
+ * 
+ * @param {number} delta - The time delta value.
+ */
+Particle.prototype.update = ( function() {
+
+	var displacement = new THREE.Vector3();
+
+	return function( delta ) {
+
+		if ( displacement === undefined )
+		{
+			displacement = new THREE.Vector3();
+		}
+
+		// update age of the particle
+		this.age += delta;
+
+		// calculate displacement
+		displacement.copy( this.velocity ).multiplyScalar( delta );
+
+		// update the position by adding the displacement
+		this.position.add( displacement );
+	};
+
+}() );
+
+module.exports = Particle;
+},{"three":1}],72:[function(require,module,exports){
+/**
+ * @file This prototype will be used to emit and update particles that share
+ * common properties such as texture, interpolated colors, interpolated scale,
+ * forces that will be applied to each particle and blending modes, and sorting
+ * criteria. Since all the particles in a particle effect will all share the
+ * same texture, several particle effects will be required to create a complex
+ * particle effect that requires several different texture to look correct (for
+ * example, a fire and smoke particle system would require at least two
+ * different particle effects – one for the fire and one for the smoke).
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require( "three" );
+
+var Emitter = require( "./emitter/Emitter" );
+var Particle = require( "./Particle" );
+var logger = require( "../core/Logger" );
+var world = require( "../core/World" );
+
+/**
+ * Creates a particle effect.
+ * 
+ * @constructor
+ * 
+ * @param {number} numberOfParticles - The number of the particles.
+ * @param {Emitter} particleEmitter - The particle emitter.
+ */
+function ParticleEffect( numberOfParticles, particleEmitter ) {
+
+	Object.defineProperties( this, {
+		// the number of particles in this effect.
+		numberOfParticles : {
+			value : numberOfParticles,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// a reference to a particle emitter
+		particleEmitter : {
+			value : particleEmitter,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the particles of the effect
+		_particles : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		// the geometry of the particle effect
+		_particleGeometry : {
+			value : new THREE.Geometry(),
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		// the material of the particle effect
+		_particleMaterial : {
+			value : new THREE.PointsMaterial(),
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		// the actual 3D object which contains the geometry and material of the
+		// particle effect. this property will be created in the initialize
+		// method
+		_particleSystem : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		}
+	} );
+
+}
+
+/**
+ * Initializes the particle effect.
+ */
+ParticleEffect.prototype.init = function() {
+
+	var index, particle;
+
+	// check existence of a valid particle emitter
+	if ( this.particleEmitter instanceof Emitter === false )
+	{
+		throw "ERROR: ParticleEffect: No valid particle emitter set.";
+	}
+
+	// then create the particles
+	for ( index = 0; index < this.numberOfParticles; index++ )
+	{
+		particle = new Particle();
+
+		// push the particle to the internal array
+		this._particles.push( particle );
+
+		// push the position vector to the geometry object
+		this._particleGeometry.vertices.push( particle.position );
+	}
+
+	// create the particle effect
+	this._particleSystem = new THREE.Points( this._particleGeometry, this._particleMaterial );
+
+	// disable view frustum culling. this avoids disappearing particles when
+	// moving the camera away from the emitter
+	this._particleSystem.frustumCulled = false;
+
+	// add the system to the world
+	world.addObject3D( this._particleSystem );
+};
+
+/**
+ * Updates the particle effect.
+ * 
+ * @param {number} delta - The time delta value.
+ */
+ParticleEffect.prototype.update = function( delta ) {
+
+	var index, particle;
+
+	for ( index = 0; index < this._particles.length; index++ )
+	{
+		particle = this._particles[ index ];
+
+		// update the particle
+		particle.update( delta );
+
+		// if the particle exceeds its lifetime, just emit it again
+		if ( particle.age > particle.lifetime )
+		{
+			this.particleEmitter.emit( particle );
+		}
+	}
+
+	// we need to tell three.js to update the vertices of the geometry
+	this._particleGeometry.verticesNeedUpdate = true;
+};
+
+/**
+ * Destroys the particle effect.
+ */
+ParticleEffect.prototype.destroy = function() {
+
+	// remove the particle effect from the world
+	world.removeObject3D( this._particleSystem );
+};
+
+module.exports = ParticleEffect;
+},{"../core/Logger":21,"../core/World":31,"./Particle":71,"./emitter/Emitter":74,"three":1}],73:[function(require,module,exports){
+/**
+ * @file The cube emitter uses an AABB to determine the position particles will
+ * be emitted.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require( "three" );
+
+var Emitter = require( "./Emitter" );
+
+/**
+ * Creates a cube emitter.
+ * 
+ * @constructor
+ * @augments Emitter
+ * 
+ * @param {object} options - The options of the emitter.
+ */
+function CubeEmitter( options ) {
+	
+	Emitter.call( this );
+
+	Object.defineProperties( this, {
+		// the position of the emitter
+		origin : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		// the size of the emitter
+		size : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		// the minimum lifetime of a particle
+		minLifetime : {
+			value : 5,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the maximum lifetime of a particle
+		maxLifetime : {
+			value : 10,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the minimum speed of a particle
+		minSpeed : {
+			value : 5,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the maximum speed of a particle
+		maxSpeed : {
+			value : 10,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		_boundingVolume : {
+			value : new THREE.Box3(),
+			configurable : false,
+			enumerable : false,
+			writable : true
+		}
+
+	} );
+
+	// transfer the options values to the object
+	for ( var property in options )
+	{
+		if ( options.hasOwnProperty( property ) )
+		{
+			if ( options[ property ] instanceof THREE.Vector3 || options[ property ] instanceof THREE.Box3 )
+			{
+				this[ property ].copy( options[ property ] );
+			}
+			else
+			{
+				this[ property ] = options[ property ];
+			}
+		}
+	}
+	
+	// calculate bounding volume
+	this._boundingVolume.setFromCenterAndSize( new THREE.Vector3(), this.size );
+
+}
+
+CubeEmitter.prototype = Object.create( Emitter.prototype );
+CubeEmitter.prototype.constructor = CubeEmitter;
+
+/**
+ * Emits the particle within a predefined bounding volume.
+ * 
+ * @param {Particle} particle - The particle to emit.
+ */
+CubeEmitter.prototype.emit = ( function() {
+
+	var position;
+
+	return function( particle ) {
+
+		if ( position === undefined )
+		{
+			position = new THREE.Vector3();
+		}
+
+		// determine random values for speed and lifetime
+		var speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
+		var lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
+
+		// determine random values for position
+		position.x = THREE.Math.randFloat( this._boundingVolume.min.x, this._boundingVolume.max.x );
+		position.y = THREE.Math.randFloat( this._boundingVolume.min.y, this._boundingVolume.max.y );
+		position.z = THREE.Math.randFloat( this._boundingVolume.min.z, this._boundingVolume.max.z );
+
+		// add the origin of the emitter to the relative position of the
+		// particle to get world coordinates
+		particle.position.copy( position ).add( this.origin );
+
+		// calculate velocity
+		particle.velocity.copy( position ).normalize().multiplyScalar( speed );
+
+		// set time properties
+		particle.lifetime = lifetime;
+		particle.age = 0;
+	};
+
+}() );
+
+module.exports = CubeEmitter;
+},{"./Emitter":74,"three":1}],74:[function(require,module,exports){
+/**
+ * @file Base prototype for all emitters.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require( "three" );
+
+/**
+ * Creates an emitter.
+ * 
+ * @constructor
+ */
+function Emitter() {
+
+	Object.defineProperties( this, {
+		origin : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		}
+	} );
+	
+}
+
+/**
+ * Emits the particle within a predefined bounding volume.
+ * 
+ * @param {Particle} particle - The particle to emit.
+ */
+Emitter.prototype.emit = function( particle ) {
+
+	throw "ERROR: Emitter: This method must be implemented in a derived emitter prototype.";
+};
+
+module.exports = Emitter;
+},{"three":1}],75:[function(require,module,exports){
+/**
+ * @file The sphere emitter will randomly emit a particle somewhere about a
+ * sphere within some range. The emitter uses spherical coordinates to determine
+ * the range in which particles will be emitted in. The spherical coordinates
+ * are converted to Cartesian coordinates to determine the position and velocity
+ * that the particle is emitted in 3D space.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require( "three" );
+
+var Emitter = require( "./Emitter" );
+
+/**
+ * Creates a sphere emitter.
+ * 
+ * @constructor
+ * @augments Emitter
+ * 
+ * @param {object} options - The options of the emitter.
+ */
+function SphereEmitter( options ) {
+	
+	Emitter.call( this );
+
+	Object.defineProperties( this, {
+		// radius must be in range: [ 0, ∞ )
+		// the minimum radius
+		minRadius : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the maximum radius
+		maxRadius : {
+			value : 10,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// azimuth must be in range: [ 0, 2π )
+		// the minimum azimuth
+		minAzimuth : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the maximum azimuth
+		maxAzimuth : {
+			value : Math.PI * 1.999,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// inclination must be in range: [ 0, π ]
+		// the minimum inclination
+		minInclination : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the maximum inclination
+		maxInclination : {
+			value : Math.PI,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the minimum lifetime of a particle
+		minLifetime : {
+			value : 5,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the maximum lifetime of a particle
+		maxLifetime : {
+			value : 10,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the minimum speed of a particle
+		minSpeed : {
+			value : 5,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the maximum speed of a particle
+		maxSpeed : {
+			value : 10,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		}
+
+	} );
+
+	// transfer the options values to the object
+	for ( var property in options )
+	{
+		if ( options.hasOwnProperty( property ) )
+		{
+			if ( options[ property ] instanceof THREE.Vector3 || options[ property ] instanceof THREE.Box3 )
+			{
+				this[ property ].copy( options[ property ] );
+			}
+			else
+			{
+				this[ property ] = options[ property ];
+			}
+		}
+	}
+
+}
+
+SphereEmitter.prototype = Object.create( Emitter.prototype );
+SphereEmitter.prototype.constructor = SphereEmitter;
+
+/**
+ * Emits the particle within a predefined bounding volume.
+ * 
+ * @param {Particle} particle - The particle to emit.
+ */
+SphereEmitter.prototype.emit = ( function() {
+
+	var position;
+
+	return function( particle ) {
+
+		if ( position === undefined )
+		{
+			position = new THREE.Vector3();
+		}
+
+		// calculate components of polar coordinates
+		var azimuth = THREE.Math.randFloat( this.minAzimuth, this.maxAzimuth );
+		var inclination = THREE.Math.randFloat( this.minInclination, this.maxInclination );
+
+		// determine random values for radius, speed and lifetime
+		var radius = THREE.Math.randFloat( this.minRadius, this.maxRadius );
+		var speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
+		var lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
+
+		// determine the relative position of the particle by converting polar
+		// coordinates to Cartesian coordinates
+		var sinusInclination = Math.sin( inclination );
+
+		position.x = sinusInclination * Math.cos( azimuth );
+		position.y = sinusInclination * Math.sin( azimuth );
+		position.z = Math.cos( inclination );
+
+		particle.position.copy( position ).multiplyScalar( radius );
+
+		// add the origin of the emitter to the relative position of the
+		// particle to get world coordinates
+		particle.position.add( this.origin );
+
+		// calculate velocity
+		particle.velocity.copy( position ).normalize().multiplyScalar( speed );
+
+		// calculate time properties
+		particle.lifetime = lifetime;
+		particle.age = 0;
+	};
+
+}() );
+
+module.exports = SphereEmitter;
+},{"./Emitter":74,"three":1}],76:[function(require,module,exports){
+/**
  * @file This prototype manages effects for post-processing.
  * 
  * @author Human Interactive
@@ -50840,7 +51438,7 @@ EffectComposer.prototype._reset = function( renderTarget ) {
 };
 
 module.exports = EffectComposer;
-},{"three":1}],72:[function(require,module,exports){
+},{"three":1}],77:[function(require,module,exports){
 /**
  * @file This prototype provides a render pass for post-processing.
  * 
@@ -50902,7 +51500,7 @@ RenderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = RenderPass;
-},{"three":1}],73:[function(require,module,exports){
+},{"three":1}],78:[function(require,module,exports){
 /**
  * @file This prototype provides a shader pass for post-processing.
  * 
@@ -51008,7 +51606,7 @@ ShaderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = ShaderPass;
-},{"three":1}],74:[function(require,module,exports){
+},{"three":1}],79:[function(require,module,exports){
 /**
  * @file This shader can be used for vertex displacement to create water or
  * fabric materials. It implements an exemplary diffuse lighting equation, which
@@ -51043,7 +51641,7 @@ module.exports = {
 	"varying vec3 vNormalWorld;",
 
 	// 1D random function
-	"float hash( float n ) {", 
+	"float random( float n ) {", 
 	
 		"return fract( sin( x ) * 1e4 );",
 		
@@ -51128,10 +51726,11 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{"three":1}],75:[function(require,module,exports){
+},{"three":1}],80:[function(require,module,exports){
 /**
- * @file This shader creates a simple horizon. Use this shader as a material on
- * a sphere.
+ * @file This shader creates a 2D flame. Use it as a material along with
+ * a view-oriented billboard to simulate candles or other fire effects. If you
+ * have performance issues with this shader, use sprite animations instead.
  * 
  * @author Human Interactive
  */
@@ -51256,7 +51855,7 @@ module.exports = {
 		    "position.x -= 0.5;",
 		    "position.y -= 0.25;",
 		    
-		    // the default color of the background
+		    // the default color of the background/border
 		    "vec4 defaultColor = vec4( 0.5, 0.5, 0.5, 0.0 );",
 		    
 		    // this will calculate the motions and structure of the flame
@@ -51282,7 +51881,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{}],76:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 /**
  * @file This shader applies a gaussian blur effect. Used in post-processing.
  * 
@@ -51360,7 +51959,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{"three":1}],77:[function(require,module,exports){
+},{"three":1}],82:[function(require,module,exports){
 /**
  * @file This shader transforms all colors to grayscale. Used in
  * post-processing.
@@ -51416,7 +52015,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{}],78:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 /**
  * @file This shader creates a simple horizon. Use this shader as a material on
  * a sphere.
@@ -51494,7 +52093,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{"three":1}],79:[function(require,module,exports){
+},{"three":1}],84:[function(require,module,exports){
 /**
  * @file This shader creates a vignette effect. Used in post-processing.
  * 
@@ -51574,7 +52173,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{}],80:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51689,7 +52288,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],81:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],86:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -51867,7 +52466,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],82:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],87:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52037,7 +52636,7 @@ function colorMesh( mesh ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],83:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],88:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52209,7 +52808,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],84:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],89:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52333,7 +52932,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],85:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],90:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52520,7 +53119,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],86:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],91:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52691,7 +53290,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],87:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],92:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52842,7 +53441,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],88:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],93:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -53021,7 +53620,7 @@ function showLODCircles( world ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],89:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],94:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -53199,7 +53798,7 @@ function onKeyDown( event ) {
 
 module.exports = Stage;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],90:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],95:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -53342,7 +53941,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],91:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],96:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -53521,7 +54120,7 @@ Chat.prototype._onMessage = function( message, data ) {
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":100}],92:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":105}],97:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel. Only if the development
@@ -53583,7 +54182,7 @@ DevelopmentPanel.prototype.setText = function( text ) {
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":100}],93:[function(require,module,exports){
+},{"./UiElement":105}],98:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -53644,7 +54243,7 @@ InformationPanel.prototype.setText = function( textKey ) {
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":100}],94:[function(require,module,exports){
+},{"./UiElement":105}],99:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -53721,7 +54320,7 @@ InteractionLabel.prototype.hide = function() {
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":100}],95:[function(require,module,exports){
+},{"./UiElement":105}],100:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -53911,7 +54510,7 @@ LoadingScreen.prototype._onReady = function( message, data ) {
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":100}],96:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":105}],101:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -54067,7 +54666,7 @@ Menu.prototype._publishFinishEvent = function( message, data ) {
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Environment":20,"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":100}],97:[function(require,module,exports){
+},{"../core/Environment":20,"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":105}],102:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -54191,7 +54790,7 @@ ModalDialog.prototype._onClose = function( event ) {
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":100}],98:[function(require,module,exports){
+},{"./UiElement":105}],103:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor. Only if the development
@@ -54410,7 +55009,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":100}],99:[function(require,module,exports){
+},{"./UiElement":105}],104:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -54636,7 +55235,7 @@ TextScreen.prototype._printName = function() {
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":100}],100:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":105}],105:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -54686,7 +55285,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":42}],101:[function(require,module,exports){
+},{"../etc/TextManager":42}],106:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in stages to
@@ -54952,4 +55551,4 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68,"./Chat":91,"./DevelopmentPanel":92,"./InformationPanel":93,"./InteractionLabel":94,"./LoadingScreen":95,"./Menu":96,"./ModalDialog":97,"./PerformanceMonitor":98,"./TextScreen":99}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101]);
+},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68,"./Chat":96,"./DevelopmentPanel":97,"./InformationPanel":98,"./InteractionLabel":99,"./LoadingScreen":100,"./Menu":101,"./ModalDialog":102,"./PerformanceMonitor":103,"./TextScreen":104}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106]);

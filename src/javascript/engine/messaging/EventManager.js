@@ -355,14 +355,14 @@ function callSubscriberWithImmediateExceptions( subscriber, message, data ) {
  * @param {object} data - The data to pass to subscribers.
  * @param {object} isImmediateExceptions - Force immediate exceptions?
  */
-function deliverMessage( originalMessage, matchedMessage, data, immediateExceptions ) {
+function deliverMessage( originalMessage, matchedMessage, data, isImmediateExceptions ) {
 
 	// get the subscribers of the topic.
 	// thats a object with the structure token -> callback.
 	var subscribers = messages[ matchedMessage ];
 
 	// determine the type of function call
-	var callSubscriber = immediateExceptions ? callSubscriberWithImmediateExceptions : callSubscriberWithDelayedExceptions;
+	var callSubscriber = isImmediateExceptions ? callSubscriberWithImmediateExceptions : callSubscriberWithDelayedExceptions;
 
 	// ensure the matchedMessage is an existing topic
 	if ( messages.hasOwnProperty( matchedMessage ) === false )
