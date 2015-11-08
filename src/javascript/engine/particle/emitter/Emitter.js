@@ -36,4 +36,12 @@ Emitter.prototype.emit = function( particle ) {
 	throw "ERROR: Emitter: This method must be implemented in a derived emitter prototype.";
 };
 
+/**
+ * Updates the internal state of the emitter.
+ */
+Emitter.prototype.update = function() {
+
+	throw "ERROR: Emitter: This method must be implemented in a derived emitter prototype.";
+};
+
 module.exports = Emitter;

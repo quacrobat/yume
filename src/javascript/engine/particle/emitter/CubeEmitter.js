@@ -24,13 +24,6 @@ function CubeEmitter( options ) {
 	Emitter.call( this );
 
 	Object.defineProperties( this, {
-		// the position of the emitter
-		origin : {
-			value : new THREE.Vector3(),
-			configurable : false,
-			enumerable : true,
-			writable : false
-		},
 		// the size of the emitter
 		size : {
 			value : new THREE.Vector3(),
@@ -80,7 +73,7 @@ function CubeEmitter( options ) {
 	{
 		if ( options.hasOwnProperty( property ) )
 		{
-			if ( options[ property ] instanceof THREE.Vector3 || options[ property ] instanceof THREE.Box3 )
+			if ( options[ property ] instanceof THREE.Vector3 )
 			{
 				this[ property ].copy( options[ property ] );
 			}
@@ -91,9 +84,8 @@ function CubeEmitter( options ) {
 		}
 	}
 	
-	// calculate bounding volume
-	this._boundingVolume.setFromCenterAndSize( new THREE.Vector3(), this.size );
-
+	// ensure the update method is called at least once
+	this.update();
 }
 
 CubeEmitter.prototype = Object.create( Emitter.prototype );
@@ -109,6 +101,8 @@ CubeEmitter.prototype.emit = ( function() {
 	var position;
 
 	return function( particle ) {
+		
+		var speed, lifetime;
 
 		if ( position === undefined )
 		{
@@ -116,8 +110,8 @@ CubeEmitter.prototype.emit = ( function() {
 		}
 
 		// determine random values for speed and lifetime
-		var speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
-		var lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
+		speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
+		lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
 
 		// determine random values for position
 		position.x = THREE.Math.randFloat( this._boundingVolume.min.x, this._boundingVolume.max.x );
@@ -134,6 +128,26 @@ CubeEmitter.prototype.emit = ( function() {
 		// set time properties
 		particle.lifetime = lifetime;
 		particle.age = 0;
+	};
+
+}() );
+
+/**
+ * Updates the internal state of the emitter.
+ */
+CubeEmitter.prototype.update = ( function() {
+
+	var center;
+
+	return function() {
+
+		if ( center === undefined )
+		{
+			center = new THREE.Vector3();
+		}
+
+		// calculate bounding volume
+		this._boundingVolume.setFromCenterAndSize( center, this.size );
 	};
 
 }() );

@@ -45,6 +45,14 @@ function ParticleEffect( numberOfParticles, particleEmitter ) {
 			enumerable : true,
 			writable : true
 		},
+		// this controls the update of the emitter. static particle effects can
+		// set this value to false
+		emitterAutoUpdate : {
+			value : true,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
 		// the particles of the effect
 		_particles : {
 			value : [],
@@ -77,12 +85,56 @@ function ParticleEffect( numberOfParticles, particleEmitter ) {
 		}
 	} );
 
+	this._init();
 }
+
+/**
+ * Updates the particle effect.
+ * 
+ * @param {number} delta - The time delta value.
+ */
+ParticleEffect.prototype.update = function( delta ) {
+
+	var index, particle;
+
+	// update emitter only if the respective flag is set
+	if ( this.emitterAutoUpdate === true )
+	{
+		this.particleEmitter.update();
+	}
+
+	// update all particles
+	for ( index = 0; index < this._particles.length; index++ )
+	{
+		particle = this._particles[ index ];
+
+		particle.update( delta );
+
+		// if the particle exceeds its lifetime, just emit it again
+		if ( particle.age > particle.lifetime )
+		{
+			this.particleEmitter.emit( particle );
+		}
+
+	} // next particle
+
+	// we need to tell three.js to update the vertices of the geometry
+	this._particleGeometry.verticesNeedUpdate = true;
+};
+
+/**
+ * Destroys the particle effect.
+ */
+ParticleEffect.prototype.destroy = function() {
+
+	// remove the particle effect from the world
+	world.removeObject3D( this._particleSystem );
+};
 
 /**
  * Initializes the particle effect.
  */
-ParticleEffect.prototype.init = function() {
+ParticleEffect.prototype._init = function() {
 
 	var index, particle;
 
@@ -113,42 +165,6 @@ ParticleEffect.prototype.init = function() {
 
 	// add the system to the world
 	world.addObject3D( this._particleSystem );
-};
-
-/**
- * Updates the particle effect.
- * 
- * @param {number} delta - The time delta value.
- */
-ParticleEffect.prototype.update = function( delta ) {
-
-	var index, particle;
-
-	for ( index = 0; index < this._particles.length; index++ )
-	{
-		particle = this._particles[ index ];
-
-		// update the particle
-		particle.update( delta );
-
-		// if the particle exceeds its lifetime, just emit it again
-		if ( particle.age > particle.lifetime )
-		{
-			this.particleEmitter.emit( particle );
-		}
-	}
-
-	// we need to tell three.js to update the vertices of the geometry
-	this._particleGeometry.verticesNeedUpdate = true;
-};
-
-/**
- * Destroys the particle effect.
- */
-ParticleEffect.prototype.destroy = function() {
-
-	// remove the particle effect from the world
-	world.removeObject3D( this._particleSystem );
 };
 
 module.exports = ParticleEffect;

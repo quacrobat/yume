@@ -108,7 +108,7 @@ function SphereEmitter( options ) {
 	{
 		if ( options.hasOwnProperty( property ) )
 		{
-			if ( options[ property ] instanceof THREE.Vector3 || options[ property ] instanceof THREE.Box3 )
+			if ( options[ property ] instanceof THREE.Vector3 )
 			{
 				this[ property ].copy( options[ property ] );
 			}
@@ -118,7 +118,9 @@ function SphereEmitter( options ) {
 			}
 		}
 	}
-
+	
+	// ensure the update method is called at least once
+	this.update();
 }
 
 SphereEmitter.prototype = Object.create( Emitter.prototype );
@@ -134,6 +136,8 @@ SphereEmitter.prototype.emit = ( function() {
 	var position;
 
 	return function( particle ) {
+		
+		var azimuth, inclination, sinusInclination, radius, speed, lifetime;
 
 		if ( position === undefined )
 		{
@@ -141,17 +145,17 @@ SphereEmitter.prototype.emit = ( function() {
 		}
 
 		// calculate components of polar coordinates
-		var azimuth = THREE.Math.randFloat( this.minAzimuth, this.maxAzimuth );
-		var inclination = THREE.Math.randFloat( this.minInclination, this.maxInclination );
+		azimuth = THREE.Math.randFloat( this.minAzimuth, this.maxAzimuth );
+		inclination = THREE.Math.randFloat( this.minInclination, this.maxInclination );
 
 		// determine random values for radius, speed and lifetime
-		var radius = THREE.Math.randFloat( this.minRadius, this.maxRadius );
-		var speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
-		var lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
+		radius = THREE.Math.randFloat( this.minRadius, this.maxRadius );
+		speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
+		lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
 
 		// determine the relative position of the particle by converting polar
 		// coordinates to Cartesian coordinates
-		var sinusInclination = Math.sin( inclination );
+		sinusInclination = Math.sin( inclination );
 
 		position.x = sinusInclination * Math.cos( azimuth );
 		position.y = sinusInclination * Math.sin( azimuth );
@@ -172,5 +176,13 @@ SphereEmitter.prototype.emit = ( function() {
 	};
 
 }() );
+
+/**
+ * Updates the internal state of the emitter.
+ */
+SphereEmitter.prototype.update = function() {
+
+	// nothing to do here
+};
 
 module.exports = SphereEmitter;
