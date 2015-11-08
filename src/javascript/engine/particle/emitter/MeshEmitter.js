@@ -24,6 +24,7 @@ function MeshEmitter( options ) {
 	Emitter.call( this );
 
 	Object.defineProperties( this, {
+
 		// the mesh of the emitter
 		mesh : {
 			value : null,
@@ -31,34 +32,7 @@ function MeshEmitter( options ) {
 			enumerable : true,
 			writable : true
 		},
-		// the minimum lifetime of a particle
-		minLifetime : {
-			value : 5,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the maximum lifetime of a particle
-		maxLifetime : {
-			value : 10,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the minimum speed of a particle
-		minSpeed : {
-			value : 5,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the maximum speed of a particle
-		maxSpeed : {
-			value : 10,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
+		// this will be used to calculate the vertex normal in world space
 		_normalMatrix : {
 			value : new THREE.Matrix3(),
 			configurable : false,
@@ -83,11 +57,11 @@ function MeshEmitter( options ) {
 			}
 		}
 	}
-	
+
 	// to calculate the velocity, we need face normals and vertex normals
 	this.mesh.geometry.computeFaceNormals();
 	this.mesh.geometry.computeVertexNormals( true );
-	
+
 	// ensure the update method is called at least once
 	this.update();
 }
@@ -152,7 +126,7 @@ MeshEmitter.prototype.update = function() {
 
 	// update the world matrix of the mesh
 	this.mesh.updateMatrixWorld( true );
-	
+
 	// update the normal matrix. used for velocity calculation
 	this._normalMatrix.getNormalMatrix( this.mesh.matrixWorld );
 };
@@ -191,9 +165,9 @@ MeshEmitter.prototype._getVertexNormal = ( function() {
 
 					return;
 				}
-				
+
 			} // next vertex normal
-			
+
 		} // next face
 	};
 

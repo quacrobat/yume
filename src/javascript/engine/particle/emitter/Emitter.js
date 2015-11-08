@@ -16,14 +16,38 @@ var THREE = require( "three" );
 function Emitter() {
 
 	Object.defineProperties( this, {
-		origin : {
-			value : new THREE.Vector3(),
+		
+		// the minimum lifetime of a particle
+		minLifetime : {
+			value : 5,
 			configurable : false,
 			enumerable : true,
-			writable : false
+			writable : true
+		},
+		// the maximum lifetime of a particle
+		maxLifetime : {
+			value : 10,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the minimum speed of a particle
+		minSpeed : {
+			value : 5,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the maximum speed of a particle
+		maxSpeed : {
+			value : 10,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
+		
 	} );
-	
+
 }
 
 /**

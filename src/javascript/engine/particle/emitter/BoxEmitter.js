@@ -1,5 +1,5 @@
 /**
- * @file The cube emitter uses an AABB to determine the position particles will
+ * @file The box emitter uses an AABB to determine the position particles will
  * be emitted.
  * 
  * @author Human Interactive
@@ -12,18 +12,26 @@ var THREE = require( "three" );
 var Emitter = require( "./Emitter" );
 
 /**
- * Creates a cube emitter.
+ * Creates a box emitter.
  * 
  * @constructor
  * @augments Emitter
  * 
  * @param {object} options - The options of the emitter.
  */
-function CubeEmitter( options ) {
+function BoxEmitter( options ) {
 	
 	Emitter.call( this );
 
 	Object.defineProperties( this, {
+		
+		// the origin of the emitter
+		origin : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
 		// the size of the emitter
 		size : {
 			value : new THREE.Vector3(),
@@ -31,41 +39,13 @@ function CubeEmitter( options ) {
 			enumerable : true,
 			writable : false
 		},
-		// the minimum lifetime of a particle
-		minLifetime : {
-			value : 5,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the maximum lifetime of a particle
-		maxLifetime : {
-			value : 10,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the minimum speed of a particle
-		minSpeed : {
-			value : 5,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the maximum speed of a particle
-		maxSpeed : {
-			value : 10,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
 		_boundingVolume : {
 			value : new THREE.Box3(),
 			configurable : false,
 			enumerable : false,
 			writable : true
 		}
-
+		
 	} );
 
 	// transfer the options values to the object
@@ -88,15 +68,15 @@ function CubeEmitter( options ) {
 	this.update();
 }
 
-CubeEmitter.prototype = Object.create( Emitter.prototype );
-CubeEmitter.prototype.constructor = CubeEmitter;
+BoxEmitter.prototype = Object.create( Emitter.prototype );
+BoxEmitter.prototype.constructor = BoxEmitter;
 
 /**
  * Emits the particle within a predefined bounding volume.
  * 
  * @param {Particle} particle - The particle to emit.
  */
-CubeEmitter.prototype.emit = ( function() {
+BoxEmitter.prototype.emit = ( function() {
 
 	var position;
 
@@ -135,7 +115,7 @@ CubeEmitter.prototype.emit = ( function() {
 /**
  * Updates the internal state of the emitter.
  */
-CubeEmitter.prototype.update = ( function() {
+BoxEmitter.prototype.update = ( function() {
 
 	var center;
 
@@ -152,4 +132,4 @@ CubeEmitter.prototype.update = ( function() {
 
 }() );
 
-module.exports = CubeEmitter;
+module.exports = BoxEmitter;

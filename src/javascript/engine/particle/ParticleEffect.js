@@ -31,6 +31,7 @@ var world = require( "../core/World" );
 function ParticleEffect( numberOfParticles, particleEmitter ) {
 
 	Object.defineProperties( this, {
+		
 		// the number of particles in this effect.
 		numberOfParticles : {
 			value : numberOfParticles,
@@ -83,6 +84,7 @@ function ParticleEffect( numberOfParticles, particleEmitter ) {
 			enumerable : false,
 			writable : true
 		}
+		
 	} );
 
 	this._init();

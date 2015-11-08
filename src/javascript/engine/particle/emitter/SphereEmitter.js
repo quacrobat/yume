@@ -27,6 +27,14 @@ function SphereEmitter( options ) {
 	Emitter.call( this );
 
 	Object.defineProperties( this, {
+		
+		// the origin of the emitter
+		origin : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
 		// radius must be in range: [ 0, ∞ )
 		// the minimum radius
 		minRadius : {
@@ -68,34 +76,6 @@ function SphereEmitter( options ) {
 		// the maximum inclination
 		maxInclination : {
 			value : Math.PI,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the minimum lifetime of a particle
-		minLifetime : {
-			value : 5,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the maximum lifetime of a particle
-		maxLifetime : {
-			value : 10,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the minimum speed of a particle
-		minSpeed : {
-			value : 5,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the maximum speed of a particle
-		maxSpeed : {
-			value : 10,
 			configurable : false,
 			enumerable : true,
 			writable : true

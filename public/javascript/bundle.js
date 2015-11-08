@@ -50681,6 +50681,7 @@ var THREE = require( "three" );
 function Particle() {
 
 	Object.defineProperties( this, {
+		
 		// the position of the particle
 		position : {
 			value : new THREE.Vector3(),
@@ -50711,7 +50712,7 @@ function Particle() {
 			enumerable : true,
 			writable : true
 		}
-
+		
 	} );
 
 }
@@ -50779,6 +50780,7 @@ var world = require( "../core/World" );
 function ParticleEffect( numberOfParticles, particleEmitter ) {
 
 	Object.defineProperties( this, {
+		
 		// the number of particles in this effect.
 		numberOfParticles : {
 			value : numberOfParticles,
@@ -50831,6 +50833,7 @@ function ParticleEffect( numberOfParticles, particleEmitter ) {
 			enumerable : false,
 			writable : true
 		}
+		
 	} );
 
 	this._init();
@@ -50918,7 +50921,7 @@ ParticleEffect.prototype._init = function() {
 module.exports = ParticleEffect;
 },{"../core/Logger":21,"../core/World":31,"./Particle":71,"./emitter/Emitter":74,"three":1}],73:[function(require,module,exports){
 /**
- * @file The cube emitter uses an AABB to determine the position particles will
+ * @file The box emitter uses an AABB to determine the position particles will
  * be emitted.
  * 
  * @author Human Interactive
@@ -50931,18 +50934,26 @@ var THREE = require( "three" );
 var Emitter = require( "./Emitter" );
 
 /**
- * Creates a cube emitter.
+ * Creates a box emitter.
  * 
  * @constructor
  * @augments Emitter
  * 
  * @param {object} options - The options of the emitter.
  */
-function CubeEmitter( options ) {
+function BoxEmitter( options ) {
 	
 	Emitter.call( this );
 
 	Object.defineProperties( this, {
+		
+		// the origin of the emitter
+		origin : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
 		// the size of the emitter
 		size : {
 			value : new THREE.Vector3(),
@@ -50950,41 +50961,13 @@ function CubeEmitter( options ) {
 			enumerable : true,
 			writable : false
 		},
-		// the minimum lifetime of a particle
-		minLifetime : {
-			value : 5,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the maximum lifetime of a particle
-		maxLifetime : {
-			value : 10,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the minimum speed of a particle
-		minSpeed : {
-			value : 5,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the maximum speed of a particle
-		maxSpeed : {
-			value : 10,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
 		_boundingVolume : {
 			value : new THREE.Box3(),
 			configurable : false,
 			enumerable : false,
 			writable : true
 		}
-
+		
 	} );
 
 	// transfer the options values to the object
@@ -51007,15 +50990,15 @@ function CubeEmitter( options ) {
 	this.update();
 }
 
-CubeEmitter.prototype = Object.create( Emitter.prototype );
-CubeEmitter.prototype.constructor = CubeEmitter;
+BoxEmitter.prototype = Object.create( Emitter.prototype );
+BoxEmitter.prototype.constructor = BoxEmitter;
 
 /**
  * Emits the particle within a predefined bounding volume.
  * 
  * @param {Particle} particle - The particle to emit.
  */
-CubeEmitter.prototype.emit = ( function() {
+BoxEmitter.prototype.emit = ( function() {
 
 	var position;
 
@@ -51054,7 +51037,7 @@ CubeEmitter.prototype.emit = ( function() {
 /**
  * Updates the internal state of the emitter.
  */
-CubeEmitter.prototype.update = ( function() {
+BoxEmitter.prototype.update = ( function() {
 
 	var center;
 
@@ -51071,7 +51054,7 @@ CubeEmitter.prototype.update = ( function() {
 
 }() );
 
-module.exports = CubeEmitter;
+module.exports = BoxEmitter;
 },{"./Emitter":74,"three":1}],74:[function(require,module,exports){
 /**
  * @file Base prototype for all emitters.
@@ -51091,14 +51074,38 @@ var THREE = require( "three" );
 function Emitter() {
 
 	Object.defineProperties( this, {
-		origin : {
-			value : new THREE.Vector3(),
+		
+		// the minimum lifetime of a particle
+		minLifetime : {
+			value : 5,
 			configurable : false,
 			enumerable : true,
-			writable : false
+			writable : true
+		},
+		// the maximum lifetime of a particle
+		maxLifetime : {
+			value : 10,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the minimum speed of a particle
+		minSpeed : {
+			value : 5,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the maximum speed of a particle
+		maxSpeed : {
+			value : 10,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
+		
 	} );
-	
+
 }
 
 /**
@@ -51147,6 +51154,7 @@ function MeshEmitter( options ) {
 	Emitter.call( this );
 
 	Object.defineProperties( this, {
+
 		// the mesh of the emitter
 		mesh : {
 			value : null,
@@ -51154,34 +51162,7 @@ function MeshEmitter( options ) {
 			enumerable : true,
 			writable : true
 		},
-		// the minimum lifetime of a particle
-		minLifetime : {
-			value : 5,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the maximum lifetime of a particle
-		maxLifetime : {
-			value : 10,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the minimum speed of a particle
-		minSpeed : {
-			value : 5,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the maximum speed of a particle
-		maxSpeed : {
-			value : 10,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
+		// this will be used to calculate the vertex normal in world space
 		_normalMatrix : {
 			value : new THREE.Matrix3(),
 			configurable : false,
@@ -51206,11 +51187,11 @@ function MeshEmitter( options ) {
 			}
 		}
 	}
-	
+
 	// to calculate the velocity, we need face normals and vertex normals
 	this.mesh.geometry.computeFaceNormals();
 	this.mesh.geometry.computeVertexNormals( true );
-	
+
 	// ensure the update method is called at least once
 	this.update();
 }
@@ -51275,7 +51256,7 @@ MeshEmitter.prototype.update = function() {
 
 	// update the world matrix of the mesh
 	this.mesh.updateMatrixWorld( true );
-	
+
 	// update the normal matrix. used for velocity calculation
 	this._normalMatrix.getNormalMatrix( this.mesh.matrixWorld );
 };
@@ -51314,9 +51295,9 @@ MeshEmitter.prototype._getVertexNormal = ( function() {
 
 					return;
 				}
-				
+
 			} // next vertex normal
-			
+
 		} // next face
 	};
 
@@ -51353,6 +51334,14 @@ function SphereEmitter( options ) {
 	Emitter.call( this );
 
 	Object.defineProperties( this, {
+		
+		// the origin of the emitter
+		origin : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
 		// radius must be in range: [ 0, ∞ )
 		// the minimum radius
 		minRadius : {
@@ -51394,34 +51383,6 @@ function SphereEmitter( options ) {
 		// the maximum inclination
 		maxInclination : {
 			value : Math.PI,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the minimum lifetime of a particle
-		minLifetime : {
-			value : 5,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the maximum lifetime of a particle
-		maxLifetime : {
-			value : 10,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the minimum speed of a particle
-		minSpeed : {
-			value : 5,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// the maximum speed of a particle
-		maxSpeed : {
-			value : 10,
 			configurable : false,
 			enumerable : true,
 			writable : true

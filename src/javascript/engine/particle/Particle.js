@@ -17,6 +17,7 @@ var THREE = require( "three" );
 function Particle() {
 
 	Object.defineProperties( this, {
+		
 		// the position of the particle
 		position : {
 			value : new THREE.Vector3(),
@@ -47,7 +48,7 @@ function Particle() {
 			enumerable : true,
 			writable : true
 		}
-
+		
 	} );
 
 }
