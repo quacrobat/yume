@@ -17,6 +17,7 @@ var THREE = require( "three" );
 
 var Emitter = require( "./emitter/Emitter" );
 var Particle = require( "./Particle" );
+var Interpolator = require( "./Interpolator" );
 var logger = require( "../core/Logger" );
 var world = require( "../core/World" );
 
@@ -31,7 +32,7 @@ var world = require( "../core/World" );
 function ParticleEffect( numberOfParticles, particleEmitter ) {
 
 	Object.defineProperties( this, {
-		
+
 		// the number of particles in this effect.
 		numberOfParticles : {
 			value : numberOfParticles,
@@ -63,14 +64,16 @@ function ParticleEffect( numberOfParticles, particleEmitter ) {
 		},
 		// the geometry of the particle effect
 		_particleGeometry : {
-			value : new THREE.Geometry(),
+			value : new THREE.BufferGeometry(),
 			configurable : false,
 			enumerable : false,
 			writable : false
 		},
 		// the material of the particle effect
 		_particleMaterial : {
-			value : new THREE.PointsMaterial(),
+			value : new THREE.PointsMaterial( {
+				vertexColors : THREE.VertexColors
+			} ),
 			configurable : false,
 			enumerable : false,
 			writable : false
@@ -83,8 +86,15 @@ function ParticleEffect( numberOfParticles, particleEmitter ) {
 			configurable : false,
 			enumerable : false,
 			writable : true
+		},
+		// this will be used to interpolate the particle color over time
+		_colorInterpolator : {
+			value : new Interpolator(),
+			configurable : false,
+			enumerable : false,
+			writable : false
 		}
-		
+
 	} );
 
 	this._init();
@@ -95,34 +105,57 @@ function ParticleEffect( numberOfParticles, particleEmitter ) {
  * 
  * @param {number} delta - The time delta value.
  */
-ParticleEffect.prototype.update = function( delta ) {
+ParticleEffect.prototype.update = ( function() {
 
-	var index, particle;
+	var displacement;
 
-	// update emitter only if the respective flag is set
-	if ( this.emitterAutoUpdate === true )
-	{
-		this.particleEmitter.update();
-	}
+	return function( delta ) {
 
-	// update all particles
-	for ( index = 0; index < this._particles.length; index++ )
-	{
-		particle = this._particles[ index ];
+		var index, particle, lifeRatio;
 
-		particle.update( delta );
-
-		// if the particle exceeds its lifetime, just emit it again
-		if ( particle.age > particle.lifetime )
+		if ( displacement === undefined )
 		{
-			this.particleEmitter.emit( particle );
+			displacement = new THREE.Vector3();
 		}
 
-	} // next particle
+		// update emitter only if the respective flag is set
+		if ( this.emitterAutoUpdate === true )
+		{
+			this.particleEmitter.update();
+		}
 
-	// we need to tell three.js to update the vertices of the geometry
-	this._particleGeometry.verticesNeedUpdate = true;
-};
+		// update all particles
+		for ( index = 0; index < this._particles.length; index++ )
+		{
+			// buffer particle
+			particle = this._particles[ index ];
+
+			// update age of the particle
+			particle.age += delta;
+
+			// if the particle exceeds its lifetime, just emit it again
+			if ( particle.age > particle.lifetime )
+			{
+				this.particleEmitter.emit( particle );
+			}
+
+			// update the position by adding a displacement
+			displacement.copy( particle.velocity ).multiplyScalar( delta );
+			particle.position.add( displacement );
+
+			// this value will be used for interpolation
+			lifeRatio = THREE.Math.clamp( ( particle.age / particle.lifetime ), 0, 1 );
+			
+			// interpolate color
+			this._colorInterpolator.getValue( lifeRatio, particle.color );
+			
+		} // next particle
+
+		// update the buffer data for shader program
+		this._buildBuffer();
+	};
+
+}() );
 
 /**
  * Destroys the particle effect.
@@ -138,7 +171,7 @@ ParticleEffect.prototype.destroy = function() {
  */
 ParticleEffect.prototype._init = function() {
 
-	var index, particle;
+	var index, positionBuffer, colorBuffer;
 
 	// check existence of a valid particle emitter
 	if ( this.particleEmitter instanceof Emitter === false )
@@ -149,14 +182,17 @@ ParticleEffect.prototype._init = function() {
 	// then create the particles
 	for ( index = 0; index < this.numberOfParticles; index++ )
 	{
-		particle = new Particle();
-
 		// push the particle to the internal array
-		this._particles.push( particle );
-
-		// push the position vector to the geometry object
-		this._particleGeometry.vertices.push( particle.position );
+		this._particles.push( new Particle() );
 	}
+
+	// create buffers
+	positionBuffer = new Float32Array( this.numberOfParticles * 3 );
+	colorBuffer = new Float32Array( this.numberOfParticles * 3 );
+
+	// add buffers to geometry
+	this._particleGeometry.addAttribute( "position", new THREE.BufferAttribute( positionBuffer, 3 ) );
+	this._particleGeometry.addAttribute( "color", new THREE.BufferAttribute( colorBuffer, 3 ) );
 
 	// create the particle effect
 	this._particleSystem = new THREE.Points( this._particleGeometry, this._particleMaterial );
@@ -167,6 +203,43 @@ ParticleEffect.prototype._init = function() {
 
 	// add the system to the world
 	world.addObject3D( this._particleSystem );
+	
+	// setup the color interpolator
+	this._colorInterpolator.addValue( 0.0, new THREE.Color( 0xff0000) );
+	this._colorInterpolator.addValue( 0.4, new THREE.Color( 0x00ff00) );
+	this._colorInterpolator.addValue( 0.7, new THREE.Color( 0x0000ff) );
+};
+
+/**
+ * Builds the buffer for the partciel shader program.
+ */
+ParticleEffect.prototype._buildBuffer = function() {
+
+	var particle, positionBuffer, colorBuffer, i, j;
+
+	// shortcut to buffers
+	positionBuffer = this._particleGeometry.attributes.position.array;
+	colorBuffer = this._particleGeometry.attributes.color.array;
+
+	// iterate over all particles and create the corresponding buffer data
+	for ( i = 0, j = 0; i < this._particles.length; i++, j += 3 )
+	{
+		particle = this._particles[ i ];
+
+		// position
+		positionBuffer[ j + 0 ] = particle.position.x;
+		positionBuffer[ j + 1 ] = particle.position.y;
+		positionBuffer[ j + 2 ] = particle.position.z;
+		
+		// color
+		colorBuffer[ j + 0 ] = particle.color.r;
+		colorBuffer[ j + 1 ] = particle.color.g;
+		colorBuffer[ j + 2 ] = particle.color.b;
+	}
+
+	// we need to tell three.js to update buffer
+	this._particleGeometry.attributes.position.needsUpdate = true;
+	this._particleGeometry.attributes.color.needsUpdate = true;
 };
 
 module.exports = ParticleEffect;

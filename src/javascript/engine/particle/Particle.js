@@ -32,6 +32,13 @@ function Particle() {
 			enumerable : true,
 			writable : false
 		},
+		// the color of the particle
+		color : {
+			value : new THREE.Color(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
 		// the duration in seconds since the particle was emitted
 		age : {
 			value : 0,
@@ -52,33 +59,5 @@ function Particle() {
 	} );
 
 }
-
-/**
- * Updates the particle.
- * 
- * @param {number} delta - The time delta value.
- */
-Particle.prototype.update = ( function() {
-
-	var displacement = new THREE.Vector3();
-
-	return function( delta ) {
-
-		if ( displacement === undefined )
-		{
-			displacement = new THREE.Vector3();
-		}
-
-		// update age of the particle
-		this.age += delta;
-
-		// calculate displacement
-		displacement.copy( this.velocity ).multiplyScalar( delta );
-
-		// update the position by adding the displacement
-		this.position.add( displacement );
-	};
-
-}() );
 
 module.exports = Particle;

@@ -66,7 +66,7 @@ function EffectComposer( renderer, renderTarget ) {
 		this._renderTarget = new THREE.WebGLRenderTarget( width, height, parameters );
 	}
 
-	// create read/write buffers based the render target
+	// create read/write buffers based on the render target
 	this._readBuffer = this._renderTarget;
 	this._writeBuffer = this._renderTarget.clone();
 }
