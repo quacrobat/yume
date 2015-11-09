@@ -51162,6 +51162,14 @@ function MeshEmitter( options ) {
 			enumerable : true,
 			writable : true
 		},
+		// this will be used to store the vertex normals. access via vertex
+		// index
+		_vertexNormals : {
+			value : {},
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
 		// this will be used to calculate the vertex normal in world space
 		_normalMatrix : {
 			value : new THREE.Matrix3(),
@@ -51188,9 +51196,8 @@ function MeshEmitter( options ) {
 		}
 	}
 
-	// to calculate the velocity, we need face normals and vertex normals
-	this.mesh.geometry.computeFaceNormals();
-	this.mesh.geometry.computeVertexNormals( true );
+	// retrieve the vertex normals for velocity calculation
+	this._getVertexNormals();
 
 	// ensure the update method is called at least once
 	this.update();
@@ -51206,7 +51213,7 @@ MeshEmitter.prototype.constructor = MeshEmitter;
  */
 MeshEmitter.prototype.emit = ( function() {
 
-	var position, vertexNormal;
+	var position;
 
 	return function( particle ) {
 
@@ -51215,7 +51222,6 @@ MeshEmitter.prototype.emit = ( function() {
 		if ( position === undefined )
 		{
 			position = new THREE.Vector3();
-			vertexNormal = new THREE.Vector3();
 		}
 
 		// determine random values for speed and lifetime
@@ -51232,12 +51238,11 @@ MeshEmitter.prototype.emit = ( function() {
 		// the world position of the particle
 		particle.position.applyMatrix4( this.mesh.matrixWorld );
 
-		// retrieve the vertex normal
-		this._getVertexNormal( vertexIndex, vertexNormal );
+		// the vertex normal determines the movement direction of the particle
+		particle.velocity.copy( this._vertexNormals[ vertexIndex ] );
 
-		// the vertex normal and the normal matrix determines the direction in
-		// world space
-		particle.velocity.copy( vertexNormal ).applyMatrix3( this._normalMatrix );
+		// transform the velocity/normal to world space
+		particle.velocity.applyMatrix3( this._normalMatrix );
 
 		// regard the speed
 		particle.velocity.normalize().multiplyScalar( speed );
@@ -51262,16 +51267,35 @@ MeshEmitter.prototype.update = function() {
 };
 
 /**
+ * This method creates a simple map for fast access to the vertex normal via the
+ * index of a vertex.
+ */
+MeshEmitter.prototype._getVertexNormals = function() {
+
+	var index;
+
+	// first, calculate face and vertex normals
+	this.mesh.geometry.computeFaceNormals();
+	this.mesh.geometry.computeVertexNormals( true );
+
+	// then create the map. save the vertex normal along with the vertex index
+	for ( index = 0; index < this.mesh.geometry.vertices.length; index++ )
+	{
+		this._vertexNormals[ index ] = this._getVertexNormal( index );
+	}
+
+};
+
+/**
  * Returns the normal of a given vertex.
  * 
  * @param {number} vertexIndex - The index of the vertex.
- * @param {THREE.Vector3} vertexNormal - The vertex normal.
  */
 MeshEmitter.prototype._getVertexNormal = ( function() {
 
 	var keys;
 
-	return function( vertexIndex, vertexNormal ) {
+	return function( vertexIndex ) {
 
 		var face, i, j;
 
@@ -51288,12 +51312,10 @@ MeshEmitter.prototype._getVertexNormal = ( function() {
 			for ( j = 0; j < face.vertexNormals.length; j++ )
 			{
 				// if the index of the current face vertex is equal with the
-				// given vertex index, we can retrieve the vertex normal
+				// given index, we can return the vertex normal
 				if ( face[ keys[ j ] ] === vertexIndex )
 				{
-					vertexNormal.copy( face.vertexNormals[ j ] );
-
-					return;
+					return face.vertexNormals[ j ];
 				}
 
 			} // next vertex normal
