@@ -39,6 +39,27 @@ function Particle() {
 			enumerable : true,
 			writable : false
 		},
+		// the size of the particle
+		size : {
+			value : 1,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the particles texture will be rotated by this value in the fragment shader
+		angle : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// this will manipulate how fast the angle of the particle is changed
+		angleVelocity : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
 		// the duration in seconds since the particle was emitted
 		age : {
 			value : 0,

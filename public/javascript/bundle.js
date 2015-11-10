@@ -36446,7 +36446,7 @@ ActionManager.prototype._onInteraction = function( message, data ) {
 };
 
 module.exports = new ActionManager();
-},{"../core/Logger":21,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":108,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
+},{"../core/Logger":21,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":109,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
 /**
  * @file The ActionTrigger is a static trigger for actions.
  * 
@@ -39850,7 +39850,7 @@ FirstPersonControls.RUN = {
 
 module.exports = FirstPersonControls;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../etc/SettingsManager":40,"../etc/Utils":43,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":108,"three":1}],18:[function(require,module,exports){
+},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../etc/SettingsManager":40,"../etc/Utils":43,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":109,"three":1}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -39963,7 +39963,7 @@ Bootstrap.prototype._loadStage = function() {
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/MultiplayerManager":35,"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../network/NetworkManager":70,"../ui/UserInterfaceManager":108,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27,"./World":31}],19:[function(require,module,exports){
+},{"../etc/MultiplayerManager":35,"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../network/NetworkManager":70,"../ui/UserInterfaceManager":109,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27,"./World":31}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for camera-based
@@ -40781,7 +40781,7 @@ Renderer.prototype._onResize = function( message, data ) {
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"../postprocessing/EffectComposer":78,"../postprocessing/RenderPass":79,"../postprocessing/ShaderPass":80,"../shader/GaussianBlurShader":83,"../shader/GrayscaleShader":84,"../shader/VignetteShader":86,"./Logger":21,"three":1}],24:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"../postprocessing/EffectComposer":78,"../postprocessing/RenderPass":79,"../postprocessing/ShaderPass":80,"../shader/GaussianBlurShader":83,"../shader/GrayscaleShader":84,"../shader/VignetteShader":87,"./Logger":21,"three":1}],24:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic for scene-based functionality.
  * 
@@ -41076,7 +41076,7 @@ StageBase.COLORS = {
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../etc/PerformanceManager":38,"../etc/SaveGameManager":39,"../etc/SettingsManager":40,"../etc/TextManager":42,"../game/entity/EntityManager":44,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":108,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
+},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../etc/PerformanceManager":38,"../etc/SaveGameManager":39,"../etc/SettingsManager":40,"../etc/TextManager":42,"../game/entity/EntityManager":44,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":109,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -41368,7 +41368,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../stages/Stage_001":87,"../stages/Stage_002":88,"../stages/Stage_003":89,"../stages/Stage_004":90,"../stages/Stage_005":91,"../stages/Stage_006":92,"../stages/Stage_007":93,"../stages/Stage_008":94,"../stages/Stage_009":95,"../stages/Stage_010":96,"../stages/Stage_011":97,"../ui/UserInterfaceManager":108,"./Logger":21}],27:[function(require,module,exports){
+},{"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../stages/Stage_001":88,"../stages/Stage_002":89,"../stages/Stage_003":90,"../stages/Stage_004":91,"../stages/Stage_005":92,"../stages/Stage_006":93,"../stages/Stage_007":94,"../stages/Stage_008":95,"../stages/Stage_009":96,"../stages/Stage_010":97,"../stages/Stage_011":98,"../ui/UserInterfaceManager":109,"./Logger":21}],27:[function(require,module,exports){
 /**
  * @file This prototype holds core information about the engine. The runtime
  * behavior of the application depends crucially of this prototype.
@@ -50845,6 +50845,27 @@ function Particle() {
 			enumerable : true,
 			writable : false
 		},
+		// the size of the particle
+		size : {
+			value : 1,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the particles texture will be rotated by this value in the fragment shader
+		angle : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// this will manipulate how fast the angle of the particle is changed
+		angleVelocity : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
 		// the duration in seconds since the particle was emitted
 		age : {
 			value : 0,
@@ -50885,34 +50906,60 @@ module.exports = Particle;
 
 var THREE = require( "three" );
 
-var Emitter = require( "./emitter/Emitter" );
-var Particle = require( "./Particle" );
-var Interpolator = require( "./Interpolator" );
 var logger = require( "../core/Logger" );
 var world = require( "../core/World" );
+var camera = require( "../core/Camera" );
+
+var Particle = require( "./Particle" );
+var Interpolator = require( "./Interpolator" );
+var Emitter = require( "./emitter/Emitter" );
+var ParticleShader = require( "../shader/ParticleShader" );
 
 /**
  * Creates a particle effect.
  * 
  * @constructor
  * 
- * @param {number} numberOfParticles - The number of the particles.
- * @param {Emitter} particleEmitter - The particle emitter.
+ * @param {object} options - The options of the particle effect.
  */
-function ParticleEffect( numberOfParticles, particleEmitter ) {
+function ParticleEffect( options ) {
 
 	Object.defineProperties( this, {
 
 		// the number of particles in this effect.
 		numberOfParticles : {
-			value : numberOfParticles,
+			value : 0,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
 		// a reference to a particle emitter
 		particleEmitter : {
-			value : particleEmitter,
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// this texture will be used for all particles. if the effect requires
+		// more than one texture, you need to create additional instances of
+		// this prototype
+		texture : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// this indicates if the effect sorts the particles in back-to-front
+		// order
+		sortParticles : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// this indicates if the particles should be transparent
+		transparent : {
+			value : false,
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -50941,8 +50988,11 @@ function ParticleEffect( numberOfParticles, particleEmitter ) {
 		},
 		// the material of the particle effect
 		_particleMaterial : {
-			value : new THREE.PointsMaterial( {
-				vertexColors : THREE.VertexColors
+			value : new THREE.ShaderMaterial( {
+				defines : ParticleShader.defines,
+				uniforms : ParticleShader.uniforms,
+				vertexShader : ParticleShader.vertexShader,
+				fragmentShader : ParticleShader.fragmentShader
 			} ),
 			configurable : false,
 			enumerable : false,
@@ -50966,6 +51016,15 @@ function ParticleEffect( numberOfParticles, particleEmitter ) {
 		}
 
 	} );
+
+	// transfer the options values to the object
+	for ( var property in options )
+	{
+		if ( options.hasOwnProperty( property ) )
+		{
+			this[ property ] = options[ property ];
+		}
+	}
 
 	this._init();
 }
@@ -51015,14 +51074,23 @@ ParticleEffect.prototype.update = ( function() {
 
 			// this value will be used for interpolation
 			lifeRatio = THREE.Math.clamp( ( particle.age / particle.lifetime ), 0, 1 );
-			
+
 			// interpolate color
 			this._colorInterpolator.getValue( lifeRatio, particle.color );
 			
+			// angle calculation
+			particle.angle += particle.angleVelocity * delta;
+
 		} // next particle
 
 		// update the buffer data for shader program
 		this._buildBuffer();
+
+		// finally, sort the particles if necessary
+		if ( this.sortParticles === true )
+		{
+			this._sortParticles();
+		}
 	};
 
 }() );
@@ -51041,7 +51109,7 @@ ParticleEffect.prototype.destroy = function() {
  */
 ParticleEffect.prototype._init = function() {
 
-	var index, positionBuffer, colorBuffer;
+	var index, positionBuffer, colorBuffer, sizeBuffer, angleBuffer, indexBuffer;
 
 	// check existence of a valid particle emitter
 	if ( this.particleEmitter instanceof Emitter === false )
@@ -51056,13 +51124,43 @@ ParticleEffect.prototype._init = function() {
 		this._particles.push( new Particle() );
 	}
 
+	// if no texture is set, delete a constant from the shader progam that
+	// controls the texture sampling
+	if ( this.texture === null )
+	{
+		delete this._particleMaterial.defines.USE_TEXTURE;
+	}
+
+	// always apply texture to material, even if its null
+	this._particleMaterial.uniforms.texture.value = this.texture;
+
+	// set transparent flag
+	this._particleMaterial.transparent = this.transparent;
+
 	// create buffers
 	positionBuffer = new Float32Array( this.numberOfParticles * 3 );
 	colorBuffer = new Float32Array( this.numberOfParticles * 3 );
+	sizeBuffer = new Float32Array( this.numberOfParticles );
+	angleBuffer = new Float32Array( this.numberOfParticles );
 
 	// add buffers to geometry
 	this._particleGeometry.addAttribute( "position", new THREE.BufferAttribute( positionBuffer, 3 ) );
 	this._particleGeometry.addAttribute( "color", new THREE.BufferAttribute( colorBuffer, 3 ) );
+	this._particleGeometry.addAttribute( "size", new THREE.BufferAttribute( sizeBuffer, 1 ) );
+	this._particleGeometry.addAttribute( "angle", new THREE.BufferAttribute( angleBuffer, 1 ) );
+
+	// if the need sorted particles, we create an additional index buffer
+	if ( this.sortParticles === true )
+	{
+		indexBuffer = new Uint16Array( this.numberOfParticles );
+
+		for ( index = 0; index < this._particles.length; index++ )
+		{
+			indexBuffer[ index ] = index;
+		}
+
+		this._particleGeometry.setIndex( new THREE.BufferAttribute( indexBuffer, 1 ) );
+	}
 
 	// create the particle effect
 	this._particleSystem = new THREE.Points( this._particleGeometry, this._particleMaterial );
@@ -51073,11 +51171,11 @@ ParticleEffect.prototype._init = function() {
 
 	// add the system to the world
 	world.addObject3D( this._particleSystem );
-	
+
 	// setup the color interpolator
-	this._colorInterpolator.addValue( 0.0, new THREE.Color( 0xff0000) );
-	this._colorInterpolator.addValue( 0.4, new THREE.Color( 0x00ff00) );
-	this._colorInterpolator.addValue( 0.7, new THREE.Color( 0x0000ff) );
+	this._colorInterpolator.addValue( 0.0, new THREE.Color( 0xff0000 ) );
+	this._colorInterpolator.addValue( 0.4, new THREE.Color( 0x00ff00 ) );
+	this._colorInterpolator.addValue( 0.7, new THREE.Color( 0x0000ff ) );
 };
 
 /**
@@ -51085,11 +51183,13 @@ ParticleEffect.prototype._init = function() {
  */
 ParticleEffect.prototype._buildBuffer = function() {
 
-	var particle, positionBuffer, colorBuffer, i, j;
+	var particle, positionBuffer, colorBuffer, sizeBuffer, angleBuffer, i, j;
 
 	// shortcut to buffers
 	positionBuffer = this._particleGeometry.attributes.position.array;
 	colorBuffer = this._particleGeometry.attributes.color.array;
+	sizeBuffer = this._particleGeometry.attributes.size.array;
+	angleBuffer = this._particleGeometry.attributes.angle.array;
 
 	// iterate over all particles and create the corresponding buffer data
 	for ( i = 0, j = 0; i < this._particles.length; i++, j += 3 )
@@ -51100,20 +51200,89 @@ ParticleEffect.prototype._buildBuffer = function() {
 		positionBuffer[ j + 0 ] = particle.position.x;
 		positionBuffer[ j + 1 ] = particle.position.y;
 		positionBuffer[ j + 2 ] = particle.position.z;
-		
+
 		// color
 		colorBuffer[ j + 0 ] = particle.color.r;
 		colorBuffer[ j + 1 ] = particle.color.g;
 		colorBuffer[ j + 2 ] = particle.color.b;
+
+		// size
+		sizeBuffer[ i ] = particle.size;
+		
+		// angle
+		angleBuffer[ i ] = particle.angle;
 	}
 
-	// we need to tell three.js to update buffer
+	// we need to tell three.js to update the buffers
 	this._particleGeometry.attributes.position.needsUpdate = true;
 	this._particleGeometry.attributes.color.needsUpdate = true;
+	this._particleGeometry.attributes.size.needsUpdate = true;
+	this._particleGeometry.attributes.angle.needsUpdate = true;
 };
 
+/**
+ * The method sorts all particles in back-to-front order. This is sometimes for
+ * particles with transparency.
+ */
+ParticleEffect.prototype._sortParticles = ( function() {
+
+	var vector = new THREE.Vector3();
+	var mvpMatrix = new THREE.Matrix4();
+
+	var sortArray = [];
+
+	return function() {
+
+		var index, positionBuffer, indexBuffer;
+
+		// reset array
+		sortArray.length = 0;
+
+		// shortcut to buffers
+		positionBuffer = this._particleGeometry.attributes.position.array;
+		indexBuffer = this._particleGeometry.index.array;
+
+		// calculate model view projection matrix
+		mvpMatrix.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse );
+		mvpMatrix.multiply( this._particleSystem.matrixWorld );
+
+		// calculate for all particles the depth an store this value along with
+		// its index
+		for ( index = 0; index < this._particles.length; index++ )
+		{
+			// transform the position vector to clip-space to get its depth value
+			vector.fromArray( positionBuffer, index * 3 );
+			vector.applyProjection( mvpMatrix );
+
+			// push the entry to the sort array
+			sortArray.push( [ vector.z, index ] );
+		}
+
+		// execute the sort ( back-to-front )
+		sortArray.sort( compareNumbers );
+
+		// update the index buffer with the sorted values
+		for ( index = 0; index < this._particles.length; index++ )
+		{
+			indexBuffer[ index ] = sortArray[ index ][ 1 ];
+		}
+
+		// we need to tell three.js to update the buffer
+		this._particleGeometry.index.needsUpdate = true;
+	};
+
+}() );
+
 module.exports = ParticleEffect;
-},{"../core/Logger":21,"../core/World":31,"./Interpolator":71,"./Particle":72,"./emitter/Emitter":75,"three":1}],74:[function(require,module,exports){
+
+/**
+ * Compare function for array.sort().
+ */
+function compareNumbers( a, b ) {
+
+	return b[ 0 ] - a[ 0 ];
+}
+},{"../core/Camera":19,"../core/Logger":21,"../core/World":31,"../shader/ParticleShader":86,"./Interpolator":71,"./Particle":72,"./emitter/Emitter":75,"three":1}],74:[function(require,module,exports){
 /**
  * @file The box emitter uses an AABB to determine the position particles will
  * be emitted.
@@ -51198,16 +51367,18 @@ BoxEmitter.prototype.emit = ( function() {
 
 	return function( particle ) {
 		
-		var speed, lifetime;
+		var speed, lifetime, size, angleVelocity;
 
 		if ( position === undefined )
 		{
 			position = new THREE.Vector3();
 		}
 
-		// determine random values for speed and lifetime
+		// determine random values for speed, lifetime, size and angle velocity
 		speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
 		lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
+		size = THREE.Math.randFloat( this.minSize, this.maxSize );
+		angleVelocity = THREE.Math.randFloat( this.minAngleSpeed, this.maxAngleSpeed );
 
 		// determine random values for position
 		position.x = THREE.Math.randFloat( this._boundingVolume.min.x, this._boundingVolume.max.x );
@@ -51224,6 +51395,13 @@ BoxEmitter.prototype.emit = ( function() {
 		// set time properties
 		particle.lifetime = lifetime;
 		particle.age = 0;
+		
+		// set size value
+		particle.size = size;
+		
+		// set angle properties
+		particle.angleVelocity = angleVelocity;
+		particle.angle = 0;
 	};
 
 }() );
@@ -51269,6 +51447,20 @@ function Emitter() {
 
 	Object.defineProperties( this, {
 		
+		// the minimum size of a particle
+		minSize : {
+			value : 3,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the maximum size of a particle
+		maxSize : {
+			value : 5,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},	
 		// the minimum lifetime of a particle
 		minLifetime : {
 			value : 5,
@@ -51293,6 +51485,20 @@ function Emitter() {
 		// the maximum speed of a particle
 		maxSpeed : {
 			value : 10,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the minimum rotation speed of a particle
+		minAngleSpeed : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the maximum rotation speed of a particle
+		maxAngleSpeed : {
+			value : Math.PI * 0.5, // 90 degrees per second
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -51411,16 +51617,18 @@ MeshEmitter.prototype.emit = ( function() {
 
 	return function( particle ) {
 
-		var speed, lifetime, vertexIndex;
+		var speed, lifetime, size, angleVelocity, vertexIndex;
 
 		if ( position === undefined )
 		{
 			position = new THREE.Vector3();
 		}
 
-		// determine random values for speed and lifetime
+		// determine random values for speed, lifetime, size and angle velocity
 		speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
 		lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
+		size = THREE.Math.randFloat( this.minSize, this.maxSize );
+		angleVelocity = THREE.Math.randFloat( this.minAngleSpeed, this.maxAngleSpeed );
 
 		// determine randomly a vertex from the geometry
 		vertexIndex = THREE.Math.randInt( 0, this.mesh.geometry.vertices.length - 1 );
@@ -51444,6 +51652,13 @@ MeshEmitter.prototype.emit = ( function() {
 		// set time properties
 		particle.lifetime = lifetime;
 		particle.age = 0;
+		
+		// set size value
+		particle.size = size;
+		
+		// set angle properties
+		particle.angleVelocity = angleVelocity;
+		particle.angle = 0;
 	};
 
 }() );
@@ -51640,7 +51855,7 @@ SphereEmitter.prototype.emit = ( function() {
 
 	return function( particle ) {
 		
-		var azimuth, inclination, sinusInclination, radius, speed, lifetime;
+		var azimuth, inclination, sinusInclination, radius, speed, lifetime, size, angleVelocity;
 
 		if ( position === undefined )
 		{
@@ -51651,10 +51866,12 @@ SphereEmitter.prototype.emit = ( function() {
 		azimuth = THREE.Math.randFloat( this.minAzimuth, this.maxAzimuth );
 		inclination = THREE.Math.randFloat( this.minInclination, this.maxInclination );
 
-		// determine random values for radius, speed and lifetime
+		// determine random values for radius, speed, lifetime, size and angle velocity
 		radius = THREE.Math.randFloat( this.minRadius, this.maxRadius );
 		speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
 		lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
+		size = THREE.Math.randFloat( this.minSize, this.maxSize );
+		angleVelocity = THREE.Math.randFloat( this.minAngleSpeed, this.maxAngleSpeed );
 
 		// determine the relative position of the particle by converting polar
 		// coordinates to Cartesian coordinates
@@ -51673,9 +51890,17 @@ SphereEmitter.prototype.emit = ( function() {
 		// calculate velocity
 		particle.velocity.copy( position ).normalize().multiplyScalar( speed );
 
-		// calculate time properties
+		// set time properties
 		particle.lifetime = lifetime;
 		particle.age = 0;
+		
+		// set size value
+		particle.size = size;
+		
+		// set angle properties
+		particle.angleVelocity = angleVelocity;
+		particle.angle = 0;
+		
 	};
 
 }() );
@@ -52525,6 +52750,124 @@ module.exports = {
 };
 },{"three":1}],86:[function(require,module,exports){
 /**
+ * @file This shader will be used as a material for particles.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require( "three" );
+
+module.exports = {
+
+	defines : {
+
+		// this activates size attenuation for particles. if you don't need
+		// this, just delete this entry
+		USE_SIZEATTENUATION : "",
+		// this activates texture sampling. delete this constant if you don't
+		// use a texture, otherwise you will get a black particle
+		USE_TEXTURE : "",
+	},
+
+	uniforms : {
+
+		// the texture of the particles
+		"texture" : {
+			type : "t",
+			value : null
+		},
+		// the amount of size-scaling of a particle
+		"scale" : {
+			type : "f",
+			value : 300
+		}
+
+	},
+
+	vertexShader : [
+
+		"uniform float scale;",
+	
+		// the size of a particle
+		"attribute float size;",
+		
+		// the angle of a particle
+		"attribute float angle;",
+	
+		// the color of a particle
+		"attribute vec3 color;",
+	
+		// this will send the color and the angle to the fragment shader
+		"varying vec3 vColor;",
+		
+		"varying float vAngle;",
+	
+		"void main(){",
+	
+			// assign attribute to varying
+			"vColor = color;",
+			
+			"vAngle = angle;",
+	
+			// calculate the position in eye/camera space
+			"vec4 positionEye = modelViewMatrix * vec4( position, 1.0 );",
+	
+			// check symbolic constant to control size attenuation
+			"#ifdef USE_SIZEATTENUATION",
+	
+				// to create a realistic effect we need to ensure that particles
+				// receive a greater point size if they are close to the camera
+				"gl_PointSize = size * ( scale / length( positionEye.xyz ) );",
+	
+			"#else",
+	
+				"gl_PointSize = size;",
+	
+			"#endif",
+	
+			"gl_Position = projectionMatrix * positionEye;",
+	
+		"}"
+
+	].join( "\n" ),
+
+	fragmentShader : [
+
+		"uniform sampler2D texture;",
+	
+		"varying vec3 vColor;",
+		
+		"varying float vAngle;",
+	
+		"void main() {",
+		
+			"vec4 color = vec4( vColor, 1.0 );",
+					
+			"#ifdef USE_TEXTURE",
+			
+				"float c = cos( vAngle );",
+				
+				"float s = sin( vAngle );",
+				
+				// this will rotate the UV coordinate by the given angle. 
+				// rotating the texture will look like rotating the entire particle
+				"vec2 rotatedUV = vec2( c * ( gl_PointCoord.x - 0.5 ) + s * ( gl_PointCoord.y - 0.5 ) + 0.5, " +
+				"						c * ( gl_PointCoord.y - 0.5 ) - s * ( gl_PointCoord.x - 0.5 ) + 0.5 );",
+			
+				"color *= texture2D( texture, rotatedUV );",
+			
+			"#endif",
+	
+			"gl_FragColor = color;",
+	
+		"}"
+
+	].join( "\n" )
+};
+},{"three":1}],87:[function(require,module,exports){
+/**
  * @file This shader creates a vignette effect. Used in post-processing.
  * 
  * @author Human Interactive
@@ -52603,7 +52946,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{}],87:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52718,7 +53061,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],88:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],89:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -52896,7 +53239,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],89:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],90:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -53066,7 +53409,7 @@ function colorMesh( mesh ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],90:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],91:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -53238,7 +53581,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],91:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],92:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -53362,7 +53705,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],92:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],93:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -53549,7 +53892,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],93:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],94:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -53720,7 +54063,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],94:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],95:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -53871,7 +54214,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],95:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],96:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -54050,7 +54393,7 @@ function showLODCircles( world ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],96:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],97:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -54228,7 +54571,7 @@ function onKeyDown( event ) {
 
 module.exports = Stage;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],97:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],98:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -54371,7 +54714,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],98:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],99:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -54550,7 +54893,7 @@ Chat.prototype._onMessage = function( message, data ) {
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":107}],99:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":108}],100:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel. Only if the development
@@ -54612,7 +54955,7 @@ DevelopmentPanel.prototype.setText = function( text ) {
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":107}],100:[function(require,module,exports){
+},{"./UiElement":108}],101:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -54673,7 +55016,7 @@ InformationPanel.prototype.setText = function( textKey ) {
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":107}],101:[function(require,module,exports){
+},{"./UiElement":108}],102:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -54750,7 +55093,7 @@ InteractionLabel.prototype.hide = function() {
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":107}],102:[function(require,module,exports){
+},{"./UiElement":108}],103:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -54940,7 +55283,7 @@ LoadingScreen.prototype._onReady = function( message, data ) {
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":107}],103:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":108}],104:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -55096,7 +55439,7 @@ Menu.prototype._publishFinishEvent = function( message, data ) {
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Environment":20,"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":107}],104:[function(require,module,exports){
+},{"../core/Environment":20,"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":108}],105:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -55220,7 +55563,7 @@ ModalDialog.prototype._onClose = function( event ) {
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":107}],105:[function(require,module,exports){
+},{"./UiElement":108}],106:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor. Only if the development
@@ -55439,7 +55782,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":107}],106:[function(require,module,exports){
+},{"./UiElement":108}],107:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -55665,7 +56008,7 @@ TextScreen.prototype._printName = function() {
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":107}],107:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":108}],108:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -55715,7 +56058,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":42}],108:[function(require,module,exports){
+},{"../etc/TextManager":42}],109:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in stages to
@@ -55981,4 +56324,4 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68,"./Chat":98,"./DevelopmentPanel":99,"./InformationPanel":100,"./InteractionLabel":101,"./LoadingScreen":102,"./Menu":103,"./ModalDialog":104,"./PerformanceMonitor":105,"./TextScreen":106}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108]);
+},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68,"./Chat":99,"./DevelopmentPanel":100,"./InformationPanel":101,"./InteractionLabel":102,"./LoadingScreen":103,"./Menu":104,"./ModalDialog":105,"./PerformanceMonitor":106,"./TextScreen":107}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109]);

@@ -117,7 +117,7 @@ SphereEmitter.prototype.emit = ( function() {
 
 	return function( particle ) {
 		
-		var azimuth, inclination, sinusInclination, radius, speed, lifetime;
+		var azimuth, inclination, sinusInclination, radius, speed, lifetime, size, angleVelocity;
 
 		if ( position === undefined )
 		{
@@ -128,10 +128,12 @@ SphereEmitter.prototype.emit = ( function() {
 		azimuth = THREE.Math.randFloat( this.minAzimuth, this.maxAzimuth );
 		inclination = THREE.Math.randFloat( this.minInclination, this.maxInclination );
 
-		// determine random values for radius, speed and lifetime
+		// determine random values for radius, speed, lifetime, size and angle velocity
 		radius = THREE.Math.randFloat( this.minRadius, this.maxRadius );
 		speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
 		lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
+		size = THREE.Math.randFloat( this.minSize, this.maxSize );
+		angleVelocity = THREE.Math.randFloat( this.minAngleSpeed, this.maxAngleSpeed );
 
 		// determine the relative position of the particle by converting polar
 		// coordinates to Cartesian coordinates
@@ -150,9 +152,17 @@ SphereEmitter.prototype.emit = ( function() {
 		// calculate velocity
 		particle.velocity.copy( position ).normalize().multiplyScalar( speed );
 
-		// calculate time properties
+		// set time properties
 		particle.lifetime = lifetime;
 		particle.age = 0;
+		
+		// set size value
+		particle.size = size;
+		
+		// set angle properties
+		particle.angleVelocity = angleVelocity;
+		particle.angle = 0;
+		
 	};
 
 }() );

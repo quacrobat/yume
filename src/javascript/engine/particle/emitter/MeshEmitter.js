@@ -87,16 +87,18 @@ MeshEmitter.prototype.emit = ( function() {
 
 	return function( particle ) {
 
-		var speed, lifetime, vertexIndex;
+		var speed, lifetime, size, angleVelocity, vertexIndex;
 
 		if ( position === undefined )
 		{
 			position = new THREE.Vector3();
 		}
 
-		// determine random values for speed and lifetime
+		// determine random values for speed, lifetime, size and angle velocity
 		speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
 		lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
+		size = THREE.Math.randFloat( this.minSize, this.maxSize );
+		angleVelocity = THREE.Math.randFloat( this.minAngleSpeed, this.maxAngleSpeed );
 
 		// determine randomly a vertex from the geometry
 		vertexIndex = THREE.Math.randInt( 0, this.mesh.geometry.vertices.length - 1 );
@@ -120,6 +122,13 @@ MeshEmitter.prototype.emit = ( function() {
 		// set time properties
 		particle.lifetime = lifetime;
 		particle.age = 0;
+		
+		// set size value
+		particle.size = size;
+		
+		// set angle properties
+		particle.angleVelocity = angleVelocity;
+		particle.angle = 0;
 	};
 
 }() );

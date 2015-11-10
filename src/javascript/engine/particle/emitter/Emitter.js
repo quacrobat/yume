@@ -17,6 +17,20 @@ function Emitter() {
 
 	Object.defineProperties( this, {
 		
+		// the minimum size of a particle
+		minSize : {
+			value : 3,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the maximum size of a particle
+		maxSize : {
+			value : 5,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},	
 		// the minimum lifetime of a particle
 		minLifetime : {
 			value : 5,
@@ -41,6 +55,20 @@ function Emitter() {
 		// the maximum speed of a particle
 		maxSpeed : {
 			value : 10,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the minimum rotation speed of a particle
+		minAngleSpeed : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the maximum rotation speed of a particle
+		maxAngleSpeed : {
+			value : Math.PI * 0.5, // 90 degrees per second
 			configurable : false,
 			enumerable : true,
 			writable : true

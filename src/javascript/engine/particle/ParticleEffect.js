@@ -15,34 +15,60 @@
 
 var THREE = require( "three" );
 
-var Emitter = require( "./emitter/Emitter" );
-var Particle = require( "./Particle" );
-var Interpolator = require( "./Interpolator" );
 var logger = require( "../core/Logger" );
 var world = require( "../core/World" );
+var camera = require( "../core/Camera" );
+
+var Particle = require( "./Particle" );
+var Interpolator = require( "./Interpolator" );
+var Emitter = require( "./emitter/Emitter" );
+var ParticleShader = require( "../shader/ParticleShader" );
 
 /**
  * Creates a particle effect.
  * 
  * @constructor
  * 
- * @param {number} numberOfParticles - The number of the particles.
- * @param {Emitter} particleEmitter - The particle emitter.
+ * @param {object} options - The options of the particle effect.
  */
-function ParticleEffect( numberOfParticles, particleEmitter ) {
+function ParticleEffect( options ) {
 
 	Object.defineProperties( this, {
 
 		// the number of particles in this effect.
 		numberOfParticles : {
-			value : numberOfParticles,
+			value : 0,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
 		// a reference to a particle emitter
 		particleEmitter : {
-			value : particleEmitter,
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// this texture will be used for all particles. if the effect requires
+		// more than one texture, you need to create additional instances of
+		// this prototype
+		texture : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// this indicates if the effect sorts the particles in back-to-front
+		// order
+		sortParticles : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// this indicates if the particles should be transparent
+		transparent : {
+			value : false,
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -71,8 +97,11 @@ function ParticleEffect( numberOfParticles, particleEmitter ) {
 		},
 		// the material of the particle effect
 		_particleMaterial : {
-			value : new THREE.PointsMaterial( {
-				vertexColors : THREE.VertexColors
+			value : new THREE.ShaderMaterial( {
+				defines : ParticleShader.defines,
+				uniforms : ParticleShader.uniforms,
+				vertexShader : ParticleShader.vertexShader,
+				fragmentShader : ParticleShader.fragmentShader
 			} ),
 			configurable : false,
 			enumerable : false,
@@ -96,6 +125,15 @@ function ParticleEffect( numberOfParticles, particleEmitter ) {
 		}
 
 	} );
+
+	// transfer the options values to the object
+	for ( var property in options )
+	{
+		if ( options.hasOwnProperty( property ) )
+		{
+			this[ property ] = options[ property ];
+		}
+	}
 
 	this._init();
 }
@@ -145,14 +183,23 @@ ParticleEffect.prototype.update = ( function() {
 
 			// this value will be used for interpolation
 			lifeRatio = THREE.Math.clamp( ( particle.age / particle.lifetime ), 0, 1 );
-			
+
 			// interpolate color
 			this._colorInterpolator.getValue( lifeRatio, particle.color );
 			
+			// angle calculation
+			particle.angle += particle.angleVelocity * delta;
+
 		} // next particle
 
 		// update the buffer data for shader program
 		this._buildBuffer();
+
+		// finally, sort the particles if necessary
+		if ( this.sortParticles === true )
+		{
+			this._sortParticles();
+		}
 	};
 
 }() );
@@ -171,7 +218,7 @@ ParticleEffect.prototype.destroy = function() {
  */
 ParticleEffect.prototype._init = function() {
 
-	var index, positionBuffer, colorBuffer;
+	var index, positionBuffer, colorBuffer, sizeBuffer, angleBuffer, indexBuffer;
 
 	// check existence of a valid particle emitter
 	if ( this.particleEmitter instanceof Emitter === false )
@@ -186,13 +233,43 @@ ParticleEffect.prototype._init = function() {
 		this._particles.push( new Particle() );
 	}
 
+	// if no texture is set, delete a constant from the shader progam that
+	// controls the texture sampling
+	if ( this.texture === null )
+	{
+		delete this._particleMaterial.defines.USE_TEXTURE;
+	}
+
+	// always apply texture to material, even if its null
+	this._particleMaterial.uniforms.texture.value = this.texture;
+
+	// set transparent flag
+	this._particleMaterial.transparent = this.transparent;
+
 	// create buffers
 	positionBuffer = new Float32Array( this.numberOfParticles * 3 );
 	colorBuffer = new Float32Array( this.numberOfParticles * 3 );
+	sizeBuffer = new Float32Array( this.numberOfParticles );
+	angleBuffer = new Float32Array( this.numberOfParticles );
 
 	// add buffers to geometry
 	this._particleGeometry.addAttribute( "position", new THREE.BufferAttribute( positionBuffer, 3 ) );
 	this._particleGeometry.addAttribute( "color", new THREE.BufferAttribute( colorBuffer, 3 ) );
+	this._particleGeometry.addAttribute( "size", new THREE.BufferAttribute( sizeBuffer, 1 ) );
+	this._particleGeometry.addAttribute( "angle", new THREE.BufferAttribute( angleBuffer, 1 ) );
+
+	// if the need sorted particles, we create an additional index buffer
+	if ( this.sortParticles === true )
+	{
+		indexBuffer = new Uint16Array( this.numberOfParticles );
+
+		for ( index = 0; index < this._particles.length; index++ )
+		{
+			indexBuffer[ index ] = index;
+		}
+
+		this._particleGeometry.setIndex( new THREE.BufferAttribute( indexBuffer, 1 ) );
+	}
 
 	// create the particle effect
 	this._particleSystem = new THREE.Points( this._particleGeometry, this._particleMaterial );
@@ -203,11 +280,11 @@ ParticleEffect.prototype._init = function() {
 
 	// add the system to the world
 	world.addObject3D( this._particleSystem );
-	
+
 	// setup the color interpolator
-	this._colorInterpolator.addValue( 0.0, new THREE.Color( 0xff0000) );
-	this._colorInterpolator.addValue( 0.4, new THREE.Color( 0x00ff00) );
-	this._colorInterpolator.addValue( 0.7, new THREE.Color( 0x0000ff) );
+	this._colorInterpolator.addValue( 0.0, new THREE.Color( 0xff0000 ) );
+	this._colorInterpolator.addValue( 0.4, new THREE.Color( 0x00ff00 ) );
+	this._colorInterpolator.addValue( 0.7, new THREE.Color( 0x0000ff ) );
 };
 
 /**
@@ -215,11 +292,13 @@ ParticleEffect.prototype._init = function() {
  */
 ParticleEffect.prototype._buildBuffer = function() {
 
-	var particle, positionBuffer, colorBuffer, i, j;
+	var particle, positionBuffer, colorBuffer, sizeBuffer, angleBuffer, i, j;
 
 	// shortcut to buffers
 	positionBuffer = this._particleGeometry.attributes.position.array;
 	colorBuffer = this._particleGeometry.attributes.color.array;
+	sizeBuffer = this._particleGeometry.attributes.size.array;
+	angleBuffer = this._particleGeometry.attributes.angle.array;
 
 	// iterate over all particles and create the corresponding buffer data
 	for ( i = 0, j = 0; i < this._particles.length; i++, j += 3 )
@@ -230,16 +309,85 @@ ParticleEffect.prototype._buildBuffer = function() {
 		positionBuffer[ j + 0 ] = particle.position.x;
 		positionBuffer[ j + 1 ] = particle.position.y;
 		positionBuffer[ j + 2 ] = particle.position.z;
-		
+
 		// color
 		colorBuffer[ j + 0 ] = particle.color.r;
 		colorBuffer[ j + 1 ] = particle.color.g;
 		colorBuffer[ j + 2 ] = particle.color.b;
+
+		// size
+		sizeBuffer[ i ] = particle.size;
+		
+		// angle
+		angleBuffer[ i ] = particle.angle;
 	}
 
-	// we need to tell three.js to update buffer
+	// we need to tell three.js to update the buffers
 	this._particleGeometry.attributes.position.needsUpdate = true;
 	this._particleGeometry.attributes.color.needsUpdate = true;
+	this._particleGeometry.attributes.size.needsUpdate = true;
+	this._particleGeometry.attributes.angle.needsUpdate = true;
 };
 
+/**
+ * The method sorts all particles in back-to-front order. This is sometimes for
+ * particles with transparency.
+ */
+ParticleEffect.prototype._sortParticles = ( function() {
+
+	var vector = new THREE.Vector3();
+	var mvpMatrix = new THREE.Matrix4();
+
+	var sortArray = [];
+
+	return function() {
+
+		var index, positionBuffer, indexBuffer;
+
+		// reset array
+		sortArray.length = 0;
+
+		// shortcut to buffers
+		positionBuffer = this._particleGeometry.attributes.position.array;
+		indexBuffer = this._particleGeometry.index.array;
+
+		// calculate model view projection matrix
+		mvpMatrix.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse );
+		mvpMatrix.multiply( this._particleSystem.matrixWorld );
+
+		// calculate for all particles the depth an store this value along with
+		// its index
+		for ( index = 0; index < this._particles.length; index++ )
+		{
+			// transform the position vector to clip-space to get its depth value
+			vector.fromArray( positionBuffer, index * 3 );
+			vector.applyProjection( mvpMatrix );
+
+			// push the entry to the sort array
+			sortArray.push( [ vector.z, index ] );
+		}
+
+		// execute the sort ( back-to-front )
+		sortArray.sort( compareNumbers );
+
+		// update the index buffer with the sorted values
+		for ( index = 0; index < this._particles.length; index++ )
+		{
+			indexBuffer[ index ] = sortArray[ index ][ 1 ];
+		}
+
+		// we need to tell three.js to update the buffer
+		this._particleGeometry.index.needsUpdate = true;
+	};
+
+}() );
+
 module.exports = ParticleEffect;
+
+/**
+ * Compare function for array.sort().
+ */
+function compareNumbers( a, b ) {
+
+	return b[ 0 ] - a[ 0 ];
+}
