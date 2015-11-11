@@ -30,7 +30,21 @@ function Emitter() {
 			configurable : false,
 			enumerable : true,
 			writable : true
-		},	
+		},
+		// the minimum opacity of a particle
+		minOpacity : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the maximum opacity of a particle
+		maxOpacity : {
+			value : 1,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
 		// the minimum lifetime of a particle
 		minLifetime : {
 			value : 5,

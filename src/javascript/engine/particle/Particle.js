@@ -46,6 +46,13 @@ function Particle() {
 			enumerable : true,
 			writable : true
 		},
+		// the opacity of the particle
+		opacity : {
+			value : 1,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
 		// the particles texture will be rotated by this value in the fragment shader
 		angle : {
 			value : 0,

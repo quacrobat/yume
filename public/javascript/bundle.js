@@ -50852,6 +50852,13 @@ function Particle() {
 			enumerable : true,
 			writable : true
 		},
+		// the opacity of the particle
+		opacity : {
+			value : 1,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
 		// the particles texture will be rotated by this value in the fragment shader
 		angle : {
 			value : 0,
@@ -50989,7 +50996,12 @@ function ParticleEffect( options ) {
 		// the material of the particle effect
 		_particleMaterial : {
 			value : new THREE.ShaderMaterial( {
-				defines : ParticleShader.defines,
+				// we can't assign the reference for defines, because particle
+				// effects may need different constants in their shader program
+				defines : {
+					USE_SIZE_ATTENUATION : ParticleShader.defines.USE_SIZE_ATTENUATION,
+					USE_TEXTURE : ParticleShader.defines.USE_TEXTURE
+				},
 				uniforms : ParticleShader.uniforms,
 				vertexShader : ParticleShader.vertexShader,
 				fragmentShader : ParticleShader.fragmentShader
@@ -51080,7 +51092,7 @@ ParticleEffect.prototype.update = ( function() {
 			
 			// angle calculation
 			particle.angle += particle.angleVelocity * delta;
-
+			
 		} // next particle
 
 		// update the buffer data for shader program
@@ -51124,8 +51136,8 @@ ParticleEffect.prototype._init = function() {
 		this._particles.push( new Particle() );
 	}
 
-	// if no texture is set, delete a constant from the shader progam that
-	// controls the texture sampling
+	// if no texture is set, delete a constant from the shader program that
+	// controls texture sampling
 	if ( this.texture === null )
 	{
 		delete this._particleMaterial.defines.USE_TEXTURE;
@@ -51139,17 +51151,17 @@ ParticleEffect.prototype._init = function() {
 
 	// create buffers
 	positionBuffer = new Float32Array( this.numberOfParticles * 3 );
-	colorBuffer = new Float32Array( this.numberOfParticles * 3 );
+	colorBuffer = new Float32Array( this.numberOfParticles * 4 );
 	sizeBuffer = new Float32Array( this.numberOfParticles );
 	angleBuffer = new Float32Array( this.numberOfParticles );
 
 	// add buffers to geometry
 	this._particleGeometry.addAttribute( "position", new THREE.BufferAttribute( positionBuffer, 3 ) );
-	this._particleGeometry.addAttribute( "color", new THREE.BufferAttribute( colorBuffer, 3 ) );
+	this._particleGeometry.addAttribute( "color", new THREE.BufferAttribute( colorBuffer, 4 ) );
 	this._particleGeometry.addAttribute( "size", new THREE.BufferAttribute( sizeBuffer, 1 ) );
 	this._particleGeometry.addAttribute( "angle", new THREE.BufferAttribute( angleBuffer, 1 ) );
 
-	// if the need sorted particles, we create an additional index buffer
+	// if we need sorted particles, we create an additional index buffer
 	if ( this.sortParticles === true )
 	{
 		indexBuffer = new Uint16Array( this.numberOfParticles );
@@ -51183,7 +51195,7 @@ ParticleEffect.prototype._init = function() {
  */
 ParticleEffect.prototype._buildBuffer = function() {
 
-	var particle, positionBuffer, colorBuffer, sizeBuffer, angleBuffer, i, j;
+	var particle, positionBuffer, colorBuffer, sizeBuffer, angleBuffer, i, j, c;
 
 	// shortcut to buffers
 	positionBuffer = this._particleGeometry.attributes.position.array;
@@ -51192,7 +51204,7 @@ ParticleEffect.prototype._buildBuffer = function() {
 	angleBuffer = this._particleGeometry.attributes.angle.array;
 
 	// iterate over all particles and create the corresponding buffer data
-	for ( i = 0, j = 0; i < this._particles.length; i++, j += 3 )
+	for ( i = j = c = 0; i < this._particles.length; i += 1, j += 3, c += 4 )
 	{
 		particle = this._particles[ i ];
 
@@ -51202,9 +51214,10 @@ ParticleEffect.prototype._buildBuffer = function() {
 		positionBuffer[ j + 2 ] = particle.position.z;
 
 		// color
-		colorBuffer[ j + 0 ] = particle.color.r;
-		colorBuffer[ j + 1 ] = particle.color.g;
-		colorBuffer[ j + 2 ] = particle.color.b;
+		colorBuffer[ c + 0 ] = particle.color.r;
+		colorBuffer[ c + 1 ] = particle.color.g;
+		colorBuffer[ c + 2 ] = particle.color.b;
+		colorBuffer[ c + 3 ] = particle.opacity;
 
 		// size
 		sizeBuffer[ i ] = particle.size;
@@ -51221,8 +51234,8 @@ ParticleEffect.prototype._buildBuffer = function() {
 };
 
 /**
- * The method sorts all particles in back-to-front order. This is sometimes for
- * particles with transparency.
+ * The method sorts all particles in back-to-front order. This is sometimes
+ * necessary for particles with transparency.
  */
 ParticleEffect.prototype._sortParticles = ( function() {
 
@@ -51250,7 +51263,8 @@ ParticleEffect.prototype._sortParticles = ( function() {
 		// its index
 		for ( index = 0; index < this._particles.length; index++ )
 		{
-			// transform the position vector to clip-space to get its depth value
+			// transform the position vector to clip-space to get its depth
+			// value
 			vector.fromArray( positionBuffer, index * 3 );
 			vector.applyProjection( mvpMatrix );
 
@@ -51460,7 +51474,21 @@ function Emitter() {
 			configurable : false,
 			enumerable : true,
 			writable : true
-		},	
+		},
+		// the minimum opacity of a particle
+		minOpacity : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the maximum opacity of a particle
+		maxOpacity : {
+			value : 1,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
 		// the minimum lifetime of a particle
 		minLifetime : {
 			value : 5,
@@ -52765,7 +52793,7 @@ module.exports = {
 
 		// this activates size attenuation for particles. if you don't need
 		// this, just delete this entry
-		USE_SIZEATTENUATION : "",
+		USE_SIZE_ATTENUATION : "",
 		// this activates texture sampling. delete this constant if you don't
 		// use a texture, otherwise you will get a black particle
 		USE_TEXTURE : "",
@@ -52797,25 +52825,34 @@ module.exports = {
 		"attribute float angle;",
 	
 		// the color of a particle
-		"attribute vec3 color;",
+		"attribute vec4 color;",
 	
-		// this will send the color and the angle to the fragment shader
-		"varying vec3 vColor;",
+		// and it is used by the fragment shader
+		"varying vec4 vColor;",
 		
-		"varying float vAngle;",
+		// angle is only used by the fragment shader if there is a texture
+		"#ifdef USE_TEXTURE",
+		
+			"varying float vAngle;",
+			
+		"#endif",
 	
 		"void main(){",
-	
-			// assign attribute to varying
+
+			// assign attributes to varyings
 			"vColor = color;",
 			
-			"vAngle = angle;",
-	
+			"#ifdef USE_TEXTURE",
+			
+				"vAngle = angle;",
+				
+			"#endif",
+			
 			// calculate the position in eye/camera space
 			"vec4 positionEye = modelViewMatrix * vec4( position, 1.0 );",
 	
 			// check symbolic constant to control size attenuation
-			"#ifdef USE_SIZEATTENUATION",
+			"#ifdef USE_SIZE_ATTENUATION",
 	
 				// to create a realistic effect we need to ensure that particles
 				// receive a greater point size if they are close to the camera
@@ -52837,25 +52874,27 @@ module.exports = {
 
 		"uniform sampler2D texture;",
 	
-		"varying vec3 vColor;",
+		"varying vec4 vColor;",
 		
-		"varying float vAngle;",
+		"#ifdef USE_TEXTURE",
+		
+			"varying float vAngle;",
+			
+		"#endif",
 	
 		"void main() {",
 		
-			"vec4 color = vec4( vColor, 1.0 );",
+			"vec4 color = vColor;",
 					
 			"#ifdef USE_TEXTURE",
 			
-				"float c = cos( vAngle );",
-				
+				"float c = cos( vAngle );",	
 				"float s = sin( vAngle );",
 				
 				// this will rotate the UV coordinate by the given angle. 
 				// rotating the texture will look like rotating the entire particle
-				"vec2 rotatedUV = vec2( c * ( gl_PointCoord.x - 0.5 ) + s * ( gl_PointCoord.y - 0.5 ) + 0.5, " +
-				"						c * ( gl_PointCoord.y - 0.5 ) - s * ( gl_PointCoord.x - 0.5 ) + 0.5 );",
-			
+				"vec2 rotatedUV = vec2( c * ( gl_PointCoord.x - 0.5 ) + s * ( gl_PointCoord.y - 0.5 ) + 0.5, c * ( gl_PointCoord.y - 0.5 ) - s * ( gl_PointCoord.x - 0.5 ) + 0.5 );",
+
 				"color *= texture2D( texture, rotatedUV );",
 			
 			"#endif",

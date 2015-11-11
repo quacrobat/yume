@@ -14,7 +14,7 @@ module.exports = {
 
 		// this activates size attenuation for particles. if you don't need
 		// this, just delete this entry
-		USE_SIZEATTENUATION : "",
+		USE_SIZE_ATTENUATION : "",
 		// this activates texture sampling. delete this constant if you don't
 		// use a texture, otherwise you will get a black particle
 		USE_TEXTURE : "",
@@ -46,25 +46,34 @@ module.exports = {
 		"attribute float angle;",
 	
 		// the color of a particle
-		"attribute vec3 color;",
+		"attribute vec4 color;",
 	
-		// this will send the color and the angle to the fragment shader
-		"varying vec3 vColor;",
+		// and it is used by the fragment shader
+		"varying vec4 vColor;",
 		
-		"varying float vAngle;",
+		// angle is only used by the fragment shader if there is a texture
+		"#ifdef USE_TEXTURE",
+		
+			"varying float vAngle;",
+			
+		"#endif",
 	
 		"void main(){",
-	
-			// assign attribute to varying
+
+			// assign attributes to varyings
 			"vColor = color;",
 			
-			"vAngle = angle;",
-	
+			"#ifdef USE_TEXTURE",
+			
+				"vAngle = angle;",
+				
+			"#endif",
+			
 			// calculate the position in eye/camera space
 			"vec4 positionEye = modelViewMatrix * vec4( position, 1.0 );",
 	
 			// check symbolic constant to control size attenuation
-			"#ifdef USE_SIZEATTENUATION",
+			"#ifdef USE_SIZE_ATTENUATION",
 	
 				// to create a realistic effect we need to ensure that particles
 				// receive a greater point size if they are close to the camera
@@ -86,25 +95,27 @@ module.exports = {
 
 		"uniform sampler2D texture;",
 	
-		"varying vec3 vColor;",
+		"varying vec4 vColor;",
 		
-		"varying float vAngle;",
+		"#ifdef USE_TEXTURE",
+		
+			"varying float vAngle;",
+			
+		"#endif",
 	
 		"void main() {",
 		
-			"vec4 color = vec4( vColor, 1.0 );",
+			"vec4 color = vColor;",
 					
 			"#ifdef USE_TEXTURE",
 			
-				"float c = cos( vAngle );",
-				
+				"float c = cos( vAngle );",	
 				"float s = sin( vAngle );",
 				
 				// this will rotate the UV coordinate by the given angle. 
 				// rotating the texture will look like rotating the entire particle
-				"vec2 rotatedUV = vec2( c * ( gl_PointCoord.x - 0.5 ) + s * ( gl_PointCoord.y - 0.5 ) + 0.5, " +
-				"						c * ( gl_PointCoord.y - 0.5 ) - s * ( gl_PointCoord.x - 0.5 ) + 0.5 );",
-			
+				"vec2 rotatedUV = vec2( c * ( gl_PointCoord.x - 0.5 ) + s * ( gl_PointCoord.y - 0.5 ) + 0.5, c * ( gl_PointCoord.y - 0.5 ) - s * ( gl_PointCoord.x - 0.5 ) + 0.5 );",
+
 				"color *= texture2D( texture, rotatedUV );",
 			
 			"#endif",

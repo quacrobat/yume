@@ -98,7 +98,12 @@ function ParticleEffect( options ) {
 		// the material of the particle effect
 		_particleMaterial : {
 			value : new THREE.ShaderMaterial( {
-				defines : ParticleShader.defines,
+				// we can't assign the reference for defines, because particle
+				// effects may need different constants in their shader program
+				defines : {
+					USE_SIZE_ATTENUATION : ParticleShader.defines.USE_SIZE_ATTENUATION,
+					USE_TEXTURE : ParticleShader.defines.USE_TEXTURE
+				},
 				uniforms : ParticleShader.uniforms,
 				vertexShader : ParticleShader.vertexShader,
 				fragmentShader : ParticleShader.fragmentShader
@@ -189,7 +194,7 @@ ParticleEffect.prototype.update = ( function() {
 			
 			// angle calculation
 			particle.angle += particle.angleVelocity * delta;
-
+			
 		} // next particle
 
 		// update the buffer data for shader program
@@ -233,8 +238,8 @@ ParticleEffect.prototype._init = function() {
 		this._particles.push( new Particle() );
 	}
 
-	// if no texture is set, delete a constant from the shader progam that
-	// controls the texture sampling
+	// if no texture is set, delete a constant from the shader program that
+	// controls texture sampling
 	if ( this.texture === null )
 	{
 		delete this._particleMaterial.defines.USE_TEXTURE;
@@ -248,17 +253,17 @@ ParticleEffect.prototype._init = function() {
 
 	// create buffers
 	positionBuffer = new Float32Array( this.numberOfParticles * 3 );
-	colorBuffer = new Float32Array( this.numberOfParticles * 3 );
+	colorBuffer = new Float32Array( this.numberOfParticles * 4 );
 	sizeBuffer = new Float32Array( this.numberOfParticles );
 	angleBuffer = new Float32Array( this.numberOfParticles );
 
 	// add buffers to geometry
 	this._particleGeometry.addAttribute( "position", new THREE.BufferAttribute( positionBuffer, 3 ) );
-	this._particleGeometry.addAttribute( "color", new THREE.BufferAttribute( colorBuffer, 3 ) );
+	this._particleGeometry.addAttribute( "color", new THREE.BufferAttribute( colorBuffer, 4 ) );
 	this._particleGeometry.addAttribute( "size", new THREE.BufferAttribute( sizeBuffer, 1 ) );
 	this._particleGeometry.addAttribute( "angle", new THREE.BufferAttribute( angleBuffer, 1 ) );
 
-	// if the need sorted particles, we create an additional index buffer
+	// if we need sorted particles, we create an additional index buffer
 	if ( this.sortParticles === true )
 	{
 		indexBuffer = new Uint16Array( this.numberOfParticles );
@@ -292,7 +297,7 @@ ParticleEffect.prototype._init = function() {
  */
 ParticleEffect.prototype._buildBuffer = function() {
 
-	var particle, positionBuffer, colorBuffer, sizeBuffer, angleBuffer, i, j;
+	var particle, positionBuffer, colorBuffer, sizeBuffer, angleBuffer, i, j, c;
 
 	// shortcut to buffers
 	positionBuffer = this._particleGeometry.attributes.position.array;
@@ -301,7 +306,7 @@ ParticleEffect.prototype._buildBuffer = function() {
 	angleBuffer = this._particleGeometry.attributes.angle.array;
 
 	// iterate over all particles and create the corresponding buffer data
-	for ( i = 0, j = 0; i < this._particles.length; i++, j += 3 )
+	for ( i = j = c = 0; i < this._particles.length; i += 1, j += 3, c += 4 )
 	{
 		particle = this._particles[ i ];
 
@@ -311,9 +316,10 @@ ParticleEffect.prototype._buildBuffer = function() {
 		positionBuffer[ j + 2 ] = particle.position.z;
 
 		// color
-		colorBuffer[ j + 0 ] = particle.color.r;
-		colorBuffer[ j + 1 ] = particle.color.g;
-		colorBuffer[ j + 2 ] = particle.color.b;
+		colorBuffer[ c + 0 ] = particle.color.r;
+		colorBuffer[ c + 1 ] = particle.color.g;
+		colorBuffer[ c + 2 ] = particle.color.b;
+		colorBuffer[ c + 3 ] = particle.opacity;
 
 		// size
 		sizeBuffer[ i ] = particle.size;
@@ -330,8 +336,8 @@ ParticleEffect.prototype._buildBuffer = function() {
 };
 
 /**
- * The method sorts all particles in back-to-front order. This is sometimes for
- * particles with transparency.
+ * The method sorts all particles in back-to-front order. This is sometimes
+ * necessary for particles with transparency.
  */
 ParticleEffect.prototype._sortParticles = ( function() {
 
@@ -359,7 +365,8 @@ ParticleEffect.prototype._sortParticles = ( function() {
 		// its index
 		for ( index = 0; index < this._particles.length; index++ )
 		{
-			// transform the position vector to clip-space to get its depth value
+			// transform the position vector to clip-space to get its depth
+			// value
 			vector.fromArray( positionBuffer, index * 3 );
 			vector.applyProjection( mvpMatrix );
 
