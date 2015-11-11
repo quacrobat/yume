@@ -107,6 +107,6 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( "grunt-browserify" );
 	grunt.loadNpmTasks( "grunt-mocha-test" );
 
-	grunt.registerTask( "default", [ "browserify", "uglify", "less", "autoprefixer", "concat", "clean" ] );
+	grunt.registerTask( "default", [ "browserify", "uglify", "less", "autoprefixer", "concat", "clean", "mochaTest" ] );
 	grunt.registerTask( "test", "mochaTest" );
 };
