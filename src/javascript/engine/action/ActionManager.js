@@ -12,8 +12,7 @@ var THREE = require( "three" );
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 var Action = require( "./Action" );
-var InteractiveObject = require( "./InteractiveObject" );
-var StaticObject = require( "./StaticObject" );
+var ActionObject = require( "./ActionObject" );
 var ActionTrigger = require( "./ActionTrigger" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var logger = require( "../core/Logger" );
@@ -120,11 +119,11 @@ ActionManager.prototype.update = function( player ) {
  * @param {string} label - The label of the action.
  * @param {function} actionCallback - The action callback.
  * 
- * @returns {InteractiveObject} The new interactive object.
+ * @returns {ActionObject} The new interactive object.
  */
 ActionManager.prototype.createInteraction = function( mesh, collisionType, raycastPrecision, label, actionCallback ) {
 
-	var interactiveObject = new InteractiveObject( mesh, collisionType, raycastPrecision, new Action( Action.TYPES.INTERACTION, actionCallback, label ) );
+	var interactiveObject = new ActionObject( mesh, collisionType, raycastPrecision, new Action( actionCallback, label ) );
 	this.addInteractiveObject( interactiveObject );
 	return interactiveObject;
 };
@@ -135,11 +134,11 @@ ActionManager.prototype.createInteraction = function( mesh, collisionType, rayca
  * @param {THREE.Mesh} mesh - The mesh object.
  * @param {number} collisionType - The type of collision detection.
  * 
- * @returns {StaticObject} The new static object.
+ * @returns {ActionObject} The new static object.
  */
 ActionManager.prototype.createStatic = function( mesh, collisionType ) {
 
-	var staticObject = new StaticObject( mesh, collisionType );
+	var staticObject = new ActionObject( mesh, collisionType );
 	this.addStaticObject( staticObject );
 	return staticObject;
 };
@@ -157,7 +156,7 @@ ActionManager.prototype.createStatic = function( mesh, collisionType ) {
  */
 ActionManager.prototype.createTrigger = function( label, position, radius, isOnetime, actionCallback ) {
 
-	var trigger = new ActionTrigger( position, radius, isOnetime, new Action( Action.TYPES.SCRIPT, actionCallback, label ) );
+	var trigger = new ActionTrigger( position, radius, isOnetime, new Action( actionCallback, label ) );
 	this.addTrigger( trigger );
 	return trigger;
 };
@@ -165,7 +164,7 @@ ActionManager.prototype.createTrigger = function( label, position, radius, isOne
 /**
  * Adds a single interactive object to the internal array.
  * 
- * @param {InteractiveObject} interactiveObject - The interactive object to be
+ * @param {ActionObject} interactiveObject - The interactive object to be
  * added.
  */
 ActionManager.prototype.addInteractiveObject = function( interactiveObject ) {
@@ -176,7 +175,7 @@ ActionManager.prototype.addInteractiveObject = function( interactiveObject ) {
 /**
  * Removes a single interactive object from the internal array.
  * 
- * @param {InteractiveObject} interactiveObject - The interactive object to be
+ * @param {ActionObject} interactiveObject - The interactive object to be
  * removed.
  */
 ActionManager.prototype.removeInteractiveObject = function( interactiveObject ) {
@@ -225,7 +224,7 @@ ActionManager.prototype.removeTriggers = function() {
 /**
  * Adds a single static object to the internal array.
  * 
- * @param {StaticObject} staticObject - The static object to be added.
+ * @param {ActionObject} staticObject - The static object to be added.
  */
 ActionManager.prototype.addStaticObject = function( staticObject ) {
 
@@ -235,7 +234,7 @@ ActionManager.prototype.addStaticObject = function( staticObject ) {
 /**
  * Removes a single static object from the internal array.
  * 
- * @param {StaticObject} staticObject - The static object to be removed.
+ * @param {ActionObject} staticObject - The static object to be removed.
  */
 ActionManager.prototype.removeStaticObject = function( staticObject ) {
 

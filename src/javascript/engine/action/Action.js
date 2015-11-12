@@ -10,24 +10,18 @@
  * Creates an action.
  * 
  * @constructor
- * @param {number} type - The type of the action.
+ * 
  * @param {function} actionCallback - The action callback.
  * @param {string} label - The label of the action.
  */
-function Action( type, actionCallback, label ) {
+function Action( actionCallback, label ) {
 
 	Object.defineProperties( this, {
-		type : {
-			value : type,
-			configurable : false,
-			enumerable : true,
-			writable : false
-		},
 		label : {
 			value : label || "",
 			configurable : false,
 			enumerable : true,
-			writable : true
+			writable : false
 		},
 		isActive : {
 			value : true,
@@ -57,11 +51,6 @@ Action.prototype.run = function() {
 	{
 		throw "ERROR: Action: Assigned callback not type of 'function'.";
 	}
-};
-
-Action.TYPES = {
-	INTERACTION : 0,
-	SCRIPT : 1
 };
 
 module.exports = Action;

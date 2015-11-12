@@ -36038,7 +36038,7 @@ global.window.onload = function() {
 	var bootstrap = new Bootstrap();
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./core/Bootstrap":18}],4:[function(require,module,exports){
+},{"./core/Bootstrap":17}],4:[function(require,module,exports){
 /**
  * @file Prototype for defining script-based actions.
  * 
@@ -36051,24 +36051,18 @@ global.window.onload = function() {
  * Creates an action.
  * 
  * @constructor
- * @param {number} type - The type of the action.
+ * 
  * @param {function} actionCallback - The action callback.
  * @param {string} label - The label of the action.
  */
-function Action( type, actionCallback, label ) {
+function Action( actionCallback, label ) {
 
 	Object.defineProperties( this, {
-		type : {
-			value : type,
-			configurable : false,
-			enumerable : true,
-			writable : false
-		},
 		label : {
 			value : label || "",
 			configurable : false,
 			enumerable : true,
-			writable : true
+			writable : false
 		},
 		isActive : {
 			value : true,
@@ -36100,11 +36094,6 @@ Action.prototype.run = function() {
 	}
 };
 
-Action.TYPES = {
-	INTERACTION : 0,
-	SCRIPT : 1
-};
-
 module.exports = Action;
 },{}],5:[function(require,module,exports){
 /**
@@ -36121,8 +36110,7 @@ var THREE = require( "three" );
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 var Action = require( "./Action" );
-var InteractiveObject = require( "./InteractiveObject" );
-var StaticObject = require( "./StaticObject" );
+var ActionObject = require( "./ActionObject" );
 var ActionTrigger = require( "./ActionTrigger" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var logger = require( "../core/Logger" );
@@ -36229,11 +36217,11 @@ ActionManager.prototype.update = function( player ) {
  * @param {string} label - The label of the action.
  * @param {function} actionCallback - The action callback.
  * 
- * @returns {InteractiveObject} The new interactive object.
+ * @returns {ActionObject} The new interactive object.
  */
 ActionManager.prototype.createInteraction = function( mesh, collisionType, raycastPrecision, label, actionCallback ) {
 
-	var interactiveObject = new InteractiveObject( mesh, collisionType, raycastPrecision, new Action( Action.TYPES.INTERACTION, actionCallback, label ) );
+	var interactiveObject = new ActionObject( mesh, collisionType, raycastPrecision, new Action( actionCallback, label ) );
 	this.addInteractiveObject( interactiveObject );
 	return interactiveObject;
 };
@@ -36244,11 +36232,11 @@ ActionManager.prototype.createInteraction = function( mesh, collisionType, rayca
  * @param {THREE.Mesh} mesh - The mesh object.
  * @param {number} collisionType - The type of collision detection.
  * 
- * @returns {StaticObject} The new static object.
+ * @returns {ActionObject} The new static object.
  */
 ActionManager.prototype.createStatic = function( mesh, collisionType ) {
 
-	var staticObject = new StaticObject( mesh, collisionType );
+	var staticObject = new ActionObject( mesh, collisionType );
 	this.addStaticObject( staticObject );
 	return staticObject;
 };
@@ -36266,7 +36254,7 @@ ActionManager.prototype.createStatic = function( mesh, collisionType ) {
  */
 ActionManager.prototype.createTrigger = function( label, position, radius, isOnetime, actionCallback ) {
 
-	var trigger = new ActionTrigger( position, radius, isOnetime, new Action( Action.TYPES.SCRIPT, actionCallback, label ) );
+	var trigger = new ActionTrigger( position, radius, isOnetime, new Action( actionCallback, label ) );
 	this.addTrigger( trigger );
 	return trigger;
 };
@@ -36274,7 +36262,7 @@ ActionManager.prototype.createTrigger = function( label, position, radius, isOne
 /**
  * Adds a single interactive object to the internal array.
  * 
- * @param {InteractiveObject} interactiveObject - The interactive object to be
+ * @param {ActionObject} interactiveObject - The interactive object to be
  * added.
  */
 ActionManager.prototype.addInteractiveObject = function( interactiveObject ) {
@@ -36285,7 +36273,7 @@ ActionManager.prototype.addInteractiveObject = function( interactiveObject ) {
 /**
  * Removes a single interactive object from the internal array.
  * 
- * @param {InteractiveObject} interactiveObject - The interactive object to be
+ * @param {ActionObject} interactiveObject - The interactive object to be
  * removed.
  */
 ActionManager.prototype.removeInteractiveObject = function( interactiveObject ) {
@@ -36334,7 +36322,7 @@ ActionManager.prototype.removeTriggers = function() {
 /**
  * Adds a single static object to the internal array.
  * 
- * @param {StaticObject} staticObject - The static object to be added.
+ * @param {ActionObject} staticObject - The static object to be added.
  */
 ActionManager.prototype.addStaticObject = function( staticObject ) {
 
@@ -36344,7 +36332,7 @@ ActionManager.prototype.addStaticObject = function( staticObject ) {
 /**
  * Removes a single static object from the internal array.
  * 
- * @param {StaticObject} staticObject - The static object to be removed.
+ * @param {ActionObject} staticObject - The static object to be removed.
  */
 ActionManager.prototype.removeStaticObject = function( staticObject ) {
 
@@ -36446,7 +36434,248 @@ ActionManager.prototype._onInteraction = function( message, data ) {
 };
 
 module.exports = new ActionManager();
-},{"../core/Logger":21,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":109,"./Action":4,"./ActionTrigger":6,"./InteractiveObject":7,"./StaticObject":8,"three":1}],6:[function(require,module,exports){
+},{"../core/Logger":20,"../messaging/EventManager":65,"../messaging/Topic":67,"../ui/UserInterfaceManager":108,"./Action":4,"./ActionObject":6,"./ActionTrigger":7,"three":1}],6:[function(require,module,exports){
+/**
+ * @file This prototype enables ordinary 3D-Objects to be interactive. Any
+ * action object is part of the collision-detection logic and ready for
+ * interacting with the player.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require( "three" );
+var OBB = require( "../etc/OBB" );
+
+/**
+ * Creates an action object.
+ * 
+ * @constructor
+ * 
+ * @param {THREE.Mesh} mesh - The mesh object.
+ * @param {number} collisionType - The type of collision detection.
+ * @param {number} raycastPrecision - The precision of the raycast operation.
+ * @param {Action} action - The action, that should be executed.
+ */
+function ActionObject( mesh, collisionType, raycastPrecision, action ) {
+
+	Object.defineProperties( this, {
+		mesh : {
+			value : mesh,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		collisionType : {
+			value : collisionType,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		raycastPrecision : {
+			value : raycastPrecision || undefined,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		action : {
+			value : action || undefined,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// bounding volumes
+		boundingSphere : {
+			value : new THREE.Sphere(),
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		aabb : {
+			value : new THREE.Box3(),
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		obb : {
+			value : new OBB(),
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+
+	} );
+
+	// compute default bounding volumes
+	this.mesh.geometry.computeBoundingBox();
+	this.mesh.geometry.computeBoundingSphere();
+}
+
+/**
+ * Updates the static object.
+ */
+ActionObject.prototype.update = function() {
+
+	// always update bounding sphere
+	// other bounding volumes are only calculated if required
+	this.boundingSphere.copy( this.mesh.geometry.boundingSphere );
+	this.boundingSphere.applyMatrix4( this.mesh.matrixWorld );
+};
+
+/**
+ * This method detects an intersection between the raycaster and the relevant
+ * object. According to raycast precision, different algorithm are used to
+ * detect an intersection.
+ * 
+ * @param {THREE.Raycaster} raycaster - A raycaster instance.
+ * @param {object} intersects - An array with intersection points.
+ */
+ActionObject.prototype.raycast = function( raycaster, intersects ) {
+
+	var intersectsRay = [], intersectionPoint, index, distance;
+
+	// check raycast precision
+	switch ( this.raycastPrecision )
+	{
+
+		case ActionObject.RAYCASTPRECISION.AABB:
+		{
+			// apply transformation
+			this.aabb.copy( this.mesh.geometry.boundingBox );
+			this.aabb.applyMatrix4( this.mesh.matrixWorld );
+
+			// do intersection test
+			intersectionPoint = raycaster.ray.intersectBox( this.aabb );
+
+			break;
+		}
+
+		case ActionObject.RAYCASTPRECISION.OBB:
+		{
+			// calculate OBB
+			this.obb.setFromObject( this.mesh );
+
+			// do intersection test
+			intersectionPoint = this.obb.intersectRay( raycaster.ray );
+
+			break;
+		}
+
+		case ActionObject.RAYCASTPRECISION.FACE:
+		{
+			// call default raycast method of the mesh object
+			this.mesh.raycast( raycaster, intersectsRay );
+
+			for ( index = 0; index < intersectsRay.length; index++ )
+			{
+				// set the action object as result object
+				intersectsRay[ index ].object = this;
+
+				// push to result array
+				intersects.push( intersectsRay[ index ] );
+			}
+			// reset array for next call
+			intersectsRay.length = 0;
+
+			break;
+		}
+
+		default:
+		{
+
+			throw "ERROR: ActionObject: No valid raycast precision applied to object.";
+		}
+
+	}
+
+	// if a single intersectionPoint is found, we need to calculate
+	// additional data and push the point into the intersects array
+	if ( intersectionPoint !== undefined )
+	{
+		// get the distance to the intersection point
+		distance = raycaster.ray.origin.distanceTo( intersectionPoint );
+
+		if ( distance >= raycaster.precision && distance >= raycaster.near && distance <= raycaster.far )
+		{
+			// store the result in special data structure, see
+			// THREE.Mesh.raycast
+			intersects.push( {
+				distance : distance,
+				point : intersectionPoint,
+				face : null,
+				faceIndex : null,
+				object : this
+			} );
+		}
+
+		// reset value
+		intersectionPoint = null;
+	}
+};
+
+/**
+ * This method detects an intersection between the given bounding box and the
+ * bounding volume of the action object.
+ * 
+ * @param {THREE.Box3} boundingBox - The boundingBox of the controls.
+ * 
+ * @returns {boolean} Intersects the object with the given bounding box?
+ */
+ActionObject.prototype.isIntersection = function( boundingBox ) {
+
+	var isIntersection = false;
+
+	// check type of collision test
+	switch ( this.collisionType )
+	{
+
+		case ActionObject.COLLISIONTYPES.AABB:
+		{
+			// apply transformation
+			this.aabb.copy( this.mesh.geometry.boundingBox );
+			this.aabb.applyMatrix4( this.mesh.matrixWorld );
+
+			// do intersection test
+			isIntersection = this.aabb.isIntersectionBox( boundingBox );
+
+			break;
+		}
+
+		case ActionObject.COLLISIONTYPES.OBB:
+		{
+			// calculate OBB
+			this.obb.setFromObject( this.mesh );
+
+			// do intersection test
+			isIntersection = this.obb.isIntersectionAABB( boundingBox );
+
+			break;
+		}
+
+		default:
+		{
+			throw "ERROR: ActionObject: No valid collision type applied to object.";
+		}
+	}
+
+	return isIntersection;
+
+};
+
+ActionObject.COLLISIONTYPES = {
+	AABB : 0,
+	OBB : 1
+};
+
+ActionObject.RAYCASTPRECISION = {
+	AABB : 0,
+	OBB : 1,
+	FACE : 2
+};
+
+module.exports = ActionObject;
+},{"../etc/OBB":35,"three":1}],7:[function(require,module,exports){
 /**
  * @file The ActionTrigger is a static trigger for actions.
  * 
@@ -36612,376 +36841,7 @@ ActionTrigger.prototype.setRadius = function( radius ){
 };
 
 module.exports = ActionTrigger;
-},{"../core/Logger":21,"../core/System":27,"three":1}],7:[function(require,module,exports){
-/**
- * @file The prototype InteractiveObject enables ordinary 3D-Objects to be
- * interactive. Any interactive object is part of the collision-detection logic
- * and ready for interacting with the player.
- * 
- * @author Human Interactive
- */
-
-"use strict";
-
-var THREE = require( "three" );
-var OBB = require( "../etc/OBB" );
-
-/**
- * Creates an interactive object.
- * 
- * @constructor
- * 
- * @param {THREE.Mesh} mesh - The mesh object.
- * @param {number} collisionType - The type of collision detection.
- * @param {number} raycastPrecision - The precision of the raycast operation.
- * @param {Action} action - The action, that should be executed.
- */
-function InteractiveObject( mesh, collisionType, raycastPrecision, action ) {
-
-	Object.defineProperties( this, {
-		mesh : {
-			value : mesh,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		collisionType : {
-			value : collisionType,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		raycastPrecision : {
-			value : raycastPrecision,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		action : {
-			value : action,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// bounding volumes
-		boundingSphere : {
-			value : new THREE.Sphere(),
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		aabb : {
-			value : new THREE.Box3(),
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		obb : {
-			value : new OBB(),
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-
-	} );
-
-	// compute default bounding volumes
-	this.mesh.geometry.computeBoundingBox();
-	this.mesh.geometry.computeBoundingSphere();
-}
-
-/**
- * Updates the static object.
- */
-InteractiveObject.prototype.update = function() {
-
-	// always update bounding sphere
-	// other bounding volumes are only calculated if required
-	this.boundingSphere.copy( this.mesh.geometry.boundingSphere );
-	this.boundingSphere.applyMatrix4( this.mesh.matrixWorld );
-};
-
-/**
- * This method detects an intersection between the raycaster and the relevant
- * object. According to raycast precision, different algorithm are used to
- * detect an intersection.
- * 
- * @param {THREE.Raycaster} raycaster - A raycaster instance.
- * @param {object} intersects - An array with intersection points.
- */
-InteractiveObject.prototype.raycast = function( raycaster, intersects ) {
-
-	var intersectsRay = [], intersectionPoint, index, distance;
-
-	// check raycast precision
-	switch ( this.raycastPrecision )
-	{
-
-		case InteractiveObject.RAYCASTPRECISION.AABB:
-		{
-			// apply transformation
-			this.aabb.copy( this.mesh.geometry.boundingBox );
-			this.aabb.applyMatrix4( this.mesh.matrixWorld );
-
-			// do intersection test
-			intersectionPoint = raycaster.ray.intersectBox( this.aabb );
-
-			break;
-		}
-
-		case InteractiveObject.RAYCASTPRECISION.OBB:
-		{
-			// calculate OBB
-			this.obb.setFromObject( this.mesh );
-
-			// do intersection test
-			intersectionPoint = this.obb.intersectRay( raycaster.ray );
-
-			break;
-		}
-
-		case InteractiveObject.RAYCASTPRECISION.FACE:
-		{
-			// call default raycast method of the mesh object
-			this.mesh.raycast( raycaster, intersectsRay );
-
-			for ( index = 0; index < intersectsRay.length; index++ )
-			{
-				// set the interactive object as result object
-				intersectsRay[ index ].object = this;
-
-				// push to result array
-				intersects.push( intersectsRay[ index ] );
-			}
-			// reset array for next call
-			intersectsRay.length = 0;
-
-			break;
-		}
-
-		default:
-		{
-
-			throw "ERROR: InteractiveObject: No valid raycast precision applied to object.";
-		}
-
-	}
-
-	// if a single intersectionPoint is found, we need to calculate
-	// additional data and push the point into the intersects array
-	if ( intersectionPoint !== undefined )
-	{
-		// get the distance to the intersection point
-		distance = raycaster.ray.origin.distanceTo( intersectionPoint );
-
-		if ( distance >= raycaster.precision && distance >= raycaster.near && distance <= raycaster.far )
-		{
-			// store the result in special data structure, see
-			// THREE.Mesh.raycast
-			intersects.push( {
-				distance : distance,
-				point : intersectionPoint,
-				face : null,
-				faceIndex : null,
-				object : this
-			} );
-		}
-
-		// reset value
-		intersectionPoint = null;
-	}
-};
-
-/**
- * This method detects an intersection between the given bounding box and the
- * bounding volume of the interactive object.
- * 
- * @param {THREE.Box3} boundingBox - The boundingBox of the controls.
- * 
- * @returns {boolean} Intersects the object with the given bounding box?
- */
-InteractiveObject.prototype.isIntersection = function( boundingBox ) {
-
-	var isIntersection = false;
-
-	// check type of collision test
-	switch ( this.collisionType )
-	{
-
-		case InteractiveObject.COLLISIONTYPES.AABB:
-		{
-			// apply transformation
-			this.aabb.copy( this.mesh.geometry.boundingBox );
-			this.aabb.applyMatrix4( this.mesh.matrixWorld );
-
-			// do intersection test
-			isIntersection = this.aabb.isIntersectionBox( boundingBox );
-
-			break;
-		}
-
-		case InteractiveObject.COLLISIONTYPES.OBB:
-		{
-			// calculate OBB
-			this.obb.setFromObject( this.mesh );
-
-			// do intersection test
-			isIntersection = this.obb.isIntersectionAABB( boundingBox );
-
-			break;
-		}
-
-		default:
-		{
-			throw "ERROR: InteractiveObject: No valid collision type applied to object.";
-		}
-	}
-
-	return isIntersection;
-
-};
-
-InteractiveObject.COLLISIONTYPES = {
-	AABB : 0,
-	OBB : 1
-};
-
-InteractiveObject.RAYCASTPRECISION = {
-	AABB : 0,
-	OBB : 1,
-	FACE : 2
-};
-
-module.exports = InteractiveObject;
-},{"../etc/OBB":36,"three":1}],8:[function(require,module,exports){
-/**
- * @file The prototype StaticObject enables ordinary 3D-Objects to be static.
- * Any interactive object is part of the collision-detection logic.
- * 
- * @author Human Interactive
- */
-
-"use strict";
-
-var THREE = require( "three" );
-var OBB = require( "../etc/OBB" );
-
-/**
- * Creates a static object.
- * 
- * @constructor
- * 
- * @param {THREE.Mesh} mesh - The mesh object.
- * @param {number} collisionType - The type of collision detection.
- */
-function StaticObject( object, collisionType ) {
-
-	Object.defineProperties( this, {
-		mesh : {
-			value : object,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		collisionType : {
-			value : collisionType,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// bounding volumes
-		boundingSphere : {
-			value : new THREE.Sphere(),
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		aabb : {
-			value : new THREE.Box3(),
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		obb : {
-			value : new OBB(),
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-	} );
-
-	// compute default bounding volumes
-	this.mesh.geometry.computeBoundingBox();
-	this.mesh.geometry.computeBoundingSphere();
-}
-
-/**
- * Updates the static object.
- */
-StaticObject.prototype.update = function() {
-
-	// always update bounding sphere
-	// other bounding volumes are only calculated if required
-	this.boundingSphere.copy( this.mesh.geometry.boundingSphere );
-	this.boundingSphere.applyMatrix4( this.mesh.matrixWorld );
-};
-
-/**
- * This method detects an intersection between the given bounding box and the
- * bounding volume of the static object.
- * 
- * @param {THREE.Box3} boundingBox - The boundingBox of the controls.
- * 
- * @returns {boolean} Intersects the object with the given bounding box?
- */
-StaticObject.prototype.isIntersection = function( boundingBox ) {
-
-	var isIntersection = false;
-
-	// check type of collision test
-	switch ( this.collisionType )
-	{
-
-		case StaticObject.COLLISIONTYPES.AABB:
-		{
-			// apply transformation
-			this.aabb.copy( this.mesh.geometry.boundingBox );
-			this.aabb.applyMatrix4( this.mesh.matrixWorld );
-
-			// do intersection test
-			isIntersection = this.aabb.isIntersectionBox( boundingBox );
-
-			break;
-		}
-
-		case StaticObject.COLLISIONTYPES.OBB:
-		{
-			// calculate OBB
-			this.obb.setFromObject( this.mesh );
-
-			// do intersection test
-			isIntersection = this.obb.isIntersectionAABB( boundingBox );
-
-			break;
-		}
-
-		default:
-		{
-			throw "ERROR: StaticObject: No valid collision type applied to object.";
-		}
-	}
-
-	return isIntersection;
-
-};
-
-StaticObject.COLLISIONTYPES = {
-	AABB : 0,
-	OBB : 1
-};
-
-module.exports = StaticObject;
-},{"../etc/OBB":36,"three":1}],9:[function(require,module,exports){
+},{"../core/Logger":20,"../core/System":26,"three":1}],8:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for defining an animation for a single property.
@@ -37230,7 +37090,7 @@ Animation.prototype.setHover = function( isHover ) {
 
 module.exports = Animation;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Logger":21}],10:[function(require,module,exports){
+},{"../core/Logger":20}],9:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire animation-handling. This prototype is used in
@@ -37433,7 +37293,7 @@ AnimationManager.prototype.removeSprites = function() {
 
 module.exports = new AnimationManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Animation":9,"../animation/SpriteAnimation":12}],11:[function(require,module,exports){
+},{"../animation/Animation":8,"../animation/SpriteAnimation":11}],10:[function(require,module,exports){
 /**
  * @file This file contains easing functions for animations.
  * 
@@ -37809,7 +37669,7 @@ var Easing = {
 };
 
 module.exports = Easing;
-},{}],12:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /**
  * @file Prototype for defining an animation based on sprites.
  * 
@@ -37925,7 +37785,7 @@ SpriteAnimation.prototype.update = function( delta ) {
 };
 
 module.exports = SpriteAnimation;
-},{"three":1}],13:[function(require,module,exports){
+},{"three":1}],12:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading and decoding audio-files. The resulting buffers
@@ -38075,7 +37935,7 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 
 module.exports = AudioBufferList;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68}],14:[function(require,module,exports){
+},{"../core/System":26,"../messaging/EventManager":65,"../messaging/Topic":67}],13:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype holds the central Web Audio context and manages the
@@ -38176,7 +38036,7 @@ AudioListener.prototype.updateMatrixWorld = ( function() {
 
 module.exports = AudioListener;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"three":1}],15:[function(require,module,exports){
+},{"three":1}],14:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire audio handling. This prototype is used in stages
@@ -38530,7 +38390,7 @@ AudioManager.prototype._onErrorBackgroundMusic = function() {
 
 module.exports = new AudioManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Camera":19,"../core/Logger":21,"../messaging/EventManager":66,"../messaging/Topic":68,"./AudioBufferList":13,"./AudioListener":14,"./DynamicAudio":16}],16:[function(require,module,exports){
+},{"../core/Camera":18,"../core/Logger":20,"../messaging/EventManager":65,"../messaging/Topic":67,"./AudioBufferList":12,"./AudioListener":13,"./DynamicAudio":15}],15:[function(require,module,exports){
 /**
  * @file Prototype for creating dynamic, full-buffered audio objects.
  * 
@@ -38816,7 +38676,7 @@ DynamicAudio.prototype.updateMatrixWorld = ( function() {
 } )();
 
 module.exports = DynamicAudio;
-},{"three":1}],17:[function(require,module,exports){
+},{"three":1}],16:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for first person controls. The logic uses HTML5 Pointer Lock
@@ -39850,7 +39710,7 @@ FirstPersonControls.RUN = {
 
 module.exports = FirstPersonControls;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../etc/SettingsManager":40,"../etc/Utils":43,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":109,"three":1}],18:[function(require,module,exports){
+},{"../animation/Easing":10,"../audio/AudioManager":14,"../core/Camera":18,"../etc/SettingsManager":39,"../etc/Utils":42,"../messaging/EventManager":65,"../messaging/Topic":67,"../ui/UserInterfaceManager":108,"three":1}],17:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -39963,7 +39823,7 @@ Bootstrap.prototype._loadStage = function() {
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/MultiplayerManager":35,"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../network/NetworkManager":70,"../ui/UserInterfaceManager":109,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27,"./World":31}],19:[function(require,module,exports){
+},{"../etc/MultiplayerManager":34,"../etc/SaveGameManager":38,"../messaging/EventManager":65,"../messaging/Topic":67,"../network/NetworkManager":69,"../ui/UserInterfaceManager":108,"./Camera":18,"./Environment":19,"./Renderer":22,"./System":26,"./World":30}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for camera-based
@@ -40033,7 +39893,7 @@ Camera.prototype._onResize = function( message, data ) {
 
 module.exports = new Camera();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"three":1}],20:[function(require,module,exports){
+},{"../messaging/EventManager":65,"../messaging/Topic":67,"three":1}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype is used to ensure that all necessary browser features
@@ -40281,7 +40141,7 @@ Environment.prototype._testWebPerformance = function() {
 
 module.exports = new Environment();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],21:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 /**
  * @file This prototype provides logging functionality. It's a wrapper for the
  * browser console API.
@@ -40363,7 +40223,7 @@ Logger.prototype.logSystemInfo = function( renderer ) {
 };
 
 module.exports = new Logger();
-},{"./System":27}],22:[function(require,module,exports){
+},{"./System":26}],21:[function(require,module,exports){
 (function (global){
 /**
  * @file Use this prototype to regulate code flow (e.g. for an update function).
@@ -40472,7 +40332,7 @@ Regulator.prototype.isReady = function() {
 
 module.exports = Regulator;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"three":1}],23:[function(require,module,exports){
+},{"three":1}],22:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for rendering-based
@@ -40781,7 +40641,7 @@ Renderer.prototype._onResize = function( message, data ) {
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"../postprocessing/EffectComposer":78,"../postprocessing/RenderPass":79,"../postprocessing/ShaderPass":80,"../shader/GaussianBlurShader":83,"../shader/GrayscaleShader":84,"../shader/VignetteShader":87,"./Logger":21,"three":1}],24:[function(require,module,exports){
+},{"../messaging/EventManager":65,"../messaging/Topic":67,"../postprocessing/EffectComposer":77,"../postprocessing/RenderPass":78,"../postprocessing/ShaderPass":79,"../shader/GaussianBlurShader":82,"../shader/GrayscaleShader":83,"../shader/VignetteShader":86,"./Logger":20,"three":1}],23:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic for scene-based functionality.
  * 
@@ -40823,7 +40683,7 @@ Scene.prototype.clear = function() {
 };
 
 module.exports = new Scene();
-},{"three":1}],25:[function(require,module,exports){
+},{"three":1}],24:[function(require,module,exports){
 (function (global){
 /**
  * @file Basis prototype for all stages. It is used to provide specific stages a
@@ -41076,7 +40936,7 @@ StageBase.COLORS = {
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../etc/PerformanceManager":38,"../etc/SaveGameManager":39,"../etc/SettingsManager":40,"../etc/TextManager":42,"../game/entity/EntityManager":44,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":109,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
+},{"../action/ActionManager":5,"../animation/AnimationManager":9,"../audio/AudioManager":14,"../etc/PerformanceManager":37,"../etc/SaveGameManager":38,"../etc/SettingsManager":39,"../etc/TextManager":41,"../game/entity/EntityManager":43,"../messaging/EventManager":65,"../messaging/Topic":67,"../ui/UserInterfaceManager":108,"./Camera":18,"./Renderer":22,"./System":26,"./World":30,"three":1}],25:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -41368,7 +41228,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../stages/Stage_001":88,"../stages/Stage_002":89,"../stages/Stage_003":90,"../stages/Stage_004":91,"../stages/Stage_005":92,"../stages/Stage_006":93,"../stages/Stage_007":94,"../stages/Stage_008":95,"../stages/Stage_009":96,"../stages/Stage_010":97,"../stages/Stage_011":98,"../ui/UserInterfaceManager":109,"./Logger":21}],27:[function(require,module,exports){
+},{"../etc/SaveGameManager":38,"../messaging/EventManager":65,"../messaging/Topic":67,"../stages/Stage_001":87,"../stages/Stage_002":88,"../stages/Stage_003":89,"../stages/Stage_004":90,"../stages/Stage_005":91,"../stages/Stage_006":92,"../stages/Stage_007":93,"../stages/Stage_008":94,"../stages/Stage_009":95,"../stages/Stage_010":96,"../stages/Stage_011":97,"../ui/UserInterfaceManager":108,"./Logger":20}],26:[function(require,module,exports){
 /**
  * @file This prototype holds core information about the engine. The runtime
  * behavior of the application depends crucially of this prototype.
@@ -41458,7 +41318,7 @@ System.prototype.init = function( parameter ) {
 };
 
 module.exports = new System();
-},{}],28:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype represents a thread-object. It uses the HTML5-API Web
@@ -41541,7 +41401,7 @@ Thread.prototype.onError = function( listener ) {
 
 module.exports = Thread;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],29:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for thread-based
@@ -41684,7 +41544,7 @@ ThreadManager.prototype._getScriptURL = function( script ) {
 
 module.exports = new ThreadManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Thread":28}],30:[function(require,module,exports){
+},{"./Thread":27}],29:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype is a wrapper for the HTML5 User Timing API. It provides
@@ -41762,7 +41622,7 @@ Timing.prototype.print = function( name ) {
 
 module.exports = new Timing();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Logger":21,"./System":27}],31:[function(require,module,exports){
+},{"./Logger":20,"./System":26}],30:[function(require,module,exports){
 /**
  * @file This prototype contains all important environment data of a stage.
  * 
@@ -42029,7 +41889,7 @@ World.prototype.clear = function() {
 };
 
 module.exports = new World();
-},{"../action/ActionManager":5,"../game/entity/EntityManager":44,"../game/entity/GameEntity":45,"./Scene":24,"three":1}],32:[function(require,module,exports){
+},{"../action/ActionManager":5,"../game/entity/EntityManager":43,"../game/entity/GameEntity":44,"./Scene":23,"three":1}],31:[function(require,module,exports){
 /**
  * @file This prototype handles all stuff for impostors. An impostor is a
  * billboard that is created on the fly by rendering a complex object from the
@@ -42499,7 +42359,7 @@ Impostor.prototype._render = function() {
 };
 
 module.exports = Impostor;
-},{"three":1}],33:[function(require,module,exports){
+},{"three":1}],32:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading 3D objects in JSON-format from the server. The
@@ -42607,7 +42467,7 @@ JSONLoader.prototype.load = function( url, onLoad ) {
 
 module.exports = JSONLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68,"three":1}],34:[function(require,module,exports){
+},{"../core/System":26,"../messaging/EventManager":65,"../messaging/Topic":67,"three":1}],33:[function(require,module,exports){
 /**
  * @file This prototype is used for LOD handling. It is an enhancement of the
  * LOD functionality of three.js. Instead of switching directly between LOD
@@ -42787,7 +42647,7 @@ LOD.MODE = {
 };
 
 module.exports = LOD;
-},{"three":1}],35:[function(require,module,exports){
+},{"three":1}],34:[function(require,module,exports){
 /**
  * @file This prototype manages the characters of the other teammates.
  * 
@@ -42960,7 +42820,7 @@ MultiplayerManager.prototype._getTeammate = function( id ) {
 };
 
 module.exports = new MultiplayerManager();
-},{"../core/Logger":21,"../core/World":31,"../messaging/EventManager":66,"../messaging/Topic":68,"./Teammate":41,"three":1}],36:[function(require,module,exports){
+},{"../core/Logger":20,"../core/World":30,"../messaging/EventManager":65,"../messaging/Topic":67,"./Teammate":40,"three":1}],35:[function(require,module,exports){
 /**
  * @file A 3D arbitrarily oriented bounding box.
  * 
@@ -43656,7 +43516,7 @@ OBB.prototype.clone = function() {
 };
 
 module.exports = OBB;
-},{"three":1}],37:[function(require,module,exports){
+},{"three":1}],36:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading 3D objects in object-format from the server. The
@@ -43760,7 +43620,7 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 
 module.exports = ObjectLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68,"three":1}],38:[function(require,module,exports){
+},{"../core/System":26,"../messaging/EventManager":65,"../messaging/Topic":67,"three":1}],37:[function(require,module,exports){
 /**
  * @file Interface for performance handling. This prototype is used in stages to
  * create e.g. LOD instances.
@@ -44073,7 +43933,7 @@ PerformanceManager.prototype._updateImpostors = function() {
 };
 
 module.exports = new PerformanceManager();
-},{"../core/Camera":19,"../core/Renderer":23,"../core/World":31,"./Impostor":32,"./LOD":34,"three":1}],39:[function(require,module,exports){
+},{"../core/Camera":18,"../core/Renderer":22,"../core/World":30,"./Impostor":31,"./LOD":33,"three":1}],38:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire savegame-handling. This prototype is using HTML
@@ -44152,7 +44012,7 @@ SaveGameManager.prototype.remove = function() {
 
 module.exports = new SaveGameManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],40:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire settings-handling. This prototype is used to
@@ -44347,7 +44207,7 @@ SettingsManager.MOUSE = {
 
 module.exports = new SettingsManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"three":1}],41:[function(require,module,exports){
+},{"../core/System":26,"three":1}],40:[function(require,module,exports){
 /**
  * @file This prototype represents the character of a teammate.
  * 
@@ -44397,7 +44257,7 @@ Teammate.prototype.update = function( position, quaternion ) {
 };
 
 module.exports = Teammate;
-},{"../game/entity/GameEntity":45}],42:[function(require,module,exports){
+},{"../game/entity/GameEntity":44}],41:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire text-handling. This prototype is used in stages to
@@ -44572,7 +44432,7 @@ TextManager.prototype._searchAndRepalce = function() {
 
 module.exports = new TextManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68}],43:[function(require,module,exports){
+},{"../core/System":26,"../messaging/EventManager":65,"../messaging/Topic":67}],42:[function(require,module,exports){
 (function (global){
 /**
  * @file All helper and util functions are organized in this module.
@@ -44641,7 +44501,7 @@ Utils.prototype.preloadImages = function( images, callback ) {
 
 module.exports = new Utils();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],44:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 /**
  * @file This prototype manages all game entities.
  * 
@@ -44792,7 +44652,7 @@ EntityManager.prototype.removeEntities = function( isClear ) {
 };
 
 module.exports = new EntityManager();
-},{"./GameEntity":45,"./Player":47,"./Vehicle":48}],45:[function(require,module,exports){
+},{"./GameEntity":44,"./Player":46,"./Vehicle":47}],44:[function(require,module,exports){
 /**
  * @file All entities that are part of the game logic inherit from this
  * prototype.
@@ -44925,7 +44785,7 @@ GameEntity.SCOPE = {
 };
 
 module.exports = GameEntity;
-},{"three":1}],46:[function(require,module,exports){
+},{"three":1}],45:[function(require,module,exports){
 /**
  * @file Base prototype from which all moving game agents are derived.
  * 
@@ -45116,7 +44976,7 @@ MovingEntity.prototype.getDirection = function() {
 };
 
 module.exports = MovingEntity;
-},{"./GameEntity":45,"three":1}],47:[function(require,module,exports){
+},{"./GameEntity":44,"three":1}],46:[function(require,module,exports){
 /**
  * @file This prototype represents the player body.
  * 
@@ -45431,7 +45291,7 @@ Player.prototype._isCollisionDetected = function() {
 };
 
 module.exports = Player;
-},{"../../controls/FirstPersonControls":17,"../../core/System":27,"../../messaging/EventManager":66,"../../messaging/Topic":68,"./GameEntity":45,"three":1}],48:[function(require,module,exports){
+},{"../../controls/FirstPersonControls":16,"../../core/System":26,"../../messaging/EventManager":65,"../../messaging/Topic":67,"./GameEntity":44,"three":1}],47:[function(require,module,exports){
 /**
  * @file A simple vehicle that uses steering behaviors.
  * 
@@ -45564,7 +45424,7 @@ Vehicle.prototype.update = ( function() {
 }() );
 
 module.exports = Vehicle;
-},{"../steering/Smoother":64,"../steering/SteeringBehaviors":65,"./MovingEntity":46,"three":1}],49:[function(require,module,exports){
+},{"../steering/Smoother":63,"../steering/SteeringBehaviors":64,"./MovingEntity":45,"three":1}],48:[function(require,module,exports){
 /**
  * @file Super prototype for states used by FSMs.
  * 
@@ -45615,7 +45475,7 @@ State.prototype.exit = function( entity ) { };
 State.prototype.onMessage = function( entity, telegram ) { return false; };
 
 module.exports = State;
-},{}],50:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 /**
  * @file This prototype is a basic finite state machine used for AI logic.
  * 
@@ -45756,7 +45616,7 @@ StateMachine.prototype.isInState = function( state ) {
 };
 
 module.exports = StateMachine;
-},{"../../core/Logger":21,"./State":49}],51:[function(require,module,exports){
+},{"../../core/Logger":20,"./State":48}],50:[function(require,module,exports){
 /**
  * @file Prototype to define an edge connecting two nodes. An edge has an
  * associated cost.
@@ -45841,7 +45701,7 @@ GraphEdge.prototype.copy = function( source ){
 };
 
 module.exports = GraphEdge;
-},{}],52:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 /**
  * @file Some useful functions you can use with graphs.
  * 
@@ -46174,7 +46034,7 @@ function generateEdges( graph, offset ) {
 	}// next node
 
 }
-},{"../../core/World":31,"./NavGraphEdge":54,"./NavGraphNode":55,"three":1}],53:[function(require,module,exports){
+},{"../../core/World":30,"./NavGraphEdge":53,"./NavGraphNode":54,"three":1}],52:[function(require,module,exports){
 /**
  * @file Node prototype to be used with graphs.
  * 
@@ -46208,7 +46068,7 @@ function GraphNode( index ) {
 GraphNode.INVALID_NODE_INDEX = -1;
 
 module.exports = GraphNode;
-},{}],54:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 /**
  * @file Prototype to define an edge connecting two navigation nodes.
  * 
@@ -46293,7 +46153,7 @@ NavGraphEdge.FLAGS = {
 };
 
 module.exports = NavGraphEdge;
-},{"./GraphEdge":51}],55:[function(require,module,exports){
+},{"./GraphEdge":50}],54:[function(require,module,exports){
 /**
  * @file Graph node for use in creating a navigation graph. This node contains
  * the position of the node and a pointer to a GameEntity... useful if you want
@@ -46348,7 +46208,7 @@ NavGraphNode.prototype = Object.create( GraphNode.prototype );
 NavGraphNode.prototype.constructor = NavGraphNode;
 
 module.exports = NavGraphNode;
-},{"./GraphNode":53,"three":1}],56:[function(require,module,exports){
+},{"./GraphNode":52,"three":1}],55:[function(require,module,exports){
 /**
  * @file Graph prototype using the adjacency list representation.
  * 
@@ -46875,7 +46735,7 @@ SparseGraph.prototype._cullInvalidEdges = function() {
 };
 
 module.exports = SparseGraph;
-},{}],57:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 /**
  * @file Some useful functions you can use with algorithms.
  * 
@@ -46943,7 +46803,7 @@ AlgorithmHelper.prototype.sortQueueByCost = function( a, b ) {
 };
 
 module.exports = new AlgorithmHelper();
-},{}],58:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 /**
  * @file Prototype to implement the A* search algorithm.
  * 
@@ -47214,7 +47074,7 @@ GraphSearchAStar.prototype._search = function() {
 };
 
 module.exports = GraphSearchAStar;
-},{"../GraphEdge":51,"../GraphNode":53,"./AlgorithmHelper":57}],59:[function(require,module,exports){
+},{"../GraphEdge":50,"../GraphNode":52,"./AlgorithmHelper":56}],58:[function(require,module,exports){
 /**
  * @file Prototype to implement a breadth first search.
  * 
@@ -47402,7 +47262,7 @@ GraphSearchBFS.prototype._search = function() {
 };
 
 module.exports = GraphSearchBFS;
-},{"../GraphEdge":51,"../GraphNode":53}],60:[function(require,module,exports){
+},{"../GraphEdge":50,"../GraphNode":52}],59:[function(require,module,exports){
 /**
  * @file Prototype to implement a depth first search.
  * 
@@ -47562,7 +47422,7 @@ GraphSearchDFS.prototype._search = function() {
 };
 
 module.exports = GraphSearchDFS;
-},{"../GraphEdge":51,"../GraphNode":53}],61:[function(require,module,exports){
+},{"../GraphEdge":50,"../GraphNode":52}],60:[function(require,module,exports){
 /**
  * @file Prototype to implement dijkstra’s shortest path algorithm.
  * 
@@ -47814,7 +47674,7 @@ GraphSearchDijkstra.prototype._search = function() {
 };
 
 module.exports = GraphSearchDijkstra;
-},{"../GraphEdge":51,"../GraphNode":53,"./AlgorithmHelper":57}],62:[function(require,module,exports){
+},{"../GraphEdge":50,"../GraphNode":52,"./AlgorithmHelper":56}],61:[function(require,module,exports){
 /**
  * @file This prototype defines heuristic policies for use with the A* search
  * algorithm.
@@ -47951,7 +47811,7 @@ module.exports = {
 	EuclideanSq : new HeuristicPolicyEuclidSq(),
 	Dijkstra : new HeuristicPolicyDijkstra()
 };
-},{}],63:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 /**
  * @file Prototype to define, manage, and traverse a path defined by a series of
  * 3D vectors.
@@ -48113,7 +47973,7 @@ Path.prototype.createRandomPath = function( numberOfWaypoints, boundingBox ) {
 };
 
 module.exports = Path;
-},{"../../core/Logger":21,"three":1}],64:[function(require,module,exports){
+},{"../../core/Logger":20,"three":1}],63:[function(require,module,exports){
 /**
  * @file Prototype to help calculate the average value of a history of vector
  * values.
@@ -48198,7 +48058,7 @@ Smoother.prototype.update = function( mostRecentValue, average ) {
 };
 
 module.exports = Smoother;
-},{"three":1}],65:[function(require,module,exports){
+},{"three":1}],64:[function(require,module,exports){
 /**
  * @file Prototype to encapsulate steering behaviors for a vehicle.
  * 
@@ -49700,7 +49560,7 @@ SteeringBehaviors.DECELERATION = {
 };
 
 module.exports = SteeringBehaviors;
-},{"../../core/Logger":21,"three":1}],66:[function(require,module,exports){
+},{"../../core/Logger":20,"three":1}],65:[function(require,module,exports){
 /**
  * @file This prototype provides topic-based publish/subscribe messaging and
  * enables communication between game entities.
@@ -50241,7 +50101,7 @@ function sendMessageToEntity( sender, receiver, message, data, isSync, delay ) {
 }
 
 module.exports = new EventManager();
-},{"../core/Logger":21,"../game/entity/GameEntity":45,"./Telegram":67}],67:[function(require,module,exports){
+},{"../core/Logger":20,"../game/entity/GameEntity":44,"./Telegram":66}],66:[function(require,module,exports){
 /**
  * @file This defines a telegram. A telegram is a data structure that records
  * information required to dispatch game messages. These messages are used by
@@ -50299,7 +50159,7 @@ function Telegram( sender, receiver, message, data, delay ) {
 }
 
 module.exports = Telegram;
-},{}],68:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 /**
  * @file This file contains all topics for publish & subscribe. YUME supports a
  * publish/subscribe messaging system with hierarchical addressing, so topics
@@ -50356,7 +50216,7 @@ var TOPIC = {
 };
 
 module.exports = TOPIC;
-},{}],69:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 /**
  * @file Prototype for network-messages.
  * 
@@ -50406,7 +50266,7 @@ Message.TYPES = {
 };
 
 module.exports = Message;
-},{}],70:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for network-based
@@ -50661,7 +50521,7 @@ NetworkManager.SERVER = {
 
 module.exports = new NetworkManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Logger":21,"../core/ThreadManager":29,"../messaging/EventManager":66,"../messaging/Topic":68,"./Message":69,"ws":2}],71:[function(require,module,exports){
+},{"../core/Logger":20,"../core/ThreadManager":28,"../messaging/EventManager":65,"../messaging/Topic":67,"./Message":68,"ws":2}],70:[function(require,module,exports){
 /**
  * @file This prototype will be used to interpolate within a predefined set of
  * values. There must be added at least two values for interpolation.
@@ -50803,7 +50663,7 @@ Interpolator.prototype.getValue = function( alpha, target ) {
 };
 
 module.exports = Interpolator;
-},{"three":1}],72:[function(require,module,exports){
+},{"three":1}],71:[function(require,module,exports){
 /**
  * @file The particle prototype defines the properties of a single particle that
  * is used to simulate the particle effect.
@@ -50895,7 +50755,7 @@ function Particle() {
 }
 
 module.exports = Particle;
-},{"three":1}],73:[function(require,module,exports){
+},{"three":1}],72:[function(require,module,exports){
 /**
  * @file This prototype will be used to emit and update particles that share
  * common properties such as texture, interpolated colors, interpolated scale,
@@ -51296,7 +51156,7 @@ function compareNumbers( a, b ) {
 
 	return b[ 0 ] - a[ 0 ];
 }
-},{"../core/Camera":19,"../core/Logger":21,"../core/World":31,"../shader/ParticleShader":86,"./Interpolator":71,"./Particle":72,"./emitter/Emitter":75,"three":1}],74:[function(require,module,exports){
+},{"../core/Camera":18,"../core/Logger":20,"../core/World":30,"../shader/ParticleShader":85,"./Interpolator":70,"./Particle":71,"./emitter/Emitter":74,"three":1}],73:[function(require,module,exports){
 /**
  * @file The box emitter uses an AABB to determine the position particles will
  * be emitted.
@@ -51441,7 +51301,7 @@ BoxEmitter.prototype.update = ( function() {
 }() );
 
 module.exports = BoxEmitter;
-},{"./Emitter":75,"three":1}],75:[function(require,module,exports){
+},{"./Emitter":74,"three":1}],74:[function(require,module,exports){
 /**
  * @file Base prototype for all emitters.
  * 
@@ -51555,7 +51415,7 @@ Emitter.prototype.update = function() {
 };
 
 module.exports = Emitter;
-},{"three":1}],76:[function(require,module,exports){
+},{"three":1}],75:[function(require,module,exports){
 /**
  * @file The mesh emitter uses an arbitrary mesh to determine the position
  * particles will be emitted.
@@ -51763,7 +51623,7 @@ MeshEmitter.prototype._getVertexNormal = ( function() {
 }() );
 
 module.exports = MeshEmitter;
-},{"./Emitter":75,"three":1}],77:[function(require,module,exports){
+},{"./Emitter":74,"three":1}],76:[function(require,module,exports){
 /**
  * @file The sphere emitter will randomly emit a particle somewhere about a
  * sphere within some range. The emitter uses spherical coordinates to determine
@@ -51942,7 +51802,7 @@ SphereEmitter.prototype.update = function() {
 };
 
 module.exports = SphereEmitter;
-},{"./Emitter":75,"three":1}],78:[function(require,module,exports){
+},{"./Emitter":74,"three":1}],77:[function(require,module,exports){
 /**
  * @file This prototype manages effects for post-processing.
  * 
@@ -52121,7 +51981,7 @@ EffectComposer.prototype._reset = function( renderTarget ) {
 };
 
 module.exports = EffectComposer;
-},{"three":1}],79:[function(require,module,exports){
+},{"three":1}],78:[function(require,module,exports){
 /**
  * @file This prototype provides a render pass for post-processing.
  * 
@@ -52183,7 +52043,7 @@ RenderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = RenderPass;
-},{"three":1}],80:[function(require,module,exports){
+},{"three":1}],79:[function(require,module,exports){
 /**
  * @file This prototype provides a shader pass for post-processing.
  * 
@@ -52289,7 +52149,7 @@ ShaderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = ShaderPass;
-},{"three":1}],81:[function(require,module,exports){
+},{"three":1}],80:[function(require,module,exports){
 /**
  * @file This shader can be used for vertex displacement to create water or
  * fabric materials. It implements an exemplary diffuse lighting equation, which
@@ -52409,7 +52269,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{"three":1}],82:[function(require,module,exports){
+},{"three":1}],81:[function(require,module,exports){
 /**
  * @file This shader creates a 2D flame. Use it as a material along with
  * a view-oriented billboard to simulate candles or other fire effects. If you
@@ -52564,7 +52424,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{}],83:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 /**
  * @file This shader applies a gaussian blur effect. Used in post-processing.
  * 
@@ -52642,7 +52502,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{"three":1}],84:[function(require,module,exports){
+},{"three":1}],83:[function(require,module,exports){
 /**
  * @file This shader transforms all colors to grayscale. Used in
  * post-processing.
@@ -52698,7 +52558,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{}],85:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 /**
  * @file This shader creates a simple horizon. Use this shader as a material on
  * a sphere.
@@ -52776,7 +52636,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{"three":1}],86:[function(require,module,exports){
+},{"three":1}],85:[function(require,module,exports){
 /**
  * @file This shader will be used as a material for particles.
  * 
@@ -52905,7 +52765,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{"three":1}],87:[function(require,module,exports){
+},{"three":1}],86:[function(require,module,exports){
 /**
  * @file This shader creates a vignette effect. Used in post-processing.
  * 
@@ -52985,7 +52845,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{}],88:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -53100,7 +52960,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],89:[function(require,module,exports){
+},{"../animation/Easing":10,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],88:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -53278,7 +53138,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],90:[function(require,module,exports){
+},{"../animation/Easing":10,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],89:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -53448,7 +53308,7 @@ function colorMesh( mesh ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],91:[function(require,module,exports){
+},{"../animation/Easing":10,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],90:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -53620,7 +53480,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],92:[function(require,module,exports){
+},{"../animation/Easing":10,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],91:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -53744,7 +53604,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],93:[function(require,module,exports){
+},{"../animation/Easing":10,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],92:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -53931,7 +53791,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],94:[function(require,module,exports){
+},{"../animation/Easing":10,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],93:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -54102,7 +53962,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],95:[function(require,module,exports){
+},{"../animation/Easing":10,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],94:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -54253,7 +54113,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],96:[function(require,module,exports){
+},{"../animation/Easing":10,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],95:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -54432,7 +54292,7 @@ function showLODCircles( world ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],97:[function(require,module,exports){
+},{"../animation/Easing":10,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],96:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -54610,7 +54470,7 @@ function onKeyDown( event ) {
 
 module.exports = Stage;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],98:[function(require,module,exports){
+},{"../animation/Easing":10,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],97:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -54753,7 +54613,7 @@ function colorFaces( geometry ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],99:[function(require,module,exports){
+},{"../animation/Easing":10,"../core/StageBase":24,"../etc/JSONLoader":32,"three":1}],98:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -54932,7 +54792,7 @@ Chat.prototype._onMessage = function( message, data ) {
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":108}],100:[function(require,module,exports){
+},{"../messaging/EventManager":65,"../messaging/Topic":67,"./UiElement":107}],99:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel. Only if the development
@@ -54994,7 +54854,7 @@ DevelopmentPanel.prototype.setText = function( text ) {
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":108}],101:[function(require,module,exports){
+},{"./UiElement":107}],100:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -55055,7 +54915,7 @@ InformationPanel.prototype.setText = function( textKey ) {
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":108}],102:[function(require,module,exports){
+},{"./UiElement":107}],101:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -55132,7 +54992,7 @@ InteractionLabel.prototype.hide = function() {
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":108}],103:[function(require,module,exports){
+},{"./UiElement":107}],102:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -55322,7 +55182,7 @@ LoadingScreen.prototype._onReady = function( message, data ) {
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":108}],104:[function(require,module,exports){
+},{"../messaging/EventManager":65,"../messaging/Topic":67,"./UiElement":107}],103:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -55478,7 +55338,7 @@ Menu.prototype._publishFinishEvent = function( message, data ) {
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Environment":20,"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":108}],105:[function(require,module,exports){
+},{"../core/Environment":19,"../messaging/EventManager":65,"../messaging/Topic":67,"./UiElement":107}],104:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -55602,7 +55462,7 @@ ModalDialog.prototype._onClose = function( event ) {
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":108}],106:[function(require,module,exports){
+},{"./UiElement":107}],105:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor. Only if the development
@@ -55821,7 +55681,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":108}],107:[function(require,module,exports){
+},{"./UiElement":107}],106:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -56047,7 +55907,7 @@ TextScreen.prototype._printName = function() {
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":108}],108:[function(require,module,exports){
+},{"../messaging/EventManager":65,"../messaging/Topic":67,"./UiElement":107}],107:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -56097,7 +55957,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":42}],109:[function(require,module,exports){
+},{"../etc/TextManager":41}],108:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in stages to
@@ -56363,4 +56223,4 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68,"./Chat":99,"./DevelopmentPanel":100,"./InformationPanel":101,"./InteractionLabel":102,"./LoadingScreen":103,"./Menu":104,"./ModalDialog":105,"./PerformanceMonitor":106,"./TextScreen":107}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109]);
+},{"../core/System":26,"../messaging/EventManager":65,"../messaging/Topic":67,"./Chat":98,"./DevelopmentPanel":99,"./InformationPanel":100,"./InteractionLabel":101,"./LoadingScreen":102,"./Menu":103,"./ModalDialog":104,"./PerformanceMonitor":105,"./TextScreen":106}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108]);

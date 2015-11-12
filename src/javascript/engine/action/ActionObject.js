@@ -1,7 +1,7 @@
 /**
- * @file The prototype InteractiveObject enables ordinary 3D-Objects to be
- * interactive. Any interactive object is part of the collision-detection logic
- * and ready for interacting with the player.
+ * @file This prototype enables ordinary 3D-Objects to be interactive. Any
+ * action object is part of the collision-detection logic and ready for
+ * interacting with the player.
  * 
  * @author Human Interactive
  */
@@ -12,7 +12,7 @@ var THREE = require( "three" );
 var OBB = require( "../etc/OBB" );
 
 /**
- * Creates an interactive object.
+ * Creates an action object.
  * 
  * @constructor
  * 
@@ -21,7 +21,7 @@ var OBB = require( "../etc/OBB" );
  * @param {number} raycastPrecision - The precision of the raycast operation.
  * @param {Action} action - The action, that should be executed.
  */
-function InteractiveObject( mesh, collisionType, raycastPrecision, action ) {
+function ActionObject( mesh, collisionType, raycastPrecision, action ) {
 
 	Object.defineProperties( this, {
 		mesh : {
@@ -37,13 +37,13 @@ function InteractiveObject( mesh, collisionType, raycastPrecision, action ) {
 			writable : true
 		},
 		raycastPrecision : {
-			value : raycastPrecision,
+			value : raycastPrecision || undefined,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
 		action : {
-			value : action,
+			value : action || undefined,
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -78,7 +78,7 @@ function InteractiveObject( mesh, collisionType, raycastPrecision, action ) {
 /**
  * Updates the static object.
  */
-InteractiveObject.prototype.update = function() {
+ActionObject.prototype.update = function() {
 
 	// always update bounding sphere
 	// other bounding volumes are only calculated if required
@@ -94,7 +94,7 @@ InteractiveObject.prototype.update = function() {
  * @param {THREE.Raycaster} raycaster - A raycaster instance.
  * @param {object} intersects - An array with intersection points.
  */
-InteractiveObject.prototype.raycast = function( raycaster, intersects ) {
+ActionObject.prototype.raycast = function( raycaster, intersects ) {
 
 	var intersectsRay = [], intersectionPoint, index, distance;
 
@@ -102,7 +102,7 @@ InteractiveObject.prototype.raycast = function( raycaster, intersects ) {
 	switch ( this.raycastPrecision )
 	{
 
-		case InteractiveObject.RAYCASTPRECISION.AABB:
+		case ActionObject.RAYCASTPRECISION.AABB:
 		{
 			// apply transformation
 			this.aabb.copy( this.mesh.geometry.boundingBox );
@@ -114,7 +114,7 @@ InteractiveObject.prototype.raycast = function( raycaster, intersects ) {
 			break;
 		}
 
-		case InteractiveObject.RAYCASTPRECISION.OBB:
+		case ActionObject.RAYCASTPRECISION.OBB:
 		{
 			// calculate OBB
 			this.obb.setFromObject( this.mesh );
@@ -125,14 +125,14 @@ InteractiveObject.prototype.raycast = function( raycaster, intersects ) {
 			break;
 		}
 
-		case InteractiveObject.RAYCASTPRECISION.FACE:
+		case ActionObject.RAYCASTPRECISION.FACE:
 		{
 			// call default raycast method of the mesh object
 			this.mesh.raycast( raycaster, intersectsRay );
 
 			for ( index = 0; index < intersectsRay.length; index++ )
 			{
-				// set the interactive object as result object
+				// set the action object as result object
 				intersectsRay[ index ].object = this;
 
 				// push to result array
@@ -147,7 +147,7 @@ InteractiveObject.prototype.raycast = function( raycaster, intersects ) {
 		default:
 		{
 
-			throw "ERROR: InteractiveObject: No valid raycast precision applied to object.";
+			throw "ERROR: ActionObject: No valid raycast precision applied to object.";
 		}
 
 	}
@@ -179,13 +179,13 @@ InteractiveObject.prototype.raycast = function( raycaster, intersects ) {
 
 /**
  * This method detects an intersection between the given bounding box and the
- * bounding volume of the interactive object.
+ * bounding volume of the action object.
  * 
  * @param {THREE.Box3} boundingBox - The boundingBox of the controls.
  * 
  * @returns {boolean} Intersects the object with the given bounding box?
  */
-InteractiveObject.prototype.isIntersection = function( boundingBox ) {
+ActionObject.prototype.isIntersection = function( boundingBox ) {
 
 	var isIntersection = false;
 
@@ -193,7 +193,7 @@ InteractiveObject.prototype.isIntersection = function( boundingBox ) {
 	switch ( this.collisionType )
 	{
 
-		case InteractiveObject.COLLISIONTYPES.AABB:
+		case ActionObject.COLLISIONTYPES.AABB:
 		{
 			// apply transformation
 			this.aabb.copy( this.mesh.geometry.boundingBox );
@@ -205,7 +205,7 @@ InteractiveObject.prototype.isIntersection = function( boundingBox ) {
 			break;
 		}
 
-		case InteractiveObject.COLLISIONTYPES.OBB:
+		case ActionObject.COLLISIONTYPES.OBB:
 		{
 			// calculate OBB
 			this.obb.setFromObject( this.mesh );
@@ -218,7 +218,7 @@ InteractiveObject.prototype.isIntersection = function( boundingBox ) {
 
 		default:
 		{
-			throw "ERROR: InteractiveObject: No valid collision type applied to object.";
+			throw "ERROR: ActionObject: No valid collision type applied to object.";
 		}
 	}
 
@@ -226,15 +226,15 @@ InteractiveObject.prototype.isIntersection = function( boundingBox ) {
 
 };
 
-InteractiveObject.COLLISIONTYPES = {
+ActionObject.COLLISIONTYPES = {
 	AABB : 0,
 	OBB : 1
 };
 
-InteractiveObject.RAYCASTPRECISION = {
+ActionObject.RAYCASTPRECISION = {
 	AABB : 0,
 	OBB : 1,
 	FACE : 2
 };
 
-module.exports = InteractiveObject;
+module.exports = ActionObject;
