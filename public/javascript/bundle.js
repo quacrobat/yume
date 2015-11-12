@@ -36474,13 +36474,21 @@ function ActionObject( mesh, collisionType, raycastPrecision, action ) {
 			writable : true
 		},
 		raycastPrecision : {
-			value : raycastPrecision || undefined,
+			value : raycastPrecision || null,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
 		action : {
-			value : action || undefined,
+			value : action || null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// if the action object never changes its position or orientation, you
+		// can set this value to false to prevent the update of bounding volumes
+		autoUpdate : {
+			value : true,
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -36503,24 +36511,42 @@ function ActionObject( mesh, collisionType, raycastPrecision, action ) {
 			configurable : false,
 			enumerable : true,
 			writable : true
-		},
+		}
 
 	} );
 
 	// compute default bounding volumes
 	this.mesh.geometry.computeBoundingBox();
 	this.mesh.geometry.computeBoundingSphere();
+	
+	// update the action object at least once
+	this.update();
 }
 
 /**
- * Updates the static object.
+ * This method will update the bounding volumes of the action object.
  */
 ActionObject.prototype.update = function() {
 
-	// always update bounding sphere
-	// other bounding volumes are only calculated if required
-	this.boundingSphere.copy( this.mesh.geometry.boundingSphere );
-	this.boundingSphere.applyMatrix4( this.mesh.matrixWorld );
+	if ( this.autoUpdate === true )
+	{
+		// update bounding sphere
+		this.boundingSphere.copy( this.mesh.geometry.boundingSphere );
+		this.boundingSphere.applyMatrix4( this.mesh.matrixWorld );
+
+		// update other bounding volumes if necessary
+		if ( this.collisionType === ActionObject.COLLISIONTYPES.AABB || this.raycastPrecision === ActionObject.RAYCASTPRECISION.AABB )
+		{
+			this.aabb.copy( this.mesh.geometry.boundingBox );
+			this.aabb.applyMatrix4( this.mesh.matrixWorld );
+		}
+
+		if ( this.collisionType === ActionObject.COLLISIONTYPES.OBB || this.raycastPrecision === ActionObject.RAYCASTPRECISION.OBB )
+		{
+			this.obb.setFromObject( this.mesh );
+		}
+
+	}
 };
 
 /**
@@ -36541,11 +36567,6 @@ ActionObject.prototype.raycast = function( raycaster, intersects ) {
 
 		case ActionObject.RAYCASTPRECISION.AABB:
 		{
-			// apply transformation
-			this.aabb.copy( this.mesh.geometry.boundingBox );
-			this.aabb.applyMatrix4( this.mesh.matrixWorld );
-
-			// do intersection test
 			intersectionPoint = raycaster.ray.intersectBox( this.aabb );
 
 			break;
@@ -36553,10 +36574,6 @@ ActionObject.prototype.raycast = function( raycaster, intersects ) {
 
 		case ActionObject.RAYCASTPRECISION.OBB:
 		{
-			// calculate OBB
-			this.obb.setFromObject( this.mesh );
-
-			// do intersection test
 			intersectionPoint = this.obb.intersectRay( raycaster.ray );
 
 			break;
@@ -36575,6 +36592,7 @@ ActionObject.prototype.raycast = function( raycaster, intersects ) {
 				// push to result array
 				intersects.push( intersectsRay[ index ] );
 			}
+			
 			// reset array for next call
 			intersectsRay.length = 0;
 
@@ -36583,7 +36601,6 @@ ActionObject.prototype.raycast = function( raycaster, intersects ) {
 
 		default:
 		{
-
 			throw "ERROR: ActionObject: No valid raycast precision applied to object.";
 		}
 
@@ -36632,11 +36649,6 @@ ActionObject.prototype.isIntersection = function( boundingBox ) {
 
 		case ActionObject.COLLISIONTYPES.AABB:
 		{
-			// apply transformation
-			this.aabb.copy( this.mesh.geometry.boundingBox );
-			this.aabb.applyMatrix4( this.mesh.matrixWorld );
-
-			// do intersection test
 			isIntersection = this.aabb.isIntersectionBox( boundingBox );
 
 			break;
@@ -36644,10 +36656,6 @@ ActionObject.prototype.isIntersection = function( boundingBox ) {
 
 		case ActionObject.COLLISIONTYPES.OBB:
 		{
-			// calculate OBB
-			this.obb.setFromObject( this.mesh );
-
-			// do intersection test
 			isIntersection = this.obb.isIntersectionAABB( boundingBox );
 
 			break;
