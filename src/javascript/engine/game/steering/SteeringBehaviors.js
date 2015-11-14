@@ -939,18 +939,15 @@ SteeringBehaviors.prototype._hide = ( function() {
 
 	return function( hunter ) {
 		
-		var distanceSq, closestDistanceSq, numberOfObstacle, obstacle, index;
+		var distanceSq, closestDistanceSq, obstacle, index;
 
 		// this will be used to track the distance to the closest hiding spot
 		closestDistanceSq = Infinity;
 
-		// get number of obstacles in the world
-		numberOfObstacle = this.vehicle.world.getNumberOfObstacles();
-
-		for ( index = 0; index < numberOfObstacle; index++ )
+		for ( index = 0; index < this.vehicle.world.obstacles.length; index++ )
 		{
-			// retrieve obstacle
-			obstacle = this.vehicle.world.getObstacle( index );
+			// buffer obstacle
+			obstacle = this.vehicle.world.obstacles[ index ];
 
 			// calculate the position of the hiding spot for this obstacle
 			this._getHidingPosition( obstacle.boundingSphere.center, obstacle.boundingSphere.radius, hunter.position, hidingSpot );
@@ -1067,9 +1064,6 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
 		// this will be used to track the distance to the closest obstacle
 		var distanceToClosestObstacle = Infinity;
 		
-		// get number of obstacles in the world
-		var numberOfObstacle = this.vehicle.world.getNumberOfObstacles();
-		
 		// the detection box length is proportional to the agent's velocity
 		var detectionBoxLength = this.vehicle.getSpeed() + this.vehicle.maxSpeed + vehicleSize.z * 0.5;
 
@@ -1082,10 +1076,10 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
 		// this matrix will transform points to the local space of the vehicle
 		inverseMatrix.getInverse( this.vehicle.object3D.matrixWorld );
 
-		for ( index = 0; index < numberOfObstacle; index++ )
+		for ( index = 0; index < this.vehicle.world.obstacles; index++ )
 		{
 			// retrieve obstacle
-			obstacle = this.vehicle.world.getObstacle( index );
+			obstacle = this.vehicle.world.obstacles[ index ];
 
 			// calculate this obstacle's position in local space
 			localPositionOfObstacle.copy( obstacle.boundingSphere.center ).applyMatrix4( inverseMatrix );

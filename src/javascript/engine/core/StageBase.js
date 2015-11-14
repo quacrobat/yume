@@ -165,9 +165,7 @@ StageBase.prototype.start = function() {
 StageBase.prototype.destroy = function() {
 
 	// remove stage objects from all managers
-	this.actionManager.removeInteractiveObjects();
-
-	this.actionManager.removeStaticObjects();
+	this.actionManager.removeActionObjects();
 
 	this.actionManager.removeTriggers();
 

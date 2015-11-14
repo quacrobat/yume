@@ -46,54 +46,54 @@ Stage.prototype.setup = function() {
 	colorFaces( groundGeometry );
 
 	// create interactive box
-	var interactiveBox = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+	var boxInteraction = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
 		color : StageBase.COLORS.BLUE_DARK
 	} ) );
-	interactiveBox.matrixAutoUpdate = false;
-	interactiveBox.position.set( 50, 5, 0 );
-	interactiveBox.castShadow = true;
-	interactiveBox.updateMatrix();
-	this.world.addObject3D( interactiveBox );
+	boxInteraction.matrixAutoUpdate = false;
+	boxInteraction.position.set( 50, 5, 0 );
+	boxInteraction.castShadow = true;
+	boxInteraction.updateMatrix();
+	this.world.addObject3D( boxInteraction );
 
-	this.actionManager.createInteraction( interactiveBox, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Action", function() {
+	this.actionManager.createInteractiveObject( boxInteraction, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Action", function() {
 
 		// nothing happens here...
 	} );
 
-	// create first static box with AABB collision detection
-	var staticBoxHover = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+	// create first box with AABB collision detection
+	var boxAABB = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
 		color : StageBase.COLORS.PRIMARY
 	} ) );
-	staticBoxHover.matrixAutoUpdate = false;
-	staticBoxHover.position.set( 17, 15, 0 );
-	staticBoxHover.castShadow = true;
-	staticBoxHover.updateMatrix();
-	this.world.addObject3D( staticBoxHover );
+	boxAABB.matrixAutoUpdate = false;
+	boxAABB.position.set( 17, 15, 0 );
+	boxAABB.castShadow = true;
+	boxAABB.updateMatrix();
+	this.world.addObject3D( boxAABB );
 
-	this.actionManager.createStatic( staticBoxHover, this.actionManager.COLLISIONTYPES.AABB );
+	this.actionManager.createActionObject( boxAABB, this.actionManager.COLLISIONTYPES.AABB );
 
-	// create second static box with OBB collision detection
-	var staticBox = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 20 ), new THREE.MeshLambertMaterial( {
+	// create second box with OBB collision detection
+	var boxOBB = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 20 ), new THREE.MeshLambertMaterial( {
 		color : StageBase.COLORS.PRIMARY
 	} ) );
-	staticBox.matrixAutoUpdate = false;
-	staticBox.position.set( -17, 5, 0 );
-	staticBox.rotation.set( 0, Math.PI * 0.2, 0 );
-	staticBox.castShadow = true;
-	staticBox.updateMatrix();
-	this.world.addObject3D( staticBox );
+	boxOBB.matrixAutoUpdate = false;
+	boxOBB.position.set( -17, 5, 0 );
+	boxOBB.rotation.set( 0, Math.PI * 0.2, 0 );
+	boxOBB.castShadow = true;
+	boxOBB.updateMatrix();
+	this.world.addObject3D( boxOBB );
 
-	this.actionManager.createStatic( staticBox, this.actionManager.COLLISIONTYPES.OBB );
+	this.actionManager.createActionObject( boxOBB, this.actionManager.COLLISIONTYPES.OBB );
 
 	// create plain object
-	var plainBox = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+	var boxPlain = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
 		color : StageBase.COLORS.BLUE_WHITE
 	} ) );
-	plainBox.matrixAutoUpdate = false;
-	plainBox.position.set( -50, 5, 0 );
-	plainBox.castShadow = true;
-	plainBox.updateMatrix();
-	this.world.addObject3D( plainBox );
+	boxPlain.matrixAutoUpdate = false;
+	boxPlain.position.set( -50, 5, 0 );
+	boxPlain.castShadow = true;
+	boxPlain.updateMatrix();
+	this.world.addObject3D( boxPlain );
 
 	// add sign
 	var signLoader = new JSONLoader();

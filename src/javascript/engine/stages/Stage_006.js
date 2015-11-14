@@ -48,34 +48,34 @@ Stage.prototype.setup = function() {
 	colorFaces( groundGeometry );
 
 	// add boxes
-	var staticBoxFire = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+	var boxFire = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
 		color :StageBase.COLORS.PRIMARY
 	} ) );
-	staticBoxFire.matrixAutoUpdate = false;
-	staticBoxFire.position.set( 40, 5, 0 );
-	staticBoxFire.castShadow = true;
-	staticBoxFire.updateMatrix();
-	this.world.addObject3D( staticBoxFire );
-	this.actionManager.createStatic( staticBoxFire, this.actionManager.COLLISIONTYPES.AABB );
+	boxFire.matrixAutoUpdate = false;
+	boxFire.position.set( 40, 5, 0 );
+	boxFire.castShadow = true;
+	boxFire.updateMatrix();
+	this.world.addObject3D( boxFire );
+	this.actionManager.createActionObject( boxFire, this.actionManager.COLLISIONTYPES.AABB );
 
-	var staticBoxClock = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+	var boxClock = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
 		color : StageBase.COLORS.BLUE_WHITE
 	} ) );
-	staticBoxClock.matrixAutoUpdate = false;
-	staticBoxClock.position.set( -40, 5, 0 );
-	staticBoxClock.castShadow = true;
-	staticBoxClock.updateMatrix();
-	this.world.addObject3D( staticBoxClock );
-	this.actionManager.createStatic( staticBoxClock, this.actionManager.COLLISIONTYPES.AABB );
+	boxClock.matrixAutoUpdate = false;
+	boxClock.position.set( -40, 5, 0 );
+	boxClock.castShadow = true;
+	boxClock.updateMatrix();
+	this.world.addObject3D( boxClock );
+	this.actionManager.createActionObject( boxClock, this.actionManager.COLLISIONTYPES.AABB );
 
-	var staticBoxWall = new THREE.Mesh( new THREE.BoxGeometry( 1, 20, 40 ), new THREE.MeshBasicMaterial( {
+	var boxWall = new THREE.Mesh( new THREE.BoxGeometry( 1, 20, 40 ), new THREE.MeshBasicMaterial( {
 		wireframe : true
 	} ) );
-	staticBoxWall.matrixAutoUpdate = false;
-	staticBoxWall.position.set( -5.5, 5, 0 );
-	staticBoxWall.updateMatrix();
-	staticBoxClock.add( staticBoxWall );
-	this.actionManager.createStatic( staticBoxWall, this.actionManager.COLLISIONTYPES.AABB );
+	boxWall.matrixAutoUpdate = false;
+	boxWall.position.set( -5.5, 5, 0 );
+	boxWall.updateMatrix();
+	boxClock.add( boxWall );
+	this.actionManager.createActionObject( boxWall, this.actionManager.COLLISIONTYPES.AABB );
 
 	// add dynamic sounds
 	this.audioManager.createAudioBufferList( [ "fire", "clock" ], function( bufferList ) {
@@ -92,8 +92,8 @@ Stage.prototype.setup = function() {
 		audioClock.addDirection( 180, 0, 0 );
 		audioClock.position.set( -5, 0, 0 );
 
-		staticBoxFire.add( audioFire );
-		staticBoxClock.add( audioClock );
+		boxFire.add( audioFire );
+		boxClock.add( audioClock );
 	} ).load();
 
 	// add sign

@@ -289,14 +289,11 @@ Player.prototype._isCollisionDetected = function() {
 
 	var index, obstacle;
 
-	// this holds the current number if obstacles in the world
-	var numberOfObstacle = this.world.getNumberOfObstacles();
-
 	// now do the collision test with all obstacles
-	for ( index = 0; index < numberOfObstacle; index++ )
+	for ( index = 0; index < this.world.obstacles.length; index++ )
 	{
 		// retrieve obstacle
-		obstacle = this.world.getObstacle( index );
+		obstacle =  this.world.obstacles[ index ];
 
 		// do collision detection but only with visible obstacles
 		if ( obstacle.mesh.visible === true && obstacle.isIntersection( this.boundingVolume ) === true )

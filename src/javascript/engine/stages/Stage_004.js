@@ -46,16 +46,16 @@ Stage.prototype.setup = function() {
 	colorFaces( groundGeometry );
 
 	// create interactive box
-	var interactiveBoxTextScreen = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+	var boxTextScreen = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
 		color : StageBase.COLORS.BLUE_DARK
 	} ) );
-	interactiveBoxTextScreen.matrixAutoUpdate = false;
-	interactiveBoxTextScreen.position.set( 20, 5, 0 );
-	interactiveBoxTextScreen.castShadow = true;
-	interactiveBoxTextScreen.updateMatrix();
-	this.world.addObject3D( interactiveBoxTextScreen );
+	boxTextScreen.matrixAutoUpdate = false;
+	boxTextScreen.position.set( 20, 5, 0 );
+	boxTextScreen.castShadow = true;
+	boxTextScreen.updateMatrix();
+	this.world.addObject3D( boxTextScreen );
 
-	this.actionManager.createInteraction( interactiveBoxTextScreen, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.TextScreen", function() {
+	this.actionManager.createInteractiveObject( boxTextScreen, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.TextScreen", function() {
 
 		self.userInterfaceManager.showTextScreen( [ {
 			name : "Name.Daniel",
@@ -70,16 +70,16 @@ Stage.prototype.setup = function() {
 	} );
 
 	// create interactive box
-	var interactiveBoxModal = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+	var boxModal = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
 		color : StageBase.COLORS.PRIMARY
 	} ) );
-	interactiveBoxModal.matrixAutoUpdate = false;
-	interactiveBoxModal.position.set( -20, 5, 0 );
-	interactiveBoxModal.castShadow = true;
-	interactiveBoxModal.updateMatrix();
-	this.world.addObject3D( interactiveBoxModal );
+	boxModal.matrixAutoUpdate = false;
+	boxModal.position.set( -20, 5, 0 );
+	boxModal.castShadow = true;
+	boxModal.updateMatrix();
+	this.world.addObject3D( boxModal );
 
-	this.actionManager.createInteraction( interactiveBoxModal, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Modal", function() {
+	this.actionManager.createInteractiveObject( boxModal, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Modal", function() {
 
 		self.userInterfaceManager.showModalDialog( {
 			headline : "Modal.Headline",

@@ -27,24 +27,32 @@ var self;
 function ActionManager() {
 
 	Object.defineProperties( this, {
-		interactiveObjects : {
+
+		// this array holds references to all action objects. objects in this
+		// array are part of the internal collision detection
+		actionObjects : {
+			value : [],
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		// this array holds references to all triggers
+		_triggers : {
 			value : [],
 			configurable : false,
 			enumerable : false,
 			writable : false
 		},
-		staticObjects : {
+		// this array holds references to action objects that are part of the
+		// interaction system. ray-tracing operations will regard only objects
+		// in this special array
+		_interactiveObjects : {
 			value : [],
 			configurable : false,
 			enumerable : false,
 			writable : false
 		},
-		triggers : {
-			value : [],
-			configurable : false,
-			enumerable : false,
-			writable : false
-		},
+		// this will be used for ray-tracing operations
 		_raycaster : {
 			value : new THREE.Raycaster(),
 			configurable : false,
@@ -87,22 +95,16 @@ ActionManager.prototype.update = function( player ) {
 
 	var index;
 
-	// update interactive objects
-	for ( index = 0; index < this.interactiveObjects.length; index++ )
+	// update action objects
+	for ( index = 0; index < this.actionObjects.length; index++ )
 	{
-		this.interactiveObjects[ index ].update();
+		this.actionObjects[ index ].update();
 	}
 
-	// update static objects
-	for ( index = 0; index < this.staticObjects.length; index++ )
-	{
-		this.staticObjects[ index ].update();
-	}
-	
 	// update triggers
-	for ( index = 0; index < this.triggers.length; index++ )
+	for ( index = 0; index < this._triggers.length; index++ )
 	{
-		this.triggers[ index ].update( player.position );
+		this._triggers[ index ].update( player.position );
 	}
 
 	// check interaction objects
@@ -110,8 +112,26 @@ ActionManager.prototype.update = function( player ) {
 };
 
 /**
+ * Creates a new action object and stores it to the respective internal array. A
+ * static object is part of the collision detection. Interactions with the
+ * object are initially not possible.
+ * 
+ * @param {THREE.Mesh} mesh - The mesh object.
+ * @param {number} collisionType - The type of collision detection.
+ * 
+ * @returns {ActionObject} The new action object.
+ */
+ActionManager.prototype.createActionObject = function( mesh, collisionType ) {
+
+	var object = new ActionObject( mesh, collisionType );
+	this.actionObjects.push( object );
+	return object;
+};
+
+/**
  * Creates a new interactive object and stores it to the respective internal
- * array.
+ * arrays. An interactive object is part of the collision detection and
+ * ray-tracing system.
  * 
  * @param {THREE.Mesh} mesh - The mesh object.
  * @param {number} collisionType - The type of collision detection.
@@ -121,26 +141,15 @@ ActionManager.prototype.update = function( player ) {
  * 
  * @returns {ActionObject} The new interactive object.
  */
-ActionManager.prototype.createInteraction = function( mesh, collisionType, raycastPrecision, label, actionCallback ) {
+ActionManager.prototype.createInteractiveObject = function( mesh, collisionType, raycastPrecision, label, actionCallback ) {
 
-	var interactiveObject = new ActionObject( mesh, collisionType, raycastPrecision, new Action( actionCallback, label ) );
-	this.addInteractiveObject( interactiveObject );
-	return interactiveObject;
-};
+	var object = new ActionObject( mesh, collisionType, raycastPrecision, new Action( actionCallback, label ) );
 
-/**
- * Creates a new static object and stores it to the respective internal array.
- * 
- * @param {THREE.Mesh} mesh - The mesh object.
- * @param {number} collisionType - The type of collision detection.
- * 
- * @returns {ActionObject} The new static object.
- */
-ActionManager.prototype.createStatic = function( mesh, collisionType ) {
+	// the object will be stored in two separate data structures
+	this.actionObjects.push( object );
+	this._interactiveObjects.push( object );
 
-	var staticObject = new ActionObject( mesh, collisionType );
-	this.addStaticObject( staticObject );
-	return staticObject;
+	return object;
 };
 
 /**
@@ -149,7 +158,8 @@ ActionManager.prototype.createStatic = function( mesh, collisionType ) {
  * @param {string} label - The label of the trigger.
  * @param {THREE.Vector3} position - The position of the trigger.
  * @param {number} radius - The radius of the trigger.
- * @param {boolean} isOnetime - Should the trigger run it's action just one time?
+ * @param {boolean} isOnetime - Should the trigger run it's action just one
+ * time?
  * @param {function} actionCallback - The action callback.
  * 
  * @returns {ActionTrigger} The new action trigger.
@@ -157,19 +167,19 @@ ActionManager.prototype.createStatic = function( mesh, collisionType ) {
 ActionManager.prototype.createTrigger = function( label, position, radius, isOnetime, actionCallback ) {
 
 	var trigger = new ActionTrigger( position, radius, isOnetime, new Action( actionCallback, label ) );
-	this.addTrigger( trigger );
+	this._triggers.push( trigger );
 	return trigger;
 };
 
 /**
- * Adds a single interactive object to the internal array.
+ * Removes a single action object from the internal array.
  * 
- * @param {ActionObject} interactiveObject - The interactive object to be
- * added.
+ * @param {ActionObject} actionObject - The action object to be removed.
  */
-ActionManager.prototype.addInteractiveObject = function( interactiveObject ) {
+ActionManager.prototype.removeActionObject = function( actionObject ) {
 
-	this.interactiveObjects.push( interactiveObject );
+	var index = this.actionObjects.indexOf( actionObject );
+	this.actionObjects.splice( index, 1 );
 };
 
 /**
@@ -178,28 +188,14 @@ ActionManager.prototype.addInteractiveObject = function( interactiveObject ) {
  * @param {ActionObject} interactiveObject - The interactive object to be
  * removed.
  */
-ActionManager.prototype.removeInteractiveObject = function( interactiveObject ) {
+ActionManager.prototype.removeInteraction = function( interactiveObject ) {
 
-	var index = this.interactiveObjects.indexOf( interactiveObject );
-	this.interactiveObjects.splice( index, 1 );
-};
+	// we need to remove the object from both arrays
+	var index = this._interactiveObjects.indexOf( interactiveObject );
+	this._interactiveObjects.splice( index, 1 );
 
-/**
- * Removes all interactive objects from the internal array.
- */
-ActionManager.prototype.removeInteractiveObjects = function() {
-
-	this.interactiveObjects.length = 0;
-};
-
-/**
- * Adds a single trigger to the internal array.
- * 
- * @param {ActionTrigger} trigger - The trigger to be added.
- */
-ActionManager.prototype.addTrigger = function( trigger ) {
-
-	this.triggers.push( trigger );
+	// also remove it from the action object array
+	this.removeActionObject( interactiveObject );
 };
 
 /**
@@ -209,8 +205,17 @@ ActionManager.prototype.addTrigger = function( trigger ) {
  */
 ActionManager.prototype.removeTrigger = function( trigger ) {
 
-	var index = this.triggers.indexOf( trigger );
-	this.triggers.splice( index, 1 );
+	var index = this._triggers.indexOf( trigger );
+	this._triggers.splice( index, 1 );
+};
+
+/**
+ * Removes all action objects from the internal array.
+ */
+ActionManager.prototype.removeActionObjects = function() {
+
+	this.actionObjects.length = 0;
+	this._interactiveObjects.length = 0;
 };
 
 /**
@@ -218,36 +223,7 @@ ActionManager.prototype.removeTrigger = function( trigger ) {
  */
 ActionManager.prototype.removeTriggers = function() {
 
-	this.triggers.length = 0;
-};
-
-/**
- * Adds a single static object to the internal array.
- * 
- * @param {ActionObject} staticObject - The static object to be added.
- */
-ActionManager.prototype.addStaticObject = function( staticObject ) {
-
-	this.staticObjects.push( staticObject );
-};
-
-/**
- * Removes a single static object from the internal array.
- * 
- * @param {ActionObject} staticObject - The static object to be removed.
- */
-ActionManager.prototype.removeStaticObject = function( staticObject ) {
-
-	var index = this.staticObjects.indexOf( staticObject );
-	this.staticObjects.splice( index, 1 );
-};
-
-/**
- * Removes all static objects from the internal array.
- */
-ActionManager.prototype.removeStaticObjects = function() {
-
-	this.staticObjects.length = 0;
+	this._triggers.length = 0;
 };
 
 /**
@@ -262,7 +238,7 @@ ActionManager.prototype._calculateClosestIntersection = function( position, dire
 	this._raycaster.far = 20;
 
 	// intersection test. the result is already sorted by distance
-	intersects = this._raycaster.intersectObjects( this.interactiveObjects );
+	intersects = this._raycaster.intersectObjects( this._interactiveObjects );
 
 	if ( intersects.length > 0 )
 	{
@@ -299,7 +275,8 @@ ActionManager.prototype._calculateClosestIntersection = function( position, dire
  */
 ActionManager.prototype._checkInteraction = function( position, direction ) {
 
-	// calculate the intersection with the closest visible and active interactive object
+	// calculate the intersection with the closest visible and active
+	// interactive object
 	var interactiveObject = this._calculateClosestIntersection( position, direction );
 
 	// show the interaction label if there is an intersection
@@ -322,16 +299,17 @@ ActionManager.prototype._checkInteraction = function( position, direction ) {
  */
 ActionManager.prototype._onInteraction = function( message, data ) {
 
-	// calculate the intersection with the closest visible and active interactive object
+	// calculate the intersection with the closest visible and active
+	// interactive object
 	var interactiveObject = self._calculateClosestIntersection( data.position, data.direction );
 
 	if ( interactiveObject !== undefined )
 	{
 		// execute the assigned action
 		interactiveObject.action.run();
-		
+
 		logger.log( "INFO: ActionManager: Interaction with interactive object. Action executed." );
-		
+
 	}
 };
 

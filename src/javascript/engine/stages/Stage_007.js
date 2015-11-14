@@ -46,45 +46,45 @@ Stage.prototype.setup = function() {
 	colorFaces( groundGeometry );
 
 	// add objects
-	var interactiveBoxBasic = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+	var boxBasic = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
 		color :StageBase.COLORS.PRIMARY
 	} ) );
-	interactiveBoxBasic.position.set( 20, 5, 0 );
-	interactiveBoxBasic.castShadow = true;
-	this.world.addObject3D( interactiveBoxBasic );
+	boxBasic.position.set( 20, 5, 0 );
+	boxBasic.castShadow = true;
+	this.world.addObject3D( boxBasic );
 
-	var interactiveObject = this.actionManager.createInteraction( interactiveBoxBasic, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.BasicAnimation", function() {
+	var interactiveObject = this.actionManager.createInteractiveObject( boxBasic, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.BasicAnimation", function() {
 
 		interactiveObject.action.isActive = false;
 
 		// create a basic animation, which animates a single value
 		self.animationManager.createBasicAnimation( {
-			object : interactiveBoxBasic.position,
+			object : boxBasic.position,
 			property : "x",
 			duration : 5000,
-			start : interactiveBoxBasic.position.x,
-			end : interactiveBoxBasic.position.x + 30,
+			start : boxBasic.position.x,
+			end : boxBasic.position.x + 30,
 			easing : Easing.Quartic.InOut
 		} ).play();
 	} );
 
-	var staticBoxHover = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+	var boxHover = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
 		color : StageBase.COLORS.BLUE_WHITE
 	} ) );
-	staticBoxHover.position.set( -40, 8, 0 );
-	staticBoxHover.castShadow = true;
-	this.world.addObject3D( staticBoxHover );
-	this.actionManager.createStatic( staticBoxHover, this.actionManager.COLLISIONTYPES.AABB );
+	boxHover.position.set( -40, 8, 0 );
+	boxHover.castShadow = true;
+	this.world.addObject3D( boxHover );
+	this.actionManager.createActionObject( boxHover, this.actionManager.COLLISIONTYPES.AABB );
 
 	// create a hover animation, which animates infinitely a property between
 	// start- and end-value
 	this.animationManager.createHoverAnimation( {
-		object : staticBoxHover.position,
+		object : boxHover.position,
 		property : "y",
 		duration : 4000,
 		delayTime : 2000,
-		start : staticBoxHover.position.y,
-		end : staticBoxHover.position.y + 2,
+		start : boxHover.position.y,
+		end : boxHover.position.y + 2,
 		easing : Easing.Sinusoidal.InOut
 	} ).play();
 

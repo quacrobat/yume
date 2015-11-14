@@ -55,7 +55,7 @@ Stage.prototype.setup = function() {
 	interactiveBox.updateMatrix();
 	this.world.addObject3D( interactiveBox );
 
-	this.actionManager.createInteraction( interactiveBox, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Color", function() {
+	this.actionManager.createInteractiveObject( interactiveBox, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Color", function() {
 
 		colorMesh( interactiveBox );
 	} );

@@ -36125,24 +36125,32 @@ var self;
 function ActionManager() {
 
 	Object.defineProperties( this, {
-		interactiveObjects : {
+
+		// this array holds references to all action objects. objects in this
+		// array are part of the internal collision detection
+		actionObjects : {
+			value : [],
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		// this array holds references to all triggers
+		_triggers : {
 			value : [],
 			configurable : false,
 			enumerable : false,
 			writable : false
 		},
-		staticObjects : {
+		// this array holds references to action objects that are part of the
+		// interaction system. ray-tracing operations will regard only objects
+		// in this special array
+		_interactiveObjects : {
 			value : [],
 			configurable : false,
 			enumerable : false,
 			writable : false
 		},
-		triggers : {
-			value : [],
-			configurable : false,
-			enumerable : false,
-			writable : false
-		},
+		// this will be used for ray-tracing operations
 		_raycaster : {
 			value : new THREE.Raycaster(),
 			configurable : false,
@@ -36185,22 +36193,16 @@ ActionManager.prototype.update = function( player ) {
 
 	var index;
 
-	// update interactive objects
-	for ( index = 0; index < this.interactiveObjects.length; index++ )
+	// update action objects
+	for ( index = 0; index < this.actionObjects.length; index++ )
 	{
-		this.interactiveObjects[ index ].update();
+		this.actionObjects[ index ].update();
 	}
 
-	// update static objects
-	for ( index = 0; index < this.staticObjects.length; index++ )
-	{
-		this.staticObjects[ index ].update();
-	}
-	
 	// update triggers
-	for ( index = 0; index < this.triggers.length; index++ )
+	for ( index = 0; index < this._triggers.length; index++ )
 	{
-		this.triggers[ index ].update( player.position );
+		this._triggers[ index ].update( player.position );
 	}
 
 	// check interaction objects
@@ -36208,8 +36210,26 @@ ActionManager.prototype.update = function( player ) {
 };
 
 /**
+ * Creates a new action object and stores it to the respective internal array. A
+ * static object is part of the collision detection. Interactions with the
+ * object are initially not possible.
+ * 
+ * @param {THREE.Mesh} mesh - The mesh object.
+ * @param {number} collisionType - The type of collision detection.
+ * 
+ * @returns {ActionObject} The new action object.
+ */
+ActionManager.prototype.createActionObject = function( mesh, collisionType ) {
+
+	var object = new ActionObject( mesh, collisionType );
+	this.actionObjects.push( object );
+	return object;
+};
+
+/**
  * Creates a new interactive object and stores it to the respective internal
- * array.
+ * arrays. An interactive object is part of the collision detection and
+ * ray-tracing system.
  * 
  * @param {THREE.Mesh} mesh - The mesh object.
  * @param {number} collisionType - The type of collision detection.
@@ -36219,26 +36239,15 @@ ActionManager.prototype.update = function( player ) {
  * 
  * @returns {ActionObject} The new interactive object.
  */
-ActionManager.prototype.createInteraction = function( mesh, collisionType, raycastPrecision, label, actionCallback ) {
+ActionManager.prototype.createInteractiveObject = function( mesh, collisionType, raycastPrecision, label, actionCallback ) {
 
-	var interactiveObject = new ActionObject( mesh, collisionType, raycastPrecision, new Action( actionCallback, label ) );
-	this.addInteractiveObject( interactiveObject );
-	return interactiveObject;
-};
+	var object = new ActionObject( mesh, collisionType, raycastPrecision, new Action( actionCallback, label ) );
 
-/**
- * Creates a new static object and stores it to the respective internal array.
- * 
- * @param {THREE.Mesh} mesh - The mesh object.
- * @param {number} collisionType - The type of collision detection.
- * 
- * @returns {ActionObject} The new static object.
- */
-ActionManager.prototype.createStatic = function( mesh, collisionType ) {
+	// the object will be stored in two separate data structures
+	this.actionObjects.push( object );
+	this._interactiveObjects.push( object );
 
-	var staticObject = new ActionObject( mesh, collisionType );
-	this.addStaticObject( staticObject );
-	return staticObject;
+	return object;
 };
 
 /**
@@ -36247,7 +36256,8 @@ ActionManager.prototype.createStatic = function( mesh, collisionType ) {
  * @param {string} label - The label of the trigger.
  * @param {THREE.Vector3} position - The position of the trigger.
  * @param {number} radius - The radius of the trigger.
- * @param {boolean} isOnetime - Should the trigger run it's action just one time?
+ * @param {boolean} isOnetime - Should the trigger run it's action just one
+ * time?
  * @param {function} actionCallback - The action callback.
  * 
  * @returns {ActionTrigger} The new action trigger.
@@ -36255,19 +36265,19 @@ ActionManager.prototype.createStatic = function( mesh, collisionType ) {
 ActionManager.prototype.createTrigger = function( label, position, radius, isOnetime, actionCallback ) {
 
 	var trigger = new ActionTrigger( position, radius, isOnetime, new Action( actionCallback, label ) );
-	this.addTrigger( trigger );
+	this._triggers.push( trigger );
 	return trigger;
 };
 
 /**
- * Adds a single interactive object to the internal array.
+ * Removes a single action object from the internal array.
  * 
- * @param {ActionObject} interactiveObject - The interactive object to be
- * added.
+ * @param {ActionObject} actionObject - The action object to be removed.
  */
-ActionManager.prototype.addInteractiveObject = function( interactiveObject ) {
+ActionManager.prototype.removeActionObject = function( actionObject ) {
 
-	this.interactiveObjects.push( interactiveObject );
+	var index = this.actionObjects.indexOf( actionObject );
+	this.actionObjects.splice( index, 1 );
 };
 
 /**
@@ -36276,28 +36286,14 @@ ActionManager.prototype.addInteractiveObject = function( interactiveObject ) {
  * @param {ActionObject} interactiveObject - The interactive object to be
  * removed.
  */
-ActionManager.prototype.removeInteractiveObject = function( interactiveObject ) {
+ActionManager.prototype.removeInteraction = function( interactiveObject ) {
 
-	var index = this.interactiveObjects.indexOf( interactiveObject );
-	this.interactiveObjects.splice( index, 1 );
-};
+	// we need to remove the object from both arrays
+	var index = this._interactiveObjects.indexOf( interactiveObject );
+	this._interactiveObjects.splice( index, 1 );
 
-/**
- * Removes all interactive objects from the internal array.
- */
-ActionManager.prototype.removeInteractiveObjects = function() {
-
-	this.interactiveObjects.length = 0;
-};
-
-/**
- * Adds a single trigger to the internal array.
- * 
- * @param {ActionTrigger} trigger - The trigger to be added.
- */
-ActionManager.prototype.addTrigger = function( trigger ) {
-
-	this.triggers.push( trigger );
+	// also remove it from the action object array
+	this.removeActionObject( interactiveObject );
 };
 
 /**
@@ -36307,8 +36303,17 @@ ActionManager.prototype.addTrigger = function( trigger ) {
  */
 ActionManager.prototype.removeTrigger = function( trigger ) {
 
-	var index = this.triggers.indexOf( trigger );
-	this.triggers.splice( index, 1 );
+	var index = this._triggers.indexOf( trigger );
+	this._triggers.splice( index, 1 );
+};
+
+/**
+ * Removes all action objects from the internal array.
+ */
+ActionManager.prototype.removeActionObjects = function() {
+
+	this.actionObjects.length = 0;
+	this._interactiveObjects.length = 0;
 };
 
 /**
@@ -36316,36 +36321,7 @@ ActionManager.prototype.removeTrigger = function( trigger ) {
  */
 ActionManager.prototype.removeTriggers = function() {
 
-	this.triggers.length = 0;
-};
-
-/**
- * Adds a single static object to the internal array.
- * 
- * @param {ActionObject} staticObject - The static object to be added.
- */
-ActionManager.prototype.addStaticObject = function( staticObject ) {
-
-	this.staticObjects.push( staticObject );
-};
-
-/**
- * Removes a single static object from the internal array.
- * 
- * @param {ActionObject} staticObject - The static object to be removed.
- */
-ActionManager.prototype.removeStaticObject = function( staticObject ) {
-
-	var index = this.staticObjects.indexOf( staticObject );
-	this.staticObjects.splice( index, 1 );
-};
-
-/**
- * Removes all static objects from the internal array.
- */
-ActionManager.prototype.removeStaticObjects = function() {
-
-	this.staticObjects.length = 0;
+	this._triggers.length = 0;
 };
 
 /**
@@ -36360,7 +36336,7 @@ ActionManager.prototype._calculateClosestIntersection = function( position, dire
 	this._raycaster.far = 20;
 
 	// intersection test. the result is already sorted by distance
-	intersects = this._raycaster.intersectObjects( this.interactiveObjects );
+	intersects = this._raycaster.intersectObjects( this._interactiveObjects );
 
 	if ( intersects.length > 0 )
 	{
@@ -36397,7 +36373,8 @@ ActionManager.prototype._calculateClosestIntersection = function( position, dire
  */
 ActionManager.prototype._checkInteraction = function( position, direction ) {
 
-	// calculate the intersection with the closest visible and active interactive object
+	// calculate the intersection with the closest visible and active
+	// interactive object
 	var interactiveObject = this._calculateClosestIntersection( position, direction );
 
 	// show the interaction label if there is an intersection
@@ -36420,16 +36397,17 @@ ActionManager.prototype._checkInteraction = function( position, direction ) {
  */
 ActionManager.prototype._onInteraction = function( message, data ) {
 
-	// calculate the intersection with the closest visible and active interactive object
+	// calculate the intersection with the closest visible and active
+	// interactive object
 	var interactiveObject = self._calculateClosestIntersection( data.position, data.direction );
 
 	if ( interactiveObject !== undefined )
 	{
 		// execute the assigned action
 		interactiveObject.action.run();
-		
+
 		logger.log( "INFO: ActionManager: Interaction with interactive object. Action executed." );
-		
+
 	}
 };
 
@@ -40860,9 +40838,7 @@ StageBase.prototype.start = function() {
 StageBase.prototype.destroy = function() {
 
 	// remove stage objects from all managers
-	this.actionManager.removeInteractiveObjects();
-
-	this.actionManager.removeStaticObjects();
+	this.actionManager.removeActionObjects();
 
 	this.actionManager.removeTriggers();
 
@@ -41678,6 +41654,13 @@ function World() {
 			configurable : false,
 			enumerable : true,
 			writable : false
+		},
+		// this is just a reference to the action objects of the action manager
+		obstacles : {
+			value : actionManager.actionObjects,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		}
 
 	} );
@@ -41801,46 +41784,6 @@ World.prototype.removeWalls = function() {
 	{
 		this.removeWall( this.walls[ index ] );
 	}
-};
-
-/**
- * Gets an obstacle by index.
- * 
- * @param {number} index - The index of the obstacle.
- * @param {object} obstacle - The target object.
- */
-World.prototype.getObstacle = function( index ) {
-
-	var i = index;
-
-	if ( i < actionManager.interactiveObjects.length )
-	{
-		return actionManager.interactiveObjects[ i ];
-	}
-	else
-	{
-		i -= actionManager.interactiveObjects.length;
-	}
-
-	if ( i < actionManager.staticObjects.length )
-	{
-		return actionManager.staticObjects[ i ];
-	}
-	else
-	{
-		throw "ERROR: World: Obstacle index out of range.";
-	}
-
-};
-
-/**
- * Returns the number of obstacles in the game world.
- * 
- * @returns {number} The number of obstacles.
- */
-World.prototype.getNumberOfObstacles = function() {
-
-	return actionManager.interactiveObjects.length + actionManager.staticObjects.length;
 };
 
 /**
@@ -45276,14 +45219,11 @@ Player.prototype._isCollisionDetected = function() {
 
 	var index, obstacle;
 
-	// this holds the current number if obstacles in the world
-	var numberOfObstacle = this.world.getNumberOfObstacles();
-
 	// now do the collision test with all obstacles
-	for ( index = 0; index < numberOfObstacle; index++ )
+	for ( index = 0; index < this.world.obstacles.length; index++ )
 	{
 		// retrieve obstacle
-		obstacle = this.world.getObstacle( index );
+		obstacle =  this.world.obstacles[ index ];
 
 		// do collision detection but only with visible obstacles
 		if ( obstacle.mesh.visible === true && obstacle.isIntersection( this.boundingVolume ) === true )
@@ -49008,18 +48948,15 @@ SteeringBehaviors.prototype._hide = ( function() {
 
 	return function( hunter ) {
 		
-		var distanceSq, closestDistanceSq, numberOfObstacle, obstacle, index;
+		var distanceSq, closestDistanceSq, obstacle, index;
 
 		// this will be used to track the distance to the closest hiding spot
 		closestDistanceSq = Infinity;
 
-		// get number of obstacles in the world
-		numberOfObstacle = this.vehicle.world.getNumberOfObstacles();
-
-		for ( index = 0; index < numberOfObstacle; index++ )
+		for ( index = 0; index < this.vehicle.world.obstacles.length; index++ )
 		{
-			// retrieve obstacle
-			obstacle = this.vehicle.world.getObstacle( index );
+			// buffer obstacle
+			obstacle = this.vehicle.world.obstacles[ index ];
 
 			// calculate the position of the hiding spot for this obstacle
 			this._getHidingPosition( obstacle.boundingSphere.center, obstacle.boundingSphere.radius, hunter.position, hidingSpot );
@@ -49136,9 +49073,6 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
 		// this will be used to track the distance to the closest obstacle
 		var distanceToClosestObstacle = Infinity;
 		
-		// get number of obstacles in the world
-		var numberOfObstacle = this.vehicle.world.getNumberOfObstacles();
-		
 		// the detection box length is proportional to the agent's velocity
 		var detectionBoxLength = this.vehicle.getSpeed() + this.vehicle.maxSpeed + vehicleSize.z * 0.5;
 
@@ -49151,10 +49085,10 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
 		// this matrix will transform points to the local space of the vehicle
 		inverseMatrix.getInverse( this.vehicle.object3D.matrixWorld );
 
-		for ( index = 0; index < numberOfObstacle; index++ )
+		for ( index = 0; index < this.vehicle.world.obstacles; index++ )
 		{
 			// retrieve obstacle
-			obstacle = this.vehicle.world.getObstacle( index );
+			obstacle = this.vehicle.world.obstacles[ index ];
 
 			// calculate this obstacle's position in local space
 			localPositionOfObstacle.copy( obstacle.boundingSphere.center ).applyMatrix4( inverseMatrix );
@@ -53017,54 +52951,54 @@ Stage.prototype.setup = function() {
 	colorFaces( groundGeometry );
 
 	// create interactive box
-	var interactiveBox = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+	var boxInteraction = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
 		color : StageBase.COLORS.BLUE_DARK
 	} ) );
-	interactiveBox.matrixAutoUpdate = false;
-	interactiveBox.position.set( 50, 5, 0 );
-	interactiveBox.castShadow = true;
-	interactiveBox.updateMatrix();
-	this.world.addObject3D( interactiveBox );
+	boxInteraction.matrixAutoUpdate = false;
+	boxInteraction.position.set( 50, 5, 0 );
+	boxInteraction.castShadow = true;
+	boxInteraction.updateMatrix();
+	this.world.addObject3D( boxInteraction );
 
-	this.actionManager.createInteraction( interactiveBox, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Action", function() {
+	this.actionManager.createInteractiveObject( boxInteraction, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Action", function() {
 
 		// nothing happens here...
 	} );
 
-	// create first static box with AABB collision detection
-	var staticBoxHover = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+	// create first box with AABB collision detection
+	var boxAABB = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
 		color : StageBase.COLORS.PRIMARY
 	} ) );
-	staticBoxHover.matrixAutoUpdate = false;
-	staticBoxHover.position.set( 17, 15, 0 );
-	staticBoxHover.castShadow = true;
-	staticBoxHover.updateMatrix();
-	this.world.addObject3D( staticBoxHover );
+	boxAABB.matrixAutoUpdate = false;
+	boxAABB.position.set( 17, 15, 0 );
+	boxAABB.castShadow = true;
+	boxAABB.updateMatrix();
+	this.world.addObject3D( boxAABB );
 
-	this.actionManager.createStatic( staticBoxHover, this.actionManager.COLLISIONTYPES.AABB );
+	this.actionManager.createActionObject( boxAABB, this.actionManager.COLLISIONTYPES.AABB );
 
-	// create second static box with OBB collision detection
-	var staticBox = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 20 ), new THREE.MeshLambertMaterial( {
+	// create second box with OBB collision detection
+	var boxOBB = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 20 ), new THREE.MeshLambertMaterial( {
 		color : StageBase.COLORS.PRIMARY
 	} ) );
-	staticBox.matrixAutoUpdate = false;
-	staticBox.position.set( -17, 5, 0 );
-	staticBox.rotation.set( 0, Math.PI * 0.2, 0 );
-	staticBox.castShadow = true;
-	staticBox.updateMatrix();
-	this.world.addObject3D( staticBox );
+	boxOBB.matrixAutoUpdate = false;
+	boxOBB.position.set( -17, 5, 0 );
+	boxOBB.rotation.set( 0, Math.PI * 0.2, 0 );
+	boxOBB.castShadow = true;
+	boxOBB.updateMatrix();
+	this.world.addObject3D( boxOBB );
 
-	this.actionManager.createStatic( staticBox, this.actionManager.COLLISIONTYPES.OBB );
+	this.actionManager.createActionObject( boxOBB, this.actionManager.COLLISIONTYPES.OBB );
 
 	// create plain object
-	var plainBox = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+	var boxPlain = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
 		color : StageBase.COLORS.BLUE_WHITE
 	} ) );
-	plainBox.matrixAutoUpdate = false;
-	plainBox.position.set( -50, 5, 0 );
-	plainBox.castShadow = true;
-	plainBox.updateMatrix();
-	this.world.addObject3D( plainBox );
+	boxPlain.matrixAutoUpdate = false;
+	boxPlain.position.set( -50, 5, 0 );
+	boxPlain.castShadow = true;
+	boxPlain.updateMatrix();
+	this.world.addObject3D( boxPlain );
 
 	// add sign
 	var signLoader = new JSONLoader();
@@ -53204,7 +53138,7 @@ Stage.prototype.setup = function() {
 	interactiveBox.updateMatrix();
 	this.world.addObject3D( interactiveBox );
 
-	this.actionManager.createInteraction( interactiveBox, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Color", function() {
+	this.actionManager.createInteractiveObject( interactiveBox, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Color", function() {
 
 		colorMesh( interactiveBox );
 	} );
@@ -53365,16 +53299,16 @@ Stage.prototype.setup = function() {
 	colorFaces( groundGeometry );
 
 	// create interactive box
-	var interactiveBoxTextScreen = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+	var boxTextScreen = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
 		color : StageBase.COLORS.BLUE_DARK
 	} ) );
-	interactiveBoxTextScreen.matrixAutoUpdate = false;
-	interactiveBoxTextScreen.position.set( 20, 5, 0 );
-	interactiveBoxTextScreen.castShadow = true;
-	interactiveBoxTextScreen.updateMatrix();
-	this.world.addObject3D( interactiveBoxTextScreen );
+	boxTextScreen.matrixAutoUpdate = false;
+	boxTextScreen.position.set( 20, 5, 0 );
+	boxTextScreen.castShadow = true;
+	boxTextScreen.updateMatrix();
+	this.world.addObject3D( boxTextScreen );
 
-	this.actionManager.createInteraction( interactiveBoxTextScreen, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.TextScreen", function() {
+	this.actionManager.createInteractiveObject( boxTextScreen, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.TextScreen", function() {
 
 		self.userInterfaceManager.showTextScreen( [ {
 			name : "Name.Daniel",
@@ -53389,16 +53323,16 @@ Stage.prototype.setup = function() {
 	} );
 
 	// create interactive box
-	var interactiveBoxModal = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+	var boxModal = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
 		color : StageBase.COLORS.PRIMARY
 	} ) );
-	interactiveBoxModal.matrixAutoUpdate = false;
-	interactiveBoxModal.position.set( -20, 5, 0 );
-	interactiveBoxModal.castShadow = true;
-	interactiveBoxModal.updateMatrix();
-	this.world.addObject3D( interactiveBoxModal );
+	boxModal.matrixAutoUpdate = false;
+	boxModal.position.set( -20, 5, 0 );
+	boxModal.castShadow = true;
+	boxModal.updateMatrix();
+	this.world.addObject3D( boxModal );
 
-	this.actionManager.createInteraction( interactiveBoxModal, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Modal", function() {
+	this.actionManager.createInteractiveObject( boxModal, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Modal", function() {
 
 		self.userInterfaceManager.showModalDialog( {
 			headline : "Modal.Headline",
@@ -53663,34 +53597,34 @@ Stage.prototype.setup = function() {
 	colorFaces( groundGeometry );
 
 	// add boxes
-	var staticBoxFire = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+	var boxFire = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
 		color :StageBase.COLORS.PRIMARY
 	} ) );
-	staticBoxFire.matrixAutoUpdate = false;
-	staticBoxFire.position.set( 40, 5, 0 );
-	staticBoxFire.castShadow = true;
-	staticBoxFire.updateMatrix();
-	this.world.addObject3D( staticBoxFire );
-	this.actionManager.createStatic( staticBoxFire, this.actionManager.COLLISIONTYPES.AABB );
+	boxFire.matrixAutoUpdate = false;
+	boxFire.position.set( 40, 5, 0 );
+	boxFire.castShadow = true;
+	boxFire.updateMatrix();
+	this.world.addObject3D( boxFire );
+	this.actionManager.createActionObject( boxFire, this.actionManager.COLLISIONTYPES.AABB );
 
-	var staticBoxClock = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+	var boxClock = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
 		color : StageBase.COLORS.BLUE_WHITE
 	} ) );
-	staticBoxClock.matrixAutoUpdate = false;
-	staticBoxClock.position.set( -40, 5, 0 );
-	staticBoxClock.castShadow = true;
-	staticBoxClock.updateMatrix();
-	this.world.addObject3D( staticBoxClock );
-	this.actionManager.createStatic( staticBoxClock, this.actionManager.COLLISIONTYPES.AABB );
+	boxClock.matrixAutoUpdate = false;
+	boxClock.position.set( -40, 5, 0 );
+	boxClock.castShadow = true;
+	boxClock.updateMatrix();
+	this.world.addObject3D( boxClock );
+	this.actionManager.createActionObject( boxClock, this.actionManager.COLLISIONTYPES.AABB );
 
-	var staticBoxWall = new THREE.Mesh( new THREE.BoxGeometry( 1, 20, 40 ), new THREE.MeshBasicMaterial( {
+	var boxWall = new THREE.Mesh( new THREE.BoxGeometry( 1, 20, 40 ), new THREE.MeshBasicMaterial( {
 		wireframe : true
 	} ) );
-	staticBoxWall.matrixAutoUpdate = false;
-	staticBoxWall.position.set( -5.5, 5, 0 );
-	staticBoxWall.updateMatrix();
-	staticBoxClock.add( staticBoxWall );
-	this.actionManager.createStatic( staticBoxWall, this.actionManager.COLLISIONTYPES.AABB );
+	boxWall.matrixAutoUpdate = false;
+	boxWall.position.set( -5.5, 5, 0 );
+	boxWall.updateMatrix();
+	boxClock.add( boxWall );
+	this.actionManager.createActionObject( boxWall, this.actionManager.COLLISIONTYPES.AABB );
 
 	// add dynamic sounds
 	this.audioManager.createAudioBufferList( [ "fire", "clock" ], function( bufferList ) {
@@ -53707,8 +53641,8 @@ Stage.prototype.setup = function() {
 		audioClock.addDirection( 180, 0, 0 );
 		audioClock.position.set( -5, 0, 0 );
 
-		staticBoxFire.add( audioFire );
-		staticBoxClock.add( audioClock );
+		boxFire.add( audioFire );
+		boxClock.add( audioClock );
 	} ).load();
 
 	// add sign
@@ -53848,45 +53782,45 @@ Stage.prototype.setup = function() {
 	colorFaces( groundGeometry );
 
 	// add objects
-	var interactiveBoxBasic = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+	var boxBasic = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
 		color :StageBase.COLORS.PRIMARY
 	} ) );
-	interactiveBoxBasic.position.set( 20, 5, 0 );
-	interactiveBoxBasic.castShadow = true;
-	this.world.addObject3D( interactiveBoxBasic );
+	boxBasic.position.set( 20, 5, 0 );
+	boxBasic.castShadow = true;
+	this.world.addObject3D( boxBasic );
 
-	var interactiveObject = this.actionManager.createInteraction( interactiveBoxBasic, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.BasicAnimation", function() {
+	var interactiveObject = this.actionManager.createInteractiveObject( boxBasic, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.BasicAnimation", function() {
 
 		interactiveObject.action.isActive = false;
 
 		// create a basic animation, which animates a single value
 		self.animationManager.createBasicAnimation( {
-			object : interactiveBoxBasic.position,
+			object : boxBasic.position,
 			property : "x",
 			duration : 5000,
-			start : interactiveBoxBasic.position.x,
-			end : interactiveBoxBasic.position.x + 30,
+			start : boxBasic.position.x,
+			end : boxBasic.position.x + 30,
 			easing : Easing.Quartic.InOut
 		} ).play();
 	} );
 
-	var staticBoxHover = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
+	var boxHover = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
 		color : StageBase.COLORS.BLUE_WHITE
 	} ) );
-	staticBoxHover.position.set( -40, 8, 0 );
-	staticBoxHover.castShadow = true;
-	this.world.addObject3D( staticBoxHover );
-	this.actionManager.createStatic( staticBoxHover, this.actionManager.COLLISIONTYPES.AABB );
+	boxHover.position.set( -40, 8, 0 );
+	boxHover.castShadow = true;
+	this.world.addObject3D( boxHover );
+	this.actionManager.createActionObject( boxHover, this.actionManager.COLLISIONTYPES.AABB );
 
 	// create a hover animation, which animates infinitely a property between
 	// start- and end-value
 	this.animationManager.createHoverAnimation( {
-		object : staticBoxHover.position,
+		object : boxHover.position,
 		property : "y",
 		duration : 4000,
 		delayTime : 2000,
-		start : staticBoxHover.position.y,
-		end : staticBoxHover.position.y + 2,
+		start : boxHover.position.y,
+		end : boxHover.position.y + 2,
 		easing : Easing.Sinusoidal.InOut
 	} ).play();
 

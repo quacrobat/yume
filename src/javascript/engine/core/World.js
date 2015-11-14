@@ -45,6 +45,13 @@ function World() {
 			configurable : false,
 			enumerable : true,
 			writable : false
+		},
+		// this is just a reference to the action objects of the action manager
+		obstacles : {
+			value : actionManager.actionObjects,
+			configurable : false,
+			enumerable : true,
+			writable : false
 		}
 
 	} );
@@ -168,46 +175,6 @@ World.prototype.removeWalls = function() {
 	{
 		this.removeWall( this.walls[ index ] );
 	}
-};
-
-/**
- * Gets an obstacle by index.
- * 
- * @param {number} index - The index of the obstacle.
- * @param {object} obstacle - The target object.
- */
-World.prototype.getObstacle = function( index ) {
-
-	var i = index;
-
-	if ( i < actionManager.interactiveObjects.length )
-	{
-		return actionManager.interactiveObjects[ i ];
-	}
-	else
-	{
-		i -= actionManager.interactiveObjects.length;
-	}
-
-	if ( i < actionManager.staticObjects.length )
-	{
-		return actionManager.staticObjects[ i ];
-	}
-	else
-	{
-		throw "ERROR: World: Obstacle index out of range.";
-	}
-
-};
-
-/**
- * Returns the number of obstacles in the game world.
- * 
- * @returns {number} The number of obstacles.
- */
-World.prototype.getNumberOfObstacles = function() {
-
-	return actionManager.interactiveObjects.length + actionManager.staticObjects.length;
 };
 
 /**
