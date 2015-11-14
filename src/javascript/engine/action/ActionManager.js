@@ -30,14 +30,7 @@ function ActionManager() {
 
 		// this array holds references to all action objects. objects in this
 		// array are part of the internal collision detection
-		actionObjects : {
-			value : [],
-			configurable : false,
-			enumerable : true,
-			writable : false
-		},
-		// this array holds references to all triggers
-		_triggers : {
+		_actionObjects : {
 			value : [],
 			configurable : false,
 			enumerable : false,
@@ -47,6 +40,13 @@ function ActionManager() {
 		// interaction system. ray-tracing operations will regard only objects
 		// in this special array
 		_interactiveObjects : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		// this array holds references to all triggers
+		_triggers : {
 			value : [],
 			configurable : false,
 			enumerable : false,
@@ -96,9 +96,9 @@ ActionManager.prototype.update = function( player ) {
 	var index;
 
 	// update action objects
-	for ( index = 0; index < this.actionObjects.length; index++ )
+	for ( index = 0; index < this._actionObjects.length; index++ )
 	{
-		this.actionObjects[ index ].update();
+		this._actionObjects[ index ].update();
 	}
 
 	// update triggers
@@ -124,7 +124,7 @@ ActionManager.prototype.update = function( player ) {
 ActionManager.prototype.createActionObject = function( mesh, collisionType ) {
 
 	var object = new ActionObject( mesh, collisionType );
-	this.actionObjects.push( object );
+	this._actionObjects.push( object );
 	return object;
 };
 
@@ -146,7 +146,7 @@ ActionManager.prototype.createInteractiveObject = function( mesh, collisionType,
 	var object = new ActionObject( mesh, collisionType, raycastPrecision, new Action( actionCallback, label ) );
 
 	// the object will be stored in two separate data structures
-	this.actionObjects.push( object );
+	this._actionObjects.push( object );
 	this._interactiveObjects.push( object );
 
 	return object;
@@ -178,8 +178,8 @@ ActionManager.prototype.createTrigger = function( label, position, radius, isOne
  */
 ActionManager.prototype.removeActionObject = function( actionObject ) {
 
-	var index = this.actionObjects.indexOf( actionObject );
-	this.actionObjects.splice( index, 1 );
+	var index = this._actionObjects.indexOf( actionObject );
+	this._actionObjects.splice( index, 1 );
 };
 
 /**
@@ -214,7 +214,7 @@ ActionManager.prototype.removeTrigger = function( trigger ) {
  */
 ActionManager.prototype.removeActionObjects = function() {
 
-	this.actionObjects.length = 0;
+	this._actionObjects.length = 0;
 	this._interactiveObjects.length = 0;
 };
 
