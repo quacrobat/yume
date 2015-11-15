@@ -83,6 +83,8 @@ OBB.prototype.setFromObject = ( function() {
 	var vector = new THREE.Vector3();
 
 	return function( object ) {
+		
+		var scale, aabb, w;
 
 		// calculate AABB, if necessary
 		if ( object.geometry.boundingBox === null )
@@ -94,21 +96,21 @@ OBB.prototype.setFromObject = ( function() {
 		object.updateMatrixWorld();
 
 		// shortcuts
-		var aabb = object.geometry.boundingBox;
-		var w = object.matrixWorld.elements;
+		aabb = object.geometry.boundingBox;
+		w = object.matrixWorld.elements;
 
 		// assign the transform center to the position member
-		this.position = aabb.center().applyMatrix4( object.matrixWorld );
+		aabb.center( this.position ).applyMatrix4( object.matrixWorld );
 
 		// extract the rotation and assign it to the basis of the OBB
 		// for numerical stability, you could orthonormalize the basis
 		this.basis.extractRotation( object.matrixWorld );
 
 		// calculate half sizes for each axis
-		this.halfSizes = aabb.size().multiplyScalar( 0.5 );
+		aabb.size( this.halfSizes ).multiplyScalar( 0.5 );
 
 		// extract the (uniform) scaling and apply it to the halfSizes
-		var scale = vector.set( w[ 0 ], w[ 1 ], w[ 2 ] ).length();
+		scale = vector.set( w[ 0 ], w[ 1 ], w[ 2 ] ).length();
 
 		// do the scale
 		this.halfSizes.multiplyScalar( scale );
@@ -127,9 +129,9 @@ OBB.prototype.setFromObject = ( function() {
  */
 OBB.prototype.setFromAABB = function( aabb ) {
 
-	this.position = aabb.center();
+	aabb.center( this.position );
 
-	this.halfSizes = aabb.size().multiplyScalar( 0.5 );
+	aabb.size( this.halfSizes ).multiplyScalar( 0.5 );
 
 	this.basis.identity();
 
@@ -145,7 +147,7 @@ OBB.prototype.setFromAABB = function( aabb ) {
  */
 OBB.prototype.setFromSphere = function( sphere ) {
 
-	this.position = sphere.center;
+	this.position.copy( sphere.center );
 
 	this.halfSizes.set( sphere.radius, sphere.radius, sphere.radius );
 
@@ -586,6 +588,8 @@ OBB.prototype.isIntersectionRay = function( ray ) {
  */
 OBB.prototype.intersectRay = ( function() {
 
+	var zeroVector = new THREE.Vector3();
+	var size = new THREE.Vector3();
 	var aabb = new THREE.Box3();
 	var rayLocal = new THREE.Ray();
 
@@ -595,9 +599,12 @@ OBB.prototype.intersectRay = ( function() {
 	return function( ray ) {
 
 		var intersection;
+		
+		// get size of OBB
+		this.size( size );
 
 		// set AABB to origin with the size of the OBB
-		aabb.setFromCenterAndSize( new THREE.Vector3(), this.size() );
+		aabb.setFromCenterAndSize( zeroVector, size );
 
 		// transform ray to the local space of the OBB
 		transformationMatrix.copy( this.basis );
@@ -644,11 +651,15 @@ OBB.prototype.intersectSphere = function( sphere ) {
 /**
  * Gets the size of the OBB.
  * 
+ * @param {THREE.Vector3} optionalTarget - An optional target for the operation.
+ * 
  * @returns {THREE.Vector3} The size of the OBB.
  */
-OBB.prototype.size = function() {
+OBB.prototype.size = function( optionalTarget ) {
+	
+	var result = optionalTarget || new THREE.Vector3();
 
-	return this.halfSizes.clone().multiplyScalar( 2 );
+	return result.copy( this.halfSizes ).multiplyScalar( 2 );
 };
 
 /**

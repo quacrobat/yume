@@ -37,13 +37,13 @@ function ActionObject( mesh, collisionType, raycastPrecision, action ) {
 			writable : true
 		},
 		raycastPrecision : {
-			value : raycastPrecision || null,
+			value : raycastPrecision,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
 		action : {
-			value : action || null,
+			value : action,
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -171,12 +171,12 @@ ActionObject.prototype.raycast = function( raycaster, intersects ) {
 
 	// if a single intersectionPoint is found, we need to calculate
 	// additional data and push the point into the intersects array
-	if ( intersectionPoint !== undefined )
+	if ( intersectionPoint !== undefined && intersectionPoint !== null )
 	{
 		// get the distance to the intersection point
 		distance = raycaster.ray.origin.distanceTo( intersectionPoint );
 
-		if ( distance >= raycaster.precision && distance >= raycaster.near && distance <= raycaster.far )
+		if ( distance >= raycaster.near && distance <= raycaster.far )
 		{
 			// store the result in special data structure, see
 			// THREE.Mesh.raycast
@@ -188,9 +188,6 @@ ActionObject.prototype.raycast = function( raycaster, intersects ) {
 				object : this
 			} );
 		}
-
-		// reset value
-		intersectionPoint = null;
 	}
 };
 
