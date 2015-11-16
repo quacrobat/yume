@@ -99,7 +99,7 @@ function ActionManager() {
 	} );
 	
 	// create BSP-Tree
-	this._bspTree = new BSPTree( this._interactiveObjects );
+	this._bspTree = new BSPTree( this._actionObjects, this._interactiveObjects );
 
 	// subscriptions
 	eventManager.subscribe( TOPIC.ACTION.INTERACTION, this._onInteraction );

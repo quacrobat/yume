@@ -36197,7 +36197,7 @@ function ActionManager() {
 	} );
 	
 	// create BSP-Tree
-	this._bspTree = new BSPTree( this._interactiveObjects );
+	this._bspTree = new BSPTree( this._actionObjects, this._interactiveObjects );
 
 	// subscriptions
 	eventManager.subscribe( TOPIC.ACTION.INTERACTION, this._onInteraction );
@@ -36911,10 +36911,12 @@ var system = require( "../core/System" );
  * 
  * @constructor
  * 
+ * @param {object} actionObjects - A reference to an array with all
+ * action objects.
  * @param {object} interactiveObjects - A reference to an array with all
  * interactive objects.
  */
-function BSPTree( interactiveObjects ) {
+function BSPTree( actionObjects, interactiveObjects ) {
 
 	Object.defineProperties( this, {
 		_root : {
@@ -36923,11 +36925,17 @@ function BSPTree( interactiveObjects ) {
 			enumerable : false,
 			writable : true
 		},
+		_actionObjects : {
+			value : actionObjects,
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
 		_interactiveObjects : {
 			value : interactiveObjects,
 			configurable : false,
 			enumerable : false,
-			writable : true
+			writable : false
 		},
 		_currentAxis : {
 			value : 0,
@@ -42251,7 +42259,7 @@ function World() {
 			writable : false
 		},
 		// this is just a reference to the action objects of the action manager
-		obstacles : {
+		actionObjects : {
 			value : actionManager._actionObjects,
 			configurable : false,
 			enumerable : true,
@@ -45562,7 +45570,7 @@ function Player( world ) {
 
 	Object.defineProperties( this, {
 		// the reference to the world object, so the player can access
-		// obstacles, walls etc.
+		// grounds, walls etc.
 		world : {
 			value : world,
 			configurable : false,
@@ -45653,7 +45661,7 @@ Player.prototype.update = ( function() {
 			// update the bounding volume of the player
 			this._updateBoundingVolume();
 
-			// do ground and obstacle collision test. in this game scenario the
+			// do ground and collision test. in this game scenario the
 			// player can only move on valid grounds and if there is no
 			// intersection
 			if ( this._isPlayerOnGround() === true && this._isCollisionDetected() === false )
@@ -45816,29 +45824,28 @@ Player.prototype._isPlayerOnGround = ( function() {
 }() );
 
 /**
- * This method checks, if there are collision between the any obstacles in the
+ * This method checks, if there are collision between the any action objects in the
  * world and the player's bounding volume.
  * 
- * @returns {boolean} Is there a collision between an obstacle and the player.
+ * @returns {boolean} Is there a collision between an action object and the player.
  */
 Player.prototype._isCollisionDetected = function() {
 
-	var index, obstacle;
+	var index, object;
 
-	// now do the collision test with all obstacles
-	for ( index = 0; index < this.world.obstacles.length; index++ )
+	// now do the collision test with all objects
+	for ( index = 0; index < this.world.actionObjects.length; index++ )
 	{
-		// retrieve obstacle
-		obstacle =  this.world.obstacles[ index ];
+		object =  this.world.actionObjects[ index ];
 
-		// do collision detection but only with visible obstacles
-		if ( obstacle.mesh.visible === true && obstacle.isIntersection( this.boundingVolume ) === true )
+		// do collision detection but only with visible objects
+		if ( object.mesh.visible === true && object.isIntersection( this.boundingVolume ) === true )
 		{
 			// exit method, because there is an intersection
 			return true;
 		}
 
-	} // next obstacle 
+	} // next object 
 
 	// no intersection
 	return false;
@@ -45875,7 +45882,7 @@ function Vehicle( world, object3D, numSamplesForSmoothing ) {
 
 	Object.defineProperties( this, {
 		// the reference to the world object, so the vehicle can access
-		// obstacles, walls etc.
+		// grounds, walls etc.
 		world : {
 			value : world,
 			configurable : false,
@@ -49559,10 +49566,9 @@ SteeringBehaviors.prototype._hide = ( function() {
 		// this will be used to track the distance to the closest hiding spot
 		closestDistanceSq = Infinity;
 
-		for ( index = 0; index < this.vehicle.world.obstacles.length; index++ )
+		for ( index = 0; index < this.vehicle.world.actionObjects.length; index++ )
 		{
-			// buffer obstacle
-			obstacle = this.vehicle.world.obstacles[ index ];
+			obstacle = this.vehicle.world.actionObjects[ index ];
 
 			// calculate the position of the hiding spot for this obstacle
 			this._getHidingPosition( obstacle.boundingSphere.center, obstacle.boundingSphere.radius, hunter.position, hidingSpot );
@@ -49691,10 +49697,9 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
 		// this matrix will transform points to the local space of the vehicle
 		inverseMatrix.getInverse( this.vehicle.object3D.matrixWorld );
 
-		for ( index = 0; index < this.vehicle.world.obstacles; index++ )
+		for ( index = 0; index < this.vehicle.world.actionObjects; index++ )
 		{
-			// retrieve obstacle
-			obstacle = this.vehicle.world.obstacles[ index ];
+			obstacle = this.vehicle.world.actionObjects[ index ];
 
 			// calculate this obstacle's position in local space
 			localPositionOfObstacle.copy( obstacle.boundingSphere.center ).applyMatrix4( inverseMatrix );

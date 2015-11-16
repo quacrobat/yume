@@ -19,10 +19,12 @@ var system = require( "../core/System" );
  * 
  * @constructor
  * 
+ * @param {object} actionObjects - A reference to an array with all
+ * action objects.
  * @param {object} interactiveObjects - A reference to an array with all
  * interactive objects.
  */
-function BSPTree( interactiveObjects ) {
+function BSPTree( actionObjects, interactiveObjects ) {
 
 	Object.defineProperties( this, {
 		_root : {
@@ -31,11 +33,17 @@ function BSPTree( interactiveObjects ) {
 			enumerable : false,
 			writable : true
 		},
+		_actionObjects : {
+			value : actionObjects,
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
 		_interactiveObjects : {
 			value : interactiveObjects,
 			configurable : false,
 			enumerable : false,
-			writable : true
+			writable : false
 		},
 		_currentAxis : {
 			value : 0,

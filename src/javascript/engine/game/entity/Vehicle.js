@@ -27,7 +27,7 @@ function Vehicle( world, object3D, numSamplesForSmoothing ) {
 
 	Object.defineProperties( this, {
 		// the reference to the world object, so the vehicle can access
-		// obstacles, walls etc.
+		// grounds, walls etc.
 		world : {
 			value : world,
 			configurable : false,

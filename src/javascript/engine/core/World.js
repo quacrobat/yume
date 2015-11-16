@@ -47,7 +47,7 @@ function World() {
 			writable : false
 		},
 		// this is just a reference to the action objects of the action manager
-		obstacles : {
+		actionObjects : {
 			value : actionManager._actionObjects,
 			configurable : false,
 			enumerable : true,

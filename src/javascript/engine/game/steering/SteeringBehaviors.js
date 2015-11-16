@@ -944,10 +944,9 @@ SteeringBehaviors.prototype._hide = ( function() {
 		// this will be used to track the distance to the closest hiding spot
 		closestDistanceSq = Infinity;
 
-		for ( index = 0; index < this.vehicle.world.obstacles.length; index++ )
+		for ( index = 0; index < this.vehicle.world.actionObjects.length; index++ )
 		{
-			// buffer obstacle
-			obstacle = this.vehicle.world.obstacles[ index ];
+			obstacle = this.vehicle.world.actionObjects[ index ];
 
 			// calculate the position of the hiding spot for this obstacle
 			this._getHidingPosition( obstacle.boundingSphere.center, obstacle.boundingSphere.radius, hunter.position, hidingSpot );
@@ -1076,10 +1075,9 @@ SteeringBehaviors.prototype._obstacleAvoidance = ( function() {
 		// this matrix will transform points to the local space of the vehicle
 		inverseMatrix.getInverse( this.vehicle.object3D.matrixWorld );
 
-		for ( index = 0; index < this.vehicle.world.obstacles; index++ )
+		for ( index = 0; index < this.vehicle.world.actionObjects; index++ )
 		{
-			// retrieve obstacle
-			obstacle = this.vehicle.world.obstacles[ index ];
+			obstacle = this.vehicle.world.actionObjects[ index ];
 
 			// calculate this obstacle's position in local space
 			localPositionOfObstacle.copy( obstacle.boundingSphere.center ).applyMatrix4( inverseMatrix );

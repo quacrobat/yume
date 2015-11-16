@@ -26,7 +26,7 @@ function Player( world ) {
 
 	Object.defineProperties( this, {
 		// the reference to the world object, so the player can access
-		// obstacles, walls etc.
+		// grounds, walls etc.
 		world : {
 			value : world,
 			configurable : false,
@@ -117,7 +117,7 @@ Player.prototype.update = ( function() {
 			// update the bounding volume of the player
 			this._updateBoundingVolume();
 
-			// do ground and obstacle collision test. in this game scenario the
+			// do ground and collision test. in this game scenario the
 			// player can only move on valid grounds and if there is no
 			// intersection
 			if ( this._isPlayerOnGround() === true && this._isCollisionDetected() === false )
@@ -280,29 +280,28 @@ Player.prototype._isPlayerOnGround = ( function() {
 }() );
 
 /**
- * This method checks, if there are collision between the any obstacles in the
+ * This method checks, if there are collision between the any action objects in the
  * world and the player's bounding volume.
  * 
- * @returns {boolean} Is there a collision between an obstacle and the player.
+ * @returns {boolean} Is there a collision between an action object and the player.
  */
 Player.prototype._isCollisionDetected = function() {
 
-	var index, obstacle;
+	var index, object;
 
-	// now do the collision test with all obstacles
-	for ( index = 0; index < this.world.obstacles.length; index++ )
+	// now do the collision test with all objects
+	for ( index = 0; index < this.world.actionObjects.length; index++ )
 	{
-		// retrieve obstacle
-		obstacle =  this.world.obstacles[ index ];
+		object =  this.world.actionObjects[ index ];
 
-		// do collision detection but only with visible obstacles
-		if ( obstacle.mesh.visible === true && obstacle.isIntersection( this.boundingVolume ) === true )
+		// do collision detection but only with visible objects
+		if ( object.mesh.visible === true && object.isIntersection( this.boundingVolume ) === true )
 		{
 			// exit method, because there is an intersection
 			return true;
 		}
 
-	} // next obstacle 
+	} // next object 
 
 	// no intersection
 	return false;
