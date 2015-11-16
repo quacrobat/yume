@@ -22,6 +22,8 @@ var textScreen = require( "./TextScreen" );
 var modalDialog = require( "./ModalDialog" );
 var chat = require( "./Chat" );
 
+var self;
+
 /**
  * Creates the user interface manager.
  * 
@@ -37,6 +39,8 @@ function UserInterfaceManager() {
 			writable : true
 		}
 	} );
+	
+	self = this;
 }
 
 /**
@@ -186,12 +190,8 @@ UserInterfaceManager.prototype.hideModalDialog = function() {
 
 /**
  * Handles the press of the space-key.
- * 
- * @param {object} event - The event object.
  */
-UserInterfaceManager.prototype.handleUiInteraction = function( event ) {
-
-	event.preventDefault(); // prevent scrolling
+UserInterfaceManager.prototype.handleUiInteraction = function() {
 
 	if ( textScreen.isActive === true )
 	{
@@ -202,14 +202,6 @@ UserInterfaceManager.prototype.handleUiInteraction = function( event ) {
 		eventManager.publish( TOPIC.STAGE.START, undefined );
 		loadingScreen.hide();
 	}
-};
-
-/**
- * Toggles the visibility of the performance-monitor.
- */
-UserInterfaceManager.prototype.tooglePerformanceMonitor = function() {
-
-	performanceMonitor.toggle();
 };
 
 /**
@@ -252,12 +244,35 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 
 	switch ( event.keyCode )
 	{
+		// enter
 		case 13:
-			// enter
+
 			chat.toogle();
+
+			break;
+
+		// space
+		case 32:
+
+			// prevent scrolling
+			event.preventDefault();
+
+			// because pressing the space key can cause different actions, the
+			// logic for this key handling is placed in a separate method
+			self.handleUiInteraction();
+
+			break;
+
+		// f
+		case 70:
+
+			if ( system.isDevModeActive === true )
+			{
+				performanceMonitor.toggle();
+			}
+
 			break;
 	}
-
 };
 
 module.exports = new UserInterfaceManager();

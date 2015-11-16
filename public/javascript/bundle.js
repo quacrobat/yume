@@ -39283,6 +39283,7 @@ var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var camera = require( "../core/Camera" );
+var logger = require( "../core/Logger" );
 var audioManager = require( "../audio/AudioManager" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var settingsManager = require( "../etc/SettingsManager" );
@@ -39692,7 +39693,7 @@ FirstPersonControls.prototype._init = function() {
 	eventManager.subscribe( TOPIC.CONTROLS.LOCK, this._onLock );
 
 	// events
-	global.document.addEventListener( "lockPointer", this._onLockPointer );
+	global.document.addEventListener( "lockPointer", this._onCapturePointer );
 	global.document.addEventListener( "releasePointer", this._onReleasePointer );
 
 	global.document.addEventListener( "mousemove", this._onMouseMove );
@@ -40045,9 +40046,9 @@ FirstPersonControls.prototype._onLock = function( message, data ) {
 };
 
 /**
- * Locks the pointer for detecting mouse movements.
+ * Captures the pointer for detecting mouse movements.
  */
-FirstPersonControls.prototype._onLockPointer = function() {
+FirstPersonControls.prototype._onCapturePointer = function() {
 
 	self.isUiElementActive = false;
 
@@ -40074,7 +40075,7 @@ FirstPersonControls.prototype._onReleasePointer = function() {
 
 /**
  * Detects the change of the pointer lock status. It is used to control the
- * Menu.
+ * menu.
  */
 FirstPersonControls.prototype._onPointerlockchange = function() {
 
@@ -40088,6 +40089,8 @@ FirstPersonControls.prototype._onPointerlockchange = function() {
 		{
 			userInterfaceManager.hideMenu();
 		}
+		
+		logger.log( "INFO: FirstPersonControls: Capture pointer and activate controls.");
 
 	}
 	else
@@ -40098,6 +40101,8 @@ FirstPersonControls.prototype._onPointerlockchange = function() {
 		{
 			userInterfaceManager.showMenu();
 		}
+		
+		logger.log( "INFO: FirstPersonControls: Release pointer and deactivate controls.");
 	}
 
 	self._reset();
@@ -40106,7 +40111,7 @@ FirstPersonControls.prototype._onPointerlockchange = function() {
 /**
  * Any error situation should be marked with an exception.
  */
-FirstPersonControls.prototype._onPointerlockerror = function( event ) {
+FirstPersonControls.prototype._onPointerlockerror = function() {
 
 	throw "ERROR: FirstPersonControls: Pointer Lock Error.";
 };
@@ -40143,57 +40148,61 @@ FirstPersonControls.prototype._onMouseMove = function( event ) {
  * @param {object} event - Default event object.
  */
 FirstPersonControls.prototype._onKeyDown = function( event ) {
-
-	if ( self.isCaptured === true )
+	
+	if ( self.isCaptured === true && self.isLocked === false )
 	{
 		switch ( event.keyCode )
 		{
+			// w
 			case 87:
-				// w
+
 				self._isMoveForward = true;
+
 				break;
 
+			// a
 			case 65:
-				// a
+
 				self._isMoveLeft = true;
+
 				break;
 
+			// s
 			case 83:
-				// s
+
 				self._isMoveBackward = true;
+				
 				break;
 
+			// d
 			case 68:
-				// d
+
 				self._isMoveRight = true;
+
 				break;
 
+			// c
 			case 67:
-				// c
+
 				self._handleCrouch();
+
 				break;
 
+			// shift
 			case 16:
-				// shift
+
 				self._handleRun( true );
+
 				break;
 
+			// e
 			case 69:
-				// e
+
 				eventManager.publish( TOPIC.ACTION.INTERACTION, {
 					position : self._player.head.getWorldPosition(),
 					direction : self.getDirection()
 				} );
-				break;
 
-			case 70:
-				// f
-				userInterfaceManager.tooglePerformanceMonitor();
-				break;
-
-			case 32:
-				// space
-				userInterfaceManager.handleUiInteraction( event );
 				break;
 		}
 	}
@@ -40206,32 +40215,41 @@ FirstPersonControls.prototype._onKeyDown = function( event ) {
  */
 FirstPersonControls.prototype._onKeyUp = function( event ) {
 
-	if ( self.isCaptured === true )
+	if ( self.isCaptured === true && self.isLocked === false )
 	{
 		switch ( event.keyCode )
 		{
+			// w
 			case 87:
-				// w
+
 				self._isMoveForward = false;
+
 				break;
 
+			// a
 			case 65:
-				// a
+
 				self._isMoveLeft = false;
+
 				break;
 
+			// a
 			case 83:
-				// a
+
 				self._isMoveBackward = false;
+
 				break;
 
+			// d
 			case 68:
-				// d
+
 				self._isMoveRight = false;
+
 				break;
 
+			// shift
 			case 16:
-				// shift
+
 				if ( self._isCrouch === false )
 				{
 					self._handleRun( false );
@@ -40299,7 +40317,7 @@ FirstPersonControls.RUN = {
 
 module.exports = FirstPersonControls;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../etc/SettingsManager":40,"../etc/Utils":43,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":109,"three":1}],18:[function(require,module,exports){
+},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/Logger":21,"../etc/SettingsManager":40,"../etc/Utils":43,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":109,"three":1}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -56536,6 +56554,8 @@ var textScreen = require( "./TextScreen" );
 var modalDialog = require( "./ModalDialog" );
 var chat = require( "./Chat" );
 
+var self;
+
 /**
  * Creates the user interface manager.
  * 
@@ -56551,6 +56571,8 @@ function UserInterfaceManager() {
 			writable : true
 		}
 	} );
+	
+	self = this;
 }
 
 /**
@@ -56700,12 +56722,8 @@ UserInterfaceManager.prototype.hideModalDialog = function() {
 
 /**
  * Handles the press of the space-key.
- * 
- * @param {object} event - The event object.
  */
-UserInterfaceManager.prototype.handleUiInteraction = function( event ) {
-
-	event.preventDefault(); // prevent scrolling
+UserInterfaceManager.prototype.handleUiInteraction = function() {
 
 	if ( textScreen.isActive === true )
 	{
@@ -56716,14 +56734,6 @@ UserInterfaceManager.prototype.handleUiInteraction = function( event ) {
 		eventManager.publish( TOPIC.STAGE.START, undefined );
 		loadingScreen.hide();
 	}
-};
-
-/**
- * Toggles the visibility of the performance-monitor.
- */
-UserInterfaceManager.prototype.tooglePerformanceMonitor = function() {
-
-	performanceMonitor.toggle();
 };
 
 /**
@@ -56766,12 +56776,35 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 
 	switch ( event.keyCode )
 	{
+		// enter
 		case 13:
-			// enter
+
 			chat.toogle();
+
+			break;
+
+		// space
+		case 32:
+
+			// prevent scrolling
+			event.preventDefault();
+
+			// because pressing the space key can cause different actions, the
+			// logic for this key handling is placed in a separate method
+			self.handleUiInteraction();
+
+			break;
+
+		// f
+		case 70:
+
+			if ( system.isDevModeActive === true )
+			{
+				performanceMonitor.toggle();
+			}
+
 			break;
 	}
-
 };
 
 module.exports = new UserInterfaceManager();
