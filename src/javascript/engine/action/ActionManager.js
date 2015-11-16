@@ -14,8 +14,10 @@ var TOPIC = require( "../messaging/Topic" );
 var Action = require( "./Action" );
 var ActionObject = require( "./ActionObject" );
 var ActionTrigger = require( "./ActionTrigger" );
+var BSPTree = require( "./BSPTree" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var logger = require( "../core/Logger" );
+var timing = require( "../core/Timing" );
 
 var self;
 
@@ -27,7 +29,16 @@ var self;
 function ActionManager() {
 
 	Object.defineProperties( this, {
-
+		// if you have many objects in your stage, you can use this flag turn on
+		// space partitioning with a BSP Tree. right now, raytracing would be
+		// executed faster with this. collision detection with a BSP Tree
+		// is not yet implemented
+		useSpacePartitioning : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
 		// this array holds references to all action objects. objects in this
 		// array are part of the internal collision detection
 		_actionObjects : {
@@ -59,6 +70,13 @@ function ActionManager() {
 			enumerable : false,
 			writable : false
 		},
+		// a BSP Tree for spatial space partitioning
+		_bspTree : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
 		COLLISIONTYPES : {
 			value : {
 				AABB : 0,
@@ -79,6 +97,9 @@ function ActionManager() {
 			writable : false
 		}
 	} );
+	
+	// create BSP-Tree
+	this._bspTree = new BSPTree( this._interactiveObjects );
 
 	// subscriptions
 	eventManager.subscribe( TOPIC.ACTION.INTERACTION, this._onInteraction );
@@ -109,6 +130,24 @@ ActionManager.prototype.update = function( player ) {
 
 	// check interaction objects
 	this._checkInteraction( player.getHeadPosition(), player.getDirection() );
+};
+
+/**
+ * Generates the internal BSP-Tree with data from the current stage.
+ * 
+ * @param {World} world - The world object.
+ */
+ActionManager.prototype.generateBSPTree = function( world ) {
+
+	timing.mark( "BSP_START" );
+	
+	this._bspTree.generate( world );
+	
+	timing.mark( "BSP_END" );
+	
+	timing.measure( "BSP-Tree Generation", "BSP_START", "BSP_END" );
+	
+	timing.print( "BSP-Tree Generation" );
 };
 
 /**
@@ -228,43 +267,69 @@ ActionManager.prototype.removeTriggers = function() {
 
 /**
  * Calculates the closest intersection with an interactive object.
+ * 
+ * @param {THREE.Vector3} position - The position of the player.
+ * @param {THREE.Vector3} direction - The direction the player is looking at.
  */
-ActionManager.prototype._calculateClosestIntersection = function( position, direction ) {
+ActionManager.prototype._calculateClosestIntersection = ( function() {
 
-	var interactiveObject, intersects, index;
+	var objectsToTest = [];
 
-	// prepare raycaster
-	this._raycaster.set( position, direction );
-	this._raycaster.far = 20;
+	return function( position, direction ) {
 
-	// intersection test. the result is already sorted by distance
-	intersects = this._raycaster.intersectObjects( this._interactiveObjects );
+		var interactiveObject, intersects, index;
 
-	if ( intersects.length > 0 )
-	{
-		for ( index = 0; index < intersects.length; index++ )
+		// prepare raycaster
+		this._raycaster.set( position, direction );
+		this._raycaster.far = 20;
+
+		// if space partitioning is activated, use a BSP Tree to decrease the
+		// amount of objects to test
+		if ( this.useSpacePartitioning === true )
 		{
-			interactiveObject = intersects[ index ].object;
+			// reset the array
+			objectsToTest.length = 0;
 
-			// the action property must always set
-			if ( interactiveObject.action !== undefined )
-			{
-				// return the object if it has an active action. if not,
-				// continue with the next object
-				if ( interactiveObject.action.isActive === true )
-				{
-					return interactiveObject;
-				}
-			}
-			else
-			{
-				throw "ERROR: ActionManager: No action defined for interactive object.";
-			}
+			// check the BSP Tree
+			this._bspTree.intersectRay( this._raycaster.ray, objectsToTest );
 
+			// do the actual intersection test
+			intersects = this._raycaster.intersectObjects( objectsToTest );
 		}
-	}
+		else
+		{
+			// do the intersection test without BSP Tree
+			intersects = this._raycaster.intersectObjects( this._interactiveObjects );
+		}
 
-};
+		// now check the results
+		if ( intersects.length > 0 )
+		{
+			// the objects are already sorted by distance, so we are starting with the closest
+			for ( index = 0; index < intersects.length; index++ )
+			{
+				interactiveObject = intersects[ index ].object;
+
+				// the action property must always set
+				if ( interactiveObject.action !== undefined )
+				{
+					// return the object if it has an active action. if not,
+					// continue with the next object
+					if ( interactiveObject.action.isActive === true )
+					{
+						return interactiveObject;
+					}
+				}
+				else
+				{
+					throw "ERROR: ActionManager: No action defined for interactive object.";
+				}
+
+			}
+		}
+	};
+
+}() );
 
 /**
  * This method checks if the user interface should indicate, that the player can
