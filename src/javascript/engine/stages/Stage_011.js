@@ -70,15 +70,6 @@ Stage.prototype.setup = function() {
 	var ambientLight = new THREE.AmbientLight( 0x111111 );
 	this.world.addObject3D( ambientLight );
 
-	var directionalLight = new THREE.DirectionalLight( 0xffffff );
-	directionalLight.position.set( -100, 50, -100 );
-	directionalLight.shadowCameraLeft = -40;
-	directionalLight.shadowCameraRight = 40;
-	directionalLight.shadowCameraTop = 40;
-	directionalLight.shadowCameraBottom = -40;
-	this.settingsManager.adjustLight( directionalLight );
-	this.world.addObject3D( directionalLight );
-
 	// add trigger for ending
 	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 15, true, function() {
 

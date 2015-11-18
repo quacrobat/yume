@@ -141,30 +141,22 @@ SettingsManager.prototype.adjustLight = function( light ) {
 	{
 		// smoother shadows on high-settings
 		light.castShadow = true;
-		light.shadowMapWidth = 1024;
-		light.shadowMapHeight = 1024;
+		light.shadow.mapSize.x = 1024;
+		light.shadow.mapSize.y = 1024;
 	}
 	else if ( this._settings.graphicSettings === SettingsManager.GRAPHICS.MIDDLE )
 	{
 		// shadows on middle-settings
 		light.castShadow = true;
-		light.shadowMapWidth = 512;
-		light.shadowMapHeight = 512;
+		light.shadow.mapSize.x = 512;
+		light.shadow.mapSize.y = 512;
 	}
 	else
 	{
 		// no shadows on low-settings
 		light.castShadow = false;
 	}
-
-	if ( system.isDevModeActive === true )
-	{
-		if ( light instanceof THREE.SpotLight || light instanceof THREE.DirectionalLight )
-		{
-			light.castShadow = true;
-			light.shadowCameraVisible = true;
-		}
-	}
+	
 };
 
 /**

@@ -129,10 +129,11 @@ Stage.prototype.setup = function() {
 
 	var directionalLight = new THREE.DirectionalLight( 0xffffff );
 	directionalLight.position.set( -100, 50, -100 );
-	directionalLight.shadowCameraLeft = -40;
-	directionalLight.shadowCameraRight = 40;
-	directionalLight.shadowCameraTop = 40;
-	directionalLight.shadowCameraBottom = -40;
+	directionalLight.shadow.camera.left = -40;
+	directionalLight.shadow.camera.right = 40;
+	directionalLight.shadow.camera.top = 40;
+	directionalLight.shadow.camera.bottom = -40;
+	directionalLight.shadow.darkness = 0.5;
 	this.settingsManager.adjustLight( directionalLight );
 	this.world.addObject3D( directionalLight );
 
