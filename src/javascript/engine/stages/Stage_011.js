@@ -4,6 +4,7 @@ var THREE = require( "three" );
 
 var StageBase = require( "../core/StageBase" );
 var JSONLoader = require( "../etc/JSONLoader" );
+var utils = require( "../etc/Utils" );
 var Easing = require( "../animation/Easing" );
 
 var self;
@@ -37,13 +38,13 @@ Stage.prototype.setup = function() {
 
 	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
+	ground.rotation.x = - utils.HALF_PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
 
 	// color faces
-	colorFaces( groundGeometry );
+	utils.colorFaces( groundGeometry, StageBase.COLORS.PRIMARY, StageBase.COLORS.BLUE_DARK );
 
 	// add sign
 	var signLoader = new JSONLoader();
@@ -53,7 +54,7 @@ Stage.prototype.setup = function() {
 
 		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
@@ -73,13 +74,7 @@ Stage.prototype.setup = function() {
 	// add trigger for ending
 	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 15, true, function() {
 
-		self.userInterfaceManager.showModalDialog( {
-			headline : "Modal.Headline",
-			button : "Modal.Button",
-			content : "Modal.Content"
-		} );
-
-		self.saveGameManager.remove();	
+		self._changeStage( "012", true );	
 	} );
 
 	// post processing
@@ -112,22 +107,5 @@ Stage.prototype._render = function() {
 
 	StageBase.prototype._render.call( self );
 };
-
-// custom functions
-
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
 
 module.exports = Stage;

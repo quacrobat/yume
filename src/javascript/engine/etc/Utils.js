@@ -30,6 +30,32 @@ function Utils() {
 }
 
 /**
+ * This method colors the faces of a geometry with two colors in an alternating
+ * way.
+ * 
+ * @param {THREE.Geometry} geometry - The geometry object.
+ * @param {THREE.Color} color1 - The first color of the faces.
+ * @param {THREE.Color} color2 - The second color of the faces.
+ */
+Utils.prototype.colorFaces = function( geometry, color1, color2 ) {
+
+	var index;
+
+	for ( index = 0; index < geometry.faces.length; index++ )
+	{
+		if ( index % 2 === 0 )
+		{
+			geometry.faces[ index ].color = color1;
+		}
+		else
+		{
+			geometry.faces[ index ].color = color2;
+		}
+	}
+
+};
+
+/**
  * Preloads images and executes a callback, when all work is done.
  * 
  * @param {object} images - An array with URLs of images.

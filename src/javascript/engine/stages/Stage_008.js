@@ -4,6 +4,7 @@ var THREE = require( "three" );
 
 var StageBase = require( "../core/StageBase" );
 var JSONLoader = require( "../etc/JSONLoader" );
+var utils = require( "../etc/Utils" );
 var Easing = require( "../animation/Easing" );
 
 var self;
@@ -39,7 +40,7 @@ Stage.prototype.setup = function() {
 	var groundDown = new THREE.Mesh( groundGeometry, groundMaterial );
 	groundDown.matrixAutoUpdate = false;
 	groundDown.position.set( 0, 0, -50 );
-	groundDown.rotation.x = -0.5 * Math.PI;
+	groundDown.rotation.x = - utils.HALF_PI;
 	groundDown.updateMatrix();
 	groundDown.receiveShadow = true;
 	this.world.addGround( groundDown );
@@ -48,13 +49,13 @@ Stage.prototype.setup = function() {
 	var groundUp = new THREE.Mesh( groundGeometry, groundMaterial );
 	groundUp.matrixAutoUpdate = false;
 	groundUp.position.set( 0, 7.5, 68 );
-	groundUp.rotation.x = -0.5 * Math.PI;
+	groundUp.rotation.x = - utils.HALF_PI;
 	groundUp.updateMatrix();
 	groundUp.receiveShadow = true;
 	this.world.addGround( groundUp );
 
 	// color faces
-	colorFaces( groundGeometry );
+	utils.colorFaces( groundGeometry, StageBase.COLORS.PRIMARY, StageBase.COLORS.BLUE_DARK );
 
 	// add sign
 	var signLoader = new JSONLoader();
@@ -64,7 +65,7 @@ Stage.prototype.setup = function() {
 
 		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 27.5, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
@@ -93,12 +94,12 @@ Stage.prototype.setup = function() {
 
 	// add invisible ramp
 	var rampGeometry = new THREE.PlaneBufferGeometry( 200, 25, 1, 1 );
-	var rampMaterial = new THREE.MeshBasicMaterial( { visible:false } );
+	var rampMaterial = new THREE.MeshBasicMaterial( { visible: false } );
 
 	var ramp = new THREE.Mesh( rampGeometry, rampMaterial );
 	ramp.matrixAutoUpdate = false;
-	ramp.position.set( 0, 2.8, 6.4 );
-	ramp.rotation.x = 1.378 * Math.PI;
+	ramp.position.set( 0, 2.8, 6.45 );
+	ramp.rotation.x = 1.376 * Math.PI;
 	ramp.updateMatrix();
 	this.world.addGround( ramp );
 
@@ -129,22 +130,5 @@ Stage.prototype._render = function() {
 
 	StageBase.prototype._render.call( self );
 };
-
-// custom functions
-
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
 
 module.exports = Stage;

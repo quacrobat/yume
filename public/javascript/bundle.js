@@ -36681,7 +36681,7 @@ ActionManager.prototype._onInteraction = function( message, data ) {
 };
 
 module.exports = new ActionManager();
-},{"../core/Logger":21,"../core/Timing":30,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":109,"./Action":4,"./ActionObject":6,"./ActionTrigger":7,"./BSPTree":8,"three":1}],6:[function(require,module,exports){
+},{"../core/Logger":21,"../core/Timing":30,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":110,"./Action":4,"./ActionObject":6,"./ActionTrigger":7,"./BSPTree":8,"three":1}],6:[function(require,module,exports){
 /**
  * @file This prototype enables ordinary 3D-Objects to be interactive. Any
  * action object is part of the collision-detection logic and ready for
@@ -40521,7 +40521,7 @@ FirstPersonControls.RUN = {
 
 module.exports = FirstPersonControls;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/Logger":21,"../etc/SettingsManager":40,"../etc/Utils":43,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":109,"three":1}],18:[function(require,module,exports){
+},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/Logger":21,"../etc/SettingsManager":40,"../etc/Utils":43,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":110,"three":1}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -40634,7 +40634,7 @@ Bootstrap.prototype._loadStage = function() {
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/MultiplayerManager":35,"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../network/NetworkManager":70,"../ui/UserInterfaceManager":109,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27,"./World":31}],19:[function(require,module,exports){
+},{"../etc/MultiplayerManager":35,"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../network/NetworkManager":70,"../ui/UserInterfaceManager":110,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27,"./World":31}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for camera-based
@@ -41745,7 +41745,7 @@ StageBase.COLORS = {
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../etc/PerformanceManager":38,"../etc/SaveGameManager":39,"../etc/SettingsManager":40,"../etc/TextManager":42,"../game/entity/EntityManager":44,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":109,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
+},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../etc/PerformanceManager":38,"../etc/SaveGameManager":39,"../etc/SettingsManager":40,"../etc/TextManager":42,"../game/entity/EntityManager":44,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":110,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -41774,6 +41774,7 @@ var Stage_008 = require( "../stages/Stage_008" );
 var Stage_009 = require( "../stages/Stage_009" );
 var Stage_010 = require( "../stages/Stage_010" );
 var Stage_011 = require( "../stages/Stage_011" );
+var Stage_012 = require( "../stages/Stage_012" );
 
 /**
  * Creates the stage manager.
@@ -41887,6 +41888,11 @@ StageManager.prototype.load = function( stageId ) {
 		case "011":
 
 			this._stage = new Stage_011();
+			break;
+			
+		case "012":
+			
+			this._stage = new Stage_012();
 			break;
 
 		default:
@@ -42037,7 +42043,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../stages/Stage_001":88,"../stages/Stage_002":89,"../stages/Stage_003":90,"../stages/Stage_004":91,"../stages/Stage_005":92,"../stages/Stage_006":93,"../stages/Stage_007":94,"../stages/Stage_008":95,"../stages/Stage_009":96,"../stages/Stage_010":97,"../stages/Stage_011":98,"../ui/UserInterfaceManager":109,"./Logger":21}],27:[function(require,module,exports){
+},{"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../stages/Stage_001":88,"../stages/Stage_002":89,"../stages/Stage_003":90,"../stages/Stage_004":91,"../stages/Stage_005":92,"../stages/Stage_006":93,"../stages/Stage_007":94,"../stages/Stage_008":95,"../stages/Stage_009":96,"../stages/Stage_010":97,"../stages/Stage_011":98,"../stages/Stage_012":99,"../ui/UserInterfaceManager":110,"./Logger":21}],27:[function(require,module,exports){
 /**
  * @file This prototype holds core information about the engine. The runtime
  * behavior of the application depends crucially of this prototype.
@@ -44836,9 +44842,6 @@ function SettingsManager() {
 	} );
 
 	this._settings = this.load();
-
-	// cross-domain settings
-	THREE.ImageUtils.crossOrigin = "anonymous";
 }
 
 /**
@@ -45243,6 +45246,32 @@ function Utils() {
 		}
 	} );
 }
+
+/**
+ * This method colors the faces of a geometry with two colors in an alternating
+ * way.
+ * 
+ * @param {THREE.Geometry} geometry - The geometry object.
+ * @param {THREE.Color} color1 - The first color of the faces.
+ * @param {THREE.Color} color2 - The second color of the faces.
+ */
+Utils.prototype.colorFaces = function( geometry, color1, color2 ) {
+
+	var index;
+
+	for ( index = 0; index < geometry.faces.length; index++ )
+	{
+		if ( index % 2 === 0 )
+		{
+			geometry.faces[ index ].color = color1;
+		}
+		else
+		{
+			geometry.faces[ index ].color = color2;
+		}
+	}
+
+};
 
 /**
  * Preloads images and executes a callback, when all work is done.
@@ -51568,7 +51597,7 @@ function ParticleEffect( options ) {
 			writable : true
 		},
 		// a reference to a particle emitter
-		particleEmitter : {
+		emitter : {
 			value : null,
 			configurable : false,
 			enumerable : true,
@@ -51689,7 +51718,7 @@ ParticleEffect.prototype.update = ( function() {
 		// update emitter only if the respective flag is set
 		if ( this.emitterAutoUpdate === true )
 		{
-			this.particleEmitter.update();
+			this.emitter.update();
 		}
 
 		// update all particles
@@ -51704,7 +51733,7 @@ ParticleEffect.prototype.update = ( function() {
 			// if the particle exceeds its lifetime, just emit it again
 			if ( particle.age > particle.lifetime )
 			{
-				this.particleEmitter.emit( particle );
+				this.emitter.emit( particle );
 			}
 
 			// update the position by adding a displacement
@@ -51751,7 +51780,7 @@ ParticleEffect.prototype._init = function() {
 	var index, positionBuffer, colorBuffer, sizeBuffer, angleBuffer, indexBuffer;
 
 	// check existence of a valid particle emitter
-	if ( this.particleEmitter instanceof Emitter === false )
+	if ( this.emitter instanceof Emitter === false )
 	{
 		throw "ERROR: ParticleEffect: No valid particle emitter set.";
 	}
@@ -53619,6 +53648,7 @@ var THREE = require( "three" );
 
 var StageBase = require( "../core/StageBase" );
 var JSONLoader = require( "../etc/JSONLoader" );
+var utils = require( "../etc/Utils" );
 var Easing = require( "../animation/Easing" );
 
 var self;
@@ -53652,13 +53682,13 @@ Stage.prototype.setup = function() {
 
 	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
+	ground.rotation.x = - utils.HALF_PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
 
 	// color faces
-	colorFaces( groundGeometry );
+	utils.colorFaces( groundGeometry, StageBase.COLORS.PRIMARY, StageBase.COLORS.BLUE_DARK );
 
 	// add sign
 	var signLoader = new JSONLoader();
@@ -53668,7 +53698,7 @@ Stage.prototype.setup = function() {
 
 		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
@@ -53709,31 +53739,15 @@ Stage.prototype._render = function() {
 	StageBase.prototype._render.call( self );
 };
 
-// custom functions
-
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
-
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],89:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],89:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
 
 var StageBase = require( "../core/StageBase" );
 var JSONLoader = require( "../etc/JSONLoader" );
+var utils = require( "../etc/Utils" );
 var Easing = require( "../animation/Easing" );
 
 var self;
@@ -53767,13 +53781,13 @@ Stage.prototype.setup = function() {
 
 	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
+	ground.rotation.x = - utils.HALF_PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
 
 	// color faces
-	colorFaces( groundGeometry );
+	utils.colorFaces( groundGeometry, StageBase.COLORS.PRIMARY, StageBase.COLORS.BLUE_DARK );
 
 	// create interactive box
 	var boxInteraction = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
@@ -53833,7 +53847,7 @@ Stage.prototype.setup = function() {
 
 		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
@@ -53889,30 +53903,15 @@ Stage.prototype._render = function() {
 	StageBase.prototype._render.call( self );
 };
 
-// custom functions
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
-
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],90:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],90:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
 
 var StageBase = require( "../core/StageBase" );
 var JSONLoader = require( "../etc/JSONLoader" );
+var utils = require( "../etc/Utils" );
 var Easing = require( "../animation/Easing" );
 
 var self, index = 0;
@@ -53946,13 +53945,13 @@ Stage.prototype.setup = function() {
 
 	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
+	ground.rotation.x = - utils.HALF_PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
 
 	// color faces
-	colorFaces( groundGeometry );
+	utils.colorFaces( groundGeometry, StageBase.COLORS.PRIMARY, StageBase.COLORS.BLUE_DARK );
 
 	// create interactive box
 	var interactiveBox = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
@@ -53991,7 +53990,7 @@ Stage.prototype.setup = function() {
 
 		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
@@ -54049,21 +54048,6 @@ Stage.prototype._render = function() {
 
 // custom functions
 
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
-
 function colorMesh( mesh ) {
 
 	if ( ++index % 2 === 0 )
@@ -54077,13 +54061,14 @@ function colorMesh( mesh ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],91:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],91:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
 
 var StageBase = require( "../core/StageBase" );
 var JSONLoader = require( "../etc/JSONLoader" );
+var utils = require( "../etc/Utils" );
 var Easing = require( "../animation/Easing" );
 
 var self;
@@ -54117,13 +54102,13 @@ Stage.prototype.setup = function() {
 
 	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
+	ground.rotation.x = - utils.HALF_PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
 
 	// color faces
-	colorFaces( groundGeometry );
+	utils.colorFaces( groundGeometry, StageBase.COLORS.PRIMARY, StageBase.COLORS.BLUE_DARK );
 
 	// create interactive box
 	var boxTextScreen = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
@@ -54176,7 +54161,7 @@ Stage.prototype.setup = function() {
 
 		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
@@ -54232,31 +54217,15 @@ Stage.prototype._render = function() {
 	StageBase.prototype._render.call( self );
 };
 
-// custom functions
-
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
-
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],92:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],92:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
 
 var StageBase = require( "../core/StageBase" );
 var JSONLoader = require( "../etc/JSONLoader" );
+var utils = require( "../etc/Utils" );
 var Easing = require( "../animation/Easing" );
 
 var self;
@@ -54290,13 +54259,13 @@ Stage.prototype.setup = function() {
 
 	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
+	ground.rotation.x = - utils.HALF_PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
 
 	// color faces
-	colorFaces( groundGeometry );
+	utils.colorFaces( groundGeometry, StageBase.COLORS.PRIMARY, StageBase.COLORS.BLUE_DARK );
 
 	// add background music
 	this.audioManager.setBackgroundMusic( "music", 0.5 );
@@ -54309,7 +54278,7 @@ Stage.prototype.setup = function() {
 
 		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
@@ -54356,31 +54325,15 @@ Stage.prototype._render = function() {
 	StageBase.prototype._render.call( self );
 };
 
-// custom functions
-
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
-
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],93:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],93:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
 
 var StageBase = require( "../core/StageBase" );
 var JSONLoader = require( "../etc/JSONLoader" );
+var utils = require( "../etc/Utils" );
 var Easing = require( "../animation/Easing" );
 
 var self;
@@ -54416,13 +54369,13 @@ Stage.prototype.setup = function() {
 
 	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
+	ground.rotation.x = - utils.HALF_PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
 
 	// color faces
-	colorFaces( groundGeometry );
+	utils.colorFaces( groundGeometry, StageBase.COLORS.PRIMARY, StageBase.COLORS.BLUE_DARK );
 
 	// add boxes
 	var boxFire = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
@@ -54481,7 +54434,7 @@ Stage.prototype.setup = function() {
 
 		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
@@ -54544,31 +54497,15 @@ Stage.prototype._render = function() {
 	StageBase.prototype._render.call( self );
 };
 
-// custom functions
-
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
-
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],94:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],94:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
 
 var StageBase = require( "../core/StageBase" );
 var JSONLoader = require( "../etc/JSONLoader" );
+var utils = require( "../etc/Utils" );
 var Easing = require( "../animation/Easing" );
 
 var self;
@@ -54602,13 +54539,13 @@ Stage.prototype.setup = function() {
 
 	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
+	ground.rotation.x = - utils.HALF_PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
 
 	// color faces
-	colorFaces( groundGeometry );
+	utils.colorFaces( groundGeometry, StageBase.COLORS.PRIMARY, StageBase.COLORS.BLUE_DARK );
 
 	// add objects
 	var boxBasic = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
@@ -54661,7 +54598,7 @@ Stage.prototype.setup = function() {
 
 		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
@@ -54716,31 +54653,15 @@ Stage.prototype._render = function() {
 	StageBase.prototype._render.call( self );
 };
 
-// custom functions
-
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
-
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],95:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],95:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
 
 var StageBase = require( "../core/StageBase" );
 var JSONLoader = require( "../etc/JSONLoader" );
+var utils = require( "../etc/Utils" );
 var Easing = require( "../animation/Easing" );
 
 var self;
@@ -54776,7 +54697,7 @@ Stage.prototype.setup = function() {
 	var groundDown = new THREE.Mesh( groundGeometry, groundMaterial );
 	groundDown.matrixAutoUpdate = false;
 	groundDown.position.set( 0, 0, -50 );
-	groundDown.rotation.x = -0.5 * Math.PI;
+	groundDown.rotation.x = - utils.HALF_PI;
 	groundDown.updateMatrix();
 	groundDown.receiveShadow = true;
 	this.world.addGround( groundDown );
@@ -54785,13 +54706,13 @@ Stage.prototype.setup = function() {
 	var groundUp = new THREE.Mesh( groundGeometry, groundMaterial );
 	groundUp.matrixAutoUpdate = false;
 	groundUp.position.set( 0, 7.5, 68 );
-	groundUp.rotation.x = -0.5 * Math.PI;
+	groundUp.rotation.x = - utils.HALF_PI;
 	groundUp.updateMatrix();
 	groundUp.receiveShadow = true;
 	this.world.addGround( groundUp );
 
 	// color faces
-	colorFaces( groundGeometry );
+	utils.colorFaces( groundGeometry, StageBase.COLORS.PRIMARY, StageBase.COLORS.BLUE_DARK );
 
 	// add sign
 	var signLoader = new JSONLoader();
@@ -54801,7 +54722,7 @@ Stage.prototype.setup = function() {
 
 		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 27.5, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
@@ -54830,12 +54751,12 @@ Stage.prototype.setup = function() {
 
 	// add invisible ramp
 	var rampGeometry = new THREE.PlaneBufferGeometry( 200, 25, 1, 1 );
-	var rampMaterial = new THREE.MeshBasicMaterial( { visible:false } );
+	var rampMaterial = new THREE.MeshBasicMaterial( { visible: false } );
 
 	var ramp = new THREE.Mesh( rampGeometry, rampMaterial );
 	ramp.matrixAutoUpdate = false;
-	ramp.position.set( 0, 2.8, 6.4 );
-	ramp.rotation.x = 1.378 * Math.PI;
+	ramp.position.set( 0, 2.8, 6.45 );
+	ramp.rotation.x = 1.376 * Math.PI;
 	ramp.updateMatrix();
 	this.world.addGround( ramp );
 
@@ -54867,31 +54788,15 @@ Stage.prototype._render = function() {
 	StageBase.prototype._render.call( self );
 };
 
-// custom functions
-
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
-
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],96:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],96:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
 
 var StageBase = require( "../core/StageBase" );
 var JSONLoader = require( "../etc/JSONLoader" );
+var utils = require( "../etc/Utils" );
 var Easing = require( "../animation/Easing" );
 
 var self;
@@ -54925,13 +54830,13 @@ Stage.prototype.setup = function() {
 
 	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
+	ground.rotation.x = - utils.HALF_PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
 
 	// color faces
-	colorFaces( groundGeometry );
+	utils.colorFaces( groundGeometry, StageBase.COLORS.PRIMARY, StageBase.COLORS.BLUE_DARK );
 
 	// add sign
 	var signLoader = new JSONLoader();
@@ -54941,7 +54846,7 @@ Stage.prototype.setup = function() {
 
 		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
@@ -55033,21 +54938,6 @@ Stage.prototype._render = function() {
 
 // custom functions
 
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
-
 function showLODCircles( world ) {
 
 	var circleOne = new THREE.Mesh( new THREE.CircleGeometry( 60, 25 ), new THREE.MeshBasicMaterial( {
@@ -55057,15 +54947,15 @@ function showLODCircles( world ) {
 		wireframe : true
 	} ) );
 
-	circleOne.rotation.set( Math.PI * 0.5, 0, 0 );
-	circleTwo.rotation.set( Math.PI * 0.5, 0, 0 );
+	circleOne.rotation.set( utils.HALF_PI, 0, 0 );
+	circleTwo.rotation.set( utils.HALF_PI, 0, 0 );
 
 	world.addObject3D( circleOne );
 	world.addObject3D( circleTwo );
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],97:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],97:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -55073,6 +54963,7 @@ var THREE = require( "three" );
 
 var StageBase = require( "../core/StageBase" );
 var JSONLoader = require( "../etc/JSONLoader" );
+var utils = require( "../etc/Utils" );
 var Easing = require( "../animation/Easing" );
 
 var self, box, sphere;
@@ -55106,13 +54997,13 @@ Stage.prototype.setup = function() {
 
 	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
+	ground.rotation.x = - utils.HALF_PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
 
 	// color faces
-	colorFaces( groundGeometry );
+	utils.colorFaces( groundGeometry, StageBase.COLORS.PRIMARY, StageBase.COLORS.BLUE_DARK );
 
 	// create first mesh for impostor demo
 	sphere = new THREE.Mesh( new THREE.SphereGeometry( 10, 25, 25 ), new THREE.MeshLambertMaterial( {
@@ -55145,7 +55036,7 @@ Stage.prototype.setup = function() {
 
 		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
@@ -55211,21 +55102,6 @@ Stage.prototype._render = function() {
 
 // custom functions
 
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
-
 function onKeyDown( event ) {
 
 	switch ( event.keyCode )
@@ -55244,13 +55120,14 @@ function onKeyDown( event ) {
 
 module.exports = Stage;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],98:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],98:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
 
 var StageBase = require( "../core/StageBase" );
 var JSONLoader = require( "../etc/JSONLoader" );
+var utils = require( "../etc/Utils" );
 var Easing = require( "../animation/Easing" );
 
 var self;
@@ -55284,13 +55161,13 @@ Stage.prototype.setup = function() {
 
 	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
+	ground.rotation.x = - utils.HALF_PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
 
 	// color faces
-	colorFaces( groundGeometry );
+	utils.colorFaces( groundGeometry, StageBase.COLORS.PRIMARY, StageBase.COLORS.BLUE_DARK );
 
 	// add sign
 	var signLoader = new JSONLoader();
@@ -55300,7 +55177,7 @@ Stage.prototype.setup = function() {
 
 		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
@@ -55320,13 +55197,7 @@ Stage.prototype.setup = function() {
 	// add trigger for ending
 	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 15, true, function() {
 
-		self.userInterfaceManager.showModalDialog( {
-			headline : "Modal.Headline",
-			button : "Modal.Button",
-			content : "Modal.Content"
-		} );
-
-		self.saveGameManager.remove();	
+		self._changeStage( "012", true );	
 	} );
 
 	// post processing
@@ -55360,25 +55231,135 @@ Stage.prototype._render = function() {
 	StageBase.prototype._render.call( self );
 };
 
-// custom functions
+module.exports = Stage;
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],99:[function(require,module,exports){
+"use strict";
 
-function colorFaces( geometry ) {
+var THREE = require( "three" );
 
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
+var StageBase = require( "../core/StageBase" );
+var JSONLoader = require( "../etc/JSONLoader" );
+var utils = require( "../etc/Utils" );
+var Easing = require( "../animation/Easing" );
+
+var ParticleEffect = require( "../particle/ParticleEffect" );
+var SphereEmitter = require( "../particle/emitter/SphereEmitter" );
+
+var self, particles;
+
+function Stage() {
+
+	StageBase.call( this, "012" );
+
+	self = this;
 }
 
+Stage.prototype = Object.create( StageBase.prototype );
+Stage.prototype.constructor = Stage;
+
+Stage.prototype.setup = function() {
+
+	StageBase.prototype.setup.call( this );
+
+	// player setup
+	this.world.player.position.set( 0, 0, -75 );
+	this.world.player.setDirection( new THREE.Vector3( 0, 0, 1 ) );
+
+	// load texts
+	this.textManager.load( this.stageId );
+
+	// add ground
+	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
+	var groundMaterial = new THREE.MeshBasicMaterial( {
+		vertexColors : THREE.FaceColors
+	} );
+
+	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
+	ground.matrixAutoUpdate = false;
+	ground.rotation.x = - utils.HALF_PI;
+	ground.updateMatrix();
+	ground.receiveShadow = true;
+	this.world.addGround( ground );
+
+	// color faces
+	utils.colorFaces( groundGeometry, StageBase.COLORS.PRIMARY, StageBase.COLORS.BLUE_DARK );
+
+	// add sign
+	var signLoader = new JSONLoader();
+	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+
+		self.settingsManager.adjustMaterials( materials, self.renderer );
+
+		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
+		sign.position.set( 0, 20, 75 );
+		sign.rotation.set( 0, - utils.HALF_PI, 0 );
+		self.world.addObject3D( sign );
+
+		self.animationManager.createHoverAnimation( {
+			object : sign.position,
+			property : "y",
+			duration : 5000,
+			start : sign.position.y,
+			end : sign.position.y + 5,
+			easing : Easing.Sinusoidal.InOut
+		} ).play();
+	} );
+	
+	// particle texture
+	var texture = new THREE.TextureLoader().load( "/assets/textures/Blossom_1_S.png" );
+	
+	// particle emitter
+	var emitter = new SphereEmitter({
+		origin: new THREE.Vector3( 0, 10, 0)
+	});
+	
+	// particle effect
+	particles = new ParticleEffect({
+		numberOfParticles : 10000,
+		emitter : emitter,
+		texture : texture,
+		transparent: true,
+		sortParticles: true
+	});
+
+	// add trigger for ending
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 15, true, function() {
+
+		self.userInterfaceManager.showModalDialog( {
+			headline : "Modal.Headline",
+			button : "Modal.Button",
+			content : "Modal.Content"
+		} );
+
+		self.saveGameManager.remove();	
+	} );
+
+	// start rendering
+	this._render();
+};
+
+Stage.prototype.start = function() {
+
+	StageBase.prototype.start.call( this );
+
+	// set information panel text
+	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
+};
+
+Stage.prototype.destroy = function() {
+
+	StageBase.prototype.destroy.call( this );
+};
+
+Stage.prototype._render = function() {
+	
+	particles.update( self._delta );
+
+	StageBase.prototype._render.call( self );
+};
+
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"three":1}],99:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"../particle/ParticleEffect":73,"../particle/emitter/SphereEmitter":77,"three":1}],100:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -55557,7 +55538,7 @@ Chat.prototype._onMessage = function( message, data ) {
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":108}],100:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":109}],101:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel. Only if the development
@@ -55619,7 +55600,7 @@ DevelopmentPanel.prototype.setText = function( text ) {
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":108}],101:[function(require,module,exports){
+},{"./UiElement":109}],102:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -55680,7 +55661,7 @@ InformationPanel.prototype.setText = function( textKey ) {
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":108}],102:[function(require,module,exports){
+},{"./UiElement":109}],103:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -55757,7 +55738,7 @@ InteractionLabel.prototype.hide = function() {
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":108}],103:[function(require,module,exports){
+},{"./UiElement":109}],104:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -55947,7 +55928,7 @@ LoadingScreen.prototype._onReady = function( message, data ) {
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":108}],104:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":109}],105:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -56103,7 +56084,7 @@ Menu.prototype._publishFinishEvent = function( message, data ) {
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Environment":20,"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":108}],105:[function(require,module,exports){
+},{"../core/Environment":20,"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":109}],106:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -56227,7 +56208,7 @@ ModalDialog.prototype._onClose = function( event ) {
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":108}],106:[function(require,module,exports){
+},{"./UiElement":109}],107:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor. Only if the development
@@ -56446,7 +56427,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":108}],107:[function(require,module,exports){
+},{"./UiElement":109}],108:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -56672,7 +56653,7 @@ TextScreen.prototype._printName = function() {
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":108}],108:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":109}],109:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -56722,7 +56703,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":42}],109:[function(require,module,exports){
+},{"../etc/TextManager":42}],110:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in stages to
@@ -57003,4 +56984,4 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68,"./Chat":99,"./DevelopmentPanel":100,"./InformationPanel":101,"./InteractionLabel":102,"./LoadingScreen":103,"./Menu":104,"./ModalDialog":105,"./PerformanceMonitor":106,"./TextScreen":107}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109]);
+},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68,"./Chat":100,"./DevelopmentPanel":101,"./InformationPanel":102,"./InteractionLabel":103,"./LoadingScreen":104,"./Menu":105,"./ModalDialog":106,"./PerformanceMonitor":107,"./TextScreen":108}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110]);

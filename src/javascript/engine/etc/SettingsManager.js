@@ -33,9 +33,6 @@ function SettingsManager() {
 	} );
 
 	this._settings = this.load();
-
-	// cross-domain settings
-	THREE.ImageUtils.crossOrigin = "anonymous";
 }
 
 /**

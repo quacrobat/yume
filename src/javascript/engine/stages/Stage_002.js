@@ -4,6 +4,7 @@ var THREE = require( "three" );
 
 var StageBase = require( "../core/StageBase" );
 var JSONLoader = require( "../etc/JSONLoader" );
+var utils = require( "../etc/Utils" );
 var Easing = require( "../animation/Easing" );
 
 var self;
@@ -37,13 +38,13 @@ Stage.prototype.setup = function() {
 
 	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
 	ground.matrixAutoUpdate = false;
-	ground.rotation.x = -0.5 * Math.PI;
+	ground.rotation.x = - utils.HALF_PI;
 	ground.updateMatrix();
 	ground.receiveShadow = true;
 	this.world.addGround( ground );
 
 	// color faces
-	colorFaces( groundGeometry );
+	utils.colorFaces( groundGeometry, StageBase.COLORS.PRIMARY, StageBase.COLORS.BLUE_DARK );
 
 	// create interactive box
 	var boxInteraction = new THREE.Mesh( new THREE.BoxGeometry( 10, 10, 10 ), new THREE.MeshLambertMaterial( {
@@ -103,7 +104,7 @@ Stage.prototype.setup = function() {
 
 		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
 		sign.position.set( 0, 20, 75 );
-		sign.rotation.set( 0, Math.PI * -0.5, 0 );
+		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
 		self.animationManager.createHoverAnimation( {
@@ -158,21 +159,5 @@ Stage.prototype._render = function() {
 
 	StageBase.prototype._render.call( self );
 };
-
-// custom functions
-function colorFaces( geometry ) {
-
-	for ( var i = 0; i < geometry.faces.length; i++ )
-	{
-		if ( i % 2 === 0 )
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.PRIMARY;
-		}
-		else
-		{
-			geometry.faces[ i ].color = StageBase.COLORS.BLUE_DARK;
-		}
-	}
-}
 
 module.exports = Stage;

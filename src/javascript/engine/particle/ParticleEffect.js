@@ -43,7 +43,7 @@ function ParticleEffect( options ) {
 			writable : true
 		},
 		// a reference to a particle emitter
-		particleEmitter : {
+		emitter : {
 			value : null,
 			configurable : false,
 			enumerable : true,
@@ -164,7 +164,7 @@ ParticleEffect.prototype.update = ( function() {
 		// update emitter only if the respective flag is set
 		if ( this.emitterAutoUpdate === true )
 		{
-			this.particleEmitter.update();
+			this.emitter.update();
 		}
 
 		// update all particles
@@ -179,7 +179,7 @@ ParticleEffect.prototype.update = ( function() {
 			// if the particle exceeds its lifetime, just emit it again
 			if ( particle.age > particle.lifetime )
 			{
-				this.particleEmitter.emit( particle );
+				this.emitter.emit( particle );
 			}
 
 			// update the position by adding a displacement
@@ -226,7 +226,7 @@ ParticleEffect.prototype._init = function() {
 	var index, positionBuffer, colorBuffer, sizeBuffer, angleBuffer, indexBuffer;
 
 	// check existence of a valid particle emitter
-	if ( this.particleEmitter instanceof Emitter === false )
+	if ( this.emitter instanceof Emitter === false )
 	{
 		throw "ERROR: ParticleEffect: No valid particle emitter set.";
 	}
