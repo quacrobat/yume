@@ -45834,21 +45834,6 @@ function Player( world ) {
 			enumerable : true,
 			writable : false
 		},
-		// the center of the player's body
-		center : {
-			value : new THREE.Vector3(),
-			configurable : false,
-			enumerable : true,
-			writable : false
-		},
-		// the size of the player's body. this value changes if the player is
-		// crouching
-		size : {
-			value : new THREE.Vector3(),
-			configurable : false,
-			enumerable : true,
-			writable : false
-		},
 		// this will be used as the parent object for the camera
 		head : {
 			value : new THREE.Object3D(),
@@ -46001,18 +45986,26 @@ Player.prototype._publishPlayerStatus = ( function() {
 /**
  * Updates the bounding volume of the player.
  */
-Player.prototype._updateBoundingVolume = function() {
+Player.prototype._updateBoundingVolume = ( function() {
 
-	// calculate the center of the players body
-	this.center.copy( this.position );
-	this.center.y += this.head.position.y * 0.5;
+	var center = new THREE.Vector3();
+	var size = new THREE.Vector3();
 
-	// calculate size of the player's body
-	this.size.set( 4, this.head.position.y, 4 );
+	return function() {
 
-	// create bounding box
-	this.boundingVolume.setFromCenterAndSize( this.center, this.size );
-};
+		// calculate the center of the players body
+		center.copy( this.position );
+		center.y += this.head.position.y * 0.5;
+
+		// calculate size of the player's body
+		size.set( 4, this.head.position.y, 4 );
+
+		// create bounding box
+		this.boundingVolume.setFromCenterAndSize( center, size );
+		
+	};
+
+}() );
 
 /**
  * Checks, of the player is on a ground object.
