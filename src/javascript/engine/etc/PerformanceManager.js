@@ -165,9 +165,9 @@ PerformanceManager.prototype.removeImpostors = function() {
  */
 PerformanceManager.prototype.getLOD = function( id ) {
 
-	var lod = null;
+	var index, lod;
 
-	for ( var index = 0; index < this._lods.length; index++ )
+	for ( index = 0; index < this._lods.length; index++ )
 	{
 		if ( this._lods[ index ].idLOD === id )
 		{
@@ -176,7 +176,7 @@ PerformanceManager.prototype.getLOD = function( id ) {
 		}
 	}
 
-	if ( lod === null )
+	if ( lod === undefined )
 	{
 		throw "ERROR: PerformanceManager: LOD instance with ID " + id + " not existing.";
 	}
@@ -195,9 +195,9 @@ PerformanceManager.prototype.getLOD = function( id ) {
  */
 PerformanceManager.prototype.getImpostor = function( id ) {
 
-	var impostor = null;
+	var index, impostor;
 
-	for ( var index = 0; index < this._impostors.length; index++ )
+	for ( index = 0; index < this._impostors.length; index++ )
 	{
 		if ( this._impostors[ index ].idImpostor === id )
 		{
@@ -206,7 +206,7 @@ PerformanceManager.prototype.getImpostor = function( id ) {
 		}
 	}
 
-	if ( impostor === null )
+	if ( impostor === undefined )
 	{
 		throw "ERROR: PerformanceManager: Impostor instance with ID " + id + " not existing.";
 	}
@@ -227,17 +227,17 @@ PerformanceManager.prototype.update = function() {
 };
 
 /**
- * Generates all impostors. Because the geometry of impostors changes over time,
- * it's necessary to create new (impostor) billboard. These billboard are
- * replaced with the old ones, via adding and removing to the world object.
+ * This method prepares some global data needed for all impostors (e.g. camera,
+ * lights) and triggers the actual generation of all impostors.
  */
 PerformanceManager.prototype.generateImpostors = function() {
-
-	// copy camera properties to impostor camera.
 	
-	// we can't use the copy method of the camera object, because it does
-	// automatically a deep copy. since the actual camera has child objects
-	// (dynamic audio), we only want to copy the most necessary data.
+	var index;
+
+	// copy camera properties to impostor camera. we can't use the copy method
+	// of the camera object, because it does automatically a deep copy. since
+	// the actual camera has child objects (audio), we only want to copy
+	// the most necessary data.
 	this._impostorCamera.matrixWorldInverse.copy( camera.matrixWorldInverse );
 	this._impostorCamera.projectionMatrix.copy( camera.projectionMatrix );
 
@@ -248,11 +248,10 @@ PerformanceManager.prototype.generateImpostors = function() {
 	this._impostorCamera.zoom = camera.zoom;
 
 	// ensure the position of the camera is in world coordinates
-	var cameraWorldPosition = camera.getWorldPosition();
-	this._impostorCamera.position.set( cameraWorldPosition.x, cameraWorldPosition.y, cameraWorldPosition.z );
+	camera.getWorldPosition( this._impostorCamera.position );
 
 	// update the internal array with the entire lighting of the actual stage
-	for ( var index = 0; index < world.scene.children.length; index++ )
+	for ( index = 0; index < world.scene.children.length; index++ )
 	{
 		if ( world.scene.children[ index ] instanceof THREE.Light )
 		{
@@ -263,20 +262,7 @@ PerformanceManager.prototype.generateImpostors = function() {
 	// generate each impostor
 	for ( index = 0; index < this._impostors.length; index++ )
 	{
-		// remove old impostor
-		if ( this._impostors[ index ].billboard !== null )
-		{
-			world.removeObject3D( this._impostors[ index ].billboard );
-		}
-
-		// prepare the generation...
-		this._impostors[ index ].prepareGeneration( renderer, this._impostorCamera, this._impostorLights );
-
-		// ...and run it
-		this._impostors[ index ].generate();
-
-		// add new mesh to world
-		world.addObject3D( this._impostors[ index ].billboard );
+		this._impostors[ index ].generate( renderer, this._impostorCamera, this._impostorLights );
 	}
 
 	// clean up
@@ -287,8 +273,10 @@ PerformanceManager.prototype.generateImpostors = function() {
  * Updates all LOD instances.
  */
 PerformanceManager.prototype._updateLODs = function() {
+	
+	var index;
 
-	for ( var index = 0; index < this._lods.length; index++ )
+	for ( index = 0; index < this._lods.length; index++ )
 	{
 		this._lods[ index ].update();
 	}
@@ -296,17 +284,31 @@ PerformanceManager.prototype._updateLODs = function() {
 };
 
 /**
- * Updates all LOD instances.
+ * Updates all impostor.
  */
-PerformanceManager.prototype._updateImpostors = function() {
+PerformanceManager.prototype._updateImpostors = ( function() {
 
-	// the camera world position is equal for each impostor
-	var cameraWorldPosition = camera.getWorldPosition();
+	var cameraWorldPosition;
 
-	for ( var index = 0; index < this._impostors.length; index++ )
-	{
-		this._impostors[ index ].update( cameraWorldPosition );
-	}
-};
+	return function() {
+
+		var index;
+
+		if ( cameraWorldPosition === undefined )
+		{
+			cameraWorldPosition = new THREE.Vector3();
+		}
+
+		// the camera world position is equal for each impostor
+		camera.getWorldPosition( cameraWorldPosition );
+
+		for ( index = 0; index < this._impostors.length; index++ )
+		{
+			this._impostors[ index ].update( cameraWorldPosition );
+		}
+		
+	};
+
+}() );
 
 module.exports = new PerformanceManager();

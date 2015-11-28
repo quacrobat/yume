@@ -29,6 +29,7 @@ Stage.prototype.setup = function() {
 	// player setup
 	this.world.player.position.set( 0, 0, -75 );
 	this.world.player.setDirection( new THREE.Vector3( 0, 0, 1 ) );
+	this.world.player.updateMatrixWorld();
 
 	// load texts
 	this.textManager.load( this.stageId );

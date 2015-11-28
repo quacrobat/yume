@@ -26,6 +26,7 @@ Stage.prototype.setup = function() {
 	// player setup
 	this.world.player.position.set( 0, 0, -75 );
 	this.world.player.setDirection( new THREE.Vector3( 0, 0, 1 ) );
+	this.world.player.updateMatrixWorld();
 
 	// load texts
 	this.textManager.load( this.stageId );
@@ -65,9 +66,13 @@ Stage.prototype.setup = function() {
 	box.updateMatrix();
 	box.visible = false;
 	this.world.addObject3D( box );
-
-	this.performanceManager.createImpostor( "sphere", sphere, 512 );
-	this.performanceManager.createImpostor( "box", box, 512 );
+	
+	// add impostor
+	var impostorSphere = this.performanceManager.createImpostor( "sphere", sphere, 512 );
+	this.world.addObject3D( impostorSphere.billboard );
+	
+	var impostorBox = this.performanceManager.createImpostor( "box", box, 512 );
+	this.world.addObject3D( impostorBox.billboard );
 
 	// add sign
 	var signLoader = new JSONLoader();

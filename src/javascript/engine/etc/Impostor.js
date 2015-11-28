@@ -89,20 +89,8 @@ function Impostor( id, sourceObject, resolution, angle ) {
 			enumerable : false,
 			writable : true
 		},
-		_lights : {
-			value : null,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
-		_renderer : {
-			value : null,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
 		_lastDirection : {
-			value : null,
+			value : new THREE.Vector3(),
 			configurable : false,
 			enumerable : false,
 			writable : true
@@ -113,45 +101,23 @@ function Impostor( id, sourceObject, resolution, angle ) {
 	this._renderTarget = new THREE.WebGLRenderTarget( this.resolution, this.resolution, {
 		format : THREE.RGBAFormat
 	} );
+
+	// create the billboard
+	this._createBillboard();
 }
 
 /**
- * Prepares the generation of the impostor.
+ * Generates the impostor.
  * 
  * @param {Renderer} renderer - The renderer object.
  * @param {Camera} camera - The camera object.
  * @param {object} lights - The lights of the stage.
  */
-Impostor.prototype.prepareGeneration = function( renderer, camera, lights ) {
-
-	// constant for all impostors
-	this._renderer = renderer;
-	this._lights = lights;
+Impostor.prototype.generate = function( renderer, camera, lights ) {
 
 	// the matrices of the camera get transformed, so it's necessary to clone it
 	this._camera = camera.clone();
-
-	// create new billboard and apply impostor material
-	this.billboard = new THREE.Mesh();
-
-	// apply material. the alpha value avoids semi-transparent black borders at
-	// the billboard
-	this.billboard.material = new THREE.MeshBasicMaterial( {
-		map : this._renderTarget,
-		transparent : true,
-		alphaTest : 0.9
-	} );
-
-	// the model matrix is calculated by the impostor so disable the automatic
-	// update
-	this.billboard.matrixAutoUpdate = false;
-};
-
-/**
- * Generates the impostor.
- */
-Impostor.prototype.generate = function() {
-
+	
 	this._computeBoundingBox();
 
 	this._computeViewMatrix();
@@ -160,13 +126,13 @@ Impostor.prototype.generate = function() {
 
 	this._computePosition();
 
-	this._computeGeometry();
+	this._updateGeometry();
 
 	this._computeProjectionMatrix();
 
-	this._prepareScene();
+	this._prepareScene( lights );
 
-	this._render();
+	this._render( renderer );
 };
 
 /**
@@ -187,27 +153,25 @@ Impostor.prototype.update = ( function() {
 
 	return function( cameraPosition ) {
 
-		if ( this.billboard !== null )
-		{
-			// first, compute zAxis
-			zAxis.subVectors( cameraPosition, this.billboard.position );
-			
-			// this will ensure, that the impostor rotates correctly around the axis
-			zAxis.y = 0;
-			zAxis.normalize();
+		// first, compute zAxis
+		zAxis.subVectors( cameraPosition, this.billboard.position );
+		
+		// this will ensure, that the impostor rotates correctly around the axis
+		zAxis.y = 0;
+		zAxis.normalize();
 
-			// compute the last axis with the cross product
-			xAxis.crossVectors( yAxis, zAxis );
+		// compute the last axis with the cross product
+		xAxis.crossVectors( yAxis, zAxis );
 
-			// create new model matrix from basis vectors
-			this.billboard.matrix.makeBasis( xAxis, yAxis, zAxis );
+		// create new model matrix from basis vectors
+		this.billboard.matrix.makeBasis( xAxis, yAxis, zAxis );
 
-			// apply the position
-			this.billboard.matrix.setPosition( this.billboard.position );
+		// apply the position
+		this.billboard.matrix.setPosition( this.billboard.position );
 
-			// force world matrix to update
-			this.billboard.matrixWorldNeedsUpdate = true;
-		}
+		// force world matrix to update
+		this.billboard.matrixWorldNeedsUpdate = true;
+		
 	};
 
 }() );
@@ -224,9 +188,11 @@ Impostor.prototype.isGenerationNeeded = function( currentDirection ) {
 
 	var angle;
 
+	// if "lastDirection" is null, we have nothing to compare. so we just save
+	// the current direction in this step
 	if ( this._lastDirection === null )
 	{
-		this._lastDirection = currentDirection.clone();
+		this._lastDirection.copy( currentDirection );
 
 	}
 	else
@@ -240,19 +206,50 @@ Impostor.prototype.isGenerationNeeded = function( currentDirection ) {
 		// check against property
 		if ( angle > this.angle * 0.5 )
 		{
-
 			// save the direction
 			this._lastDirection = currentDirection.clone();
 
 			// return true to trigger a generation
 			return true;
 		}
-
-		return false;
 	}
 
 	return false;
 
+};
+
+/**
+ * Creates the billboard of the impostor.
+ */
+Impostor.prototype._createBillboard = function() {
+
+	// create billboard geometry
+	var billboardGeomtry = new THREE.BufferGeometry();
+	
+	// create buffers
+	var positionBuffer = new Float32Array( 12 );
+	var uvBuffer = new Float32Array( [ 0, 0, 0, 1, 1, 0, 1, 1 ] );
+	var indexBuffer = new Uint16Array( [ 0, 2, 1, 2, 3, 1 ] );
+
+	// add buffers to geometry
+	billboardGeomtry.addAttribute( "position", new THREE.BufferAttribute( positionBuffer, 3 ) );
+	billboardGeomtry.addAttribute( "uv", new THREE.BufferAttribute( uvBuffer, 2 ) );
+	billboardGeomtry.setIndex( new THREE.BufferAttribute( indexBuffer, 1 ) );
+
+	// create billboard material. the alpha value avoids
+	// semi-transparent black borders at the billboard
+	var billboardMaterial = new THREE.MeshBasicMaterial( {
+		map : this._renderTarget,
+		transparent : true,
+		alphaTest : 0.9
+	} );
+
+	// create billboard
+	this.billboard = new THREE.Mesh( billboardGeomtry, billboardMaterial );
+
+	// the model matrix is calculated by the impostor so disable the automatic
+	// update
+	this.billboard.matrixAutoUpdate = false;
 };
 
 /**
@@ -338,10 +335,9 @@ Impostor.prototype._computePosition = function() {
 };
 
 /**
- * Computes the geometry of impostor. The method creates a simple plane geometry
- * to display the rendered texture.
+ * Updates the geometry of the impostor.
  */
-Impostor.prototype._computeGeometry = ( function() {
+Impostor.prototype._updateGeometry = ( function() {
 
 	var translationMatrix = new THREE.Matrix4();
 	var rotationMatrix = new THREE.Matrix4();
@@ -349,19 +345,12 @@ Impostor.prototype._computeGeometry = ( function() {
 	// create point array
 	var points = [ new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3() ];
 
-	// create shared buffers for indices and uvs
-	var indices = new Uint16Array( [ 0, 2, 1, 2, 3, 1 ] ); // fix values
-	var uvs = new Float32Array( [ 0, 0, 0, 1, 1, 0, 1, 1 ] ); // fix values
-
 	return function() {
-		
-		var index;
 
-		// create new geometry
-		var geometry = new THREE.BufferGeometry();
+		var index, positionBuffer;
 
-		// create vertex buffer, unique for each impostor
-		var vertices = new Float32Array( 12 );
+		// shortcut to position buffer
+		positionBuffer = this.billboard.geometry.attributes.position.array;
 
 		// get the points of the bounding rectangle
 		points[ 0 ].set( this._boundingRectangle.min.x, this._boundingRectangle.min.y, this._depth );
@@ -369,22 +358,20 @@ Impostor.prototype._computeGeometry = ( function() {
 		points[ 2 ].set( this._boundingRectangle.max.x, this._boundingRectangle.min.y, this._depth );
 		points[ 3 ].set( this._boundingRectangle.max.x, this._boundingRectangle.max.y, this._depth );
 
-		// set vertices
+		// set new position
 		for ( index = 0; index < points.length; index++ )
 		{
 			// transform point from screen space to world space
 			points[ index ].unproject( this._camera );
 
-			// set the vertices of the bounding rectangle
-			vertices[ index * 3 + 0 ] = points[ index ].x;
-			vertices[ index * 3 + 1 ] = points[ index ].y;
-			vertices[ index * 3 + 2 ] = points[ index ].z;
+			// apply the position to the respective buffer
+			positionBuffer[ index * 3 + 0 ] = points[ index ].x;
+			positionBuffer[ index * 3 + 1 ] = points[ index ].y;
+			positionBuffer[ index * 3 + 2 ] = points[ index ].z;
 		}
 
-		// add vertices, uvs and  indices to geometry
-		geometry.addAttribute( "position", new THREE.BufferAttribute( vertices, 3 ) );
-		geometry.addAttribute( "uv", new THREE.BufferAttribute( uvs, 2 ) );
-		geometry.setIndex( new THREE.BufferAttribute( indices, 1 ) );
+		// we need to tell three.js to update the buffer
+		this.billboard.geometry.attributes.position.needsUpdate = true;
 
 		// prepare matrices
 		translationMatrix.identity();
@@ -397,11 +384,8 @@ Impostor.prototype._computeGeometry = ( function() {
 		rotationMatrix.extractRotation( this._camera.matrixWorldInverse );
 
 		// reset geometry
-		geometry.applyMatrix( translationMatrix );
-		geometry.applyMatrix( rotationMatrix );
-
-		// apply geometry
-		this.billboard.geometry = geometry;
+		this.billboard.geometry.applyMatrix( translationMatrix );
+		this.billboard.geometry.applyMatrix( rotationMatrix );
 	};
 
 }() );
@@ -428,8 +412,10 @@ Impostor.prototype._computeProjectionMatrix = function() {
 /**
  * Prepares the scene for rendering. This method ensures, that the actual object
  * and the entire lightning of the scene are part of the rendering.
+ * 
+ * @param {object} lights - The lights of the stage.
  */
-Impostor.prototype._prepareScene = function() {
+Impostor.prototype._prepareScene = function( lights ) {
 
 	// reset scene
 	this._scene = new THREE.Scene();
@@ -443,27 +429,29 @@ Impostor.prototype._prepareScene = function() {
 	// add to scene
 	this._scene.add( object );
 
-	// add all light source
-	Array.prototype.push.apply( this._scene.children, this._lights );
+	// add all light sources
+	Array.prototype.push.apply( this._scene.children, lights );
 };
 
 /**
  * Renders the scene to the render target.
+ * 
+ * @param {Renderer} renderer - The renderer object.
  */
-Impostor.prototype._render = function() {
+Impostor.prototype._render = function( renderer ) {
 
 	// save existing clear color and alpha
-	var clearColor = this._renderer.getClearColor();
-	var clearAlpha = this._renderer.getClearAlpha();
+	var clearColor = renderer.getClearColor();
+	var clearAlpha = renderer.getClearAlpha();
 
 	// the following clear ensures that the rendered texture has transparency
-	this._renderer.setClearColor( 0x000000, 0 );
+	renderer.setClearColor( 0x000000, 0 );
 
 	// render to target
-	this._renderer.render( this._scene, this._camera, this._renderTarget, true );
+	renderer.render( this._scene, this._camera, this._renderTarget, true );
 
 	// restore clear values
-	this._renderer.setClearColor( clearColor, clearAlpha );
+	renderer.setClearColor( clearColor, clearAlpha );
 };
 
 module.exports = Impostor;
