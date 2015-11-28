@@ -45993,7 +45993,7 @@ Player.prototype._updateBoundingVolume = ( function() {
 
 	return function() {
 
-		// calculate the center of the players body
+		// calculate the center of the player's body
 		center.copy( this.position );
 		center.y += this.head.position.y * 0.5;
 
@@ -46002,7 +46002,6 @@ Player.prototype._updateBoundingVolume = ( function() {
 
 		// create bounding box
 		this.boundingVolume.setFromCenterAndSize( center, size );
-		
 	};
 
 }() );
