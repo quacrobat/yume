@@ -21,8 +21,8 @@ module.exports = {
 			type : "v2",
 			value : new THREE.Vector2()
 		},
-		// the amount of blur
-		"blur" : {
+		// the size of a pixel
+		"size" : {
 			type : "f",
 			value : 0.0
 		},
@@ -47,7 +47,7 @@ module.exports = {
 
 	"uniform sampler2D tDiffuse;", 
 	"uniform vec2 direction;", 
-	"uniform float blur;",
+	"uniform float size;",
 
 	"varying vec2 vUv;",
 
@@ -57,17 +57,17 @@ module.exports = {
 		"vec4 result = vec4( 0.0 );", 
 
 		// sample the texture 9 times for every fragment (9-tap filter)
-		"result += texture2D( tDiffuse, vec2( vUv.x - 4.0 * blur * direction.x, vUv.y - 4.0 * blur * direction.y ) ) * 0.0162162162;", 
-		"result += texture2D( tDiffuse, vec2( vUv.x - 3.0 * blur * direction.x, vUv.y - 3.0 * blur * direction.y ) ) * 0.0540540541;", 
-		"result += texture2D( tDiffuse, vec2( vUv.x - 2.0 * blur * direction.x, vUv.y - 2.0 * blur * direction.y ) ) * 0.1216216216;", 
-		"result += texture2D( tDiffuse, vec2( vUv.x - 1.0 * blur * direction.x, vUv.y - 1.0 * blur * direction.y ) ) * 0.1945945946;",
+		"result += texture2D( tDiffuse, vec2( vUv.x - 4.0 * size * direction.x, vUv.y - 4.0 * size * direction.y ) ) * 0.0162162162;", 
+		"result += texture2D( tDiffuse, vec2( vUv.x - 3.0 * size * direction.x, vUv.y - 3.0 * size * direction.y ) ) * 0.0540540541;", 
+		"result += texture2D( tDiffuse, vec2( vUv.x - 2.0 * size * direction.x, vUv.y - 2.0 * size * direction.y ) ) * 0.1216216216;", 
+		"result += texture2D( tDiffuse, vec2( vUv.x - 1.0 * size * direction.x, vUv.y - 1.0 * size * direction.y ) ) * 0.1945945946;",
 
 		"result += texture2D( tDiffuse, vec2( vUv.x, vUv.y ) ) * 0.2270270270;",
 
-		"result += texture2D( tDiffuse, vec2( vUv.x + 1.0 * blur * direction.x, vUv.y + 1.0 * blur * direction.y ) ) * 0.1945945946;", 
-		"result += texture2D( tDiffuse, vec2( vUv.x + 2.0 * blur * direction.x, vUv.y + 2.0 * blur * direction.y ) ) * 0.1216216216;", 
-		"result += texture2D( tDiffuse, vec2( vUv.x + 3.0 * blur * direction.x, vUv.y + 3.0 * blur * direction.y ) ) * 0.0540540541;", 
-		"result += texture2D( tDiffuse, vec2( vUv.x + 4.0 * blur * direction.x, vUv.y + 4.0 * blur * direction.y ) ) * 0.0162162162;",
+		"result += texture2D( tDiffuse, vec2( vUv.x + 1.0 * size * direction.x, vUv.y + 1.0 * size * direction.y ) ) * 0.1945945946;", 
+		"result += texture2D( tDiffuse, vec2( vUv.x + 2.0 * size * direction.x, vUv.y + 2.0 * size * direction.y ) ) * 0.1216216216;", 
+		"result += texture2D( tDiffuse, vec2( vUv.x + 3.0 * size * direction.x, vUv.y + 3.0 * size * direction.y ) ) * 0.0540540541;", 
+		"result += texture2D( tDiffuse, vec2( vUv.x + 4.0 * size * direction.x, vUv.y + 4.0 * size * direction.y ) ) * 0.0162162162;",
 
 		"gl_FragColor = result;",
 

@@ -189,7 +189,7 @@ Renderer.prototype.addHBlurEffect = function( options ) {
 
 	// set uniforms
 	effect.uniforms.direction.value = new THREE.Vector2( 1, 0 ); // x-axis
-	effect.uniforms.blur.value = ( options.blur || 1 ) / global.window.innerWidth;
+	effect.uniforms.size.value = ( options.size || 1 ) / global.window.innerWidth;
 
 	this._composer.addPass( effect );
 	this._effectCount++;
@@ -215,7 +215,7 @@ Renderer.prototype.addVBlurEffect = function( options ) {
 
 	// set uniforms
 	effect.uniforms.direction.value = new THREE.Vector2( 0, 1 ); // y-axis
-	effect.uniforms.blur.value = ( options.blur || 1 ) / global.window.innerHeight;
+	effect.uniforms.size.value = ( options.size || 1 ) / global.window.innerHeight;
 
 	this._composer.addPass( effect );
 	this._effectCount++;
