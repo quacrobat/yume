@@ -19,8 +19,6 @@ var saveGameManager = require( "../etc/SaveGameManager" );
 var multiplayerManager = require( "../etc/MultiplayerManager" );
 var networkManager = require( "../network/NetworkManager" );
 
-
-
 /**
  * Creates a Bootstrap instance, which initializes the entire application.
  * 
@@ -36,16 +34,24 @@ function Bootstrap() {
 }
 
 /**
- * Gets startup parameter from session context. The data were stored in the
- * session context by the index.ejs.
+ * This method provides the startup parameter for the engine from session
+ * context. The data were stored originally by index.ejs and will be deleted
+ * after parsing.
  */
 Bootstrap.prototype._getStartupParameter = function() {
+	
+	// read and parse parameter from session context
+	var parameter = JSON.parse( global.sessionStorage.getItem( "parameter" ) );
+	
+	// remove the parameter from session context
+	global.sessionStorage.removeItem( "parameter" );
 
-	system.init( JSON.parse( global.sessionStorage.getItem( "parameter" ) ) );
+	// initialize the engine with the parameter object
+	system.init( parameter );
 };
 
 /**
- * Initializes the core engine logic.
+ * Initializes the core components of the engine.
  */
 Bootstrap.prototype._initEngine = function() {
 
