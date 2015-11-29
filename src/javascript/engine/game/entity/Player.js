@@ -144,14 +144,6 @@ Player.prototype.update = ( function() {
 }() );
 
 /**
- * Updates the world matrix of the player's 3D object and its children.
- */
-Player.prototype.updateMatrixWorld = function() {
-
-	this.object3D.updateMatrixWorld();
-};
-
-/**
  * Sets the direction of the player.
  * 
  * @param {THREE.Vector3} direction - The new direction of the player.

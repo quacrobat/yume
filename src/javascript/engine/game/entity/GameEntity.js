@@ -124,6 +124,22 @@ GameEntity.prototype.handleMessage = function( telegram ) {
 	return false;
 };
 
+/**
+ * Updates the matrix of the 3D object.
+ */
+GameEntity.prototype.updateMatrix = function() {
+
+	this.object3D.updateMatrix();
+};
+
+/**
+ * Updates the world matrix of the 3D object and its children.
+ */
+GameEntity.prototype.updateMatrixWorld = function() {
+
+	this.object3D.updateMatrixWorld();
+};
+
 GameEntity.SCOPE = {
 	WORLD : 0,
 	STAGE : 1

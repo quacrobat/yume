@@ -505,17 +505,17 @@ SteeringBehaviors.prototype._prepareCalculation = function() {
 	// reset steering force
 	this._steeringForce.set( 0, 0, 0 );
 
-	// update model matrices of 3D object
-	this.vehicle.object3D.updateMatrixWorld();
+	// update model matrices
+	this.vehicle.updateMatrixWorld();
 
 	if ( this.targetAgent1 !== null )
 	{
-		this.targetAgent1.object3D.updateMatrixWorld();
+		this.targetAgent1.updateMatrixWorld();
 	}
 
 	if ( this.targetAgent2 !== null )
 	{
-		this.targetAgent2.object3D.updateMatrixWorld();
+		this.targetAgent2.updateMatrixWorld();
 	}
 
 	// calculate neighbors if one of the following group behaviors is active
