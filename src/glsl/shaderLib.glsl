@@ -311,7 +311,7 @@ float borderSmooth( in float width, in float smoothness, in vec2 uv ) {
     vec2 border = smoothstep( vec2( width - smoothness ), vec2( width ), uv ) -
                   smoothstep( vec2( 1.0 - width ), vec2( 1.0 - width + smoothness ), uv );
 
-     return 1.0 -  ( border.x * border.y );
+    return 1.0 -  ( border.x * border.y );
 }
 
 /*
@@ -355,16 +355,16 @@ float lineSmooth( in float f, in float y, in float width ) {
  * @returns {float} Amount to mix per fragment.
  */
 float lineSegment( in vec2 start, in vec2 end, in float width, in vec2 uv ) {
-    
+
     width *= 0.5;
 
     vec2 dir0 = end - start;
     vec2 dir1 = uv - start;
-    
+
     float h = clamp( dot( dir1, dir0 ) / dot( dir0, dir0 ), 0.0, 1.0 );
     float d = length( dir1 - dir0 * h );
 
-   	return 1.0 - step( width, d );
+    return 1.0 - step( width, d );
 }
 
 /*
@@ -379,15 +379,15 @@ float lineSegment( in vec2 start, in vec2 end, in float width, in vec2 uv ) {
  * @returns {float} Amount to mix per fragment.
  */
 float lineSegmentSmooth( in vec2 start, in vec2 end, in float width, in float smoothness, in vec2 uv ) {
-    
+
     width *= 0.5;
-    
+
     vec2 dir0 = end - start;
     vec2 dir1 = uv - start;
-    
+
     float h = clamp( dot( dir1, dir0 ) / dot( dir0, dir0 ), 0.0, 1.0 );
     float d = length( dir1 - dir0 * h );
-    
+
     return 1.0 - smoothstep( width - smoothness, width + smoothness, d );
 }
 
