@@ -316,15 +316,14 @@ float borderSmooth( in float width, in float smoothness, in vec2 uv ) {
 
 /*
  * Calculates the shape of a straight line with sharp edges.
- * This function needs uv coordinates in range [0, 1].
  *
- * @param {float} width - The width of the line.
  * @param {float} f - The y-value of the line to draw.
  * @param {float} y - The y-value of the uv coordinate.
+ * @param {float} width - The width of the line.
  *
  * @returns {float} Amount to mix per fragment.
  */
-float line( in float width, in float f, in float y ) {
+float line( in float f, in float y, in float width ) {
 
    return step( f - width, y ) -
           step( f + width, y );
@@ -332,23 +331,68 @@ float line( in float width, in float f, in float y ) {
 
 /*
  * Calculates the shape of a straight line with smooth edges.
- * This function needs uv coordinates in range [0, 1].
  *
- * @param {float} width - The width of the line.
  * @param {float} f - The y-value of the line to draw.
  * @param {float} y - The y-value of the uv coordinate.
+ * @param {float} width - The width of the line.
  *
  * @returns {float} Amount to mix per fragment.
  */
-float lineSmooth( in float width, in float f, in float y ) {
+float lineSmooth( in float f, in float y, in float width ) {
 
    return smoothstep( f - width, f, y ) -
           smoothstep( f, f + width, y );
 }
 
 /*
+ * Calculates the shape of a line segment with sharp edges.
+ *
+ * @param {vec2} start - The start point of the line segment.
+ * @param {vec2} end - The end point of the line segment.
+ * @param {float} width - The width of the line segment.
+ * @param {vec2} uv - The uv coordinates.
+ *
+ * @returns {float} Amount to mix per fragment.
+ */
+float lineSegment( in vec2 start, in vec2 end, in float width, in vec2 uv ) {
+    
+    width *= 0.5;
+
+    vec2 dir0 = end - start;
+    vec2 dir1 = uv - start;
+    
+    float h = clamp( dot( dir1, dir0 ) / dot( dir0, dir0 ), 0.0, 1.0 );
+    float d = length( dir1 - dir0 * h );
+
+   	return 1.0 - step( width, d );
+}
+
+/*
+ * Calculates the shape of a line segment with smooth edges.
+ *
+ * @param {vec2} start - The start point of the line segment.
+ * @param {vec2} end - The end point of the line segment.
+ * @param {float} width - The width of the line segment.
+ * @param {float} smoothness - The smoothness of the line segment.
+ * @param {vec2} uv - The uv coordinates.
+ *
+ * @returns {float} Amount to mix per fragment.
+ */
+float lineSegmentSmooth( in vec2 start, in vec2 end, in float width, in float smoothness, in vec2 uv ) {
+    
+    width *= 0.5;
+    
+    vec2 dir0 = end - start;
+    vec2 dir1 = uv - start;
+    
+    float h = clamp( dot( dir1, dir0 ) / dot( dir0, dir0 ), 0.0, 1.0 );
+    float d = length( dir1 - dir0 * h );
+    
+    return 1.0 - smoothstep( width - smoothness, width + smoothness, d );
+}
+
+/*
  * Calculates the shape of a rectangle with sharp edges.
- * This function can use uv coordinates with any range.
  *
  * @param {vec2} position - The position of the rectangle.
  * @param {float} width - The width of the rectangle.
@@ -372,7 +416,6 @@ float rectangle( in vec2 position, in float width, in float height, in vec2 uv )
 
 /*
  * Calculates the shape of a rectangle with smooth edges.
- * This function can use uv coordinates with any range.
  *
  * @param {vec2} position - The position of the rectangle.
  * @param {float} width - The width of the rectangle.
@@ -398,7 +441,6 @@ float rectangleSmooth( in vec2 position, in float width, in float height, in flo
 
 /*
  * Calculates the shape of a circle with sharp edges.
- * This function can use uv coordinates with any range.
  *
  * @param {vec2} center - The center of the circle.
  * @param {float} radius - The radius of the circle.
@@ -413,7 +455,6 @@ float circle( in vec2 center, in float radius, in vec2 uv ) {
 
 /*
  * Calculates the shape of a circle with smooth edges.
- * This function can use uv coordinates with any range.
  *
  * @param {vec2} center - The center of the circle.
  * @param {float} radius - The radius of the circle.
@@ -429,7 +470,6 @@ float circleSmooth( in vec2 center, in float radius, in float smoothness, in vec
 
 /*
  * Calculates the shape of a polygon with arbitrary sides and sharp edges.
- * This function can use uv coordinates with any range.
  *
  * @param {float} size - The size of the polygon.
  * @param {int} sides - The number of sides.
@@ -449,7 +489,6 @@ float polygon( in float size, in int sides, in vec2 uv ) {
 
 /*
  * Calculates the shape of a polygon with arbitrary sides and sharp edges.
- * This function can use uv coordinates with any range.
  *
  * @param {float} size - The size of the polygon.
  * @param {int} sides - The number of sides.
