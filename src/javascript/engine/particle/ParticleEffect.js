@@ -73,6 +73,13 @@ function ParticleEffect( options ) {
 			enumerable : true,
 			writable : true
 		},
+		// this controls the blending mode
+		blending : {
+			value : THREE.NormalBlending,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
 		// this controls the update of the emitter. static particle effects can
 		// set this value to false
 		emitterAutoUpdate : {
@@ -255,8 +262,9 @@ ParticleEffect.prototype._init = function() {
 	// always apply texture to material, even if its null
 	this._particleMaterial.uniforms.texture.value = this.texture;
 
-	// set transparent flag
+	// set transparent flag and blending
 	this._particleMaterial.transparent = this.transparent;
+	this._particleMaterial.blending = this.blending;
 
 	// create buffers
 	positionBuffer = new Float32Array( this.numberOfParticles * 3 );
