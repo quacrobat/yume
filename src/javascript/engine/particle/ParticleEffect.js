@@ -223,7 +223,7 @@ ParticleEffect.prototype.destroy = function() {
  */
 ParticleEffect.prototype._init = function() {
 
-	var index, positionBuffer, colorBuffer, sizeBuffer, angleBuffer, indexBuffer;
+	var index, particle, positionBuffer, colorBuffer, sizeBuffer, angleBuffer, indexBuffer;
 
 	// check existence of a valid particle emitter
 	if ( this.emitter instanceof Emitter === false )
@@ -234,8 +234,15 @@ ParticleEffect.prototype._init = function() {
 	// then create the particles
 	for ( index = 0; index < this.numberOfParticles; index++ )
 	{
+		// create a new particle
+		particle = new Particle();
+		
+		// provide a first random lifetime.
+		// this will ensure, that particles will be emitted evenly
+		particle.lifetime = THREE.Math.randFloat( 0, this.emitter.maxLifetime );
+		
 		// push the particle to the internal array
-		this._particles.push( new Particle() );
+		this._particles.push( particle );
 	}
 
 	// if no texture is set, delete a constant from the shader program that
