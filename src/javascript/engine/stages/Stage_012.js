@@ -8,6 +8,7 @@ var utils = require( "../etc/Utils" );
 var Easing = require( "../animation/Easing" );
 
 var ParticleEffect = require( "../particle/ParticleEffect" );
+var Interpolator = require( "../particle/Interpolator" );
 var SphereEmitter = require( "../particle/emitter/SphereEmitter" );
 
 var self, particles;
@@ -84,9 +85,20 @@ Stage.prototype.setup = function() {
 		numberOfParticles : 10000,
 		emitter : emitter,
 		texture : texture,
+		rotateTexture: true,
 		transparent: true,
 		sortParticles: true
 	});
+	
+	// color interpolator
+	var colorInterpolator = new Interpolator();
+	
+	colorInterpolator.addValue( 0.0, new THREE.Color( 0xff0000 ) );
+	colorInterpolator.addValue( 0.4, new THREE.Color( 0x00ff00 ) );
+	colorInterpolator.addValue( 0.7, new THREE.Color( 0x0000ff ) );
+	
+	// add interpolator to particle effect
+	particles.addInterpolatorToProperty( colorInterpolator, "color" );
 
 	// add trigger for ending
 	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 15, true, function() {
@@ -115,6 +127,8 @@ Stage.prototype.start = function() {
 Stage.prototype.destroy = function() {
 
 	StageBase.prototype.destroy.call( this );
+	
+	particles.destroy();
 };
 
 Stage.prototype._render = function() {

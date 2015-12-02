@@ -82,18 +82,18 @@ BoxEmitter.prototype.emit = ( function() {
 
 	return function( particle ) {
 		
-		var speed, lifetime, size, angleVelocity;
+		var speed;
 
 		if ( position === undefined )
 		{
 			position = new THREE.Vector3();
 		}
+		
+		// first, call method of base prototype
+		Emitter.prototype.emit.call( this, particle );
 
 		// determine random values for speed, lifetime, size and angle velocity
 		speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
-		lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
-		size = THREE.Math.randFloat( this.minSize, this.maxSize );
-		angleVelocity = THREE.Math.randFloat( this.minAngleSpeed, this.maxAngleSpeed );
 
 		// determine random values for position
 		position.x = THREE.Math.randFloat( this._boundingVolume.min.x, this._boundingVolume.max.x );
@@ -106,17 +106,6 @@ BoxEmitter.prototype.emit = ( function() {
 
 		// calculate velocity
 		particle.velocity.copy( position ).normalize().multiplyScalar( speed );
-
-		// set time properties
-		particle.lifetime = lifetime;
-		particle.age = 0;
-		
-		// set size value
-		particle.size = size;
-		
-		// set angle properties
-		particle.angleVelocity = angleVelocity;
-		particle.angle = 0;
 	};
 
 }() );

@@ -58,6 +58,13 @@ function ParticleEffect( options ) {
 			enumerable : true,
 			writable : true
 		},
+		// this indicates if the texture should rotate
+		rotateTexture : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
 		// this indicates if the effect sorts the particles in back-to-front
 		// order
 		sortParticles : {
@@ -109,7 +116,8 @@ function ParticleEffect( options ) {
 				// effects may need different constants in their shader program
 				defines : {
 					USE_SIZE_ATTENUATION : ParticleShader.defines.USE_SIZE_ATTENUATION,
-					USE_TEXTURE : ParticleShader.defines.USE_TEXTURE
+					USE_TEXTURE : ParticleShader.defines.USE_TEXTURE,
+					USE_ROTATION : ParticleShader.defines.USE_ROTATION
 				},
 				uniforms : ParticleShader.uniforms,
 				vertexShader : ParticleShader.vertexShader,
@@ -128,13 +136,13 @@ function ParticleEffect( options ) {
 			enumerable : false,
 			writable : true
 		},
-		// this will be used to interpolate the particle color over time
-		_colorInterpolator : {
-			value : new Interpolator(),
+		// this will be used to store all interpolators of the effect
+		_interpolators : {
+			value : [],
 			configurable : false,
 			enumerable : false,
 			writable : false
-		}
+		},
 
 	} );
 
@@ -195,12 +203,18 @@ ParticleEffect.prototype.update = ( function() {
 
 			// this value will be used for interpolation
 			lifeRatio = THREE.Math.clamp( ( particle.age / particle.lifetime ), 0, 1 );
-
-			// interpolate color
-			this._colorInterpolator.getValue( lifeRatio, particle.color );
 			
-			// angle calculation
-			particle.angle += particle.angleVelocity * delta;
+			// execute interpolators
+			if ( this._interpolators.length > 0 )
+			{
+				this._interpolate( particle, lifeRatio );
+			}
+			
+			// angle calculation if necessary
+			if ( this.rotateTexture === true )
+			{
+				particle.angle += particle.angleVelocity * delta;
+			}
 			
 		} // next particle
 
@@ -226,6 +240,50 @@ ParticleEffect.prototype.destroy = function() {
 };
 
 /**
+ * Adds an interpolator to the particle effect.
+ * 
+ * @param {Interpolator} interpolator - The interpolator object.
+ * @param {String} name - The name of a particle property.
+ */
+ParticleEffect.prototype.addInterpolatorToProperty = function( interpolator, name ) {
+
+	if ( interpolator instanceof Interpolator )
+	{
+		this._interpolators.push( {
+			key : name,
+			object : interpolator
+		} );
+	}
+	else
+	{
+		throw "ERROR: ParticleEffect: No valid interpolator set.";
+	}
+
+};
+
+/**
+ * Removes an interpolator of the particle effect.
+ * 
+ * @param {String} name - The name of a particle property.
+ */
+ParticleEffect.prototype.removeInterpolatorFromProperty = function( name ) {
+
+	var index, interpolator;
+
+	for ( index = 0; index < this._interpolators.length; index++ )
+	{
+		interpolator = this._interpolators[ index ];
+		
+		if( interpolator.key === name ){
+			
+			this._interpolators.splice( index, 1 );
+			
+			return;
+		}
+	}
+};
+
+/**
  * Initializes the particle effect.
  */
 ParticleEffect.prototype._init = function() {
@@ -238,31 +296,25 @@ ParticleEffect.prototype._init = function() {
 		throw "ERROR: ParticleEffect: No valid particle emitter set.";
 	}
 
-	// then create the particles
-	for ( index = 0; index < this.numberOfParticles; index++ )
-	{
-		// create a new particle
-		particle = new Particle();
-		
-		// provide a first random lifetime.
-		// this will ensure, that particles will be emitted evenly
-		particle.lifetime = THREE.Math.randFloat( 0, this.emitter.maxLifetime );
-		
-		// push the particle to the internal array
-		this._particles.push( particle );
-	}
-
-	// if no texture is set, delete a constant from the shader program that
-	// controls texture sampling
+	// if no texture is set, delete the constants from the shader program that
+	// controls texture sampling and rotating
 	if ( this.texture === null )
 	{
 		delete this._particleMaterial.defines.USE_TEXTURE;
+		delete this._particleMaterial.defines.USE_ROTATION;
+	}
+	else
+	{
+		// if we have a texture, we maybe want no rotation. if so, delete the
+		// corresponding shader constant
+		if ( this.rotateTexture === false )
+		{
+			delete this._particleMaterial.defines.USE_ROTATION;
+		}
 	}
 
-	// always apply texture to material, even if its null
+	// set texture, transparent flag and blending mode
 	this._particleMaterial.uniforms.texture.value = this.texture;
-
-	// set transparent flag and blending
 	this._particleMaterial.transparent = this.transparent;
 	this._particleMaterial.blending = this.blending;
 
@@ -277,13 +329,27 @@ ParticleEffect.prototype._init = function() {
 	this._particleGeometry.addAttribute( "color", new THREE.BufferAttribute( colorBuffer, 4 ) );
 	this._particleGeometry.addAttribute( "size", new THREE.BufferAttribute( sizeBuffer, 1 ) );
 	this._particleGeometry.addAttribute( "angle", new THREE.BufferAttribute( angleBuffer, 1 ) );
+	
+	// then create the particles
+	for ( index = 0; index < this.numberOfParticles; index++ )
+	{
+		// create a new particle
+		particle = new Particle();
+		
+		// provide a first random lifetime.
+		// this will ensure, that particles will be emitted evenly
+		particle.lifetime = THREE.Math.randFloat( 0, this.emitter.maxLifetime );
+		
+		// push the particle to the internal array
+		this._particles.push( particle );
+	}
 
 	// if we need sorted particles, we create an additional index buffer
 	if ( this.sortParticles === true )
 	{
 		indexBuffer = new Uint16Array( this.numberOfParticles );
 
-		for ( index = 0; index < this._particles.length; index++ )
+		for ( index = 0; index < this.numberOfParticles; index++ )
 		{
 			indexBuffer[ index ] = index;
 		}
@@ -300,11 +366,6 @@ ParticleEffect.prototype._init = function() {
 
 	// add the system to the world
 	world.addObject3D( this._particleSystem );
-
-	// setup the color interpolator
-	this._colorInterpolator.addValue( 0.0, new THREE.Color( 0xff0000 ) );
-	this._colorInterpolator.addValue( 0.4, new THREE.Color( 0x00ff00 ) );
-	this._colorInterpolator.addValue( 0.7, new THREE.Color( 0x0000ff ) );
 };
 
 /**
@@ -348,6 +409,33 @@ ParticleEffect.prototype._buildBuffer = function() {
 	this._particleGeometry.attributes.color.needsUpdate = true;
 	this._particleGeometry.attributes.size.needsUpdate = true;
 	this._particleGeometry.attributes.angle.needsUpdate = true;
+};
+
+/**
+ * Executes all interpolators for a given particle.
+ * 
+ * @param {Particle} particle - The particle used for interpolation.
+ * @param {number} lifeRatio - The life ratio of the particle.
+ */
+ParticleEffect.prototype._interpolate = function( particle, lifeRatio ) {
+
+	var index, interpolator;
+
+	for ( index = 0; index < this._interpolators.length; index++ )
+	{
+		interpolator = this._interpolators[ index ];
+
+		// the method call of "getValue" depends on the interpolated property.
+		// we distinguish between objects and primitives
+		if ( typeof particle[ interpolator.key ] === "object" )
+		{
+			interpolator.object.getValue( lifeRatio, particle[ interpolator.key ] );
+		}
+		else
+		{
+			particle[ interpolator.key ] = interpolator.object.getValue( lifeRatio );
+		}
+	}
 };
 
 /**

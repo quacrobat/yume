@@ -51616,6 +51616,13 @@ function ParticleEffect( options ) {
 			enumerable : true,
 			writable : true
 		},
+		// this indicates if the texture should rotate
+		rotateTexture : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
 		// this indicates if the effect sorts the particles in back-to-front
 		// order
 		sortParticles : {
@@ -51667,7 +51674,8 @@ function ParticleEffect( options ) {
 				// effects may need different constants in their shader program
 				defines : {
 					USE_SIZE_ATTENUATION : ParticleShader.defines.USE_SIZE_ATTENUATION,
-					USE_TEXTURE : ParticleShader.defines.USE_TEXTURE
+					USE_TEXTURE : ParticleShader.defines.USE_TEXTURE,
+					USE_ROTATION : ParticleShader.defines.USE_ROTATION
 				},
 				uniforms : ParticleShader.uniforms,
 				vertexShader : ParticleShader.vertexShader,
@@ -51686,13 +51694,13 @@ function ParticleEffect( options ) {
 			enumerable : false,
 			writable : true
 		},
-		// this will be used to interpolate the particle color over time
-		_colorInterpolator : {
-			value : new Interpolator(),
+		// this will be used to store all interpolators of the effect
+		_interpolators : {
+			value : [],
 			configurable : false,
 			enumerable : false,
 			writable : false
-		}
+		},
 
 	} );
 
@@ -51753,12 +51761,18 @@ ParticleEffect.prototype.update = ( function() {
 
 			// this value will be used for interpolation
 			lifeRatio = THREE.Math.clamp( ( particle.age / particle.lifetime ), 0, 1 );
-
-			// interpolate color
-			this._colorInterpolator.getValue( lifeRatio, particle.color );
 			
-			// angle calculation
-			particle.angle += particle.angleVelocity * delta;
+			// execute interpolators
+			if ( this._interpolators.length > 0 )
+			{
+				this._interpolate( particle, lifeRatio );
+			}
+			
+			// angle calculation if necessary
+			if ( this.rotateTexture === true )
+			{
+				particle.angle += particle.angleVelocity * delta;
+			}
 			
 		} // next particle
 
@@ -51784,6 +51798,50 @@ ParticleEffect.prototype.destroy = function() {
 };
 
 /**
+ * Adds an interpolator to the particle effect.
+ * 
+ * @param {Interpolator} interpolator - The interpolator object.
+ * @param {String} name - The name of a particle property.
+ */
+ParticleEffect.prototype.addInterpolatorToProperty = function( interpolator, name ) {
+
+	if ( interpolator instanceof Interpolator )
+	{
+		this._interpolators.push( {
+			key : name,
+			object : interpolator
+		} );
+	}
+	else
+	{
+		throw "ERROR: ParticleEffect: No valid interpolator set.";
+	}
+
+};
+
+/**
+ * Removes an interpolator of the particle effect.
+ * 
+ * @param {String} name - The name of a particle property.
+ */
+ParticleEffect.prototype.removeInterpolatorFromProperty = function( name ) {
+
+	var index, interpolator;
+
+	for ( index = 0; index < this._interpolators.length; index++ )
+	{
+		interpolator = this._interpolators[ index ];
+		
+		if( interpolator.key === name ){
+			
+			this._interpolators.splice( index, 1 );
+			
+			return;
+		}
+	}
+};
+
+/**
  * Initializes the particle effect.
  */
 ParticleEffect.prototype._init = function() {
@@ -51796,31 +51854,25 @@ ParticleEffect.prototype._init = function() {
 		throw "ERROR: ParticleEffect: No valid particle emitter set.";
 	}
 
-	// then create the particles
-	for ( index = 0; index < this.numberOfParticles; index++ )
-	{
-		// create a new particle
-		particle = new Particle();
-		
-		// provide a first random lifetime.
-		// this will ensure, that particles will be emitted evenly
-		particle.lifetime = THREE.Math.randFloat( 0, this.emitter.maxLifetime );
-		
-		// push the particle to the internal array
-		this._particles.push( particle );
-	}
-
-	// if no texture is set, delete a constant from the shader program that
-	// controls texture sampling
+	// if no texture is set, delete the constants from the shader program that
+	// controls texture sampling and rotating
 	if ( this.texture === null )
 	{
 		delete this._particleMaterial.defines.USE_TEXTURE;
+		delete this._particleMaterial.defines.USE_ROTATION;
+	}
+	else
+	{
+		// if we have a texture, we maybe want no rotation. if so, delete the
+		// corresponding shader constant
+		if ( this.rotateTexture === false )
+		{
+			delete this._particleMaterial.defines.USE_ROTATION;
+		}
 	}
 
-	// always apply texture to material, even if its null
+	// set texture, transparent flag and blending mode
 	this._particleMaterial.uniforms.texture.value = this.texture;
-
-	// set transparent flag and blending
 	this._particleMaterial.transparent = this.transparent;
 	this._particleMaterial.blending = this.blending;
 
@@ -51835,13 +51887,27 @@ ParticleEffect.prototype._init = function() {
 	this._particleGeometry.addAttribute( "color", new THREE.BufferAttribute( colorBuffer, 4 ) );
 	this._particleGeometry.addAttribute( "size", new THREE.BufferAttribute( sizeBuffer, 1 ) );
 	this._particleGeometry.addAttribute( "angle", new THREE.BufferAttribute( angleBuffer, 1 ) );
+	
+	// then create the particles
+	for ( index = 0; index < this.numberOfParticles; index++ )
+	{
+		// create a new particle
+		particle = new Particle();
+		
+		// provide a first random lifetime.
+		// this will ensure, that particles will be emitted evenly
+		particle.lifetime = THREE.Math.randFloat( 0, this.emitter.maxLifetime );
+		
+		// push the particle to the internal array
+		this._particles.push( particle );
+	}
 
 	// if we need sorted particles, we create an additional index buffer
 	if ( this.sortParticles === true )
 	{
 		indexBuffer = new Uint16Array( this.numberOfParticles );
 
-		for ( index = 0; index < this._particles.length; index++ )
+		for ( index = 0; index < this.numberOfParticles; index++ )
 		{
 			indexBuffer[ index ] = index;
 		}
@@ -51858,11 +51924,6 @@ ParticleEffect.prototype._init = function() {
 
 	// add the system to the world
 	world.addObject3D( this._particleSystem );
-
-	// setup the color interpolator
-	this._colorInterpolator.addValue( 0.0, new THREE.Color( 0xff0000 ) );
-	this._colorInterpolator.addValue( 0.4, new THREE.Color( 0x00ff00 ) );
-	this._colorInterpolator.addValue( 0.7, new THREE.Color( 0x0000ff ) );
 };
 
 /**
@@ -51906,6 +51967,33 @@ ParticleEffect.prototype._buildBuffer = function() {
 	this._particleGeometry.attributes.color.needsUpdate = true;
 	this._particleGeometry.attributes.size.needsUpdate = true;
 	this._particleGeometry.attributes.angle.needsUpdate = true;
+};
+
+/**
+ * Executes all interpolators for a given particle.
+ * 
+ * @param {Particle} particle - The particle used for interpolation.
+ * @param {number} lifeRatio - The life ratio of the particle.
+ */
+ParticleEffect.prototype._interpolate = function( particle, lifeRatio ) {
+
+	var index, interpolator;
+
+	for ( index = 0; index < this._interpolators.length; index++ )
+	{
+		interpolator = this._interpolators[ index ];
+
+		// the method call of "getValue" depends on the interpolated property.
+		// we distinguish between objects and primitives
+		if ( typeof particle[ interpolator.key ] === "object" )
+		{
+			interpolator.object.getValue( lifeRatio, particle[ interpolator.key ] );
+		}
+		else
+		{
+			particle[ interpolator.key ] = interpolator.object.getValue( lifeRatio );
+		}
+	}
 };
 
 /**
@@ -52056,18 +52144,18 @@ BoxEmitter.prototype.emit = ( function() {
 
 	return function( particle ) {
 		
-		var speed, lifetime, size, angleVelocity;
+		var speed;
 
 		if ( position === undefined )
 		{
 			position = new THREE.Vector3();
 		}
+		
+		// first, call method of base prototype
+		Emitter.prototype.emit.call( this, particle );
 
 		// determine random values for speed, lifetime, size and angle velocity
 		speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
-		lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
-		size = THREE.Math.randFloat( this.minSize, this.maxSize );
-		angleVelocity = THREE.Math.randFloat( this.minAngleSpeed, this.maxAngleSpeed );
 
 		// determine random values for position
 		position.x = THREE.Math.randFloat( this._boundingVolume.min.x, this._boundingVolume.max.x );
@@ -52080,17 +52168,6 @@ BoxEmitter.prototype.emit = ( function() {
 
 		// calculate velocity
 		particle.velocity.copy( position ).normalize().multiplyScalar( speed );
-
-		// set time properties
-		particle.lifetime = lifetime;
-		particle.age = 0;
-		
-		// set size value
-		particle.size = size;
-		
-		// set angle properties
-		particle.angleVelocity = angleVelocity;
-		particle.angle = 0;
 	};
 
 }() );
@@ -52136,6 +52213,13 @@ function Emitter() {
 
 	Object.defineProperties( this, {
 		
+		// the color of a particle
+		color : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
 		// the minimum size of a particle
 		minSize : {
 			value : 3,
@@ -52152,7 +52236,7 @@ function Emitter() {
 		},
 		// the minimum opacity of a particle
 		minOpacity : {
-			value : 0,
+			value : 1,
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -52218,7 +52302,24 @@ function Emitter() {
  */
 Emitter.prototype.emit = function( particle ) {
 
-	throw "ERROR: Emitter: This method must be implemented in a derived emitter prototype.";
+	// set time properties
+	particle.lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
+	particle.age = 0;
+	
+	// set size and opacity value 
+	particle.size = THREE.Math.randFloat( this.minSize, this.maxSize );
+	particle.opacity = THREE.Math.randFloat( this.minOpacity, this.maxOpacity );
+	
+	// set angle properties
+	particle.angleVelocity = THREE.Math.randFloat( this.minAngleSpeed, this.maxAngleSpeed );
+	particle.angle = 0;
+	
+	// set color
+	if ( this.color !== null )
+	{
+		particle.color.copy( this.color );
+	}
+
 };
 
 /**
@@ -52320,18 +52421,18 @@ MeshEmitter.prototype.emit = ( function() {
 
 	return function( particle ) {
 
-		var speed, lifetime, size, angleVelocity, vertexIndex;
+		var speed, vertexIndex;
 
 		if ( position === undefined )
 		{
 			position = new THREE.Vector3();
 		}
+		
+		// first, call method of base prototype
+		Emitter.prototype.emit.call( this, particle );
 
 		// determine random values for speed, lifetime, size and angle velocity
 		speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
-		lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
-		size = THREE.Math.randFloat( this.minSize, this.maxSize );
-		angleVelocity = THREE.Math.randFloat( this.minAngleSpeed, this.maxAngleSpeed );
 
 		// determine randomly a vertex from the geometry
 		vertexIndex = THREE.Math.randInt( 0, this.mesh.geometry.vertices.length - 1 );
@@ -52351,17 +52452,6 @@ MeshEmitter.prototype.emit = ( function() {
 
 		// regard the speed
 		particle.velocity.normalize().multiplyScalar( speed );
-
-		// set time properties
-		particle.lifetime = lifetime;
-		particle.age = 0;
-		
-		// set size value
-		particle.size = size;
-		
-		// set angle properties
-		particle.angleVelocity = angleVelocity;
-		particle.angle = 0;
 	};
 
 }() );
@@ -52558,12 +52648,15 @@ SphereEmitter.prototype.emit = ( function() {
 
 	return function( particle ) {
 		
-		var azimuth, inclination, sinusInclination, radius, speed, lifetime, size, angleVelocity;
+		var azimuth, inclination, sinusInclination, radius, speed;
 
 		if ( position === undefined )
 		{
 			position = new THREE.Vector3();
 		}
+		
+		// first, call method of base prototype
+		Emitter.prototype.emit.call( this, particle );
 
 		// calculate components of polar coordinates
 		azimuth = THREE.Math.randFloat( this.minAzimuth, this.maxAzimuth );
@@ -52572,10 +52665,7 @@ SphereEmitter.prototype.emit = ( function() {
 		// determine random values for radius, speed, lifetime, size and angle velocity
 		radius = THREE.Math.randFloat( this.minRadius, this.maxRadius );
 		speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
-		lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
-		size = THREE.Math.randFloat( this.minSize, this.maxSize );
-		angleVelocity = THREE.Math.randFloat( this.minAngleSpeed, this.maxAngleSpeed );
-
+	
 		// determine the relative position of the particle by converting polar
 		// coordinates to Cartesian coordinates
 		sinusInclination = Math.sin( inclination );
@@ -52593,17 +52683,6 @@ SphereEmitter.prototype.emit = ( function() {
 		// calculate velocity
 		particle.velocity.copy( position ).normalize().multiplyScalar( speed );
 
-		// set time properties
-		particle.lifetime = lifetime;
-		particle.age = 0;
-		
-		// set size value
-		particle.size = size;
-		
-		// set angle properties
-		particle.angleVelocity = angleVelocity;
-		particle.angle = 0;
-		
 	};
 
 }() );
@@ -53467,11 +53546,16 @@ module.exports = {
 	defines : {
 
 		// this activates size attenuation for particles. if you don't need
-		// this, just delete this entry
-		USE_SIZE_ATTENUATION : "",
-		// this activates texture sampling. delete this constant if you don't
-		// use a texture, otherwise you will get a black particle
+		// this, just delete this entry in the particle effect
+		SIZE_ATTENUATION : "",
+
+		// this activates texture sampling. delete this constant in the particle
+		// effect if you don't use a texture, otherwise you will get a black particle
 		USE_TEXTURE : "",
+
+		// this activates texture rotating. delete this constant in the particle
+		// effect if you want static textures
+		USE_ROTATION : ""
 	},
 
 	uniforms : {
@@ -53481,6 +53565,7 @@ module.exports = {
 			type : "t",
 			value : null
 		},
+		
 		// the amount of size-scaling of a particle
 		"scale" : {
 			type : "f",
@@ -53505,8 +53590,8 @@ module.exports = {
 		// and it is used by the fragment shader
 		"varying vec4 vColor;",
 		
-		// angle is only used by the fragment shader if there is a texture
-		"#ifdef USE_TEXTURE",
+		// angle is only used by the fragment shader if we want to rotate the texture
+		"#ifdef USE_ROTATION",
 		
 			"varying float vAngle;",
 			
@@ -53517,7 +53602,7 @@ module.exports = {
 			// assign attributes to varyings
 			"vColor = color;",
 			
-			"#ifdef USE_TEXTURE",
+			"#ifdef USE_ROTATION",
 			
 				"vAngle = angle;",
 				
@@ -53551,7 +53636,7 @@ module.exports = {
 	
 		"varying vec4 vColor;",
 		
-		"#ifdef USE_TEXTURE",
+		"#ifdef USE_ROTATION",
 		
 			"varying float vAngle;",
 			
@@ -53563,14 +53648,20 @@ module.exports = {
 					
 			"#ifdef USE_TEXTURE",
 			
-				"float c = cos( vAngle );",	
-				"float s = sin( vAngle );",
+				"vec2 uv = gl_PointCoord;",
+			
+				"#ifdef USE_ROTATION",
+			
+					"float c = cos( vAngle );",	
+					"float s = sin( vAngle );",
 				
-				// this will rotate the UV coordinate by the given angle. 
-				// rotating the texture will look like rotating the entire particle
-				"vec2 rotatedUV = vec2( c * ( gl_PointCoord.x - 0.5 ) + s * ( gl_PointCoord.y - 0.5 ) + 0.5, c * ( gl_PointCoord.y - 0.5 ) - s * ( gl_PointCoord.x - 0.5 ) + 0.5 );",
+					// this will rotate the UV coordinate by the given angle. 
+					// rotating the texture will look like rotating the entire particle
+					"uv = vec2( c * ( uv.x - 0.5 ) + s * ( uv.y - 0.5 ) + 0.5, c * ( uv.y - 0.5 ) - s * ( uv.x - 0.5 ) + 0.5 );",
+				
+				"#endif",
 
-				"color *= texture2D( texture, rotatedUV );",
+				"color *= texture2D( texture, uv );",
 			
 			"#endif",
 	
@@ -55277,6 +55368,7 @@ var utils = require( "../etc/Utils" );
 var Easing = require( "../animation/Easing" );
 
 var ParticleEffect = require( "../particle/ParticleEffect" );
+var Interpolator = require( "../particle/Interpolator" );
 var SphereEmitter = require( "../particle/emitter/SphereEmitter" );
 
 var self, particles;
@@ -55353,9 +55445,20 @@ Stage.prototype.setup = function() {
 		numberOfParticles : 10000,
 		emitter : emitter,
 		texture : texture,
+		rotateTexture: true,
 		transparent: true,
 		sortParticles: true
 	});
+	
+	// color interpolator
+	var colorInterpolator = new Interpolator();
+	
+	colorInterpolator.addValue( 0.0, new THREE.Color( 0xff0000 ) );
+	colorInterpolator.addValue( 0.4, new THREE.Color( 0x00ff00 ) );
+	colorInterpolator.addValue( 0.7, new THREE.Color( 0x0000ff ) );
+	
+	// add interpolator to particle effect
+	particles.addInterpolatorToProperty( colorInterpolator, "color" );
 
 	// add trigger for ending
 	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 15, true, function() {
@@ -55384,6 +55487,8 @@ Stage.prototype.start = function() {
 Stage.prototype.destroy = function() {
 
 	StageBase.prototype.destroy.call( this );
+	
+	particles.destroy();
 };
 
 Stage.prototype._render = function() {
@@ -55394,7 +55499,7 @@ Stage.prototype._render = function() {
 };
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"../particle/ParticleEffect":73,"../particle/emitter/SphereEmitter":77,"three":1}],100:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"../particle/Interpolator":71,"../particle/ParticleEffect":73,"../particle/emitter/SphereEmitter":77,"three":1}],100:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.

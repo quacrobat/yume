@@ -17,6 +17,13 @@ function Emitter() {
 
 	Object.defineProperties( this, {
 		
+		// the color of a particle
+		color : {
+			value : null,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
 		// the minimum size of a particle
 		minSize : {
 			value : 3,
@@ -33,7 +40,7 @@ function Emitter() {
 		},
 		// the minimum opacity of a particle
 		minOpacity : {
-			value : 0,
+			value : 1,
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -99,7 +106,24 @@ function Emitter() {
  */
 Emitter.prototype.emit = function( particle ) {
 
-	throw "ERROR: Emitter: This method must be implemented in a derived emitter prototype.";
+	// set time properties
+	particle.lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
+	particle.age = 0;
+	
+	// set size and opacity value 
+	particle.size = THREE.Math.randFloat( this.minSize, this.maxSize );
+	particle.opacity = THREE.Math.randFloat( this.minOpacity, this.maxOpacity );
+	
+	// set angle properties
+	particle.angleVelocity = THREE.Math.randFloat( this.minAngleSpeed, this.maxAngleSpeed );
+	particle.angle = 0;
+	
+	// set color
+	if ( this.color !== null )
+	{
+		particle.color.copy( this.color );
+	}
+
 };
 
 /**
