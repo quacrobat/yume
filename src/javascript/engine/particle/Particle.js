@@ -25,7 +25,7 @@ function Particle() {
 			enumerable : true,
 			writable : false
 		},
-		// the movement of the particle
+		// the movement direction of the particle
 		movement : {
 			value : new THREE.Vector3(),
 			configurable : false,
@@ -38,6 +38,13 @@ function Particle() {
 			configurable : false,
 			enumerable : true,
 			writable : false
+		},
+		// the speed of the particle
+		speed : {
+			value : 1,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
 		// the size of the particle
 		size : {

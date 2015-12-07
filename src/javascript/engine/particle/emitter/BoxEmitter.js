@@ -82,8 +82,6 @@ BoxEmitter.prototype.emit = ( function() {
 
 	return function( particle ) {
 		
-		var speed;
-
 		if ( position === undefined )
 		{
 			position = new THREE.Vector3();
@@ -91,9 +89,6 @@ BoxEmitter.prototype.emit = ( function() {
 		
 		// first, call method of base prototype
 		Emitter.prototype.emit.call( this, particle );
-
-		// determine random values for speed, lifetime, size and angle velocity
-		speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
 
 		// determine random values for position
 		position.x = THREE.Math.randFloat( this._boundingVolume.min.x, this._boundingVolume.max.x );
@@ -107,11 +102,9 @@ BoxEmitter.prototype.emit = ( function() {
 		// calculate default movement
 		if ( this.defaultMovement === true )
 		{
-			particle.movement.copy( position ).normalize();
+			particle.movement.copy( position ).normalize().multiplyScalar( particle.speed );
 		}
 		
-		// regard speed
-		particle.movement.multiplyScalar( speed );
 	};
 
 }() );

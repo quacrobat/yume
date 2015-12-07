@@ -117,7 +117,7 @@ SphereEmitter.prototype.emit = ( function() {
 
 	return function( particle ) {
 
-		var azimuth, inclination, sinusInclination, radius, speed;
+		var azimuth, inclination, sinusInclination, radius;
 
 		if ( position === undefined )
 		{
@@ -134,9 +134,8 @@ SphereEmitter.prototype.emit = ( function() {
 		// determine random values for radius, speed, lifetime, size and angle
 		// velocity
 		radius = THREE.Math.randFloat( this.minRadius, this.maxRadius );
-		speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
 
-		// determine the relative position of the particle by converting polar
+		// determine the relative position of the particle by converting Polar
 		// coordinates to Cartesian coordinates
 		sinusInclination = Math.sin( inclination );
 
@@ -153,11 +152,8 @@ SphereEmitter.prototype.emit = ( function() {
 		// calculate default movement
 		if ( this.defaultMovement === true )
 		{
-			particle.movement.copy( position ).normalize();
+			particle.movement.copy( position ).normalize().multiplyScalar( particle.speed );
 		}
-		
-		// regard speed
-		particle.movement.multiplyScalar( speed );
 	};
 
 }() );

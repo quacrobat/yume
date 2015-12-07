@@ -1,6 +1,7 @@
 /**
  * @file This prototype will be used to interpolate within a predefined set of
- * values. There must be added at least two values for interpolation.
+ * values. There must be added at least two values for interpolation. Can be
+ * used to execute a linear interpolation of particle properties.
  * 
  * @author Human Interactive
  */

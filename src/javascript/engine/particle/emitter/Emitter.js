@@ -31,6 +31,7 @@ function Emitter() {
 			enumerable : true,
 			writable : true		
 		},
+		// the spread of the movement
 		movementSpread : {
 			value : new THREE.Vector3(),
 			configurable : false,
@@ -129,6 +130,9 @@ Emitter.prototype.emit = function( particle ) {
 
 	// set color
 	particle.color.copy( this.color );
+	
+	// set speed
+	particle.speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
 
 	// set particle movement
 	particle.movement.copy( this.movementBasis );
@@ -137,13 +141,13 @@ Emitter.prototype.emit = function( particle ) {
 	particle.movement.y += THREE.Math.randFloat( this.movementSpread.y * -0.5, this.movementSpread.y * 0.5 );
 	particle.movement.z += THREE.Math.randFloat( this.movementSpread.z * -0.5, this.movementSpread.z * 0.5 );
 
-	particle.movement.normalize();
-
+	particle.movement.normalize().multiplyScalar( particle.speed );
+	
 	// set time properties
 	particle.lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
 	particle.age = 0;
 
-	// set size and opacity value
+	// set size and opacity
 	particle.size = THREE.Math.randFloat( this.minSize, this.maxSize );
 	particle.opacity = THREE.Math.randFloat( this.minOpacity, this.maxOpacity );
 

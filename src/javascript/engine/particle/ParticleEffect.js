@@ -20,7 +20,7 @@ var world = require( "../core/World" );
 var camera = require( "../core/Camera" );
 
 var Particle = require( "./Particle" );
-var Interpolator = require( "./Interpolator" );
+var Interpolator = require( "./operator/Interpolator" );
 var Emitter = require( "./emitter/Emitter" );
 var ParticleShader = require( "../shader/ParticleShader" );
 

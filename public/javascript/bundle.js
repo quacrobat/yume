@@ -36681,7 +36681,7 @@ ActionManager.prototype._onInteraction = function( message, data ) {
 };
 
 module.exports = new ActionManager();
-},{"../core/Logger":21,"../core/Timing":30,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":110,"./Action":4,"./ActionObject":6,"./ActionTrigger":7,"./BSPTree":8,"three":1}],6:[function(require,module,exports){
+},{"../core/Logger":21,"../core/Timing":30,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":111,"./Action":4,"./ActionObject":6,"./ActionTrigger":7,"./BSPTree":8,"three":1}],6:[function(require,module,exports){
 /**
  * @file This prototype enables ordinary 3D-Objects to be interactive. Any
  * action object is part of the collision-detection logic and ready for
@@ -40521,7 +40521,7 @@ FirstPersonControls.RUN = {
 
 module.exports = FirstPersonControls;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/Logger":21,"../etc/SettingsManager":40,"../etc/Utils":43,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":110,"three":1}],18:[function(require,module,exports){
+},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/Logger":21,"../etc/SettingsManager":40,"../etc/Utils":43,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":111,"three":1}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -40640,7 +40640,7 @@ Bootstrap.prototype._loadStage = function() {
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/MultiplayerManager":35,"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../network/NetworkManager":70,"../ui/UserInterfaceManager":110,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27,"./World":31}],19:[function(require,module,exports){
+},{"../etc/MultiplayerManager":35,"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../network/NetworkManager":70,"../ui/UserInterfaceManager":111,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27,"./World":31}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for camera-based
@@ -41458,7 +41458,7 @@ Renderer.prototype._onResize = function( message, data ) {
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"../postprocessing/EffectComposer":78,"../postprocessing/RenderPass":79,"../postprocessing/ShaderPass":80,"../shader/GaussianBlurShader":83,"../shader/GrayscaleShader":84,"../shader/VignetteShader":87,"./Logger":21,"three":1}],24:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"../postprocessing/EffectComposer":79,"../postprocessing/RenderPass":80,"../postprocessing/ShaderPass":81,"../shader/GaussianBlurShader":84,"../shader/GrayscaleShader":85,"../shader/VignetteShader":88,"./Logger":21,"three":1}],24:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic for scene-based functionality.
  * 
@@ -41751,7 +41751,7 @@ StageBase.COLORS = {
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../etc/PerformanceManager":38,"../etc/SaveGameManager":39,"../etc/SettingsManager":40,"../etc/TextManager":42,"../game/entity/EntityManager":44,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":110,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
+},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../etc/PerformanceManager":38,"../etc/SaveGameManager":39,"../etc/SettingsManager":40,"../etc/TextManager":42,"../game/entity/EntityManager":44,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":111,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -42049,7 +42049,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../stages/Stage_001":88,"../stages/Stage_002":89,"../stages/Stage_003":90,"../stages/Stage_004":91,"../stages/Stage_005":92,"../stages/Stage_006":93,"../stages/Stage_007":94,"../stages/Stage_008":95,"../stages/Stage_009":96,"../stages/Stage_010":97,"../stages/Stage_011":98,"../stages/Stage_012":99,"../ui/UserInterfaceManager":110,"./Logger":21}],27:[function(require,module,exports){
+},{"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../stages/Stage_001":89,"../stages/Stage_002":90,"../stages/Stage_003":91,"../stages/Stage_004":92,"../stages/Stage_005":93,"../stages/Stage_006":94,"../stages/Stage_007":95,"../stages/Stage_008":96,"../stages/Stage_009":97,"../stages/Stage_010":98,"../stages/Stage_011":99,"../stages/Stage_012":100,"../ui/UserInterfaceManager":111,"./Logger":21}],27:[function(require,module,exports){
 /**
  * @file This prototype holds core information about the engine. The runtime
  * behavior of the application depends crucially of this prototype.
@@ -51323,148 +51323,6 @@ module.exports = new NetworkManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../core/Logger":21,"../core/ThreadManager":29,"../messaging/EventManager":66,"../messaging/Topic":68,"./Message":69,"ws":2}],71:[function(require,module,exports){
 /**
- * @file This prototype will be used to interpolate within a predefined set of
- * values. There must be added at least two values for interpolation.
- * 
- * @author Human Interactive
- */
-
-"use strict";
-
-var THREE = require( "three" );
-
-/**
- * Creates an interpolator.
- * 
- * @constructor
- */
-function Interpolator() {
-
-	Object.defineProperties( this, {
-
-		// alpha values are stored in a sortable array
-		_alpha : {
-			value : [],
-			configurable : false,
-			enumerable : false,
-			writable : false
-		},
-		// the actual values are stored in an object. access via respective
-		// alpha value
-		_values : {
-			value : {},
-			configurable : false,
-			enumerable : false,
-			writable : false
-		}
-
-	} );
-
-}
-
-/**
- * Adds a value to the internal map.
- * 
- * @param {number} alpha - This value determines the interpolation.
- * @param {object} value - The actual value. Can be a number, THREE.Vector or
- * THREE.Color.
- */
-Interpolator.prototype.addValue = function( alpha, value ) {
-
-	// store the alpha value and sort the array
-	this._alpha.push( alpha );
-	this._alpha.sort();
-
-	// store the value
-	this._values[ alpha ] = value;
-};
-
-/**
- * Returns an interpolated value at a given alpha value. If the internal values
- * are objects, the "target" parameter must be used to obtain a result, because
- * the method won't create new objects for performance reasons.
- * 
- * @param {number} alpha - This value determines the interpolation.
- * @param {object} target - The target object. Not used for primitive values.
- */
-Interpolator.prototype.getValue = function( alpha, target ) {
-
-	var result, index, alphaStart, alphaEnd, ratio, valueStart, valueEnd;
-
-	// iterate over all map entries to determine the closest values for the
-	// given alpha value (in other words: start and end value for interpolation)
-	for ( index = 0; index < this._alpha.length; index++ )
-	{
-		if ( this._alpha[ index ] <= alpha )
-		{
-			alphaStart = this._alpha[ index ];
-		}
-
-		if ( this._alpha[ index ] > alpha )
-		{
-			alphaEnd = this._alpha[ index ];
-			break;
-		}
-	}
-
-	// case 1: the given alpha value is smaller than all alpha values in the
-	// map
-	if ( alphaStart === undefined )
-	{
-		// no interpolation, just return the first value of the map
-		result = this._values[ this._alpha[ 0 ] ];
-
-		if ( target !== undefined )
-		{
-			target.copy( result );
-			return;
-		}
-		else
-		{
-			return result;
-		}
-	}
-
-	// case 2: the given alpha value is greater than all alpha values in the
-	// map
-	if ( alphaEnd === undefined )
-	{
-		// no interpolation, just return the last value of the map
-		result = this._values[ this._alpha[ this._alpha.length - 1 ] ];
-
-		if ( target !== undefined )
-		{
-			target.copy( result );
-			return;
-		}
-		else
-		{
-			return result;
-		}
-	}
-
-	// case 3: the given alpha value lies between two values of the map.
-	// interpolation required
-	ratio = ( alpha - alphaStart ) / ( alphaEnd - alphaStart );
-
-	valueStart = this._values[ alphaStart ];
-	valueEnd = this._values[ alphaEnd ];
-
-	if ( target !== undefined )
-	{
-		target.copy( valueStart ).lerp( valueEnd, ratio );
-		return;
-	}
-	else
-	{
-		return valueStart * ( 1 - ratio ) + ( valueEnd * ratio );
-	}
-
-};
-
-module.exports = Interpolator;
-},{"three":1}],72:[function(require,module,exports){
-/**
  * @file The particle prototype defines the properties of a single particle that
  * is used to simulate the particle effect.
  * 
@@ -51491,7 +51349,7 @@ function Particle() {
 			enumerable : true,
 			writable : false
 		},
-		// the movement of the particle
+		// the movement direction of the particle
 		movement : {
 			value : new THREE.Vector3(),
 			configurable : false,
@@ -51504,6 +51362,13 @@ function Particle() {
 			configurable : false,
 			enumerable : true,
 			writable : false
+		},
+		// the speed of the particle
+		speed : {
+			value : 1,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		},
 		// the size of the particle
 		size : {
@@ -51555,7 +51420,7 @@ function Particle() {
 }
 
 module.exports = Particle;
-},{"three":1}],73:[function(require,module,exports){
+},{"three":1}],72:[function(require,module,exports){
 /**
  * @file This prototype will be used to emit and update particles that share
  * common properties such as texture, interpolated colors, interpolated scale,
@@ -51578,7 +51443,7 @@ var world = require( "../core/World" );
 var camera = require( "../core/Camera" );
 
 var Particle = require( "./Particle" );
-var Interpolator = require( "./Interpolator" );
+var Interpolator = require( "./operator/Interpolator" );
 var Emitter = require( "./emitter/Emitter" );
 var ParticleShader = require( "../shader/ParticleShader" );
 
@@ -52059,7 +51924,7 @@ function compareNumbers( a, b ) {
 
 	return b[ 0 ] - a[ 0 ];
 }
-},{"../core/Camera":19,"../core/Logger":21,"../core/World":31,"../shader/ParticleShader":86,"./Interpolator":71,"./Particle":72,"./emitter/Emitter":75,"three":1}],74:[function(require,module,exports){
+},{"../core/Camera":19,"../core/Logger":21,"../core/World":31,"../shader/ParticleShader":87,"./Particle":71,"./emitter/Emitter":74,"./operator/Interpolator":77,"three":1}],73:[function(require,module,exports){
 /**
  * @file The box emitter uses an AABB to determine the position particles will
  * be emitted.
@@ -52144,8 +52009,6 @@ BoxEmitter.prototype.emit = ( function() {
 
 	return function( particle ) {
 		
-		var speed;
-
 		if ( position === undefined )
 		{
 			position = new THREE.Vector3();
@@ -52153,9 +52016,6 @@ BoxEmitter.prototype.emit = ( function() {
 		
 		// first, call method of base prototype
 		Emitter.prototype.emit.call( this, particle );
-
-		// determine random values for speed, lifetime, size and angle velocity
-		speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
 
 		// determine random values for position
 		position.x = THREE.Math.randFloat( this._boundingVolume.min.x, this._boundingVolume.max.x );
@@ -52169,11 +52029,9 @@ BoxEmitter.prototype.emit = ( function() {
 		// calculate default movement
 		if ( this.defaultMovement === true )
 		{
-			particle.movement.copy( position ).normalize();
+			particle.movement.copy( position ).normalize().multiplyScalar( particle.speed );
 		}
 		
-		// regard speed
-		particle.movement.multiplyScalar( speed );
 	};
 
 }() );
@@ -52199,7 +52057,7 @@ BoxEmitter.prototype.update = ( function() {
 }() );
 
 module.exports = BoxEmitter;
-},{"./Emitter":75,"three":1}],75:[function(require,module,exports){
+},{"./Emitter":74,"three":1}],74:[function(require,module,exports){
 /**
  * @file Base prototype for all emitters.
  * 
@@ -52233,6 +52091,7 @@ function Emitter() {
 			enumerable : true,
 			writable : true		
 		},
+		// the spread of the movement
 		movementSpread : {
 			value : new THREE.Vector3(),
 			configurable : false,
@@ -52331,6 +52190,9 @@ Emitter.prototype.emit = function( particle ) {
 
 	// set color
 	particle.color.copy( this.color );
+	
+	// set speed
+	particle.speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
 
 	// set particle movement
 	particle.movement.copy( this.movementBasis );
@@ -52339,13 +52201,13 @@ Emitter.prototype.emit = function( particle ) {
 	particle.movement.y += THREE.Math.randFloat( this.movementSpread.y * -0.5, this.movementSpread.y * 0.5 );
 	particle.movement.z += THREE.Math.randFloat( this.movementSpread.z * -0.5, this.movementSpread.z * 0.5 );
 
-	particle.movement.normalize();
-
+	particle.movement.normalize().multiplyScalar( particle.speed );
+	
 	// set time properties
 	particle.lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
 	particle.age = 0;
 
-	// set size and opacity value
+	// set size and opacity
 	particle.size = THREE.Math.randFloat( this.minSize, this.maxSize );
 	particle.opacity = THREE.Math.randFloat( this.minOpacity, this.maxOpacity );
 
@@ -52364,7 +52226,7 @@ Emitter.prototype.update = function() {
 };
 
 module.exports = Emitter;
-},{"three":1}],76:[function(require,module,exports){
+},{"three":1}],75:[function(require,module,exports){
 /**
  * @file The mesh emitter uses an arbitrary mesh to determine the position
  * particles will be emitted.
@@ -52454,7 +52316,7 @@ MeshEmitter.prototype.emit = ( function() {
 
 	return function( particle ) {
 
-		var speed, vertexIndex;
+		var vertexIndex;
 
 		if ( position === undefined )
 		{
@@ -52463,9 +52325,6 @@ MeshEmitter.prototype.emit = ( function() {
 		
 		// first, call method of base prototype
 		Emitter.prototype.emit.call( this, particle );
-
-		// determine random values for speed, lifetime, size and angle velocity
-		speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
 
 		// determine randomly a vertex from the geometry
 		vertexIndex = THREE.Math.randInt( 0, this.mesh.geometry.vertices.length - 1 );
@@ -52484,11 +52343,11 @@ MeshEmitter.prototype.emit = ( function() {
 			particle.movement.copy( this._vertexNormals[ vertexIndex ] );
 
 			// transform the movement/normal to world space
-			particle.movement.applyMatrix3( this._normalMatrix ).normalize();	
+			particle.movement.applyMatrix3( this._normalMatrix );
+			
+			// calculate final movement value
+			particle.movement.normalize().multiplyScalar( particle.speed );	
 		}
-		
-		// regard speed
-		particle.movement.multiplyScalar( speed );
 		
 	};
 
@@ -52566,7 +52425,7 @@ MeshEmitter.prototype._getVertexNormal = ( function() {
 }() );
 
 module.exports = MeshEmitter;
-},{"./Emitter":75,"three":1}],77:[function(require,module,exports){
+},{"./Emitter":74,"three":1}],76:[function(require,module,exports){
 /**
  * @file The sphere emitter will randomly emit a particle somewhere about a
  * sphere within some range. The emitter uses spherical coordinates to determine
@@ -52686,7 +52545,7 @@ SphereEmitter.prototype.emit = ( function() {
 
 	return function( particle ) {
 
-		var azimuth, inclination, sinusInclination, radius, speed;
+		var azimuth, inclination, sinusInclination, radius;
 
 		if ( position === undefined )
 		{
@@ -52703,9 +52562,8 @@ SphereEmitter.prototype.emit = ( function() {
 		// determine random values for radius, speed, lifetime, size and angle
 		// velocity
 		radius = THREE.Math.randFloat( this.minRadius, this.maxRadius );
-		speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
 
-		// determine the relative position of the particle by converting polar
+		// determine the relative position of the particle by converting Polar
 		// coordinates to Cartesian coordinates
 		sinusInclination = Math.sin( inclination );
 
@@ -52722,11 +52580,8 @@ SphereEmitter.prototype.emit = ( function() {
 		// calculate default movement
 		if ( this.defaultMovement === true )
 		{
-			particle.movement.copy( position ).normalize();
+			particle.movement.copy( position ).normalize().multiplyScalar( particle.speed );
 		}
-		
-		// regard speed
-		particle.movement.multiplyScalar( speed );
 	};
 
 }() );
@@ -52740,7 +52595,211 @@ SphereEmitter.prototype.update = function() {
 };
 
 module.exports = SphereEmitter;
-},{"./Emitter":75,"three":1}],78:[function(require,module,exports){
+},{"./Emitter":74,"three":1}],77:[function(require,module,exports){
+/**
+ * @file This prototype will be used to interpolate within a predefined set of
+ * values. There must be added at least two values for interpolation. Can be
+ * used to execute a linear interpolation of particle properties.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require( "three" );
+
+/**
+ * Creates an interpolator.
+ * 
+ * @constructor
+ */
+function Interpolator() {
+
+	Object.defineProperties( this, {
+
+		// alpha values are stored in a sortable array
+		_alpha : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		// the actual values are stored in an object. access via respective
+		// alpha value
+		_values : {
+			value : {},
+			configurable : false,
+			enumerable : false,
+			writable : false
+		}
+
+	} );
+
+}
+
+/**
+ * Adds a value to the internal map.
+ * 
+ * @param {number} alpha - This value determines the interpolation.
+ * @param {object} value - The actual value. Can be a number, THREE.Vector or
+ * THREE.Color.
+ */
+Interpolator.prototype.addValue = function( alpha, value ) {
+
+	// store the alpha value and sort the array
+	this._alpha.push( alpha );
+	this._alpha.sort();
+
+	// store the value
+	this._values[ alpha ] = value;
+};
+
+/**
+ * Returns an interpolated value at a given alpha value. If the internal values
+ * are objects, the "target" parameter must be used to obtain a result, because
+ * the method won't create new objects for performance reasons.
+ * 
+ * @param {number} alpha - This value determines the interpolation.
+ * @param {object} target - The target object. Not used for primitive values.
+ */
+Interpolator.prototype.getValue = function( alpha, target ) {
+
+	var result, index, alphaStart, alphaEnd, ratio, valueStart, valueEnd;
+
+	// iterate over all map entries to determine the closest values for the
+	// given alpha value (in other words: start and end value for interpolation)
+	for ( index = 0; index < this._alpha.length; index++ )
+	{
+		if ( this._alpha[ index ] <= alpha )
+		{
+			alphaStart = this._alpha[ index ];
+		}
+
+		if ( this._alpha[ index ] > alpha )
+		{
+			alphaEnd = this._alpha[ index ];
+			break;
+		}
+	}
+
+	// case 1: the given alpha value is smaller than all alpha values in the
+	// map
+	if ( alphaStart === undefined )
+	{
+		// no interpolation, just return the first value of the map
+		result = this._values[ this._alpha[ 0 ] ];
+
+		if ( target !== undefined )
+		{
+			target.copy( result );
+			return;
+		}
+		else
+		{
+			return result;
+		}
+	}
+
+	// case 2: the given alpha value is greater than all alpha values in the
+	// map
+	if ( alphaEnd === undefined )
+	{
+		// no interpolation, just return the last value of the map
+		result = this._values[ this._alpha[ this._alpha.length - 1 ] ];
+
+		if ( target !== undefined )
+		{
+			target.copy( result );
+			return;
+		}
+		else
+		{
+			return result;
+		}
+	}
+
+	// case 3: the given alpha value lies between two values of the map.
+	// interpolation required
+	ratio = ( alpha - alphaStart ) / ( alphaEnd - alphaStart );
+
+	valueStart = this._values[ alphaStart ];
+	valueEnd = this._values[ alphaEnd ];
+
+	if ( target !== undefined )
+	{
+		target.copy( valueStart ).lerp( valueEnd, ratio );
+		return;
+	}
+	else
+	{
+		return valueStart * ( 1 - ratio ) + ( valueEnd * ratio );
+	}
+
+};
+
+module.exports = Interpolator;
+},{"three":1}],78:[function(require,module,exports){
+/**
+ * @file This prototype will be used to manipulate vectors with an oscillation
+ * animation. This operator can be used to create a wavy particle effects.
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var utils = require( "../../etc/Utils" );
+
+/**
+ * Creates an oscillator.
+ * 
+ * @constructor
+ * 
+ * @param {number} amplitude - The amplitude of the oscillator.
+ * @param {number} period - The time period of a single wave in seconds.
+ * @param {number} offset - The offset of the oscillator curve.
+ */
+function Oscillator( amplitude, period, offset ) {
+
+	Object.defineProperties( this, {
+
+		amplitude : {
+			value : amplitude || 1,
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		period : {
+			value : period || 1,
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		offset : {
+			value : offset || 0,
+			configurable : false,
+			enumerable : false,
+			writable : false
+		}
+
+	} );
+
+}
+
+/**
+ * Calculates the value of the oscillation animation.
+ * 
+ * @param {number} elapsedTime - The elapsed time.
+ *  
+ * @returns {number} The calculated value.
+ */
+Oscillator.prototype.getValue = function( elapsedTime ){
+	
+	return ( this.amplitude * Math.sin( ( elapsedTime * utils.TWO_PI ) / this.period ) ) + this.offset;
+};
+
+module.exports = Oscillator;
+},{"../../etc/Utils":43}],79:[function(require,module,exports){
 /**
  * @file This prototype manages effects for post-processing.
  * 
@@ -52919,7 +52978,7 @@ EffectComposer.prototype._reset = function( renderTarget ) {
 };
 
 module.exports = EffectComposer;
-},{"three":1}],79:[function(require,module,exports){
+},{"three":1}],80:[function(require,module,exports){
 /**
  * @file This prototype provides a render pass for post-processing.
  * 
@@ -52981,7 +53040,7 @@ RenderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = RenderPass;
-},{"three":1}],80:[function(require,module,exports){
+},{"three":1}],81:[function(require,module,exports){
 /**
  * @file This prototype provides a shader pass for post-processing.
  * 
@@ -53087,7 +53146,7 @@ ShaderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = ShaderPass;
-},{"three":1}],81:[function(require,module,exports){
+},{"three":1}],82:[function(require,module,exports){
 /**
  * @file This shader can be used for vertex displacement to create water or
  * fabric materials. It implements an exemplary diffuse lighting equation, which
@@ -53207,7 +53266,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{"three":1}],82:[function(require,module,exports){
+},{"three":1}],83:[function(require,module,exports){
 /**
  * @file This shader creates a 2D flame. Use it as a material along with
  * a view-oriented billboard to simulate candles or other fire effects. If you
@@ -53362,7 +53421,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{}],83:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 /**
  * @file This shader applies a gaussian blur effect. Used in post-processing.
  * 
@@ -53440,7 +53499,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{"three":1}],84:[function(require,module,exports){
+},{"three":1}],85:[function(require,module,exports){
 /**
  * @file This shader transforms all colors to grayscale. Used in
  * post-processing.
@@ -53496,7 +53555,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{}],85:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 /**
  * @file This shader creates a simple horizon. Use this shader as a material on
  * a sphere.
@@ -53574,7 +53633,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{"three":1}],86:[function(require,module,exports){
+},{"three":1}],87:[function(require,module,exports){
 /**
  * @file This shader will be used as a material for particles.
  * 
@@ -53715,7 +53774,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{"three":1}],87:[function(require,module,exports){
+},{"three":1}],88:[function(require,module,exports){
 /**
  * @file This shader creates a vignette effect. Used in post-processing.
  * 
@@ -53795,7 +53854,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{}],88:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -53895,7 +53954,7 @@ Stage.prototype._render = function() {
 };
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],89:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],90:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -54060,7 +54119,7 @@ Stage.prototype._render = function() {
 };
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],90:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],91:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -54218,7 +54277,7 @@ function colorMesh( mesh ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],91:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],92:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -54376,7 +54435,7 @@ Stage.prototype._render = function() {
 };
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],92:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],93:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -54485,7 +54544,7 @@ Stage.prototype._render = function() {
 };
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],93:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],94:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -54658,7 +54717,7 @@ Stage.prototype._render = function() {
 };
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],94:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],95:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -54815,7 +54874,7 @@ Stage.prototype._render = function() {
 };
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],95:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],96:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -54951,7 +55010,7 @@ Stage.prototype._render = function() {
 };
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],96:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],97:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -55118,7 +55177,7 @@ function showLODCircles( world ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],97:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],98:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -55288,7 +55347,7 @@ function onKeyDown( event ) {
 
 module.exports = Stage;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],98:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],99:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -55401,7 +55460,7 @@ Stage.prototype._render = function() {
 };
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],99:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],100:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -55412,7 +55471,7 @@ var utils = require( "../etc/Utils" );
 var Easing = require( "../animation/Easing" );
 
 var ParticleEffect = require( "../particle/ParticleEffect" );
-var Interpolator = require( "../particle/Interpolator" );
+var Interpolator = require( "../particle/operator/Interpolator" );
 var SphereEmitter = require( "../particle/emitter/SphereEmitter" );
 
 var self, particles;
@@ -55538,13 +55597,13 @@ Stage.prototype.destroy = function() {
 
 Stage.prototype._render = function() {
 	
-	particles.update( self._delta );
+	particles.update( self._delta, self.timeManager.elapsedTime );
 
 	StageBase.prototype._render.call( self );
 };
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"../particle/Interpolator":71,"../particle/ParticleEffect":73,"../particle/emitter/SphereEmitter":77,"three":1}],100:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"../particle/ParticleEffect":72,"../particle/emitter/SphereEmitter":76,"../particle/operator/Interpolator":77,"three":1}],101:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -55723,7 +55782,7 @@ Chat.prototype._onMessage = function( message, data ) {
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":109}],101:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":110}],102:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel. Only if the development
@@ -55785,7 +55844,7 @@ DevelopmentPanel.prototype.setText = function( text ) {
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":109}],102:[function(require,module,exports){
+},{"./UiElement":110}],103:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -55846,7 +55905,7 @@ InformationPanel.prototype.setText = function( textKey ) {
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":109}],103:[function(require,module,exports){
+},{"./UiElement":110}],104:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -55923,7 +55982,7 @@ InteractionLabel.prototype.hide = function() {
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":109}],104:[function(require,module,exports){
+},{"./UiElement":110}],105:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -56113,7 +56172,7 @@ LoadingScreen.prototype._onReady = function( message, data ) {
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":109}],105:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":110}],106:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -56269,7 +56328,7 @@ Menu.prototype._publishFinishEvent = function( message, data ) {
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Environment":20,"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":109}],106:[function(require,module,exports){
+},{"../core/Environment":20,"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":110}],107:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -56393,7 +56452,7 @@ ModalDialog.prototype._onClose = function( event ) {
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":109}],107:[function(require,module,exports){
+},{"./UiElement":110}],108:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor. Only if the development
@@ -56612,7 +56671,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":109}],108:[function(require,module,exports){
+},{"./UiElement":110}],109:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -56838,7 +56897,7 @@ TextScreen.prototype._printName = function() {
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":109}],109:[function(require,module,exports){
+},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":110}],110:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -56888,7 +56947,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":42}],110:[function(require,module,exports){
+},{"../etc/TextManager":42}],111:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in stages to
@@ -57169,4 +57228,4 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68,"./Chat":100,"./DevelopmentPanel":101,"./InformationPanel":102,"./InteractionLabel":103,"./LoadingScreen":104,"./Menu":105,"./ModalDialog":106,"./PerformanceMonitor":107,"./TextScreen":108}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110]);
+},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68,"./Chat":101,"./DevelopmentPanel":102,"./InformationPanel":103,"./InteractionLabel":104,"./LoadingScreen":105,"./Menu":106,"./ModalDialog":107,"./PerformanceMonitor":108,"./TextScreen":109}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111]);

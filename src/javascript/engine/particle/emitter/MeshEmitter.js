@@ -87,7 +87,7 @@ MeshEmitter.prototype.emit = ( function() {
 
 	return function( particle ) {
 
-		var speed, vertexIndex;
+		var vertexIndex;
 
 		if ( position === undefined )
 		{
@@ -96,9 +96,6 @@ MeshEmitter.prototype.emit = ( function() {
 		
 		// first, call method of base prototype
 		Emitter.prototype.emit.call( this, particle );
-
-		// determine random values for speed, lifetime, size and angle velocity
-		speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
 
 		// determine randomly a vertex from the geometry
 		vertexIndex = THREE.Math.randInt( 0, this.mesh.geometry.vertices.length - 1 );
@@ -117,11 +114,11 @@ MeshEmitter.prototype.emit = ( function() {
 			particle.movement.copy( this._vertexNormals[ vertexIndex ] );
 
 			// transform the movement/normal to world space
-			particle.movement.applyMatrix3( this._normalMatrix ).normalize();	
+			particle.movement.applyMatrix3( this._normalMatrix );
+			
+			// calculate final movement value
+			particle.movement.normalize().multiplyScalar( particle.speed );	
 		}
-		
-		// regard speed
-		particle.movement.multiplyScalar( speed );
 		
 	};
 

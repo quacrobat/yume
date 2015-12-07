@@ -7,7 +7,7 @@
 "use strict";
 
 var assert = require( "assert" );
-var Interpolator = require( "../src/javascript/engine/particle/Interpolator" );
+var Interpolator = require( "../src/javascript/engine/particle/operator/Interpolator" );
 
 describe( "Interpolator", function() {
 

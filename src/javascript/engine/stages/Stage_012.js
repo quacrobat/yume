@@ -8,7 +8,7 @@ var utils = require( "../etc/Utils" );
 var Easing = require( "../animation/Easing" );
 
 var ParticleEffect = require( "../particle/ParticleEffect" );
-var Interpolator = require( "../particle/Interpolator" );
+var Interpolator = require( "../particle/operator/Interpolator" );
 var SphereEmitter = require( "../particle/emitter/SphereEmitter" );
 
 var self, particles;
@@ -134,7 +134,7 @@ Stage.prototype.destroy = function() {
 
 Stage.prototype._render = function() {
 	
-	particles.update( self._delta );
+	particles.update( self._delta, self.timeManager.elapsedTime );
 
 	StageBase.prototype._render.call( self );
 };
