@@ -198,7 +198,7 @@ ParticleEffect.prototype.update = ( function() {
 			}
 
 			// update the position by adding a displacement
-			displacement.copy( particle.velocity ).multiplyScalar( delta );
+			displacement.copy( particle.movement ).multiplyScalar( delta );
 			particle.position.add( displacement );
 
 			// this value will be used for interpolation

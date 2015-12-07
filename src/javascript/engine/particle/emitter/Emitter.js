@@ -19,7 +19,20 @@ function Emitter() {
 		
 		// the color of a particle
 		color : {
-			value : null,
+			value : new THREE.Color(),
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the basis movement vector
+		movementBasis : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : true		
+		},
+		movementSpread : {
+			value : new THREE.Vector3(),
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -93,6 +106,14 @@ function Emitter() {
 			configurable : false,
 			enumerable : true,
 			writable : true
+		},
+		// this controls the usage of the default particle movement calculation of the emitter.
+		// if this is set to false, you need to specify manually values for movement 
+		defaultMovement: {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
 		
 	} );
@@ -106,23 +127,29 @@ function Emitter() {
  */
 Emitter.prototype.emit = function( particle ) {
 
+	// set color
+	particle.color.copy( this.color );
+
+	// set particle movement
+	particle.movement.copy( this.movementBasis );
+
+	particle.movement.x += THREE.Math.randFloat( this.movementSpread.x * -0.5, this.movementSpread.x * 0.5 );
+	particle.movement.y += THREE.Math.randFloat( this.movementSpread.y * -0.5, this.movementSpread.y * 0.5 );
+	particle.movement.z += THREE.Math.randFloat( this.movementSpread.z * -0.5, this.movementSpread.z * 0.5 );
+
+	particle.movement.normalize();
+
 	// set time properties
 	particle.lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
 	particle.age = 0;
-	
-	// set size and opacity value 
+
+	// set size and opacity value
 	particle.size = THREE.Math.randFloat( this.minSize, this.maxSize );
 	particle.opacity = THREE.Math.randFloat( this.minOpacity, this.maxOpacity );
-	
+
 	// set angle properties
 	particle.angleVelocity = THREE.Math.randFloat( this.minAngleSpeed, this.maxAngleSpeed );
 	particle.angle = 0;
-	
-	// set color
-	if ( this.color !== null )
-	{
-		particle.color.copy( this.color );
-	}
 
 };
 

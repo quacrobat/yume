@@ -104,8 +104,14 @@ BoxEmitter.prototype.emit = ( function() {
 		// particle to get world coordinates
 		particle.position.copy( position ).add( this.origin );
 
-		// calculate velocity
-		particle.velocity.copy( position ).normalize().multiplyScalar( speed );
+		// calculate default movement
+		if ( this.defaultMovement === true )
+		{
+			particle.movement.copy( position ).normalize();
+		}
+		
+		// regard speed
+		particle.movement.multiplyScalar( speed );
 	};
 
 }() );

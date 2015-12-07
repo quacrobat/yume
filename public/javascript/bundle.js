@@ -51491,8 +51491,8 @@ function Particle() {
 			enumerable : true,
 			writable : false
 		},
-		// the velocity of the particle
-		velocity : {
+		// the movement of the particle
+		movement : {
 			value : new THREE.Vector3(),
 			configurable : false,
 			enumerable : true,
@@ -51756,7 +51756,7 @@ ParticleEffect.prototype.update = ( function() {
 			}
 
 			// update the position by adding a displacement
-			displacement.copy( particle.velocity ).multiplyScalar( delta );
+			displacement.copy( particle.movement ).multiplyScalar( delta );
 			particle.position.add( displacement );
 
 			// this value will be used for interpolation
@@ -52166,8 +52166,14 @@ BoxEmitter.prototype.emit = ( function() {
 		// particle to get world coordinates
 		particle.position.copy( position ).add( this.origin );
 
-		// calculate velocity
-		particle.velocity.copy( position ).normalize().multiplyScalar( speed );
+		// calculate default movement
+		if ( this.defaultMovement === true )
+		{
+			particle.movement.copy( position ).normalize();
+		}
+		
+		// regard speed
+		particle.movement.multiplyScalar( speed );
 	};
 
 }() );
@@ -52215,7 +52221,20 @@ function Emitter() {
 		
 		// the color of a particle
 		color : {
-			value : null,
+			value : new THREE.Color(),
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the basis movement vector
+		movementBasis : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : true		
+		},
+		movementSpread : {
+			value : new THREE.Vector3(),
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -52289,6 +52308,14 @@ function Emitter() {
 			configurable : false,
 			enumerable : true,
 			writable : true
+		},
+		// this controls the usage of the default particle movement calculation of the emitter.
+		// if this is set to false, you need to specify manually values for movement 
+		defaultMovement: {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
 		
 	} );
@@ -52302,23 +52329,29 @@ function Emitter() {
  */
 Emitter.prototype.emit = function( particle ) {
 
+	// set color
+	particle.color.copy( this.color );
+
+	// set particle movement
+	particle.movement.copy( this.movementBasis );
+
+	particle.movement.x += THREE.Math.randFloat( this.movementSpread.x * -0.5, this.movementSpread.x * 0.5 );
+	particle.movement.y += THREE.Math.randFloat( this.movementSpread.y * -0.5, this.movementSpread.y * 0.5 );
+	particle.movement.z += THREE.Math.randFloat( this.movementSpread.z * -0.5, this.movementSpread.z * 0.5 );
+
+	particle.movement.normalize();
+
 	// set time properties
 	particle.lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
 	particle.age = 0;
-	
-	// set size and opacity value 
+
+	// set size and opacity value
 	particle.size = THREE.Math.randFloat( this.minSize, this.maxSize );
 	particle.opacity = THREE.Math.randFloat( this.minOpacity, this.maxOpacity );
-	
+
 	// set angle properties
 	particle.angleVelocity = THREE.Math.randFloat( this.minAngleSpeed, this.maxAngleSpeed );
 	particle.angle = 0;
-	
-	// set color
-	if ( this.color !== null )
-	{
-		particle.color.copy( this.color );
-	}
 
 };
 
@@ -52443,15 +52476,20 @@ MeshEmitter.prototype.emit = ( function() {
 		// finally, we need to apply the world matrix of the mesh to calculate
 		// the world position of the particle
 		particle.position.applyMatrix4( this.mesh.matrixWorld );
+		
+		// calculate default movement
+		if ( this.defaultMovement === true ){
+			
+			// the vertex normal determines the movement direction of the particle
+			particle.movement.copy( this._vertexNormals[ vertexIndex ] );
 
-		// the vertex normal determines the movement direction of the particle
-		particle.velocity.copy( this._vertexNormals[ vertexIndex ] );
-
-		// transform the velocity/normal to world space
-		particle.velocity.applyMatrix3( this._normalMatrix );
-
-		// regard the speed
-		particle.velocity.normalize().multiplyScalar( speed );
+			// transform the movement/normal to world space
+			particle.movement.applyMatrix3( this._normalMatrix ).normalize();	
+		}
+		
+		// regard speed
+		particle.movement.multiplyScalar( speed );
+		
 	};
 
 }() );
@@ -52647,14 +52685,14 @@ SphereEmitter.prototype.emit = ( function() {
 	var position;
 
 	return function( particle ) {
-		
+
 		var azimuth, inclination, sinusInclination, radius, speed;
 
 		if ( position === undefined )
 		{
 			position = new THREE.Vector3();
 		}
-		
+
 		// first, call method of base prototype
 		Emitter.prototype.emit.call( this, particle );
 
@@ -52662,10 +52700,11 @@ SphereEmitter.prototype.emit = ( function() {
 		azimuth = THREE.Math.randFloat( this.minAzimuth, this.maxAzimuth );
 		inclination = THREE.Math.randFloat( this.minInclination, this.maxInclination );
 
-		// determine random values for radius, speed, lifetime, size and angle velocity
+		// determine random values for radius, speed, lifetime, size and angle
+		// velocity
 		radius = THREE.Math.randFloat( this.minRadius, this.maxRadius );
 		speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
-	
+
 		// determine the relative position of the particle by converting polar
 		// coordinates to Cartesian coordinates
 		sinusInclination = Math.sin( inclination );
@@ -52680,9 +52719,14 @@ SphereEmitter.prototype.emit = ( function() {
 		// particle to get world coordinates
 		particle.position.add( this.origin );
 
-		// calculate velocity
-		particle.velocity.copy( position ).normalize().multiplyScalar( speed );
-
+		// calculate default movement
+		if ( this.defaultMovement === true )
+		{
+			particle.movement.copy( position ).normalize();
+		}
+		
+		// regard speed
+		particle.movement.multiplyScalar( speed );
 	};
 
 }() );
@@ -55437,7 +55481,8 @@ Stage.prototype.setup = function() {
 	
 	// particle emitter
 	var emitter = new SphereEmitter({
-		origin: new THREE.Vector3( 0, 10, 0)
+		origin: new THREE.Vector3( 0, 10, 0),
+		defaultMovement: true
 	});
 	
 	// particle effect

@@ -109,15 +109,20 @@ MeshEmitter.prototype.emit = ( function() {
 		// finally, we need to apply the world matrix of the mesh to calculate
 		// the world position of the particle
 		particle.position.applyMatrix4( this.mesh.matrixWorld );
+		
+		// calculate default movement
+		if ( this.defaultMovement === true ){
+			
+			// the vertex normal determines the movement direction of the particle
+			particle.movement.copy( this._vertexNormals[ vertexIndex ] );
 
-		// the vertex normal determines the movement direction of the particle
-		particle.velocity.copy( this._vertexNormals[ vertexIndex ] );
-
-		// transform the velocity/normal to world space
-		particle.velocity.applyMatrix3( this._normalMatrix );
-
-		// regard the speed
-		particle.velocity.normalize().multiplyScalar( speed );
+			// transform the movement/normal to world space
+			particle.movement.applyMatrix3( this._normalMatrix ).normalize();	
+		}
+		
+		// regard speed
+		particle.movement.multiplyScalar( speed );
+		
 	};
 
 }() );

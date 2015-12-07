@@ -25,8 +25,8 @@ function Particle() {
 			enumerable : true,
 			writable : false
 		},
-		// the velocity of the particle
-		velocity : {
+		// the movement of the particle
+		movement : {
 			value : new THREE.Vector3(),
 			configurable : false,
 			enumerable : true,
