@@ -51350,7 +51350,14 @@ function Particle() {
 			writable : false
 		},
 		// the movement direction of the particle
-		movement : {
+		direction : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		// the displacement vector ( direction * speed * time delta )
+		displacement : {
 			value : new THREE.Vector3(),
 			configurable : false,
 			enumerable : true,
@@ -51444,6 +51451,7 @@ var camera = require( "../core/Camera" );
 
 var Particle = require( "./Particle" );
 var Interpolator = require( "./operator/Interpolator" );
+var Oscillator = require( "./operator/Oscillator" );
 var Emitter = require( "./emitter/Emitter" );
 var ParticleShader = require( "../shader/ParticleShader" );
 
@@ -51566,6 +51574,13 @@ function ParticleEffect( options ) {
 			enumerable : false,
 			writable : false
 		},
+		// this will be used to store all oscillators of the effect
+		_oscillators : {
+			value : [],
+			configurable : false,
+			enumerable : false,
+			writable : false
+		}
 
 	} );
 
@@ -51585,73 +51600,72 @@ function ParticleEffect( options ) {
  * Updates the particle effect.
  * 
  * @param {number} delta - The time delta value.
+ * @param {number} elapsedTime - The elapsed time.
  */
-ParticleEffect.prototype.update = ( function() {
+ParticleEffect.prototype.update = function( delta, elapsedTime ) {
 
-	var displacement;
+	var index, particle, lifeRatio;
 
-	return function( delta ) {
+	// update emitter only if the respective flag is set
+	if ( this.emitterAutoUpdate === true )
+	{
+		this.emitter.update();
+	}
 
-		var index, particle, lifeRatio;
+	// update all particles
+	for ( index = 0; index < this._particles.length; index++ )
+	{
+		// buffer particle
+		particle = this._particles[ index ];
 
-		if ( displacement === undefined )
+		// update the displacement vector
+		particle.displacement.copy( particle.direction );
+
+		// update age of the particle
+		particle.age += delta;
+
+		// if the particle exceeds its lifetime, just emit it again
+		if ( particle.age > particle.lifetime )
 		{
-			displacement = new THREE.Vector3();
+			this.emitter.emit( particle );
 		}
 
-		// update emitter only if the respective flag is set
-		if ( this.emitterAutoUpdate === true )
+		// this value will be used for interpolation
+		lifeRatio = THREE.Math.clamp( ( particle.age / particle.lifetime ), 0, 1 );
+
+		// execute interpolators
+		if ( this._interpolators.length > 0 )
 		{
-			this.emitter.update();
+			this._interpolate( particle, lifeRatio );
 		}
 
-		// update all particles
-		for ( index = 0; index < this._particles.length; index++ )
+		// execute oscillators
+		if ( this._oscillators.length > 0 )
 		{
-			// buffer particle
-			particle = this._particles[ index ];
-
-			// update age of the particle
-			particle.age += delta;
-
-			// if the particle exceeds its lifetime, just emit it again
-			if ( particle.age > particle.lifetime )
-			{
-				this.emitter.emit( particle );
-			}
-
-			// update the position by adding a displacement
-			displacement.copy( particle.movement ).multiplyScalar( delta );
-			particle.position.add( displacement );
-
-			// this value will be used for interpolation
-			lifeRatio = THREE.Math.clamp( ( particle.age / particle.lifetime ), 0, 1 );
-			
-			// execute interpolators
-			if ( this._interpolators.length > 0 )
-			{
-				this._interpolate( particle, lifeRatio );
-			}
-			
-			// angle calculation if necessary
-			if ( this.rotateTexture === true )
-			{
-				particle.angle += particle.angleVelocity * delta;
-			}
-			
-		} // next particle
-
-		// update the buffer data for shader program
-		this._buildBuffer();
-
-		// finally, sort the particles if necessary
-		if ( this.sortParticles === true )
-		{
-			this._sortParticles();
+			this._oscillate( particle, elapsedTime );
 		}
-	};
 
-}() );
+		// angle calculation if necessary
+		if ( this.rotateTexture === true )
+		{
+			particle.angle += particle.angleVelocity * delta;
+		}
+
+		// update the position by adding the displacement
+		particle.displacement.normalize().multiplyScalar( particle.speed * delta );
+		particle.position.add( particle.displacement );
+
+	} // next particle
+
+	// update the buffer data for shader program
+	this._buildBuffer();
+
+	// finally, sort the particles if necessary
+	if ( this.sortParticles === true )
+	{
+		this._sortParticles();
+	}
+};
 
 /**
  * Destroys the particle effect.
@@ -51674,12 +51688,36 @@ ParticleEffect.prototype.addInterpolatorToProperty = function( interpolator, nam
 	{
 		this._interpolators.push( {
 			key : name,
-			object : interpolator
+			operator : interpolator
 		} );
 	}
 	else
 	{
 		throw "ERROR: ParticleEffect: No valid interpolator set.";
+	}
+
+};
+
+/**
+ * Adds an oscillator to the particle effect.
+ * 
+ * @param {Oscillator} oscillator - The oscillator object.
+ * @param {THREE.Vector3} influence - The amount of influence for a vector component.
+ * @param {String} name - The name of a particle property.
+ */
+ParticleEffect.prototype.addOscillatorToProperty = function( oscillator, influence, name ) {
+
+	if ( oscillator instanceof Oscillator )
+	{
+		this._oscillators.push( {
+			key : name,
+			operator : oscillator,
+			influence : influence
+		} );
+	}
+	else
+	{
+		throw "ERROR: ParticleEffect: No valid oscillator set.";
 	}
 
 };
@@ -51700,6 +51738,28 @@ ParticleEffect.prototype.removeInterpolatorFromProperty = function( name ) {
 		if( interpolator.key === name ){
 			
 			this._interpolators.splice( index, 1 );
+			
+			return;
+		}
+	}
+};
+
+/**
+ * Removes an oscillator of the particle effect.
+ * 
+ * @param {String} name - The name of a particle property.
+ */
+ParticleEffect.prototype.removeOscillatorFromProperty = function( name ) {
+
+	var index, oscillator;
+
+	for ( index = 0; index < this._oscillators.length; index++ )
+	{
+		oscillator = this._oscillators[ index ];
+		
+		if( oscillator.key === name ){
+			
+			this._oscillators.splice( index, 1 );
 			
 			return;
 		}
@@ -51792,7 +51852,7 @@ ParticleEffect.prototype._init = function() {
 };
 
 /**
- * Builds the buffer for the partciel shader program.
+ * Builds the buffer for the particle shader program.
  */
 ParticleEffect.prototype._buildBuffer = function() {
 
@@ -51837,7 +51897,7 @@ ParticleEffect.prototype._buildBuffer = function() {
 /**
  * Executes all interpolators for a given particle.
  * 
- * @param {Particle} particle - The particle used for interpolation.
+ * @param {Particle} particle - The particle object.
  * @param {number} lifeRatio - The life ratio of the particle.
  */
 ParticleEffect.prototype._interpolate = function( particle, lifeRatio ) {
@@ -51848,15 +51908,48 @@ ParticleEffect.prototype._interpolate = function( particle, lifeRatio ) {
 	{
 		interpolator = this._interpolators[ index ];
 
-		// the method call of "getValue" depends on the interpolated property.
-		// we distinguish between objects and primitives
-		if ( typeof particle[ interpolator.key ] === "object" )
+		// the method call of "getValue" depends on the interpolated property
+		if ( particle[ interpolator.key ] instanceof THREE.Vector3 ||  particle[ interpolator.key ] instanceof THREE.Color )
 		{
-			interpolator.object.getValue( lifeRatio, particle[ interpolator.key ] );
+			interpolator.operator.getValue( lifeRatio, particle[ interpolator.key ] );
 		}
 		else
 		{
-			particle[ interpolator.key ] = interpolator.object.getValue( lifeRatio );
+			particle[ interpolator.key ] = interpolator.operator.getValue( lifeRatio );
+		}
+	}
+};
+
+/**
+ * Executes all oscillators for a given particle.
+ * 
+ * @param {Particle} particle - The particle object.
+ * @param {number} elapsedTime - The elapsed time.
+ */
+ParticleEffect.prototype._oscillate = function( particle, elapsedTime ) {
+
+	var index, oscillator, value;
+
+	for ( index = 0; index < this._oscillators.length; index++ )
+	{
+		oscillator = this._oscillators[ index ];
+
+		if ( particle[ oscillator.key ] instanceof THREE.Vector3 )
+		{
+			// first get the value of the oscillator
+			value = oscillator.operator.getValue( elapsedTime );
+
+			// the influence vector determines the amount of manipulation per
+			// vector component
+			particle[ oscillator.key ].x += value * oscillator.influence.x;
+			particle[ oscillator.key ].y += value * oscillator.influence.y;
+			particle[ oscillator.key ].z += value * oscillator.influence.z;
+		}
+		else
+		{
+			// there is no need for an influence vector if we manipulate a
+			// primitive value
+			particle[ oscillator.key ] = oscillator.operator.getValue( elapsedTime );
 		}
 	}
 };
@@ -51924,7 +52017,7 @@ function compareNumbers( a, b ) {
 
 	return b[ 0 ] - a[ 0 ];
 }
-},{"../core/Camera":19,"../core/Logger":21,"../core/World":31,"../shader/ParticleShader":87,"./Particle":71,"./emitter/Emitter":74,"./operator/Interpolator":77,"three":1}],73:[function(require,module,exports){
+},{"../core/Camera":19,"../core/Logger":21,"../core/World":31,"../shader/ParticleShader":87,"./Particle":71,"./emitter/Emitter":74,"./operator/Interpolator":77,"./operator/Oscillator":78,"three":1}],73:[function(require,module,exports){
 /**
  * @file The box emitter uses an AABB to determine the position particles will
  * be emitted.
@@ -51957,14 +52050,14 @@ function BoxEmitter( options ) {
 			value : new THREE.Vector3(),
 			configurable : false,
 			enumerable : true,
-			writable : false
+			writable : true
 		},
 		// the size of the emitter
 		size : {
 			value : new THREE.Vector3(),
 			configurable : false,
 			enumerable : true,
-			writable : false
+			writable : true
 		},
 		_boundingVolume : {
 			value : new THREE.Box3(),
@@ -51980,14 +52073,7 @@ function BoxEmitter( options ) {
 	{
 		if ( options.hasOwnProperty( property ) )
 		{
-			if ( options[ property ] instanceof THREE.Vector3 )
-			{
-				this[ property ].copy( options[ property ] );
-			}
-			else
-			{
-				this[ property ] = options[ property ];
-			}
+			this[ property ] = options[ property ];
 		}
 	}
 	
@@ -52026,10 +52112,10 @@ BoxEmitter.prototype.emit = ( function() {
 		// particle to get world coordinates
 		particle.position.copy( position ).add( this.origin );
 
-		// calculate default movement
-		if ( this.defaultMovement === true )
+		if ( this.defaultDirection === true )
 		{
-			particle.movement.copy( position ).normalize().multiplyScalar( particle.speed );
+			// calculate default movement direction
+			particle.direction.copy( position ).normalize();
 		}
 		
 	};
@@ -52084,15 +52170,15 @@ function Emitter() {
 			enumerable : true,
 			writable : true
 		},
-		// the basis movement vector
-		movementBasis : {
+		// the basis movement direction vector
+		directionBasis : {
 			value : new THREE.Vector3(),
 			configurable : false,
 			enumerable : true,
 			writable : true		
 		},
-		// the spread of the movement
-		movementSpread : {
+		// the spread of the movement direction
+		directionSpread : {
 			value : new THREE.Vector3(),
 			configurable : false,
 			enumerable : true,
@@ -52168,9 +52254,10 @@ function Emitter() {
 			enumerable : true,
 			writable : true
 		},
-		// this controls the usage of the default particle movement calculation of the emitter.
-		// if this is set to false, you need to specify manually values for movement 
-		defaultMovement: {
+		// this controls the usage of the default particle movement direction
+		// calculation of the emitter. if this is set to false, you need to
+		// specify manually values for the direction
+		defaultDirection : {
 			value : false,
 			configurable : false,
 			enumerable : true,
@@ -52194,14 +52281,14 @@ Emitter.prototype.emit = function( particle ) {
 	// set speed
 	particle.speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
 
-	// set particle movement
-	particle.movement.copy( this.movementBasis );
+	// set particle movement direction
+	particle.direction.copy( this.directionBasis );
 
-	particle.movement.x += THREE.Math.randFloat( this.movementSpread.x * -0.5, this.movementSpread.x * 0.5 );
-	particle.movement.y += THREE.Math.randFloat( this.movementSpread.y * -0.5, this.movementSpread.y * 0.5 );
-	particle.movement.z += THREE.Math.randFloat( this.movementSpread.z * -0.5, this.movementSpread.z * 0.5 );
+	particle.direction.x += THREE.Math.randFloat( this.directionSpread.x * -0.5, this.directionSpread.x * 0.5 );
+	particle.direction.y += THREE.Math.randFloat( this.directionSpread.y * -0.5, this.directionSpread.y * 0.5 );
+	particle.direction.z += THREE.Math.randFloat( this.directionSpread.z * -0.5, this.directionSpread.z * 0.5 );
 
-	particle.movement.normalize().multiplyScalar( particle.speed );
+	particle.direction.normalize();
 	
 	// set time properties
 	particle.lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );
@@ -52284,14 +52371,7 @@ function MeshEmitter( options ) {
 	{
 		if ( options.hasOwnProperty( property ) )
 		{
-			if ( options[ property ] instanceof THREE.Vector3 )
-			{
-				this[ property ].copy( options[ property ] );
-			}
-			else
-			{
-				this[ property ] = options[ property ];
-			}
+			this[ property ] = options[ property ];
 		}
 	}
 
@@ -52336,17 +52416,14 @@ MeshEmitter.prototype.emit = ( function() {
 		// the world position of the particle
 		particle.position.applyMatrix4( this.mesh.matrixWorld );
 		
-		// calculate default movement
-		if ( this.defaultMovement === true ){
+		// calculate default movement direction
+		if ( this.defaultDirection === true ){
 			
 			// the vertex normal determines the movement direction of the particle
-			particle.movement.copy( this._vertexNormals[ vertexIndex ] );
+			particle.direction.copy( this._vertexNormals[ vertexIndex ] );
 
-			// transform the movement/normal to world space
-			particle.movement.applyMatrix3( this._normalMatrix );
-			
-			// calculate final movement value
-			particle.movement.normalize().multiplyScalar( particle.speed );	
+			// transform the direction/normal to world space
+			particle.direction.applyMatrix3( this._normalMatrix ).normalize();
 		}
 		
 	};
@@ -52461,7 +52538,7 @@ function SphereEmitter( options ) {
 			value : new THREE.Vector3(),
 			configurable : false,
 			enumerable : true,
-			writable : false
+			writable : true
 		},
 		// radius must be in range: [ 0, ∞ )
 		// the minimum radius
@@ -52516,14 +52593,7 @@ function SphereEmitter( options ) {
 	{
 		if ( options.hasOwnProperty( property ) )
 		{
-			if ( options[ property ] instanceof THREE.Vector3 )
-			{
-				this[ property ].copy( options[ property ] );
-			}
-			else
-			{
-				this[ property ] = options[ property ];
-			}
+			this[ property ] = options[ property ];
 		}
 	}
 	
@@ -52576,11 +52646,11 @@ SphereEmitter.prototype.emit = ( function() {
 		// add the origin of the emitter to the relative position of the
 		// particle to get world coordinates
 		particle.position.add( this.origin );
-
-		// calculate default movement
-		if ( this.defaultMovement === true )
+		
+		if ( this.defaultDirection === true )
 		{
-			particle.movement.copy( position ).normalize().multiplyScalar( particle.speed );
+			// calculate default movement direction
+			particle.direction.copy( position ).normalize();
 		}
 	};
 
@@ -55541,7 +55611,7 @@ Stage.prototype.setup = function() {
 	// particle emitter
 	var emitter = new SphereEmitter({
 		origin: new THREE.Vector3( 0, 10, 0),
-		defaultMovement: true
+		defaultDirection: true
 	});
 	
 	// particle effect

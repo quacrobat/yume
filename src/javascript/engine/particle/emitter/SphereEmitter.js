@@ -33,7 +33,7 @@ function SphereEmitter( options ) {
 			value : new THREE.Vector3(),
 			configurable : false,
 			enumerable : true,
-			writable : false
+			writable : true
 		},
 		// radius must be in range: [ 0, ∞ )
 		// the minimum radius
@@ -88,14 +88,7 @@ function SphereEmitter( options ) {
 	{
 		if ( options.hasOwnProperty( property ) )
 		{
-			if ( options[ property ] instanceof THREE.Vector3 )
-			{
-				this[ property ].copy( options[ property ] );
-			}
-			else
-			{
-				this[ property ] = options[ property ];
-			}
+			this[ property ] = options[ property ];
 		}
 	}
 	
@@ -148,11 +141,11 @@ SphereEmitter.prototype.emit = ( function() {
 		// add the origin of the emitter to the relative position of the
 		// particle to get world coordinates
 		particle.position.add( this.origin );
-
-		// calculate default movement
-		if ( this.defaultMovement === true )
+		
+		if ( this.defaultDirection === true )
 		{
-			particle.movement.copy( position ).normalize().multiplyScalar( particle.speed );
+			// calculate default movement direction
+			particle.direction.copy( position ).normalize();
 		}
 	};
 

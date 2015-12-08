@@ -26,7 +26,14 @@ function Particle() {
 			writable : false
 		},
 		// the movement direction of the particle
-		movement : {
+		direction : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : true,
+			writable : false
+		},
+		// the displacement vector ( direction * speed * time delta )
+		displacement : {
 			value : new THREE.Vector3(),
 			configurable : false,
 			enumerable : true,

@@ -30,14 +30,14 @@ function BoxEmitter( options ) {
 			value : new THREE.Vector3(),
 			configurable : false,
 			enumerable : true,
-			writable : false
+			writable : true
 		},
 		// the size of the emitter
 		size : {
 			value : new THREE.Vector3(),
 			configurable : false,
 			enumerable : true,
-			writable : false
+			writable : true
 		},
 		_boundingVolume : {
 			value : new THREE.Box3(),
@@ -53,14 +53,7 @@ function BoxEmitter( options ) {
 	{
 		if ( options.hasOwnProperty( property ) )
 		{
-			if ( options[ property ] instanceof THREE.Vector3 )
-			{
-				this[ property ].copy( options[ property ] );
-			}
-			else
-			{
-				this[ property ] = options[ property ];
-			}
+			this[ property ] = options[ property ];
 		}
 	}
 	
@@ -99,10 +92,10 @@ BoxEmitter.prototype.emit = ( function() {
 		// particle to get world coordinates
 		particle.position.copy( position ).add( this.origin );
 
-		// calculate default movement
-		if ( this.defaultMovement === true )
+		if ( this.defaultDirection === true )
 		{
-			particle.movement.copy( position ).normalize().multiplyScalar( particle.speed );
+			// calculate default movement direction
+			particle.direction.copy( position ).normalize();
 		}
 		
 	};

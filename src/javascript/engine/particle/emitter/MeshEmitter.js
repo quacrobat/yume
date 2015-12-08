@@ -55,14 +55,7 @@ function MeshEmitter( options ) {
 	{
 		if ( options.hasOwnProperty( property ) )
 		{
-			if ( options[ property ] instanceof THREE.Vector3 )
-			{
-				this[ property ].copy( options[ property ] );
-			}
-			else
-			{
-				this[ property ] = options[ property ];
-			}
+			this[ property ] = options[ property ];
 		}
 	}
 
@@ -107,17 +100,14 @@ MeshEmitter.prototype.emit = ( function() {
 		// the world position of the particle
 		particle.position.applyMatrix4( this.mesh.matrixWorld );
 		
-		// calculate default movement
-		if ( this.defaultMovement === true ){
+		// calculate default movement direction
+		if ( this.defaultDirection === true ){
 			
 			// the vertex normal determines the movement direction of the particle
-			particle.movement.copy( this._vertexNormals[ vertexIndex ] );
+			particle.direction.copy( this._vertexNormals[ vertexIndex ] );
 
-			// transform the movement/normal to world space
-			particle.movement.applyMatrix3( this._normalMatrix );
-			
-			// calculate final movement value
-			particle.movement.normalize().multiplyScalar( particle.speed );	
+			// transform the direction/normal to world space
+			particle.direction.applyMatrix3( this._normalMatrix ).normalize();
 		}
 		
 	};

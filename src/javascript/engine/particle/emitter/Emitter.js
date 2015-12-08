@@ -24,15 +24,15 @@ function Emitter() {
 			enumerable : true,
 			writable : true
 		},
-		// the basis movement vector
-		movementBasis : {
+		// the basis movement direction vector
+		directionBasis : {
 			value : new THREE.Vector3(),
 			configurable : false,
 			enumerable : true,
 			writable : true		
 		},
-		// the spread of the movement
-		movementSpread : {
+		// the spread of the movement direction
+		directionSpread : {
 			value : new THREE.Vector3(),
 			configurable : false,
 			enumerable : true,
@@ -108,9 +108,10 @@ function Emitter() {
 			enumerable : true,
 			writable : true
 		},
-		// this controls the usage of the default particle movement calculation of the emitter.
-		// if this is set to false, you need to specify manually values for movement 
-		defaultMovement: {
+		// this controls the usage of the default particle movement direction
+		// calculation of the emitter. if this is set to false, you need to
+		// specify manually values for the direction
+		defaultDirection : {
 			value : false,
 			configurable : false,
 			enumerable : true,
@@ -134,14 +135,14 @@ Emitter.prototype.emit = function( particle ) {
 	// set speed
 	particle.speed = THREE.Math.randFloat( this.minSpeed, this.maxSpeed );
 
-	// set particle movement
-	particle.movement.copy( this.movementBasis );
+	// set particle movement direction
+	particle.direction.copy( this.directionBasis );
 
-	particle.movement.x += THREE.Math.randFloat( this.movementSpread.x * -0.5, this.movementSpread.x * 0.5 );
-	particle.movement.y += THREE.Math.randFloat( this.movementSpread.y * -0.5, this.movementSpread.y * 0.5 );
-	particle.movement.z += THREE.Math.randFloat( this.movementSpread.z * -0.5, this.movementSpread.z * 0.5 );
+	particle.direction.x += THREE.Math.randFloat( this.directionSpread.x * -0.5, this.directionSpread.x * 0.5 );
+	particle.direction.y += THREE.Math.randFloat( this.directionSpread.y * -0.5, this.directionSpread.y * 0.5 );
+	particle.direction.z += THREE.Math.randFloat( this.directionSpread.z * -0.5, this.directionSpread.z * 0.5 );
 
-	particle.movement.normalize().multiplyScalar( particle.speed );
+	particle.direction.normalize();
 	
 	// set time properties
 	particle.lifetime = THREE.Math.randFloat( this.minLifetime, this.maxLifetime );

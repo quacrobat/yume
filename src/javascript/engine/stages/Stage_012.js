@@ -78,7 +78,7 @@ Stage.prototype.setup = function() {
 	// particle emitter
 	var emitter = new SphereEmitter({
 		origin: new THREE.Vector3( 0, 10, 0),
-		defaultMovement: true
+		defaultDirection: true
 	});
 	
 	// particle effect
