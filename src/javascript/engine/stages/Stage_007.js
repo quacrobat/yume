@@ -55,7 +55,7 @@ Stage.prototype.setup = function() {
 	boxBasic.castShadow = true;
 	this.world.addObject3D( boxBasic );
 
-	var interactiveObject = this.actionManager.createInteractiveObject( boxBasic, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.BasicAnimation", function() {
+	var interactiveObject = this.actionManager.createInteractiveObject( boxBasic, this.actionManager.COLLISIONTYPES.AABB, this.actionManager.RAYCASTPRECISION.FACE, "Label.Animation", function() {
 
 		interactiveObject.action.isActive = false;
 
