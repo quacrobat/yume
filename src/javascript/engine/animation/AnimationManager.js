@@ -6,7 +6,7 @@
  */
 "use strict";
 
-var BasicAnimation = require( "../animation/Animation" );
+var Animation = require( "../animation/Animation" );
 var SpriteAnimation = require( "../animation/SpriteAnimation" );
 
 /**
@@ -33,7 +33,7 @@ function AnimationManager() {
 }
 
 /**
- * Creates an animation, which animates one property of an object.
+ * Creates an animation, which animates a single property of an object.
  * 
  * @param {object} options - The options for the animation.
  * 
@@ -41,25 +41,8 @@ function AnimationManager() {
  */
 AnimationManager.prototype.createBasicAnimation = function( options ) {
 
-	var animation = new BasicAnimation( options );
+	var animation = new Animation( options );
 	this.addAnimation( animation );
-	return animation;
-};
-
-/**
- * Creates an animation, which animates one property of an object in an endless
- * loop.
- * 
- * @param {object} options - The options for the animation.
- * 
- * @returns {Animation} The new animation.
- */
-AnimationManager.prototype.createHoverAnimation = function( options ) {
-
-	var animation = new BasicAnimation( options );
-	animation.setHover( true );
-	this.addAnimation( animation );
-
 	return animation;
 };
 

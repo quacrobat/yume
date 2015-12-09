@@ -80,14 +80,15 @@ Stage.prototype.setup = function() {
 
 	// create a hover animation, which animates infinitely a property between
 	// start- and end-value
-	this.animationManager.createHoverAnimation( {
+	this.animationManager.createBasicAnimation( {
 		object : boxHover.position,
 		property : "y",
 		duration : 4000,
 		delayTime : 2000,
 		start : boxHover.position.y,
 		end : boxHover.position.y + 2,
-		easing : Easing.Sinusoidal.InOut
+		easing : Easing.Sinusoidal.InOut,
+		loop : true
 	} ).play();
 
 	// add sign
@@ -101,13 +102,14 @@ Stage.prototype.setup = function() {
 		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
-		self.animationManager.createHoverAnimation( {
+		self.animationManager.createBasicAnimation( {
 			object : sign.position,
 			property : "y",
 			duration : 5000,
 			start : sign.position.y,
 			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
+			easing : Easing.Sinusoidal.InOut,
+			loop : true
 		} ).play();
 	} );
 

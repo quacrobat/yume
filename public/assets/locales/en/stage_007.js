@@ -1,4 +1,4 @@
 {
 	"Label.BasicAnimation": "Start Basic Animation",
-	"InformationPanel.Text": "<h3>Animations</h3>YUME has a component for developing simple animations.<ul><li><strong>Basic Animation</strong> (left box): The Basic Animation animates one single property of an object. Interact with the box to start the animation.</li><li><strong>Hover Animation</strong> (right box): The Hover Animation is perfect to illustrate infinite loops.</li></ul>"
+	"InformationPanel.Text": "<h3>Animations</h3>YUME has a component for developing simple animations. Such a basic animation changes a one single object-property over a given period of time. You can configure the animation with various parameters and easing functions to achieve different effects. It's also possible to start an animation within an Action."
 }

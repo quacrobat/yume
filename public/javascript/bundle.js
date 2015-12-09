@@ -37692,6 +37692,12 @@ function Animation( options ) {
 			enumerable : false,
 			writable : true
 		},
+		loop : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
 		easing : {
 			value : undefined,
 			configurable : false,
@@ -37730,12 +37736,6 @@ function Animation( options ) {
 		},
 		_startTime : {
 			value : 0,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
-		_isHover : {
-			value : false,
 			configurable : false,
 			enumerable : false,
 			writable : true
@@ -37807,9 +37807,8 @@ Animation.prototype.update = function( time ) {
 	// check finish
 	if ( elapsed === 1 )
 	{
-		// when the hover flag is set, the animation
-		// will be played in an endless loop.
-		if ( this._isHover === true )
+		// check if the animation should be played in an endless loop
+		if ( this.loop === true )
 		{
 			// switch start and end values
 			temp = this.start;
@@ -37871,16 +37870,6 @@ Animation.prototype.stop = function() {
 	}
 };
 
-/**
- * Sets the hover flag.
- * 
- * @param {boolean} hover - Should the animation has an endless hover effect?
- */
-Animation.prototype.setHover = function( isHover ) {
-
-	this._isHover = isHover;
-};
-
 module.exports = Animation;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../core/Logger":21}],10:[function(require,module,exports){
@@ -37893,7 +37882,7 @@ module.exports = Animation;
  */
 "use strict";
 
-var BasicAnimation = require( "../animation/Animation" );
+var Animation = require( "../animation/Animation" );
 var SpriteAnimation = require( "../animation/SpriteAnimation" );
 
 /**
@@ -37920,7 +37909,7 @@ function AnimationManager() {
 }
 
 /**
- * Creates an animation, which animates one property of an object.
+ * Creates an animation, which animates a single property of an object.
  * 
  * @param {object} options - The options for the animation.
  * 
@@ -37928,25 +37917,8 @@ function AnimationManager() {
  */
 AnimationManager.prototype.createBasicAnimation = function( options ) {
 
-	var animation = new BasicAnimation( options );
+	var animation = new Animation( options );
 	this.addAnimation( animation );
-	return animation;
-};
-
-/**
- * Creates an animation, which animates one property of an object in an endless
- * loop.
- * 
- * @param {object} options - The options for the animation.
- * 
- * @returns {Animation} The new animation.
- */
-AnimationManager.prototype.createHoverAnimation = function( options ) {
-
-	var animation = new BasicAnimation( options );
-	animation.setHover( true );
-	this.addAnimation( animation );
-
 	return animation;
 };
 
@@ -53985,13 +53957,14 @@ Stage.prototype.setup = function() {
 		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
-		self.animationManager.createHoverAnimation( {
+		self.animationManager.createBasicAnimation( {
 			object : sign.position,
 			property : "y",
 			duration : 5000,
 			start : sign.position.y,
 			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
+			easing : Easing.Sinusoidal.InOut,
+			loop : true
 		} ).play();
 	} );
 
@@ -54135,13 +54108,14 @@ Stage.prototype.setup = function() {
 		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
-		self.animationManager.createHoverAnimation( {
+		self.animationManager.createBasicAnimation( {
 			object : sign.position,
 			property : "y",
 			duration : 5000,
 			start : sign.position.y,
 			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
+			easing : Easing.Sinusoidal.InOut,
+			loop : true
 		} ).play();
 	} );
 
@@ -54279,13 +54253,14 @@ Stage.prototype.setup = function() {
 		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
-		self.animationManager.createHoverAnimation( {
+		self.animationManager.createBasicAnimation( {
 			object : sign.position,
 			property : "y",
 			duration : 5000,
 			start : sign.position.y,
 			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
+			easing : Easing.Sinusoidal.InOut,
+			loop : true
 		} ).play();
 	} );
 
@@ -54451,13 +54426,14 @@ Stage.prototype.setup = function() {
 		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
-		self.animationManager.createHoverAnimation( {
+		self.animationManager.createBasicAnimation( {
 			object : sign.position,
 			property : "y",
 			duration : 5000,
 			start : sign.position.y,
 			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
+			easing : Easing.Sinusoidal.InOut,
+			loop : true
 		} ).play();
 	} );
 
@@ -54569,13 +54545,14 @@ Stage.prototype.setup = function() {
 		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
-		self.animationManager.createHoverAnimation( {
+		self.animationManager.createBasicAnimation( {
 			object : sign.position,
 			property : "y",
 			duration : 5000,
 			start : sign.position.y,
 			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
+			easing : Easing.Sinusoidal.InOut,
+			loop : true
 		} ).play();
 	} );
 
@@ -54726,13 +54703,14 @@ Stage.prototype.setup = function() {
 		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
-		self.animationManager.createHoverAnimation( {
+		self.animationManager.createBasicAnimation( {
 			object : sign.position,
 			property : "y",
 			duration : 5000,
 			start : sign.position.y,
 			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
+			easing : Easing.Sinusoidal.InOut,
+			loop : true
 		} ).play();
 	} );
 
@@ -54870,14 +54848,15 @@ Stage.prototype.setup = function() {
 
 	// create a hover animation, which animates infinitely a property between
 	// start- and end-value
-	this.animationManager.createHoverAnimation( {
+	this.animationManager.createBasicAnimation( {
 		object : boxHover.position,
 		property : "y",
 		duration : 4000,
 		delayTime : 2000,
 		start : boxHover.position.y,
 		end : boxHover.position.y + 2,
-		easing : Easing.Sinusoidal.InOut
+		easing : Easing.Sinusoidal.InOut,
+		loop : true
 	} ).play();
 
 	// add sign
@@ -54891,13 +54870,14 @@ Stage.prototype.setup = function() {
 		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
-		self.animationManager.createHoverAnimation( {
+		self.animationManager.createBasicAnimation( {
 			object : sign.position,
 			property : "y",
 			duration : 5000,
 			start : sign.position.y,
 			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
+			easing : Easing.Sinusoidal.InOut,
+			loop : true
 		} ).play();
 	} );
 
@@ -55016,13 +54996,14 @@ Stage.prototype.setup = function() {
 		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
-		self.animationManager.createHoverAnimation( {
+		self.animationManager.createBasicAnimation( {
 			object : sign.position,
 			property : "y",
 			duration : 5000,
 			start : sign.position.y,
 			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
+			easing : Easing.Sinusoidal.InOut,
+			loop : true
 		} ).play();
 	} );
 
@@ -55141,13 +55122,14 @@ Stage.prototype.setup = function() {
 		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
-		self.animationManager.createHoverAnimation( {
+		self.animationManager.createBasicAnimation( {
 			object : sign.position,
 			property : "y",
 			duration : 5000,
 			start : sign.position.y,
 			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
+			easing : Easing.Sinusoidal.InOut,
+			loop : true
 		} ).play();
 	} );
 
@@ -55336,13 +55318,14 @@ Stage.prototype.setup = function() {
 		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
-		self.animationManager.createHoverAnimation( {
+		self.animationManager.createBasicAnimation( {
 			object : sign.position,
 			property : "y",
 			duration : 5000,
 			start : sign.position.y,
 			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
+			easing : Easing.Sinusoidal.InOut,
+			loop : true
 		} ).play();
 	} );
 
@@ -55478,13 +55461,14 @@ Stage.prototype.setup = function() {
 		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
-		self.animationManager.createHoverAnimation( {
+		self.animationManager.createBasicAnimation( {
 			object : sign.position,
 			property : "y",
 			duration : 5000,
 			start : sign.position.y,
 			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
+			easing : Easing.Sinusoidal.InOut,
+			loop : true
 		} ).play();
 	} );
 
@@ -55595,13 +55579,14 @@ Stage.prototype.setup = function() {
 		sign.rotation.set( 0, - utils.HALF_PI, 0 );
 		self.world.addObject3D( sign );
 
-		self.animationManager.createHoverAnimation( {
+		self.animationManager.createBasicAnimation( {
 			object : sign.position,
 			property : "y",
 			duration : 5000,
 			start : sign.position.y,
 			end : sign.position.y + 5,
-			easing : Easing.Sinusoidal.InOut
+			easing : Easing.Sinusoidal.InOut,
+			loop : true
 		} ).play();
 	} );
 	

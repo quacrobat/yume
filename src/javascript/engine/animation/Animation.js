@@ -54,6 +54,12 @@ function Animation( options ) {
 			enumerable : false,
 			writable : true
 		},
+		loop : {
+			value : false,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
 		easing : {
 			value : undefined,
 			configurable : false,
@@ -92,12 +98,6 @@ function Animation( options ) {
 		},
 		_startTime : {
 			value : 0,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
-		_isHover : {
-			value : false,
 			configurable : false,
 			enumerable : false,
 			writable : true
@@ -169,9 +169,8 @@ Animation.prototype.update = function( time ) {
 	// check finish
 	if ( elapsed === 1 )
 	{
-		// when the hover flag is set, the animation
-		// will be played in an endless loop.
-		if ( this._isHover === true )
+		// check if the animation should be played in an endless loop
+		if ( this.loop === true )
 		{
 			// switch start and end values
 			temp = this.start;
@@ -231,16 +230,6 @@ Animation.prototype.stop = function() {
 	{
 		this.onStopCallback();
 	}
-};
-
-/**
- * Sets the hover flag.
- * 
- * @param {boolean} hover - Should the animation has an endless hover effect?
- */
-Animation.prototype.setHover = function( isHover ) {
-
-	this._isHover = isHover;
 };
 
 module.exports = Animation;
