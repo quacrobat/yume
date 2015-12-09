@@ -37656,84 +37656,101 @@ var logger = require( "../core/Logger" );
 function Animation( options ) {
 
 	Object.defineProperties( this, {
+		
+		// the animation only works with object properties
 		object : {
 			value : null,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
+		// the animated property
 		property : {
 			value : null,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
+		// the duration of the animation
 		duration : {
 			value : 0,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
+		// the start value of the animation
 		start : {
 			value : 0,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
+		// the end value of the animation
 		end : {
 			value : 0,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
+		// this will delay the animation by the given time
 		delayTime : {
 			value : 0,
 			configurable : false,
-			enumerable : false,
+			enumerable : true,
 			writable : true
 		},
+		// if set to true, it specifies that the animation will start over
+		// again, every time it is finished
 		loop : {
 			value : false,
 			configurable : false,
-			enumerable : false,
+			enumerable : true,
 			writable : true
 		},
+		// the easing function
 		easing : {
 			value : undefined,
 			configurable : false,
-			enumerable : false,
+			enumerable : true,
 			writable : true
 		},
+		// executed when the animation is started ( the play method is called ).
+		// in looped animations, it is called just once
 		onStartCallback : {
 			value : undefined,
 			configurable : false,
-			enumerable : false,
+			enumerable : true,
 			writable : true
 		},
+		// executed when the animation is updated
 		onUpdateCallback : {
 			value : undefined,
 			configurable : false,
-			enumerable : false,
+			enumerable : true,
 			writable : true
 		},
+		// executed when the animation is completed
 		onCompleteCallback : {
 			value : undefined,
 			configurable : false,
-			enumerable : false,
+			enumerable : true,
 			writable : true
 		},
+		// executed when the animation is stopped
 		onStopCallback : {
 			value : undefined,
 			configurable : false,
-			enumerable : false,
+			enumerable : true,
 			writable : true
 		},
+		// indicates if the animation is active
 		isPlaying : {
 			value : false,
 			configurable : false,
-			enumerable : false,
+			enumerable : true,
 			writable : true
 		},
+		// internal timestamp value
 		_startTime : {
 			value : 0,
 			configurable : false,
@@ -37751,7 +37768,7 @@ function Animation( options ) {
 		}
 		else
 		{
-			logger.warn( "WARN: Animation: Object created with faulty options. Property '%s' is no member of Animation.", property );
+			logger.warn( "WARN: Animation: Object created with wrong options. Property '%s' is not a member of Animation.", property );
 		}
 	}
 }
