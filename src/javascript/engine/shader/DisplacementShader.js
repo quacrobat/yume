@@ -32,13 +32,13 @@ module.exports = {
 	"varying vec3 vNormalWorld;",
 
 	// 1D random function
-	"float random( float n ) {", 
+	"float random( float x ) {", 
 	
 		"return fract( sin( x ) * 1e4 );",
 		
 	"}",
 
-	// 3D noise function
+	// 3D value noise function
 	"float noise( vec3 x ) {",
 
 		"const vec3 step = vec3( 110, 241, 171 );",
