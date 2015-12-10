@@ -15,13 +15,13 @@ var logger = require( "../../core/Logger" );
  * 
  * @constructor
  * 
- * @param {boolean} isLoop - Flag to indicate if the path should be looped.
+ * @param {boolean} loop - Flag to indicate if the path should be looped.
  */
-function Path( isLoop ) {
+function Path( loop ) {
 
 	Object.defineProperties( this, {
-		isLoop : {
-			value : isLoop || false,
+		loop : {
+			value : loop || false,
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -74,7 +74,7 @@ Path.prototype.clear = function() {
  */
 Path.prototype.isFinished = function() {
 
-	return this.isLoop === true ? false : ( this._index === this._waypoints.length - 1 );
+	return this.loop === true ? false : ( this._index === this._waypoints.length - 1 );
 };
 
 /**
@@ -88,7 +88,7 @@ Path.prototype.setNextWaypoint = function() {
 
 	if ( ++this._index === this._waypoints.length )
 	{
-		if ( this.isLoop === true )
+		if ( this.loop === true )
 		{
 			this._index = 0;
 		}

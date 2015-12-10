@@ -19,6 +19,7 @@ var THREE = require( "three" );
  * @param {string} id - The id of the impostor.
  * @param {THREE.Object3D} sourceObject - The source 3D object of the impostor.
  * @param {number} resolution - The resolution of the rendered texture.
+ * @param {number} angle - This value can be used to auto-generation the impostor.
  */
 function Impostor( id, sourceObject, resolution, angle ) {
 

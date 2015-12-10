@@ -71,15 +71,15 @@ function AudioManager() {
  * 
  * @param {string} id - The ID of the dynamic audio.
  * @param {object} buffer - The buffered audio file.
- * @param {boolean} isLoop - Should the audio played in a loop?
- * @param {boolean} isStageIndependent - Should the audio independent of the
+ * @param {boolean} loop - Should the audio played in a loop?
+ * @param {boolean} stageIndependent - Should the audio independent of the
  * stage?
  * 
  * @returns {DynamicAudio} The new dynamic audio.
  */
-AudioManager.prototype.createDynamicSound = function( id, buffer, isLoop, isStageIndependent ) {
+AudioManager.prototype.createDynamicSound = function( id, buffer, loop, stageIndependent ) {
 
-	var audio = new DynamicAudio( id, this._listener, buffer, isLoop, isStageIndependent );
+	var audio = new DynamicAudio( id, this._listener, buffer, loop, stageIndependent );
 	this._dynamicAudios.push( audio );
 	return audio;
 };
@@ -114,7 +114,7 @@ AudioManager.prototype.removeDynamicAudios = function( isClear ) {
 	{
 		for ( var i = this._dynamicAudios.length - 1; i >= 0; i-- )
 		{
-			if ( this._dynamicAudios[ i ].isStageIndependent === false )
+			if ( this._dynamicAudios[ i ].stageIndependent === false )
 			{
 				this._dynamicAudios.splice( i, 1 );
 			}
@@ -157,15 +157,15 @@ AudioManager.prototype.getDynamicAudio = function( id ) {
  * 
  * @param {string} file - The actual audio file. Only MP3s are valid.
  * @param {number} volume - The volume of the audio.
- * @param {boolean} isLoop - Should the audio played in a loop?
+ * @param {boolean} loop - Should the audio played in a loop?
  */
-AudioManager.prototype.setBackgroundMusic = function( file, volume, isLoop ) {
+AudioManager.prototype.setBackgroundMusic = function( file, volume, loop ) {
 
 	var url = "assets/audio/static/" + file + ".mp3";
 
 	this._backgroundMusic.src = url;
 	this._backgroundMusic.volume = volume || 1;
-	this._backgroundMusic.loop = isLoop || true;
+	this._backgroundMusic.loop = loop || true;
 
 	this._backgroundMusic.oncanplay = function( event ) {
 
@@ -310,11 +310,11 @@ AudioManager.prototype.isBackgroundMusicLoop = function() {
 /**
  * Sets the loop property of the background music.
  * 
- * @param {boolean} isLoop - The loop-flag to set.
+ * @param {boolean} loop - The loop-flag to set.
  */
-AudioManager.prototype.setBackgroundMusicLoop = function( isLoop ) {
+AudioManager.prototype.setBackgroundMusicLoop = function( loop ) {
 
-	this._backgroundMusic.loop = isLoop;
+	this._backgroundMusic.loop = loop;
 };
 
 /**

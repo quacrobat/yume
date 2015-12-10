@@ -38894,15 +38894,15 @@ function AudioManager() {
  * 
  * @param {string} id - The ID of the dynamic audio.
  * @param {object} buffer - The buffered audio file.
- * @param {boolean} isLoop - Should the audio played in a loop?
- * @param {boolean} isStageIndependent - Should the audio independent of the
+ * @param {boolean} loop - Should the audio played in a loop?
+ * @param {boolean} stageIndependent - Should the audio independent of the
  * stage?
  * 
  * @returns {DynamicAudio} The new dynamic audio.
  */
-AudioManager.prototype.createDynamicSound = function( id, buffer, isLoop, isStageIndependent ) {
+AudioManager.prototype.createDynamicSound = function( id, buffer, loop, stageIndependent ) {
 
-	var audio = new DynamicAudio( id, this._listener, buffer, isLoop, isStageIndependent );
+	var audio = new DynamicAudio( id, this._listener, buffer, loop, stageIndependent );
 	this._dynamicAudios.push( audio );
 	return audio;
 };
@@ -38937,7 +38937,7 @@ AudioManager.prototype.removeDynamicAudios = function( isClear ) {
 	{
 		for ( var i = this._dynamicAudios.length - 1; i >= 0; i-- )
 		{
-			if ( this._dynamicAudios[ i ].isStageIndependent === false )
+			if ( this._dynamicAudios[ i ].stageIndependent === false )
 			{
 				this._dynamicAudios.splice( i, 1 );
 			}
@@ -38980,15 +38980,15 @@ AudioManager.prototype.getDynamicAudio = function( id ) {
  * 
  * @param {string} file - The actual audio file. Only MP3s are valid.
  * @param {number} volume - The volume of the audio.
- * @param {boolean} isLoop - Should the audio played in a loop?
+ * @param {boolean} loop - Should the audio played in a loop?
  */
-AudioManager.prototype.setBackgroundMusic = function( file, volume, isLoop ) {
+AudioManager.prototype.setBackgroundMusic = function( file, volume, loop ) {
 
 	var url = "assets/audio/static/" + file + ".mp3";
 
 	this._backgroundMusic.src = url;
 	this._backgroundMusic.volume = volume || 1;
-	this._backgroundMusic.loop = isLoop || true;
+	this._backgroundMusic.loop = loop || true;
 
 	this._backgroundMusic.oncanplay = function( event ) {
 
@@ -39133,11 +39133,11 @@ AudioManager.prototype.isBackgroundMusicLoop = function() {
 /**
  * Sets the loop property of the background music.
  * 
- * @param {boolean} isLoop - The loop-flag to set.
+ * @param {boolean} loop - The loop-flag to set.
  */
-AudioManager.prototype.setBackgroundMusicLoop = function( isLoop ) {
+AudioManager.prototype.setBackgroundMusicLoop = function( loop ) {
 
-	this._backgroundMusic.loop = isLoop;
+	this._backgroundMusic.loop = loop;
 };
 
 /**
@@ -39194,12 +39194,12 @@ var THREE = require( "three" );
  * @param {string} id - The ID of the dynamic audio.
  * @param {AudioListener} listener - The listener object.
  * @param {object} buffer - The buffered audio file.
- * @param {boolean} isLoop - Should the audio played in a loop?
- * @param {boolean} isStageIndependent - Should the audio independent of the
+ * @param {boolean} loop - Should the audio played in a loop?
+ * @param {boolean} stageIndependent - Should the audio independent of the
  * stage?
  * 
  */
-function DynamicAudio( id, listener, buffer, isLoop, isStageIndependent ) {
+function DynamicAudio( id, listener, buffer, loop, stageIndependent ) {
 
 	THREE.Object3D.call( this );
 
@@ -39222,14 +39222,14 @@ function DynamicAudio( id, listener, buffer, isLoop, isStageIndependent ) {
 			enumerable : true,
 			writable : true
 		},
-		isLoop : {
-			value : isLoop || false,
+		loop : {
+			value : loop || false,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
-		isStageIndependent : {
-			value : isStageIndependent || false,
+		stageIndependent : {
+			value : stageIndependent || false,
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -39298,7 +39298,7 @@ DynamicAudio.prototype.play = function( time ) {
 	this._source = this._context.createBufferSource();
 
 	this._source.buffer = this.buffer;
-	this._source.loop = this.isLoop;
+	this._source.loop = this.loop;
 	this._source.connect( this._panner );
 
 	// regard pitch variation
@@ -42689,6 +42689,7 @@ var THREE = require( "three" );
  * @param {string} id - The id of the impostor.
  * @param {THREE.Object3D} sourceObject - The source 3D object of the impostor.
  * @param {number} resolution - The resolution of the rendered texture.
+ * @param {number} angle - This value can be used to auto-generation the impostor.
  */
 function Impostor( id, sourceObject, resolution, angle ) {
 
@@ -48627,13 +48628,13 @@ var logger = require( "../../core/Logger" );
  * 
  * @constructor
  * 
- * @param {boolean} isLoop - Flag to indicate if the path should be looped.
+ * @param {boolean} loop - Flag to indicate if the path should be looped.
  */
-function Path( isLoop ) {
+function Path( loop ) {
 
 	Object.defineProperties( this, {
-		isLoop : {
-			value : isLoop || false,
+		loop : {
+			value : loop || false,
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -48686,7 +48687,7 @@ Path.prototype.clear = function() {
  */
 Path.prototype.isFinished = function() {
 
-	return this.isLoop === true ? false : ( this._index === this._waypoints.length - 1 );
+	return this.loop === true ? false : ( this._index === this._waypoints.length - 1 );
 };
 
 /**
@@ -48700,7 +48701,7 @@ Path.prototype.setNextWaypoint = function() {
 
 	if ( ++this._index === this._waypoints.length )
 	{
-		if ( this.isLoop === true )
+		if ( this.loop === true )
 		{
 			this._index = 0;
 		}

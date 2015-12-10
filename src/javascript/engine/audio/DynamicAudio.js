@@ -18,12 +18,12 @@ var THREE = require( "three" );
  * @param {string} id - The ID of the dynamic audio.
  * @param {AudioListener} listener - The listener object.
  * @param {object} buffer - The buffered audio file.
- * @param {boolean} isLoop - Should the audio played in a loop?
- * @param {boolean} isStageIndependent - Should the audio independent of the
+ * @param {boolean} loop - Should the audio played in a loop?
+ * @param {boolean} stageIndependent - Should the audio independent of the
  * stage?
  * 
  */
-function DynamicAudio( id, listener, buffer, isLoop, isStageIndependent ) {
+function DynamicAudio( id, listener, buffer, loop, stageIndependent ) {
 
 	THREE.Object3D.call( this );
 
@@ -46,14 +46,14 @@ function DynamicAudio( id, listener, buffer, isLoop, isStageIndependent ) {
 			enumerable : true,
 			writable : true
 		},
-		isLoop : {
-			value : isLoop || false,
+		loop : {
+			value : loop || false,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
-		isStageIndependent : {
-			value : isStageIndependent || false,
+		stageIndependent : {
+			value : stageIndependent || false,
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -122,7 +122,7 @@ DynamicAudio.prototype.play = function( time ) {
 	this._source = this._context.createBufferSource();
 
 	this._source.buffer = this.buffer;
-	this._source.loop = this.isLoop;
+	this._source.loop = this.loop;
 	this._source.connect( this._panner );
 
 	// regard pitch variation
