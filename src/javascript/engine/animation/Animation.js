@@ -62,7 +62,8 @@ function Animation( options ) {
 			writable : true
 		},
 		// if set to true, it specifies that the animation will start over
-		// again, every time it is finished
+		// again, every time it is finished. the start and end values will be
+		// switched to create a seamless "yoyo" animation
 		loop : {
 			value : false,
 			configurable : false,
