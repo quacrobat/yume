@@ -200,7 +200,8 @@ World.prototype.calculateNeighbors = ( function() {
 		{
 			entity = entityManager.entities[ index ];
 
-			if ( entity !== vehicle )
+			// in this case, the own vehicle AND the player will be ignored
+			if ( entity !== vehicle && entity !== this.player )
 			{
 				// calculate displacement vector
 				toEntity.subVectors( entity.position, vehicle.object3D.position );

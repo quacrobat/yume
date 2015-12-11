@@ -74,21 +74,27 @@ AudioListener.prototype.constructor = AudioListener;
  */
 AudioListener.prototype.updateMatrixWorld = ( function() {
 
-	var position = new THREE.Vector3();
-	var quaternion = new THREE.Quaternion();
-	var scale = new THREE.Vector3();
-
-	var orientation = new THREE.Vector3();
+	var position, quaternion, scale, orientation;
 
 	return function( force ) {
 
+		if ( position === undefined )
+		{
+			position = new THREE.Vector3();
+			quaternion = new THREE.Quaternion();
+			scale = new THREE.Vector3();
+			orientation = new THREE.Vector3();
+		}
+
+		// call the parent method
 		THREE.Object3D.prototype.updateMatrixWorld.call( this, force );
 
 		this.matrixWorld.decompose( position, quaternion, scale );
 
+		// calculate the orientation of the audio listener
 		orientation.set( 0, 0, -1 ).applyQuaternion( quaternion );
 
-		// set position and orientation of the audio listener
+		// set position and orientation to the WebAudio context
 		this.context.listener.setPosition( position.x, position.y, position.z );
 		this.context.listener.setOrientation( orientation.x, orientation.y, orientation.z, this.up.x, this.up.y, this.up.z );
 	};

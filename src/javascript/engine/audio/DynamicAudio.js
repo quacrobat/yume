@@ -269,9 +269,14 @@ DynamicAudio.prototype.addPitchVariation = function( pitchVariation ) {
  */
 DynamicAudio.prototype.updateMatrixWorld = ( function() {
 
-	var position = new THREE.Vector3();
+	var position;
 
 	return function( force ) {
+
+		if ( position === undefined )
+		{
+			position = new THREE.Vector3();
+		}
 
 		THREE.Object3D.prototype.updateMatrixWorld.call( this, force );
 
