@@ -72,9 +72,14 @@ function ActionTrigger( position, radius, isOnetime, action ) {
  */
 ActionTrigger.prototype.update = ( function() {
 
-	var closestPoint = new THREE.Vector3();
+	var closestPoint;
 
 	return function( position ) {
+
+		if ( closestPoint === undefined )
+		{
+			closestPoint = new THREE.Vector3();
+		}
 
 		// the action property must always be set
 		if ( this.action !== undefined )

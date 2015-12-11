@@ -154,23 +154,31 @@ Player.prototype.setDirection = function( direction ) {
 };
 
 /**
- * Gets the direction of the player.
+ * Returns the direction of the player.
+ * 
+ * @param {THREE.Vector3} optionalTarget - The optional target vector.
  * 
  * @returns {THREE.Vector3} The direction of the player.
  */
-Player.prototype.getDirection = function() {
+Player.prototype.getDirection = function( optionalTarget ) {
+	
+	var result = optionalTarget || new THREE.Vector3();
 
-	return this.controls.getDirection();
+	return this.controls.getDirection( result );
 };
 
 /**
- * Gets the position of the head in world coordinates.
+ * Returns the position of the head in world coordinates.
+ * 
+ * @param {THREE.Vector3} optionalTarget - The optional target vector.
  * 
  * @returns {THREE.Vector3} The position of the head.
  */
-Player.prototype.getHeadPosition = function() {
+Player.prototype.getHeadPosition = function( optionalTarget ) {
+	
+	var result = optionalTarget || new THREE.Vector3();
 
-	return this.head.getWorldPosition();
+	return this.head.getWorldPosition( result );
 };
 
 /**

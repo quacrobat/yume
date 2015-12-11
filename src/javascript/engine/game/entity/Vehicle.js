@@ -78,10 +78,15 @@ Vehicle.prototype.constructor = Vehicle;
  */
 Vehicle.prototype.update = ( function() {
 
-	var displacement = new THREE.Vector3();
-	var acceleration = new THREE.Vector3();
+	var displacement, acceleration;
 
 	return function( delta ) {
+
+		if ( displacement === undefined )
+		{
+			displacement = new THREE.Vector3();
+			acceleration = new THREE.Vector3();
+		}
 
 		// calculate steering force
 		var steeringForce = this.steering.calculate( delta );

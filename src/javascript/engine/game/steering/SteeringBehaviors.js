@@ -531,19 +531,28 @@ SteeringBehaviors.prototype._prepareCalculation = function() {
  */
 SteeringBehaviors.prototype._createFeelers = ( function() {
 
-	var rotation = new THREE.Matrix4();
+	var rotation, direction;
 
 	return function() {
+
+		if ( rotation === undefined )
+		{
+			rotation = new THREE.Matrix4();
+			direction = new THREE.Vector3();
+		}
 
 		// if there are no feelers yet, create them
 		if ( this._feelers.length === 0 )
 		{
 			this._feelers.push( new THREE.Raycaster(), new THREE.Raycaster(), new THREE.Raycaster() );
 		}
+		
+		// get direction of the vehicle
+		this.vehicle.getDirection( direction );
 
 		// first feeler pointing straight in front
 		this._feelers[ 0 ].ray.origin.copy( this.vehicle.position );
-		this._feelers[ 0 ].ray.direction = this.vehicle.getDirection();
+		this._feelers[ 0 ].ray.direction.copy( direction );
 		this._feelers[ 0 ].far = this.wallDetectionFeelerLength;
 
 		// second feeler to left
@@ -551,7 +560,7 @@ SteeringBehaviors.prototype._createFeelers = ( function() {
 		rotation.makeRotationY( Math.PI * 1.75 );
 
 		this._feelers[ 1 ].ray.origin.copy( this.vehicle.position );
-		this._feelers[ 1 ].ray.direction = this.vehicle.getDirection().transformDirection( rotation );
+		this._feelers[ 1 ].ray.direction.copy( direction ).transformDirection( rotation );
 		this._feelers[ 1 ].far = this.wallDetectionFeelerLength * 0.5;
 
 		// third feeler to right
@@ -559,7 +568,7 @@ SteeringBehaviors.prototype._createFeelers = ( function() {
 		rotation.makeRotationY( Math.PI * 0.25 );
 
 		this._feelers[ 2 ].ray.origin.copy( this.vehicle.position );
-		this._feelers[ 2 ].ray.direction = this.vehicle.getDirection().transformDirection( rotation );
+		this._feelers[ 2 ].ray.direction.copy( direction ).transformDirection( rotation );
 		this._feelers[ 2 ].far = this.wallDetectionFeelerLength * 0.5;
 	};
 
@@ -577,9 +586,14 @@ SteeringBehaviors.prototype._createFeelers = ( function() {
  */
 SteeringBehaviors.prototype._getHidingPosition = ( function() {
 
-	var toHidingSpot = new THREE.Vector3();
+	var toHidingSpot;
 
 	return function( positionObstacle, radiusObstacle, positionHunter, hidingSpot ) {
+
+		if ( toHidingSpot === undefined )
+		{
+			toHidingSpot = new THREE.Vector3();
+		}
 
 		// calculate how far away the agent is to be from the chosen obstacle's
 		// bounding radius
@@ -745,6 +759,8 @@ SteeringBehaviors.prototype._arrive = ( function() {
 SteeringBehaviors.prototype._pursuit = ( function() {
 
 	var toEvader = new THREE.Vector3();
+	var vehicleDirection = new THREE.Vector3();
+	var evaderDirection = new THREE.Vector3();
 	var newEvaderVelocity = new THREE.Vector3();
 	var predcitedPosition = new THREE.Vector3();
 
@@ -758,14 +774,15 @@ SteeringBehaviors.prototype._pursuit = ( function() {
 		// calculate displacement vector
 		toEvader.subVectors( evader.position, this.vehicle.position );
 
-		// buffer vehicle direction
-		vehicleDirection = this.vehicle.getDirection();
+		// buffer vehicle and evader direction
+		this.vehicle.getDirection( vehicleDirection );
+		evader.getDirection( evaderDirection );
 
 		// check first condition. evader must be in front of the pursuer
 		isEvaderAhead = toEvader.dot( vehicleDirection ) > 0;
 
 		// check second condition. evader must almost directly facing the agent
-		isFacing = vehicleDirection.dot( evader.getDirection() ) < 0.95;
+		isFacing = vehicleDirection.dot( evaderDirection ) < 0.95;
 
 		if ( isEvaderAhead && isFacing )
 		{
@@ -1316,6 +1333,7 @@ SteeringBehaviors.prototype._alignment = ( function() {
 
 	// used to record the average heading of the neighbors
 	var averageHeading = new THREE.Vector3();
+	var direction = new THREE.Vector3();
 
 	return function() {
 		
@@ -1332,12 +1350,14 @@ SteeringBehaviors.prototype._alignment = ( function() {
 		for ( index = 0; index < this._neighbors.length; index++ )
 		{
 			neighbor = this._neighbors[ index ];
+			
+			 neighbor.getDirection( direction );
 
 			// make sure this agent isn't included in the calculations
 			// also make sure it doesn't include the evade target
 			if ( neighbor !== this.vehicle && neighbor !== this.targetAgent1 )
 			{
-				averageHeading.add( neighbor.getDirection() );
+				averageHeading.add( direction );
 
 				neighborCount++;
 			}
@@ -1348,8 +1368,10 @@ SteeringBehaviors.prototype._alignment = ( function() {
 		if ( neighborCount > 0 )
 		{
 			averageHeading.divideScalar( neighborCount );
+			
+			this.vehicle.getDirection( direction );
 
-			force.subVectors( averageHeading, this.vehicle.getDirection() );
+			force.subVectors( averageHeading, direction );
 		}
 
 		return force;

@@ -112,25 +112,42 @@ function ActionManager() {
  * 
  * @param {Player} player - The player object.
  */
-ActionManager.prototype.update = function( player ) {
+ActionManager.prototype.update = ( function() {
 
-	var index;
+	var position, direction;
 
-	// update action objects
-	for ( index = 0; index < this._actionObjects.length; index++ )
-	{
-		this._actionObjects[ index ].update();
-	}
+	return function( player ) {
 
-	// update triggers
-	for ( index = 0; index < this._triggers.length; index++ )
-	{
-		this._triggers[ index ].update( player.position );
-	}
+		var index;
 
-	// check interaction objects
-	this._checkInteraction( player.getHeadPosition(), player.getDirection() );
-};
+		if ( position === undefined )
+		{
+			position = new THREE.Vector3();
+			direction = new THREE.Vector3();
+		}
+
+		// retrieve data from player entity
+		player.getHeadPosition( position );
+		player.getDirection( direction );
+
+		// update action objects
+		for ( index = 0; index < this._actionObjects.length; index++ )
+		{
+			this._actionObjects[ index ].update();
+		}
+
+		// update triggers
+		for ( index = 0; index < this._triggers.length; index++ )
+		{
+			this._triggers[ index ].update( player.position );
+		}
+
+		// check interaction objects
+		this._checkInteraction( position, direction );
+
+	};
+
+}() );
 
 /**
  * Generates the internal BSP-Tree with data from the current stage.

@@ -36414,25 +36414,42 @@ function ActionManager() {
  * 
  * @param {Player} player - The player object.
  */
-ActionManager.prototype.update = function( player ) {
+ActionManager.prototype.update = ( function() {
 
-	var index;
+	var position, direction;
 
-	// update action objects
-	for ( index = 0; index < this._actionObjects.length; index++ )
-	{
-		this._actionObjects[ index ].update();
-	}
+	return function( player ) {
 
-	// update triggers
-	for ( index = 0; index < this._triggers.length; index++ )
-	{
-		this._triggers[ index ].update( player.position );
-	}
+		var index;
 
-	// check interaction objects
-	this._checkInteraction( player.getHeadPosition(), player.getDirection() );
-};
+		if ( position === undefined )
+		{
+			position = new THREE.Vector3();
+			direction = new THREE.Vector3();
+		}
+
+		// retrieve data from player entity
+		player.getHeadPosition( position );
+		player.getDirection( direction );
+
+		// update action objects
+		for ( index = 0; index < this._actionObjects.length; index++ )
+		{
+			this._actionObjects[ index ].update();
+		}
+
+		// update triggers
+		for ( index = 0; index < this._triggers.length; index++ )
+		{
+			this._triggers[ index ].update( player.position );
+		}
+
+		// check interaction objects
+		this._checkInteraction( position, direction );
+
+	};
+
+}() );
 
 /**
  * Generates the internal BSP-Tree with data from the current stage.
@@ -37002,9 +37019,14 @@ function ActionTrigger( position, radius, isOnetime, action ) {
  */
 ActionTrigger.prototype.update = ( function() {
 
-	var closestPoint = new THREE.Vector3();
+	var closestPoint;
 
 	return function( position ) {
+
+		if ( closestPoint === undefined )
+		{
+			closestPoint = new THREE.Vector3();
+		}
 
 		// the action property must always be set
 		if ( this.action !== undefined )
@@ -39705,14 +39727,19 @@ FirstPersonControls.prototype.update = function( delta, displacement ) {
  */
 FirstPersonControls.prototype.setDirection = ( function() {
 
-	var xAxis = new THREE.Vector3(); // right
-	var yAxis = new THREE.Vector3(); // up
-	var zAxis = new THREE.Vector3(); // front
-
-	var rotationMatrix = new THREE.Matrix4();
-	var euler = new THREE.Euler( 0, 0, 0, "YXZ" );
+	var xAxis, yAxis, zAxis, rotationMatrix, euler;
 
 	return function( direction ) {
+
+		if ( xAxis === undefined )
+		{
+			xAxis = new THREE.Vector3(); // right
+			yAxis = new THREE.Vector3(); // up
+			zAxis = new THREE.Vector3(); // front
+
+			rotationMatrix = new THREE.Matrix4();
+			euler = new THREE.Euler( 0, 0, 0, "YXZ" );
+		}
 
 		// the front vector always points to the direction vector
 		zAxis.copy( direction ).normalize();
@@ -39741,7 +39768,7 @@ FirstPersonControls.prototype.setDirection = ( function() {
 
 		// create euler angles from rotation
 		euler.setFromRotationMatrix( rotationMatrix );
-		
+
 		// apply rotation to control objects
 		this._player.rotation.y = euler.y;
 		this._player.head.rotation.x = euler.x;
@@ -39750,21 +39777,28 @@ FirstPersonControls.prototype.setDirection = ( function() {
 }() );
 
 /**
- * Gets the direction of the controls.
+ * Returns the direction of the controls.
+ * 
+ * @param {THREE.Vector3} optionalTarget - The optional target vector.
  * 
  * @returns {THREE.Vector3} The direction vector.
  */
 FirstPersonControls.prototype.getDirection = ( function() {
 
-	var result = new THREE.Vector3();
-	var direction = new THREE.Vector3( 0, 0, 1 );
-	var rotation = new THREE.Euler( 0, 0, 0, "YXZ" );
+	var rotation;
 
-	return function() {
+	return function( optionalTarget ) {
+		
+		var result = optionalTarget || new THREE.Vector3();
 
+		if ( rotation === undefined )
+		{
+			rotation = new THREE.Euler( 0, 0, 0, "YXZ" );
+		}
+		
 		// calculate direction
 		rotation.set( this._player.head.rotation.x, this._player.rotation.y, 0 );
-		result.copy( direction ).applyEuler( rotation );
+		result.set( 0, 0, 1 ).applyEuler( rotation );
 		return result;
 	};
 
@@ -39934,10 +39968,16 @@ FirstPersonControls.prototype._init = function() {
  */
 FirstPersonControls.prototype._calculateMovement = ( function() {
 
-	var velocity = new THREE.Vector3();
+	var velocity;
 
-	return function( delta, displacement) {
-		
+	return function( delta, displacement ) {
+
+		if ( velocity === undefined )
+		{
+			velocity = new THREE.Vector3();
+		}
+
+		// ensure displacement is set to zero
 		displacement.set( 0, 0, 0 );
 
 		// convert booleans to one number to determine the movement direction
@@ -39951,11 +39991,11 @@ FirstPersonControls.prototype._calculateMovement = ( function() {
 		// assign move and strafe values to displacement vector
 		displacement.z = this._move;
 		displacement.x = this._strafe;
-		
+
 		// normalization prevents that the player moves to fast when
 		// e.g. forward and right are pressed simultaneously
 		displacement.normalize().multiply( velocity );
-		
+
 		return displacement;
 	};
 
@@ -40341,66 +40381,84 @@ FirstPersonControls.prototype._onMouseMove = function( event ) {
  * 
  * @param {object} event - Default event object.
  */
-FirstPersonControls.prototype._onKeyDown = function( event ) {
-	
-	if ( self.isCaptured === true && self.isLocked === false )
-	{
-		switch ( event.keyCode )
+FirstPersonControls.prototype._onKeyDown = ( function() {
+
+	var position, direction;
+
+	return function( event ) {
+
+		if ( position === undefined )
 		{
-			// w
-			case 87:
-
-				self._isMoveForward = true;
-
-				break;
-
-			// a
-			case 65:
-
-				self._isMoveLeft = true;
-
-				break;
-
-			// s
-			case 83:
-
-				self._isMoveBackward = true;
-				
-				break;
-
-			// d
-			case 68:
-
-				self._isMoveRight = true;
-
-				break;
-
-			// c
-			case 67:
-
-				self._handleCrouch();
-
-				break;
-
-			// shift
-			case 16:
-
-				self._handleRun( true );
-
-				break;
-
-			// e
-			case 69:
-
-				eventManager.publish( TOPIC.ACTION.INTERACTION, {
-					position : self._player.head.getWorldPosition(),
-					direction : self.getDirection()
-				} );
-
-				break;
+			position = new THREE.Vector3();
+			direction = new THREE.Vector3();
 		}
-	}
-};
+
+		if ( self.isCaptured === true && self.isLocked === false )
+		{
+			switch ( event.keyCode )
+			{
+				// w
+				case 87:
+
+					self._isMoveForward = true;
+
+					break;
+
+				// a
+				case 65:
+
+					self._isMoveLeft = true;
+
+					break;
+
+				// s
+				case 83:
+
+					self._isMoveBackward = true;
+
+					break;
+
+				// d
+				case 68:
+
+					self._isMoveRight = true;
+
+					break;
+
+				// c
+				case 67:
+
+					self._handleCrouch();
+
+					break;
+
+				// shift
+				case 16:
+
+					self._handleRun( true );
+
+					break;
+
+				// e
+				case 69:
+					
+					// retrieve data
+					self._player.head.getWorldPosition( position );
+					self.getDirection( direction );
+
+					// publish message with player data
+					eventManager.publish( TOPIC.ACTION.INTERACTION, {
+						position : position,
+						direction : direction
+					} );
+
+					break;
+			}
+		}
+
+	};
+
+}() );
 
 /**
  * Executes, when a key is released.
@@ -45671,15 +45729,20 @@ MovingEntity.prototype.constructor = MovingEntity;
  */
 MovingEntity.prototype.rotateToDirection = ( function() {
 
-	var xAxis = new THREE.Vector3(); // right
-	var yAxis = new THREE.Vector3(); // up
-	var zAxis = new THREE.Vector3(); // front
-
-	var upTemp = new THREE.Vector3( 0, 1, 0 );
-
-	var rotationMatrix = new THREE.Matrix4();
+	var xAxis, yAxis, zAxis, upTemp, rotationMatrix;
 
 	return function( direction ) {
+		
+		if( xAxis === undefined ){
+			
+			 xAxis = new THREE.Vector3(); // right
+			 yAxis = new THREE.Vector3(); // up
+			 zAxis = new THREE.Vector3(); // front
+			 
+			 upTemp = new THREE.Vector3( 0, 1, 0 );
+			 
+			 rotationMatrix = new THREE.Matrix4();
+		}
 
 		// the front vector always points to the direction vector
 		zAxis.copy( direction ).normalize();
@@ -45722,15 +45785,24 @@ MovingEntity.prototype.rotateToDirection = ( function() {
  */
 MovingEntity.prototype.isRotateToTarget = ( function() {
 
-	var rotationToTarget = new THREE.Matrix4();
-	var quaternionToTarget = new THREE.Quaternion();
+	var direction, rotationToTarget, quaternionToTarget;
 
 	return function( targetPosition ) {
-		
+
 		var angle, t;
 
+		if ( direction === undefined )
+		{
+			direction = new THREE.Vector3();
+			rotationToTarget = new THREE.Matrix4();
+			quaternionToTarget = new THREE.Quaternion();
+		}
+
+		// get direction of moving entity
+		this.getDirection( direction );
+
 		// first determine the angle between the look vector and the target
-		angle = targetPosition.angleTo( this.getDirection() );
+		angle = targetPosition.angleTo( direction );
 
 		// return true if the player is facing the target
 		if ( angle < 0.00001 )
@@ -45779,11 +45851,15 @@ MovingEntity.prototype.getSpeedSq = function() {
 /**
  * Gets the normalized direction of the vehicle.
  * 
+ * @param {THREE.Vector3} optionalTarget - The optional target vector.
+ * 
  * @returns {THREE.Vector3} The direction vector.
  */
-MovingEntity.prototype.getDirection = function() {
+MovingEntity.prototype.getDirection = function( optionalTarget ) {
+	
+	var result = optionalTarget || new THREE.Vector3();
 
-	return new THREE.Vector3( 0, 0, 1 ).applyQuaternion( this.quaternion ).normalize();
+	return result.set( 0, 0, 1 ).applyQuaternion( this.quaternion ).normalize();
 };
 
 module.exports = MovingEntity;
@@ -45944,23 +46020,31 @@ Player.prototype.setDirection = function( direction ) {
 };
 
 /**
- * Gets the direction of the player.
+ * Returns the direction of the player.
+ * 
+ * @param {THREE.Vector3} optionalTarget - The optional target vector.
  * 
  * @returns {THREE.Vector3} The direction of the player.
  */
-Player.prototype.getDirection = function() {
+Player.prototype.getDirection = function( optionalTarget ) {
+	
+	var result = optionalTarget || new THREE.Vector3();
 
-	return this.controls.getDirection();
+	return this.controls.getDirection( result );
 };
 
 /**
- * Gets the position of the head in world coordinates.
+ * Returns the position of the head in world coordinates.
+ * 
+ * @param {THREE.Vector3} optionalTarget - The optional target vector.
  * 
  * @returns {THREE.Vector3} The position of the head.
  */
-Player.prototype.getHeadPosition = function() {
+Player.prototype.getHeadPosition = function( optionalTarget ) {
+	
+	var result = optionalTarget || new THREE.Vector3();
 
-	return this.head.getWorldPosition();
+	return this.head.getWorldPosition( result );
 };
 
 /**
@@ -46171,10 +46255,15 @@ Vehicle.prototype.constructor = Vehicle;
  */
 Vehicle.prototype.update = ( function() {
 
-	var displacement = new THREE.Vector3();
-	var acceleration = new THREE.Vector3();
+	var displacement, acceleration;
 
 	return function( delta ) {
+
+		if ( displacement === undefined )
+		{
+			displacement = new THREE.Vector3();
+			acceleration = new THREE.Vector3();
+		}
 
 		// calculate steering force
 		var steeringForce = this.steering.calculate( delta );
@@ -49391,19 +49480,28 @@ SteeringBehaviors.prototype._prepareCalculation = function() {
  */
 SteeringBehaviors.prototype._createFeelers = ( function() {
 
-	var rotation = new THREE.Matrix4();
+	var rotation, direction;
 
 	return function() {
+
+		if ( rotation === undefined )
+		{
+			rotation = new THREE.Matrix4();
+			direction = new THREE.Vector3();
+		}
 
 		// if there are no feelers yet, create them
 		if ( this._feelers.length === 0 )
 		{
 			this._feelers.push( new THREE.Raycaster(), new THREE.Raycaster(), new THREE.Raycaster() );
 		}
+		
+		// get direction of the vehicle
+		this.vehicle.getDirection( direction );
 
 		// first feeler pointing straight in front
 		this._feelers[ 0 ].ray.origin.copy( this.vehicle.position );
-		this._feelers[ 0 ].ray.direction = this.vehicle.getDirection();
+		this._feelers[ 0 ].ray.direction.copy( direction );
 		this._feelers[ 0 ].far = this.wallDetectionFeelerLength;
 
 		// second feeler to left
@@ -49411,7 +49509,7 @@ SteeringBehaviors.prototype._createFeelers = ( function() {
 		rotation.makeRotationY( Math.PI * 1.75 );
 
 		this._feelers[ 1 ].ray.origin.copy( this.vehicle.position );
-		this._feelers[ 1 ].ray.direction = this.vehicle.getDirection().transformDirection( rotation );
+		this._feelers[ 1 ].ray.direction.copy( direction ).transformDirection( rotation );
 		this._feelers[ 1 ].far = this.wallDetectionFeelerLength * 0.5;
 
 		// third feeler to right
@@ -49419,7 +49517,7 @@ SteeringBehaviors.prototype._createFeelers = ( function() {
 		rotation.makeRotationY( Math.PI * 0.25 );
 
 		this._feelers[ 2 ].ray.origin.copy( this.vehicle.position );
-		this._feelers[ 2 ].ray.direction = this.vehicle.getDirection().transformDirection( rotation );
+		this._feelers[ 2 ].ray.direction.copy( direction ).transformDirection( rotation );
 		this._feelers[ 2 ].far = this.wallDetectionFeelerLength * 0.5;
 	};
 
@@ -49437,9 +49535,14 @@ SteeringBehaviors.prototype._createFeelers = ( function() {
  */
 SteeringBehaviors.prototype._getHidingPosition = ( function() {
 
-	var toHidingSpot = new THREE.Vector3();
+	var toHidingSpot;
 
 	return function( positionObstacle, radiusObstacle, positionHunter, hidingSpot ) {
+
+		if ( toHidingSpot === undefined )
+		{
+			toHidingSpot = new THREE.Vector3();
+		}
 
 		// calculate how far away the agent is to be from the chosen obstacle's
 		// bounding radius
@@ -49605,6 +49708,8 @@ SteeringBehaviors.prototype._arrive = ( function() {
 SteeringBehaviors.prototype._pursuit = ( function() {
 
 	var toEvader = new THREE.Vector3();
+	var vehicleDirection = new THREE.Vector3();
+	var evaderDirection = new THREE.Vector3();
 	var newEvaderVelocity = new THREE.Vector3();
 	var predcitedPosition = new THREE.Vector3();
 
@@ -49618,14 +49723,15 @@ SteeringBehaviors.prototype._pursuit = ( function() {
 		// calculate displacement vector
 		toEvader.subVectors( evader.position, this.vehicle.position );
 
-		// buffer vehicle direction
-		vehicleDirection = this.vehicle.getDirection();
+		// buffer vehicle and evader direction
+		this.vehicle.getDirection( vehicleDirection );
+		evader.getDirection( evaderDirection );
 
 		// check first condition. evader must be in front of the pursuer
 		isEvaderAhead = toEvader.dot( vehicleDirection ) > 0;
 
 		// check second condition. evader must almost directly facing the agent
-		isFacing = vehicleDirection.dot( evader.getDirection() ) < 0.95;
+		isFacing = vehicleDirection.dot( evaderDirection ) < 0.95;
 
 		if ( isEvaderAhead && isFacing )
 		{
@@ -50176,6 +50282,7 @@ SteeringBehaviors.prototype._alignment = ( function() {
 
 	// used to record the average heading of the neighbors
 	var averageHeading = new THREE.Vector3();
+	var direction = new THREE.Vector3();
 
 	return function() {
 		
@@ -50192,12 +50299,14 @@ SteeringBehaviors.prototype._alignment = ( function() {
 		for ( index = 0; index < this._neighbors.length; index++ )
 		{
 			neighbor = this._neighbors[ index ];
+			
+			 neighbor.getDirection( direction );
 
 			// make sure this agent isn't included in the calculations
 			// also make sure it doesn't include the evade target
 			if ( neighbor !== this.vehicle && neighbor !== this.targetAgent1 )
 			{
-				averageHeading.add( neighbor.getDirection() );
+				averageHeading.add( direction );
 
 				neighborCount++;
 			}
@@ -50208,8 +50317,10 @@ SteeringBehaviors.prototype._alignment = ( function() {
 		if ( neighborCount > 0 )
 		{
 			averageHeading.divideScalar( neighborCount );
+			
+			this.vehicle.getDirection( direction );
 
-			force.subVectors( averageHeading, this.vehicle.getDirection() );
+			force.subVectors( averageHeading, direction );
 		}
 
 		return force;

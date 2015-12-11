@@ -72,15 +72,20 @@ MovingEntity.prototype.constructor = MovingEntity;
  */
 MovingEntity.prototype.rotateToDirection = ( function() {
 
-	var xAxis = new THREE.Vector3(); // right
-	var yAxis = new THREE.Vector3(); // up
-	var zAxis = new THREE.Vector3(); // front
-
-	var upTemp = new THREE.Vector3( 0, 1, 0 );
-
-	var rotationMatrix = new THREE.Matrix4();
+	var xAxis, yAxis, zAxis, upTemp, rotationMatrix;
 
 	return function( direction ) {
+		
+		if( xAxis === undefined ){
+			
+			 xAxis = new THREE.Vector3(); // right
+			 yAxis = new THREE.Vector3(); // up
+			 zAxis = new THREE.Vector3(); // front
+			 
+			 upTemp = new THREE.Vector3( 0, 1, 0 );
+			 
+			 rotationMatrix = new THREE.Matrix4();
+		}
 
 		// the front vector always points to the direction vector
 		zAxis.copy( direction ).normalize();
@@ -123,15 +128,24 @@ MovingEntity.prototype.rotateToDirection = ( function() {
  */
 MovingEntity.prototype.isRotateToTarget = ( function() {
 
-	var rotationToTarget = new THREE.Matrix4();
-	var quaternionToTarget = new THREE.Quaternion();
+	var direction, rotationToTarget, quaternionToTarget;
 
 	return function( targetPosition ) {
-		
+
 		var angle, t;
 
+		if ( direction === undefined )
+		{
+			direction = new THREE.Vector3();
+			rotationToTarget = new THREE.Matrix4();
+			quaternionToTarget = new THREE.Quaternion();
+		}
+
+		// get direction of moving entity
+		this.getDirection( direction );
+
 		// first determine the angle between the look vector and the target
-		angle = targetPosition.angleTo( this.getDirection() );
+		angle = targetPosition.angleTo( direction );
 
 		// return true if the player is facing the target
 		if ( angle < 0.00001 )
@@ -180,11 +194,15 @@ MovingEntity.prototype.getSpeedSq = function() {
 /**
  * Gets the normalized direction of the vehicle.
  * 
+ * @param {THREE.Vector3} optionalTarget - The optional target vector.
+ * 
  * @returns {THREE.Vector3} The direction vector.
  */
-MovingEntity.prototype.getDirection = function() {
+MovingEntity.prototype.getDirection = function( optionalTarget ) {
+	
+	var result = optionalTarget || new THREE.Vector3();
 
-	return new THREE.Vector3( 0, 0, 1 ).applyQuaternion( this.quaternion ).normalize();
+	return result.set( 0, 0, 1 ).applyQuaternion( this.quaternion ).normalize();
 };
 
 module.exports = MovingEntity;
