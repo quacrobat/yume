@@ -28,7 +28,6 @@ var self;
  * Creates a renderer.
  * 
  * @constructor
- * 
  */
 function Renderer() {
 
@@ -247,6 +246,26 @@ Renderer.prototype.clear = function() {
 
 	// clear the internal renderer
 	this._renderer.clear();
+};
+
+/**
+ * Returns the WebGL rendering context. Useful for access to the plain WebGL API.
+ * 
+ * @returns {WebGLRenderingContext} The WebGLRenderingContext object.
+ */
+Renderer.prototype.getWebGLContext = function() {
+
+	return this._renderer.context;
+};
+
+/**
+ * Returns the current WebGL configuration state.
+ * 
+ * @returns {THREE.WebGLState} The internal WebGL state.
+ */
+Renderer.prototype.getWebGLState = function() {
+
+	return this._renderer.state;
 };
 
 /**

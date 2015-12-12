@@ -36698,7 +36698,7 @@ ActionManager.prototype._onInteraction = function( message, data ) {
 };
 
 module.exports = new ActionManager();
-},{"../core/Logger":21,"../core/Timing":30,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":111,"./Action":4,"./ActionObject":6,"./ActionTrigger":7,"./BSPTree":8,"three":1}],6:[function(require,module,exports){
+},{"../core/Logger":21,"../core/Timing":30,"../messaging/EventManager":67,"../messaging/Topic":69,"../ui/UserInterfaceManager":112,"./Action":4,"./ActionObject":6,"./ActionTrigger":7,"./BSPTree":8,"three":1}],6:[function(require,module,exports){
 /**
  * @file This prototype enables ordinary 3D-Objects to be interactive. Any
  * action object is part of the collision-detection logic and ready for
@@ -36944,7 +36944,7 @@ ActionObject.RAYCASTPRECISION = {
 };
 
 module.exports = ActionObject;
-},{"../etc/OBB":36,"three":1}],7:[function(require,module,exports){
+},{"../etc/OBB":37,"three":1}],7:[function(require,module,exports){
 /**
  * @file The ActionTrigger is a static trigger for actions.
  * 
@@ -38740,7 +38740,7 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 
 module.exports = AudioBufferList;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68}],14:[function(require,module,exports){
+},{"../core/System":27,"../messaging/EventManager":67,"../messaging/Topic":69}],14:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype holds the central Web Audio context and manages the
@@ -39201,7 +39201,7 @@ AudioManager.prototype._onErrorBackgroundMusic = function() {
 
 module.exports = new AudioManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Camera":19,"../core/Logger":21,"../messaging/EventManager":66,"../messaging/Topic":68,"./AudioBufferList":13,"./AudioListener":14,"./DynamicAudio":16}],16:[function(require,module,exports){
+},{"../core/Camera":19,"../core/Logger":21,"../messaging/EventManager":67,"../messaging/Topic":69,"./AudioBufferList":13,"./AudioListener":14,"./DynamicAudio":16}],16:[function(require,module,exports){
 /**
  * @file Prototype for creating dynamic, full-buffered audio objects.
  * 
@@ -40580,7 +40580,7 @@ FirstPersonControls.RUN = {
 
 module.exports = FirstPersonControls;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/Logger":21,"../etc/SettingsManager":40,"../etc/Utils":43,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":111,"three":1}],18:[function(require,module,exports){
+},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/Logger":21,"../etc/SettingsManager":41,"../etc/Utils":44,"../messaging/EventManager":67,"../messaging/Topic":69,"../ui/UserInterfaceManager":112,"three":1}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -40699,7 +40699,7 @@ Bootstrap.prototype._loadStage = function() {
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/MultiplayerManager":35,"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../network/NetworkManager":70,"../ui/UserInterfaceManager":111,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27,"./World":31}],19:[function(require,module,exports){
+},{"../etc/MultiplayerManager":36,"../etc/SaveGameManager":40,"../messaging/EventManager":67,"../messaging/Topic":69,"../network/NetworkManager":71,"../ui/UserInterfaceManager":112,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27,"./World":31}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for camera-based
@@ -40769,7 +40769,7 @@ Camera.prototype._onResize = function( message, data ) {
 
 module.exports = new Camera();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"three":1}],20:[function(require,module,exports){
+},{"../messaging/EventManager":67,"../messaging/Topic":69,"three":1}],20:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype is used to ensure that all necessary browser features
@@ -41240,7 +41240,6 @@ var self;
  * Creates a renderer.
  * 
  * @constructor
- * 
  */
 function Renderer() {
 
@@ -41462,6 +41461,26 @@ Renderer.prototype.clear = function() {
 };
 
 /**
+ * Returns the WebGL rendering context. Useful for access to the plain WebGL API.
+ * 
+ * @returns {WebGLRenderingContext} The WebGLRenderingContext object.
+ */
+Renderer.prototype.getWebGLContext = function() {
+
+	return this._renderer.context;
+};
+
+/**
+ * Returns the current WebGL configuration state.
+ * 
+ * @returns {THREE.WebGLState} The internal WebGL state.
+ */
+Renderer.prototype.getWebGLState = function() {
+
+	return this._renderer.state;
+};
+
+/**
  * Returns the maximum anisotropic filter value.
  * 
  * @returns {number} The maximum anisotropic filter value.
@@ -41517,7 +41536,7 @@ Renderer.prototype._onResize = function( message, data ) {
 
 module.exports = new Renderer();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"../postprocessing/EffectComposer":79,"../postprocessing/RenderPass":80,"../postprocessing/ShaderPass":81,"../shader/GaussianBlurShader":84,"../shader/GrayscaleShader":85,"../shader/VignetteShader":88,"./Logger":21,"three":1}],24:[function(require,module,exports){
+},{"../messaging/EventManager":67,"../messaging/Topic":69,"../postprocessing/EffectComposer":80,"../postprocessing/RenderPass":81,"../postprocessing/ShaderPass":82,"../shader/GaussianBlurShader":85,"../shader/GrayscaleShader":86,"../shader/VignetteShader":89,"./Logger":21,"three":1}],24:[function(require,module,exports){
 /**
  * @file This prototype contains the entire logic for scene-based functionality.
  * 
@@ -41810,7 +41829,7 @@ StageBase.COLORS = {
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../etc/PerformanceManager":38,"../etc/SaveGameManager":39,"../etc/SettingsManager":40,"../etc/TextManager":42,"../game/entity/EntityManager":44,"../messaging/EventManager":66,"../messaging/Topic":68,"../ui/UserInterfaceManager":111,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
+},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../etc/PerformanceManager":39,"../etc/SaveGameManager":40,"../etc/SettingsManager":41,"../etc/TextManager":43,"../game/entity/EntityManager":45,"../messaging/EventManager":67,"../messaging/Topic":69,"../ui/UserInterfaceManager":112,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -42108,7 +42127,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":39,"../messaging/EventManager":66,"../messaging/Topic":68,"../stages/Stage_001":89,"../stages/Stage_002":90,"../stages/Stage_003":91,"../stages/Stage_004":92,"../stages/Stage_005":93,"../stages/Stage_006":94,"../stages/Stage_007":95,"../stages/Stage_008":96,"../stages/Stage_009":97,"../stages/Stage_010":98,"../stages/Stage_011":99,"../stages/Stage_012":100,"../ui/UserInterfaceManager":111,"./Logger":21}],27:[function(require,module,exports){
+},{"../etc/SaveGameManager":40,"../messaging/EventManager":67,"../messaging/Topic":69,"../stages/Stage_001":90,"../stages/Stage_002":91,"../stages/Stage_003":92,"../stages/Stage_004":93,"../stages/Stage_005":94,"../stages/Stage_006":95,"../stages/Stage_007":96,"../stages/Stage_008":97,"../stages/Stage_009":98,"../stages/Stage_010":99,"../stages/Stage_011":100,"../stages/Stage_012":101,"../ui/UserInterfaceManager":112,"./Logger":21}],27:[function(require,module,exports){
 /**
  * @file This prototype holds core information about the engine. The runtime
  * behavior of the application depends crucially of this prototype.
@@ -42737,7 +42756,7 @@ World.prototype.clear = function() {
 };
 
 module.exports = new World();
-},{"../action/ActionManager":5,"../game/entity/EntityManager":44,"../game/entity/GameEntity":45,"./Scene":24,"three":1}],32:[function(require,module,exports){
+},{"../action/ActionManager":5,"../game/entity/EntityManager":45,"../game/entity/GameEntity":46,"./Scene":24,"three":1}],32:[function(require,module,exports){
 /**
  * @file This prototype handles all stuff for impostors. An impostor is a
  * billboard that is created on the fly by rendering a complex object from the
@@ -43304,7 +43323,7 @@ JSONLoader.prototype.load = function( url, onLoad ) {
 
 module.exports = JSONLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68,"three":1}],34:[function(require,module,exports){
+},{"../core/System":27,"../messaging/EventManager":67,"../messaging/Topic":69,"three":1}],34:[function(require,module,exports){
 /**
  * @file This prototype is used for LOD handling. It is an enhancement of the
  * LOD functionality of three.js. Instead of switching directly between LOD
@@ -43486,6 +43505,374 @@ LOD.MODE = {
 module.exports = LOD;
 },{"three":1}],35:[function(require,module,exports){
 /**
+ * @file This prototype can be used to create a mirror 3D-object. The prototype
+ * uses the stencil buffer and a reflection matrix to render the mirror.
+ * 
+ * see: Real-Time Rendering, Third Edition, Akenine-Möller/Haines/Hoffman
+ * Chapter 9.3.1 Planar Reflections
+ * 
+ * @author Human Interactive
+ */
+
+"use strict";
+
+var THREE = require( "three" );
+
+var system = require( "../core/System" );
+
+/**
+ * Creates a mirror.
+ * 
+ * @constructor
+ * @augments THREE.Mesh
+ * 
+ * @param {number} width - The width of the mirror.
+ * @param {number} height - The height of the mirror.
+ * @param {Renderer} renderer - The renderer object.
+ * @param {Camera} camera - The camera object.
+ * @param {World} world - The world object.
+ */
+function Mirror( width, height, renderer, camera, world ) {
+
+	THREE.Mesh.call( this );
+
+	Object.defineProperties( this, {
+
+		// this value can be used to add a little offset to the reflected
+		// objects. it avoids render errors/ artifacts
+		offset : {
+			value : new THREE.Vector3(),
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		// a reference to the renderer object
+		_renderer : {
+			value : renderer,
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		// a reference to the camera object
+		_camera : {
+			value : camera,
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		// a reference to the world object
+		_world : {
+			value : world,
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		// the reflection plane of the mirror. this plane will be used to build
+		// the reflection matrix
+		_reflectionPlane : {
+			value : new THREE.Plane(),
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		// this will be used to transform the camera to the correct viewpoint of
+		// the mirror
+		_reflectionMatrix : {
+			value : new THREE.Matrix4(),
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		// the camera object of the mirror. it represents the actual view of the
+		// mirror
+		_mirrorCamera : {
+			value : new THREE.PerspectiveCamera(),
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		// this scene holds all 3D objects that should reflect in the mirror
+		_scene : {
+			value : new THREE.Scene(),
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		// this special scene holds only the mirror object. three.js render
+		// method can render single objects, but scenes
+		_sceneMirror : {
+			value : new THREE.Scene(),
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
+		// this helper object visualizes the mirror camera position
+		_cameraHelper : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
+		// this helper shows the view direction of the mirror camera
+		_directionHelper : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		}
+	} );
+
+	this._init( width, height );
+}
+
+Mirror.prototype = Object.create( THREE.Mesh.prototype );
+Mirror.prototype.constructor = Mirror;
+
+/**
+ * Update method of the mirror.
+ */
+Mirror.prototype.update = function() {
+
+	// only update reflection entities if necessary
+	if ( this.matrixAutoUpdate === true )
+	{
+		this.makeReflectionPlane();
+		
+		this.makeReflectionMatrix();
+	}
+	
+	this._render();
+};
+
+/**
+ * This overrides the standard three.ms method. If this method is called, we
+ * also want to update the reflection entities.
+ */
+Mirror.prototype.updateMatrix = function() {
+
+	THREE.Mesh.prototype.updateMatrix.call( this );
+
+	this.makeReflectionPlane();
+
+	this.makeReflectionMatrix();
+};
+
+/**
+ * Adds a 3D object to the mirror's internal scene.
+ * 
+ * @param {THREE.Object3D} object3D - The 3D object to add.
+ */
+Mirror.prototype.addObject3D = function( object3D ) {
+
+	// it is necessary to clone the object, because three.js can't handle
+	// objects in two different scenes
+	var objectMirror = object3D.clone();
+
+	this._scene.add( objectMirror );
+
+	if ( objectMirror.material !== undefined )
+	{
+		// it's also necessary to clone the material. because reflection reverses the winding order, we need to switch to front-face culling
+		objectMirror.material = objectMirror.material.clone();
+		objectMirror.material.side = THREE.BackSide;
+		
+		// add an offset to each object to avoid artifacts
+		objectMirror.position.add( this.offset );
+		objectMirror.updateMatrix();
+	}
+
+};
+
+/**
+ * Creates the reflection plane of the mirror.
+ */
+Mirror.prototype.makeReflectionPlane = ( function() {
+
+	var normal, position, quaternion;
+
+	return function() {
+
+		if ( normal === undefined )
+		{
+			normal = new THREE.Vector3();
+			position = new THREE.Vector3();
+			quaternion = new THREE.Quaternion();
+		}
+
+		this.getWorldQuaternion( quaternion );
+		this.getWorldPosition( position );
+
+		// get the normal of the mirror/plane
+		normal.set( 0, 0, 1 ).applyQuaternion( quaternion ).normalize();
+
+		// calculate reflection plane
+		this._reflectionPlane.setFromNormalAndCoplanarPoint( normal, this.position );
+	};
+
+}() );
+
+/**
+ * Creates the reflection matrix of the mirror.
+ * 
+ * see: 3D Math Primer for Graphics and Game Development (Second Edition),
+ * Chapter 5.4 Reflection, 3D matrix to reflect about an arbitrary plane
+ */
+Mirror.prototype.makeReflectionMatrix = function() {
+
+	// construct reflection matrix from reflection plane
+
+	this._reflectionMatrix.elements[ 0 ] = -2 * this._reflectionPlane.normal.x * this._reflectionPlane.normal.x + 1;
+	this._reflectionMatrix.elements[ 1 ] = -2 * this._reflectionPlane.normal.y * this._reflectionPlane.normal.x;
+	this._reflectionMatrix.elements[ 2 ] = -2 * this._reflectionPlane.normal.z * this._reflectionPlane.normal.x;
+	this._reflectionMatrix.elements[ 3 ] = 0;
+
+	this._reflectionMatrix.elements[ 4 ] = -2 * this._reflectionPlane.normal.x * this._reflectionPlane.normal.y;
+	this._reflectionMatrix.elements[ 5 ] = -2 * this._reflectionPlane.normal.y * this._reflectionPlane.normal.y + 1;
+	this._reflectionMatrix.elements[ 6 ] = -2 * this._reflectionPlane.normal.z * this._reflectionPlane.normal.y;
+	this._reflectionMatrix.elements[ 7 ] = 0;
+
+	this._reflectionMatrix.elements[ 8 ] = -2 * this._reflectionPlane.normal.x * this._reflectionPlane.normal.z;
+	this._reflectionMatrix.elements[ 9 ] = -2 * this._reflectionPlane.normal.y * this._reflectionPlane.normal.z;
+	this._reflectionMatrix.elements[ 10 ] = -2 * this._reflectionPlane.normal.z * this._reflectionPlane.normal.z + 1;
+	this._reflectionMatrix.elements[ 11 ] = 0;
+
+	this._reflectionMatrix.elements[ 12 ] = -2 * this._reflectionPlane.normal.x * this._reflectionPlane.constant;
+	this._reflectionMatrix.elements[ 13 ] = -2 * this._reflectionPlane.normal.y * this._reflectionPlane.constant;
+	this._reflectionMatrix.elements[ 14 ] = -2 * this._reflectionPlane.normal.z * this._reflectionPlane.constant;
+	this._reflectionMatrix.elements[ 15 ] = 1;
+};
+
+/**
+ * Initializes the mirror.
+ * 
+ * @param {number} width - The width of the mirror.
+ * @param {number} height - The height of the mirror.
+ */
+Mirror.prototype._init = function( width, height ) {
+
+	// geometry and material for our mirror
+	this.geometry = new THREE.PlaneBufferGeometry( width, height, 1, 1 );
+	this.material = new THREE.MeshBasicMaterial( {
+		color : this._renderer.getClearColor(),
+		depthWrite : false
+	} );
+	
+	// we need to store the mirror in a separate scene for rendering
+	this._sceneMirror.add( this );
+
+	// prevent three.js to auto-update the camera
+	this._mirrorCamera.matrixAutoUpdate = false;
+
+	// add helper objects in dev mode
+	if ( system.isDevModeActive === true )
+	{
+		var helperGeometry = new THREE.BoxGeometry( 2, 2, 2 );
+		var helperMaterial = new THREE.MeshBasicMaterial( {
+			color : 0xffffff
+		} );
+		
+		// create a simple mesh to visualize the position of  the mirror camera
+		this._cameraHelper = new THREE.Mesh( helperGeometry, helperMaterial );
+
+		// create a arrow to visualize the orientation of the mirror camera
+		this._directionHelper = new THREE.ArrowHelper( this._cameraHelper.getWorldDirection(), this._cameraHelper.position, 10 );
+
+		// add helpers to world
+		this._world.addObject3D( this._cameraHelper );
+		this._world.addObject3D( this._directionHelper );
+	}
+
+};
+
+/**
+ * Render method of the mirror.
+ */
+Mirror.prototype._render = function() {
+
+	this._beforeDrawing();
+	
+	// draw all reflected objects
+	this._renderer.render( this._scene, this._mirrorCamera );
+	
+	this._afterDrawing();
+	
+};
+
+/**
+ * This method is called before rendering. It prepares the stencil buffer and
+ * the mirror camera.
+ */
+Mirror.prototype._beforeDrawing = function() {
+
+	this._updateStencilBuffer();
+
+	this._updateMirrorCamera();
+
+};
+
+/**
+ * This method is called after rendering. It is used to reset the WebGL state.
+ */
+Mirror.prototype._afterDrawing = function() {
+
+	var gl = this._renderer.getWebGLContext();
+	var glState = this._renderer.getWebGLState();
+
+	// disable stencil test
+	glState.disable( gl.STENCIL_TEST );
+};
+
+/**
+ * This will update the stencil buffer. It ensures that the viewer sees
+ * reflected objects only inside the mirror. So it's just a special form of
+ * clipping.
+ */
+Mirror.prototype._updateStencilBuffer = function() {
+
+	var gl = this._renderer.getWebGLContext();
+	var glState = this._renderer.getWebGLState();
+
+	// enable stencil test
+	glState.enable( gl.STENCIL_TEST );
+	gl.stencilFunc( gl.ALWAYS, 1, 0xff );
+	gl.stencilOp( gl.REPLACE, gl.REPLACE, gl.REPLACE );
+
+	// draw mirror to stencil buffer
+	this._renderer.render( this._sceneMirror, this._camera );
+
+	// change stencil function and operation for testing
+	gl.stencilFunc( gl.EQUAL, 1, 0xff );
+	gl.stencilOp( gl.KEEP, gl.KEEP, gl.KEEP );
+};
+
+/**
+ * This will update the mirror camera to the correct view position and
+ * orientation.
+ */
+Mirror.prototype._updateMirrorCamera = function() {
+
+	// we use our reflection matrix to flip the position and orientation of our
+	// actual camera
+	this._mirrorCamera.matrix.copy( this._reflectionMatrix ).multiply( this._camera.matrixWorld );
+
+	// we need to tell three.js to update the world matrix
+	this._mirrorCamera.matrixWorldNeedsUpdate = true;
+
+	// the projection matrix is equal
+	this._mirrorCamera.projectionMatrix.copy( this._camera.projectionMatrix );
+
+	// update helper
+	if ( system.isDevModeActive === true )
+	{
+		this._cameraHelper.position.setFromMatrixPosition( this._mirrorCamera.matrix );
+		this._directionHelper.position.setFromMatrixPosition( this._mirrorCamera.matrix );
+		this._directionHelper.setDirection( this._mirrorCamera.getWorldDirection() );
+	}
+};
+
+module.exports = Mirror;
+},{"../core/System":27,"three":1}],36:[function(require,module,exports){
+/**
  * @file This prototype manages the characters of the other teammates.
  * 
  * @author Human Interactive
@@ -43657,7 +44044,7 @@ MultiplayerManager.prototype._getTeammate = function( id ) {
 };
 
 module.exports = new MultiplayerManager();
-},{"../core/Logger":21,"../core/World":31,"../messaging/EventManager":66,"../messaging/Topic":68,"./Teammate":41,"three":1}],36:[function(require,module,exports){
+},{"../core/Logger":21,"../core/World":31,"../messaging/EventManager":67,"../messaging/Topic":69,"./Teammate":42,"three":1}],37:[function(require,module,exports){
 /**
  * @file A 3D arbitrarily oriented bounding box.
  * 
@@ -44364,7 +44751,7 @@ OBB.prototype.clone = function() {
 };
 
 module.exports = OBB;
-},{"three":1}],37:[function(require,module,exports){
+},{"three":1}],38:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for loading 3D objects in object-format from the server. The
@@ -44468,7 +44855,7 @@ ObjectLoader.prototype.load = function( url, onLoad ) {
 
 module.exports = ObjectLoader;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68,"three":1}],38:[function(require,module,exports){
+},{"../core/System":27,"../messaging/EventManager":67,"../messaging/Topic":69,"three":1}],39:[function(require,module,exports){
 /**
  * @file Interface for performance handling. This prototype is used in stages to
  * create e.g. LOD instances.
@@ -44783,7 +45170,7 @@ PerformanceManager.prototype._updateImpostors = ( function() {
 }() );
 
 module.exports = new PerformanceManager();
-},{"../core/Camera":19,"../core/Renderer":23,"../core/World":31,"./Impostor":32,"./LOD":34,"three":1}],39:[function(require,module,exports){
+},{"../core/Camera":19,"../core/Renderer":23,"../core/World":31,"./Impostor":32,"./LOD":34,"three":1}],40:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire savegame-handling. This prototype is using HTML
@@ -44862,7 +45249,7 @@ SaveGameManager.prototype.remove = function() {
 
 module.exports = new SaveGameManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire settings-handling. This prototype is used to
@@ -45046,7 +45433,7 @@ SettingsManager.MOUSE = {
 
 module.exports = new SettingsManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"three":1}],41:[function(require,module,exports){
+},{"../core/System":27,"three":1}],42:[function(require,module,exports){
 /**
  * @file This prototype represents the character of a teammate.
  * 
@@ -45096,7 +45483,7 @@ Teammate.prototype.update = function( position, quaternion ) {
 };
 
 module.exports = Teammate;
-},{"../game/entity/GameEntity":45}],42:[function(require,module,exports){
+},{"../game/entity/GameEntity":46}],43:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire text-handling. This prototype is used in stages to
@@ -45271,7 +45658,7 @@ TextManager.prototype._searchAndRepalce = function() {
 
 module.exports = new TextManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68}],43:[function(require,module,exports){
+},{"../core/System":27,"../messaging/EventManager":67,"../messaging/Topic":69}],44:[function(require,module,exports){
 (function (global){
 /**
  * @file All helper and util functions are organized in this module.
@@ -45366,7 +45753,7 @@ Utils.prototype.preloadImages = function( images, callback ) {
 
 module.exports = new Utils();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 /**
  * @file This prototype manages all game entities.
  * 
@@ -45517,7 +45904,7 @@ EntityManager.prototype.removeEntities = function( isClear ) {
 };
 
 module.exports = new EntityManager();
-},{"./GameEntity":45,"./Player":47,"./Vehicle":48}],45:[function(require,module,exports){
+},{"./GameEntity":46,"./Player":48,"./Vehicle":49}],46:[function(require,module,exports){
 /**
  * @file All entities that are part of the game logic inherit from this
  * prototype.
@@ -45666,7 +46053,7 @@ GameEntity.SCOPE = {
 };
 
 module.exports = GameEntity;
-},{"three":1}],46:[function(require,module,exports){
+},{"three":1}],47:[function(require,module,exports){
 /**
  * @file Base prototype from which all moving game agents are derived.
  * 
@@ -45875,7 +46262,7 @@ MovingEntity.prototype.getDirection = function( optionalTarget ) {
 };
 
 module.exports = MovingEntity;
-},{"./GameEntity":45,"three":1}],47:[function(require,module,exports){
+},{"./GameEntity":46,"three":1}],48:[function(require,module,exports){
 /**
  * @file This prototype represents the player body.
  * 
@@ -46186,7 +46573,7 @@ Player.prototype._isCollisionDetected = function() {
 };
 
 module.exports = Player;
-},{"../../controls/FirstPersonControls":17,"../../core/System":27,"../../messaging/EventManager":66,"../../messaging/Topic":68,"./GameEntity":45,"three":1}],48:[function(require,module,exports){
+},{"../../controls/FirstPersonControls":17,"../../core/System":27,"../../messaging/EventManager":67,"../../messaging/Topic":69,"./GameEntity":46,"three":1}],49:[function(require,module,exports){
 /**
  * @file A simple vehicle that uses steering behaviors.
  * 
@@ -46324,7 +46711,7 @@ Vehicle.prototype.update = ( function() {
 }() );
 
 module.exports = Vehicle;
-},{"../steering/Smoother":64,"../steering/SteeringBehaviors":65,"./MovingEntity":46,"three":1}],49:[function(require,module,exports){
+},{"../steering/Smoother":65,"../steering/SteeringBehaviors":66,"./MovingEntity":47,"three":1}],50:[function(require,module,exports){
 /**
  * @file Super prototype for states used by FSMs.
  * 
@@ -46375,7 +46762,7 @@ State.prototype.exit = function( entity ) { };
 State.prototype.onMessage = function( entity, telegram ) { return false; };
 
 module.exports = State;
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 /**
  * @file This prototype is a basic finite state machine used for AI logic.
  * 
@@ -46516,7 +46903,7 @@ StateMachine.prototype.isInState = function( state ) {
 };
 
 module.exports = StateMachine;
-},{"../../core/Logger":21,"./State":49}],51:[function(require,module,exports){
+},{"../../core/Logger":21,"./State":50}],52:[function(require,module,exports){
 /**
  * @file Prototype to define an edge connecting two nodes. An edge has an
  * associated cost.
@@ -46601,7 +46988,7 @@ GraphEdge.prototype.copy = function( source ){
 };
 
 module.exports = GraphEdge;
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 /**
  * @file Some useful functions you can use with graphs.
  * 
@@ -46934,7 +47321,7 @@ function generateEdges( graph, offset ) {
 	}// next node
 
 }
-},{"../../core/World":31,"./NavGraphEdge":54,"./NavGraphNode":55,"three":1}],53:[function(require,module,exports){
+},{"../../core/World":31,"./NavGraphEdge":55,"./NavGraphNode":56,"three":1}],54:[function(require,module,exports){
 /**
  * @file Node prototype to be used with graphs.
  * 
@@ -46968,7 +47355,7 @@ function GraphNode( index ) {
 GraphNode.INVALID_NODE_INDEX = -1;
 
 module.exports = GraphNode;
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 /**
  * @file Prototype to define an edge connecting two navigation nodes.
  * 
@@ -47053,7 +47440,7 @@ NavGraphEdge.FLAGS = {
 };
 
 module.exports = NavGraphEdge;
-},{"./GraphEdge":51}],55:[function(require,module,exports){
+},{"./GraphEdge":52}],56:[function(require,module,exports){
 /**
  * @file Graph node for use in creating a navigation graph. This node contains
  * the position of the node and a pointer to a GameEntity... useful if you want
@@ -47108,7 +47495,7 @@ NavGraphNode.prototype = Object.create( GraphNode.prototype );
 NavGraphNode.prototype.constructor = NavGraphNode;
 
 module.exports = NavGraphNode;
-},{"./GraphNode":53,"three":1}],56:[function(require,module,exports){
+},{"./GraphNode":54,"three":1}],57:[function(require,module,exports){
 /**
  * @file Graph prototype using the adjacency list representation.
  * 
@@ -47635,7 +48022,7 @@ SparseGraph.prototype._cullInvalidEdges = function() {
 };
 
 module.exports = SparseGraph;
-},{}],57:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 /**
  * @file Some useful functions you can use with algorithms.
  * 
@@ -47703,7 +48090,7 @@ AlgorithmHelper.prototype.sortQueueByCost = function( a, b ) {
 };
 
 module.exports = new AlgorithmHelper();
-},{}],58:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 /**
  * @file Prototype to implement the A* search algorithm.
  * 
@@ -47974,7 +48361,7 @@ GraphSearchAStar.prototype._search = function() {
 };
 
 module.exports = GraphSearchAStar;
-},{"../GraphEdge":51,"../GraphNode":53,"./AlgorithmHelper":57}],59:[function(require,module,exports){
+},{"../GraphEdge":52,"../GraphNode":54,"./AlgorithmHelper":58}],60:[function(require,module,exports){
 /**
  * @file Prototype to implement a breadth first search.
  * 
@@ -48162,7 +48549,7 @@ GraphSearchBFS.prototype._search = function() {
 };
 
 module.exports = GraphSearchBFS;
-},{"../GraphEdge":51,"../GraphNode":53}],60:[function(require,module,exports){
+},{"../GraphEdge":52,"../GraphNode":54}],61:[function(require,module,exports){
 /**
  * @file Prototype to implement a depth first search.
  * 
@@ -48322,7 +48709,7 @@ GraphSearchDFS.prototype._search = function() {
 };
 
 module.exports = GraphSearchDFS;
-},{"../GraphEdge":51,"../GraphNode":53}],61:[function(require,module,exports){
+},{"../GraphEdge":52,"../GraphNode":54}],62:[function(require,module,exports){
 /**
  * @file Prototype to implement dijkstra’s shortest path algorithm.
  * 
@@ -48574,7 +48961,7 @@ GraphSearchDijkstra.prototype._search = function() {
 };
 
 module.exports = GraphSearchDijkstra;
-},{"../GraphEdge":51,"../GraphNode":53,"./AlgorithmHelper":57}],62:[function(require,module,exports){
+},{"../GraphEdge":52,"../GraphNode":54,"./AlgorithmHelper":58}],63:[function(require,module,exports){
 /**
  * @file This prototype defines heuristic policies for use with the A* search
  * algorithm.
@@ -48711,7 +49098,7 @@ module.exports = {
 	EuclideanSq : new HeuristicPolicyEuclidSq(),
 	Dijkstra : new HeuristicPolicyDijkstra()
 };
-},{}],63:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 /**
  * @file Prototype to define, manage, and traverse a path defined by a series of
  * 3D vectors.
@@ -48873,7 +49260,7 @@ Path.prototype.createRandomPath = function( numberOfWaypoints, boundingBox ) {
 };
 
 module.exports = Path;
-},{"../../core/Logger":21,"three":1}],64:[function(require,module,exports){
+},{"../../core/Logger":21,"three":1}],65:[function(require,module,exports){
 /**
  * @file Prototype to help calculate the average value of a history of vector
  * values.
@@ -48958,7 +49345,7 @@ Smoother.prototype.update = function( mostRecentValue, average ) {
 };
 
 module.exports = Smoother;
-},{"three":1}],65:[function(require,module,exports){
+},{"three":1}],66:[function(require,module,exports){
 /**
  * @file Prototype to encapsulate steering behaviors for a vehicle.
  * 
@@ -50556,7 +50943,7 @@ SteeringBehaviors.DECELERATION = {
 };
 
 module.exports = SteeringBehaviors;
-},{"../../core/Logger":21,"three":1}],66:[function(require,module,exports){
+},{"../../core/Logger":21,"three":1}],67:[function(require,module,exports){
 /**
  * @file This prototype provides topic-based publish/subscribe messaging and
  * enables communication between game entities.
@@ -51097,7 +51484,7 @@ function sendMessageToEntity( sender, receiver, message, data, isSync, delay ) {
 }
 
 module.exports = new EventManager();
-},{"../core/Logger":21,"../game/entity/GameEntity":45,"./Telegram":67}],67:[function(require,module,exports){
+},{"../core/Logger":21,"../game/entity/GameEntity":46,"./Telegram":68}],68:[function(require,module,exports){
 /**
  * @file This defines a telegram. A telegram is a data structure that records
  * information required to dispatch game messages. These messages are used by
@@ -51155,7 +51542,7 @@ function Telegram( sender, receiver, message, data, delay ) {
 }
 
 module.exports = Telegram;
-},{}],68:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 /**
  * @file This file contains all topics for publish & subscribe. YUME supports a
  * publish/subscribe messaging system with hierarchical addressing, so topics
@@ -51212,7 +51599,7 @@ var TOPIC = {
 };
 
 module.exports = TOPIC;
-},{}],69:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 /**
  * @file Prototype for network-messages.
  * 
@@ -51262,7 +51649,7 @@ Message.TYPES = {
 };
 
 module.exports = Message;
-},{}],70:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for network-based
@@ -51517,7 +51904,7 @@ NetworkManager.SERVER = {
 
 module.exports = new NetworkManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Logger":21,"../core/ThreadManager":29,"../messaging/EventManager":66,"../messaging/Topic":68,"./Message":69,"ws":2}],71:[function(require,module,exports){
+},{"../core/Logger":21,"../core/ThreadManager":29,"../messaging/EventManager":67,"../messaging/Topic":69,"./Message":70,"ws":2}],72:[function(require,module,exports){
 /**
  * @file The particle prototype defines the properties of a single particle that
  * is used to simulate the particle effect.
@@ -51623,7 +52010,7 @@ function Particle() {
 }
 
 module.exports = Particle;
-},{"three":1}],72:[function(require,module,exports){
+},{"three":1}],73:[function(require,module,exports){
 /**
  * @file This prototype will be used to emit and update particles that share
  * common properties such as texture, interpolated colors, interpolated scale,
@@ -52213,7 +52600,7 @@ function compareNumbers( a, b ) {
 
 	return b[ 0 ] - a[ 0 ];
 }
-},{"../core/Camera":19,"../core/Logger":21,"../core/World":31,"../shader/ParticleShader":87,"./Particle":71,"./emitter/Emitter":74,"./operator/Interpolator":77,"./operator/Oscillator":78,"three":1}],73:[function(require,module,exports){
+},{"../core/Camera":19,"../core/Logger":21,"../core/World":31,"../shader/ParticleShader":88,"./Particle":72,"./emitter/Emitter":75,"./operator/Interpolator":78,"./operator/Oscillator":79,"three":1}],74:[function(require,module,exports){
 /**
  * @file The box emitter uses an AABB to determine the position particles will
  * be emitted.
@@ -52339,7 +52726,7 @@ BoxEmitter.prototype.update = ( function() {
 }() );
 
 module.exports = BoxEmitter;
-},{"./Emitter":74,"three":1}],74:[function(require,module,exports){
+},{"./Emitter":75,"three":1}],75:[function(require,module,exports){
 /**
  * @file Base prototype for all emitters.
  * 
@@ -52509,7 +52896,7 @@ Emitter.prototype.update = function() {
 };
 
 module.exports = Emitter;
-},{"three":1}],75:[function(require,module,exports){
+},{"three":1}],76:[function(require,module,exports){
 /**
  * @file The mesh emitter uses an arbitrary mesh to determine the position
  * particles will be emitted.
@@ -52698,7 +53085,7 @@ MeshEmitter.prototype._getVertexNormal = ( function() {
 }() );
 
 module.exports = MeshEmitter;
-},{"./Emitter":74,"three":1}],76:[function(require,module,exports){
+},{"./Emitter":75,"three":1}],77:[function(require,module,exports){
 /**
  * @file The sphere emitter will randomly emit a particle somewhere about a
  * sphere within some range. The emitter uses spherical coordinates to determine
@@ -52861,7 +53248,7 @@ SphereEmitter.prototype.update = function() {
 };
 
 module.exports = SphereEmitter;
-},{"./Emitter":74,"three":1}],77:[function(require,module,exports){
+},{"./Emitter":75,"three":1}],78:[function(require,module,exports){
 /**
  * @file This prototype will be used to interpolate within a predefined set of
  * values. There must be added at least two values for interpolation. Can be
@@ -53004,7 +53391,7 @@ Interpolator.prototype.getValue = function( alpha, target ) {
 };
 
 module.exports = Interpolator;
-},{"three":1}],78:[function(require,module,exports){
+},{"three":1}],79:[function(require,module,exports){
 /**
  * @file This prototype will be used to manipulate vectors with an oscillation
  * animation. This operator can be used to create a wavy particle effects.
@@ -53065,7 +53452,7 @@ Oscillator.prototype.getValue = function( elapsedTime ){
 };
 
 module.exports = Oscillator;
-},{"../../etc/Utils":43}],79:[function(require,module,exports){
+},{"../../etc/Utils":44}],80:[function(require,module,exports){
 /**
  * @file This prototype manages effects for post-processing.
  * 
@@ -53244,7 +53631,7 @@ EffectComposer.prototype._reset = function( renderTarget ) {
 };
 
 module.exports = EffectComposer;
-},{"three":1}],80:[function(require,module,exports){
+},{"three":1}],81:[function(require,module,exports){
 /**
  * @file This prototype provides a render pass for post-processing.
  * 
@@ -53306,7 +53693,7 @@ RenderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = RenderPass;
-},{"three":1}],81:[function(require,module,exports){
+},{"three":1}],82:[function(require,module,exports){
 /**
  * @file This prototype provides a shader pass for post-processing.
  * 
@@ -53412,7 +53799,7 @@ ShaderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 };
 
 module.exports = ShaderPass;
-},{"three":1}],82:[function(require,module,exports){
+},{"three":1}],83:[function(require,module,exports){
 /**
  * @file This shader can be used for vertex displacement to create water or
  * fabric materials. It implements an exemplary diffuse lighting equation, which
@@ -53532,7 +53919,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{"three":1}],83:[function(require,module,exports){
+},{"three":1}],84:[function(require,module,exports){
 /**
  * @file This shader creates a 2D flame. Use it as a material along with
  * a view-oriented billboard to simulate candles or other fire effects. If you
@@ -53687,7 +54074,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{}],84:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 /**
  * @file This shader applies a gaussian blur effect. Used in post-processing.
  * 
@@ -53765,7 +54152,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{"three":1}],85:[function(require,module,exports){
+},{"three":1}],86:[function(require,module,exports){
 /**
  * @file This shader transforms all colors to grayscale. Used in
  * post-processing.
@@ -53821,7 +54208,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{}],86:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 /**
  * @file This shader creates a simple horizon. Use this shader as a material on
  * a sphere.
@@ -53899,7 +54286,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{"three":1}],87:[function(require,module,exports){
+},{"three":1}],88:[function(require,module,exports){
 /**
  * @file This shader will be used as a material for particles.
  * 
@@ -54040,7 +54427,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{"three":1}],88:[function(require,module,exports){
+},{"three":1}],89:[function(require,module,exports){
 /**
  * @file This shader creates a vignette effect. Used in post-processing.
  * 
@@ -54120,7 +54507,7 @@ module.exports = {
 
 	].join( "\n" )
 };
-},{}],89:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -54221,7 +54608,7 @@ Stage.prototype._render = function() {
 };
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],90:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":44,"three":1}],91:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -54387,7 +54774,7 @@ Stage.prototype._render = function() {
 };
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],91:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":44,"three":1}],92:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -54546,7 +54933,7 @@ function colorMesh( mesh ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],92:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":44,"three":1}],93:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -54705,7 +55092,7 @@ Stage.prototype._render = function() {
 };
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],93:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":44,"three":1}],94:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -54815,7 +55202,7 @@ Stage.prototype._render = function() {
 };
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],94:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":44,"three":1}],95:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -54989,7 +55376,7 @@ Stage.prototype._render = function() {
 };
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],95:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":44,"three":1}],96:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -55148,7 +55535,7 @@ Stage.prototype._render = function() {
 };
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],96:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":44,"three":1}],97:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -55285,7 +55672,7 @@ Stage.prototype._render = function() {
 };
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],97:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":44,"three":1}],98:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -55453,7 +55840,7 @@ function showLODCircles( world ) {
 }
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],98:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":44,"three":1}],99:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -55624,7 +56011,7 @@ function onKeyDown( event ) {
 
 module.exports = Stage;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],99:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":44,"three":1}],100:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -55738,7 +56125,7 @@ Stage.prototype._render = function() {
 };
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"three":1}],100:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":44,"three":1}],101:[function(require,module,exports){
 "use strict";
 
 var THREE = require( "three" );
@@ -55882,7 +56269,7 @@ Stage.prototype._render = function() {
 };
 
 module.exports = Stage;
-},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":43,"../particle/ParticleEffect":72,"../particle/emitter/SphereEmitter":76,"../particle/operator/Interpolator":77,"three":1}],101:[function(require,module,exports){
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":44,"../particle/ParticleEffect":73,"../particle/emitter/SphereEmitter":77,"../particle/operator/Interpolator":78,"three":1}],102:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -56061,7 +56448,7 @@ Chat.prototype._onMessage = function( message, data ) {
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":110}],102:[function(require,module,exports){
+},{"../messaging/EventManager":67,"../messaging/Topic":69,"./UiElement":111}],103:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel. Only if the development
@@ -56123,7 +56510,7 @@ DevelopmentPanel.prototype.setText = function( text ) {
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":110}],103:[function(require,module,exports){
+},{"./UiElement":111}],104:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -56184,7 +56571,7 @@ InformationPanel.prototype.setText = function( textKey ) {
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":110}],104:[function(require,module,exports){
+},{"./UiElement":111}],105:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -56261,7 +56648,7 @@ InteractionLabel.prototype.hide = function() {
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":110}],105:[function(require,module,exports){
+},{"./UiElement":111}],106:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -56451,7 +56838,7 @@ LoadingScreen.prototype._onReady = function( message, data ) {
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":110}],106:[function(require,module,exports){
+},{"../messaging/EventManager":67,"../messaging/Topic":69,"./UiElement":111}],107:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -56607,7 +56994,7 @@ Menu.prototype._publishFinishEvent = function( message, data ) {
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Environment":20,"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":110}],107:[function(require,module,exports){
+},{"../core/Environment":20,"../messaging/EventManager":67,"../messaging/Topic":69,"./UiElement":111}],108:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -56731,7 +57118,7 @@ ModalDialog.prototype._onClose = function( event ) {
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":110}],108:[function(require,module,exports){
+},{"./UiElement":111}],109:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor. Only if the development
@@ -56950,7 +57337,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":110}],109:[function(require,module,exports){
+},{"./UiElement":111}],110:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -57176,7 +57563,7 @@ TextScreen.prototype._printName = function() {
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":66,"../messaging/Topic":68,"./UiElement":110}],110:[function(require,module,exports){
+},{"../messaging/EventManager":67,"../messaging/Topic":69,"./UiElement":111}],111:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -57226,7 +57613,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":42}],111:[function(require,module,exports){
+},{"../etc/TextManager":43}],112:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in stages to
@@ -57507,4 +57894,4 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":66,"../messaging/Topic":68,"./Chat":101,"./DevelopmentPanel":102,"./InformationPanel":103,"./InteractionLabel":104,"./LoadingScreen":105,"./Menu":106,"./ModalDialog":107,"./PerformanceMonitor":108,"./TextScreen":109}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111]);
+},{"../core/System":27,"../messaging/EventManager":67,"../messaging/Topic":69,"./Chat":102,"./DevelopmentPanel":103,"./InformationPanel":104,"./InteractionLabel":105,"./LoadingScreen":106,"./Menu":107,"./ModalDialog":108,"./PerformanceMonitor":109,"./TextScreen":110}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112]);
