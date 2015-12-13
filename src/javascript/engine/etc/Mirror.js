@@ -37,7 +37,7 @@ function Mirror( width, height, renderer, camera, world ) {
 		offset : {
 			value : new THREE.Vector3(),
 			configurable : false,
-			enumerable : false,
+			enumerable : true,
 			writable : false
 		},
 		// a reference to the renderer object

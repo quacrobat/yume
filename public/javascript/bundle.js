@@ -42859,7 +42859,8 @@ function Impostor( id, sourceObject, resolution, angle ) {
 
 	// create render target
 	this._renderTarget = new THREE.WebGLRenderTarget( this.resolution, this.resolution, {
-		format : THREE.RGBAFormat
+		format : THREE.RGBAFormat,
+		stencilBuffer : false
 	} );
 
 	// create the billboard
@@ -43543,7 +43544,7 @@ function Mirror( width, height, renderer, camera, world ) {
 		offset : {
 			value : new THREE.Vector3(),
 			configurable : false,
-			enumerable : false,
+			enumerable : true,
 			writable : false
 		},
 		// a reference to the renderer object
