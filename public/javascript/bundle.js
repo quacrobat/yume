@@ -43599,7 +43599,7 @@ function Mirror( width, height, renderer, camera, world ) {
 			writable : false
 		},
 		// this special scene holds only the mirror object. three.js render
-		// method can render single objects, but scenes
+		// method can't render single objects, but just scenes
 		_sceneMirror : {
 			value : new THREE.Scene(),
 			configurable : false,
