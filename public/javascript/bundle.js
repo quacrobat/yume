@@ -43670,16 +43670,9 @@ Mirror.prototype.addObject3D = function( object3D ) {
 
 	this._scene.add( objectMirror );
 
-	if ( objectMirror.material !== undefined )
-	{
-		// it's also necessary to clone the material. because reflection reverses the winding order, we need to switch to front-face culling
-		objectMirror.material = objectMirror.material.clone();
-		objectMirror.material.side = THREE.BackSide;
-		
-		// add an offset to each object to avoid artifacts
-		objectMirror.position.add( this.offset );
-		objectMirror.updateMatrix();
-	}
+	// add an optional offset to each object to avoid potential artifacts
+	objectMirror.position.add( this.offset );
+	objectMirror.updateMatrix();
 
 };
 
@@ -43807,6 +43800,9 @@ Mirror.prototype._beforeDrawing = function() {
 	this._updateStencilBuffer();
 
 	this._updateMirrorCamera();
+	
+	// flip face culling for reflected objects
+	this._flipFaceCulling();
 
 };
 
@@ -43820,6 +43816,9 @@ Mirror.prototype._afterDrawing = function() {
 
 	// disable stencil test
 	glState.disable( gl.STENCIL_TEST );
+	
+	// undo flip
+	this._flipFaceCulling();
 };
 
 /**
@@ -43868,6 +43867,22 @@ Mirror.prototype._updateMirrorCamera = function() {
 		this._directionHelper.position.setFromMatrixPosition( this._mirrorCamera.matrix );
 		this._directionHelper.setDirection( this._mirrorCamera.getWorldDirection() );
 	}
+};
+
+/**
+ * This method controls the culling mode of objects. Because reflection reverses
+ * the winding order, it is necessary to switch the culling mode for each
+ * object.
+ */
+Mirror.prototype._flipFaceCulling = function() {
+
+	this._scene.traverseVisible( function( object ) {
+
+		if ( object.material !== undefined && object.material.side !== THREE.DoubleSide )
+		{
+			object.material.side = object.material.side === THREE.FrontSide ? THREE.BackSide : THREE.FrontSide;
+		}
+	} );
 };
 
 module.exports = Mirror;
