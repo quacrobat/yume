@@ -43646,7 +43646,7 @@ Mirror.prototype.update = function() {
 };
 
 /**
- * This overrides the standard three.ms method. If this method is called, we
+ * This overrides the standard three.js method. If this method is called, we
  * also want to update the reflection entities.
  */
 Mirror.prototype.updateMatrix = function() {
@@ -43769,11 +43769,11 @@ Mirror.prototype._init = function( width, height ) {
 		this._cameraHelper = new THREE.Mesh( helperGeometry, helperMaterial );
 
 		// create a arrow to visualize the orientation of the mirror camera
-		this._directionHelper = new THREE.ArrowHelper( this._cameraHelper.getWorldDirection(), this._cameraHelper.position, 10 );
+		this._directionHelper = new THREE.ArrowHelper( this._cameraHelper.getWorldDirection(), new THREE.Vector3(), 10 );
 
 		// add helpers to world
+		this._cameraHelper.add( this._directionHelper );
 		this._world.addObject3D( this._cameraHelper );
-		this._world.addObject3D( this._directionHelper );
 	}
 
 };
@@ -43865,7 +43865,6 @@ Mirror.prototype._updateMirrorCamera = function() {
 	if ( system.isDevModeActive === true )
 	{
 		this._cameraHelper.position.setFromMatrixPosition( this._mirrorCamera.matrix );
-		this._directionHelper.position.setFromMatrixPosition( this._mirrorCamera.matrix );
 		this._directionHelper.setDirection( this._mirrorCamera.getWorldDirection() );
 	}
 };
@@ -52149,7 +52148,7 @@ function ParticleEffect( options ) {
 					USE_TEXTURE : ParticleShader.defines.USE_TEXTURE,
 					USE_ROTATION : ParticleShader.defines.USE_ROTATION
 				},
-				uniforms : ParticleShader.uniforms,
+				uniforms : THREE.UniformsUtils.clone( ParticleShader.uniforms ),
 				vertexShader : ParticleShader.vertexShader,
 				fragmentShader : ParticleShader.fragmentShader
 			} ),
@@ -54336,20 +54335,12 @@ module.exports = {
 		"texture" : {
 			type : "t",
 			value : null
-		},
-		
-		// the amount of size-scaling of a particle
-		"scale" : {
-			type : "f",
-			value : 300
 		}
 
 	},
 
 	vertexShader : [
 
-		"uniform float scale;",
-	
 		// the size of a particle
 		"attribute float size;",
 		
@@ -54388,7 +54379,7 @@ module.exports = {
 	
 				// to create a realistic effect we need to ensure that particles
 				// receive a greater point size if they are close to the camera
-				"gl_PointSize = size * ( scale / length( positionEye.xyz ) );",
+				"gl_PointSize = size * ( 300.0 / length( positionEye.xyz ) );",
 	
 			"#else",
 	

@@ -139,7 +139,7 @@ Mirror.prototype.update = function() {
 };
 
 /**
- * This overrides the standard three.ms method. If this method is called, we
+ * This overrides the standard three.js method. If this method is called, we
  * also want to update the reflection entities.
  */
 Mirror.prototype.updateMatrix = function() {
@@ -262,11 +262,11 @@ Mirror.prototype._init = function( width, height ) {
 		this._cameraHelper = new THREE.Mesh( helperGeometry, helperMaterial );
 
 		// create a arrow to visualize the orientation of the mirror camera
-		this._directionHelper = new THREE.ArrowHelper( this._cameraHelper.getWorldDirection(), this._cameraHelper.position, 10 );
+		this._directionHelper = new THREE.ArrowHelper( this._cameraHelper.getWorldDirection(), new THREE.Vector3(), 10 );
 
 		// add helpers to world
+		this._cameraHelper.add( this._directionHelper );
 		this._world.addObject3D( this._cameraHelper );
-		this._world.addObject3D( this._directionHelper );
 	}
 
 };
@@ -358,7 +358,6 @@ Mirror.prototype._updateMirrorCamera = function() {
 	if ( system.isDevModeActive === true )
 	{
 		this._cameraHelper.position.setFromMatrixPosition( this._mirrorCamera.matrix );
-		this._directionHelper.position.setFromMatrixPosition( this._mirrorCamera.matrix );
 		this._directionHelper.setDirection( this._mirrorCamera.getWorldDirection() );
 	}
 };

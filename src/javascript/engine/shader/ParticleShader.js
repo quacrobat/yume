@@ -31,20 +31,12 @@ module.exports = {
 		"texture" : {
 			type : "t",
 			value : null
-		},
-		
-		// the amount of size-scaling of a particle
-		"scale" : {
-			type : "f",
-			value : 300
 		}
 
 	},
 
 	vertexShader : [
 
-		"uniform float scale;",
-	
 		// the size of a particle
 		"attribute float size;",
 		
@@ -83,7 +75,7 @@ module.exports = {
 	
 				// to create a realistic effect we need to ensure that particles
 				// receive a greater point size if they are close to the camera
-				"gl_PointSize = size * ( scale / length( positionEye.xyz ) );",
+				"gl_PointSize = size * ( 300.0 / length( positionEye.xyz ) );",
 	
 			"#else",
 	

@@ -120,7 +120,7 @@ function ParticleEffect( options ) {
 					USE_TEXTURE : ParticleShader.defines.USE_TEXTURE,
 					USE_ROTATION : ParticleShader.defines.USE_ROTATION
 				},
-				uniforms : ParticleShader.uniforms,
+				uniforms : THREE.UniformsUtils.clone( ParticleShader.uniforms ),
 				vertexShader : ParticleShader.vertexShader,
 				fragmentShader : ParticleShader.fragmentShader
 			} ),
