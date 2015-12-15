@@ -12,12 +12,6 @@ module.exports = {
 
 	uniforms : {
 
-		// the color of the mirror
-		"color" : {
-			type : "c",
-			value : null
-		},
-		
 		// this texture contains the reflection of the mirror
 		"texture" : {
 			type : "t",
@@ -51,23 +45,13 @@ module.exports = {
 
 	fragmentShader : [
 
-		"uniform vec3 color;",
-		
 		"uniform sampler2D texture;",
 		
 		"varying vec4 vUv;",
 		
-		"float blendOverlay( in float base, in float blend ) {",
-		
-			"return ( base < 0.5 ? ( 2.0 * base * blend ) : ( 1.0 - 2.0 * ( 1.0 - base ) * ( 1.0 - blend ) ) );",
-			
-		"}",
-		
 		"void main() {",
-		
-			"vec4 texel = texture2DProj( texture, vUv );",
-			
-			"gl_FragColor = vec4( blendOverlay( color.r, texel.r ), blendOverlay( color.g, texel.g ), blendOverlay( color.b, texel.b ), 1.0 );",
+
+			"gl_FragColor = texture2DProj( texture, vUv );",
 		
 		"}"
 

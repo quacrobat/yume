@@ -43506,8 +43506,8 @@ LOD.MODE = {
 module.exports = LOD;
 },{"three":1}],35:[function(require,module,exports){
 /**
- * @file This prototype can be used to create a mirror 3D-object. The prototype
- * uses two variants:
+ * @file This prototype can be used to create a mirror 3D-object. The
+ * implementation can use two variants to create reflection:
  * 
  * 1. Stencil Buffer: First, the logic renders the shape of the mirror to the
  * stencil and color buffer. Then all reflected objects are drawn with activated
@@ -43694,11 +43694,22 @@ Mirror.prototype.update = function() {
 	if ( this.matrixAutoUpdate === true )
 	{
 		this.makeReflectionPlane();
-		
+
 		this.makeReflectionMatrix();
 	}
 	
+	// render section
+	this._beforeRender();
+
 	this._render();
+	
+	this._afterRender();
+
+	// update helpers in dev mode
+	if ( system.isDevModeActive === true )
+	{
+		this._updateHelpers();
+	}
 };
 
 /**
@@ -43819,7 +43830,6 @@ Mirror.prototype._init = function( width, height ) {
 
 		// assign uniform data
 		this.material.uniforms.texture.value = this._renderTarget;
-		this.material.uniforms.color.value = new THREE.Color( 0x7F7F7F );
 		this.material.uniforms.textureMatrix.value = this._textureMatrix;
 		
 		// add mirror to world
@@ -43843,33 +43853,17 @@ Mirror.prototype._init = function( width, height ) {
 	// prevent three.js to auto-update the camera
 	this._mirrorCamera.matrixAutoUpdate = false;
 
-	// add helper objects in dev mode
+	// add helpers in dev mode
 	if ( system.isDevModeActive === true )
 	{
-		var helperGeometry = new THREE.BoxGeometry( 2, 2, 2 );
-		var helperMaterial = new THREE.MeshBasicMaterial( {
-			color : 0xffffff
-		} );
-
-		// create a simple mesh to visualize the position of the mirror camera
-		this._cameraHelper = new THREE.Mesh( helperGeometry, helperMaterial );
-
-		// create a arrow to visualize the orientation of the mirror camera
-		this._directionHelper = new THREE.ArrowHelper( this._cameraHelper.getWorldDirection(), new THREE.Vector3(), 10 );
-
-		// add helpers to world
-		this._cameraHelper.add( this._directionHelper );
-		this._world.addObject3D( this._cameraHelper );
+		this._addHelpers();
 	}
-
 };
 
 /**
  * Render method of the mirror.
  */
 Mirror.prototype._render = function() {
-
-	this._beforeDrawing();
 
 	if ( this._useTexture === true )
 	{
@@ -43882,15 +43876,12 @@ Mirror.prototype._render = function() {
 		this._renderer.render( this._scene, this._mirrorCamera );
 	}
 
-	this._afterDrawing();
-
 };
 
 /**
- * This method is called before rendering. It prepares the stencil buffer and
- * the mirror camera.
+ * This method is called before rendering.
  */
-Mirror.prototype._beforeDrawing = function() {
+Mirror.prototype._beforeRender = function() {
 
 	this._updateMirrorCamera();
 
@@ -43911,9 +43902,9 @@ Mirror.prototype._beforeDrawing = function() {
 };
 
 /**
- * This method is called after rendering. It is used to reset the WebGL state.
+ * This method is called after rendering.
  */
-Mirror.prototype._afterDrawing = function() {
+Mirror.prototype._afterRender = function() {
 
 	var gl = this._renderer.getWebGLContext();
 	var glState = this._renderer.getWebGLState();
@@ -43941,7 +43932,7 @@ Mirror.prototype._updateStencilBuffer = function() {
 	// enable stencil test
 	glState.enable( gl.STENCIL_TEST );
 	gl.stencilFunc( gl.ALWAYS, 1, 0xff );
-	gl.stencilOp( gl.REPLACE, gl.REPLACE, gl.REPLACE );
+	gl.stencilOp( gl.REPLACE, gl.KEEP, gl.REPLACE );
 
 	// draw mirror to stencil buffer
 	this._renderer.render( this._sceneMirror, this._camera );
@@ -43970,13 +43961,36 @@ Mirror.prototype._updateMirrorCamera = function() {
 	{
 		this._mirrorCamera.matrixWorldInverse.getInverse( this._mirrorCamera.matrixWorld );
 	}
+};
 
-	// update helper
-	if ( system.isDevModeActive === true )
-	{
-		this._cameraHelper.position.setFromMatrixPosition( this._mirrorCamera.matrix );
-		this._directionHelper.setDirection( this._mirrorCamera.getWorldDirection() );
-	}
+/**
+ * Updates helper objects.
+ */
+Mirror.prototype._updateHelpers = function() {
+
+	this._cameraHelper.position.setFromMatrixPosition( this._mirrorCamera.matrix );
+	this._directionHelper.setDirection( this._mirrorCamera.getWorldDirection() );
+};
+
+/**
+ * Adds 3D helper objects for debugging.
+ */
+Mirror.prototype._addHelpers = function() {
+
+	var helperGeometry = new THREE.BoxGeometry( 2, 2, 2 );
+	var helperMaterial = new THREE.MeshBasicMaterial( {
+		color : 0xffffff
+	} );
+
+	// create a simple mesh to visualize the position of the mirror camera
+	this._cameraHelper = new THREE.Mesh( helperGeometry, helperMaterial );
+
+	// create a arrow to visualize the orientation of the mirror camera
+	this._directionHelper = new THREE.ArrowHelper( this._cameraHelper.getWorldDirection(), new THREE.Vector3(), 10 );
+
+	// add helpers to world
+	this._cameraHelper.add( this._directionHelper );
+	this._world.addObject3D( this._cameraHelper );
 };
 
 /**
@@ -54524,12 +54538,6 @@ module.exports = {
 
 	uniforms : {
 
-		// the color of the mirror
-		"color" : {
-			type : "c",
-			value : null
-		},
-		
 		// this texture contains the reflection of the mirror
 		"texture" : {
 			type : "t",
@@ -54563,23 +54571,13 @@ module.exports = {
 
 	fragmentShader : [
 
-		"uniform vec3 color;",
-		
 		"uniform sampler2D texture;",
 		
 		"varying vec4 vUv;",
 		
-		"float blendOverlay( in float base, in float blend ) {",
-		
-			"return ( base < 0.5 ? ( 2.0 * base * blend ) : ( 1.0 - 2.0 * ( 1.0 - base ) * ( 1.0 - blend ) ) );",
-			
-		"}",
-		
 		"void main() {",
-		
-			"vec4 texel = texture2DProj( texture, vUv );",
-			
-			"gl_FragColor = vec4( blendOverlay( color.r, texel.r ), blendOverlay( color.g, texel.g ), blendOverlay( color.b, texel.b ), 1.0 );",
+
+			"gl_FragColor = texture2DProj( texture, vUv );",
 		
 		"}"
 
