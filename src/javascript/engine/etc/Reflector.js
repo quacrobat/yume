@@ -1,19 +1,19 @@
 /**
- * @file This prototype can be used to create a mirror 3D-object. The
+ * @file This prototype can be used to create a reflector. The
  * implementation can use two variants to create reflection:
  * 
- * 1. Stencil Buffer: First, the logic renders the shape of the mirror to the
+ * 1. Stencil Buffer: First, the logic renders the shape of the reflector to the
  * stencil and color buffer. Then all reflected objects are drawn with activated
  * stencil test and the rest of the stage is rendered normally. The invocation
- * of the mirror's update method must always happen AFTER the invocation of the
+ * of the reflector's update method must always happen AFTER the invocation of the
  * stage render method.
  * 
  * see: Real-Time Rendering, Third Edition, Akenine-Möller/Haines/Hoffman
  * Chapter 9.3.1 Planar Reflections
  * 
  * 2. Projective Texture Mapping: This variant renders the reflection into a
- * texture map. This texture is then applied to the mirror via projective
- * texture mapping. The invocation of the mirror's update method must always
+ * texture map. This texture is then applied to the reflector via projective
+ * texture mapping. The invocation of the reflector's update method must always
  * happen BEFORE the invocation of the stage render method.
  * 
  * see: http://www.futurenation.net/glbase/reflect.htm
@@ -29,27 +29,39 @@
 var THREE = require( "three" );
 
 var system = require( "../core/System" );
-var MirrorShader = require( "../shader/MirrorShader" );
+var ReflectorShader = require( "../shader/ReflectorShader" );
 
 /**
- * Creates a mirror.
+ * Creates a reflector.
  * 
  * @constructor
  * @augments THREE.Mesh
  * 
- * @param {number} width - The width of the mirror.
- * @param {number} height - The height of the mirror.
  * @param {Renderer} renderer - The renderer object.
  * @param {Camera} camera - The camera object.
  * @param {World} world - The world object.
- * @param {boolean} useTexture - Controls the usage of a texture.
+ * @param {object} options - The options of the reflector.
  */
-function Mirror( width, height, renderer, camera, world, useTexture ) {
+function Reflector( renderer, camera, world, options ) {
 
 	THREE.Mesh.call( this );
 
 	Object.defineProperties( this, {
 
+		// the width of the reflector
+		width : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
+		// the height of the reflector
+		height : {
+			value : 0,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
 		// this value can be used to add a little offset to the reflected
 		// objects. it avoids render errors/ artifacts when working with the
 		// stencil buffer
@@ -57,7 +69,7 @@ function Mirror( width, height, renderer, camera, world, useTexture ) {
 			value : new THREE.Vector3(),
 			configurable : false,
 			enumerable : true,
-			writable : false
+			writable : true
 		},
 		// this value can be used to tweak the clipping if projective texture
 		// mapping is used
@@ -74,12 +86,12 @@ function Mirror( width, height, renderer, camera, world, useTexture ) {
 			enumerable : true,
 			writable : true
 		},
-		// controls the type of mirror algorithm
-		_useTexture : {
-			value : useTexture || false,
+		// controls the type of reflector algorithm
+		useTexture : {
+			value : false,
 			configurable : false,
-			enumerable : false,
-			writable : false
+			enumerable : true,
+			writable : true
 		},
 		// a reference to the renderer object
 		_renderer : {
@@ -102,7 +114,7 @@ function Mirror( width, height, renderer, camera, world, useTexture ) {
 			enumerable : false,
 			writable : false
 		},
-		// the reflection plane of the mirror. this plane will be used to build
+		// the reflection plane of the reflector. this plane will be used to build
 		// the reflection matrix
 		_reflectionPlane : {
 			value : new THREE.Plane(),
@@ -110,60 +122,60 @@ function Mirror( width, height, renderer, camera, world, useTexture ) {
 			enumerable : false,
 			writable : false
 		},
-		// this will be used to transform the camera to the correct viewpoint of
-		// the mirror
+		// this will be used to transform the virtual camera to the correct
+		// viewpoint of the reflector
 		_reflectionMatrix : {
 			value : new THREE.Matrix4(),
 			configurable : false,
 			enumerable : false,
 			writable : false
 		},
-		// the camera object of the mirror. it represents the actual view of the
-		// mirror
-		_mirrorCamera : {
+		// the virtual camera. it represents the actual view of the reflector
+		_reflectorCamera : {
 			value : new THREE.PerspectiveCamera(),
 			configurable : false,
 			enumerable : false,
 			writable : false
 		},
-		// this scene holds all 3D objects that should reflect in the mirror
+		// this scene holds all 3D objects that should reflect in the reflector
 		_scene : {
 			value : new THREE.Scene(),
 			configurable : false,
 			enumerable : false,
 			writable : false
 		},
-		// this special scene holds only the mirror object. three.js render
-		// method can't render single objects, but just scenes
-		_sceneMirror : {
+		// this special scene holds only the reflector for rendering to the
+		// stencil buffer. three.js render method can't render single objects,
+		// but just scenes
+		_sceneReflector : {
 			value : null,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
-		// the render target for our texture
-		_renderTarget : {
+		// this texture contains the reflection of the reflector
+		_reflectionMap : {
 			value : null,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
-		// this matrix is used in the shader to map the texture to our mirror
-		// surface
+		// this matrix is used to generate uv coordinates in the shader to map
+		// the texture to the reflector's surface
 		_textureMatrix : {
 			value : null,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
-		// this helper object visualizes the mirror camera position
+		// this helper object visualizes the position of the virtual camera
 		_cameraHelper : {
 			value : null,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
-		// this helper shows the view direction of the mirror camera
+		// this helper shows the view direction of the reflector's camera
 		_directionHelper : {
 			value : null,
 			configurable : false,
@@ -171,45 +183,39 @@ function Mirror( width, height, renderer, camera, world, useTexture ) {
 			writable : true
 		}
 	} );
+	
+	// transfer the options values to the object
+	for ( var property in options )
+	{
+		if ( options.hasOwnProperty( property ) )
+		{
+			this[ property ] = options[ property ];
+		}
+	}
 
-	this._init( width, height );
+	this._init();
 }
 
-Mirror.prototype = Object.create( THREE.Mesh.prototype );
-Mirror.prototype.constructor = Mirror;
+Reflector.prototype = Object.create( THREE.Mesh.prototype );
+Reflector.prototype.constructor = Reflector;
 
 /**
- * Update method of the mirror.
+ * Update method of the reflector.
  */
-Mirror.prototype.update = function() {
-
-	// only update reflection entities if necessary
-	if ( this.matrixAutoUpdate === true )
-	{
-		this.makeReflectionPlane();
-
-		this.makeReflectionMatrix();
-	}
+Reflector.prototype.update = function() {
 	
-	// render section
 	this._beforeRender();
 
 	this._render();
 	
 	this._afterRender();
-
-	// update helpers in dev mode
-	if ( system.isDevModeActive === true )
-	{
-		this._updateHelpers();
-	}
 };
 
 /**
  * This overrides the standard three.js method. If this method is called, we
  * also want to update the reflection entities.
  */
-Mirror.prototype.updateMatrix = function() {
+Reflector.prototype.updateMatrix = function() {
 
 	THREE.Mesh.prototype.updateMatrix.call( this );
 
@@ -219,30 +225,11 @@ Mirror.prototype.updateMatrix = function() {
 };
 
 /**
- * Adds a 3D object to the mirror's internal scene.
- * 
- * @param {THREE.Object3D} object3D - The 3D object to add.
+ * Creates the reflection plane of the reflector.
  */
-Mirror.prototype.addObject3D = function( object3D ) {
+Reflector.prototype.makeReflectionPlane = ( function() {
 
-	// it is necessary to clone the object, because three.js can't handle
-	// objects in two different scenes
-	var objectMirror = object3D.clone();
-
-	this._scene.add( objectMirror );
-
-	// add an optional offset to each object to avoid potential artifacts
-	objectMirror.position.add( this.offset );
-	objectMirror.updateMatrix();
-
-};
-
-/**
- * Creates the reflection plane of the mirror.
- */
-Mirror.prototype.makeReflectionPlane = ( function() {
-
-	var normal, position, quaternion;
+	var normal, position, quaternion, scale;
 
 	return function() {
 
@@ -251,13 +238,20 @@ Mirror.prototype.makeReflectionPlane = ( function() {
 			normal = new THREE.Vector3();
 			position = new THREE.Vector3();
 			quaternion = new THREE.Quaternion();
+			scale = new THREE.Vector3();
 		}
-
-		this.getWorldQuaternion( quaternion );
-		this.getWorldPosition( position );
-
-		// get the normal of the mirror/plane
+		
+		// ensure matrixWorld is up to date
+		this.updateMatrixWorld( true );
+		
+		// then extract position and orientation 
+		this.matrixWorld.decompose( position, quaternion, scale );
+		
+		// get the normal of the reflector/plane
 		normal.set( 0, 0, 1 ).applyQuaternion( quaternion ).normalize();
+		
+		// optional: tweak the normal to avoid render artifacts ( stencil buffer )
+		normal.add( this.offset ).normalize();
 
 		// calculate reflection plane
 		this._reflectionPlane.setFromNormalAndCoplanarPoint( normal, this.position );
@@ -266,12 +260,12 @@ Mirror.prototype.makeReflectionPlane = ( function() {
 }() );
 
 /**
- * Creates the reflection matrix of the mirror.
+ * Creates the reflection matrix of the reflector.
  * 
  * see: 3D Math Primer for Graphics and Game Development (Second Edition),
  * Chapter 5.4 Reflection, 3D matrix to reflect about an arbitrary plane
  */
-Mirror.prototype.makeReflectionMatrix = function() {
+Reflector.prototype.makeReflectionMatrix = function() {
 
 	// construct reflection matrix from reflection plane
 
@@ -297,76 +291,70 @@ Mirror.prototype.makeReflectionMatrix = function() {
 };
 
 /**
- * Initializes the mirror.
- * 
- * @param {number} width - The width of the mirror.
- * @param {number} height - The height of the mirror.
+ * Initializes the reflector.
  */
-Mirror.prototype._init = function( width, height ) {
+Reflector.prototype._init = function() {
+	
+	// geometry and material for our reflector
+	this.geometry = new THREE.PlaneBufferGeometry( this.width, this.height, 1, 1 );
+	
+	// prevent three.js to auto-update the camera
+	this._reflectorCamera.matrixAutoUpdate = false;
 
-	if ( this._useTexture === true )
+	// check the usage of a texture. if set to true, we render the reflection to
+	// a texture and use this in a custom shader material
+	if ( this.useTexture === true )
 	{
-		// geometry and material for our mirror
-		this.geometry = new THREE.PlaneBufferGeometry( width, height, 1, 1 );
-		
 		this.material = new THREE.ShaderMaterial( {
-			uniforms : THREE.UniformsUtils.clone( MirrorShader.uniforms ),
-			vertexShader : MirrorShader.vertexShader,
-			fragmentShader : MirrorShader.fragmentShader
+			uniforms : THREE.UniformsUtils.clone( ReflectorShader.uniforms ),
+			vertexShader : ReflectorShader.vertexShader,
+			fragmentShader : ReflectorShader.fragmentShader
 		} );
 
-		// the render target or texture for our mirror
-		this._createRenderTarget( width, height );
-		
+		// create a render target for the reflection texture
+		this._reflectionMap = this._createRenderTarget();
+
 		// create texture matrix
 		this._textureMatrix = new THREE.Matrix4();
 
 		// assign uniform data
-		this.material.uniforms.texture.value = this._renderTarget;
+		this.material.uniforms.reflectionMap.value = this._reflectionMap;
 		this.material.uniforms.textureMatrix.value = this._textureMatrix;
-		
-		// add mirror to world
+
+		// add reflector to world
 		this._world.addObject3D( this );
 	}
 	else
 	{
-		// geometry and material for our mirror
-		this.geometry = new THREE.PlaneBufferGeometry( width, height, 1, 1 );
-		
+		// we only see reflected objects within the reflector if we disable
+		// writing to the depth buffer
 		this.material = new THREE.MeshBasicMaterial( {
 			color : this._renderer.getClearColor(),
 			depthWrite : false
 		} );
-		
-		// we need to store the mirror in a separate scene for rendering to the stencil buffer
-		this._sceneMirror = new THREE.Scene();
-		this._sceneMirror.add( this );
+
+		// we need to store the reflector in a separate scene for rendering to
+		// the stencil buffer
+		this._sceneReflector = new THREE.Scene();
+		this._sceneReflector.add( this );
 	}
 
-	// prevent three.js to auto-update the camera
-	this._mirrorCamera.matrixAutoUpdate = false;
-
-	// add helpers in dev mode
-	if ( system.isDevModeActive === true )
-	{
-		this._addHelpers();
-	}
 };
 
 /**
- * Render method of the mirror.
+ * Render method of the reflector.
  */
-Mirror.prototype._render = function() {
+Reflector.prototype._render = function() {
 
-	if ( this._useTexture === true )
+	if ( this.useTexture === true )
 	{
 		// draw all reflected objects into the render target
-		this._renderer.render( this._scene, this._mirrorCamera, this._renderTarget, true );
+		this._renderer.render( this._world.scene, this._reflectorCamera, this._reflectionMap, true );		
 	}
 	else
 	{
 		// draw all reflected objects to the framebuffer
-		this._renderer.render( this._scene, this._mirrorCamera );
+		this._renderer.render( this._world.scene, this._reflectorCamera );
 	}
 
 };
@@ -374,15 +362,18 @@ Mirror.prototype._render = function() {
 /**
  * This method is called before rendering.
  */
-Mirror.prototype._beforeRender = function() {
+Reflector.prototype._beforeRender = function() {
 
-	this._updateMirrorCamera();
+	this._updateReflectorCamera();
 
-	if ( this._useTexture === true )
+	if ( this.useTexture === true )
 	{
 		this._updateTextureMatrix();
 
-		this._updateClipping();
+		this._updateClipping( this._reflectionPlane, this._reflectorCamera );
+		
+		// the reflector should not draw itself to the texture
+		this.material.visible = false;
 	}
 	else
 	{
@@ -397,12 +388,16 @@ Mirror.prototype._beforeRender = function() {
 /**
  * This method is called after rendering.
  */
-Mirror.prototype._afterRender = function() {
+Reflector.prototype._afterRender = function() {
 
 	var gl = this._renderer.getWebGLContext();
 	var glState = this._renderer.getWebGLState();
 
-	if ( this._useTexture === false )
+	if ( this.useTexture === true )
+	{
+		this.material.visible = true;
+	}
+	else
 	{
 		// disable stencil test
 		glState.disable( gl.STENCIL_TEST );
@@ -414,10 +409,10 @@ Mirror.prototype._afterRender = function() {
 
 /**
  * This will update the stencil buffer. It ensures that the viewer sees
- * reflected objects only inside the mirror. So it's just a special form of
+ * reflected objects only inside the reflector. So it's just a special form of
  * clipping.
  */
-Mirror.prototype._updateStencilBuffer = function() {
+Reflector.prototype._updateStencilBuffer = function() {
 
 	var gl = this._renderer.getWebGLContext();
 	var glState = this._renderer.getWebGLState();
@@ -427,8 +422,8 @@ Mirror.prototype._updateStencilBuffer = function() {
 	gl.stencilFunc( gl.ALWAYS, 1, 0xff );
 	gl.stencilOp( gl.REPLACE, gl.KEEP, gl.REPLACE );
 
-	// draw mirror to stencil buffer
-	this._renderer.render( this._sceneMirror, this._camera );
+	// draw reflector to stencil buffer
+	this._renderer.render( this._sceneReflector, this._camera );
 
 	// change stencil function and operation for testing
 	gl.stencilFunc( gl.EQUAL, 1, 0xff );
@@ -436,49 +431,49 @@ Mirror.prototype._updateStencilBuffer = function() {
 };
 
 /**
- * This will update the mirror camera to the correct view position and
+ * This will update the reflector camera to the correct view position and
  * orientation.
  */
-Mirror.prototype._updateMirrorCamera = function() {
+Reflector.prototype._updateReflectorCamera = function() {
 
 	// we use our reflection matrix to flip the position and orientation of our
-	// actual camera
-	this._mirrorCamera.matrix.copy( this._reflectionMatrix ).multiply( this._camera.matrixWorld );
+	// virtual camera
+	this._reflectorCamera.matrix.copy( this._reflectionMatrix ).multiply( this._camera.matrixWorld );
 
 	// update matrices
-	this._mirrorCamera.updateMatrixWorld( true );
-	this._mirrorCamera.projectionMatrix.copy( this._camera.projectionMatrix );
+	this._reflectorCamera.updateMatrixWorld( true );
+	this._reflectorCamera.projectionMatrix.copy( this._camera.projectionMatrix );
 
 	// this is only necessary if we render to a texture
-	if ( this._useTexture === true )
+	if ( this.useTexture === true )
 	{
-		this._mirrorCamera.matrixWorldInverse.getInverse( this._mirrorCamera.matrixWorld );
+		this._reflectorCamera.matrixWorldInverse.getInverse( this._reflectorCamera.matrixWorld );
 	}
 };
 
 /**
  * Updates helper objects.
  */
-Mirror.prototype._updateHelpers = function() {
+Reflector.prototype._updateHelpers = function() {
 
-	this._cameraHelper.position.setFromMatrixPosition( this._mirrorCamera.matrix );
-	this._directionHelper.setDirection( this._mirrorCamera.getWorldDirection() );
+	this._cameraHelper.position.setFromMatrixPosition( this._reflectorCamera.matrix );
+	this._directionHelper.setDirection( this._reflectorCamera.getWorldDirection() );
 };
 
 /**
  * Adds 3D helper objects for debugging.
  */
-Mirror.prototype._addHelpers = function() {
+Reflector.prototype._addHelpers = function() {
 
 	var helperGeometry = new THREE.BoxGeometry( 2, 2, 2 );
 	var helperMaterial = new THREE.MeshBasicMaterial( {
 		color : 0xffffff
 	} );
 
-	// create a simple mesh to visualize the position of the mirror camera
+	// create a simple mesh to visualize the position of the reflector camera
 	this._cameraHelper = new THREE.Mesh( helperGeometry, helperMaterial );
 
-	// create a arrow to visualize the orientation of the mirror camera
+	// create a arrow to visualize the orientation of the reflector camera
 	this._directionHelper = new THREE.ArrowHelper( this._cameraHelper.getWorldDirection(), new THREE.Vector3(), 10 );
 
 	// add helpers to world
@@ -491,13 +486,13 @@ Mirror.prototype._addHelpers = function() {
  * the winding order, it is necessary to switch the culling mode for each
  * object.
  */
-Mirror.prototype._flipFaceCulling = function() {
+Reflector.prototype._flipFaceCulling = function() {
 
-	this._scene.traverseVisible( function( object ) {
+	this._world.scene.traverseVisible( function( object ) {
 
 		if ( object.material !== undefined && object.material.side !== THREE.DoubleSide )
 		{
-			object.material.side = object.material.side === THREE.FrontSide ? THREE.BackSide : THREE.FrontSide;
+			object.material.side = ( object.material.side === THREE.FrontSide ) ? THREE.BackSide : THREE.FrontSide;
 		}
 	} );
 };
@@ -506,7 +501,7 @@ Mirror.prototype._flipFaceCulling = function() {
  * Creates the render target that is used to rendering the reflection into a
  * texture.
  */
-Mirror.prototype._createRenderTarget = function( width, height ) {
+Reflector.prototype._createRenderTarget = function() {
 
 	var resolution = new THREE.Vector2();
 	var parameter = {
@@ -516,20 +511,20 @@ Mirror.prototype._createRenderTarget = function( width, height ) {
 
 	// we check the ratio of the dimensions and calculate an appropriate
 	// resolution
-	if ( width > height )
+	if ( this.width > this.height )
 	{
 		resolution.x = this.resolution;
-		resolution.y = Math.floor( this.resolution * ( height / width ) );
+		resolution.y = Math.floor( this.resolution * ( this.height / this.width ) );
 
 	}
 	else
 	{
-		resolution.x = Math.floor( this.resolution * ( width / height ) );
+		resolution.x = Math.floor( this.resolution * ( this.width / this.height ) );
 		resolution.y = this.resolution;
 	}
 
 	// create the render target
-	this._renderTarget = new THREE.WebGLRenderTarget( resolution.x, resolution.y, parameter );
+	return new THREE.WebGLRenderTarget( resolution.x, resolution.y, parameter );
 };
 
 /**
@@ -538,15 +533,20 @@ Mirror.prototype._createRenderTarget = function( width, height ) {
  * 
  * see: http://developer.download.nvidia.com/assets/gamedev/docs/projective_texture_mapping.pdf
  */
-Mirror.prototype._updateTextureMatrix = function() {
+Reflector.prototype._updateTextureMatrix = function() {
 
+	// this matrix does range mapping to [ 0, 1 ]
 	this._textureMatrix.set( 0.5, 0.0, 0.0, 0.5, 
 							 0.0, 0.5, 0.0, 0.5, 
 							 0.0, 0.0, 0.5, 0.5, 
 							 0.0, 0.0, 0.0, 1.0 );
 
-	this._textureMatrix.multiply( this._mirrorCamera.projectionMatrix );
-	this._textureMatrix.multiply( this._mirrorCamera.matrixWorldInverse );
+	// we use Object Linear Texgen, so we need to multiply the texture matrix T
+	// (matrix above) with the projection and view matrix of the virtual camera
+	// and the model matrix of the 3D object (the reflector)
+	this._textureMatrix.multiply( this._reflectorCamera.projectionMatrix );
+	this._textureMatrix.multiply( this._reflectorCamera.matrixWorldInverse );
+	this._textureMatrix.multiply( this.matrixWorld );
 };
 
 /**
@@ -556,14 +556,14 @@ Mirror.prototype._updateTextureMatrix = function() {
  * Journal of Game Development, Vol. 1, No. 2 (2005), Charles River Media, pp.
  * 5–16.
  */
-Mirror.prototype._updateClipping = ( function() {
+Reflector.prototype._updateClipping = ( function() {
 
 	var clipPlane, clipVector, q;
 
-	return function() {
+	return function( clippingPlane, camera ) {
 
 		// shortcut
-		var projectionMatrix = this._mirrorCamera.projectionMatrix;
+		var projectionMatrix = camera.projectionMatrix;
 
 		if ( clipPlane === undefined )
 		{
@@ -573,9 +573,9 @@ Mirror.prototype._updateClipping = ( function() {
 		}
 
 		// copy the reflection plane and apply the inverse world matrix of the
-		// mirror camera
-		clipPlane.copy( this._reflectionPlane );
-		clipPlane.applyMatrix4( this._mirrorCamera.matrixWorldInverse );
+		// reflector camera
+		clipPlane.copy( clippingPlane );
+		clipPlane.applyMatrix4( camera.matrixWorldInverse );
 
 		// we transfer the information of our plane to a four component vector
 		clipVector.set( clipPlane.normal.x, clipPlane.normal.y, clipPlane.normal.z, clipPlane.constant );
@@ -600,4 +600,4 @@ Mirror.prototype._updateClipping = ( function() {
 
 }() );
 
-module.exports = Mirror;
+module.exports = Reflector;

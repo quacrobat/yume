@@ -1,5 +1,5 @@
 /**
- * @file This shader is used as a material for mirrors.
+ * @file This shader is used as a material for reflectors.
  * 
  * @author Human Interactive
  */
@@ -12,8 +12,8 @@ module.exports = {
 
 	uniforms : {
 
-		// this texture contains the reflection of the mirror
-		"texture" : {
+		// this texture contains the reflection of the reflectors
+		"reflectionMap" : {
 			type : "t",
 			value : null
 		},
@@ -35,7 +35,7 @@ module.exports = {
 		"void main() {",
 	
 			// uv coordinates for texture projection
-			"vUv = textureMatrix * modelMatrix * vec4( position, 1.0 );",
+			"vUv = textureMatrix * vec4( position, 1.0 );",
 	
 			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 	
@@ -45,13 +45,13 @@ module.exports = {
 
 	fragmentShader : [
 
-		"uniform sampler2D texture;",
+		"uniform sampler2D reflectionMap;",
 		
 		"varying vec4 vUv;",
 		
 		"void main() {",
 
-			"gl_FragColor = texture2DProj( texture, vUv );",
+			"gl_FragColor = texture2DProj( reflectionMap, vUv );",
 		
 		"}"
 
