@@ -1,20 +1,20 @@
 /**
- * @file This prototype can be used to create a reflector. The
- * implementation can use two variants to create reflection:
+ * @file This prototype can be used to create a reflector. The implementation
+ * can use two variants to create reflection:
  * 
  * 1. Stencil Buffer: First, the logic renders the shape of the reflector to the
  * stencil and color buffer. Then all reflected objects are drawn with activated
  * stencil test and the rest of the stage is rendered normally. The invocation
- * of the reflector's update method must always happen AFTER the invocation of the
- * stage render method.
+ * of the reflector's update method must always happen AFTER the invocation of
+ * the stage render method.
  * 
  * see: Real-Time Rendering, Third Edition, Akenine-Möller/Haines/Hoffman
  * Chapter 9.3.1 Planar Reflections
  * 
  * 2. Projective Texture Mapping: This variant renders the reflection into a
- * texture map. This texture is then applied to the reflector via projective
- * texture mapping. The invocation of the reflector's update method must always
- * happen BEFORE the invocation of the stage render method.
+ * texture. This map is then applied to the reflector via projective texture
+ * mapping. The invocation of the reflector's update method must always happen
+ * BEFORE the invocation of the stage render method.
  * 
  * see: http://www.futurenation.net/glbase/reflect.htm
  * 
@@ -28,7 +28,6 @@
 
 var THREE = require( "three" );
 
-var system = require( "../core/System" );
 var ReflectorShader = require( "../shader/ReflectorShader" );
 
 /**
@@ -62,9 +61,9 @@ function Reflector( renderer, camera, world, options ) {
 			enumerable : true,
 			writable : true
 		},
-		// this value can be used to add a little offset to the reflected
-		// objects. it avoids render errors/ artifacts when working with the
-		// stencil buffer
+		// this value can be used to add a little offset to the normal of the
+		// reflection plane. it avoids render errors/ artifacts when working
+		// with the stencil buffer
 		offset : {
 			value : new THREE.Vector3(),
 			configurable : false,
@@ -133,13 +132,6 @@ function Reflector( renderer, camera, world, options ) {
 		// the virtual camera. it represents the actual view of the reflector
 		_reflectorCamera : {
 			value : new THREE.PerspectiveCamera(),
-			configurable : false,
-			enumerable : false,
-			writable : false
-		},
-		// this scene holds all 3D objects that should reflect in the reflector
-		_scene : {
-			value : new THREE.Scene(),
 			configurable : false,
 			enumerable : false,
 			writable : false
@@ -295,16 +287,17 @@ Reflector.prototype.makeReflectionMatrix = function() {
  */
 Reflector.prototype._init = function() {
 	
-	// geometry and material for our reflector
+	// geometry of the reflector
 	this.geometry = new THREE.PlaneBufferGeometry( this.width, this.height, 1, 1 );
 	
-	// prevent three.js to auto-update the camera
+	// prevent auto-update of virtual camera
 	this._reflectorCamera.matrixAutoUpdate = false;
 
 	// check the usage of a texture. if set to true, we render the reflection to
 	// a texture and use this in a custom shader material
 	if ( this.useTexture === true )
 	{
+		// custom shader material
 		this.material = new THREE.ShaderMaterial( {
 			uniforms : THREE.UniformsUtils.clone( ReflectorShader.uniforms ),
 			vertexShader : ReflectorShader.vertexShader,
@@ -312,7 +305,7 @@ Reflector.prototype._init = function() {
 		} );
 
 		// create a render target for the reflection texture
-		this._reflectionMap = this._createRenderTarget();
+		this._createRenderTarget();
 
 		// create texture matrix
 		this._textureMatrix = new THREE.Matrix4();
@@ -320,9 +313,6 @@ Reflector.prototype._init = function() {
 		// assign uniform data
 		this.material.uniforms.reflectionMap.value = this._reflectionMap;
 		this.material.uniforms.textureMatrix.value = this._textureMatrix;
-
-		// add reflector to world
-		this._world.addObject3D( this );
 	}
 	else
 	{
@@ -364,15 +354,15 @@ Reflector.prototype._render = function() {
  */
 Reflector.prototype._beforeRender = function() {
 
-	this._updateReflectorCamera();
+	this._updateCamera();
 
 	if ( this.useTexture === true )
 	{
 		this._updateTextureMatrix();
 
-		this._updateClipping( this._reflectionPlane, this._reflectorCamera );
+		this._updateClipping();
 		
-		// the reflector should not draw itself to the texture
+		// the reflector should not render itself
 		this.material.visible = false;
 	}
 	else
@@ -431,10 +421,10 @@ Reflector.prototype._updateStencilBuffer = function() {
 };
 
 /**
- * This will update the reflector camera to the correct view position and
+ * This will update the virtual camera to the correct view position and
  * orientation.
  */
-Reflector.prototype._updateReflectorCamera = function() {
+Reflector.prototype._updateCamera = function() {
 
 	// we use our reflection matrix to flip the position and orientation of our
 	// virtual camera
@@ -524,7 +514,7 @@ Reflector.prototype._createRenderTarget = function() {
 	}
 
 	// create the render target
-	return new THREE.WebGLRenderTarget( resolution.x, resolution.y, parameter );
+	this._reflectionMap = new THREE.WebGLRenderTarget( resolution.x, resolution.y, parameter );
 };
 
 /**
@@ -536,12 +526,9 @@ Reflector.prototype._createRenderTarget = function() {
 Reflector.prototype._updateTextureMatrix = function() {
 
 	// this matrix does range mapping to [ 0, 1 ]
-	this._textureMatrix.set( 0.5, 0.0, 0.0, 0.5, 
-							 0.0, 0.5, 0.0, 0.5, 
-							 0.0, 0.0, 0.5, 0.5, 
-							 0.0, 0.0, 0.0, 1.0 );
+	this._textureMatrix.set( 0.5, 0.0, 0.0, 0.5, 0.0, 0.5, 0.0, 0.5, 0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 1.0 );
 
-	// we use Object Linear Texgen, so we need to multiply the texture matrix T
+	// we use "Object Linear Texgen", so we need to multiply the texture matrix T
 	// (matrix above) with the projection and view matrix of the virtual camera
 	// and the model matrix of the 3D object (the reflector)
 	this._textureMatrix.multiply( this._reflectorCamera.projectionMatrix );
@@ -560,10 +547,10 @@ Reflector.prototype._updateClipping = ( function() {
 
 	var clipPlane, clipVector, q;
 
-	return function( clippingPlane, camera ) {
+	return function() {
 
 		// shortcut
-		var projectionMatrix = camera.projectionMatrix;
+		var projectionMatrix = this._reflectorCamera.projectionMatrix;
 
 		if ( clipPlane === undefined )
 		{
@@ -574,8 +561,8 @@ Reflector.prototype._updateClipping = ( function() {
 
 		// copy the reflection plane and apply the inverse world matrix of the
 		// reflector camera
-		clipPlane.copy( clippingPlane );
-		clipPlane.applyMatrix4( camera.matrixWorldInverse );
+		clipPlane.copy( this._reflectionPlane );
+		clipPlane.applyMatrix4( this._reflectorCamera.matrixWorldInverse );
 
 		// we transfer the information of our plane to a four component vector
 		clipVector.set( clipPlane.normal.x, clipPlane.normal.y, clipPlane.normal.z, clipPlane.constant );

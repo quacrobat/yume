@@ -1,5 +1,5 @@
 /**
- * @file This shader is used as a material for reflectors.
+ * @file This shader is used as a material for refractors.
  * 
  * @author Human Interactive
  */
@@ -12,8 +12,8 @@ module.exports = {
 
 	uniforms : {
 
-		// this texture contains the reflection
-		"reflectionMap" : {
+		// this texture contains the refraction
+		"refractionMap" : {
 			type : "t",
 			value : null
 		},
@@ -45,13 +45,13 @@ module.exports = {
 
 	fragmentShader : [
 
-		"uniform sampler2D reflectionMap;",
+		"uniform sampler2D refractionMap;",
 		
 		"varying vec4 vUv;",
 		
 		"void main() {",
 
-			"gl_FragColor = texture2DProj( reflectionMap, vUv );",
+			"gl_FragColor = texture2DProj( refractionMap, vUv );",
 		
 		"}"
 
