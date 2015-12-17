@@ -44892,7 +44892,7 @@ function Reflector( renderer, camera, world, options ) {
 			writable : true
 		},
 		// controls the type of reflector algorithm
-		useTexture : {
+		useStencilBuffer : {
 			value : false,
 			configurable : false,
 			enumerable : true,
@@ -45052,7 +45052,7 @@ Reflector.prototype.makeReflectionPlane = ( function() {
 		normal.add( this.offset ).normalize();
 
 		// calculate reflection plane
-		this._reflectionPlane.setFromNormalAndCoplanarPoint( normal, this.position );
+		this._reflectionPlane.setFromNormalAndCoplanarPoint( normal, position );
 	};
 
 }() );
@@ -45099,9 +45099,24 @@ Reflector.prototype._init = function() {
 	// prevent auto-update of virtual camera
 	this._reflectorCamera.matrixAutoUpdate = false;
 
-	// check the usage of a texture. if set to true, we render the reflection to
-	// a texture and use this in a custom shader material
-	if ( this.useTexture === true )
+	// check the usage of the stencil buffer. if set to true, we don't render the reflection to
+	// a texture but directly to the world
+	if ( this.useStencilBuffer === true )
+	{
+		// when we don't use a render target, we must ensure that the reflector
+		// itself is not written to the depth buffer. otherwise we won't see
+		// objects "inside" the reflector
+		this.material = new THREE.MeshBasicMaterial( {
+			color : this._renderer.getClearColor(),
+			depthWrite : false
+		} );
+
+		// we need to store the reflector in a separate scene for rendering to
+		// the stencil buffer
+		this._sceneReflector = new THREE.Scene();
+		this._sceneReflector.add( this );
+	}
+	else
 	{
 		// custom shader material
 		this.material = new THREE.ShaderMaterial( {
@@ -45120,20 +45135,6 @@ Reflector.prototype._init = function() {
 		this.material.uniforms.reflectionMap.value = this._reflectionMap;
 		this.material.uniforms.textureMatrix.value = this._textureMatrix;
 	}
-	else
-	{
-		// we only see reflected objects within the reflector if we disable
-		// writing to the depth buffer
-		this.material = new THREE.MeshBasicMaterial( {
-			color : this._renderer.getClearColor(),
-			depthWrite : false
-		} );
-
-		// we need to store the reflector in a separate scene for rendering to
-		// the stencil buffer
-		this._sceneReflector = new THREE.Scene();
-		this._sceneReflector.add( this );
-	}
 
 };
 
@@ -45142,15 +45143,15 @@ Reflector.prototype._init = function() {
  */
 Reflector.prototype._render = function() {
 
-	if ( this.useTexture === true )
-	{
-		// draw all reflected objects into the render target
-		this._renderer.render( this._world.scene, this._reflectorCamera, this._reflectionMap, true );		
-	}
-	else
+	if ( this.useStencilBuffer === true )
 	{
 		// draw all reflected objects to the framebuffer
 		this._renderer.render( this._world.scene, this._reflectorCamera );
+	}
+	else
+	{
+		// draw all reflected objects into the render target
+		this._renderer.render( this._world.scene, this._reflectorCamera, this._reflectionMap, true );	
 	}
 
 };
@@ -45162,7 +45163,11 @@ Reflector.prototype._beforeRender = function() {
 
 	this._updateCamera();
 
-	if ( this.useTexture === true )
+	if ( this.useStencilBuffer === true )
+	{
+		this._updateStencilBuffer();
+	}
+	else
 	{
 		this._updateTextureMatrix();
 
@@ -45171,13 +45176,9 @@ Reflector.prototype._beforeRender = function() {
 		// the reflector should not render itself
 		this.material.visible = false;
 	}
-	else
-	{
-		this._updateStencilBuffer();
-	}
 
-	// flip face culling for reflected objects
-	this._flipFaceCulling();
+	// update culling of faces
+	this._updateCulling();
 
 };
 
@@ -45189,18 +45190,17 @@ Reflector.prototype._afterRender = function() {
 	var gl = this._renderer.getWebGLContext();
 	var glState = this._renderer.getWebGLState();
 
-	if ( this.useTexture === true )
-	{
-		this.material.visible = true;
-	}
-	else
+	if ( this.useStencilBuffer === true )
 	{
 		// disable stencil test
 		glState.disable( gl.STENCIL_TEST );
 	}
+	else
+	{
+		this.material.visible = true;
+	}
 
-	// undo flip
-	this._flipFaceCulling();
+	this._updateCulling();
 };
 
 /**
@@ -45241,7 +45241,7 @@ Reflector.prototype._updateCamera = function() {
 	this._reflectorCamera.projectionMatrix.copy( this._camera.projectionMatrix );
 
 	// this is only necessary if we render to a texture
-	if ( this.useTexture === true )
+	if ( this.useStencilBuffer === false )
 	{
 		this._reflectorCamera.matrixWorldInverse.getInverse( this._reflectorCamera.matrixWorld );
 	}
@@ -45282,15 +45282,45 @@ Reflector.prototype._addHelpers = function() {
  * the winding order, it is necessary to switch the culling mode for each
  * object.
  */
-Reflector.prototype._flipFaceCulling = function() {
+Reflector.prototype._updateCulling = function() {
+
+	var index, self;
+	
+	self = this;
 
 	this._world.scene.traverseVisible( function( object ) {
 
-		if ( object.material !== undefined && object.material.side !== THREE.DoubleSide )
+		if ( object.material !== undefined )
 		{
-			object.material.side = ( object.material.side === THREE.FrontSide ) ? THREE.BackSide : THREE.FrontSide;
+			// multi materials have an array of materials
+			if ( object.material instanceof THREE.MultiMaterial )
+			{
+				for ( index = 0; index < object.material.materials.length; index++ )
+				{
+					self._flipFaceCulling( object.material.materials[ index ] );
+				}
+			}
+			else
+			{
+				self._flipFaceCulling( object.material );
+			}
+
 		}
+		
 	} );
+};
+
+/**
+ * This method changes between front and back face culling.
+ * 
+ * @param {THREE.Material} material - The material object.
+ */
+Reflector.prototype._flipFaceCulling = function( material ) {
+
+	if ( material.side !== THREE.DoubleSide )
+	{
+		material.side = ( material.side === THREE.FrontSide ) ? THREE.BackSide : THREE.FrontSide;
+	}
 };
 
 /**
@@ -45581,7 +45611,7 @@ Refractor.prototype.makeRefractionPlane = ( function() {
 		normal.negate();
 		
 		// calculate refractor plane
-		this._refractionPlane.setFromNormalAndCoplanarPoint( normal, this.position );
+		this._refractionPlane.setFromNormalAndCoplanarPoint( normal, position );
 	};
 
 }() );

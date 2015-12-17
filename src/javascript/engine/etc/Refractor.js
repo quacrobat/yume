@@ -184,7 +184,7 @@ Refractor.prototype.makeRefractionPlane = ( function() {
 		normal.negate();
 		
 		// calculate refractor plane
-		this._refractionPlane.setFromNormalAndCoplanarPoint( normal, this.position );
+		this._refractionPlane.setFromNormalAndCoplanarPoint( normal, position );
 	};
 
 }() );
