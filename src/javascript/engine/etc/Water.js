@@ -1,7 +1,20 @@
 /**
- * @file This file creates a realistic and expensive water effect. The material is
- * real-time reflective & refractive, it calculates a distortion of the water
+ * @file This file creates a realistic and expensive water effect. The material
+ * is real-time reflective & refractive, it calculates a distortion of the water
  * surface and implements a basic fresnel and lighting equation.
+ * 
+ * The shader needs a normal and du/dv map. The du/dv map is used to create
+ * distortions and can be easily created with Photoshop from a normal map in
+ * just two steps (see https://developer.valvesoftware.com/wiki/Du/dv_map).
+ * 
+ * 1. Open the normal map and invert the colors. 
+ * 2. Go to Image > Adjustments > Brightness/Contrast. 
+ * 		1. Check "Use Legacy" 
+ * 		2. Set Brightness to -17 
+ * 		3. Set Contrast to 100
+ * 
+ * Maybe you have to tweak the values to get a good result. It's important that
+ * the du/dv map does not contain full black or white areas.
  * 
  * @author Human Interactive
  */
@@ -232,10 +245,12 @@ Water.prototype._init = function() {
 		resolution: this.resolution
 	});
 	
-	// load dudv map for texture distortions
+	// load du/dv map
 	var dudvMap = new THREE.TextureLoader().load( "/assets/textures/Water_1_M_DuDv.jpg" );
 	dudvMap.wrapS = dudvMap.wrapT = THREE.RepeatWrapping;
 	
+	// load corresponding normal map (as mentioned before , normal and dudv
+	// map should always match)
 	var normalMap = new THREE.TextureLoader().load( "/assets/textures/Water_1_M_Normal.jpg" );
 	normalMap.wrapS = normalMap.wrapT = THREE.RepeatWrapping;
 		
@@ -247,12 +262,12 @@ Water.prototype._init = function() {
 	this.material.uniforms.textureMatrixReflection.value = this._reflector._textureMatrix;
 	this.material.uniforms.textureMatrixRefraction.value = this._refractor._textureMatrix;
 	
-	// set dudv and normal map to uniforms
+	// set du/dv and normal map to uniforms
 	this.material.uniforms.dudvMap.value = dudvMap;
 	this.material.uniforms.normalMap.value = normalMap;
 
 	// set the amount of segments of the water. this value determines, how often
-	// the normal and dudv map are repeated
+	// the normal and du/dv map are repeated
 	this.material.uniforms.segments.value = this.geometry.parameters.widthSegments;
 	
 	// no auto update for water

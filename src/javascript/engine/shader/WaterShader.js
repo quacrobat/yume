@@ -115,7 +115,7 @@ module.exports = {
 			"vec4 worldPosition = modelMatrix * vec4( position, 1.0 );",
 			
 			// default uv coordinates. the segment uniform scales them, so
-			// the normal and dudv map are sampled more often
+			// the normal and du/dv map are sampled more often
 			"vUv = uv * segments;",
 			
 			// uv coordinates for texture projection
