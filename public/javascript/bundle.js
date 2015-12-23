@@ -46421,14 +46421,14 @@ function Water( renderer, camera, world, options ) {
 	
 	Object.defineProperties( this, {
 
-		// the width of the reflector
+		// the width of the water mesh
 		width : {
 			value : 0,
 			configurable : false,
 			enumerable : true,
 			writable : true
 		},
-		// the height of the reflector
+		// the height of the water mesh
 		height : {
 			value : 0,
 			configurable : false,
@@ -46626,7 +46626,7 @@ Water.prototype._init = function() {
 	var dudvMap = new THREE.TextureLoader().load( "/assets/textures/Water_1_M_DuDv.jpg" );
 	dudvMap.wrapS = dudvMap.wrapT = THREE.RepeatWrapping;
 	
-	// load corresponding normal map (as mentioned before , normal and dudv
+	// load corresponding normal map (as mentioned before, normal and du/dv
 	// map should always match)
 	var normalMap = new THREE.TextureLoader().load( "/assets/textures/Water_1_M_Normal.jpg" );
 	normalMap.wrapS = normalMap.wrapT = THREE.RepeatWrapping;
