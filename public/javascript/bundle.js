@@ -38675,7 +38675,7 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 	var self = this;
 
 	// build url
-	var url = system.cdn + "assets/audio/dynamic/" + file + ".mp3";
+	var url = system.cdn + "/assets/audio/dynamic/" + file + ".mp3";
 
 	// add nocache, if necessary
 	if ( system.isDevModeActive === true )
@@ -39012,7 +39012,7 @@ AudioManager.prototype.getDynamicAudio = function( id ) {
  */
 AudioManager.prototype.setBackgroundMusic = function( file, volume, loop ) {
 
-	var url = "assets/audio/static/" + file + ".mp3";
+	var url = "/assets/audio/static/" + file + ".mp3";
 
 	this._backgroundMusic.src = url;
 	this._backgroundMusic.volume = volume || 1;
@@ -46146,7 +46146,7 @@ TextManager.prototype.load = function( stageId, callback ) {
 	var self = this;
 
 	// build url
-	var url = system.cdn + "assets/locales/" + system.locale + "/stage_" + stageId + ".js";
+	var url = system.cdn + "/assets/locales/" + system.locale + "/stage_" + stageId + ".js";
 
 	// add nocache, if necessary
 	if ( system.isDevModeActive === true )
@@ -55767,7 +55767,7 @@ Stage.prototype.setup = function() {
 
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+	signLoader.load( "/assets/models/sign.json", function( geometry, materials ) {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
@@ -55918,7 +55918,7 @@ Stage.prototype.setup = function() {
 
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+	signLoader.load( "/assets/models/sign.json", function( geometry, materials ) {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
@@ -56063,7 +56063,7 @@ Stage.prototype.setup = function() {
 
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+	signLoader.load( "/assets/models/sign.json", function( geometry, materials ) {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
@@ -56236,7 +56236,7 @@ Stage.prototype.setup = function() {
 
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+	signLoader.load( "/assets/models/sign.json", function( geometry, materials ) {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
@@ -56355,7 +56355,7 @@ Stage.prototype.setup = function() {
 
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+	signLoader.load( "/assets/models/sign.json", function( geometry, materials ) {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
@@ -56513,7 +56513,7 @@ Stage.prototype.setup = function() {
 
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+	signLoader.load( "/assets/models/sign.json", function( geometry, materials ) {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
@@ -56680,7 +56680,7 @@ Stage.prototype.setup = function() {
 
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+	signLoader.load( "/assets/models/sign.json", function( geometry, materials ) {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
@@ -56806,7 +56806,7 @@ Stage.prototype.setup = function() {
 
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+	signLoader.load( "/assets/models/sign.json", function( geometry, materials ) {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
@@ -56828,7 +56828,7 @@ Stage.prototype.setup = function() {
 
 	// add stairs
 	var stairsLoader = new JSONLoader();
-	stairsLoader.load( "assets/models/stairs.json", function( geometry, materials ) {
+	stairsLoader.load( "/assets/models/stairs.json", function( geometry, materials ) {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
@@ -56932,7 +56932,7 @@ Stage.prototype.setup = function() {
 
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+	signLoader.load( "/assets/models/sign.json", function( geometry, materials ) {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
@@ -57128,7 +57128,7 @@ Stage.prototype.setup = function() {
 
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+	signLoader.load( "/assets/models/sign.json", function( geometry, materials ) {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
@@ -57271,7 +57271,7 @@ Stage.prototype.setup = function() {
 
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+	signLoader.load( "/assets/models/sign.json", function( geometry, materials ) {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
@@ -57389,7 +57389,7 @@ Stage.prototype.setup = function() {
 
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+	signLoader.load( "/assets/models/sign.json", function( geometry, materials ) {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 
