@@ -78,7 +78,7 @@ Stage.prototype.setup = function() {
 
 	// add sign
 	var signLoader = new JSONLoader();
-	signLoader.load( "assets/models/sign.json", function( geometry, materials ) {
+	signLoader.load( "/assets/models/sign.json", function( geometry, materials ) {
 
 		self.settingsManager.adjustMaterials( materials, self.renderer );
 

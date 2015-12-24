@@ -38,7 +38,7 @@ TextManager.prototype.load = function( stageId, callback ) {
 	var self = this;
 
 	// build url
-	var url = system.cdn + "assets/locales/" + system.locale + "/stage_" + stageId + ".js";
+	var url = system.cdn + "/assets/locales/" + system.locale + "/stage_" + stageId + ".js";
 
 	// add nocache, if necessary
 	if ( system.isDevModeActive === true )

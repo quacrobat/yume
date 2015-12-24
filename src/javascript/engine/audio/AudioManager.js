@@ -161,7 +161,7 @@ AudioManager.prototype.getDynamicAudio = function( id ) {
  */
 AudioManager.prototype.setBackgroundMusic = function( file, volume, loop ) {
 
-	var url = "assets/audio/static/" + file + ".mp3";
+	var url = "/assets/audio/static/" + file + ".mp3";
 
 	this._backgroundMusic.src = url;
 	this._backgroundMusic.volume = volume || 1;
