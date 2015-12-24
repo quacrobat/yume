@@ -170,9 +170,8 @@ function ParticleEffect( options ) {
  * Updates the particle effect.
  * 
  * @param {number} delta - The time delta value.
- * @param {number} elapsedTime - The elapsed time.
  */
-ParticleEffect.prototype.update = function( delta, elapsedTime ) {
+ParticleEffect.prototype.update = function( delta ) {
 
 	var index, particle, lifeRatio;
 
@@ -212,7 +211,7 @@ ParticleEffect.prototype.update = function( delta, elapsedTime ) {
 		// execute oscillators
 		if ( this._oscillators.length > 0 )
 		{
-			this._oscillate( particle, elapsedTime );
+			this._oscillate( particle, lifeRatio );
 		}
 
 		// angle calculation if necessary
@@ -494,9 +493,9 @@ ParticleEffect.prototype._interpolate = function( particle, lifeRatio ) {
  * Executes all oscillators for a given particle.
  * 
  * @param {Particle} particle - The particle object.
- * @param {number} elapsedTime - The elapsed time.
+ * @param {number} lifeRatio - The life ratio of the particle.
  */
-ParticleEffect.prototype._oscillate = function( particle, elapsedTime ) {
+ParticleEffect.prototype._oscillate = function( particle, lifeRatio ) {
 
 	var index, oscillator, value;
 
@@ -507,7 +506,7 @@ ParticleEffect.prototype._oscillate = function( particle, elapsedTime ) {
 		if ( particle[ oscillator.key ] instanceof THREE.Vector3 )
 		{
 			// first get the value of the oscillator
-			value = oscillator.operator.getValue( elapsedTime );
+			value = oscillator.operator.getValue( lifeRatio );
 
 			// the influence vector determines the amount of manipulation per
 			// vector component
@@ -519,7 +518,7 @@ ParticleEffect.prototype._oscillate = function( particle, elapsedTime ) {
 		{
 			// there is no need for an influence vector if we manipulate a
 			// primitive value
-			particle[ oscillator.key ] = oscillator.operator.getValue( elapsedTime );
+			particle[ oscillator.key ] += oscillator.operator.getValue( lifeRatio );
 		}
 	}
 };

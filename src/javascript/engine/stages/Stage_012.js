@@ -135,8 +135,8 @@ Stage.prototype.destroy = function() {
 
 Stage.prototype._render = function() {
 	
-	particles.update( self._delta, self.timeManager.elapsedTime );
-
+	particles.update( self._delta );
+	
 	StageBase.prototype._render.call( self );
 };
 

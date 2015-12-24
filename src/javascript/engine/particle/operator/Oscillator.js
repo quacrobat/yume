@@ -48,13 +48,13 @@ function Oscillator( amplitude, period, offset ) {
 /**
  * Calculates the value of the oscillation animation.
  * 
- * @param {number} elapsedTime - The elapsed time.
+ * @param {number} alpha - The alpha value of the function.
  *  
  * @returns {number} The calculated value.
  */
-Oscillator.prototype.getValue = function( elapsedTime ){
+Oscillator.prototype.getValue = function( alpha ){
 	
-	return ( this.amplitude * Math.sin( ( elapsedTime * utils.TWO_PI ) / this.period ) ) + this.offset;
+	return ( this.amplitude * Math.sin( ( alpha * utils.TWO_PI ) / this.period ) ) + this.offset;
 };
 
 module.exports = Oscillator;
