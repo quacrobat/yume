@@ -1,6 +1,3 @@
 {
-	"Modal.Headline": "ENDE",
-	"Modal.Button": "Schließen",
-	"Modal.Content": "<p>Vielen Dank für's Durchspielen! Den Source-Code und weitere Informationen zum Projekt findest du bei <a href='https://github.com/Mugen87/yume'>github</a>.</p>",
 	"InformationPanel.Text": "<h3>Partikelsystem</h3><p>Eine weitere Komponente von YUME ermöglicht die Erzeugung einfacher Partikeleffekte. Wie im Beispiel zu sehen, kann das System eine große Anzahl einzelner Elementen (Partikeln) verarbeiten. Darüber hinaus findet die Komponente Anwendung bei der Darstellung von Feuer, Rauch oder Dampf. Zur möglichst realistischen Darstellung von Partikeln stehen neben vielen Konfigurationsmöglichkeiten sogenannte Operatoren zur Verfügung.<ul><li><strong>Interpolator</strong>: Dieser Operator erlaubt die Definition beliebiger Zielwerte innerhalb der Lebenszeit eines Partikels. Mit vorschreitendem Alter findet eine lineare Interpolation zwischen den einzelnen Werten statt. Im Beispiel wird dieser Operator eingesetzt, um die Farbe der Blüten zu verändern (rot -> grün -> blau).</li><li><strong>Oscillator</strong>: Dieser Operator wird in erster Linie dazu eingesetzt, die Bewegung eines Partikels zu manipulieren. Er erlaubt die Erzeugung von wellenförmigen bzw. schwankenden Bewegungsabläufen, die zur realistischen Darstellung bestimmter Effekte nützlich sind (z.B. Feuer).</li></ul></p>"
 }

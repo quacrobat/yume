@@ -27,6 +27,7 @@ var Stage_009 = require( "../stages/Stage_009" );
 var Stage_010 = require( "../stages/Stage_010" );
 var Stage_011 = require( "../stages/Stage_011" );
 var Stage_012 = require( "../stages/Stage_012" );
+var Stage_013 = require( "../stages/Stage_013" );
 
 /**
  * Creates the stage manager.
@@ -145,6 +146,11 @@ StageManager.prototype.load = function( stageId ) {
 		case "012":
 			
 			this._stage = new Stage_012();
+			break;
+			
+		case "013":
+			
+			this._stage = new Stage_013();
 			break;
 
 		default:

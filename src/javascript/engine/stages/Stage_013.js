@@ -7,15 +7,13 @@ var JSONLoader = require( "../etc/JSONLoader" );
 var utils = require( "../etc/Utils" );
 var Easing = require( "../animation/Easing" );
 
-var ParticleEffect = require( "../particle/ParticleEffect" );
-var Interpolator = require( "../particle/operator/Interpolator" );
-var SphereEmitter = require( "../particle/emitter/SphereEmitter" );
+var Water = require ( "../etc/Water" );
 
-var self, particles;
+var self, water, box, sphere;
 
 function Stage() {
 
-	StageBase.call( this, "012" );
+	StageBase.call( this, "013" );
 
 	self = this;
 }
@@ -73,40 +71,43 @@ Stage.prototype.setup = function() {
 		} ).play();
 	} );
 	
-	// particle texture
-	var texture = new THREE.TextureLoader().load( "/assets/textures/Blossom_1_S.png" );
-	
-	// particle emitter
-	var emitter = new SphereEmitter({
-		origin: new THREE.Vector3( 0, 10, 0),
-		defaultDirection: true
-	});
-	
-	// particle effect
-	particles = new ParticleEffect({
-		numberOfParticles : 10000,
-		emitter : emitter,
-		texture : texture,
-		rotateTexture: true,
-		transparent: true,
-		sortParticles: true
-	});
-	
-	// color interpolator
-	var colorInterpolator = new Interpolator();
-	
-	colorInterpolator.addValue( 0.0, new THREE.Color( 0xff0000 ) );
-	colorInterpolator.addValue( 0.4, new THREE.Color( 0x00ff00 ) );
-	colorInterpolator.addValue( 0.7, new THREE.Color( 0x0000ff ) );
-	
-	// add interpolator to particle effect
-	particles.addInterpolatorToProperty( colorInterpolator, "color" );
-
 	// add trigger for ending
 	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 15, true, function() {
 
-		self._changeStage( "013", true );
+		self.userInterfaceManager.showModalDialog( {
+			headline : "Modal.Headline",
+			button : "Modal.Button",
+			content : "Modal.Content"
+		} );
+
+		self.saveGameManager.remove();	
 	} );
+	
+	// add some moving objects to demonstrate the water effect
+	box = new THREE.Mesh( new THREE.BoxGeometry( 5, 5, 5 ), new THREE.MeshBasicMaterial( {
+		color : StageBase.COLORS.BLUE_DARK
+	} ) );
+	
+	this.world.addObject3D( box );
+	
+	sphere = new THREE.Mesh( new THREE.SphereGeometry( 2.5, 10, 10 ), new THREE.MeshBasicMaterial( {
+		color : StageBase.COLORS.BLUE_WHITE
+	} ) );
+	
+	this.world.addObject3D( sphere );
+	
+	// create water 
+	water = new Water( this.renderer, this.camera, this.world, {
+		width: 200,
+		height: 200,
+		segments: 3,
+		lightDirection: new THREE.Vector3( 0.7, 0.7, 0 )
+	});
+	
+	water.position.set( 0, 1, 0 );
+	water.rotation.set( Math.PI * -0.5, 0, 0 );
+	water.updateMatrix();
+	this.world.addObject3D( water );
 
 	// start rendering
 	this._render();
@@ -123,13 +124,18 @@ Stage.prototype.start = function() {
 Stage.prototype.destroy = function() {
 
 	StageBase.prototype.destroy.call( this );
-	
-	particles.destroy();
 };
 
 Stage.prototype._render = function() {
 	
-	particles.update( self._delta );
+	// update the water
+	water.update( self.timeManager.elapsedTime );
+	
+	// animate the moving objects
+	var step = self.timeManager.elapsedTime * 0.5;
+	
+	box.position.set( Math.cos( step  ) * 20, 10, Math.sin( step ) * 20 );
+	sphere.position.set( Math.sin( step ) * 50, 10, Math.cos( step ) * 50 );
 	
 	StageBase.prototype._render.call( self );
 };

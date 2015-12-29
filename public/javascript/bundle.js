@@ -36698,7 +36698,7 @@ ActionManager.prototype._onInteraction = function( message, data ) {
 };
 
 module.exports = new ActionManager();
-},{"../core/Logger":21,"../core/Timing":30,"../messaging/EventManager":69,"../messaging/Topic":71,"../ui/UserInterfaceManager":117,"./Action":4,"./ActionObject":6,"./ActionTrigger":7,"./BSPTree":8,"three":1}],6:[function(require,module,exports){
+},{"../core/Logger":21,"../core/Timing":30,"../messaging/EventManager":69,"../messaging/Topic":71,"../ui/UserInterfaceManager":118,"./Action":4,"./ActionObject":6,"./ActionTrigger":7,"./BSPTree":8,"three":1}],6:[function(require,module,exports){
 /**
  * @file This prototype enables ordinary 3D-Objects to be interactive. Any
  * action object is part of the collision-detection logic and ready for
@@ -40580,7 +40580,7 @@ FirstPersonControls.RUN = {
 
 module.exports = FirstPersonControls;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/Logger":21,"../etc/SettingsManager":42,"../etc/Utils":45,"../messaging/EventManager":69,"../messaging/Topic":71,"../ui/UserInterfaceManager":117,"three":1}],18:[function(require,module,exports){
+},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/Logger":21,"../etc/SettingsManager":42,"../etc/Utils":45,"../messaging/EventManager":69,"../messaging/Topic":71,"../ui/UserInterfaceManager":118,"three":1}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -40699,7 +40699,7 @@ Bootstrap.prototype._loadStage = function() {
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/MultiplayerManager":35,"../etc/SaveGameManager":41,"../messaging/EventManager":69,"../messaging/Topic":71,"../network/NetworkManager":73,"../ui/UserInterfaceManager":117,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27,"./World":31}],19:[function(require,module,exports){
+},{"../etc/MultiplayerManager":35,"../etc/SaveGameManager":41,"../messaging/EventManager":69,"../messaging/Topic":71,"../network/NetworkManager":73,"../ui/UserInterfaceManager":118,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27,"./World":31}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for camera-based
@@ -41829,7 +41829,7 @@ StageBase.COLORS = {
 
 module.exports = StageBase;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../etc/PerformanceManager":38,"../etc/SaveGameManager":41,"../etc/SettingsManager":42,"../etc/TextManager":44,"../game/entity/EntityManager":47,"../messaging/EventManager":69,"../messaging/Topic":71,"../ui/UserInterfaceManager":117,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
+},{"../action/ActionManager":5,"../animation/AnimationManager":10,"../audio/AudioManager":15,"../etc/PerformanceManager":38,"../etc/SaveGameManager":41,"../etc/SettingsManager":42,"../etc/TextManager":44,"../game/entity/EntityManager":47,"../messaging/EventManager":69,"../messaging/Topic":71,"../ui/UserInterfaceManager":118,"./Camera":19,"./Renderer":23,"./System":27,"./World":31,"three":1}],26:[function(require,module,exports){
 /**
  * @file Interface for entire stage-handling.
  * 
@@ -41859,6 +41859,7 @@ var Stage_009 = require( "../stages/Stage_009" );
 var Stage_010 = require( "../stages/Stage_010" );
 var Stage_011 = require( "../stages/Stage_011" );
 var Stage_012 = require( "../stages/Stage_012" );
+var Stage_013 = require( "../stages/Stage_013" );
 
 /**
  * Creates the stage manager.
@@ -41977,6 +41978,11 @@ StageManager.prototype.load = function( stageId ) {
 		case "012":
 			
 			this._stage = new Stage_012();
+			break;
+			
+		case "013":
+			
+			this._stage = new Stage_013();
 			break;
 
 		default:
@@ -42127,7 +42133,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":41,"../messaging/EventManager":69,"../messaging/Topic":71,"../stages/Stage_001":95,"../stages/Stage_002":96,"../stages/Stage_003":97,"../stages/Stage_004":98,"../stages/Stage_005":99,"../stages/Stage_006":100,"../stages/Stage_007":101,"../stages/Stage_008":102,"../stages/Stage_009":103,"../stages/Stage_010":104,"../stages/Stage_011":105,"../stages/Stage_012":106,"../ui/UserInterfaceManager":117,"./Logger":21}],27:[function(require,module,exports){
+},{"../etc/SaveGameManager":41,"../messaging/EventManager":69,"../messaging/Topic":71,"../stages/Stage_001":95,"../stages/Stage_002":96,"../stages/Stage_003":97,"../stages/Stage_004":98,"../stages/Stage_005":99,"../stages/Stage_006":100,"../stages/Stage_007":101,"../stages/Stage_008":102,"../stages/Stage_009":103,"../stages/Stage_010":104,"../stages/Stage_011":105,"../stages/Stage_012":106,"../stages/Stage_013":107,"../ui/UserInterfaceManager":118,"./Logger":21}],27:[function(require,module,exports){
 /**
  * @file This prototype holds core information about the engine. The runtime
  * behavior of the application depends crucially of this prototype.
@@ -57441,13 +57447,7 @@ Stage.prototype.setup = function() {
 	// add trigger for ending
 	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 15, true, function() {
 
-		self.userInterfaceManager.showModalDialog( {
-			headline : "Modal.Headline",
-			button : "Modal.Button",
-			content : "Modal.Content"
-		} );
-
-		self.saveGameManager.remove();	
+		self._changeStage( "013", true );
 	} );
 
 	// start rendering
@@ -57478,6 +57478,150 @@ Stage.prototype._render = function() {
 
 module.exports = Stage;
 },{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":45,"../particle/ParticleEffect":75,"../particle/emitter/SphereEmitter":79,"../particle/operator/Interpolator":80,"three":1}],107:[function(require,module,exports){
+"use strict";
+
+var THREE = require( "three" );
+
+var StageBase = require( "../core/StageBase" );
+var JSONLoader = require( "../etc/JSONLoader" );
+var utils = require( "../etc/Utils" );
+var Easing = require( "../animation/Easing" );
+
+var Water = require ( "../etc/Water" );
+
+var self, water, box, sphere;
+
+function Stage() {
+
+	StageBase.call( this, "013" );
+
+	self = this;
+}
+
+Stage.prototype = Object.create( StageBase.prototype );
+Stage.prototype.constructor = Stage;
+
+Stage.prototype.setup = function() {
+
+	StageBase.prototype.setup.call( this );
+
+	// player setup
+	this.world.player.position.set( 0, 0, -75 );
+	this.world.player.setDirection( new THREE.Vector3( 0, 0, 1 ) );
+	this.world.player.updateMatrixWorld();
+
+	// load texts
+	this.textManager.load( this.stageId );
+
+	// add ground
+	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
+	var groundMaterial = new THREE.MeshBasicMaterial( {
+		vertexColors : THREE.FaceColors
+	} );
+
+	var ground = new THREE.Mesh( groundGeometry, groundMaterial );
+	ground.matrixAutoUpdate = false;
+	ground.rotation.x = - utils.HALF_PI;
+	ground.updateMatrix();
+	ground.receiveShadow = true;
+	this.world.addGround( ground );
+
+	// color faces
+	utils.colorFaces( groundGeometry, StageBase.COLORS.PRIMARY, StageBase.COLORS.BLUE_DARK );
+
+	// add sign
+	var signLoader = new JSONLoader();
+	signLoader.load( "/assets/models/sign.json", function( geometry, materials ) {
+
+		self.settingsManager.adjustMaterials( materials, self.renderer );
+
+		var sign = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
+		sign.position.set( 0, 20, 75 );
+		sign.rotation.set( 0, - utils.HALF_PI, 0 );
+		self.world.addObject3D( sign );
+
+		self.animationManager.createBasicAnimation( {
+			object : sign.position,
+			property : "y",
+			duration : 5000,
+			start : sign.position.y,
+			end : sign.position.y + 5,
+			easing : Easing.Sinusoidal.InOut,
+			loop : true
+		} ).play();
+	} );
+	
+	// add trigger for ending
+	var stageTrigger = this.actionManager.createTrigger( "Change Stage", new THREE.Vector3( 0, 0, 75 ), 15, true, function() {
+
+		self.userInterfaceManager.showModalDialog( {
+			headline : "Modal.Headline",
+			button : "Modal.Button",
+			content : "Modal.Content"
+		} );
+
+		self.saveGameManager.remove();	
+	} );
+	
+	// add some moving objects to demonstrate the water effect
+	box = new THREE.Mesh( new THREE.BoxGeometry( 5, 5, 5 ), new THREE.MeshBasicMaterial( {
+		color : StageBase.COLORS.BLUE_DARK
+	} ) );
+	
+	this.world.addObject3D( box );
+	
+	sphere = new THREE.Mesh( new THREE.SphereGeometry( 2.5, 10, 10 ), new THREE.MeshBasicMaterial( {
+		color : StageBase.COLORS.BLUE_WHITE
+	} ) );
+	
+	this.world.addObject3D( sphere );
+	
+	// create water 
+	water = new Water( this.renderer, this.camera, this.world, {
+		width: 200,
+		height: 200,
+		segments: 3,
+		lightDirection: new THREE.Vector3( 0.7, 0.7, 0 )
+	});
+	
+	water.position.set( 0, 1, 0 );
+	water.rotation.set( Math.PI * -0.5, 0, 0 );
+	water.updateMatrix();
+	this.world.addObject3D( water );
+
+	// start rendering
+	this._render();
+};
+
+Stage.prototype.start = function() {
+
+	StageBase.prototype.start.call( this );
+
+	// set information panel text
+	this.userInterfaceManager.setInformationPanelText( "InformationPanel.Text" );
+};
+
+Stage.prototype.destroy = function() {
+
+	StageBase.prototype.destroy.call( this );
+};
+
+Stage.prototype._render = function() {
+	
+	// update the water
+	water.update( self.timeManager.elapsedTime );
+	
+	// animate the moving objects
+	var step = self.timeManager.elapsedTime * 0.5;
+	
+	box.position.set( Math.cos( step  ) * 20, 10, Math.sin( step ) * 20 );
+	sphere.position.set( Math.sin( step ) * 50, 10, Math.cos( step ) * 50 );
+	
+	StageBase.prototype._render.call( self );
+};
+
+module.exports = Stage;
+},{"../animation/Easing":11,"../core/StageBase":25,"../etc/JSONLoader":33,"../etc/Utils":45,"../etc/Water":46,"three":1}],108:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element chat.
@@ -57656,7 +57800,7 @@ Chat.prototype._onMessage = function( message, data ) {
 
 module.exports = new Chat();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":69,"../messaging/Topic":71,"./UiElement":116}],108:[function(require,module,exports){
+},{"../messaging/EventManager":69,"../messaging/Topic":71,"./UiElement":117}],109:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element development panel. Only if the development
@@ -57718,7 +57862,7 @@ DevelopmentPanel.prototype.setText = function( text ) {
 
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":116}],109:[function(require,module,exports){
+},{"./UiElement":117}],110:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -57779,7 +57923,7 @@ InformationPanel.prototype.setText = function( textKey ) {
 
 module.exports = new InformationPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":116}],110:[function(require,module,exports){
+},{"./UiElement":117}],111:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element interaction label.
@@ -57856,7 +58000,7 @@ InteractionLabel.prototype.hide = function() {
 
 module.exports = new InteractionLabel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":116}],111:[function(require,module,exports){
+},{"./UiElement":117}],112:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element loading screen.
@@ -58046,7 +58190,7 @@ LoadingScreen.prototype._onReady = function( message, data ) {
 
 module.exports = new LoadingScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":69,"../messaging/Topic":71,"./UiElement":116}],112:[function(require,module,exports){
+},{"../messaging/EventManager":69,"../messaging/Topic":71,"./UiElement":117}],113:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element menu.
@@ -58202,7 +58346,7 @@ Menu.prototype._publishFinishEvent = function( message, data ) {
 
 module.exports = new Menu();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Environment":20,"../messaging/EventManager":69,"../messaging/Topic":71,"./UiElement":116}],113:[function(require,module,exports){
+},{"../core/Environment":20,"../messaging/EventManager":69,"../messaging/Topic":71,"./UiElement":117}],114:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element modal dialog.
@@ -58326,7 +58470,7 @@ ModalDialog.prototype._onClose = function( event ) {
 
 module.exports = new ModalDialog();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":116}],114:[function(require,module,exports){
+},{"./UiElement":117}],115:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element performance monitor. Only if the development
@@ -58545,7 +58689,7 @@ PerformanceMonitor.prototype._onSwitchMode = function() {
 
 module.exports = new PerformanceMonitor();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./UiElement":116}],115:[function(require,module,exports){
+},{"./UiElement":117}],116:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element text screen.
@@ -58771,7 +58915,7 @@ TextScreen.prototype._printName = function() {
 
 module.exports = new TextScreen();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../messaging/EventManager":69,"../messaging/Topic":71,"./UiElement":116}],116:[function(require,module,exports){
+},{"../messaging/EventManager":69,"../messaging/Topic":71,"./UiElement":117}],117:[function(require,module,exports){
 (function (global){
 /**
  * @file Super prototype of UI-Elements.
@@ -58821,7 +58965,7 @@ UiElement.prototype._getTransitionEndEvent = function() {
 
 module.exports = UiElement;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/TextManager":44}],117:[function(require,module,exports){
+},{"../etc/TextManager":44}],118:[function(require,module,exports){
 (function (global){
 /**
  * @file Interface for entire ui-handling. This prototype is used in stages to
@@ -59102,4 +59246,4 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 
 module.exports = new UserInterfaceManager();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/System":27,"../messaging/EventManager":69,"../messaging/Topic":71,"./Chat":107,"./DevelopmentPanel":108,"./InformationPanel":109,"./InteractionLabel":110,"./LoadingScreen":111,"./Menu":112,"./ModalDialog":113,"./PerformanceMonitor":114,"./TextScreen":115}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117]);
+},{"../core/System":27,"../messaging/EventManager":69,"../messaging/Topic":71,"./Chat":108,"./DevelopmentPanel":109,"./InformationPanel":110,"./InteractionLabel":111,"./LoadingScreen":112,"./Menu":113,"./ModalDialog":114,"./PerformanceMonitor":115,"./TextScreen":116}]},{},[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118]);

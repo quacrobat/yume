@@ -1,6 +1,3 @@
 {
-	"Modal.Headline": "END",
-	"Modal.Button": "Close",
-	"Modal.Content": "<p>Thanks for playing! The source code and more information about the project is available at <a href='https://github.com/Mugen87/yume'>github</a>.</p>",
 	"InformationPanel.Text": "<h3>Particle System</h3><p>An other component of YUME enables the creation of simple particle effects. As you can see in the example the system can process a large number of elements (particles). Besides, the component can be used to create effects like fire, smoke or steam. You can use many configuration possibilities and so called operators to create cool effects.<ul><li><strong>Interpolator</strong>: This operator allows the definition of arbitrary target values in the lifetime of a particle. With advancing age the system calculates a linear interpolation between these values. This operator is used in the example to change the color of blossoms (red - green -> blue).</li><li><strong>Oscillator</strong>: This operator is used primarily to control the motion of a particle. It enables the creation of wavy and bumpy motion sequences which is very useful for certain effects like fire.</li></ul></p>"
 }
