@@ -53070,7 +53070,14 @@ function ParticleEffect( options ) {
 			configurable : false,
 			enumerable : false,
 			writable : false
-		}
+		},
+		// the maximum time delta value
+		_MAX_TIME_DELTA : {
+			value : 0.034,
+			configurable : false,
+			enumerable : false,
+			writable : false
+		},
 
 	} );
 
@@ -53093,7 +53100,10 @@ function ParticleEffect( options ) {
  */
 ParticleEffect.prototype.update = function( delta ) {
 
-	var index, particle, lifeRatio;
+	var index, particle, deltaTime, lifeRatio;
+	
+	// constrain time delta value
+	deltaTime = Math.min( delta, this._MAX_TIME_DELTA );
 
 	// update emitter only if the respective flag is set
 	if ( this.emitterAutoUpdate === true )
@@ -53111,7 +53121,7 @@ ParticleEffect.prototype.update = function( delta ) {
 		particle.displacement.copy( particle.direction );
 
 		// update age of the particle
-		particle.age += delta;
+		particle.age += deltaTime;
 
 		// if the particle exceeds its lifetime, just emit it again
 		if ( particle.age > particle.lifetime )
@@ -53137,11 +53147,11 @@ ParticleEffect.prototype.update = function( delta ) {
 		// angle calculation if necessary
 		if ( this.rotateTexture === true )
 		{
-			particle.angle += particle.angleVelocity * delta;
+			particle.angle += particle.angleVelocity * deltaTime;
 		}
 
 		// update the position by adding the displacement
-		particle.displacement.normalize().multiplyScalar( particle.speed * delta );
+		particle.displacement.normalize().multiplyScalar( particle.speed * deltaTime );
 		particle.position.add( particle.displacement );
 
 	} // next particle
@@ -57426,7 +57436,7 @@ Stage.prototype.setup = function() {
 	
 	// particle effect
 	particles = new ParticleEffect({
-		numberOfParticles : 10000,
+		numberOfParticles : 5000,
 		emitter : emitter,
 		texture : texture,
 		rotateTexture: true,

@@ -84,7 +84,7 @@ Stage.prototype.setup = function() {
 	
 	// particle effect
 	particles = new ParticleEffect({
-		numberOfParticles : 10000,
+		numberOfParticles : 5000,
 		emitter : emitter,
 		texture : texture,
 		rotateTexture: true,
