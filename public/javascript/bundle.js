@@ -45102,8 +45102,11 @@ Reflector.prototype._init = function() {
 	// geometry of the reflector
 	this.geometry = new THREE.PlaneBufferGeometry( this.width, this.height, 1, 1 );
 	
-	// prevent auto-update of virtual camera
+	// no auto-update for virtual camera
 	this._reflectorCamera.matrixAutoUpdate = false;
+	
+	// no auto-update for reflector itself 
+	this.matrixAutoUpdate = false;
 
 	// check the usage of the stencil buffer. if set to true, we don't render the reflection to
 	// a texture but directly to the world
@@ -45482,8 +45485,7 @@ function Refractor( renderer, camera, world, options ) {
 			enumerable : true,
 			writable : true
 		},
-		// this value can be used to tweak the clipping if projective texture
-		// mapping is used
+		// this value can be used to tweak the clipping
 		clipBias : {
 			value : 0,
 			configurable : false,
@@ -45647,8 +45649,11 @@ Refractor.prototype._init = function() {
 	this.material.uniforms.refractionMap.value = this._refractionMap;
 	this.material.uniforms.textureMatrix.value = this._textureMatrix;
 	
-	// prevent auto-update of virtual camera
+	// no auto-update for virtual camera
 	this._refractorCamera.matrixAutoUpdate = false;
+	
+	// no auto-update for refractor itself 
+	this.matrixAutoUpdate = false;
 };
 
 /**
@@ -46653,10 +46658,8 @@ Water.prototype._init = function() {
 	// the normal and du/dv map are repeated
 	this.material.uniforms.segments.value = this.geometry.parameters.widthSegments;
 	
-	// no auto update for water
+	// no auto-update for water
 	this.matrixAutoUpdate = false;
-	this._reflector.matrixAutoUpdate = false;
-	this._refractor.matrixAutoUpdate = false;
 };
 
 module.exports = Water;

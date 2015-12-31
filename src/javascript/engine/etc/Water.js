@@ -270,10 +270,8 @@ Water.prototype._init = function() {
 	// the normal and du/dv map are repeated
 	this.material.uniforms.segments.value = this.geometry.parameters.widthSegments;
 	
-	// no auto update for water
+	// no auto-update for water
 	this.matrixAutoUpdate = false;
-	this._reflector.matrixAutoUpdate = false;
-	this._refractor.matrixAutoUpdate = false;
 };
 
 module.exports = Water;

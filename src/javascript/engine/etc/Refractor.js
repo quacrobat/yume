@@ -49,8 +49,7 @@ function Refractor( renderer, camera, world, options ) {
 			enumerable : true,
 			writable : true
 		},
-		// this value can be used to tweak the clipping if projective texture
-		// mapping is used
+		// this value can be used to tweak the clipping
 		clipBias : {
 			value : 0,
 			configurable : false,
@@ -214,8 +213,11 @@ Refractor.prototype._init = function() {
 	this.material.uniforms.refractionMap.value = this._refractionMap;
 	this.material.uniforms.textureMatrix.value = this._textureMatrix;
 	
-	// prevent auto-update of virtual camera
+	// no auto-update for virtual camera
 	this._refractorCamera.matrixAutoUpdate = false;
+	
+	// no auto-update for refractor itself 
+	this.matrixAutoUpdate = false;
 };
 
 /**
