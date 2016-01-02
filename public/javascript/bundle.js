@@ -57660,12 +57660,6 @@ function Chat() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$root : {
-			value : null,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
 		_$input : {
 			value : null,
 			configurable : false,
@@ -57844,12 +57838,6 @@ function DevelopmentPanel() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$root : {
-			value : null,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
 		_$content : {
 			value : null,
 			configurable : false,
@@ -57905,12 +57893,6 @@ function InformationPanel() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$root : {
-			value : null,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
 		_$content : {
 			value : null,
 			configurable : false,
@@ -57939,7 +57921,7 @@ InformationPanel.prototype.init = function() {
  */
 InformationPanel.prototype.setText = function( textKey ) {
 
-	this._$content.innerHTML = this.textManager.get( textKey );
+	this._$content.innerHTML = this._textManager.get( textKey );
 };
 
 module.exports = new InformationPanel();
@@ -57966,12 +57948,6 @@ function InteractionLabel() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$root : {
-			value : null,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
 		_$content : {
 			value : null,
 			configurable : false,
@@ -58008,7 +57984,7 @@ InteractionLabel.prototype.show = function( textKey ) {
 
 	if ( this.isActive === false )
 	{
-		this._$content.textContent = this.textManager.get( textKey );
+		this._$content.textContent = this._textManager.get( textKey );
 		this._$root.style.display = "block";
 		this.isActive = true;
 	}
@@ -58054,12 +58030,6 @@ function LoadingScreen() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$root : {
-			value : null,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
 		_$progress : {
 			value : null,
 			configurable : false,
@@ -58244,12 +58214,6 @@ function Menu() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$root : {
-			value : null,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
 		_$button : {
 			value : null,
 			configurable : false,
@@ -58396,12 +58360,6 @@ function ModalDialog() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$root : {
-			value : null,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
 		_$overlay : {
 			value : false,
 			configurable : false,
@@ -58467,9 +58425,9 @@ ModalDialog.prototype.show = function( textKeys ) {
 	this._$root.classList.add( "md-show" );
 
 	// set texts
-	this._$headline.textContent = this.textManager.get( textKeys.headline );
-	this._$button.textContent = this.textManager.get( textKeys.button );
-	this._$content.innerHTML = this.textManager.get( textKeys.content );
+	this._$headline.textContent = this._textManager.get( textKeys.headline );
+	this._$button.textContent = this._textManager.get( textKeys.button );
+	this._$content.innerHTML = this._textManager.get( textKeys.content );
 
 	// release pointer lock
 	global.document.dispatchEvent( new global.Event( "releasePointer" ) );
@@ -58525,12 +58483,6 @@ function PerformanceMonitor() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$root : {
-			value : null,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
 		_$fps : {
 			value : null,
 			configurable : false,
@@ -58767,12 +58719,6 @@ function TextScreen() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$root : {
-			value : null,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
 		_$content : {
 			value : null,
 			configurable : false,
@@ -58899,7 +58845,7 @@ TextScreen.prototype.complete = function() {
 		clearTimeout( this._printId );
 		this._$content.textContent = "";
 		this._printName();
-		this._$content.textContent += self.textManager.get( this._textKeys[ this._textIndex ].text );
+		this._$content.textContent += self._textManager.get( this._textKeys[ this._textIndex ].text );
 		// switch to next text and start printing
 	}
 	else if ( this._textIndex < this._textKeys.length - 1 )
@@ -58934,7 +58880,7 @@ TextScreen.prototype.complete = function() {
 TextScreen.prototype._printText = function( index ) {
 
 	// receive text
-	var text = self.textManager.get( self._textKeys[ self._textIndex ].text );
+	var text = self._textManager.get( self._textKeys[ self._textIndex ].text );
 	
 	// if index is undefined, set the value to zero
 	index = index || 0;
@@ -58961,7 +58907,7 @@ TextScreen.prototype._printName = function() {
 
 	if ( this._textKeys[ this._textIndex ].name !== undefined )
 	{
-		var name = this.textManager.get( this._textKeys[ this._textIndex ].name );
+		var name = this._textManager.get( this._textKeys[ this._textIndex ].name );
 		this._$content.textContent += name + ": ";
 	}
 };
@@ -58988,7 +58934,15 @@ var textManager = require( "../etc/TextManager" );
 function UiElement() {
 
 	Object.defineProperties( this, {
-		textManager : {
+		// a reference to the root HTML element
+		_$root : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
+		// a reference to the text manager
+		_textManager : {
 			value : textManager,
 			configurable : false,
 			enumerable : false,

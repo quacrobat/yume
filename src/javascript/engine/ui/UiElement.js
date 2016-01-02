@@ -16,7 +16,15 @@ var textManager = require( "../etc/TextManager" );
 function UiElement() {
 
 	Object.defineProperties( this, {
-		textManager : {
+		// a reference to the root HTML element
+		_$root : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
+		// a reference to the text manager
+		_textManager : {
 			value : textManager,
 			configurable : false,
 			enumerable : false,

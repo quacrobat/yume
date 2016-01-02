@@ -23,12 +23,6 @@ function PerformanceMonitor() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$root : {
-			value : null,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
 		_$fps : {
 			value : null,
 			configurable : false,

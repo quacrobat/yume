@@ -18,12 +18,6 @@ function ModalDialog() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$root : {
-			value : null,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
 		_$overlay : {
 			value : false,
 			configurable : false,
@@ -89,9 +83,9 @@ ModalDialog.prototype.show = function( textKeys ) {
 	this._$root.classList.add( "md-show" );
 
 	// set texts
-	this._$headline.textContent = this.textManager.get( textKeys.headline );
-	this._$button.textContent = this.textManager.get( textKeys.button );
-	this._$content.innerHTML = this.textManager.get( textKeys.content );
+	this._$headline.textContent = this._textManager.get( textKeys.headline );
+	this._$button.textContent = this._textManager.get( textKeys.button );
+	this._$content.innerHTML = this._textManager.get( textKeys.content );
 
 	// release pointer lock
 	global.document.dispatchEvent( new global.Event( "releasePointer" ) );

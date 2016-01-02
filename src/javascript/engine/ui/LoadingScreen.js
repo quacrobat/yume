@@ -22,12 +22,6 @@ function LoadingScreen() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$root : {
-			value : null,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
 		_$progress : {
 			value : null,
 			configurable : false,

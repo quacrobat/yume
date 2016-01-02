@@ -22,12 +22,6 @@ function Chat() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$root : {
-			value : null,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
 		_$input : {
 			value : null,
 			configurable : false,

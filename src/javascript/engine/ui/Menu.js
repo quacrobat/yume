@@ -22,12 +22,6 @@ function Menu() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$root : {
-			value : null,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
 		_$button : {
 			value : null,
 			configurable : false,

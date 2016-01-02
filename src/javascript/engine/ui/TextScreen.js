@@ -21,12 +21,6 @@ function TextScreen() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$root : {
-			value : null,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
 		_$content : {
 			value : null,
 			configurable : false,
@@ -153,7 +147,7 @@ TextScreen.prototype.complete = function() {
 		clearTimeout( this._printId );
 		this._$content.textContent = "";
 		this._printName();
-		this._$content.textContent += self.textManager.get( this._textKeys[ this._textIndex ].text );
+		this._$content.textContent += self._textManager.get( this._textKeys[ this._textIndex ].text );
 		// switch to next text and start printing
 	}
 	else if ( this._textIndex < this._textKeys.length - 1 )
@@ -188,7 +182,7 @@ TextScreen.prototype.complete = function() {
 TextScreen.prototype._printText = function( index ) {
 
 	// receive text
-	var text = self.textManager.get( self._textKeys[ self._textIndex ].text );
+	var text = self._textManager.get( self._textKeys[ self._textIndex ].text );
 	
 	// if index is undefined, set the value to zero
 	index = index || 0;
@@ -215,7 +209,7 @@ TextScreen.prototype._printName = function() {
 
 	if ( this._textKeys[ this._textIndex ].name !== undefined )
 	{
-		var name = this.textManager.get( this._textKeys[ this._textIndex ].name );
+		var name = this._textManager.get( this._textKeys[ this._textIndex ].name );
 		this._$content.textContent += name + ": ";
 	}
 };

@@ -18,12 +18,6 @@ function InformationPanel() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$root : {
-			value : null,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
 		_$content : {
 			value : null,
 			configurable : false,
@@ -52,7 +46,7 @@ InformationPanel.prototype.init = function() {
  */
 InformationPanel.prototype.setText = function( textKey ) {
 
-	this._$content.innerHTML = this.textManager.get( textKey );
+	this._$content.innerHTML = this._textManager.get( textKey );
 };
 
 module.exports = new InformationPanel();

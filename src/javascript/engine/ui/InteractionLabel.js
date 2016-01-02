@@ -18,12 +18,6 @@ function InteractionLabel() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$root : {
-			value : null,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
 		_$content : {
 			value : null,
 			configurable : false,
@@ -60,7 +54,7 @@ InteractionLabel.prototype.show = function( textKey ) {
 
 	if ( this.isActive === false )
 	{
-		this._$content.textContent = this.textManager.get( textKey );
+		this._$content.textContent = this._textManager.get( textKey );
 		this._$root.style.display = "block";
 		this.isActive = true;
 	}
