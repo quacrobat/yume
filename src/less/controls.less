@@ -87,10 +87,12 @@
 	z-index: 1;
 	background-color: @brand-background;
 	text-align: center;
-	transition: transform 0.5s;
+	transition: transform 0.5s, visibility 0.5s;
 	transform: translate3d( 0, 100%, 0 );
+	visibility: hidden;
 	&.slideEffect{
 		transform: translate3d( 0, 0, 0 );
+		visibility: visible;
 	}
 	.content{
 		height: 60px;
