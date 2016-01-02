@@ -21,13 +21,13 @@ function TextScreen() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$textScreen : {
+		_$root : {
 			value : null,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
-		_$textScreenContent : {
+		_$content : {
 			value : null,
 			configurable : false,
 			enumerable : false,
@@ -84,12 +84,12 @@ TextScreen.prototype = Object.create( UiElement.prototype );
 TextScreen.prototype.constructor = TextScreen;
 
 /**
- * Inits the control
+ * Initializes the control.
  */
 TextScreen.prototype.init = function() {
 
-	this._$textScreen = global.document.querySelector( "#text-screen" );
-	this._$textScreenContent = this._$textScreen.querySelector( ".text" );
+	this._$root = global.document.querySelector( "#text-screen" );
+	this._$content = this._$root.querySelector( ".content" );
 };
 
 /**
@@ -112,7 +112,7 @@ TextScreen.prototype.show = function( textKeys, completeCallback ) {
 
 		this._printName();
 		this._printText();
-		this._$textScreen.classList.add( "slideEffect" );
+		this._$root.classList.add( "slideEffect" );
 		
 		// lock controls
 		eventManager.publish( TOPIC.CONTROLS.LOCK, {
@@ -129,8 +129,8 @@ TextScreen.prototype.hide = function() {
 	if ( this.isActive === true )
 	{
 		this.isActive = false;
-		this._$textScreen.classList.remove( "slideEffect" );
-		this._$textScreenContent.textContent = "";
+		this._$root.classList.remove( "slideEffect" );
+		this._$content.textContent = "";
 		this._textIndex = 0;
 		
 		// release controls
@@ -151,16 +151,16 @@ TextScreen.prototype.complete = function() {
 	{
 		this._isPrint = false;
 		clearTimeout( this._printId );
-		this._$textScreenContent.textContent = "";
+		this._$content.textContent = "";
 		this._printName();
-		this._$textScreenContent.textContent += self.textManager.get( this._textKeys[ this._textIndex ].text );
+		this._$content.textContent += self.textManager.get( this._textKeys[ this._textIndex ].text );
 		// switch to next text and start printing
 	}
 	else if ( this._textIndex < this._textKeys.length - 1 )
 	{
 		this._isPrint = true;
 		this._textIndex++;
-		this._$textScreenContent.textContent = "";
+		this._$content.textContent = "";
 		this._printName();
 		this._printText();
 		// finish
@@ -196,7 +196,7 @@ TextScreen.prototype._printText = function( index ) {
 	if ( index < text.length )
 	{
 		// get the next character of the text
-		self._$textScreenContent.textContent += text[ index ];
+		self._$content.textContent += text[ index ];
 		
 		// set a timeout to print the next character
 		self._printId = setTimeout( self._printText, 75, ++index );
@@ -209,14 +209,14 @@ TextScreen.prototype._printText = function( index ) {
 };
 
 /**
- * Prints entirely the name of the person, who is currently speaking.
+ * Prints the name of the speaking person.
  */
 TextScreen.prototype._printName = function() {
 
 	if ( this._textKeys[ this._textIndex ].name !== undefined )
 	{
 		var name = this.textManager.get( this._textKeys[ this._textIndex ].name );
-		this._$textScreenContent.textContent += name + ": ";
+		this._$content.textContent += name + ": ";
 	}
 };
 

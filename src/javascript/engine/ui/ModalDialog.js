@@ -18,7 +18,7 @@ function ModalDialog() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$modal : {
+		_$root : {
 			value : null,
 			configurable : false,
 			enumerable : false,
@@ -63,16 +63,16 @@ ModalDialog.prototype = Object.create( UiElement.prototype );
 ModalDialog.prototype.constructor = ModalDialog;
 
 /**
- * Inits the control
+ * Initializes the control.
  */
 ModalDialog.prototype.init = function() {
 
-	this._$modal = global.document.querySelector( "#modal-dialog" );
+	this._$root = global.document.querySelector( "#modal-dialog" );
 	this._$overlay = global.document.querySelector( ".md-overlay" );
-	this._$close = this._$modal.querySelector( ".md-close" );
-	this._$headline = this._$modal.querySelector( "h2" );
-	this._$button = this._$modal.querySelector( ".btn" );
-	this._$content = this._$modal.querySelector( ".md-text" );
+	this._$close = this._$root.querySelector( ".md-close" );
+	this._$headline = this._$root.querySelector( "h2" );
+	this._$button = this._$root.querySelector( ".btn" );
+	this._$content = this._$root.querySelector( ".md-text" );
 
 	this._$close.addEventListener( "click", this._onClose );
 	this._$overlay.addEventListener( "click", this._onClose );
@@ -84,14 +84,14 @@ ModalDialog.prototype.init = function() {
  * @param {object} textKeys - The texts to display.
  */
 ModalDialog.prototype.show = function( textKeys ) {
+	
+	// show modal
+	this._$root.classList.add( "md-show" );
 
 	// set texts
 	this._$headline.textContent = this.textManager.get( textKeys.headline );
 	this._$button.textContent = this.textManager.get( textKeys.button );
 	this._$content.innerHTML = this.textManager.get( textKeys.content );
-
-	// show modal
-	this._$modal.classList.add( "md-show" );
 
 	// release pointer lock
 	global.document.dispatchEvent( new global.Event( "releasePointer" ) );
@@ -103,7 +103,7 @@ ModalDialog.prototype.show = function( textKeys ) {
 ModalDialog.prototype.hide = function() {
 
 	// hide modal
-	this._$modal.classList.remove( "md-show" );
+	this._$root.classList.remove( "md-show" );
 
 	// lock pointer
 	global.document.dispatchEvent( new global.Event( "lockPointer" ) );

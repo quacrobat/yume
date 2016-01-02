@@ -23,7 +23,7 @@ function PerformanceMonitor() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$performanceMonitor : {
+		_$root : {
 			value : null,
 			configurable : false,
 			enumerable : false,
@@ -70,6 +70,12 @@ function PerformanceMonitor() {
 			configurable : false,
 			enumerable : false,
 			writable : true
+		},
+		isActive : {
+			value : true,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
 	} );
 
@@ -85,22 +91,22 @@ PerformanceMonitor.prototype.constructor = PerformanceMonitor;
 PerformanceMonitor.prototype.init = function() {
 
 	// root element
-	this._$performanceMonitor = global.document.querySelector( "#performance-monitor" );
+	this._$root = global.document.querySelector( "#performance-monitor" );
 
 	// frames per seconds
-	this._$fps = this._$performanceMonitor.querySelector( ".fps" );
+	this._$fps = this._$root.querySelector( ".fps" );
 	this._$fpsText = this._$fps.querySelector( ".text" );
 	this._$fpsGraph = this._$fps.querySelector( ".graph" );
 	this._generateBarChart( this._$fpsGraph );
 
 	// frametime
-	this._$ms = this._$performanceMonitor.querySelector( ".ms" );
+	this._$ms = this._$root.querySelector( ".ms" );
 	this._$msText = this._$ms.querySelector( ".text" );
 	this._$msGraph = this._$ms.querySelector( ".graph" );
 	this._generateBarChart( this._$msGraph );
 
 	// event handler
-	this._$performanceMonitor.addEventListener( "click", this._onSwitchMode );
+	this._$root.addEventListener( "click", this._onSwitchMode );
 };
 
 /**
@@ -152,14 +158,33 @@ PerformanceMonitor.prototype.update = ( function() {
  */
 PerformanceMonitor.prototype.toggle = function() {
 
-	if ( this._$performanceMonitor.style.display === "none" )
+	if ( this.isActive === false )
 	{
-		this._$performanceMonitor.style.display = "block";
+		this.show();
 	}
 	else
 	{
-		this._$performanceMonitor.style.display = "none";
+		this.hide();
 	}
+};
+
+/**
+ * Shows the control.
+ */
+PerformanceMonitor.prototype.show = function() {
+
+	this._$root.style.display = "block";
+	this.isActive = true;
+	
+};
+
+/**
+ * Hides the control.
+ */
+PerformanceMonitor.prototype.hide = function() {
+
+	this._$root.style.display = "none";
+	this.isActive = false;
 };
 
 /**

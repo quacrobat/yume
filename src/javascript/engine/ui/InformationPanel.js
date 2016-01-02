@@ -18,13 +18,13 @@ function InformationPanel() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$informationPanel : {
+		_$root : {
 			value : null,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
-		_$informationPanelContent : {
+		_$content : {
 			value : null,
 			configurable : false,
 			enumerable : false,
@@ -37,22 +37,22 @@ InformationPanel.prototype = Object.create( UiElement.prototype );
 InformationPanel.prototype.constructor = InformationPanel;
 
 /**
- * Inits the control
+ * Initializes the control.
  */
 InformationPanel.prototype.init = function() {
 
-	this._$informationPanel = global.document.querySelector( "#information-panel" );
-	this._$informationPanelContent = this._$informationPanel.querySelector( ".text" );
+	this._$root = global.document.querySelector( "#information-panel" );
+	this._$content = this._$root.querySelector( ".content" );
 };
 
 /**
  * Sets the text of the information panel.
  * 
- * @param {string} textKey - The text-content of the information panel.
+ * @param {string} textKey - The text key of the information panel.
  */
 InformationPanel.prototype.setText = function( textKey ) {
 
-	this._$informationPanelContent.innerHTML = this.textManager.get( textKey );
+	this._$content.innerHTML = this.textManager.get( textKey );
 };
 
 module.exports = new InformationPanel();

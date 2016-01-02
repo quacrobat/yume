@@ -40122,7 +40122,7 @@ FirstPersonControls.prototype._getHeight = function() {
  */
 FirstPersonControls.prototype._handleCrouch = function() {
 
-	// toogle boolean value
+	// toggle boolean value
 	this._isCrouch = !this._isCrouch;
 
 	// running in crouch-mode not possible
@@ -57660,7 +57660,7 @@ function Chat() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$chat : {
+		_$root : {
 			value : null,
 			configurable : false,
 			enumerable : false,
@@ -57683,6 +57683,12 @@ function Chat() {
 			configurable : false,
 			enumerable : false,
 			writable : true
+		},
+		isActive : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
 	} );
 
@@ -57693,25 +57699,25 @@ Chat.prototype = Object.create( UiElement.prototype );
 Chat.prototype.constructor = Chat;
 
 /**
- * Inits the control
+ * Initializes the control.
  */
 Chat.prototype.init = function() {
 
-	this._$chat = global.document.querySelector( "#chat" );
+	this._$root = global.document.querySelector( "#chat" );
 	this._$messages = global.document.querySelector( "#messages" );
-	this._$input = this._$chat.querySelector( ".form-control" );
+	this._$input = this._$root.querySelector( ".form-control" );
 
 	eventManager.subscribe( TOPIC.MULTIPLAYER.MESSAGE, this._onMessage );
 };
 
 /**
- * Toogles the chat-ui and sends the message. While the input field for writing
+ * Toggles the chat-ui and sends the message. While the input field for writing
  * a chat message is visible, the controls are disabled. That means typing wasd
  * won't move the player.
  */
-Chat.prototype.toogle = function() {
+Chat.prototype.toggle = function() {
 
-	if ( this._$chat.style.display === "block" )
+	if ( this._$root.style.display === "block" )
 	{
 		// if the input field contains text,
 		// send it to the server and to the message box(ui)
@@ -57742,8 +57748,9 @@ Chat.prototype.toogle = function() {
  */
 Chat.prototype.show = function() {
 
-	this._$chat.style.display = "block";
+	this._$root.style.display = "block";
 	this._$input.focus();
+	this.isActive = true;
 };
 
 /**
@@ -57751,8 +57758,9 @@ Chat.prototype.show = function() {
  */
 Chat.prototype.hide = function() {
 
-	this._$chat.style.display = "none";
+	this._$root.style.display = "none";
 	this._$input.value = "";
+	this.isActive = false;
 };
 
 /**
@@ -57836,13 +57844,13 @@ function DevelopmentPanel() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$developmentPanel : {
+		_$root : {
 			value : null,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
-		_$developmentPanelContent : {
+		_$content : {
 			value : null,
 			configurable : false,
 			enumerable : false,
@@ -57859,18 +57867,18 @@ DevelopmentPanel.prototype.constructor = DevelopmentPanel;
  */
 DevelopmentPanel.prototype.init = function() {
 
-	this._$developmentPanel = global.document.querySelector( "#development-panel" );
-	this._$developmentPanelContent = this._$developmentPanel.querySelector( ".text" );
+	this._$root = global.document.querySelector( "#development-panel" );
+	this._$content = this._$root.querySelector( ".content" );
 };
 
 /**
  * Sets the text of the development panel.
  * 
- * @param {string} text - The text-content of the development panel.
+ * @param {string} text - The text of the development panel.
  */
 DevelopmentPanel.prototype.setText = function( text ) {
 
-	this._$developmentPanelContent.innerHTML = text;
+	this._$content.innerHTML = text;
 };
 
 module.exports = new DevelopmentPanel();
@@ -57897,13 +57905,13 @@ function InformationPanel() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$informationPanel : {
+		_$root : {
 			value : null,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
-		_$informationPanelContent : {
+		_$content : {
 			value : null,
 			configurable : false,
 			enumerable : false,
@@ -57916,22 +57924,22 @@ InformationPanel.prototype = Object.create( UiElement.prototype );
 InformationPanel.prototype.constructor = InformationPanel;
 
 /**
- * Inits the control
+ * Initializes the control.
  */
 InformationPanel.prototype.init = function() {
 
-	this._$informationPanel = global.document.querySelector( "#information-panel" );
-	this._$informationPanelContent = this._$informationPanel.querySelector( ".text" );
+	this._$root = global.document.querySelector( "#information-panel" );
+	this._$content = this._$root.querySelector( ".content" );
 };
 
 /**
  * Sets the text of the information panel.
  * 
- * @param {string} textKey - The text-content of the information panel.
+ * @param {string} textKey - The text key of the information panel.
  */
 InformationPanel.prototype.setText = function( textKey ) {
 
-	this._$informationPanelContent.innerHTML = this.textManager.get( textKey );
+	this._$content.innerHTML = this.textManager.get( textKey );
 };
 
 module.exports = new InformationPanel();
@@ -57958,13 +57966,19 @@ function InteractionLabel() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$interactionLabel : {
+		_$root : {
 			value : null,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
-		isInteractionLabelActive : {
+		_$content : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
+		isActive : {
 			value : false,
 			configurable : false,
 			enumerable : true,
@@ -57977,25 +57991,26 @@ InteractionLabel.prototype = Object.create( UiElement.prototype );
 InteractionLabel.prototype.constructor = InteractionLabel;
 
 /**
- * Inits the control
+ * Initializes the control.
  */
 InteractionLabel.prototype.init = function() {
 
-	this._$interactionLabel = global.document.querySelector( "#interaction-label .label" );
+	this._$root = global.document.querySelector( "#interaction-label" );
+	this._$content = this._$root.querySelector( ".content" );
 };
 
 /**
  * Shows the interaction label.
  * 
- * @param {string} textKey - The label of the corresponding action.
+ * @param {string} textKey - The text key of the corresponding action.
  */
 InteractionLabel.prototype.show = function( textKey ) {
 
-	if ( this.isInteractionLabelActive === false )
+	if ( this.isActive === false )
 	{
-		this._$interactionLabel.textContent = this.textManager.get( textKey );
-		this._$interactionLabel.style.display = "block";
-		this.isInteractionLabelActive = true;
+		this._$content.textContent = this.textManager.get( textKey );
+		this._$root.style.display = "block";
+		this.isActive = true;
 	}
 };
 
@@ -58004,10 +58019,10 @@ InteractionLabel.prototype.show = function( textKey ) {
  */
 InteractionLabel.prototype.hide = function() {
 
-	if ( this.isInteractionLabelActive === true )
+	if ( this.isActive === true )
 	{
-		this._$interactionLabel.style.display = "none";
-		this.isInteractionLabelActive = false;
+		this._$root.style.display = "none";
+		this.isActive = false;
 	}
 };
 
@@ -58039,7 +58054,7 @@ function LoadingScreen() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$loadingScreen : {
+		_$root : {
 			value : null,
 			configurable : false,
 			enumerable : false,
@@ -58090,16 +58105,16 @@ LoadingScreen.prototype = Object.create( UiElement.prototype );
 LoadingScreen.prototype.constructor = LoadingScreen;
 
 /**
- * Inits the control
+ * Initializes the control.
  */
 LoadingScreen.prototype.init = function() {
 
 	this._transitionEndEvent = this._getTransitionEndEvent();
 
-	this._$loadingScreen = global.document.querySelector( "#loading-screen" );
-	this._$progress = this._$loadingScreen.querySelector( ".progress" );
-	this._$progressBar = this._$loadingScreen.querySelector( ".progress-bar" );
-	this._$text = this._$loadingScreen.querySelector( ".text" );
+	this._$root = global.document.querySelector( "#loading-screen" );
+	this._$progress = this._$root.querySelector( ".progress" );
+	this._$progressBar = this._$root.querySelector( ".progress-bar" );
+	this._$text = this._$root.querySelector( ".text" );
 
 	// subscriptions
 	eventManager.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
@@ -58117,10 +58132,10 @@ LoadingScreen.prototype.show = function( callback ) {
 	// callback
 	function onTransitionEnd( event ) {
 
-		if ( event.target.id === self._$loadingScreen.id )
+		if ( event.target.id === self._$root.id )
 		{
 			// remove event listener, so it runs only once
-			self._$loadingScreen.removeEventListener( self._transitionEndEvent, onTransitionEnd );
+			self._$root.removeEventListener( self._transitionEndEvent, onTransitionEnd );
 			if ( typeof callback === "function" )
 			{
 				callback();
@@ -58129,10 +58144,10 @@ LoadingScreen.prototype.show = function( callback ) {
 	}
 
 	// add event-listener
-	this._$loadingScreen.addEventListener( this._transitionEndEvent, onTransitionEnd );
+	this._$root.addEventListener( this._transitionEndEvent, onTransitionEnd );
 
 	// show loading screen
-	this._$loadingScreen.classList.add( "fadeIn" );
+	this._$root.classList.add( "fadeIn" );
 
 	// set flags
 	this.isActive = true;
@@ -58147,10 +58162,10 @@ LoadingScreen.prototype.hide = function() {
 	// callback
 	function onTransitionEnd( event ) {
 
-		if ( event.target.id === self._$loadingScreen.id )
+		if ( event.target.id === self._$root.id )
 		{
 			// remove event listener, so it runs only once
-			self._$loadingScreen.removeEventListener( self._transitionEndEvent, onTransitionEnd );
+			self._$root.removeEventListener( self._transitionEndEvent, onTransitionEnd );
 
 			// reset CSS classes
 			self._$text.classList.remove( "fadeIn" );
@@ -58162,10 +58177,10 @@ LoadingScreen.prototype.hide = function() {
 	}
 
 	// add event-listener
-	this._$loadingScreen.addEventListener( this._transitionEndEvent, onTransitionEnd );
+	this._$root.addEventListener( this._transitionEndEvent, onTransitionEnd );
 
 	// hide loading screen
-	this._$loadingScreen.classList.remove( "fadeIn" );
+	this._$root.classList.remove( "fadeIn" );
 
 	// set flags
 	this.isActive = false;
@@ -58229,7 +58244,7 @@ function Menu() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$menu : {
+		_$root : {
 			value : null,
 			configurable : false,
 			enumerable : false,
@@ -58268,15 +58283,15 @@ Menu.prototype = Object.create( UiElement.prototype );
 Menu.prototype.constructor = Menu;
 
 /**
- * Inits the control
+ * Initializes the control.
  */
 Menu.prototype.init = function() {
 
-	this._$menu = global.document.querySelector( "#menu" );
-	this._$button = this._$menu.querySelector( ".btn" );
-	this._$text = this._$menu.querySelector( ".text" );
-	this._$progress = this._$menu.querySelector( ".progress" );
-	this._$progressBar = this._$menu.querySelector( ".progress-bar" );
+	this._$root = global.document.querySelector( "#menu" );
+	this._$button = this._$root.querySelector( ".btn" );
+	this._$text = this._$root.querySelector( ".text" );
+	this._$progress = this._$root.querySelector( ".progress" );
+	this._$progressBar = this._$root.querySelector( ".progress-bar" );
 
 	// subscriptions
 	eventManager.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
@@ -58291,8 +58306,8 @@ Menu.prototype.init = function() {
  */
 Menu.prototype.show = function() {
 
+	this._$root.style.display = "block";
 	this._$text.style.display = "none";
-	this._$menu.style.display = "block";
 	this._$button.style.display = "block";
 };
 
@@ -58301,7 +58316,7 @@ Menu.prototype.show = function() {
  */
 Menu.prototype.hide = function() {
 
-	this._$menu.style.display = "none";
+	this._$root.style.display = "none";
 };
 
 /**
@@ -58381,7 +58396,7 @@ function ModalDialog() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$modal : {
+		_$root : {
 			value : null,
 			configurable : false,
 			enumerable : false,
@@ -58426,16 +58441,16 @@ ModalDialog.prototype = Object.create( UiElement.prototype );
 ModalDialog.prototype.constructor = ModalDialog;
 
 /**
- * Inits the control
+ * Initializes the control.
  */
 ModalDialog.prototype.init = function() {
 
-	this._$modal = global.document.querySelector( "#modal-dialog" );
+	this._$root = global.document.querySelector( "#modal-dialog" );
 	this._$overlay = global.document.querySelector( ".md-overlay" );
-	this._$close = this._$modal.querySelector( ".md-close" );
-	this._$headline = this._$modal.querySelector( "h2" );
-	this._$button = this._$modal.querySelector( ".btn" );
-	this._$content = this._$modal.querySelector( ".md-text" );
+	this._$close = this._$root.querySelector( ".md-close" );
+	this._$headline = this._$root.querySelector( "h2" );
+	this._$button = this._$root.querySelector( ".btn" );
+	this._$content = this._$root.querySelector( ".md-text" );
 
 	this._$close.addEventListener( "click", this._onClose );
 	this._$overlay.addEventListener( "click", this._onClose );
@@ -58447,14 +58462,14 @@ ModalDialog.prototype.init = function() {
  * @param {object} textKeys - The texts to display.
  */
 ModalDialog.prototype.show = function( textKeys ) {
+	
+	// show modal
+	this._$root.classList.add( "md-show" );
 
 	// set texts
 	this._$headline.textContent = this.textManager.get( textKeys.headline );
 	this._$button.textContent = this.textManager.get( textKeys.button );
 	this._$content.innerHTML = this.textManager.get( textKeys.content );
-
-	// show modal
-	this._$modal.classList.add( "md-show" );
 
 	// release pointer lock
 	global.document.dispatchEvent( new global.Event( "releasePointer" ) );
@@ -58466,7 +58481,7 @@ ModalDialog.prototype.show = function( textKeys ) {
 ModalDialog.prototype.hide = function() {
 
 	// hide modal
-	this._$modal.classList.remove( "md-show" );
+	this._$root.classList.remove( "md-show" );
 
 	// lock pointer
 	global.document.dispatchEvent( new global.Event( "lockPointer" ) );
@@ -58510,7 +58525,7 @@ function PerformanceMonitor() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$performanceMonitor : {
+		_$root : {
 			value : null,
 			configurable : false,
 			enumerable : false,
@@ -58557,6 +58572,12 @@ function PerformanceMonitor() {
 			configurable : false,
 			enumerable : false,
 			writable : true
+		},
+		isActive : {
+			value : true,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
 	} );
 
@@ -58572,22 +58593,22 @@ PerformanceMonitor.prototype.constructor = PerformanceMonitor;
 PerformanceMonitor.prototype.init = function() {
 
 	// root element
-	this._$performanceMonitor = global.document.querySelector( "#performance-monitor" );
+	this._$root = global.document.querySelector( "#performance-monitor" );
 
 	// frames per seconds
-	this._$fps = this._$performanceMonitor.querySelector( ".fps" );
+	this._$fps = this._$root.querySelector( ".fps" );
 	this._$fpsText = this._$fps.querySelector( ".text" );
 	this._$fpsGraph = this._$fps.querySelector( ".graph" );
 	this._generateBarChart( this._$fpsGraph );
 
 	// frametime
-	this._$ms = this._$performanceMonitor.querySelector( ".ms" );
+	this._$ms = this._$root.querySelector( ".ms" );
 	this._$msText = this._$ms.querySelector( ".text" );
 	this._$msGraph = this._$ms.querySelector( ".graph" );
 	this._generateBarChart( this._$msGraph );
 
 	// event handler
-	this._$performanceMonitor.addEventListener( "click", this._onSwitchMode );
+	this._$root.addEventListener( "click", this._onSwitchMode );
 };
 
 /**
@@ -58639,14 +58660,33 @@ PerformanceMonitor.prototype.update = ( function() {
  */
 PerformanceMonitor.prototype.toggle = function() {
 
-	if ( this._$performanceMonitor.style.display === "none" )
+	if ( this.isActive === false )
 	{
-		this._$performanceMonitor.style.display = "block";
+		this.show();
 	}
 	else
 	{
-		this._$performanceMonitor.style.display = "none";
+		this.hide();
 	}
+};
+
+/**
+ * Shows the control.
+ */
+PerformanceMonitor.prototype.show = function() {
+
+	this._$root.style.display = "block";
+	this.isActive = true;
+	
+};
+
+/**
+ * Hides the control.
+ */
+PerformanceMonitor.prototype.hide = function() {
+
+	this._$root.style.display = "none";
+	this.isActive = false;
 };
 
 /**
@@ -58727,13 +58767,13 @@ function TextScreen() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$textScreen : {
+		_$root : {
 			value : null,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
-		_$textScreenContent : {
+		_$content : {
 			value : null,
 			configurable : false,
 			enumerable : false,
@@ -58790,12 +58830,12 @@ TextScreen.prototype = Object.create( UiElement.prototype );
 TextScreen.prototype.constructor = TextScreen;
 
 /**
- * Inits the control
+ * Initializes the control.
  */
 TextScreen.prototype.init = function() {
 
-	this._$textScreen = global.document.querySelector( "#text-screen" );
-	this._$textScreenContent = this._$textScreen.querySelector( ".text" );
+	this._$root = global.document.querySelector( "#text-screen" );
+	this._$content = this._$root.querySelector( ".content" );
 };
 
 /**
@@ -58818,7 +58858,7 @@ TextScreen.prototype.show = function( textKeys, completeCallback ) {
 
 		this._printName();
 		this._printText();
-		this._$textScreen.classList.add( "slideEffect" );
+		this._$root.classList.add( "slideEffect" );
 		
 		// lock controls
 		eventManager.publish( TOPIC.CONTROLS.LOCK, {
@@ -58835,8 +58875,8 @@ TextScreen.prototype.hide = function() {
 	if ( this.isActive === true )
 	{
 		this.isActive = false;
-		this._$textScreen.classList.remove( "slideEffect" );
-		this._$textScreenContent.textContent = "";
+		this._$root.classList.remove( "slideEffect" );
+		this._$content.textContent = "";
 		this._textIndex = 0;
 		
 		// release controls
@@ -58857,16 +58897,16 @@ TextScreen.prototype.complete = function() {
 	{
 		this._isPrint = false;
 		clearTimeout( this._printId );
-		this._$textScreenContent.textContent = "";
+		this._$content.textContent = "";
 		this._printName();
-		this._$textScreenContent.textContent += self.textManager.get( this._textKeys[ this._textIndex ].text );
+		this._$content.textContent += self.textManager.get( this._textKeys[ this._textIndex ].text );
 		// switch to next text and start printing
 	}
 	else if ( this._textIndex < this._textKeys.length - 1 )
 	{
 		this._isPrint = true;
 		this._textIndex++;
-		this._$textScreenContent.textContent = "";
+		this._$content.textContent = "";
 		this._printName();
 		this._printText();
 		// finish
@@ -58902,7 +58942,7 @@ TextScreen.prototype._printText = function( index ) {
 	if ( index < text.length )
 	{
 		// get the next character of the text
-		self._$textScreenContent.textContent += text[ index ];
+		self._$content.textContent += text[ index ];
 		
 		// set a timeout to print the next character
 		self._printId = setTimeout( self._printText, 75, ++index );
@@ -58915,14 +58955,14 @@ TextScreen.prototype._printText = function( index ) {
 };
 
 /**
- * Prints entirely the name of the person, who is currently speaking.
+ * Prints the name of the speaking person.
  */
 TextScreen.prototype._printName = function() {
 
 	if ( this._textKeys[ this._textIndex ].name !== undefined )
 	{
 		var name = this.textManager.get( this._textKeys[ this._textIndex ].name );
-		this._$textScreenContent.textContent += name + ": ";
+		this._$content.textContent += name + ": ";
 	}
 };
 
@@ -58947,7 +58987,15 @@ var textManager = require( "../etc/TextManager" );
  */
 function UiElement() {
 
-	this.textManager = textManager;
+	Object.defineProperties( this, {
+		textManager : {
+			value : textManager,
+			configurable : false,
+			enumerable : false,
+			writable : false
+		}
+	} );
+	
 }
 
 /**
@@ -59187,7 +59235,7 @@ UserInterfaceManager.prototype.handleUiInteraction = function() {
 };
 
 /**
- * Maps global events to topics
+ * Maps global events to topics.
  */
 UserInterfaceManager.prototype._mapGlobalEventsToTopics = function() {
 
@@ -59198,7 +59246,7 @@ UserInterfaceManager.prototype._mapGlobalEventsToTopics = function() {
 };
 
 /**
- * Inits global event handlers
+ * Initializes global event handlers.
  */
 UserInterfaceManager.prototype._initGlobalEventHandler = function() {
 
@@ -59229,26 +59277,31 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 		// enter
 		case 13:
 
-			chat.toogle();
+			chat.toggle();
 
 			break;
 
 		// space
 		case 32:
 
-			// prevent scrolling
-			event.preventDefault();
+			if ( chat.isActive === false )
+			{
+				// prevent scrolling
+				event.preventDefault();
 
-			// because pressing the space key can cause different actions, the
-			// logic for this key handling is placed in a separate method
-			self.handleUiInteraction();
+				// because pressing the space key can cause different actions,
+				// the
+				// logic for this key handling is placed in a separate method
+				self.handleUiInteraction();
+
+			}
 
 			break;
 
 		// f
 		case 70:
 
-			if ( system.isDevModeActive === true )
+			if ( system.isDevModeActive === true && chat.isActive === false )
 			{
 				performanceMonitor.toggle();
 			}

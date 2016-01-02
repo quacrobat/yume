@@ -22,7 +22,7 @@ function Menu() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$menu : {
+		_$root : {
 			value : null,
 			configurable : false,
 			enumerable : false,
@@ -61,15 +61,15 @@ Menu.prototype = Object.create( UiElement.prototype );
 Menu.prototype.constructor = Menu;
 
 /**
- * Inits the control
+ * Initializes the control.
  */
 Menu.prototype.init = function() {
 
-	this._$menu = global.document.querySelector( "#menu" );
-	this._$button = this._$menu.querySelector( ".btn" );
-	this._$text = this._$menu.querySelector( ".text" );
-	this._$progress = this._$menu.querySelector( ".progress" );
-	this._$progressBar = this._$menu.querySelector( ".progress-bar" );
+	this._$root = global.document.querySelector( "#menu" );
+	this._$button = this._$root.querySelector( ".btn" );
+	this._$text = this._$root.querySelector( ".text" );
+	this._$progress = this._$root.querySelector( ".progress" );
+	this._$progressBar = this._$root.querySelector( ".progress-bar" );
 
 	// subscriptions
 	eventManager.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
@@ -84,8 +84,8 @@ Menu.prototype.init = function() {
  */
 Menu.prototype.show = function() {
 
+	this._$root.style.display = "block";
 	this._$text.style.display = "none";
-	this._$menu.style.display = "block";
 	this._$button.style.display = "block";
 };
 
@@ -94,7 +94,7 @@ Menu.prototype.show = function() {
  */
 Menu.prototype.hide = function() {
 
-	this._$menu.style.display = "none";
+	this._$root.style.display = "none";
 };
 
 /**

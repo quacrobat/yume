@@ -18,13 +18,19 @@ function InteractionLabel() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$interactionLabel : {
+		_$root : {
 			value : null,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
-		isInteractionLabelActive : {
+		_$content : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
+		isActive : {
 			value : false,
 			configurable : false,
 			enumerable : true,
@@ -37,25 +43,26 @@ InteractionLabel.prototype = Object.create( UiElement.prototype );
 InteractionLabel.prototype.constructor = InteractionLabel;
 
 /**
- * Inits the control
+ * Initializes the control.
  */
 InteractionLabel.prototype.init = function() {
 
-	this._$interactionLabel = global.document.querySelector( "#interaction-label .label" );
+	this._$root = global.document.querySelector( "#interaction-label" );
+	this._$content = this._$root.querySelector( ".content" );
 };
 
 /**
  * Shows the interaction label.
  * 
- * @param {string} textKey - The label of the corresponding action.
+ * @param {string} textKey - The text key of the corresponding action.
  */
 InteractionLabel.prototype.show = function( textKey ) {
 
-	if ( this.isInteractionLabelActive === false )
+	if ( this.isActive === false )
 	{
-		this._$interactionLabel.textContent = this.textManager.get( textKey );
-		this._$interactionLabel.style.display = "block";
-		this.isInteractionLabelActive = true;
+		this._$content.textContent = this.textManager.get( textKey );
+		this._$root.style.display = "block";
+		this.isActive = true;
 	}
 };
 
@@ -64,10 +71,10 @@ InteractionLabel.prototype.show = function( textKey ) {
  */
 InteractionLabel.prototype.hide = function() {
 
-	if ( this.isInteractionLabelActive === true )
+	if ( this.isActive === true )
 	{
-		this._$interactionLabel.style.display = "none";
-		this.isInteractionLabelActive = false;
+		this._$root.style.display = "none";
+		this.isActive = false;
 	}
 };
 

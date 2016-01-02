@@ -19,13 +19,13 @@ function DevelopmentPanel() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$developmentPanel : {
+		_$root : {
 			value : null,
 			configurable : false,
 			enumerable : false,
 			writable : true
 		},
-		_$developmentPanelContent : {
+		_$content : {
 			value : null,
 			configurable : false,
 			enumerable : false,
@@ -42,18 +42,18 @@ DevelopmentPanel.prototype.constructor = DevelopmentPanel;
  */
 DevelopmentPanel.prototype.init = function() {
 
-	this._$developmentPanel = global.document.querySelector( "#development-panel" );
-	this._$developmentPanelContent = this._$developmentPanel.querySelector( ".text" );
+	this._$root = global.document.querySelector( "#development-panel" );
+	this._$content = this._$root.querySelector( ".content" );
 };
 
 /**
  * Sets the text of the development panel.
  * 
- * @param {string} text - The text-content of the development panel.
+ * @param {string} text - The text of the development panel.
  */
 DevelopmentPanel.prototype.setText = function( text ) {
 
-	this._$developmentPanelContent.innerHTML = text;
+	this._$content.innerHTML = text;
 };
 
 module.exports = new DevelopmentPanel();

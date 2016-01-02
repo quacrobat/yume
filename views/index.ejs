@@ -106,17 +106,20 @@
 		</div>
 	</section>
 	
+	<!-- Crosshairs
+    ================================================== -->
+	<section id="crosshairs"></section>
+	
 	<!-- Interaction-Label
     ================================================== -->
 	<section id="interaction-label">
-		<div class="icon"></div>
-		<div class="label label-primary"></div>
+		<div class="content label label-primary"></div>
 	</section>
 	
 	<!-- Text-Screen
     ================================================== -->
 	<section id="text-screen">
-		<div class="text"></div>
+		<div class="content"></div>
 		<div class="controls"><%= __("Game.TextScreen.Continue") %></div>
 	</section>
 	
@@ -146,7 +149,7 @@
 	<!-- Information-Panel
     ================================================== -->
 	<section id="information-panel">
-		<div class="text"></div>
+		<div class="content"></div>
 	</section>
 	
 	 <% if( isDevModeActive === true ){ %>
@@ -154,7 +157,7 @@
 		<!-- Development-Panel
 	    ================================================== -->
 		<section id="development-panel">
-			<div class="text"></div>
+			<div class="content"></div>
 		</section>
 		
 		<!-- Performance-Monitor

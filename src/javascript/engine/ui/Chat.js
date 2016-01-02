@@ -22,7 +22,7 @@ function Chat() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$chat : {
+		_$root : {
 			value : null,
 			configurable : false,
 			enumerable : false,
@@ -45,6 +45,12 @@ function Chat() {
 			configurable : false,
 			enumerable : false,
 			writable : true
+		},
+		isActive : {
+			value : false,
+			configurable : false,
+			enumerable : true,
+			writable : true
 		}
 	} );
 
@@ -55,25 +61,25 @@ Chat.prototype = Object.create( UiElement.prototype );
 Chat.prototype.constructor = Chat;
 
 /**
- * Inits the control
+ * Initializes the control.
  */
 Chat.prototype.init = function() {
 
-	this._$chat = global.document.querySelector( "#chat" );
+	this._$root = global.document.querySelector( "#chat" );
 	this._$messages = global.document.querySelector( "#messages" );
-	this._$input = this._$chat.querySelector( ".form-control" );
+	this._$input = this._$root.querySelector( ".form-control" );
 
 	eventManager.subscribe( TOPIC.MULTIPLAYER.MESSAGE, this._onMessage );
 };
 
 /**
- * Toogles the chat-ui and sends the message. While the input field for writing
+ * Toggles the chat-ui and sends the message. While the input field for writing
  * a chat message is visible, the controls are disabled. That means typing wasd
  * won't move the player.
  */
-Chat.prototype.toogle = function() {
+Chat.prototype.toggle = function() {
 
-	if ( this._$chat.style.display === "block" )
+	if ( this._$root.style.display === "block" )
 	{
 		// if the input field contains text,
 		// send it to the server and to the message box(ui)
@@ -104,8 +110,9 @@ Chat.prototype.toogle = function() {
  */
 Chat.prototype.show = function() {
 
-	this._$chat.style.display = "block";
+	this._$root.style.display = "block";
 	this._$input.focus();
+	this.isActive = true;
 };
 
 /**
@@ -113,8 +120,9 @@ Chat.prototype.show = function() {
  */
 Chat.prototype.hide = function() {
 
-	this._$chat.style.display = "none";
+	this._$root.style.display = "none";
 	this._$input.value = "";
+	this.isActive = false;
 };
 
 /**

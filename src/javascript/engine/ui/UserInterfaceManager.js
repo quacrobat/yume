@@ -205,7 +205,7 @@ UserInterfaceManager.prototype.handleUiInteraction = function() {
 };
 
 /**
- * Maps global events to topics
+ * Maps global events to topics.
  */
 UserInterfaceManager.prototype._mapGlobalEventsToTopics = function() {
 
@@ -216,7 +216,7 @@ UserInterfaceManager.prototype._mapGlobalEventsToTopics = function() {
 };
 
 /**
- * Inits global event handlers
+ * Initializes global event handlers.
  */
 UserInterfaceManager.prototype._initGlobalEventHandler = function() {
 
@@ -247,26 +247,31 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 		// enter
 		case 13:
 
-			chat.toogle();
+			chat.toggle();
 
 			break;
 
 		// space
 		case 32:
 
-			// prevent scrolling
-			event.preventDefault();
+			if ( chat.isActive === false )
+			{
+				// prevent scrolling
+				event.preventDefault();
 
-			// because pressing the space key can cause different actions, the
-			// logic for this key handling is placed in a separate method
-			self.handleUiInteraction();
+				// because pressing the space key can cause different actions,
+				// the
+				// logic for this key handling is placed in a separate method
+				self.handleUiInteraction();
+
+			}
 
 			break;
 
 		// f
 		case 70:
 
-			if ( system.isDevModeActive === true )
+			if ( system.isDevModeActive === true && chat.isActive === false )
 			{
 				performanceMonitor.toggle();
 			}

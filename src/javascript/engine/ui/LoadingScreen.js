@@ -22,7 +22,7 @@ function LoadingScreen() {
 	UiElement.call( this );
 
 	Object.defineProperties( this, {
-		_$loadingScreen : {
+		_$root : {
 			value : null,
 			configurable : false,
 			enumerable : false,
@@ -73,16 +73,16 @@ LoadingScreen.prototype = Object.create( UiElement.prototype );
 LoadingScreen.prototype.constructor = LoadingScreen;
 
 /**
- * Inits the control
+ * Initializes the control.
  */
 LoadingScreen.prototype.init = function() {
 
 	this._transitionEndEvent = this._getTransitionEndEvent();
 
-	this._$loadingScreen = global.document.querySelector( "#loading-screen" );
-	this._$progress = this._$loadingScreen.querySelector( ".progress" );
-	this._$progressBar = this._$loadingScreen.querySelector( ".progress-bar" );
-	this._$text = this._$loadingScreen.querySelector( ".text" );
+	this._$root = global.document.querySelector( "#loading-screen" );
+	this._$progress = this._$root.querySelector( ".progress" );
+	this._$progressBar = this._$root.querySelector( ".progress-bar" );
+	this._$text = this._$root.querySelector( ".text" );
 
 	// subscriptions
 	eventManager.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
@@ -100,10 +100,10 @@ LoadingScreen.prototype.show = function( callback ) {
 	// callback
 	function onTransitionEnd( event ) {
 
-		if ( event.target.id === self._$loadingScreen.id )
+		if ( event.target.id === self._$root.id )
 		{
 			// remove event listener, so it runs only once
-			self._$loadingScreen.removeEventListener( self._transitionEndEvent, onTransitionEnd );
+			self._$root.removeEventListener( self._transitionEndEvent, onTransitionEnd );
 			if ( typeof callback === "function" )
 			{
 				callback();
@@ -112,10 +112,10 @@ LoadingScreen.prototype.show = function( callback ) {
 	}
 
 	// add event-listener
-	this._$loadingScreen.addEventListener( this._transitionEndEvent, onTransitionEnd );
+	this._$root.addEventListener( this._transitionEndEvent, onTransitionEnd );
 
 	// show loading screen
-	this._$loadingScreen.classList.add( "fadeIn" );
+	this._$root.classList.add( "fadeIn" );
 
 	// set flags
 	this.isActive = true;
@@ -130,10 +130,10 @@ LoadingScreen.prototype.hide = function() {
 	// callback
 	function onTransitionEnd( event ) {
 
-		if ( event.target.id === self._$loadingScreen.id )
+		if ( event.target.id === self._$root.id )
 		{
 			// remove event listener, so it runs only once
-			self._$loadingScreen.removeEventListener( self._transitionEndEvent, onTransitionEnd );
+			self._$root.removeEventListener( self._transitionEndEvent, onTransitionEnd );
 
 			// reset CSS classes
 			self._$text.classList.remove( "fadeIn" );
@@ -145,10 +145,10 @@ LoadingScreen.prototype.hide = function() {
 	}
 
 	// add event-listener
-	this._$loadingScreen.addEventListener( this._transitionEndEvent, onTransitionEnd );
+	this._$root.addEventListener( this._transitionEndEvent, onTransitionEnd );
 
 	// hide loading screen
-	this._$loadingScreen.classList.remove( "fadeIn" );
+	this._$root.classList.remove( "fadeIn" );
 
 	// set flags
 	this.isActive = false;

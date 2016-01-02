@@ -626,7 +626,7 @@ FirstPersonControls.prototype._getHeight = function() {
  */
 FirstPersonControls.prototype._handleCrouch = function() {
 
-	// toogle boolean value
+	// toggle boolean value
 	this._isCrouch = !this._isCrouch;
 
 	// running in crouch-mode not possible
