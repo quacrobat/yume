@@ -13,6 +13,7 @@ var UiElement = require( "./UiElement" );
  * Creates the development panel.
  * 
  * @constructor
+ * @augments UiElement
  */
 function DevelopmentPanel() {
 

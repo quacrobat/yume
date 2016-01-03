@@ -17,6 +17,7 @@ var self;
  * Creates the performance monitor.
  * 
  * @constructor
+ * @augments UiElement
  */
 function PerformanceMonitor() {
 

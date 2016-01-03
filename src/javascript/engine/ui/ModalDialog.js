@@ -12,6 +12,7 @@ var self;
  * Creates the modal label.
  * 
  * @constructor
+ * @augments UiElement
  */
 function ModalDialog() {
 
@@ -46,6 +47,12 @@ function ModalDialog() {
 			value : false,
 			configurable : false,
 			enumerable : false,
+			writable : true
+		},
+		isActive : {
+			value : false,
+			configurable : false,
+			enumerable : true,
 			writable : true
 		}
 	} );
@@ -89,6 +96,9 @@ ModalDialog.prototype.show = function( textKeys ) {
 
 	// release pointer lock
 	global.document.dispatchEvent( new global.Event( "releasePointer" ) );
+	
+	// set active flag
+	this.isActive = true;
 };
 
 /**
@@ -101,6 +111,9 @@ ModalDialog.prototype.hide = function() {
 
 	// lock pointer
 	global.document.dispatchEvent( new global.Event( "lockPointer" ) );
+	
+	// set active flag
+	this.isActive = false;
 };
 
 /**

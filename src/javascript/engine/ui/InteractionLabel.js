@@ -12,6 +12,7 @@ var UiElement = require( "./UiElement" );
  * Creates the interaction label.
  * 
  * @constructor
+ * @augments UiElement
  */
 function InteractionLabel() {
 

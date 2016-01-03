@@ -247,7 +247,10 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 		// enter
 		case 13:
 
-			chat.toggle();
+			if ( textScreen.isActive === false && modalDialog.isActive === false )
+			{
+				chat.toggle();
+			}
 
 			break;
 
@@ -260,8 +263,7 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 				event.preventDefault();
 
 				// because pressing the space key can cause different actions,
-				// the
-				// logic for this key handling is placed in a separate method
+				// the logic for this key handling is placed in a separate method
 				self.handleUiInteraction();
 
 			}

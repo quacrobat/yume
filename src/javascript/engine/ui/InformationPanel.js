@@ -12,6 +12,7 @@ var UiElement = require( "./UiElement" );
  * Creates the information panel.
  * 
  * @constructor
+ * @augments UiElement
  */
 function InformationPanel() {
 

@@ -57832,6 +57832,7 @@ var UiElement = require( "./UiElement" );
  * Creates the development panel.
  * 
  * @constructor
+ * @augments UiElement
  */
 function DevelopmentPanel() {
 
@@ -57887,6 +57888,7 @@ var UiElement = require( "./UiElement" );
  * Creates the information panel.
  * 
  * @constructor
+ * @augments UiElement
  */
 function InformationPanel() {
 
@@ -57942,6 +57944,7 @@ var UiElement = require( "./UiElement" );
  * Creates the interaction label.
  * 
  * @constructor
+ * @augments UiElement
  */
 function InteractionLabel() {
 
@@ -58208,6 +58211,7 @@ var self;
  * Creates the menu.
  * 
  * @constructor
+ * @augments UiElement
  */
 function Menu() {
 
@@ -58354,6 +58358,7 @@ var self;
  * Creates the modal label.
  * 
  * @constructor
+ * @augments UiElement
  */
 function ModalDialog() {
 
@@ -58388,6 +58393,12 @@ function ModalDialog() {
 			value : false,
 			configurable : false,
 			enumerable : false,
+			writable : true
+		},
+		isActive : {
+			value : false,
+			configurable : false,
+			enumerable : true,
 			writable : true
 		}
 	} );
@@ -58431,6 +58442,9 @@ ModalDialog.prototype.show = function( textKeys ) {
 
 	// release pointer lock
 	global.document.dispatchEvent( new global.Event( "releasePointer" ) );
+	
+	// set active flag
+	this.isActive = true;
 };
 
 /**
@@ -58443,6 +58457,9 @@ ModalDialog.prototype.hide = function() {
 
 	// lock pointer
 	global.document.dispatchEvent( new global.Event( "lockPointer" ) );
+	
+	// set active flag
+	this.isActive = false;
 };
 
 /**
@@ -58477,6 +58494,7 @@ var self;
  * Creates the performance monitor.
  * 
  * @constructor
+ * @augments UiElement
  */
 function PerformanceMonitor() {
 
@@ -58713,6 +58731,7 @@ var TOPIC = require( "../messaging/Topic" );
  * Creates the text screen.
  * 
  * @constructor
+ * @augments UiElement
  */
 function TextScreen() {
 
@@ -58749,12 +58768,6 @@ function TextScreen() {
 			enumerable : false,
 			writable : true
 		},
-		isActive : {
-			value : false,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
 		_textIndex : {
 			value : 0,
 			configurable : false,
@@ -58765,6 +58778,12 @@ function TextScreen() {
 			value : 0,
 			configurable : false,
 			enumerable : false,
+			writable : true
+		},
+		isActive : {
+			value : false,
+			configurable : false,
+			enumerable : true,
 			writable : true
 		}
 	} );
@@ -58927,7 +58946,7 @@ module.exports = new TextScreen();
 var textManager = require( "../etc/TextManager" );
 
 /**
- * Creates an ui-element
+ * Creates an ui-element.
  * 
  * @constructor
  */
@@ -59231,7 +59250,10 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 		// enter
 		case 13:
 
-			chat.toggle();
+			if ( textScreen.isActive === false && modalDialog.isActive === false )
+			{
+				chat.toggle();
+			}
 
 			break;
 
@@ -59244,8 +59266,7 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 				event.preventDefault();
 
 				// because pressing the space key can cause different actions,
-				// the
-				// logic for this key handling is placed in a separate method
+				// the logic for this key handling is placed in a separate method
 				self.handleUiInteraction();
 
 			}

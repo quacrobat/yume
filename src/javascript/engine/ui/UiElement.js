@@ -9,7 +9,7 @@
 var textManager = require( "../etc/TextManager" );
 
 /**
- * Creates an ui-element
+ * Creates an ui-element.
  * 
  * @constructor
  */

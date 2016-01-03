@@ -16,6 +16,7 @@ var self;
  * Creates the menu.
  * 
  * @constructor
+ * @augments UiElement
  */
 function Menu() {
 

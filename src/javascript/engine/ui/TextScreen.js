@@ -15,6 +15,7 @@ var TOPIC = require( "../messaging/Topic" );
  * Creates the text screen.
  * 
  * @constructor
+ * @augments UiElement
  */
 function TextScreen() {
 
@@ -51,12 +52,6 @@ function TextScreen() {
 			enumerable : false,
 			writable : true
 		},
-		isActive : {
-			value : false,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		},
 		_textIndex : {
 			value : 0,
 			configurable : false,
@@ -67,6 +62,12 @@ function TextScreen() {
 			value : 0,
 			configurable : false,
 			enumerable : false,
+			writable : true
+		},
+		isActive : {
+			value : false,
+			configurable : false,
+			enumerable : true,
 			writable : true
 		}
 	} );
