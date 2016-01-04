@@ -47,6 +47,12 @@ function Menu() {
 			enumerable : false,
 			writable : true
 		},
+		isActive : {
+			value : true,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		}
 	} );
 
 	self = this;
@@ -82,6 +88,8 @@ Menu.prototype.show = function() {
 	this._$root.style.display = "block";
 	this._$text.style.display = "none";
 	this._$button.style.display = "block";
+	
+	this.isActive = true;
 };
 
 /**
@@ -90,6 +98,8 @@ Menu.prototype.show = function() {
 Menu.prototype.hide = function() {
 
 	this._$root.style.display = "none";
+	
+	this.isActive = false;
 };
 
 /**

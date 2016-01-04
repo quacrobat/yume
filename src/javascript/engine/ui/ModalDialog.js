@@ -118,6 +118,8 @@ ModalDialog.prototype.hide = function() {
 
 /**
  * This method handles event for closing the element.
+ * 
+ * @param {object} event - Default event object.
  */
 ModalDialog.prototype._onClose = function( event ) {
 

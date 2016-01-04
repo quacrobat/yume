@@ -209,15 +209,110 @@
 
 #development-panel{
 	position: absolute;
+	z-index: 1;
 	left: 0;
-	bottom: 0;
-	.content{
-		padding: 5px;
-		border-radius: 5px;
-		background-color: fade(@brand-background, 80);
-		&:empty{
-			display: none;
+	height: 100%;
+	width: 300px;
+	background-color: @brand-background;
+	transform: translate3d(-100%, 0, 0);
+	transition: transform 0.5s, visibility 0.5s;
+	visibility: hidden;
+	&.open{
+		transform: translate3d( 0, 0, 0 );
+		visibility: visible;
+	}
+	header{
+		padding: 1em 0 0 0;
+		text-align: center;
+	}
+	.breadcrumbs {
+		font-size: 0.7em;
+		padding: 2.5em 3.75em 1.5em 2.5em;
+		a{
+			display: inline-block;
+			cursor: pointer;
+			font-weight: bold;
+			letter-spacing: 1px;
+			text-transform: uppercase;
+			vertical-align: middle;
+			&:hover{
+				text-decoration: none;
+			}
+			&:last-child{
+				pointer-events: none;
+			}
+			&:not(:last-child):after{
+				color: darken(@brand-primary, 25%);
+				content: "\e258";	
+				font-family: "Glyphicons Halflings";
+				padding: 0 0.5em;
+				font-size: 0.8em;
+			}
 		}
+	}
+	.menu{
+		position: absolute;
+	    overflow: hidden;
+	    width: 100%;
+	    bottom: 0;
+	    top: 120px;
+	    .level{
+	    	position: absolute;
+			top: 0;
+			left: 0;
+			visibility: hidden;
+			overflow: hidden;
+			overflow-y: scroll;
+			width: calc(~"100% + 50px");
+			height: 100%;
+			margin: 0;
+			padding: 0;
+			list-style-type: none;
+			&.current{
+				visibility: visible;
+			}
+			&[class='animate-'],
+			&[class*=' animate-']{
+				visibility: visible;
+			}
+			&.animate-outToRight .item{	
+				animation: outToRight 0.6s both cubic-bezier(0.7, 0, 0.3, 1);
+			}
+			&.animate-outToLeft .item{
+				animation: outToLeft 0.6s both cubic-bezier(0.7, 0, 0.3, 1);
+			}
+			&.animate-inFromLeft .item{
+				animation: inFromLeft 0.6s both cubic-bezier(0.7, 0, 0.3, 1);
+			}
+			&.animate-inFromRight .item{
+				animation: inFromRight 0.6s both cubic-bezier(0.7, 0, 0.3, 1);
+			}
+			.item{
+				display: block;
+				width: calc(~"100% - 50px");
+				.link{
+					font-size: 15px;
+					font-weight: 500;
+				    position: relative;
+				    display: block;
+				    padding: 1em 2.5em 1em 1.5em;
+				    transition: color 0.1s;
+				    &:active,
+				    &:focus,
+				    &:hover{
+				    	text-decoration: none;
+				    }
+				    &[data-subLevel]:after {
+				    	color: darken(@brand-primary, 25%);
+						content: "\e234";
+						font-family: "Glyphicons Halflings";
+						padding: 0.25em 1.25em;
+						position: absolute;
+						right: 0;					
+					}
+				}
+			}
+	    }
 	}
 }
 
@@ -260,5 +355,41 @@
 		height: 30px;
 		float: left;
 		background-color: @brand-background;
+	}
+}
+
+@keyframes outToRight {
+	to {
+		opacity: 0;
+		transform: translate3d(100%, 0, 0);
+	}
+}
+
+@keyframes outToLeft {
+	to {
+		opacity: 0;
+		transform: translate3d(-100%, 0, 0);
+	}
+}
+
+@keyframes inFromLeft {
+	from {
+		opacity: 0;
+		transform: translate3d(-100%, 0, 0);
+	}
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
+	}
+}
+
+@keyframes inFromRight {
+	from {
+		opacity: 0;
+		transform: translate3d(100%, 0, 0);
+	}
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
 	}
 }

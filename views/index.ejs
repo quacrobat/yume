@@ -157,7 +157,73 @@
 		<!-- Development-Panel
 	    ================================================== -->
 		<section id="development-panel">
-			<div class="content"></div>
+			<header>
+				<img alt="<%= name %>" src="/assets/images/logo.png" width="200" height="61"></img>
+			</header>
+			<nav class="breadcrumbs"><a data-subLevel="main"><%= __("Game.DevPanel.Menu") %></a></nav>
+			<nav class="menu">
+			
+				<!-- MainMenu-->
+				<ul class="level" data-level="main">
+					<li class="item">
+						<a href="#" class="link" data-subLevel="subLevel-1"><%= __("Game.DevPanel.Main.Stages") %></a>
+					</li>
+					<li class="item">
+						<a href="#" class="link" data-subLevel="subLevel-2"><%= __("Game.DevPanel.Main.Settings") %></a>
+					</li>
+				</ul>
+				
+				<!-- SubLevel 1 Stages -->
+				<ul class="level" data-level="subLevel-1">
+					<li class="item">
+						<a href="#" class="link" data-type="stage" data-stageId="001"><%= __("Game.DevPanel.Stages.001") %></a>
+					</li>
+					<li class="item">
+						<a href="#" class="link" data-type="stage" data-stageId="002"><%= __("Game.DevPanel.Stages.002") %></a>
+					</li>
+					<li class="item">
+						<a href="#" class="link" data-type="stage" data-stageId="003"><%= __("Game.DevPanel.Stages.003") %></a>
+					</li>
+					<li class="item">
+						<a href="#" class="link" data-type="stage" data-stageId="004"><%= __("Game.DevPanel.Stages.004") %></a>
+					</li>
+					<li class="item">
+						<a href="#" class="link" data-type="stage" data-stageId="005"><%= __("Game.DevPanel.Stages.005") %></a>
+					</li>
+					<li class="item">
+						<a href="#" class="link" data-type="stage" data-stageId="006"><%= __("Game.DevPanel.Stages.006") %></a>
+					</li>
+					<li class="item">
+						<a href="#" class="link" data-type="stage" data-stageId="007"><%= __("Game.DevPanel.Stages.007") %></a>
+					</li>
+					<li class="item">
+						<a href="#" class="link" data-type="stage" data-stageId="008"><%= __("Game.DevPanel.Stages.008") %></a>
+					</li>
+					<li class="item">
+						<a href="#" class="link" data-type="stage" data-stageId="009"><%= __("Game.DevPanel.Stages.009") %></a>
+					</li>
+					<li class="item">
+						<a href="#" class="link" data-type="stage" data-stageId="010"><%= __("Game.DevPanel.Stages.010") %></a>
+					</li>
+					<li class="item">
+						<a href="#" class="link" data-type="stage" data-stageId="011"><%= __("Game.DevPanel.Stages.011") %></a>
+					</li>
+					<li class="item">
+						<a href="#" class="link" data-type="stage" data-stageId="012"><%= __("Game.DevPanel.Stages.012") %></a>
+					</li>
+					<li class="item">
+						<a href="#" class="link" data-type="stage" data-stageId="013"><%= __("Game.DevPanel.Stages.013") %></a>
+					</li>
+				</ul>
+				
+				<!-- SubLevel 2 Settings -->
+				<ul class="level" data-level="subLevel-2">
+					<li class="item">
+						<a href="#" class="link" data-type="setting"><%= __("Game.DevPanel.Settings.Helper") %></a>
+					</li>
+				</ul>
+				
+			</nav>
 		</section>
 		
 		<!-- Performance-Monitor

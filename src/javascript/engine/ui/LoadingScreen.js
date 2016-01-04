@@ -80,7 +80,7 @@ LoadingScreen.prototype.init = function() {
 
 	// subscriptions
 	eventManager.subscribe( TOPIC.STAGE.LOADING.PROGRESS, this._onUpdate );
-	eventManager.subscribe(  TOPIC.STAGE.READY, this._onReady );
+	eventManager.subscribe( TOPIC.STAGE.READY, this._onReady );
 };
 
 /**

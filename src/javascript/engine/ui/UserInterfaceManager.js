@@ -66,7 +66,6 @@ UserInterfaceManager.prototype.init = function() {
 		performanceMonitor.init();
 
 		developmentPanel.init();
-		developmentPanel.setText( "Development Mode Active: " + system.name + " Version: " + system.version );
 	}
 
 	// eventing
@@ -128,7 +127,6 @@ UserInterfaceManager.prototype.showMenu = function() {
 UserInterfaceManager.prototype.hideMenu = function() {
 
 	menu.hide();
-	chat.hide();
 };
 
 /**
@@ -246,8 +244,14 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 	{
 		// enter
 		case 13:
+			
+			event.preventDefault();
 
-			if ( textScreen.isActive === false && modalDialog.isActive === false )
+			if ( textScreen.isActive === false && 
+			     modalDialog.isActive === false && 
+			     developmentPanel.isActive === false && 
+			     menu.isActive === false && 
+			     loadingScreen.isActive === false )
 			{
 				chat.toggle();
 			}
@@ -265,7 +269,6 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 				// because pressing the space key can cause different actions,
 				// the logic for this key handling is placed in a separate method
 				self.handleUiInteraction();
-
 			}
 
 			break;
@@ -273,11 +276,27 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 		// f
 		case 70:
 
-			if ( system.isDevModeActive === true && chat.isActive === false )
+			if ( system.isDevModeActive === true && ( chat.isActive === false && 
+													  menu.isActive === false && 
+													  loadingScreen.isActive === false ) )
 			{
 				performanceMonitor.toggle();
 			}
 
+			break;
+			
+		// m
+		case 77:
+			
+			if ( system.isDevModeActive === true && ( textScreen.isActive === false && 
+													  modalDialog.isActive === false && 
+													  chat.isActive === false && 
+													  menu.isActive === false && 
+													  loadingScreen.isActive === false ) )
+			{
+				developmentPanel.toggle();
+			}
+			
 			break;
 	}
 };

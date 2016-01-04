@@ -41,8 +41,9 @@ function UiElement() {
  */
 UiElement.prototype._getTransitionEndEvent = function() {
 
-	var transition;
-	var element = global.document.querySelector( "body" );
+	var transition, element;
+	
+	element = global.document.querySelector( "body" );
 
 	var transitions = {
 		"transition" : "transitionend",
@@ -56,6 +57,33 @@ UiElement.prototype._getTransitionEndEvent = function() {
 		if ( element.style[ transition ] !== undefined )
 		{
 			return transitions[ transition ];
+		}
+	}
+};
+
+/**
+ * Gets the correct animationEnd event.
+ * 
+ * @returns {string} The name of the animationEnd event.
+ */
+UiElement.prototype._getAnimationEndEvent = function() {
+
+	var animation, element;
+	
+	element = global.document.querySelector( "body" );
+
+	var animations = {
+		"animation" : "animationend",
+		"OAnimation" : "oAnimationEnd",
+		"msAnimation" : "MSAnimationEnd",
+		"WebkitAnimation" : "webkitAnimationEnd"
+	};
+
+	for ( animation in animations )
+	{
+		if ( element.style[ animation ] !== undefined )
+		{
+			return animations[ animation ];
 		}
 	}
 };
