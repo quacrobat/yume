@@ -57908,11 +57908,11 @@ DevelopmentPanel.prototype.constructor = DevelopmentPanel;
  */
 DevelopmentPanel.prototype.init = function() {
 
-	// get the root element of the panel
+	// get the root and breadcrumb element of the panel
 	this._$root = global.document.querySelector( "#development-panel" );
 	this._$breadcrumbs = this._$root.querySelector( ".breadcrumbs" );
 	
-	// get the correct "animation end" event for this browser
+	// get the correct "animation end" event for the respective browser
 	animationEndEvent = this._getAnimationEndEvent();
 
 	// setup levels and events
