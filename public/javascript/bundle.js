@@ -58384,9 +58384,10 @@ DevelopmentPanel.prototype._setupSettings = function() {
 		// set the form control to the correct state
 		element = this._$root.querySelector( "input[data-key=" + settingsManager.KEYS.showFPS + "]" );
 		
-		// the element must not be null
+		// the DOM element must not be null
 		logger.assert( element !== null, "DevelopmentPanel: No valid setting key set in HTML source." );
 
+		// set value to DOM element
 		element.checked = showFPS;
 	}
 };
