@@ -882,8 +882,8 @@ FirstPersonControls.prototype._onMouseMove = function( event ) {
 		movementY = event.movementY || event.mozMovementY || 0;
 
 		// manipulate rotation of player and head
-		self._player.rotation.y -= movementX * ( settingsManager.getMouseSensitivity() * 0.0001 );
-		self._player.head.rotation.x += movementY * ( settingsManager.getMouseSensitivity() * 0.0001 );
+		self._player.rotation.y -= movementX * ( settingsManager.get( settingsManager.KEYS.mouseSensitivity ) * 0.0001 );
+		self._player.head.rotation.x += movementY * ( settingsManager.get( settingsManager.KEYS.mouseSensitivity ) * 0.0001 );
 
 		// prevent "loop" of x-axis
 		self._player.head.rotation.x = Math.max( - utils.HALF_PI, Math.min( utils.HALF_PI, self._player.head.rotation.x ) );

@@ -67,7 +67,7 @@ function PerformanceMonitor() {
 			writable : true
 		},
 		isActive : {
-			value : true,
+			value : false,
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -193,7 +193,6 @@ PerformanceMonitor.prototype._generateBarChart = function( $graph ) {
 
 	while ( $graph.children.length < 74 )
 	{
-
 		element = global.document.createElement( "span" );
 		element.className = "bar";
 		$graph.appendChild( element );

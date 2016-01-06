@@ -16,6 +16,7 @@ var system = require( "./System" );
 var world = require( "./World" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var saveGameManager = require( "../etc/SaveGameManager" );
+var settingsManager = require( "../etc/SettingsManager" );
 var multiplayerManager = require( "../etc/MultiplayerManager" );
 var networkManager = require( "../network/NetworkManager" );
 
@@ -67,6 +68,10 @@ Bootstrap.prototype._initEngine = function() {
 			message = "Please note: This demo works only with keyboard and mouse.";
 			global.alert( message );
 		}
+		
+		// load savegame and settings
+		saveGameManager.load();
+		settingsManager.load();
 
 		// initialize basic components
 		renderer.init();
@@ -95,21 +100,8 @@ Bootstrap.prototype._initEngine = function() {
  */
 Bootstrap.prototype._loadStage = function() {
 
-	var stageId = null;
-	var saveGame = saveGameManager.load();
-
-	if ( saveGame === null )
-	{
-		stageId = "001";
-		saveGameManager.save( stageId );
-	}
-	else
-	{
-		stageId = saveGame.stageId;
-	}
-
 	eventManager.publish( TOPIC.APPLICATION.START, {
-		stageId : stageId
+		stageId : saveGameManager.get( saveGameManager.KEYS.stageId )
 	} );
 };
 

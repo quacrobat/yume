@@ -48,10 +48,17 @@ function UserInterfaceManager() {
  */
 UserInterfaceManager.prototype.init = function() {
 
-	// get reference to central ui-container
+	// get reference to root DOM element of all UI controls
 	this._$uiContainer = global.document.querySelector( "#ui-container" );
 
-	// init controls
+	// eventing
+	this._initEventListener();
+
+	// subscriptions
+	this._initSubscriptions();
+
+	// the setup of controls must always be done AFTER the setup of event
+	// listener and subscriptions
 	informationPanel.init();
 	interactionLabel.init();
 	loadingScreen.init();
@@ -60,21 +67,16 @@ UserInterfaceManager.prototype.init = function() {
 	modalDialog.init();
 	chat.init();
 
-	// add development information
+	// add development controls
 	if ( system.isDevModeActive === true )
 	{
 		performanceMonitor.init();
-
 		developmentPanel.init();
 	}
-
-	// eventing
-	this._mapGlobalEventsToTopics();
-	this._initGlobalEventHandler();
 };
 
 /**
- * Updates the UserInterface-Logic, called from render-loop.
+ * Updates the manager.
  */
 UserInterfaceManager.prototype.update = function() {
 
@@ -203,27 +205,25 @@ UserInterfaceManager.prototype.handleUiInteraction = function() {
 };
 
 /**
- * Maps global events to topics.
+ * Initializes event listeners for DOM events.
  */
-UserInterfaceManager.prototype._mapGlobalEventsToTopics = function() {
-
-	global.window.addEventListener( "resize", function() {
-
-		eventManager.publish( TOPIC.APPLICATION.RESIZE, undefined );
-	} );
-};
-
-/**
- * Initializes global event handlers.
- */
-UserInterfaceManager.prototype._initGlobalEventHandler = function() {
+UserInterfaceManager.prototype._initEventListener = function() {
 
 	global.window.addEventListener( "contextmenu", this._onContextMenu );
 	global.window.addEventListener( "keydown", this._onKeyDown );
+	global.window.addEventListener( "resize", this._onResize );
 };
 
 /**
- * This method prevents the display of the contextmenu.
+ * Initializes subscriptions
+ */
+UserInterfaceManager.prototype._initSubscriptions = function() {
+
+	eventManager.subscribe( TOPIC.UI.PERFORMANCE.TOGGLE, this._onPerformanceMonitor );
+};
+
+/**
+ * This method handles the context menu event.
  * 
  * @param {object} event - The event object.
  */
@@ -234,7 +234,7 @@ UserInterfaceManager.prototype._onContextMenu = function( event ) {
 };
 
 /**
- * Executes, when a key is pressed down.
+ * This method handles the keydown event.
  * 
  * @param {object} event - Default event object.
  */
@@ -272,18 +272,6 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 			}
 
 			break;
-
-		// f
-		case 70:
-
-			if ( system.isDevModeActive === true && ( chat.isActive === false && 
-													  menu.isActive === false && 
-													  loadingScreen.isActive === false ) )
-			{
-				performanceMonitor.toggle();
-			}
-
-			break;
 			
 		// m
 		case 77:
@@ -299,6 +287,27 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 			
 			break;
 	}
+};
+
+/**
+ * This method handles the resize event.
+ * 
+ * @param {object} event - The event object.
+ */
+UserInterfaceManager.prototype._onResize = function( event ) {
+
+	eventManager.publish( TOPIC.APPLICATION.RESIZE, undefined );
+};
+
+/**
+ * This method handles the "toggle" topic for the performance monitor.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ */
+UserInterfaceManager.prototype._onPerformanceMonitor = function( message, data ) {
+	
+	performanceMonitor.toggle();
 };
 
 module.exports = new UserInterfaceManager();

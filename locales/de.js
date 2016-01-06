@@ -26,7 +26,7 @@
 	"Game.DevPanel.Stages.011": "Post-Processing",
 	"Game.DevPanel.Stages.012": "Partikelsystem",
 	"Game.DevPanel.Stages.013": "Wasser",
-	"Game.DevPanel.Settings.Helper": "Helper",
+	"Game.DevPanel.Settings.FPS": "FPS-Monitor anzeigen",
 	"Game.TextScreen.Continue": "Weiter mit Leertaste",
 	"Game.LoadingScreen.Continue": "Weiter mit Leertaste",
 	"Game.Chat.Placeholder": "Deine Chatnachricht...",

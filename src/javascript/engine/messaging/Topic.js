@@ -50,6 +50,12 @@ var TOPIC = {
 		},
 		READY : "stage.ready",
 		START : "stage.start"
+	},
+	UI : {
+		PERFORMANCE : {
+			TOGGLE: "ui.fps.toggle"
+		}
+			
 	}
 };
 

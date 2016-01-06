@@ -220,7 +220,9 @@ StageManager.prototype._onStageChange = function( message, data ) {
 			// save game
 			if ( data.isSaveGame === true )
 			{
-				saveGameManager.save( data.stageId );
+				saveGameManager.set( saveGameManager.KEYS.stageId, data.stageId );
+				
+				saveGameManager.save();
 			}
 		} );
 

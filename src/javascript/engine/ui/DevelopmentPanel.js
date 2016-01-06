@@ -9,7 +9,7 @@
 
 var UiElement = require( "./UiElement" );
 var logger = require( "../core/Logger" );
-
+var settingsManager = require( "../etc/SettingsManager" );
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
@@ -102,6 +102,9 @@ DevelopmentPanel.prototype.init = function() {
 	
 	// add the initial breadcrumb
 	this._addBreadcrumb( 0, true );
+	
+	// setup settings menu
+	this._setupSettings();
 };
 
 /**
@@ -191,8 +194,9 @@ DevelopmentPanel.prototype._setupLevels = function(){
  */
 DevelopmentPanel.prototype._setupEvents = function() {
 
-	var index, $link, $links;
+	var index, $link, $links, $checkbox, $checkboxes;
 
+	// set event listener for link elements
 	$links = this._$root.querySelectorAll( ".link" );
 
 	for ( index = 0; index < $links.length; index++ )
@@ -202,6 +206,17 @@ DevelopmentPanel.prototype._setupEvents = function() {
 		$link.addEventListener( "click", this._onItemClick );
 		
 	} // next link
+	
+	// set event listener for all checkboxes
+	$checkboxes = this._$root.querySelectorAll( "input[type=checkbox]" );
+	
+	for ( index = 0; index < $checkboxes.length; index++ )
+	{
+		$checkbox = $checkboxes[ index ];
+
+		$checkbox.addEventListener( "click", this._onCheckboxClick );
+		
+	} // next checkbox
 };
 
 /**
@@ -429,20 +444,20 @@ DevelopmentPanel.prototype._onAnimationEnd = function( item, callback ){
 /**
  * Click handler for a level navigation link.
  * 
- * @param {HTMLAnchorElement} link - The clicked link.
+ * @param {HTMLElement} element - The source element of the action.
  */
-DevelopmentPanel.prototype._executeAction = function( link ){
+DevelopmentPanel.prototype._executeAction = function( element ){
 	
-	var type, stageId;
+	var type, stageId, key;
 	
 	// get the type of the action
-	type = link.getAttribute( "data-type" );
+	type = element.getAttribute( "data-type" );
 	
 	switch( type ){
 		
 		case "stage": 
 			
-			stageId = link.getAttribute( "data-stageId" );
+			stageId = element.getAttribute( "data-stageId" );
 			
 			// the stage ID must not be null
 			logger.assert( stageId !== null, "DevelopmentPanel: No valid stage ID set in HTML source. Loading not possible." );
@@ -466,11 +481,56 @@ DevelopmentPanel.prototype._executeAction = function( link ){
 			
 		case "setting":
 			
+			key = element.getAttribute( "data-key" );
+			
+			// the entity must not be null
+			logger.assert( key !== null, "DevelopmentPanel: No valid setting key set in HTML source." );
+			
+			// check entity and process corresponding action
+			if ( key === settingsManager.KEYS.showFPS )
+			{
+				// this will toggle the UI element
+				eventManager.publish( TOPIC.UI.PERFORMANCE.TOGGLE, undefined );
+				
+				// set new key/value pair
+				settingsManager.set( settingsManager.KEYS.showFPS, !!element.checked );
+			}
+					
+			// save new settings
+			settingsManager.save();
+			
 			break;
 		
 		default:
 			
 			throw "DevelopmentPanel: Invalid action type: " + type;
+	}
+};
+
+/**
+ * This method will setup certain UI form controls that are used to change game
+ * settings.
+ */
+DevelopmentPanel.prototype._setupSettings = function() {
+
+	var showFPS, element;
+
+	// read settings
+	showFPS = settingsManager.get( settingsManager.KEYS.showFPS );
+
+	if ( showFPS === true )
+	{
+		// show the UI control
+		eventManager.publish( TOPIC.UI.PERFORMANCE.TOGGLE, undefined );
+
+		// set the form control to the correct state
+		element = this._$root.querySelector( "input[data-key=" + settingsManager.KEYS.showFPS + "]" );
+		
+		// the DOM element must not be null
+		logger.assert( element !== null, "DevelopmentPanel: No valid setting key set in HTML source." );
+
+		// set value to DOM element
+		element.checked = showFPS;
 	}
 };
 
@@ -539,6 +599,16 @@ DevelopmentPanel.prototype._onBreadcrumbClick = function( event ) {
 	{
 		self._$breadcrumbs.removeChild( event.target.nextSibling );
 	}
+};
+
+/**
+ * Click handler for a checkbox element.
+ * 
+ * @param {object} event - Default event object.
+ */
+DevelopmentPanel.prototype._onCheckboxClick = function( event ) {
+
+	self._executeAction( event.target );
 };
 
 module.exports = new DevelopmentPanel();

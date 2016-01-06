@@ -40378,8 +40378,8 @@ FirstPersonControls.prototype._onMouseMove = function( event ) {
 		movementY = event.movementY || event.mozMovementY || 0;
 
 		// manipulate rotation of player and head
-		self._player.rotation.y -= movementX * ( settingsManager.getMouseSensitivity() * 0.0001 );
-		self._player.head.rotation.x += movementY * ( settingsManager.getMouseSensitivity() * 0.0001 );
+		self._player.rotation.y -= movementX * ( settingsManager.get( settingsManager.KEYS.mouseSensitivity ) * 0.0001 );
+		self._player.head.rotation.x += movementY * ( settingsManager.get( settingsManager.KEYS.mouseSensitivity ) * 0.0001 );
 
 		// prevent "loop" of x-axis
 		self._player.head.rotation.x = Math.max( - utils.HALF_PI, Math.min( utils.HALF_PI, self._player.head.rotation.x ) );
@@ -40600,6 +40600,7 @@ var system = require( "./System" );
 var world = require( "./World" );
 var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var saveGameManager = require( "../etc/SaveGameManager" );
+var settingsManager = require( "../etc/SettingsManager" );
 var multiplayerManager = require( "../etc/MultiplayerManager" );
 var networkManager = require( "../network/NetworkManager" );
 
@@ -40651,6 +40652,10 @@ Bootstrap.prototype._initEngine = function() {
 			message = "Please note: This demo works only with keyboard and mouse.";
 			global.alert( message );
 		}
+		
+		// load savegame and settings
+		saveGameManager.load();
+		settingsManager.load();
 
 		// initialize basic components
 		renderer.init();
@@ -40679,27 +40684,14 @@ Bootstrap.prototype._initEngine = function() {
  */
 Bootstrap.prototype._loadStage = function() {
 
-	var stageId = null;
-	var saveGame = saveGameManager.load();
-
-	if ( saveGame === null )
-	{
-		stageId = "001";
-		saveGameManager.save( stageId );
-	}
-	else
-	{
-		stageId = saveGame.stageId;
-	}
-
 	eventManager.publish( TOPIC.APPLICATION.START, {
-		stageId : stageId
+		stageId : saveGameManager.get( saveGameManager.KEYS.stageId )
 	} );
 };
 
 module.exports = Bootstrap;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../etc/MultiplayerManager":35,"../etc/SaveGameManager":41,"../messaging/EventManager":69,"../messaging/Topic":71,"../network/NetworkManager":73,"../ui/UserInterfaceManager":118,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27,"./World":31}],19:[function(require,module,exports){
+},{"../etc/MultiplayerManager":35,"../etc/SaveGameManager":41,"../etc/SettingsManager":42,"../messaging/EventManager":69,"../messaging/Topic":71,"../network/NetworkManager":73,"../ui/UserInterfaceManager":118,"./Camera":19,"./Environment":20,"./Renderer":23,"./System":27,"./World":31}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for camera-based
@@ -42052,7 +42044,9 @@ StageManager.prototype._onStageChange = function( message, data ) {
 			// save game
 			if ( data.isSaveGame === true )
 			{
-				saveGameManager.save( data.stageId );
+				saveGameManager.set( saveGameManager.KEYS.stageId, data.stageId );
+				
+				saveGameManager.save();
 			}
 		} );
 
@@ -45805,8 +45799,8 @@ module.exports = Refractor;
 },{"../shader/RefractorShader":92,"three":1}],41:[function(require,module,exports){
 (function (global){
 /**
- * @file Interface for entire savegame-handling. This prototype is using HTML
- * Storage API for saving data on the client-side.
+ * @file Interface for entire savegame-handling. This prototype is used to
+ * access and save game data via HTML5-Storage API.
  * 
  * @author Human Interactive
  */
@@ -45826,57 +45820,89 @@ function SaveGameManager() {
 			configurable : false,
 			enumerable : false,
 			writable : false
+		},
+		_saveGame : {
+			value : null,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
+		KEYS : {
+			value : {
+				stageId : "stageId",
+				isFinish : "isFinish",
+			},
+			configurable : false,
+			enumerable : true,
+			writable : false
 		}
 	} );
 }
 
 /**
- * Saves the progress to localStorage. The savegame object is transformed to
+ * Saves the data to storage. The savegame object is transformed to
  * JSON and then encoded to BASE64.
- * 
- * @param {string} stageId - The ID of the stage.
- * @param {boolean} isFinish - Is the game finished?
  */
-SaveGameManager.prototype.save = function( stageId, isFinish ) {
-
-	var saveGame = {
-		time : new Date().getTime(),
-		stageId : stageId,
-		isFinish : isFinish || false
-	};
-
+SaveGameManager.prototype.save = function() {
+	
+	// update timestamp
+	this._saveGame.time = new Date().getTime();
+	
 	// transform object to JSON-string and encode to BASE64
-	saveGame = global.window.btoa( JSON.stringify( saveGame ) );
+	var saveGame = global.window.btoa( JSON.stringify( this._saveGame ) );
 
-	// save
+	// save data in storage
 	this._storage.setItem( "savegame", saveGame );
 };
 
 /**
- * Loads the savegame from localStorage. At first, the string gets BASE64
+ * Loads the savegame from storage. At first, the string gets BASE64
  * decoded and then parsed from JSON to an object.
- * 
- * @returns {object} The savegame.
  */
 SaveGameManager.prototype.load = function() {
 
+	// read savegame from storage
 	var saveGame = this._storage.getItem( "savegame" );
 
 	if ( saveGame !== null )
 	{
-		// Decode BASE64 and parse JSON-string to object
-		saveGame = JSON.parse( global.window.atob( saveGame ) );
+		// decode BASE64 and parse JSON string to object
+		this._saveGame = JSON.parse( global.window.atob( saveGame ) );
 	}
-
-	return saveGame;
+	else
+	{
+		// if no data were saved, we create some initial savegame data
+		this._saveGame = {
+			stageId : "001",
+			isFinish : false
+		};
+		
+		this.save();
+	}
 };
 
 /**
- * Removes the savegame from localStorage.
+ * Removes the savegame from storage.
  */
 SaveGameManager.prototype.remove = function() {
 
 	this._storage.removeItem( "savegame" );
+};
+
+/**
+ * Gets a value from the savegame data.
+ */
+SaveGameManager.prototype.get = function( key ) {
+
+	return this._saveGame[ key ];
+};
+
+/**
+ * Sets a value to the savegame data.
+ */
+SaveGameManager.prototype.set = function( key, value ) {
+
+	this._saveGame[ key ] = value;
 };
 
 module.exports = new SaveGameManager();
@@ -45914,56 +45940,57 @@ function SettingsManager() {
 			configurable : false,
 			enumerable : false,
 			writable : true
+		},
+		KEYS : {
+			value : {
+				graphicSettings : "graphicSettings",
+				mouseSensitivity : "mouseSensitivity",
+				showFPS : "showFPS"
+			},
+			configurable : false,
+			enumerable : true,
+			writable : false
 		}
 	} );
-
-	this._settings = this.load();
 }
 
 /**
  * Saves the settings to storage. The settings object is transformed to JSON and
  * then encoded to BASE64.
- * 
- * @param {string} graphicSettings - The common graphic settings.
- * @param {number} mouseSensitivity - The mouse sensitivity.
  */
-SettingsManager.prototype.save = function( graphicSettings, mouseSensitivity ) {
+SettingsManager.prototype.save = function() {
 
-	var settings = {
-		graphicSettings : graphicSettings,
-		mouseSensitivity : mouseSensitivity
-	};
+	// transform object to JSON string and encode to BASE64
+	var settings = global.window.btoa( JSON.stringify( this._settings ) );
 
-	// transform object to JSON-string and encode to BASE64
-	settings = global.window.btoa( JSON.stringify( settings ) );
-
-	// save
+	// save data in storage
 	this._storage.setItem( "settings", settings );
 };
 
 /**
  * Loads the settings from storage. At first, the string gets BASE64 decoded and
  * then parsed from JSON to an object.
- * 
- * @returns {object} The settings.
  */
 SettingsManager.prototype.load = function() {
 
+	// read settings from storage
 	var settings = this._storage.getItem( "settings" );
 
 	if ( settings !== null )
 	{
-
 		// decode BASE64 and parse JSON-string to object
-		settings = JSON.parse( global.window.atob( settings ) );
+		this._settings = JSON.parse( global.window.atob( settings ) );
 	}
 	else
 	{
-		// default settings
-		settings = {
+		// if no data were saved, we create some initial settings data
+		this._settings = {
 			graphicSettings : SettingsManager.GRAPHICS.HIGH,
-			mouseSensitivity : SettingsManager.MOUSE.MIDDLE
+			mouseSensitivity : SettingsManager.MOUSE.MIDDLE,
+			showFPS : true
 		};
+		
+		this.save();
 	}
 
 	return settings;
@@ -45975,6 +46002,22 @@ SettingsManager.prototype.load = function() {
 SettingsManager.prototype.remove = function() {
 
 	this._storage.removeItem( "settings" );
+};
+
+/**
+ * Gets a value from the savegame data.
+ */
+SettingsManager.prototype.get = function( key ) {
+
+	return this._settings[ key ];
+};
+
+/**
+ * Sets a value to the savegame data.
+ */
+SettingsManager.prototype.set = function( key, value ) {
+
+	this._settings[ key ] = value;
 };
 
 /**
@@ -46039,16 +46082,6 @@ SettingsManager.prototype.adjustLight = function( light ) {
 		light.castShadow = false;
 	}
 	
-};
-
-/**
- * Gets the mouse sensitivity.
- * 
- * @param {number} light - The mouse sensitivity.
- */
-SettingsManager.prototype.getMouseSensitivity = function() {
-
-	return this._settings.mouseSensitivity;
 };
 
 SettingsManager.GRAPHICS = {
@@ -52505,6 +52538,12 @@ var TOPIC = {
 		},
 		READY : "stage.ready",
 		START : "stage.start"
+	},
+	UI : {
+		PERFORMANCE : {
+			TOGGLE: "ui.fps.toggle"
+		}
+			
 	}
 };
 
@@ -57828,7 +57867,7 @@ module.exports = new Chat();
 
 var UiElement = require( "./UiElement" );
 var logger = require( "../core/Logger" );
-
+var settingsManager = require( "../etc/SettingsManager" );
 var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
@@ -57921,6 +57960,9 @@ DevelopmentPanel.prototype.init = function() {
 	
 	// add the initial breadcrumb
 	this._addBreadcrumb( 0, true );
+	
+	// setup settings menu
+	this._setupSettings();
 };
 
 /**
@@ -58010,8 +58052,9 @@ DevelopmentPanel.prototype._setupLevels = function(){
  */
 DevelopmentPanel.prototype._setupEvents = function() {
 
-	var index, $link, $links;
+	var index, $link, $links, $checkbox, $checkboxes;
 
+	// set event listener for link elements
 	$links = this._$root.querySelectorAll( ".link" );
 
 	for ( index = 0; index < $links.length; index++ )
@@ -58021,6 +58064,17 @@ DevelopmentPanel.prototype._setupEvents = function() {
 		$link.addEventListener( "click", this._onItemClick );
 		
 	} // next link
+	
+	// set event listener for all checkboxes
+	$checkboxes = this._$root.querySelectorAll( "input[type=checkbox]" );
+	
+	for ( index = 0; index < $checkboxes.length; index++ )
+	{
+		$checkbox = $checkboxes[ index ];
+
+		$checkbox.addEventListener( "click", this._onCheckboxClick );
+		
+	} // next checkbox
 };
 
 /**
@@ -58248,20 +58302,20 @@ DevelopmentPanel.prototype._onAnimationEnd = function( item, callback ){
 /**
  * Click handler for a level navigation link.
  * 
- * @param {HTMLAnchorElement} link - The clicked link.
+ * @param {HTMLElement} element - The source element of the action.
  */
-DevelopmentPanel.prototype._executeAction = function( link ){
+DevelopmentPanel.prototype._executeAction = function( element ){
 	
-	var type, stageId;
+	var type, stageId, key;
 	
 	// get the type of the action
-	type = link.getAttribute( "data-type" );
+	type = element.getAttribute( "data-type" );
 	
 	switch( type ){
 		
 		case "stage": 
 			
-			stageId = link.getAttribute( "data-stageId" );
+			stageId = element.getAttribute( "data-stageId" );
 			
 			// the stage ID must not be null
 			logger.assert( stageId !== null, "DevelopmentPanel: No valid stage ID set in HTML source. Loading not possible." );
@@ -58285,11 +58339,55 @@ DevelopmentPanel.prototype._executeAction = function( link ){
 			
 		case "setting":
 			
+			key = element.getAttribute( "data-key" );
+			
+			// the entity must not be null
+			logger.assert( key !== null, "DevelopmentPanel: No valid setting key set in HTML source." );
+			
+			// check entity and process corresponding action
+			if ( key === settingsManager.KEYS.showFPS )
+			{
+				// this will toggle the UI element
+				eventManager.publish( TOPIC.UI.PERFORMANCE.TOGGLE, undefined );
+				
+				// set new key/value pair
+				settingsManager.set( settingsManager.KEYS.showFPS, !!element.checked );
+			}
+					
+			// save new settings
+			settingsManager.save();
+			
 			break;
 		
 		default:
 			
 			throw "DevelopmentPanel: Invalid action type: " + type;
+	}
+};
+
+/**
+ * This method will setup certain UI form controls that are used to change game
+ * settings.
+ */
+DevelopmentPanel.prototype._setupSettings = function() {
+
+	var showFPS, element;
+
+	// read settings
+	showFPS = settingsManager.get( settingsManager.KEYS.showFPS );
+
+	if ( showFPS === true )
+	{
+		// show the UI control
+		eventManager.publish( TOPIC.UI.PERFORMANCE.TOGGLE, undefined );
+
+		// set the form control to the correct state
+		element = this._$root.querySelector( "input[data-key=" + settingsManager.KEYS.showFPS + "]" );
+		
+		// the element must not be null
+		logger.assert( element !== null, "DevelopmentPanel: No valid setting key set in HTML source." );
+
+		element.checked = showFPS;
 	}
 };
 
@@ -58360,9 +58458,19 @@ DevelopmentPanel.prototype._onBreadcrumbClick = function( event ) {
 	}
 };
 
+/**
+ * Click handler for a checkbox element.
+ * 
+ * @param {object} event - Default event object.
+ */
+DevelopmentPanel.prototype._onCheckboxClick = function( event ) {
+
+	self._executeAction( event.target );
+};
+
 module.exports = new DevelopmentPanel();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/Logger":21,"../messaging/EventManager":69,"../messaging/Topic":71,"./UiElement":117}],110:[function(require,module,exports){
+},{"../core/Logger":21,"../etc/SettingsManager":42,"../messaging/EventManager":69,"../messaging/Topic":71,"./UiElement":117}],110:[function(require,module,exports){
 (function (global){
 /**
  * @file Prototype for ui-element information panel.
@@ -59046,7 +59154,7 @@ function PerformanceMonitor() {
 			writable : true
 		},
 		isActive : {
-			value : true,
+			value : false,
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -59172,7 +59280,6 @@ PerformanceMonitor.prototype._generateBarChart = function( $graph ) {
 
 	while ( $graph.children.length < 74 )
 	{
-
 		element = global.document.createElement( "span" );
 		element.className = "bar";
 		$graph.appendChild( element );
@@ -59581,10 +59688,17 @@ function UserInterfaceManager() {
  */
 UserInterfaceManager.prototype.init = function() {
 
-	// get reference to central ui-container
+	// get reference to root DOM element of all UI controls
 	this._$uiContainer = global.document.querySelector( "#ui-container" );
 
-	// init controls
+	// eventing
+	this._initEventListener();
+
+	// subscriptions
+	this._initSubscriptions();
+
+	// the setup of controls must always be done AFTER the setup of event
+	// listener and subscriptions
 	informationPanel.init();
 	interactionLabel.init();
 	loadingScreen.init();
@@ -59593,21 +59707,16 @@ UserInterfaceManager.prototype.init = function() {
 	modalDialog.init();
 	chat.init();
 
-	// add development information
+	// add development controls
 	if ( system.isDevModeActive === true )
 	{
 		performanceMonitor.init();
-
 		developmentPanel.init();
 	}
-
-	// eventing
-	this._mapGlobalEventsToTopics();
-	this._initGlobalEventHandler();
 };
 
 /**
- * Updates the UserInterface-Logic, called from render-loop.
+ * Updates the manager.
  */
 UserInterfaceManager.prototype.update = function() {
 
@@ -59736,27 +59845,25 @@ UserInterfaceManager.prototype.handleUiInteraction = function() {
 };
 
 /**
- * Maps global events to topics.
+ * Initializes event listeners for DOM events.
  */
-UserInterfaceManager.prototype._mapGlobalEventsToTopics = function() {
-
-	global.window.addEventListener( "resize", function() {
-
-		eventManager.publish( TOPIC.APPLICATION.RESIZE, undefined );
-	} );
-};
-
-/**
- * Initializes global event handlers.
- */
-UserInterfaceManager.prototype._initGlobalEventHandler = function() {
+UserInterfaceManager.prototype._initEventListener = function() {
 
 	global.window.addEventListener( "contextmenu", this._onContextMenu );
 	global.window.addEventListener( "keydown", this._onKeyDown );
+	global.window.addEventListener( "resize", this._onResize );
 };
 
 /**
- * This method prevents the display of the contextmenu.
+ * Initializes subscriptions
+ */
+UserInterfaceManager.prototype._initSubscriptions = function() {
+
+	eventManager.subscribe( TOPIC.UI.PERFORMANCE.TOGGLE, this._onPerformanceMonitor );
+};
+
+/**
+ * This method handles the context menu event.
  * 
  * @param {object} event - The event object.
  */
@@ -59767,7 +59874,7 @@ UserInterfaceManager.prototype._onContextMenu = function( event ) {
 };
 
 /**
- * Executes, when a key is pressed down.
+ * This method handles the keydown event.
  * 
  * @param {object} event - Default event object.
  */
@@ -59805,18 +59912,6 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 			}
 
 			break;
-
-		// f
-		case 70:
-
-			if ( system.isDevModeActive === true && ( chat.isActive === false && 
-													  menu.isActive === false && 
-													  loadingScreen.isActive === false ) )
-			{
-				performanceMonitor.toggle();
-			}
-
-			break;
 			
 		// m
 		case 77:
@@ -59832,6 +59927,27 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 			
 			break;
 	}
+};
+
+/**
+ * This method handles the resize event.
+ * 
+ * @param {object} event - The event object.
+ */
+UserInterfaceManager.prototype._onResize = function( event ) {
+
+	eventManager.publish( TOPIC.APPLICATION.RESIZE, undefined );
+};
+
+/**
+ * This method handles the "toggle" topic for the performance monitor.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ */
+UserInterfaceManager.prototype._onPerformanceMonitor = function( message, data ) {
+	
+	performanceMonitor.toggle();
 };
 
 module.exports = new UserInterfaceManager();

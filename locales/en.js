@@ -26,7 +26,7 @@
 	"Game.DevPanel.Stages.011": "Post-Processing",
 	"Game.DevPanel.Stages.012": "Particle System",
 	"Game.DevPanel.Stages.013": "Water",
-	"Game.DevPanel.Settings.Helper": "Helper",
+	"Game.DevPanel.Settings.FPS": "Show FPS Monitor",
 	"Game.TextScreen.Continue": "Press spacebar to continue",
 	"Game.LoadingScreen.Continue": "Press spacebar to continue",
 	"Game.Chat.Placeholder": "Your chat message...",

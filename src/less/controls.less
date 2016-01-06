@@ -290,13 +290,20 @@
 			}
 			.item{
 				display: block;
+				font-size: 15px;
+				font-weight: 500;
 				width: calc(~"100% - 50px");
+				.form{
+					color: @brand-primary;
+					padding: 1em 2.5em 1em 1.5em;
+					label{
+						display: block;
+					}
+				}
 				.link{
-					font-size: 15px;
-					font-weight: 500;
-				    position: relative;
 				    display: block;
 				    padding: 1em 2.5em 1em 1.5em;
+				   	position: relative;
 				    transition: color 0.1s;
 				    &:active,
 				    &:focus,
@@ -310,7 +317,7 @@
 						font-family: "Glyphicons Halflings";
 						padding: 0.25em 1.25em;
 						position: absolute;
-						right: 0;					
+						right: 0;
 					}
 				}
 			}
@@ -319,6 +326,7 @@
 }
 
 #performance-monitor{
+	display: none;
 	position: absolute;
 	top: 0;
 	left: 0;

@@ -29,56 +29,57 @@ function SettingsManager() {
 			configurable : false,
 			enumerable : false,
 			writable : true
+		},
+		KEYS : {
+			value : {
+				graphicSettings : "graphicSettings",
+				mouseSensitivity : "mouseSensitivity",
+				showFPS : "showFPS"
+			},
+			configurable : false,
+			enumerable : true,
+			writable : false
 		}
 	} );
-
-	this._settings = this.load();
 }
 
 /**
  * Saves the settings to storage. The settings object is transformed to JSON and
  * then encoded to BASE64.
- * 
- * @param {string} graphicSettings - The common graphic settings.
- * @param {number} mouseSensitivity - The mouse sensitivity.
  */
-SettingsManager.prototype.save = function( graphicSettings, mouseSensitivity ) {
+SettingsManager.prototype.save = function() {
 
-	var settings = {
-		graphicSettings : graphicSettings,
-		mouseSensitivity : mouseSensitivity
-	};
+	// transform object to JSON string and encode to BASE64
+	var settings = global.window.btoa( JSON.stringify( this._settings ) );
 
-	// transform object to JSON-string and encode to BASE64
-	settings = global.window.btoa( JSON.stringify( settings ) );
-
-	// save
+	// save data in storage
 	this._storage.setItem( "settings", settings );
 };
 
 /**
  * Loads the settings from storage. At first, the string gets BASE64 decoded and
  * then parsed from JSON to an object.
- * 
- * @returns {object} The settings.
  */
 SettingsManager.prototype.load = function() {
 
+	// read settings from storage
 	var settings = this._storage.getItem( "settings" );
 
 	if ( settings !== null )
 	{
-
 		// decode BASE64 and parse JSON-string to object
-		settings = JSON.parse( global.window.atob( settings ) );
+		this._settings = JSON.parse( global.window.atob( settings ) );
 	}
 	else
 	{
-		// default settings
-		settings = {
+		// if no data were saved, we create some initial settings data
+		this._settings = {
 			graphicSettings : SettingsManager.GRAPHICS.HIGH,
-			mouseSensitivity : SettingsManager.MOUSE.MIDDLE
+			mouseSensitivity : SettingsManager.MOUSE.MIDDLE,
+			showFPS : true
 		};
+		
+		this.save();
 	}
 
 	return settings;
@@ -90,6 +91,22 @@ SettingsManager.prototype.load = function() {
 SettingsManager.prototype.remove = function() {
 
 	this._storage.removeItem( "settings" );
+};
+
+/**
+ * Gets a value from the savegame data.
+ */
+SettingsManager.prototype.get = function( key ) {
+
+	return this._settings[ key ];
+};
+
+/**
+ * Sets a value to the savegame data.
+ */
+SettingsManager.prototype.set = function( key, value ) {
+
+	this._settings[ key ] = value;
 };
 
 /**
@@ -154,16 +171,6 @@ SettingsManager.prototype.adjustLight = function( light ) {
 		light.castShadow = false;
 	}
 	
-};
-
-/**
- * Gets the mouse sensitivity.
- * 
- * @param {number} light - The mouse sensitivity.
- */
-SettingsManager.prototype.getMouseSensitivity = function() {
-
-	return this._settings.mouseSensitivity;
 };
 
 SettingsManager.GRAPHICS = {
