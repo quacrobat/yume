@@ -123,6 +123,8 @@
 		//"anotherCoolGlobal",
 		//"iLoveDouglas"
 		"Java", "JavaFX", "$ARG" //no effect
-	]
+	],
 	//,	"indent" : 2 // Specify indentation spacing
+
+	"-W097" : true // Hides the warning: Use the function form of “use strict”
 }

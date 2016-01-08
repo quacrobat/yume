@@ -1,1 +1,10 @@
-{"ide":{},"libs":["ecma5"],"plugins":{"node":{}}}
+{
+  "libs": [
+    "ecma5"
+  ],
+  "plugins": {
+    "node": {
+      
+    }
+  }
+}
