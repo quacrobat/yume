@@ -4,7 +4,7 @@
 
 YUME is a technological platform for developing web based 3D applications. Its technology stack consists of many popular frameworks like node.js, express or three.js. The goal of this project is to provide a foundation for all kinds of 3D-based web applications (especially games). YUME is written in JavaScript.
 
-### [DEMO](http://yume.human-interactive.org/)
+### [DEMO](https://yume.human-interactive.org/)
 
 ## Why should i use YUME?
 
