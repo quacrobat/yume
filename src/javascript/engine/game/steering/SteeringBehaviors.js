@@ -1509,8 +1509,7 @@ SteeringBehaviors.prototype._cohesion = ( function() {
 			this._seek( force, centerOfMass );
 
 			// the magnitude of cohesion is usually much larger than separation
-			// or
-			// allignment so it usually helps to normalize it
+			// or alignment so it usually helps to normalize it
 			force.normalize();
 		}
 
