@@ -67,19 +67,34 @@ function AudioManager() {
 
 /**
  * Creates a dynamic audio object and stores it to the respective internal
- * array.
+ * array. This audio object is only valid in the respective stage.
  * 
  * @param {string} id - The ID of the dynamic audio.
  * @param {object} buffer - The buffered audio file.
  * @param {boolean} loop - Should the audio played in a loop?
- * @param {boolean} stageIndependent - Should the audio independent of the
- * stage?
  * 
  * @returns {DynamicAudio} The new dynamic audio.
  */
-AudioManager.prototype.createDynamicSound = function( id, buffer, loop, stageIndependent ) {
+AudioManager.prototype.createAudioStage = function( id, buffer, loop ) {
 
-	var audio = new DynamicAudio( id, this._listener, buffer, loop, stageIndependent );
+	var audio = new DynamicAudio( id, this._listener, buffer, loop, DynamicAudio.SCOPE.STAGE );
+	this._dynamicAudios.push( audio );
+	return audio;
+};
+
+/**
+ * Creates a dynamic audio object and stores it to the respective internal
+ * array. This audio object is valid in the entire game.
+ * 
+ * @param {string} id - The ID of the dynamic audio.
+ * @param {object} buffer - The buffered audio file.
+ * @param {boolean} loop - Should the audio played in a loop?
+ * 
+ * @returns {DynamicAudio} The new dynamic audio.
+ */
+AudioManager.prototype.createAudioWorld = function( id, buffer, loop ) {
+
+	var audio = new DynamicAudio( id, this._listener, buffer, loop, DynamicAudio.SCOPE.WORLD );
 	this._dynamicAudios.push( audio );
 	return audio;
 };
@@ -99,25 +114,33 @@ AudioManager.prototype.createAudioBufferList = function( audioList, callback ) {
 };
 
 /**
- * Removes dynamic audio objects from the internal array.
- * 
- * @param {boolean} isClear - Should all dynamic audios deleted or only stage
- * dependent audios?
+ * Removes all dynamic audio objects with scope "stage" from the internal array.
  */
-AudioManager.prototype.removeDynamicAudios = function( isClear ) {
+AudioManager.prototype.removeAudiosStage = function() {
 
-	if ( isClear === true )
-	{
-		this._dynamicAudios.length = 0;
-	}
-	else
-	{
-		for ( var i = this._dynamicAudios.length - 1; i >= 0; i-- )
+	for ( var i = this._dynamicAudios.length - 1; i >= 0; i-- )
+	{		
+		if ( this._dynamicAudios[ i ].scope === DynamicAudio.SCOPE.STAGE )
 		{
-			if ( this._dynamicAudios[ i ].stageIndependent === false )
-			{
-				this._dynamicAudios.splice( i, 1 );
-			}
+			this._dynamicAudios[ i ].stop();
+
+			this._dynamicAudios.splice( i, 1 );
+		}
+	}
+};
+
+/**
+ * Removes all dynamic audio objects with scope "world" from the internal array.
+ */
+AudioManager.prototype.removeAudiosWorld = function() {
+
+	for ( var i = this._dynamicAudios.length - 1; i >= 0; i-- )
+	{		
+		if ( this._dynamicAudios[ i ].scope === DynamicAudio.SCOPE.WORLD )
+		{
+			this._dynamicAudios[ i ].stop();
+
+			this._dynamicAudios.splice( i, 1 );
 		}
 	}
 };

@@ -173,7 +173,7 @@ StageBase.prototype.destroy = function() {
 
 	this.animationManager.removeSprites();
 
-	this.audioManager.removeDynamicAudios();
+	this.audioManager.removeAudiosStage();
 
 	this.entityManager.removeEntities();
 

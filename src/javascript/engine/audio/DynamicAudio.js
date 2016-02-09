@@ -19,11 +19,10 @@ var THREE = require( "three" );
  * @param {AudioListener} listener - The listener object.
  * @param {object} buffer - The buffered audio file.
  * @param {boolean} loop - Should the audio played in a loop?
- * @param {boolean} stageIndependent - Should the audio independent of the
- * stage?
+ * @param {number} scope - The scope of the audio.
  * 
  */
-function DynamicAudio( id, listener, buffer, loop, stageIndependent ) {
+function DynamicAudio( id, listener, buffer, loop, scope ) {
 
 	THREE.Object3D.call( this );
 
@@ -52,8 +51,8 @@ function DynamicAudio( id, listener, buffer, loop, stageIndependent ) {
 			enumerable : true,
 			writable : true
 		},
-		stageIndependent : {
-			value : stageIndependent || false,
+		scope : {
+			value : scope || DynamicAudio.SCOPE.STAGE,
 			configurable : false,
 			enumerable : true,
 			writable : true
@@ -286,5 +285,10 @@ DynamicAudio.prototype.updateMatrixWorld = ( function() {
 	};
 
 } )();
+
+DynamicAudio.SCOPE = {
+	WORLD: 0,
+	STAGE: 1
+};
 
 module.exports = DynamicAudio;

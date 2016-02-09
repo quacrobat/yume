@@ -455,8 +455,8 @@ FirstPersonControls.prototype._init = function() {
 	audioManager.createAudioBufferList( [ "step1", "step2" ], function( bufferList ) {
 
 		// create new audios
-		var audioStep1 = audioManager.createDynamicSound( "controls.step1", bufferList[ 0 ], false, true );
-		var audioStep2 = audioManager.createDynamicSound( "controls.step2", bufferList[ 1 ], false, true );
+		var audioStep1 = audioManager.createAudioWorld( "controls.step1", bufferList[ 0 ], false );
+		var audioStep2 = audioManager.createAudioWorld( "controls.step2", bufferList[ 1 ], false );
 
 		// add variations
 		audioStep1.addPitchVariation( function() {

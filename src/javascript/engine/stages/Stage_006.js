@@ -82,12 +82,12 @@ Stage.prototype.setup = function() {
 	// add dynamic sounds
 	this.audioManager.createAudioBufferList( [ "fire", "clock" ], function( bufferList ) {
 
-		audioFire = self.audioManager.createDynamicSound( "ambient.fire", bufferList[ 0 ], true );
+		audioFire = self.audioManager.createAudioStage( "ambient.fire", bufferList[ 0 ], true );
 		audioFire.setRefDistance( 20 );
 		audioFire.setRolloffFactor( 1 );
 		audioFire.setMaxDistance( 50 );
 
-		audioClock = self.audioManager.createDynamicSound( "ambient.clock", bufferList[ 1 ], true );
+		audioClock = self.audioManager.createAudioStage( "ambient.clock", bufferList[ 1 ], true );
 		audioClock.setRefDistance( 20 );
 		audioClock.setRolloffFactor( 1 );
 		audioClock.setMaxDistance( 50 );
@@ -159,10 +159,6 @@ Stage.prototype.start = function() {
 Stage.prototype.destroy = function() {
 
 	StageBase.prototype.destroy.call( this );
-
-	// stop playing
-	audioFire.stop();
-	audioClock.stop();
 };
 
 Stage.prototype._render = function() {
