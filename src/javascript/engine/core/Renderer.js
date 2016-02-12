@@ -241,7 +241,7 @@ Renderer.prototype.removeEffect = function( effect ) {
 Renderer.prototype.clear = function() {
 
 	// stop post-processing
-	this._composer.removePasses();
+	this._composer.clear();
 	this._effectCount = 0;
 
 	// clear the internal renderer

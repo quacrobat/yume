@@ -33,7 +33,7 @@ Stage.prototype.setup = function() {
 
 	// add ground
 	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
-	var groundMaterial = new THREE.MeshBasicMaterial( {
+	var groundMaterial = new THREE.MeshLambertMaterial( {
 		vertexColors : THREE.FaceColors
 	} );
 
@@ -120,16 +120,15 @@ Stage.prototype.setup = function() {
 	} );
 
 	// light
-	var ambientLight = new THREE.AmbientLight( 0x111111 );
+	var ambientLight = new THREE.AmbientLight( 0x999999 );
 	this.world.addObject3D( ambientLight );
-
-	var directionalLight = new THREE.DirectionalLight( 0xffffff );
+	
+	var directionalLight = new THREE.DirectionalLight( 0xcccccc );
 	directionalLight.position.set( -100, 50, -100 );
 	directionalLight.shadow.camera.left = -50;
 	directionalLight.shadow.camera.right = 50;
 	directionalLight.shadow.camera.top = 50;
 	directionalLight.shadow.camera.bottom = -50;
-	directionalLight.shadow.darkness = 0.5;
 	this.settingsManager.adjustLight( directionalLight );
 	this.world.addObject3D( directionalLight );
 

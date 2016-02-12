@@ -287,8 +287,8 @@ DynamicAudio.prototype.updateMatrixWorld = ( function() {
 } )();
 
 DynamicAudio.SCOPE = {
-	WORLD: 0,
-	STAGE: 1
+	WORLD: 1,
+	STAGE: 2
 };
 
 module.exports = DynamicAudio;

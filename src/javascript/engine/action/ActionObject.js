@@ -199,9 +199,9 @@ ActionObject.prototype.raycast = function( raycaster, intersects ) {
  * 
  * @returns {boolean} Intersects the object with the given bounding box?
  */
-ActionObject.prototype.isIntersection = function( boundingBox ) {
+ActionObject.prototype.intersects = function( boundingBox ) {
 
-	var isIntersection = false;
+	var intersection = false;
 
 	// check type of collision test
 	switch ( this.collisionType )
@@ -209,14 +209,14 @@ ActionObject.prototype.isIntersection = function( boundingBox ) {
 
 		case ActionObject.COLLISIONTYPES.AABB:
 		{
-			isIntersection = this.aabb.isIntersectionBox( boundingBox );
+			intersection = this.aabb.intersectsBox( boundingBox );
 
 			break;
 		}
 
 		case ActionObject.COLLISIONTYPES.OBB:
 		{
-			isIntersection = this.obb.isIntersectionAABB( boundingBox );
+			intersection = this.obb.intersectsAABB( boundingBox );
 
 			break;
 		}
@@ -227,7 +227,7 @@ ActionObject.prototype.isIntersection = function( boundingBox ) {
 		}
 	}
 
-	return isIntersection;
+	return intersection;
 
 };
 

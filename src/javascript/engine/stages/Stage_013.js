@@ -35,7 +35,7 @@ Stage.prototype.setup = function() {
 
 	// add ground
 	var groundGeometry = new THREE.Geometry().fromBufferGeometry( new THREE.PlaneBufferGeometry( 200, 200, 20, 20 ) );
-	var groundMaterial = new THREE.MeshBasicMaterial( {
+	var groundMaterial = new THREE.MeshLambertMaterial( {
 		vertexColors : THREE.FaceColors
 	} );
 
@@ -108,6 +108,19 @@ Stage.prototype.setup = function() {
 	water.rotation.set( Math.PI * -0.5, 0, 0 );
 	water.updateMatrix();
 	this.world.addObject3D( water );
+	
+	// light
+	var ambientLight = new THREE.AmbientLight( 0x999999 );
+	this.world.addObject3D( ambientLight );
+	
+	var directionalLight = new THREE.DirectionalLight( 0xcccccc );
+	directionalLight.position.set( -100, 50, -100 );
+	directionalLight.shadow.camera.left = -50;
+	directionalLight.shadow.camera.right = 50;
+	directionalLight.shadow.camera.top = 50;
+	directionalLight.shadow.camera.bottom = -50;
+	this.settingsManager.adjustLight( directionalLight );
+	this.world.addObject3D( directionalLight );
 
 	// start rendering
 	this._render();

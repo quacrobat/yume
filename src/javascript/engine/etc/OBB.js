@@ -314,9 +314,9 @@ OBB.prototype.isTriangleContained = function( triangle ) {
  * @returns {boolean} Is there an intersection between the given AABB and the
  * OBB?
  */
-OBB.prototype.isIntersectionAABB = function( box ) {
+OBB.prototype.intersectsAABB = function( box ) {
 
-	return this.isIntersectionOBB( new OBB().setFromAABB( box ) );
+	return this.intersectsOBB( new OBB().setFromAABB( box ) );
 };
 
 /**
@@ -327,7 +327,7 @@ OBB.prototype.isIntersectionAABB = function( box ) {
  * @returns {boolean} Is there an intersection between the given sphere and the
  * OBB?
  */
-OBB.prototype.isIntersectionSphere = function( sphere ) {
+OBB.prototype.intersectsSphere = function( sphere ) {
 
 	return this.intersectSphere( sphere ) !== null;
 };
@@ -340,7 +340,7 @@ OBB.prototype.isIntersectionSphere = function( sphere ) {
  * @returns {boolean} Is there an intersection between the given OBB and the
  * OBB?
  */
-OBB.prototype.isIntersectionOBB = ( function() {
+OBB.prototype.intersectsOBB = ( function() {
 
 	var xAxisA = new THREE.Vector3();
 	var yAxisA = new THREE.Vector3();
@@ -539,7 +539,7 @@ OBB.prototype.isIntersectionOBB = ( function() {
  * @returns {boolean} Is there an intersection between the given plane and the
  * OBB?
  */
-OBB.prototype.isIntersectionPlane = ( function() {
+OBB.prototype.intersectsPlane = ( function() {
 
 	var xAxis = new THREE.Vector3();
 	var yAxis = new THREE.Vector3();
@@ -574,7 +574,7 @@ OBB.prototype.isIntersectionPlane = ( function() {
  * @returns {boolean} Is there an intersection between the given ray and the
  * OBB?
  */
-OBB.prototype.isIntersectionRay = function( ray ) {
+OBB.prototype.intersectsRay = function( ray ) {
 
 	return this.intersectRay( ray ) !== null;
 };

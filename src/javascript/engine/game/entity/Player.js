@@ -295,7 +295,7 @@ Player.prototype._isCollisionDetected = function() {
 		object =  this.world.actionObjects[ index ];
 
 		// do collision detection but only with visible objects
-		if ( object.mesh.visible === true && object.isIntersection( this.boundingVolume ) === true )
+		if ( object.mesh.visible === true && object.intersects( this.boundingVolume ) === true )
 		{
 			// exit method, because there is an intersection
 			return true;

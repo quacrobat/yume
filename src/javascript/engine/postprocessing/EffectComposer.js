@@ -31,8 +31,14 @@ function EffectComposer( renderer, renderTarget ) {
 			enumerable : false,
 			writable : false
 		},
-		_renderTarget : {
+		_renderTarget1 : {
 			value : renderTarget,
+			configurable : false,
+			enumerable : false,
+			writable : true
+		},
+		_renderTarget2 : {
+			value : null,
 			configurable : false,
 			enumerable : false,
 			writable : true
@@ -52,7 +58,7 @@ function EffectComposer( renderer, renderTarget ) {
 	} );
 
 	// if no render target is assigned, let's create a new one
-	if ( this._renderTarget === undefined )
+	if ( this._renderTarget1 === undefined )
 	{
 		var width = this._renderer.context.drawingBufferWidth;
 		var height = this._renderer.context.drawingBufferHeight;
@@ -63,12 +69,14 @@ function EffectComposer( renderer, renderTarget ) {
 			stencilBuffer : false
 		};
 
-		this._renderTarget = new THREE.WebGLRenderTarget( width, height, parameters );
+		this._renderTarget1 = new THREE.WebGLRenderTarget( width, height, parameters );
 	}
+	
+	this._renderTarget2 = this._renderTarget1.clone();
 
-	// create read/write buffers based on the render target
-	this._readBuffer = this._renderTarget;
-	this._writeBuffer = this._renderTarget.clone();
+	// create read/write buffers based on the render targets
+	this._readBuffer = this._renderTarget1;
+	this._writeBuffer = this._renderTarget2;
 }
 
 /**
@@ -79,6 +87,17 @@ function EffectComposer( renderer, renderTarget ) {
 EffectComposer.prototype.addPass = function( pass ) {
 
 	this._passes.push( pass );
+};
+
+/**
+ * Inserts a pass to the internal array at a specific position.
+ * 
+ * @param {object} pass - Render or shader pass.
+ * @param {number} index - The position to insert.
+ */
+EffectComposer.prototype.insertPass = function( pass, index ) {
+
+	this.passes.splice( index, 0, pass );
 };
 
 /**
@@ -93,9 +112,9 @@ EffectComposer.prototype.removePass = function( pass ) {
 };
 
 /**
- * Removes all Shader Passes from the internal array.
+ * Removes all passes from the internal array.
  */
-EffectComposer.prototype.removePasses = function() {
+EffectComposer.prototype.clear = function() {
 
 	this._passes.length = 0;
 };
@@ -126,19 +145,49 @@ EffectComposer.prototype.render = function() {
 };
 
 /**
+ * Resets the internal render targets/framebuffers.
+ * 
+ * @param {THREE.WebGLRenderTarget} renderTarget - The render target.
+ */
+EffectComposer.prototype.reset = function( renderTarget ) {
+
+	if ( renderTarget === undefined )
+	{
+		renderTarget = this._renderTarget1.clone();
+
+		renderTarget.setSize( 
+				this._renderer.context.drawingBufferWidth,
+				this._renderer.context.drawingBufferHeight
+		);
+	}
+
+	this._renderTarget1.dispose();
+	this._renderTarget1 = renderTarget;
+	this._renderTarget2.dispose();
+	this._renderTarget2 = renderTarget.clone();
+
+	this._readBuffer = this._renderTarget1;
+	this._writeBuffer = this._renderTarget2;
+
+};
+
+/**
  * Sets the size of the render target.
  * 
  * @param {number} width - The width of render target.
  * @param {number} height - The height of render target.
  */
 EffectComposer.prototype.setSize = function( width, height ) {
-
-	var renderTarget = this._renderTarget.clone();
-
-	renderTarget.width = width * this._renderer.getPixelRatio();
-	renderTarget.height = height * this._renderer.getPixelRatio();
-
-	this._reset( renderTarget );
+		
+	this._renderTarget1.setSize( 
+			width * this._renderer.getPixelRatio(),
+			height * this._renderer.getPixelRatio()
+	);
+	
+	this._renderTarget2.setSize( 
+			width * this._renderer.getPixelRatio(),
+			height * this._renderer.getPixelRatio()
+	);
 };
 
 /**
@@ -149,29 +198,6 @@ EffectComposer.prototype._swapBuffers = function() {
 	var temp = this._readBuffer;
 	this._readBuffer = this._writeBuffer;
 	this._writeBuffer = temp;
-
-};
-
-/**
- * Resets the internal render targets/framebuffers.
- * 
- * @param {THREE.WebGLRenderTarget} renderTarget - The render target.
- */
-EffectComposer.prototype._reset = function( renderTarget ) {
-
-	if ( renderTarget === undefined )
-	{
-		renderTarget = this._renderTarget.clone();
-
-		renderTarget.width = this._renderer.context.drawingBufferWidth;
-		renderTarget.height = this._renderer.context.drawingBufferHeight;
-
-	}
-
-	this._renderTarget = renderTarget;
-
-	this._readBuffer = this._renderTarget;
-	this._writeBuffer = this._renderTarget.clone();
 
 };
 

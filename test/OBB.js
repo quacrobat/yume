@@ -157,7 +157,7 @@ describe( "OBB", function() {
 
 	} );
 
-	describe( "#isIntersectionAABB()", function() {
+	describe( "#intersectsAABB()", function() {
 
 		it( "should return true if there is an intersection between a given AABB and the OBB", function() {
 
@@ -172,16 +172,16 @@ describe( "OBB", function() {
 
 			var obb = new OBB( new THREE.Vector3(), new THREE.Vector3( 5, 5, 5 ) );
 
-			assert.equal( true, obb.isIntersectionAABB( aabb1 ) );
-			assert.equal( true, obb.isIntersectionAABB( aabb2 ) );
-			assert.equal( true, obb.isIntersectionAABB( aabb3 ) );
-			assert.equal( false, obb.isIntersectionAABB( aabb4 ) );
+			assert.equal( true, obb.intersectsAABB( aabb1 ) );
+			assert.equal( true, obb.intersectsAABB( aabb2 ) );
+			assert.equal( true, obb.intersectsAABB( aabb3 ) );
+			assert.equal( false, obb.intersectsAABB( aabb4 ) );
 
 		} );
 
 	} );
 
-	describe( "#isIntersectionSphere()", function() {
+	describe( "#intersectsSphere()", function() {
 
 		it( "should return true if there is an intersection between a given BS and the OBB", function() {
 
@@ -192,16 +192,16 @@ describe( "OBB", function() {
 
 			var obb = new OBB( new THREE.Vector3(), new THREE.Vector3( 5, 5, 5 ) );
 
-			assert.equal( true, obb.isIntersectionSphere( sphere1 ) );
-			assert.equal( true, obb.isIntersectionSphere( sphere2 ) );
-			assert.equal( true, obb.isIntersectionSphere( sphere3 ) );
-			assert.equal( false, obb.isIntersectionSphere( sphere4 ) );
+			assert.equal( true, obb.intersectsSphere( sphere1 ) );
+			assert.equal( true, obb.intersectsSphere( sphere2 ) );
+			assert.equal( true, obb.intersectsSphere( sphere3 ) );
+			assert.equal( false, obb.intersectsSphere( sphere4 ) );
 
 		} );
 
 	} );
 
-	describe( "#isIntersectionOBB()", function() {
+	describe( "#intersectsOBB()", function() {
 
 		it( "should return true if there is an intersection between a given OBB and the OBB", function() {
 
@@ -212,16 +212,16 @@ describe( "OBB", function() {
 
 			var obb = new OBB( new THREE.Vector3(), new THREE.Vector3( 5, 5, 5 ) );
 
-			assert.equal( true, obb.isIntersectionOBB( obb1 ) );
-			assert.equal( true, obb.isIntersectionOBB( obb2 ) );
-			assert.equal( true, obb.isIntersectionOBB( obb3 ) );
-			assert.equal( false, obb.isIntersectionOBB( obb4 ) );
+			assert.equal( true, obb.intersectsOBB( obb1 ) );
+			assert.equal( true, obb.intersectsOBB( obb2 ) );
+			assert.equal( true, obb.intersectsOBB( obb3 ) );
+			assert.equal( false, obb.intersectsOBB( obb4 ) );
 
 		} );
 
 	} );
 
-	describe( "#isIntersectionPlane()", function() {
+	describe( "#intersectsPlane()", function() {
 
 		it( "should return true if there is an intersection between a given plane and the OBB", function() {
 
@@ -232,16 +232,16 @@ describe( "OBB", function() {
 
 			var obb = new OBB( new THREE.Vector3(), new THREE.Vector3( 5, 5, 5 ) );
 
-			assert.equal( true, obb.isIntersectionPlane( plane1 ) );
-			assert.equal( true, obb.isIntersectionPlane( plane2 ) );
-			assert.equal( true, obb.isIntersectionPlane( plane3 ) );
-			assert.equal( false, obb.isIntersectionPlane( plane4 ) );
+			assert.equal( true, obb.intersectsPlane( plane1 ) );
+			assert.equal( true, obb.intersectsPlane( plane2 ) );
+			assert.equal( true, obb.intersectsPlane( plane3 ) );
+			assert.equal( false, obb.intersectsPlane( plane4 ) );
 
 		} );
 
 	} );
 
-	describe( "#isIntersectionRay()", function() {
+	describe( "#intersectsRay()", function() {
 
 		it( "should return true if there is an intersection between a given ray and the OBB", function() {
 
@@ -252,10 +252,10 @@ describe( "OBB", function() {
 
 			var obb = new OBB( new THREE.Vector3(), new THREE.Vector3( 5, 5, 5 ) );
 
-			assert.equal( true, obb.isIntersectionRay( ray1 ) );
-			assert.equal( true, obb.isIntersectionRay( ray2 ) );
-			assert.equal( true, obb.isIntersectionRay( ray3 ) );
-			assert.equal( false, obb.isIntersectionRay( ray4 ) );
+			assert.equal( true, obb.intersectsRay( ray1 ) );
+			assert.equal( true, obb.intersectsRay( ray2 ) );
+			assert.equal( true, obb.intersectsRay( ray3 ) );
+			assert.equal( false, obb.intersectsRay( ray4 ) );
 
 		} );
 

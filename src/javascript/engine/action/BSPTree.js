@@ -132,7 +132,7 @@ BSPTree.prototype.intersectRay = ( function() {
 			nextNode = stack.pop();
 
 			// execute intersection test
-			if ( ray.isIntersectionBox( nextNode.aabb ) === true )
+			if ( ray.intersectsBox( nextNode.aabb ) === true )
 			{
 				// push all entities to the result array
 				for ( index = 0; index < nextNode.entities.length; index++ )
