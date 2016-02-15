@@ -40,7 +40,7 @@ float random( in float x ) {
  */
 float random( in vec2 uv ) {
 
-    return fract( 1e4 * sin( 17.0 * uv.x + uv.y * 0.1 ) * ( 0.1 + abs( sin( uv.y * 13.0 + uv.x ) ) ) );
+    return fract( sin( dot( uv.xy, vec2( 12.9898, 78.233 ) ) ) * 43758.5453123 );
 }
 
 /*
