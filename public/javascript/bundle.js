@@ -50908,6 +50908,13 @@ function Water( renderer, camera, world, options ) {
 			enumerable : true,
 			writable : true
 		},
+		// the color of the water
+		waterColor : {
+			value : new THREE.Color(),
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
 		// the reflectivity of the water
 		waterReflectivity : {
 			value : 0.02,
@@ -51018,6 +51025,7 @@ Water.prototype.update = function( elapsedTime ){
 	// update water properties
 	this.material.uniforms.waveStrength.value = this.waveStrength;
 	this.material.uniforms.waveSpeed.value = this.waveSpeed;
+	this.material.uniforms.waterColor.value = this.waterColor;
 	this.material.uniforms.waterReflectivity.value = this.waterReflectivity;
 	
 	// update light properties
@@ -60066,7 +60074,7 @@ module.exports = {
 			type : "f",
 			value : 0.0
 		},
-		
+				
 		// strength of the waves
 		"waveStrength" : {
 			type : "f",
@@ -60077,6 +60085,12 @@ module.exports = {
 		"waveSpeed" : {
 			type : "f",
 			value : 0.03
+		},
+		
+		// color of the water
+		"waterColor" : {
+			type : "c",
+			value : null
 		},
 		
 		// the reflectivity of the water
@@ -60153,6 +60167,7 @@ module.exports = {
 		
 		"uniform vec3 lightDirection;",
 		"uniform vec3 lightColor;",
+		"uniform vec3 waterColor;",
 		
 		"uniform float time;",
 		"uniform float waveStrength;",
@@ -60199,8 +60214,8 @@ module.exports = {
 			"float specular = pow( max( dot( reflectedLight, toEye ), 0.0 ) , shininess );",
 			"vec4 specularColor =  vec4( lightColor * specular, 0.0 );",
 
-			// mix both textures and add lighting
-			"gl_FragColor = mix( refractColor, reflectColor, reflectance ) + specularColor;",
+			// multiply water color with the mix of both textures. then add lighting
+			"gl_FragColor = vec4( waterColor, 1.0 ) * mix( refractColor, reflectColor, reflectance ) + specularColor;",
 		
 		"}"
 

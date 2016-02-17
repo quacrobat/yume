@@ -79,6 +79,13 @@ function Water( renderer, camera, world, options ) {
 			enumerable : true,
 			writable : true
 		},
+		// the color of the water
+		waterColor : {
+			value : new THREE.Color(),
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
 		// the reflectivity of the water
 		waterReflectivity : {
 			value : 0.02,
@@ -189,6 +196,7 @@ Water.prototype.update = function( elapsedTime ){
 	// update water properties
 	this.material.uniforms.waveStrength.value = this.waveStrength;
 	this.material.uniforms.waveSpeed.value = this.waveSpeed;
+	this.material.uniforms.waterColor.value = this.waterColor;
 	this.material.uniforms.waterReflectivity.value = this.waterReflectivity;
 	
 	// update light properties
