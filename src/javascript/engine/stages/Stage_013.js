@@ -142,7 +142,7 @@ Stage.prototype.destroy = function() {
 Stage.prototype._render = function() {
 	
 	// update the water
-	water.update( self.timeManager.elapsedTime );
+	water.update( self._delta );
 	
 	// animate the moving objects
 	var step = self.timeManager.elapsedTime * 0.5;

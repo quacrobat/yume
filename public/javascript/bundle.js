@@ -50950,6 +50950,13 @@ function Water( renderer, camera, world, options ) {
 			enumerable : true,
 			writable : true
 		},
+		// a cycle of a flow map phase
+		cycle : {
+			value : 0.15,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
 		// a reference to the renderer object
 		_renderer : {
 			value : renderer,
@@ -50984,6 +50991,13 @@ function Water( renderer, camera, world, options ) {
 			configurable : false,
 			enumerable : false,
 			writable : true
+		},
+		// half cycle of a flow map phase
+		_halfCycle : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
 	} );
 	
@@ -51005,33 +51019,52 @@ Water.prototype.constructor = Water;
 /**
  * Update method of the water.
  * 
- * @param {number} elapsedTime - The elapsed time.
+ * @param {number} delta - The delta time value.
  */
-Water.prototype.update = function( elapsedTime ){
-	
+Water.prototype.update = function( delta ) {
+
 	// the water should not render itself
 	this.material.visible = false;
-	
+
 	// update reflection and refraction
 	this._reflector.update();
 	this._refractor.update();
-	
+
 	// make material visible again
 	this.material.visible = true;
-	
-	// update time uniform
-	this.material.uniforms.time.value = elapsedTime;
-	
+
 	// update water properties
 	this.material.uniforms.waveStrength.value = this.waveStrength;
 	this.material.uniforms.waveSpeed.value = this.waveSpeed;
 	this.material.uniforms.waterColor.value = this.waterColor;
 	this.material.uniforms.waterReflectivity.value = this.waterReflectivity;
-	
+
 	// update light properties
 	this.material.uniforms.lightDirection.value = this.lightDirection;
 	this.material.uniforms.lightColor.value = this.lightColor;
 	this.material.uniforms.shininess.value = this.shininess;
+
+	// update water flow properties
+	this.material.uniforms.flowMapOffset0.value += 0.03 * delta;
+	this.material.uniforms.flowMapOffset1.value += 0.03 * delta;
+
+	// reset properties if necessary
+	if ( this.material.uniforms.flowMapOffset0.value >= this.cycle )
+	{
+		this.material.uniforms.flowMapOffset0.value = 0;
+		
+		if ( this.material.uniforms.flowMapOffset1.value >= this.cycle )
+		{
+			this.material.uniforms.flowMapOffset1.value = this._halfCycle;
+			
+			return;
+		}
+	}
+
+	if ( this.material.uniforms.flowMapOffset1.value >= this.cycle )
+	{
+		this.material.uniforms.flowMapOffset1.value = 0;
+	}
 };
 
 /**
@@ -51082,14 +51115,19 @@ Water.prototype._init = function() {
 		resolution: this.resolution
 	});
 	
-	// load du/dv map
-	var dudvMap = new THREE.TextureLoader().load( "/assets/textures/Water_1_M_DuDv.jpg" );
-	dudvMap.wrapS = dudvMap.wrapT = THREE.RepeatWrapping;
+	// calculate half cycle
+	this._halfCycle = this.cycle * 0.5;
 	
-	// load corresponding normal map (as mentioned before, normal and du/dv
-	// map should always match)
-	var normalMap = new THREE.TextureLoader().load( "/assets/textures/Water_1_M_Normal.jpg" );
-	normalMap.wrapS = normalMap.wrapT = THREE.RepeatWrapping;
+	// load flow and noise map
+	var flowMap = new THREE.TextureLoader().load( "/assets/textures/flowmap1.jpg" );
+	var noiseMap = new THREE.TextureLoader().load( "/assets/textures/noise.jpg" );
+	
+	// load normal maps
+	var normalMap0 = new THREE.TextureLoader().load( "/assets/textures/normal0.jpg" );
+	normalMap0.wrapS = normalMap0.wrapT = THREE.RepeatWrapping;
+	
+	var normalMap1 = new THREE.TextureLoader().load( "/assets/textures/normal1.jpg" );
+	normalMap1.wrapS = normalMap1.wrapT = THREE.RepeatWrapping;
 		
 	// set reflection and refraction map
 	this.material.uniforms.reflectionMap.value = this._reflector._reflectionMap;
@@ -51099,13 +51137,20 @@ Water.prototype._init = function() {
 	this.material.uniforms.textureMatrixReflection.value = this._reflector._textureMatrix;
 	this.material.uniforms.textureMatrixRefraction.value = this._refractor._textureMatrix;
 	
-	// set du/dv and normal map to uniforms
-	this.material.uniforms.dudvMap.value = dudvMap;
-	this.material.uniforms.normalMap.value = normalMap;
+	// set flow, noise and normal map to uniforms
+	this.material.uniforms.flowMap.value = flowMap;
+	this.material.uniforms.noiseMap.value = noiseMap;
+	this.material.uniforms.normalMap0.value = normalMap0;
+	this.material.uniforms.normalMap1.value = normalMap1;
 
 	// set the amount of segments of the water. this value determines, how often
-	// the normal and du/dv map are repeated
+	// normal maps are repeated
 	this.material.uniforms.segments.value = this.geometry.parameters.widthSegments;
+	
+	// set default values for water flow
+	this.material.uniforms.flowMapOffset0.value = 0;
+	this.material.uniforms.flowMapOffset1.value = this._halfCycle;
+	this.material.uniforms.halfCycle.value = this._halfCycle;
 	
 	// no auto-update for water
 	this.matrixAutoUpdate = false;
@@ -60045,14 +60090,26 @@ module.exports = {
 			value : null
 		},
 		
-		// this texture will be used to distort uv coordinates
-		"dudvMap" : {
+		// this texture contains the flow of the water
+		"flowMap" : {
+			type : "t",
+			value : null
+		},
+		
+		// this texture is used to create a more realistic water flow
+		"noiseMap" : {
 			type : "t",
 			value : null
 		},
 		
 		// this texture will be used to retrieve normals
-		"normalMap" : {
+		"normalMap0" : {
+			type : "t",
+			value : null
+		},
+		
+		// this texture will be used to retrieve normals
+		"normalMap1" : {
 			type : "t",
 			value : null
 		},
@@ -60069,10 +60126,16 @@ module.exports = {
 			value : null
 		},
 
-		// elapsed time value
-		"time" : {
+		// first offset of the flowmap
+		"flowMapOffset0" : {
 			type : "f",
-			value : 0.0
+			value : 0
+		},
+		
+		// second offset of the flowmap
+		"flowMapOffset1" : {
+			type : "f",
+			value : 0
 		},
 				
 		// strength of the waves
@@ -60121,6 +60184,12 @@ module.exports = {
 		"segments" : {
 			type : "f",
 			value : 1.0
+		},
+		
+		// half cycle of a flow map phase
+		"halfCycle" : {
+			type : "f",
+			value : 0.0
 		}
 
 	},
@@ -60136,14 +60205,17 @@ module.exports = {
 		"varying vec4 vUvRefract;",
 		"varying vec3 vToEye;",
 		"varying vec2 vUv;",
+		"varying float vTexScale;",
 	
 		"void main() {",
 		
 			"vec4 worldPosition = modelMatrix * vec4( position, 1.0 );",
 			
-			// default uv coordinates. the segment uniform scales them, so
-			// the normal and du/dv map are sampled more often
-			"vUv = uv * segments;",
+			// default uv coordinates
+			"vUv = uv;",
+			
+			// used for scaling of normal maps
+			"vTexScale = segments;",
 			
 			// uv coordinates for texture projection
 			"vUvReflect = textureMatrixReflection * vec4( position, 1.0 );",
@@ -60162,46 +60234,52 @@ module.exports = {
 
 		"uniform sampler2D reflectionMap;",
 		"uniform sampler2D refractionMap;",
-		"uniform sampler2D dudvMap;",
-		"uniform sampler2D normalMap;",
+		"uniform sampler2D flowMap;",
+		"uniform sampler2D noiseMap;",
+		"uniform sampler2D normalMap0;",
+		"uniform sampler2D normalMap1;",
 		
 		"uniform vec3 lightDirection;",
 		"uniform vec3 lightColor;",
 		"uniform vec3 waterColor;",
 		
-		"uniform float time;",
+		"uniform float flowMapOffset0;",
+		"uniform float flowMapOffset1;",
 		"uniform float waveStrength;",
 		"uniform float waveSpeed;",
 		"uniform float waterReflectivity;",
 		"uniform float shininess;",
+		"uniform float halfCycle;",
 		
 		"varying vec4 vUvReflect;",
 		"varying vec4 vUvRefract;",
 		"varying vec3 vToEye;",
 		"varying vec2 vUv;",
+		"varying float vTexScale;",
 	
 		"void main() {",
 		
 			"vec3 toEye = normalize( vToEye );",
-
-			// distortion
-			"vec2 distortedUv = texture2D( dudvMap, vec2( vUv.x + time * waveSpeed, vUv.y ) ).rg * waveStrength;",
-			"distortedUv = vUv + vec2( distortedUv.x, distortedUv.y + time * waveSpeed );",
-			"vec2 distortion = ( texture2D( dudvMap, distortedUv ).rg * 2.0 - 1.0 ) * waveStrength;",
 			
-			// distort uv coordiantes
-			"vec4 reflectTexCoords = vec4( vUvReflect );",
-			"reflectTexCoords.xy += distortion;",
+			// sample flowmap
+			"vec2 flowMap = texture2D( flowMap, vUv ).rg * 2.0 - 1.0;",
 			
-			"vec4 refractTexCoords = vec4( vUvRefract );",
-			"refractTexCoords.xy += distortion;",
+			// sample noise map
+			"float cycleOffset = texture2D( noiseMap, vUv ).r;",
 			
-			// sample textures
-			"vec4 reflectColor = texture2DProj( reflectionMap, reflectTexCoords );",
-			"vec4 refractColor = texture2DProj( refractionMap, refractTexCoords );",
+			// calculate current phases
+			"float phase0 = cycleOffset * 0.5 + flowMapOffset0;",
+			"float phase1 = cycleOffset * 0.5 + flowMapOffset1;",
 			
-			// calculate normal
-			"vec4 normalColor  = texture2D( normalMap, distortedUv );",	
+			// sample normal maps
+			"vec4 normalColor0 = texture2D( normalMap0, ( vUv * vTexScale ) + flowMap * phase0 );",
+			"vec4 normalColor1 = texture2D( normalMap1, ( vUv * vTexScale ) + flowMap * phase1 );",
+			
+			// linear interpolate to get the final normal color
+			"float flowLerp = ( abs( halfCycle - flowMapOffset0 ) / halfCycle );",
+			"vec4 normalColor = mix( normalColor0, normalColor1, flowLerp );",
+			
+			// determine the normal vector
 			"vec3 normal = vec3( normalColor.r * 2.0 - 1.0, normalColor.b,  normalColor.g * 2.0 - 1.0 );",
 			"normal = normalize( normal );",
 			
@@ -60213,10 +60291,17 @@ module.exports = {
 			"vec3 reflectedLight = normalize( reflect( -lightDirection, normal ) );",
 			"float specular = pow( max( dot( reflectedLight, toEye ), 0.0 ) , shininess );",
 			"vec4 specularColor =  vec4( lightColor * specular, 0.0 );",
+			
+			// sample textures
+			"vec3 uvReflect = vUvReflect.xyz / vUvReflect.w;",	
+			"vec3 uvRefract = vUvRefract.xyz / vUvRefract.w;",
+			
+			"vec4 reflectColor = texture2D( reflectionMap, uvReflect.xy + uvReflect.z * normal.xz * 0.05 );",
+			"vec4 refractColor = texture2D( refractionMap, uvRefract.xy + uvRefract.z * normal.xz * 0.05 );",
 
 			// multiply water color with the mix of both textures. then add lighting
 			"gl_FragColor = vec4( waterColor, 1.0 ) * mix( refractColor, reflectColor, reflectance ) + specularColor;",
-		
+
 		"}"
 
 	].join( "\n" )
@@ -62173,7 +62258,7 @@ Stage.prototype.destroy = function() {
 Stage.prototype._render = function() {
 	
 	// update the water
-	water.update( self.timeManager.elapsedTime );
+	water.update( self._delta );
 	
 	// animate the moving objects
 	var step = self.timeManager.elapsedTime * 0.5;

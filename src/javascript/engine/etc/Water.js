@@ -1,20 +1,7 @@
 /**
  * @file This file creates a realistic and expensive water effect. The material
- * is real-time reflective & refractive, it calculates a distortion of the water
- * surface and implements a basic fresnel and lighting equation.
- * 
- * The shader needs a normal and du/dv map. The du/dv map is used to create
- * distortions and can be easily created with Photoshop from a normal map in
- * just two steps (see https://developer.valvesoftware.com/wiki/Du/dv_map).
- * 
- * 1. Open the normal map and invert the colors. 
- * 2. Go to Image > Adjustments > Brightness/Contrast. 
- * 		1. Check "Use Legacy" 
- * 		2. Set Brightness to -17 
- * 		3. Set Contrast to 100
- * 
- * Maybe you have to tweak the values to get a good result. It's important that
- * the du/dv map does not contain full black or white areas.
+ * is real-time reflective & refractive, it calculates a distortion and flow of
+ * the water surface and implements a basic fresnel and lighting equation.
  * 
  * @author Human Interactive
  */
@@ -121,6 +108,13 @@ function Water( renderer, camera, world, options ) {
 			enumerable : true,
 			writable : true
 		},
+		// a cycle of a flow map phase
+		cycle : {
+			value : 0.15,
+			configurable : false,
+			enumerable : true,
+			writable : true
+		},
 		// a reference to the renderer object
 		_renderer : {
 			value : renderer,
@@ -155,6 +149,13 @@ function Water( renderer, camera, world, options ) {
 			configurable : false,
 			enumerable : false,
 			writable : true
+		},
+		// half cycle of a flow map phase
+		_halfCycle : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		}
 	} );
 	
@@ -176,33 +177,54 @@ Water.prototype.constructor = Water;
 /**
  * Update method of the water.
  * 
- * @param {number} elapsedTime - The elapsed time.
+ * @param {number} delta - The delta time value.
  */
-Water.prototype.update = function( elapsedTime ){
-	
+Water.prototype.update = function( delta ) {
+
 	// the water should not render itself
 	this.material.visible = false;
-	
+
 	// update reflection and refraction
 	this._reflector.update();
 	this._refractor.update();
-	
+
 	// make material visible again
 	this.material.visible = true;
-	
-	// update time uniform
-	this.material.uniforms.time.value = elapsedTime;
-	
+
 	// update water properties
 	this.material.uniforms.waveStrength.value = this.waveStrength;
 	this.material.uniforms.waveSpeed.value = this.waveSpeed;
 	this.material.uniforms.waterColor.value = this.waterColor;
 	this.material.uniforms.waterReflectivity.value = this.waterReflectivity;
-	
+
 	// update light properties
 	this.material.uniforms.lightDirection.value = this.lightDirection;
 	this.material.uniforms.lightColor.value = this.lightColor;
 	this.material.uniforms.shininess.value = this.shininess;
+
+	// update water flow properties
+	this.material.uniforms.flowMapOffset0.value += 0.03 * delta;
+	this.material.uniforms.flowMapOffset1.value += 0.03 * delta;
+
+	// reset properties if necessary
+	if ( this.material.uniforms.flowMapOffset0.value >= this.cycle )
+	{
+		this.material.uniforms.flowMapOffset0.value = 0;
+
+		// if the delta value is high, "flowMapOffset1" must not set to zero
+		// but to its initial value to avoid a "reset" effect
+		if ( this.material.uniforms.flowMapOffset1.value >= this.cycle )
+		{
+			this.material.uniforms.flowMapOffset1.value = this._halfCycle;
+
+			return;
+		}
+	}
+
+	if ( this.material.uniforms.flowMapOffset1.value >= this.cycle )
+	{
+		this.material.uniforms.flowMapOffset1.value = 0;
+	}
 };
 
 /**
@@ -253,14 +275,19 @@ Water.prototype._init = function() {
 		resolution: this.resolution
 	});
 	
-	// load du/dv map
-	var dudvMap = new THREE.TextureLoader().load( "/assets/textures/Water_1_M_DuDv.jpg" );
-	dudvMap.wrapS = dudvMap.wrapT = THREE.RepeatWrapping;
+	// calculate half cycle
+	this._halfCycle = this.cycle * 0.5;
 	
-	// load corresponding normal map (as mentioned before, normal and du/dv
-	// map should always match)
-	var normalMap = new THREE.TextureLoader().load( "/assets/textures/Water_1_M_Normal.jpg" );
-	normalMap.wrapS = normalMap.wrapT = THREE.RepeatWrapping;
+	// load flow and noise map
+	var flowMap = new THREE.TextureLoader().load( "/assets/textures/flowmap1.jpg" );
+	var noiseMap = new THREE.TextureLoader().load( "/assets/textures/noise.jpg" );
+	
+	// load normal maps
+	var normalMap0 = new THREE.TextureLoader().load( "/assets/textures/normal0.jpg" );
+	normalMap0.wrapS = normalMap0.wrapT = THREE.RepeatWrapping;
+	
+	var normalMap1 = new THREE.TextureLoader().load( "/assets/textures/normal1.jpg" );
+	normalMap1.wrapS = normalMap1.wrapT = THREE.RepeatWrapping;
 		
 	// set reflection and refraction map
 	this.material.uniforms.reflectionMap.value = this._reflector._reflectionMap;
@@ -270,13 +297,20 @@ Water.prototype._init = function() {
 	this.material.uniforms.textureMatrixReflection.value = this._reflector._textureMatrix;
 	this.material.uniforms.textureMatrixRefraction.value = this._refractor._textureMatrix;
 	
-	// set du/dv and normal map to uniforms
-	this.material.uniforms.dudvMap.value = dudvMap;
-	this.material.uniforms.normalMap.value = normalMap;
+	// set flow, noise and normal map to uniforms
+	this.material.uniforms.flowMap.value = flowMap;
+	this.material.uniforms.noiseMap.value = noiseMap;
+	this.material.uniforms.normalMap0.value = normalMap0;
+	this.material.uniforms.normalMap1.value = normalMap1;
 
 	// set the amount of segments of the water. this value determines, how often
-	// the normal and du/dv map are repeated
+	// normal maps are repeated
 	this.material.uniforms.segments.value = this.geometry.parameters.widthSegments;
+	
+	// set default values for water flow
+	this.material.uniforms.flowMapOffset0.value = 0;
+	this.material.uniforms.flowMapOffset1.value = this._halfCycle;
+	this.material.uniforms.halfCycle.value = this._halfCycle;
 	
 	// no auto-update for water
 	this.matrixAutoUpdate = false;

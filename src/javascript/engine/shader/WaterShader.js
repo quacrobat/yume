@@ -24,14 +24,26 @@ module.exports = {
 			value : null
 		},
 		
-		// this texture will be used to distort uv coordinates
-		"dudvMap" : {
+		// this texture contains the flow of the water
+		"flowMap" : {
+			type : "t",
+			value : null
+		},
+		
+		// this texture is used to create a more realistic water flow
+		"noiseMap" : {
 			type : "t",
 			value : null
 		},
 		
 		// this texture will be used to retrieve normals
-		"normalMap" : {
+		"normalMap0" : {
+			type : "t",
+			value : null
+		},
+		
+		// this texture will be used to retrieve normals
+		"normalMap1" : {
 			type : "t",
 			value : null
 		},
@@ -48,10 +60,16 @@ module.exports = {
 			value : null
 		},
 
-		// elapsed time value
-		"time" : {
+		// first offset of the flowmap
+		"flowMapOffset0" : {
 			type : "f",
-			value : 0.0
+			value : 0
+		},
+		
+		// second offset of the flowmap
+		"flowMapOffset1" : {
+			type : "f",
+			value : 0
 		},
 				
 		// strength of the waves
@@ -100,6 +118,12 @@ module.exports = {
 		"segments" : {
 			type : "f",
 			value : 1.0
+		},
+		
+		// half cycle of a flow map phase
+		"halfCycle" : {
+			type : "f",
+			value : 0.0
 		}
 
 	},
@@ -115,14 +139,17 @@ module.exports = {
 		"varying vec4 vUvRefract;",
 		"varying vec3 vToEye;",
 		"varying vec2 vUv;",
+		"varying float vTexScale;",
 	
 		"void main() {",
 		
 			"vec4 worldPosition = modelMatrix * vec4( position, 1.0 );",
 			
-			// default uv coordinates. the segment uniform scales them, so
-			// the normal and du/dv map are sampled more often
-			"vUv = uv * segments;",
+			// default uv coordinates
+			"vUv = uv;",
+			
+			// used for scaling of normal maps
+			"vTexScale = segments;",
 			
 			// uv coordinates for texture projection
 			"vUvReflect = textureMatrixReflection * vec4( position, 1.0 );",
@@ -141,46 +168,52 @@ module.exports = {
 
 		"uniform sampler2D reflectionMap;",
 		"uniform sampler2D refractionMap;",
-		"uniform sampler2D dudvMap;",
-		"uniform sampler2D normalMap;",
+		"uniform sampler2D flowMap;",
+		"uniform sampler2D noiseMap;",
+		"uniform sampler2D normalMap0;",
+		"uniform sampler2D normalMap1;",
 		
 		"uniform vec3 lightDirection;",
 		"uniform vec3 lightColor;",
 		"uniform vec3 waterColor;",
 		
-		"uniform float time;",
+		"uniform float flowMapOffset0;",
+		"uniform float flowMapOffset1;",
 		"uniform float waveStrength;",
 		"uniform float waveSpeed;",
 		"uniform float waterReflectivity;",
 		"uniform float shininess;",
+		"uniform float halfCycle;",
 		
 		"varying vec4 vUvReflect;",
 		"varying vec4 vUvRefract;",
 		"varying vec3 vToEye;",
 		"varying vec2 vUv;",
+		"varying float vTexScale;",
 	
 		"void main() {",
 		
 			"vec3 toEye = normalize( vToEye );",
-
-			// distortion
-			"vec2 distortedUv = texture2D( dudvMap, vec2( vUv.x + time * waveSpeed, vUv.y ) ).rg * waveStrength;",
-			"distortedUv = vUv + vec2( distortedUv.x, distortedUv.y + time * waveSpeed );",
-			"vec2 distortion = ( texture2D( dudvMap, distortedUv ).rg * 2.0 - 1.0 ) * waveStrength;",
 			
-			// distort uv coordiantes
-			"vec4 reflectTexCoords = vec4( vUvReflect );",
-			"reflectTexCoords.xy += distortion;",
+			// sample flow map
+			"vec2 flowMap = texture2D( flowMap, vUv ).rg * 2.0 - 1.0;",
 			
-			"vec4 refractTexCoords = vec4( vUvRefract );",
-			"refractTexCoords.xy += distortion;",
+			// sample noise map
+			"float cycleOffset = texture2D( noiseMap, vUv ).r;",
 			
-			// sample textures
-			"vec4 reflectColor = texture2DProj( reflectionMap, reflectTexCoords );",
-			"vec4 refractColor = texture2DProj( refractionMap, refractTexCoords );",
+			// calculate current phases
+			"float phase0 = cycleOffset * 0.5 + flowMapOffset0;",
+			"float phase1 = cycleOffset * 0.5 + flowMapOffset1;",
 			
-			// calculate normal
-			"vec4 normalColor  = texture2D( normalMap, distortedUv );",	
+			// sample normal maps
+			"vec4 normalColor0 = texture2D( normalMap0, ( vUv * vTexScale ) + flowMap * phase0 );",
+			"vec4 normalColor1 = texture2D( normalMap1, ( vUv * vTexScale ) + flowMap * phase1 );",
+			
+			// linear interpolate to get the final normal color
+			"float flowLerp = ( abs( halfCycle - flowMapOffset0 ) / halfCycle );",
+			"vec4 normalColor = mix( normalColor0, normalColor1, flowLerp );",
+			
+			// determine the normal vector
 			"vec3 normal = vec3( normalColor.r * 2.0 - 1.0, normalColor.b,  normalColor.g * 2.0 - 1.0 );",
 			"normal = normalize( normal );",
 			
@@ -192,10 +225,17 @@ module.exports = {
 			"vec3 reflectedLight = normalize( reflect( -lightDirection, normal ) );",
 			"float specular = pow( max( dot( reflectedLight, toEye ), 0.0 ) , shininess );",
 			"vec4 specularColor =  vec4( lightColor * specular, 0.0 );",
+			
+			// sample textures
+			"vec3 uvReflect = vUvReflect.xyz / vUvReflect.w;",	
+			"vec3 uvRefract = vUvRefract.xyz / vUvRefract.w;",
+			
+			"vec4 reflectColor = texture2D( reflectionMap, uvReflect.xy + uvReflect.z * normal.xz * 0.05 );",
+			"vec4 refractColor = texture2D( refractionMap, uvRefract.xy + uvRefract.z * normal.xz * 0.05 );",
 
 			// multiply water color with the mix of both textures. then add lighting
 			"gl_FragColor = vec4( waterColor, 1.0 ) * mix( refractColor, reflectColor, reflectance ) + specularColor;",
-		
+
 		"}"
 
 	].join( "\n" )
