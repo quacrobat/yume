@@ -52,15 +52,8 @@ function Water( renderer, camera, world, options ) {
 			enumerable : true,
 			writable : true
 		},
-		// strength of the waves
-		waveStrength : {
-			value : 0.1,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// speed of the waves
-		waveSpeed : {
+		// speed of the water motions
+		waterSpeed : {
 			value : 0.03,
 			configurable : false,
 			enumerable : true,
@@ -192,8 +185,6 @@ Water.prototype.update = function( delta ) {
 	this.material.visible = true;
 
 	// update water properties
-	this.material.uniforms.waveStrength.value = this.waveStrength;
-	this.material.uniforms.waveSpeed.value = this.waveSpeed;
 	this.material.uniforms.waterColor.value = this.waterColor;
 	this.material.uniforms.waterReflectivity.value = this.waterReflectivity;
 
@@ -203,8 +194,8 @@ Water.prototype.update = function( delta ) {
 	this.material.uniforms.shininess.value = this.shininess;
 
 	// update water flow properties
-	this.material.uniforms.flowMapOffset0.value += 0.03 * delta;
-	this.material.uniforms.flowMapOffset1.value += 0.03 * delta;
+	this.material.uniforms.flowMapOffset0.value += this.waterSpeed * delta;
+	this.material.uniforms.flowMapOffset1.value += this.waterSpeed * delta;
 
 	// reset properties if necessary
 	if ( this.material.uniforms.flowMapOffset0.value >= this.cycle )
@@ -279,14 +270,14 @@ Water.prototype._init = function() {
 	this._halfCycle = this.cycle * 0.5;
 	
 	// load flow and noise map
-	var flowMap = new THREE.TextureLoader().load( "/assets/textures/flowmap1.jpg" );
-	var noiseMap = new THREE.TextureLoader().load( "/assets/textures/noise.jpg" );
+	var flowMap = new THREE.TextureLoader().load( "/assets/textures/Water_1_M_Flow.jpg" );
+	var noiseMap = new THREE.TextureLoader().load( "/assets/textures/Water_1_M_Noise.jpg" );
 	
 	// load normal maps
-	var normalMap0 = new THREE.TextureLoader().load( "/assets/textures/normal0.jpg" );
+	var normalMap0 = new THREE.TextureLoader().load( "/assets/textures/Water_1_M_Normal.jpg" );
 	normalMap0.wrapS = normalMap0.wrapT = THREE.RepeatWrapping;
 	
-	var normalMap1 = new THREE.TextureLoader().load( "/assets/textures/normal1.jpg" );
+	var normalMap1 = new THREE.TextureLoader().load( "/assets/textures/Water_2_M_Normal.jpg" );
 	normalMap1.wrapS = normalMap1.wrapT = THREE.RepeatWrapping;
 		
 	// set reflection and refraction map
@@ -305,7 +296,7 @@ Water.prototype._init = function() {
 
 	// set the amount of segments of the water. this value determines, how often
 	// normal maps are repeated
-	this.material.uniforms.segments.value = this.geometry.parameters.widthSegments;
+	this.material.uniforms.segments.value = this.segments;
 	
 	// set default values for water flow
 	this.material.uniforms.flowMapOffset0.value = 0;

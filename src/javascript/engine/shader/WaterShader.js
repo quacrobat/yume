@@ -71,18 +71,6 @@ module.exports = {
 			type : "f",
 			value : 0
 		},
-				
-		// strength of the waves
-		"waveStrength" : {
-			type : "f",
-			value : 0.1
-		},
-		
-		// speed of the waves
-		"waveSpeed" : {
-			type : "f",
-			value : 0.03
-		},
 		
 		// color of the water
 		"waterColor" : {
@@ -179,8 +167,6 @@ module.exports = {
 		
 		"uniform float flowMapOffset0;",
 		"uniform float flowMapOffset1;",
-		"uniform float waveStrength;",
-		"uniform float waveSpeed;",
 		"uniform float waterReflectivity;",
 		"uniform float shininess;",
 		"uniform float halfCycle;",
@@ -196,7 +182,7 @@ module.exports = {
 			"vec3 toEye = normalize( vToEye );",
 			
 			// sample flow map
-			"vec2 flowMap = texture2D( flowMap, vUv ).rg * 2.0 - 1.0;",
+			"vec2 flow = texture2D( flowMap, vUv ).rg * 2.0 - 1.0;",
 			
 			// sample noise map
 			"float cycleOffset = texture2D( noiseMap, vUv ).r;",
@@ -206,16 +192,15 @@ module.exports = {
 			"float phase1 = cycleOffset * 0.5 + flowMapOffset1;",
 			
 			// sample normal maps
-			"vec4 normalColor0 = texture2D( normalMap0, ( vUv * vTexScale ) + flowMap * phase0 );",
-			"vec4 normalColor1 = texture2D( normalMap1, ( vUv * vTexScale ) + flowMap * phase1 );",
+			"vec4 normalColor0 = texture2D( normalMap0, ( vUv * vTexScale ) + flow * phase0 );",
+			"vec4 normalColor1 = texture2D( normalMap1, ( vUv * vTexScale ) + flow * phase1 );",
 			
 			// linear interpolate to get the final normal color
-			"float flowLerp = ( abs( halfCycle - flowMapOffset0 ) / halfCycle );",
+			"float flowLerp = abs( halfCycle - flowMapOffset0 ) / halfCycle;",
 			"vec4 normalColor = mix( normalColor0, normalColor1, flowLerp );",
 			
 			// determine the normal vector
-			"vec3 normal = vec3( normalColor.r * 2.0 - 1.0, normalColor.b,  normalColor.g * 2.0 - 1.0 );",
-			"normal = normalize( normal );",
+			"vec3 normal = normalize( vec3( normalColor.r * 2.0 - 1.0, normalColor.b,  normalColor.g * 2.0 - 1.0 ) );",
 			
 			// fresnel effect	
 			"float theta = max( dot( toEye, normal ), 0.0 );",
@@ -235,7 +220,7 @@ module.exports = {
 
 			// multiply water color with the mix of both textures. then add lighting
 			"gl_FragColor = vec4( waterColor, 1.0 ) * mix( refractColor, reflectColor, reflectance ) + specularColor;",
-
+			
 		"}"
 
 	].join( "\n" )

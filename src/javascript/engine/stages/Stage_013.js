@@ -100,7 +100,7 @@ Stage.prototype.setup = function() {
 	water = new Water( this.renderer, this.camera, this.world, {
 		width: 200,
 		height: 200,
-		segments: 3,
+		segments: 5,
 		lightDirection: new THREE.Vector3( 0.7, 0.7, 0 )
 	});
 	

@@ -50829,21 +50829,8 @@ module.exports = new Utils();
 },{}],46:[function(require,module,exports){
 /**
  * @file This file creates a realistic and expensive water effect. The material
- * is real-time reflective & refractive, it calculates a distortion of the water
- * surface and implements a basic fresnel and lighting equation.
- * 
- * The shader needs a normal and du/dv map. The du/dv map is used to create
- * distortions and can be easily created with Photoshop from a normal map in
- * just two steps (see https://developer.valvesoftware.com/wiki/Du/dv_map).
- * 
- * 1. Open the normal map and invert the colors. 
- * 2. Go to Image > Adjustments > Brightness/Contrast. 
- * 		1. Check "Use Legacy" 
- * 		2. Set Brightness to -17 
- * 		3. Set Contrast to 100
- * 
- * Maybe you have to tweak the values to get a good result. It's important that
- * the du/dv map does not contain full black or white areas.
+ * is real-time reflective & refractive, it calculates a distortion and flow of
+ * the water surface and implements a basic fresnel and lighting equation.
  * 
  * @author Human Interactive
  */
@@ -50894,15 +50881,8 @@ function Water( renderer, camera, world, options ) {
 			enumerable : true,
 			writable : true
 		},
-		// strength of the waves
-		waveStrength : {
-			value : 0.1,
-			configurable : false,
-			enumerable : true,
-			writable : true
-		},
-		// speed of the waves
-		waveSpeed : {
+		// speed of the water motions
+		waterSpeed : {
 			value : 0.03,
 			configurable : false,
 			enumerable : true,
@@ -51034,8 +51014,6 @@ Water.prototype.update = function( delta ) {
 	this.material.visible = true;
 
 	// update water properties
-	this.material.uniforms.waveStrength.value = this.waveStrength;
-	this.material.uniforms.waveSpeed.value = this.waveSpeed;
 	this.material.uniforms.waterColor.value = this.waterColor;
 	this.material.uniforms.waterReflectivity.value = this.waterReflectivity;
 
@@ -51045,18 +51023,20 @@ Water.prototype.update = function( delta ) {
 	this.material.uniforms.shininess.value = this.shininess;
 
 	// update water flow properties
-	this.material.uniforms.flowMapOffset0.value += 0.03 * delta;
-	this.material.uniforms.flowMapOffset1.value += 0.03 * delta;
+	this.material.uniforms.flowMapOffset0.value += this.waterSpeed * delta;
+	this.material.uniforms.flowMapOffset1.value += this.waterSpeed * delta;
 
 	// reset properties if necessary
 	if ( this.material.uniforms.flowMapOffset0.value >= this.cycle )
 	{
 		this.material.uniforms.flowMapOffset0.value = 0;
-		
+
+		// if the delta value is high, "flowMapOffset1" must not set to zero
+		// but to its initial value to avoid a "reset" effect
 		if ( this.material.uniforms.flowMapOffset1.value >= this.cycle )
 		{
 			this.material.uniforms.flowMapOffset1.value = this._halfCycle;
-			
+
 			return;
 		}
 	}
@@ -51119,14 +51099,14 @@ Water.prototype._init = function() {
 	this._halfCycle = this.cycle * 0.5;
 	
 	// load flow and noise map
-	var flowMap = new THREE.TextureLoader().load( "/assets/textures/flowmap1.jpg" );
-	var noiseMap = new THREE.TextureLoader().load( "/assets/textures/noise.jpg" );
+	var flowMap = new THREE.TextureLoader().load( "/assets/textures/Water_1_M_Flow.jpg" );
+	var noiseMap = new THREE.TextureLoader().load( "/assets/textures/Water_1_M_Noise.jpg" );
 	
 	// load normal maps
-	var normalMap0 = new THREE.TextureLoader().load( "/assets/textures/normal0.jpg" );
+	var normalMap0 = new THREE.TextureLoader().load( "/assets/textures/Water_1_M_Normal.jpg" );
 	normalMap0.wrapS = normalMap0.wrapT = THREE.RepeatWrapping;
 	
-	var normalMap1 = new THREE.TextureLoader().load( "/assets/textures/normal1.jpg" );
+	var normalMap1 = new THREE.TextureLoader().load( "/assets/textures/Water_2_M_Normal.jpg" );
 	normalMap1.wrapS = normalMap1.wrapT = THREE.RepeatWrapping;
 		
 	// set reflection and refraction map
@@ -51145,7 +51125,7 @@ Water.prototype._init = function() {
 
 	// set the amount of segments of the water. this value determines, how often
 	// normal maps are repeated
-	this.material.uniforms.segments.value = this.geometry.parameters.widthSegments;
+	this.material.uniforms.segments.value = this.segments;
 	
 	// set default values for water flow
 	this.material.uniforms.flowMapOffset0.value = 0;
@@ -60137,18 +60117,6 @@ module.exports = {
 			type : "f",
 			value : 0
 		},
-				
-		// strength of the waves
-		"waveStrength" : {
-			type : "f",
-			value : 0.1
-		},
-		
-		// speed of the waves
-		"waveSpeed" : {
-			type : "f",
-			value : 0.03
-		},
 		
 		// color of the water
 		"waterColor" : {
@@ -60245,8 +60213,6 @@ module.exports = {
 		
 		"uniform float flowMapOffset0;",
 		"uniform float flowMapOffset1;",
-		"uniform float waveStrength;",
-		"uniform float waveSpeed;",
 		"uniform float waterReflectivity;",
 		"uniform float shininess;",
 		"uniform float halfCycle;",
@@ -60261,8 +60227,8 @@ module.exports = {
 		
 			"vec3 toEye = normalize( vToEye );",
 			
-			// sample flowmap
-			"vec2 flowMap = texture2D( flowMap, vUv ).rg * 2.0 - 1.0;",
+			// sample flow map
+			"vec2 flow = texture2D( flowMap, vUv ).rg * 2.0 - 1.0;",
 			
 			// sample noise map
 			"float cycleOffset = texture2D( noiseMap, vUv ).r;",
@@ -60272,16 +60238,15 @@ module.exports = {
 			"float phase1 = cycleOffset * 0.5 + flowMapOffset1;",
 			
 			// sample normal maps
-			"vec4 normalColor0 = texture2D( normalMap0, ( vUv * vTexScale ) + flowMap * phase0 );",
-			"vec4 normalColor1 = texture2D( normalMap1, ( vUv * vTexScale ) + flowMap * phase1 );",
+			"vec4 normalColor0 = texture2D( normalMap0, ( vUv * vTexScale ) + flow * phase0 );",
+			"vec4 normalColor1 = texture2D( normalMap1, ( vUv * vTexScale ) + flow * phase1 );",
 			
 			// linear interpolate to get the final normal color
-			"float flowLerp = ( abs( halfCycle - flowMapOffset0 ) / halfCycle );",
+			"float flowLerp = abs( halfCycle - flowMapOffset0 ) / halfCycle;",
 			"vec4 normalColor = mix( normalColor0, normalColor1, flowLerp );",
 			
 			// determine the normal vector
-			"vec3 normal = vec3( normalColor.r * 2.0 - 1.0, normalColor.b,  normalColor.g * 2.0 - 1.0 );",
-			"normal = normalize( normal );",
+			"vec3 normal = normalize( vec3( normalColor.r * 2.0 - 1.0, normalColor.b,  normalColor.g * 2.0 - 1.0 ) );",
 			
 			// fresnel effect	
 			"float theta = max( dot( toEye, normal ), 0.0 );",
@@ -60301,7 +60266,7 @@ module.exports = {
 
 			// multiply water color with the mix of both textures. then add lighting
 			"gl_FragColor = vec4( waterColor, 1.0 ) * mix( refractColor, reflectColor, reflectance ) + specularColor;",
-
+			
 		"}"
 
 	].join( "\n" )
@@ -62216,7 +62181,7 @@ Stage.prototype.setup = function() {
 	water = new Water( this.renderer, this.camera, this.world, {
 		width: 200,
 		height: 200,
-		segments: 3,
+		segments: 5,
 		lightDirection: new THREE.Vector3( 0.7, 0.7, 0 )
 	});
 	
