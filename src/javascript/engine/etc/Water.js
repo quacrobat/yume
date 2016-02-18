@@ -270,14 +270,14 @@ Water.prototype._init = function() {
 	this._halfCycle = this.cycle * 0.5;
 	
 	// load flow and noise map
-	var flowMap = new THREE.TextureLoader().load( "/assets/textures/Water_1_M_Flow.jpg" );
-	var noiseMap = new THREE.TextureLoader().load( "/assets/textures/Water_1_M_Noise.jpg" );
+	var flowMap = new THREE.TextureLoader().load( "assets/textures/Water_1_M_Flow.jpg" );
+	var noiseMap = new THREE.TextureLoader().load( "assets/textures/Water_1_M_Noise.jpg" );
 	
 	// load normal maps
-	var normalMap0 = new THREE.TextureLoader().load( "/assets/textures/Water_1_M_Normal.jpg" );
+	var normalMap0 = new THREE.TextureLoader().load( "assets/textures/Water_1_M_Normal.jpg" );
 	normalMap0.wrapS = normalMap0.wrapT = THREE.RepeatWrapping;
 	
-	var normalMap1 = new THREE.TextureLoader().load( "/assets/textures/Water_2_M_Normal.jpg" );
+	var normalMap1 = new THREE.TextureLoader().load( "assets/textures/Water_2_M_Normal.jpg" );
 	normalMap1.wrapS = normalMap1.wrapT = THREE.RepeatWrapping;
 		
 	// set reflection and refraction map

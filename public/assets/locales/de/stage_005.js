@@ -1,3 +1,0 @@
-{
-	"InformationPanel.Text": "<h3>Hintergrundmusik</h3>Über das HTML5-Audio Element kann Hintergrundmusik oder ein Ambient bequem vom Server gestreamt werden. Für jedes Element kann die Lautstärke einzeln oder global über das Master-Volume des internen Audio-Systems(Web Audio) eingestellt werden.<br/><br/>Musik:<ul><li>Titel: As Time Goes By</li><li>Künstler: Houston Person</li><li>Lizenz: <a href='http://creativecommons.org/licenses/by-nc-nd/3.0/'>CC BY-NC-ND 3.0</a></li><li>Quelle: freemusicarchive.org</li></ul>"
-}

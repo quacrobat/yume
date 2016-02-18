@@ -1,4 +1,0 @@
-{
-	"Label.Color": "Change color",
-	"InformationPanel.Text": "<h3>Action System</h3>You can interact with the world in two different ways.<ul><li><strong>Interactive Objects</strong> (left box): The player can execute actions, which are linked to interactive objects. The action is freely programmable. The text of the label is also definable. In this example, the color of the box is changed.</li><li><strong>Action Trigger</strong> (right sphere): A trigger is a simple (usually invisible) sphere, which executes an action, when a player enters it. In this example, the color of the box is changed.</li></ul>Actions can be set active or inactive via a flag at any time. When an action is inactive, it's not possible to execute the respective script. Besides, the label of the corresponding interactive object is hidden."
-}

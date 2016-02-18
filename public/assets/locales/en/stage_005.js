@@ -1,3 +1,0 @@
-{
-	"InformationPanel.Text": "<h3>Background Music</h3>You can conveniently stream background or ambient music via the HTML5 audio element from the server. It's possible to adjust the volume for each element or via the global master volume of the internal audio system (Web Audio).<br/><br/>Music:<ul><li>Title: As Time Goes By</li><li>Artist: Houston Person</li><li>License: <a href='http://creativecommons.org/licenses/by-nc-nd/3.0/'>CC BY-NC-ND 3.0</a></li><li>Source: freemusicarchive.org</li></ul>"
-}

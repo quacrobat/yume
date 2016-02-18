@@ -101,7 +101,7 @@ Bootstrap.prototype._initEngine = function() {
 Bootstrap.prototype._loadStage = function() {
 
 	eventManager.publish( TOPIC.APPLICATION.START, {
-		stageId : saveGameManager.get( saveGameManager.KEYS.stageId )
+		stageId : "001"
 	} );
 };
 

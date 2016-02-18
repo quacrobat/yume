@@ -1,6 +1,0 @@
-{
-	"Modal.Headline": "ENDE",
-	"Modal.Button": "Schließen",
-	"Modal.Content": "<p>Vielen Dank für's Durchspielen! Den Source-Code und weitere Informationen zum Projekt findest du bei <a href='https://github.com/Mugen87/yume'>github</a>.</p>",
-	"InformationPanel.Text": "<h3>Wasser</h3><p>Der Wasser Shader ist eine der komplexesten Komponenten in YUME. Neben der Darstellung von Lichtbrechungen - und reflexionen in Echtzeit berechnet der Shader einen animierten Wellengang mithilfe von Normal und Du/Dv Maps. Die Logik besteht aus zwei grundlegenden Komponenten, die sich auch separat verwenden lassen: <ul><li><strong>Reflektor</strong>: Der Reflektor dient zur Darstellung reflektierender Oberflächen und kann für Spiegel, Böden oder Flüssigkeiten verwendet werden. Die Reflexion wird entweder über den Stencil Buffer oder, wie im vorliegenden Fall, über ein Framebuffer Object gerendert.</li><li><strong>Refraktor</strong>: Der Refraktor dient zur Darstellung aller 3D Objekte hinter einer lichtdurchlässigen Struktur. Je nach Anpassung des Shaderprogramms kann die Illusion einer Lichtbrechung realistisch implementiert werden.</li></ul></p>"
-}
