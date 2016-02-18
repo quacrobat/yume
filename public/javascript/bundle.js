@@ -60202,8 +60202,7 @@ module.exports = {
 			
 			// calculate normal
 			"vec4 normalColor  = texture2D( normalMap, distortedUv );",	
-			"vec3 normal = vec3( normalColor.r * 2.0 - 1.0, normalColor.b,  normalColor.g * 2.0 - 1.0 );",
-			"normal = normalize( normal );",
+			"vec3 normal = normalize( vec3( normalColor.r * 2.0 - 1.0, normalColor.b,  normalColor.g * 2.0 - 1.0 ) );",
 			
 			// fresnel effect	
 			"float theta = max( dot( toEye, normal ), 0.0 );",
