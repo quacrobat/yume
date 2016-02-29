@@ -60157,6 +60157,7 @@ module.exports = {
 			
 			// sample flow map
 			"vec2 flow = texture2D( flowMap, vUv ).rg * 2.0 - 1.0;",
+			"flow.r *= -1.0;",
 			
 			// sample noise map
 			"float cycleOffset = texture2D( noiseMap, vUv ).r;",
