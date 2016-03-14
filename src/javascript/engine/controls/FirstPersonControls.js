@@ -16,7 +16,6 @@ var TOPIC = require( "../messaging/Topic" );
 var camera = require( "../core/Camera" );
 var logger = require( "../core/Logger" );
 var audioManager = require( "../audio/AudioManager" );
-var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var settingsManager = require( "../etc/SettingsManager" );
 var Easing = require( "../animation/Easing" );
 var utils = require( "../etc/Utils" );
@@ -836,7 +835,7 @@ FirstPersonControls.prototype._onPointerlockchange = function() {
 
 		if ( self.isUiElementActive === false )
 		{
-			userInterfaceManager.hideMenu();
+			eventManager.publish( TOPIC.UI.MENU.HIDE, undefined );
 		}
 		
 		logger.log( "INFO: FirstPersonControls: Capture pointer and activate controls.");
@@ -848,7 +847,7 @@ FirstPersonControls.prototype._onPointerlockchange = function() {
 
 		if ( self.isUiElementActive === false )
 		{
-			userInterfaceManager.showMenu();
+			eventManager.publish( TOPIC.UI.MENU.SHOW, undefined );
 		}
 		
 		logger.log( "INFO: FirstPersonControls: Release pointer and deactivate controls.");

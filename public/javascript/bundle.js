@@ -40698,7 +40698,6 @@ var Action = require( "./Action" );
 var ActionObject = require( "./ActionObject" );
 var ActionTrigger = require( "./ActionTrigger" );
 var BSPTree = require( "./BSPTree" );
-var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var logger = require( "../core/Logger" );
 var timing = require( "../core/Timing" );
 
@@ -41047,11 +41046,11 @@ ActionManager.prototype._checkInteraction = function( position, direction ) {
 	// show the interaction label if there is an intersection
 	if ( interactiveObject !== undefined )
 	{
-		userInterfaceManager.showInteractionLabel( interactiveObject.action.label );
+		eventManager.publish( TOPIC.UI.INTERACTION_LABEL.SHOW, { textKey: interactiveObject.action.label } );
 	}
 	else
 	{
-		userInterfaceManager.hideInteractionLabel();
+		eventManager.publish( TOPIC.UI.INTERACTION_LABEL.HIDE, undefined );
 	}
 
 };
@@ -41079,7 +41078,7 @@ ActionManager.prototype._onInteraction = function( message, data ) {
 };
 
 module.exports = new ActionManager();
-},{"../core/Logger":21,"../core/Timing":30,"../messaging/EventManager":69,"../messaging/Topic":71,"../ui/UserInterfaceManager":118,"./Action":4,"./ActionObject":6,"./ActionTrigger":7,"./BSPTree":8,"three":1}],6:[function(require,module,exports){
+},{"../core/Logger":21,"../core/Timing":30,"../messaging/EventManager":69,"../messaging/Topic":71,"./Action":4,"./ActionObject":6,"./ActionTrigger":7,"./BSPTree":8,"three":1}],6:[function(require,module,exports){
 /**
  * @file This prototype enables ordinary 3D-Objects to be interactive. Any
  * action object is part of the collision-detection logic and ready for
@@ -43920,7 +43919,6 @@ var TOPIC = require( "../messaging/Topic" );
 var camera = require( "../core/Camera" );
 var logger = require( "../core/Logger" );
 var audioManager = require( "../audio/AudioManager" );
-var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var settingsManager = require( "../etc/SettingsManager" );
 var Easing = require( "../animation/Easing" );
 var utils = require( "../etc/Utils" );
@@ -44740,7 +44738,7 @@ FirstPersonControls.prototype._onPointerlockchange = function() {
 
 		if ( self.isUiElementActive === false )
 		{
-			userInterfaceManager.hideMenu();
+			eventManager.publish( TOPIC.UI.MENU.HIDE, undefined );
 		}
 		
 		logger.log( "INFO: FirstPersonControls: Capture pointer and activate controls.");
@@ -44752,7 +44750,7 @@ FirstPersonControls.prototype._onPointerlockchange = function() {
 
 		if ( self.isUiElementActive === false )
 		{
-			userInterfaceManager.showMenu();
+			eventManager.publish( TOPIC.UI.MENU.SHOW, undefined );
 		}
 		
 		logger.log( "INFO: FirstPersonControls: Release pointer and deactivate controls.");
@@ -44988,7 +44986,7 @@ FirstPersonControls.RUN = {
 
 module.exports = FirstPersonControls;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/Logger":21,"../etc/SettingsManager":42,"../etc/Utils":45,"../messaging/EventManager":69,"../messaging/Topic":71,"../ui/UserInterfaceManager":118,"three":1}],18:[function(require,module,exports){
+},{"../animation/Easing":11,"../audio/AudioManager":15,"../core/Camera":19,"../core/Logger":21,"../etc/SettingsManager":42,"../etc/Utils":45,"../messaging/EventManager":69,"../messaging/Topic":71,"three":1}],18:[function(require,module,exports){
 (function (global){
 /**
  * @file This prototype contains the entire logic for starting the application.
@@ -46244,7 +46242,6 @@ var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var saveGameManager = require( "../etc/SaveGameManager" );
-var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 
 // stages
 var Stage_001 = require( "../stages/Stage_001" );
@@ -46438,7 +46435,7 @@ StageManager.prototype._onStageChange = function( message, data ) {
 	if ( data !== undefined )
 	{
 		// show loading screen. execute stage change, when animation ends
-		userInterfaceManager.showLoadingScreen( function() {
+		eventManager.publish( TOPIC.UI.LOADING_SCREEN.SHOW, { callback : function() {
 
 			// set flag
 			self._isStageChangeActive = true;
@@ -46455,9 +46452,8 @@ StageManager.prototype._onStageChange = function( message, data ) {
 				saveGameManager.set( saveGameManager.KEYS.stageId, data.stageId );
 				
 				saveGameManager.save();
-			}
-		} );
-
+			}		
+		} } );
 	}
 	else
 	{
@@ -46535,7 +46531,7 @@ StageManager.prototype._onLoadComplete = function( message, data ) {
 };
 
 module.exports = new StageManager();
-},{"../etc/SaveGameManager":41,"../messaging/EventManager":69,"../messaging/Topic":71,"../stages/Stage_001":95,"../stages/Stage_002":96,"../stages/Stage_003":97,"../stages/Stage_004":98,"../stages/Stage_005":99,"../stages/Stage_006":100,"../stages/Stage_007":101,"../stages/Stage_008":102,"../stages/Stage_009":103,"../stages/Stage_010":104,"../stages/Stage_011":105,"../stages/Stage_012":106,"../stages/Stage_013":107,"../ui/UserInterfaceManager":118,"./Logger":21}],27:[function(require,module,exports){
+},{"../etc/SaveGameManager":41,"../messaging/EventManager":69,"../messaging/Topic":71,"../stages/Stage_001":95,"../stages/Stage_002":96,"../stages/Stage_003":97,"../stages/Stage_004":98,"../stages/Stage_005":99,"../stages/Stage_006":100,"../stages/Stage_007":101,"../stages/Stage_008":102,"../stages/Stage_009":103,"../stages/Stage_010":104,"../stages/Stage_011":105,"../stages/Stage_012":106,"../stages/Stage_013":107,"./Logger":21}],27:[function(require,module,exports){
 /**
  * @file This prototype holds core information about the engine. The runtime
  * behavior of the application depends crucially of this prototype.
@@ -56955,10 +56951,21 @@ var TOPIC = {
 		START : "stage.start"
 	},
 	UI : {
+		MENU : {
+			SHOW : "ui.menu.show",
+			HIDE : "ui.menu.hide"
+		},
+		INTERACTION_LABEL : {
+			SHOW : "ui.interaction_label.show",
+			HIDE : "ui.interaction_label.hide"
+		},
+		LOADING_SCREEN : {
+			SHOW : "ui.loading_screen.show",
+			HIDE : "ui.loading_screen.hide"
+		},
 		PERFORMANCE : {
-			TOGGLE: "ui.fps.toggle"
-		}
-			
+			TOGGLE : "ui.fps.toggle"
+		}			
 	}
 };
 
@@ -64183,15 +64190,6 @@ var self;
  */
 function UserInterfaceManager() {
 
-	Object.defineProperties( this, {
-		_$uiContainer : {
-			value : null,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		}
-	} );
-	
 	self = this;
 }
 
@@ -64199,9 +64197,6 @@ function UserInterfaceManager() {
  * Initializes the user interface manager.
  */
 UserInterfaceManager.prototype.init = function() {
-
-	// get reference to root DOM element of all UI controls
-	this._$uiContainer = global.document.querySelector( "#ui-container" );
 
 	// eventing
 	this._initEventListener();
@@ -64225,6 +64220,7 @@ UserInterfaceManager.prototype.init = function() {
 		performanceMonitor.init();
 		developmentPanel.init();
 	}
+	
 };
 
 /**
@@ -64249,41 +64245,6 @@ UserInterfaceManager.prototype.setInformationPanelText = function( textKey ) {
 };
 
 /**
- * Shows the interaction label.
- * 
- * @param {string} textKey - The label of the corresponding action.
- */
-UserInterfaceManager.prototype.showInteractionLabel = function( textKey ) {
-
-	interactionLabel.show( textKey );
-};
-
-/**
- * Hides the interaction label.
- */
-UserInterfaceManager.prototype.hideInteractionLabel = function() {
-
-	interactionLabel.hide();
-};
-
-/**
- * Shows the menu.
- * 
- */
-UserInterfaceManager.prototype.showMenu = function() {
-
-	menu.show();
-};
-
-/**
- * Hides the menu.
- */
-UserInterfaceManager.prototype.hideMenu = function() {
-
-	menu.hide();
-};
-
-/**
  * Shows the text screen.
  * 
  * @param {object} textObject - The conversation of the text screen.
@@ -64301,25 +64262,6 @@ UserInterfaceManager.prototype.showTextScreen = function( textKeys, completeCall
 UserInterfaceManager.prototype.hideTextScreen = function() {
 
 	textScreen.hide();
-};
-
-/**
- * Shows the loading screen.
- * 
- * @param {function} callback - This function is executed, when the loading
- * screen is shown.
- */
-UserInterfaceManager.prototype.showLoadingScreen = function( callback ) {
-
-	loadingScreen.show( callback );
-};
-
-/**
- * Hides the loading screen.
- */
-UserInterfaceManager.prototype.hideLoadingScreen = function() {
-
-	loadingScreen.hide();
 };
 
 /**
@@ -64371,6 +64313,15 @@ UserInterfaceManager.prototype._initEventListener = function() {
  */
 UserInterfaceManager.prototype._initSubscriptions = function() {
 
+	eventManager.subscribe( TOPIC.UI.MENU.SHOW, this._onShowMenu );
+	eventManager.subscribe( TOPIC.UI.MENU.HIDE, this._onHideMenu );
+	
+	eventManager.subscribe( TOPIC.UI.INTERACTION_LABEL.SHOW, this._onShowInteractionLabel );
+	eventManager.subscribe( TOPIC.UI.INTERACTION_LABEL.HIDE, this._onHideInteractionLabel );
+	
+	eventManager.subscribe( TOPIC.UI.LOADING_SCREEN.SHOW, this._onShowLoadingScreen );
+	eventManager.subscribe( TOPIC.UI.LOADING_SCREEN.HIDE, this._onHideLoadingScreen );
+	
 	eventManager.subscribe( TOPIC.UI.PERFORMANCE.TOGGLE, this._onPerformanceMonitor );
 };
 
@@ -64449,6 +64400,72 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 UserInterfaceManager.prototype._onResize = function( event ) {
 
 	eventManager.publish( TOPIC.APPLICATION.RESIZE, undefined );
+};
+
+/**
+ * This method handles the "show" topic for the menu.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ */
+UserInterfaceManager.prototype._onShowMenu = function( message, data ) {
+	
+	menu.show();
+};
+
+/**
+ * This method handles the "hide" topic for the menu.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ */
+UserInterfaceManager.prototype._onHideMenu = function( message, data ) {
+	
+	menu.hide();
+};
+
+/**
+ * This method handles the "show" topic for the interaction label.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ */
+UserInterfaceManager.prototype._onShowInteractionLabel = function( message, data ) {
+	
+	interactionLabel.show( data.textKey );
+};
+
+/**
+ * This method handles the "hide" topic for the interaction label.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ */
+UserInterfaceManager.prototype._onHideInteractionLabel = function( message, data ) {
+	
+	interactionLabel.hide();
+};
+
+/**
+ * This method handles the "show" topic for the loading screen.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ */
+UserInterfaceManager.prototype._onShowLoadingScreen = function( message, data ) {
+	
+	loadingScreen.show( data.callback );
+};
+
+/**
+ * This method handles the "hide" topic for the loading screen.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ */
+UserInterfaceManager.prototype._onHideLoadingScreen = function( message, data ) {
+	
+	loadingScreen.hide();
 };
 
 /**

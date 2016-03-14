@@ -15,7 +15,6 @@ var Action = require( "./Action" );
 var ActionObject = require( "./ActionObject" );
 var ActionTrigger = require( "./ActionTrigger" );
 var BSPTree = require( "./BSPTree" );
-var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 var logger = require( "../core/Logger" );
 var timing = require( "../core/Timing" );
 
@@ -364,11 +363,11 @@ ActionManager.prototype._checkInteraction = function( position, direction ) {
 	// show the interaction label if there is an intersection
 	if ( interactiveObject !== undefined )
 	{
-		userInterfaceManager.showInteractionLabel( interactiveObject.action.label );
+		eventManager.publish( TOPIC.UI.INTERACTION_LABEL.SHOW, { textKey: interactiveObject.action.label } );
 	}
 	else
 	{
-		userInterfaceManager.hideInteractionLabel();
+		eventManager.publish( TOPIC.UI.INTERACTION_LABEL.HIDE, undefined );
 	}
 
 };
