@@ -75,8 +75,6 @@ Renderer.prototype.init = function() {
 	this._renderer.setPixelRatio( global.window.devicePixelRatio );
 	this._renderer.setSize( global.window.innerWidth, global.window.innerHeight );
 	this._renderer.setClearColor( 0x000000 );
-	this._renderer.gammaInput = true;
-	this._renderer.gammaOutput = true;
 	this._renderer.shadowMap.enabled = true;
 
 	// append renderer to DOM
