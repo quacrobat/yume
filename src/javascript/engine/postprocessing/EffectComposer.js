@@ -162,8 +162,8 @@ EffectComposer.prototype.reset = function( renderTarget ) {
 	}
 
 	this._renderTarget1.dispose();
-	this._renderTarget1 = renderTarget;
 	this._renderTarget2.dispose();
+	this._renderTarget1 = renderTarget;
 	this._renderTarget2 = renderTarget.clone();
 
 	this._readBuffer = this._renderTarget1;

@@ -241,7 +241,7 @@ Impostor.prototype._createBillboard = function() {
 	// create billboard material. the alpha value avoids
 	// semi-transparent black borders at the billboard
 	var billboardMaterial = new THREE.MeshBasicMaterial( {
-		map : this._renderTarget,
+		map : this._renderTarget.texture,
 		transparent : true,
 		alphaTest : 0.9
 	} );
