@@ -5,6 +5,8 @@
  * @author Human Interactive
  */
 
+"use strict";
+
 const debug = require( "debug" )( "YUME" );
 const ws = require( "ws" );
 
