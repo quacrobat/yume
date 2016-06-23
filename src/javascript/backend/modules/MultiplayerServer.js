@@ -5,15 +5,13 @@
  * @author Human Interactive
  */
 
-"use strict";
+const debug = require( "debug" )( "YUME" );
+const ws = require( "ws" );
 
-var debug = require( "debug" )( "YUME" );
-var ws = require( "ws" );
+const metadata = require( "../../../../package.json" );
+const Message = require( "../../engine/network/Message" );
 
-var metadata = require( "../../../../package.json" );
-var Message = require( "../../engine/network/Message" );
-
-var self;
+let self;
 
 /**
  * Creates the multiplayer-server.
@@ -147,8 +145,8 @@ MultiplayerServer.prototype._onConnection = function( socket ) {
  * 
  */
 MultiplayerServer.prototype._assignSession = function( socket ) {
-
-	var id, session;
+	
+	let id;
 
 	// Iterate over all sessions
 	for ( id in this._sessions )
@@ -156,7 +154,7 @@ MultiplayerServer.prototype._assignSession = function( socket ) {
 		if ( this._sessions.hasOwnProperty( id ) )
 		{
 			// get session
-			session = this._sessions[ id ];
+			let session = this._sessions[ id ];
 
 			// check, if there are free slots...
 			if ( session.length < this._CLIENTS_PER_SESSION )
@@ -208,7 +206,7 @@ MultiplayerServer.prototype._assignClientId = function( socket ) {
 MultiplayerServer.prototype._clean = function( socket ) {
 
 	// get session
-	var session = this._sessions[ socket.userData.sessionId ];
+	let session = this._sessions[ socket.userData.sessionId ];
 
 	// if the session has a length of 1, the current
 	// socket is the last one in the session. To avoid empty
@@ -223,7 +221,7 @@ MultiplayerServer.prototype._clean = function( socket ) {
 	// in the same session. The socket will just be removed from the session.
 	else if ( session.length > 1 )
 	{
-		var index = session.indexOf( socket );
+		let index = session.indexOf( socket );
 
 		session.splice( index, 1 );
 
@@ -245,13 +243,11 @@ MultiplayerServer.prototype._clean = function( socket ) {
  * 
  */
 MultiplayerServer.prototype._broadcast = function( message, sender ) {
-	
-	var session, index;
 
 	// get session
-	session = this._sessions[ sender.userData.sessionId ];
+	let session = this._sessions[ sender.userData.sessionId ];
 
-	for ( index = 0; index < session.length; index++ )
+	for ( let index = 0; index < session.length; index++ )
 	{
 		// don't send the message to the sender back
 		if ( session[ index ] !== sender )
@@ -272,10 +268,8 @@ MultiplayerServer.prototype._broadcast = function( message, sender ) {
  */
 MultiplayerServer.prototype._updateOnlineStatus = function( isOnline, sender ) {
 
-	var message, session, index;
-
 	// create message
-	message = JSON.stringify( new Message( Message.TYPES.STATUS, {
+	let message = JSON.stringify( new Message( Message.TYPES.STATUS, {
 		online : isOnline,
 		clientId : sender.userData.clientId
 	} ) );
@@ -284,12 +278,12 @@ MultiplayerServer.prototype._updateOnlineStatus = function( isOnline, sender ) {
 	self._broadcast( message, sender );
 
 	// get session
-	session = this._sessions[ sender.userData.sessionId ];
+	let session = this._sessions[ sender.userData.sessionId ];
 
 	// when sender is online, send online status of other players
 	if ( isOnline === true )
 	{
-		for ( index = 0; index < session.length; index++ )
+		for ( let index = 0; index < session.length; index++ )
 		{
 			if ( session[ index ] !== sender )
 			{
