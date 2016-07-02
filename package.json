@@ -32,7 +32,7 @@
     "passport": "^0.3.2",
     "passport-http": "^0.3.0",
     "serve-favicon": "2.3.0",
-    "three": "0.77.1",
+    "three": "0.78.0",
     "ws": "0.8.0"
   },
   "devDependencies": {
