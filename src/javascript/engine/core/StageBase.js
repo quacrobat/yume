@@ -144,7 +144,7 @@ StageBase.prototype.setup = function() {
 	if ( system.isDevModeActive === true )
 	{
 		this.world.addObject3D( new THREE.AxisHelper( 30 ) );
-		this.world.addObject3D( new THREE.GridHelper( 200, 10 ) );
+		this.world.addObject3D( new THREE.GridHelper( 200, 20 ) );
 	}
 };
 
