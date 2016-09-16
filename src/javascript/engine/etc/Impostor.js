@@ -265,16 +265,25 @@ Impostor.prototype._computeBoundingBox = function() {
 /**
  * Prepares the camera for rendering.
  */
-Impostor.prototype._computeViewMatrix = function() {
+Impostor.prototype._computeViewMatrix = ( function() {
+	
+	var center = new THREE.Vector3();
+	
+	return function() {
+		
+		this._boundingBox.getCenter( center );
+		
+		// the camera should look at the center of the AABB
+		this._camera.lookAt( center );
 
-	// the camera should look at the center of the AABB
-	this._camera.lookAt( this._boundingBox.center() );
+		// compute new matrices
+		this._camera.updateMatrix();
+		this._camera.updateMatrixWorld();
+		this._camera.matrixWorldInverse.getInverse( this._camera.matrixWorld );
+		
+	};
 
-	// compute new matrices
-	this._camera.updateMatrix();
-	this._camera.updateMatrixWorld();
-	this._camera.matrixWorldInverse.getInverse( this._camera.matrixWorld );
-};
+}() );
 
 /**
  * Computes the bounding rectangle of the impostor. This 2D bounding box is the
@@ -323,18 +332,26 @@ Impostor.prototype._computeBoundingRectangle = function() {
  * Computes the position of the impostor. The center point of the bounding
  * rectangle in world space will provide the exact value.
  */
-Impostor.prototype._computePosition = function() {
+Impostor.prototype._computePosition = ( function() {
+	
+	var centerScreenSpace = new THREE.Vector3();
+	var positionWorldSpace = new THREE.Vector3();
+	
+	return function() {
 
-	// calculate center
-	var centerScreenSpace = this._boundingRectangle.center();
+		// calculate center
+		this._boundingRectangle.getCenter( centerScreenSpace );
+	
+		// use the center and the depth value to determine the new position of the
+		// impostor in screen space
+		positionWorldSpace.set( centerScreenSpace.x, centerScreenSpace.y, this._depth );
+	
+		// unproject the vector to get world position
+		this.billboard.position.copy( positionWorldSpace.unproject( this._camera ) );
+		
+	};
 
-	// use the center and the depth value to determine the new position of the
-	// impostor in screen space
-	var positionWorldSpace = new THREE.Vector3( centerScreenSpace.x, centerScreenSpace.y, this._depth );
-
-	// unproject the vector to get world position
-	this.billboard.position.copy( positionWorldSpace.unproject( this._camera ) );
-};
+}() );
 
 /**
  * Updates the geometry of the impostor.

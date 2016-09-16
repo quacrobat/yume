@@ -390,8 +390,8 @@ BSPTree.prototype._addHelper = ( function() {
 		helper = new THREE.Mesh( geometry, material );
 
 		// retrieve position and scaling from the bounding box
-		node.aabb.size( helper.scale );
-		node.aabb.center( helper.position );
+		node.aabb.getSize( helper.scale );
+		node.aabb.getCenter( helper.position );
 
 		// add it to the world
 		world.addObject3D( helper );
