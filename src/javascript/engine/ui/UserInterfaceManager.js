@@ -31,15 +31,6 @@ var self;
  */
 function UserInterfaceManager() {
 
-	Object.defineProperties( this, {
-		_$uiContainer : {
-			value : null,
-			configurable : false,
-			enumerable : false,
-			writable : true
-		}
-	} );
-	
 	self = this;
 }
 
@@ -47,9 +38,6 @@ function UserInterfaceManager() {
  * Initializes the user interface manager.
  */
 UserInterfaceManager.prototype.init = function() {
-
-	// get reference to root DOM element of all UI controls
-	this._$uiContainer = global.document.querySelector( "#ui-container" );
 
 	// eventing
 	this._initEventListener();
@@ -73,6 +61,7 @@ UserInterfaceManager.prototype.init = function() {
 		performanceMonitor.init();
 		developmentPanel.init();
 	}
+	
 };
 
 /**
@@ -97,41 +86,6 @@ UserInterfaceManager.prototype.setInformationPanelText = function( textKey ) {
 };
 
 /**
- * Shows the interaction label.
- * 
- * @param {string} textKey - The label of the corresponding action.
- */
-UserInterfaceManager.prototype.showInteractionLabel = function( textKey ) {
-
-	interactionLabel.show( textKey );
-};
-
-/**
- * Hides the interaction label.
- */
-UserInterfaceManager.prototype.hideInteractionLabel = function() {
-
-	interactionLabel.hide();
-};
-
-/**
- * Shows the menu.
- * 
- */
-UserInterfaceManager.prototype.showMenu = function() {
-
-	menu.show();
-};
-
-/**
- * Hides the menu.
- */
-UserInterfaceManager.prototype.hideMenu = function() {
-
-	menu.hide();
-};
-
-/**
  * Shows the text screen.
  * 
  * @param {object} textObject - The conversation of the text screen.
@@ -149,25 +103,6 @@ UserInterfaceManager.prototype.showTextScreen = function( textKeys, completeCall
 UserInterfaceManager.prototype.hideTextScreen = function() {
 
 	textScreen.hide();
-};
-
-/**
- * Shows the loading screen.
- * 
- * @param {function} callback - This function is executed, when the loading
- * screen is shown.
- */
-UserInterfaceManager.prototype.showLoadingScreen = function( callback ) {
-
-	loadingScreen.show( callback );
-};
-
-/**
- * Hides the loading screen.
- */
-UserInterfaceManager.prototype.hideLoadingScreen = function() {
-
-	loadingScreen.hide();
 };
 
 /**
@@ -219,6 +154,15 @@ UserInterfaceManager.prototype._initEventListener = function() {
  */
 UserInterfaceManager.prototype._initSubscriptions = function() {
 
+	eventManager.subscribe( TOPIC.UI.MENU.SHOW, this._onShowMenu );
+	eventManager.subscribe( TOPIC.UI.MENU.HIDE, this._onHideMenu );
+	
+	eventManager.subscribe( TOPIC.UI.INTERACTION_LABEL.SHOW, this._onShowInteractionLabel );
+	eventManager.subscribe( TOPIC.UI.INTERACTION_LABEL.HIDE, this._onHideInteractionLabel );
+	
+	eventManager.subscribe( TOPIC.UI.LOADING_SCREEN.SHOW, this._onShowLoadingScreen );
+	eventManager.subscribe( TOPIC.UI.LOADING_SCREEN.HIDE, this._onHideLoadingScreen );
+	
 	eventManager.subscribe( TOPIC.UI.PERFORMANCE.TOGGLE, this._onPerformanceMonitor );
 };
 
@@ -297,6 +241,72 @@ UserInterfaceManager.prototype._onKeyDown = function( event ) {
 UserInterfaceManager.prototype._onResize = function( event ) {
 
 	eventManager.publish( TOPIC.APPLICATION.RESIZE, undefined );
+};
+
+/**
+ * This method handles the "show" topic for the menu.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ */
+UserInterfaceManager.prototype._onShowMenu = function( message, data ) {
+	
+	menu.show();
+};
+
+/**
+ * This method handles the "hide" topic for the menu.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ */
+UserInterfaceManager.prototype._onHideMenu = function( message, data ) {
+	
+	menu.hide();
+};
+
+/**
+ * This method handles the "show" topic for the interaction label.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ */
+UserInterfaceManager.prototype._onShowInteractionLabel = function( message, data ) {
+	
+	interactionLabel.show( data.textKey );
+};
+
+/**
+ * This method handles the "hide" topic for the interaction label.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ */
+UserInterfaceManager.prototype._onHideInteractionLabel = function( message, data ) {
+	
+	interactionLabel.hide();
+};
+
+/**
+ * This method handles the "show" topic for the loading screen.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ */
+UserInterfaceManager.prototype._onShowLoadingScreen = function( message, data ) {
+	
+	loadingScreen.show( data.callback );
+};
+
+/**
+ * This method handles the "hide" topic for the loading screen.
+ * 
+ * @param {string} message - The message topic of the subscription.
+ * @param {object} data - The data of the message.
+ */
+UserInterfaceManager.prototype._onHideLoadingScreen = function( message, data ) {
+	
+	loadingScreen.hide();
 };
 
 /**

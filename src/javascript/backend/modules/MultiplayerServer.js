@@ -7,13 +7,13 @@
 
 "use strict";
 
-var debug = require( "debug" )( "YUME" );
-var ws = require( "ws" );
+const debug = require( "debug" )( "YUME" );
+const ws = require( "ws" );
 
-var metadata = require( "../../../../package.json" );
-var Message = require( "../../engine/network/Message" );
+const metadata = require( "../../../../package.json" );
+const Message = require( "../../engine/network/Message" );
 
-var self;
+let self;
 
 /**
  * Creates the multiplayer-server.
@@ -49,6 +49,12 @@ function MultiplayerServer( port, callback ) {
 			configurable : false,
 			enumerable : false,
 			writable : false
+		},
+		_clientIdCount : {
+			value : 0,
+			configurable : false,
+			enumerable : false,
+			writable : true
 		},
 		_CLIENTS_PER_SESSION : {
 			value : metadata.config.multiplayer.clients_per_session,
@@ -140,54 +146,47 @@ MultiplayerServer.prototype._onConnection = function( socket ) {
  * @param {object} socket - The socket object.
  * 
  */
-MultiplayerServer.prototype._assignSession = ( function() {
+MultiplayerServer.prototype._assignSession = function( socket ) {
+	
+	let id;
 
-	var session = null;
-	var id = 0;
-	var sessionCount = 0;
+	// Iterate over all sessions
+	for ( id in this._sessions )
+	{ 
+		if ( this._sessions.hasOwnProperty( id ) )
+		{
+			// get session
+			let session = this._sessions[ id ];
 
-	return function( socket ) {
-
-		// Iterate over all sessions
-		for ( id in this._sessions )// jshint ignore:line
-		{ 
-
-			if ( this._sessions.hasOwnProperty( id ) )
+			// check, if there are free slots...
+			if ( session.length < this._CLIENTS_PER_SESSION )
 			{
-				// get session
-				session = this._sessions[ id ];
+				// ...if so, push the socket to the session
+				session.push( socket );
 
-				// check, if there are free slots...
-				if ( session.length < this._CLIENTS_PER_SESSION )
-				{
+				// assign session-id to socket
+				socket.userData.sessionId = id;
 
-					// ...if so, push the socket to the session
-					session.push( socket );
+				debug( "INFO: MultiplayerServer: Client assigned to existing session with ID: %s", id );
 
-					// assign session-id to socket
-					socket.userData.sessionId = id;
-
-					debug( "INFO: MultiplayerServer: Client assigned to existing session with ID: %s", id );
-
-					return;
-				}
+				return;
 			}
 		}
+	}
 
-		// if no session was assigned, a new one will be created
-		id = sessionCount++;
+	// if no session was assigned, a new one will be created
+	id = Object.keys( this._sessions ).length;
 
-		// create new session-array with the socket of the sender
-		// and add to sessions-list.
-		this._sessions[ id ] = [ socket ];
+	// create new session-array with the socket of the sender
+	// and add to sessions-list.
+	this._sessions[ id ] = [ socket ];
 
-		// assign session-id to socket
-		socket.userData.sessionId = id;
+	// assign session-id to socket
+	socket.userData.sessionId = id;
 
-		debug( "INFO: MultiplayerServer: Client assigned to new session with ID: %s", id );
-	};
+	debug( "INFO: MultiplayerServer: Client assigned to new session with ID: %s", id );
 
-}() );
+};
 
 /**
  * Assigns a unique id to the socket object.
@@ -195,16 +194,10 @@ MultiplayerServer.prototype._assignSession = ( function() {
  * @param {object} socket - The socket object.
  * 
  */
-MultiplayerServer.prototype._assignClientId = ( function() {
+MultiplayerServer.prototype._assignClientId = function( socket ) {
 
-	var idCount = 0;
-
-	return function( socket ) {
-
-		socket.userData.clientId = idCount++;
-	};
-
-}() );
+	socket.userData.clientId = this._clientIdCount ++;
+};
 
 /**
  * This method removes the socket of its session. Empty session will be deleted.
@@ -212,45 +205,37 @@ MultiplayerServer.prototype._assignClientId = ( function() {
  * @param {object} socket - The socket object to remove.
  * 
  */
-MultiplayerServer.prototype._clean = ( function() {
+MultiplayerServer.prototype._clean = function( socket ) {
 
-	var session = null;
+	// get session
+	let session = this._sessions[ socket.userData.sessionId ];
 
-	return function( socket ) {
+	// if the session has a length of 1, the current
+	// socket is the last one in the session. To avoid empty
+	// session, the logic deletes it with the socket.
+	if ( session.length === 1 )
+	{
+		delete this._sessions[ socket.userData.sessionId ];
 
-		// get session
-		session = this._sessions[ socket.userData.sessionId ];
+		debug( "INFO: MultiplayerServer: Socket removed and session deleted with ID: %s", socket.userData.sessionId );
+	}
+	// if the session has a length greater than one, other sockets are
+	// in the same session. The socket will just be removed from the session.
+	else if ( session.length > 1 )
+	{
+		let index = session.indexOf( socket );
 
-		// if the session has a length of 1, the current
-		// socket is the last one in the session. To avoid empty
-		// session, the logic deletes it with the socket.
-		if ( session.length === 1 )
-		{
-			delete this._sessions[ socket.userData.sessionId ];
+		session.splice( index, 1 );
 
-			debug( "INFO: MultiplayerServer: Socket removed and session deleted with ID: %s", socket.userData.sessionId );
+		debug( "INFO: MultiplayerServer: Socket removed from session with ID: %s", socket.userData.sessionId );
+	}
+	else
+	{
+		// This case must never happen! If so, throw runtime error.
+		throw "ERROR: MultiplayerServer: Invalid State Exception: Wrong number of session entries.";
+	}
 
-			// if the session has a length greater than one, other sockets are
-			// in the same session.
-			// The socket will just be removed from the session.
-		}
-		else if ( session.length > 1 )
-		{
-			var index = session.indexOf( socket );
-
-			session.splice( index, 1 );
-
-			debug( "INFO: MultiplayerServer: Socket removed from session with ID: %s", socket.userData.sessionId );
-
-		}
-		else
-		{
-			// This case must never happen! If so, throw runtime error.
-			throw "ERROR: MultiplayerServer: Invalid State Exception: Wrong number of session entries.";
-		}
-	};
-
-}() );
+};
 
 /**
  * Delivers a message to all clients in the same session.
@@ -259,30 +244,22 @@ MultiplayerServer.prototype._clean = ( function() {
  * @param {object} sender - The socket object of the sender.
  * 
  */
-MultiplayerServer.prototype._broadcast = ( function() {
+MultiplayerServer.prototype._broadcast = function( message, sender ) {
 
-	var message = null;
-	var session = null;
-	var index = 0;
+	// get session
+	let session = this._sessions[ sender.userData.sessionId ];
 
-	return function( message, sender ) {
-
-		// get session
-		session = this._sessions[ sender.userData.sessionId ];
-
-		for ( index = 0; index < session.length; index++ )
+	for ( let index = 0; index < session.length; index++ )
+	{
+		// don't send the message to the sender back
+		if ( session[ index ] !== sender )
 		{
-			// don't send the message to the sender back
-			if ( session[ index ] !== sender )
-			{
-				session[ index ].send( message );
-			}
+			session[ index ].send( message );
 		}
+	}
 
-		debug( "INFO: MultiplayerServer: Session-ID: %s; Broadcast Message: %s", sender.userData.sessionId, message );
-	};
-
-}() );
+	debug( "INFO: MultiplayerServer: Session-ID: %s; Broadcast Message: %s", sender.userData.sessionId, message );
+};
 
 /**
  * Updates the status of the current socket.
@@ -291,46 +268,39 @@ MultiplayerServer.prototype._broadcast = ( function() {
  * @param {object} sender - The socket object of the sender.
  * 
  */
-MultiplayerServer.prototype._updateOnlineStatus = ( function() {
+MultiplayerServer.prototype._updateOnlineStatus = function( isOnline, sender ) {
 
-	var message = null;
-	var session = null;
-	var index = 0;
+	// create message
+	let message = JSON.stringify( new Message( Message.TYPES.STATUS, {
+		online : isOnline,
+		clientId : sender.userData.clientId
+	} ) );
 
-	return function( isOnline, sender ) {
+	// send message to all clients in the same session
+	self._broadcast( message, sender );
 
-		// create message
-		message = JSON.stringify( new Message( Message.TYPES.STATUS, {
-			online : isOnline,
-			clientId : sender.userData.clientId
-		} ) );
+	// get session
+	let session = this._sessions[ sender.userData.sessionId ];
 
-		// send message to all clients in the same session
-		self._broadcast( message, sender );
-
-		// get session
-		session = this._sessions[ sender.userData.sessionId ];
-
-		// when sender is online, send online status of other players
-		if ( isOnline === true )
+	// when sender is online, send online status of other players
+	if ( isOnline === true )
+	{
+		for ( let index = 0; index < session.length; index++ )
 		{
-			for ( index = 0; index < session.length; index++ )
+			if ( session[ index ] !== sender )
 			{
-				if ( session[ index ] !== sender )
-				{
-					message = JSON.stringify( new Message( Message.TYPES.STATUS, {
-						clientId : session[ index ].userData.clientId,
-						online : isOnline
-					} ) );
-					sender.send( message );
+				message = JSON.stringify( new Message( Message.TYPES.STATUS, {
+					clientId : session[ index ].userData.clientId,
+					online : isOnline
+				} ) );
+				sender.send( message );
 
-					debug( "INFO: MultiplayerServer: Session-ID: %s; Client Message: %s", sender.userData.sessionId, message );
-				}
+				debug( "INFO: MultiplayerServer: Session-ID: %s; Client Message: %s", sender.userData.sessionId, message );
 			}
 		}
-	};
-
-}() );
+	}
+	
+};
 
 /**
  * Prepares the message for further sending.

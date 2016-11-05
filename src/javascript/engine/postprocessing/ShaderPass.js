@@ -88,7 +88,7 @@ ShaderPass.prototype.render = function( renderer, writeBuffer, readBuffer ) {
 
 	if ( this.uniforms[ this._textureID ] !== undefined )
 	{
-		this.uniforms[ this._textureID ].value = readBuffer;
+		this.uniforms[ this._textureID ].value = readBuffer.texture;
 	}
 
 	// determine screen/ off-screen rendering

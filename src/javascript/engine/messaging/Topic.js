@@ -52,10 +52,21 @@ var TOPIC = {
 		START : "stage.start"
 	},
 	UI : {
+		MENU : {
+			SHOW : "ui.menu.show",
+			HIDE : "ui.menu.hide"
+		},
+		INTERACTION_LABEL : {
+			SHOW : "ui.interaction_label.show",
+			HIDE : "ui.interaction_label.hide"
+		},
+		LOADING_SCREEN : {
+			SHOW : "ui.loading_screen.show",
+			HIDE : "ui.loading_screen.hide"
+		},
 		PERFORMANCE : {
-			TOGGLE: "ui.fps.toggle"
-		}
-			
+			TOGGLE : "ui.fps.toggle"
+		}			
 	}
 };
 

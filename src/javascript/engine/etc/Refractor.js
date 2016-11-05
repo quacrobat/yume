@@ -210,7 +210,7 @@ Refractor.prototype._init = function() {
 	this._textureMatrix = new THREE.Matrix4();
 	
 	// assign uniform data
-	this.material.uniforms.refractionMap.value = this._refractionMap;
+	this.material.uniforms.refractionMap.value = this._refractionMap.texture;
 	this.material.uniforms.textureMatrix.value = this._textureMatrix;
 	
 	// no auto-update for virtual camera

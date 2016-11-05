@@ -126,7 +126,7 @@ Path.prototype.createRandomPath = function( numberOfWaypoints, boundingBox ) {
 	var radialDistance = new THREE.Vector3();
 	var axis = new THREE.Vector3( 0, 1, 0 );
 	var spacing = 2 * Math.PI / numberOfWaypoints;
-	var center = boundingBox.center();
+	var center = boundingBox.getCenter();
 
 	// clear existing waypoints
 	this.clear();

@@ -12,7 +12,6 @@ var eventManager = require( "../messaging/EventManager" );
 var TOPIC = require( "../messaging/Topic" );
 
 var saveGameManager = require( "../etc/SaveGameManager" );
-var userInterfaceManager = require( "../ui/UserInterfaceManager" );
 
 // stages
 var Stage_001 = require( "../stages/Stage_001" );
@@ -134,7 +133,7 @@ StageManager.prototype._onStageChange = function( message, data ) {
 	if ( data !== undefined )
 	{
 		// show loading screen. execute stage change, when animation ends
-		userInterfaceManager.showLoadingScreen( function() {
+		eventManager.publish( TOPIC.UI.LOADING_SCREEN.SHOW, { callback : function() {
 
 			// set flag
 			self._isStageChangeActive = true;
@@ -151,9 +150,8 @@ StageManager.prototype._onStageChange = function( message, data ) {
 				saveGameManager.set( saveGameManager.KEYS.stageId, data.stageId );
 				
 				saveGameManager.save();
-			}
-		} );
-
+			}		
+		} } );
 	}
 	else
 	{

@@ -144,7 +144,7 @@ StageBase.prototype.setup = function() {
 	if ( system.isDevModeActive === true )
 	{
 		this.world.addObject3D( new THREE.AxisHelper( 30 ) );
-		this.world.addObject3D( new THREE.GridHelper( 200, 10 ) );
+		this.world.addObject3D( new THREE.GridHelper( 200, 20 ) );
 	}
 };
 
@@ -239,10 +239,10 @@ StageBase.prototype._changeStage = function( stageId, isSaveGame ) {
 
 // frequently used colors
 StageBase.COLORS = {
-	PRIMARY    : new THREE.Color( 0x6083c2 ).convertGammaToLinear(),
-	SECONDARY  : new THREE.Color( 0x20252f ).convertGammaToLinear(),
-	BLUE_DARK  : new THREE.Color( 0x455066 ).convertGammaToLinear(),
-	BLUE_WHITE : new THREE.Color( 0xf3f4f6 ).convertGammaToLinear()
+	PRIMARY    : new THREE.Color( 0x6083c2 ),
+	SECONDARY  : new THREE.Color( 0x20252f ),
+	BLUE_DARK  : new THREE.Color( 0x455066 ),
+	BLUE_WHITE : new THREE.Color( 0xf3f4f6 )
 };
 
 module.exports = StageBase;

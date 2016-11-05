@@ -281,8 +281,8 @@ Water.prototype._init = function() {
 	normalMap1.wrapS = normalMap1.wrapT = THREE.RepeatWrapping;
 		
 	// set reflection and refraction map
-	this.material.uniforms.reflectionMap.value = this._reflector._reflectionMap;
-	this.material.uniforms.refractionMap.value = this._refractor._refractionMap;
+	this.material.uniforms.reflectionMap.value = this._reflector._reflectionMap.texture;
+	this.material.uniforms.refractionMap.value = this._refractor._refractionMap.texture;
 
 	// set texture matrices for projective texture mapping
 	this.material.uniforms.textureMatrixReflection.value = this._reflector._textureMatrix;

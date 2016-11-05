@@ -329,7 +329,7 @@ Reflector.prototype._init = function() {
 		this._textureMatrix = new THREE.Matrix4();
 
 		// assign uniform data
-		this.material.uniforms.reflectionMap.value = this._reflectionMap;
+		this.material.uniforms.reflectionMap.value = this._reflectionMap.texture;
 		this.material.uniforms.textureMatrix.value = this._textureMatrix;
 	}
 
