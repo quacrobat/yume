@@ -44784,7 +44784,7 @@ AudioBufferList.prototype.loadBuffer = function( file, index ) {
 	var self = this;
 
 	// build url
-	var url = system.cdn + "/assets/audio/dynamic/" + file + ".mp3";
+	var url = system.cdn + "assets/audio/dynamic/" + file + ".mp3";
 
 	// add nocache, if necessary
 	if ( system.isDevModeActive === true )

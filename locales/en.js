@@ -1,5 +1,5 @@
 {
-	"Game.Menu.Headline": "Welcome to the demo stages of YUME!",
+	"Game.Menu.Headline": "three.js: Water with Flow Maps",
 	"Game.Menu.Controls": "How to play",
 	"Game.Menu.Controls.Move": "W-A-S-D = Move",
 	"Game.Menu.Controls.Look": "Mouse = Look Around",
@@ -30,7 +30,7 @@
 	"Game.TextScreen.Continue": "Press spacebar to continue",
 	"Game.LoadingScreen.Continue": "Press spacebar to continue",
 	"Game.Chat.Placeholder": "Your chat message...",
-	"Game.Menu.Description": "The following demo stages show you some basic functionality of YUME. The source code and additional documentation is available at github.",
+	"Game.Menu.Description": "The following demo shows a basic implementation of a water effect that uses a texture map for controlling the direction of flow.",
 	"Error.404.Title": "Page not found",
 	"Error.404.Text": "The page you requested was not found!",
 	"Error.404.Button": "Go Back to Game",
