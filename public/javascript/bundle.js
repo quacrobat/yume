@@ -16608,7 +16608,7 @@
 
 			prefixVertex = [
 
-	        
+
 				'precision ' + parameters.precision + ' float;',
 				'precision ' + parameters.precision + ' int;',
 
@@ -19783,7 +19783,7 @@
 			}
 
 			scope.numPlanes = nPlanes;
-			
+
 			return dstArray;
 
 		}
@@ -19799,8 +19799,6 @@
 	 */
 
 	function WebGLRenderer( parameters ) {
-
-		console.log( 'THREE.WebGLRenderer', REVISION );
 
 		parameters = parameters || {};
 
