@@ -420,12 +420,14 @@ Impostor.prototype._computeProjectionMatrix = function() {
 	var frustumWidth = frustumHeight * this._camera.aspect;
 
 	// create new projection matrix via min/max values of the bounding rectangle
-	this._camera.projectionMatrix.makeFrustum( frustumWidth  * this._boundingRectangle.min.x, 
-											   frustumWidth  * this._boundingRectangle.max.x, 
-											   frustumHeight * this._boundingRectangle.min.y, 
-											   frustumHeight * this._boundingRectangle.max.y, 
-											   this._camera.near, 
-											   this._camera.far );
+	this._camera.projectionMatrix.makePerspective( 
+			frustumWidth  * this._boundingRectangle.min.x, 
+			frustumWidth  * this._boundingRectangle.max.x,
+			frustumHeight * this._boundingRectangle.max.y, 
+			frustumHeight * this._boundingRectangle.min.y,
+			this._camera.near, 
+			this._camera.far 
+			);
 };
 
 /**

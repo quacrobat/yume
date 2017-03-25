@@ -566,7 +566,7 @@ ParticleEffect.prototype._sortParticles = ( function() {
 			// transform the position vector to clip-space to get its depth
 			// value
 			vector.fromArray( positionBuffer, index * 3 );
-			vector.applyProjection( mvpMatrix );
+			vector.applyMatrix4( mvpMatrix );
 
 			// push the entry to the sort array
 			sortArray.push( [ vector.z, index ] );
