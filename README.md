@@ -37,7 +37,3 @@ The demo-application shows different features of YUME.
 ## Documentation
 
 Check out the [official documentation](https://github.com/Mugen87/yume/wiki) for more information.
-
-## History
-
-Human Interactive is an IT startup from Germany. Our goal is to develop 3D applications for the browser. YUME arises out of our first project "DESIRE", a First-Person Adventure. If you want an impression of our first trials, please visit our [product website](http://www.desire-the-game.com/). Thanks!
